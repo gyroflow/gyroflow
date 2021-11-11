@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Nebula Nano__720p 16by9",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Caddx",
+    "camera_model": "Nebula Nano",
+    "lens_model": "",
+    "camera_setting": "720p 16by9",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-06",
+    "calib_dimension": {
+        "w": 1280,
+        "h": 720
+    },
+    "num_images": 30,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.25324790452928964,
+        "camera_matrix": [
+            [
+                542.0190126153603,
+                0.0,
+                640.0
+            ],
+            [
+                0.0,
+                541.9179990161715,
+                360.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.13704976888997883,
+            -0.04141979992428783,
+            -0.032851135859145196,
+            0.020548982628556384
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

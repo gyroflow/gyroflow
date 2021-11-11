@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_Split 2_Ratel red lens_1080 60fps",
+    "note": "",
+    "calibrated_by": "kn8alpha",
+    "camera_brand": "Runcam",
+    "camera_model": "Split 2",
+    "lens_model": "Ratel red lens",
+    "camera_setting": "1080 60fps",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-03-06",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 10,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.3083534087017212,
+        "camera_matrix": [
+            [
+                752.0295310627812,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                752.6231574208131,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.028852513660683757,
+            0.04607168356116674,
+            -0.09025334194049286,
+            0.05325789657142566
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

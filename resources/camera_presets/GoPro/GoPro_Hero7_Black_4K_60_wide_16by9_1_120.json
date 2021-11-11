@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero 7 Black__4K 60 wide 16by9 1/120",
+    "note": "ND16",
+    "calibrated_by": "Nicecrash",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero 7 Black",
+    "lens_model": "",
+    "camera_setting": "4K 60 wide 16by9 1/120",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-09",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 28,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.5012629787842197,
+        "camera_matrix": [
+            [
+                1766.0479633582372,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                1765.468512378308,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.05763963498862702,
+            -0.0023393421602642107,
+            0.020079888985586974,
+            -0.010860416443848277
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

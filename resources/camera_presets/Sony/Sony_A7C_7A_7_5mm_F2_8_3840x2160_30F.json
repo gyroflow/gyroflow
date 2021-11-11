@@ -1,0 +1,45 @@
+{
+    "name": "Sony_A7C_7A 7.5mm F2.8_3840 - 2160 30F",
+    "note": "",
+    "calibrated_by": "Gonges",
+    "camera_brand": "Sony",
+    "camera_model": "A7C",
+    "lens_model": "7A 7.5mm F2.8",
+    "camera_setting": "3840 - 2160 30F",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 14,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7638259574930125,
+        "camera_matrix": [
+            [
+                1078.8881283876708,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                1077.2645973041301,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.05532990557918565,
+            -0.004814317462543191,
+            0.008450933096118206,
+            -0.002352462327269335
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

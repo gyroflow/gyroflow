@@ -1,0 +1,50 @@
+{
+    "name": "Insta360 Go2 2880x2880 ProMode unprocessed",
+    "note": "use the video directly from the camera, don't pass it through insta360 studio",
+    "calibrated_by": "Fabio",
+    "camera_brand": "Insta360",
+    "camera_model": "Go2",
+    "lens_model": "",
+    "camera_setting": "2880x2880_ProMode_unprocessed",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-09-12",
+    "calib_dimension": {
+        "w": 2880,
+        "h": 2880
+    },
+    "orig_dimension": {
+        "w": 2880,
+        "h": 2880
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 48,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7486373388108224,
+        "camera_matrix": [
+            [
+                1328.65090804896,
+                0.0,
+                1440.0
+            ],
+            [
+                0.0,
+                1330.7964475406288,
+                1440.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.04136791227742392,
+            -0.02547900703120792,
+            0.019594626738493645,
+            -0.011146851640152729
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

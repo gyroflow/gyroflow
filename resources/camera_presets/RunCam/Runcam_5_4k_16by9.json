@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_5__4k 16by9",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Runcam",
+    "camera_model": "5",
+    "lens_model": "",
+    "camera_setting": "4k 16by9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-11",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 20,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.3711706373114012,
+        "camera_matrix": [
+            [
+                1931.6962002208868,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                1450.6199768301365,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.0114297597621466,
+            -0.0546192162130909,
+            0.07214298099600765,
+            -0.04133473362701579
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

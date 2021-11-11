@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Orca__2.7K50 LDC OFF EIS OFF",
+    "note": "",
+    "calibrated_by": "Logicenios",
+    "camera_brand": "Caddx",
+    "camera_model": "Orca",
+    "lens_model": "",
+    "camera_setting": "2.7K50 LDC OFF EIS OFF",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-03-04",
+    "calib_dimension": {
+        "w": 2704,
+        "h": 1520
+    },
+    "num_images": 19,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.8025679541514373,
+        "camera_matrix": [
+            [
+                1481.0786337943478,
+                0.0,
+                1352.0
+            ],
+            [
+                0.0,
+                1110.809636089182,
+                760.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.036756122645392096,
+            0.03204134854543812,
+            -0.06998363500145699,
+            0.039568079379342265
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

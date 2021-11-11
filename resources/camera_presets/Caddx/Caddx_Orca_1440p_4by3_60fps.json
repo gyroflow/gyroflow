@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Orca__1440p 4:3 60fps",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Caddx",
+    "camera_model": "Orca",
+    "lens_model": "",
+    "camera_setting": "1440p 4:3 60fps",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-08",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "num_images": 35,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.9805217848651635,
+        "camera_matrix": [
+            [
+                1060.2970589776064,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                1060.7840920313058,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.04828631383460121,
+            0.03699371746643823,
+            -0.06467201722573604,
+            0.03194175017634195
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

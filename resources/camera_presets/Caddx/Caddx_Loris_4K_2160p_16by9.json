@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Loris 4K__2160p 16by9",
+    "note": "",
+    "calibrated_by": "https://052.jp",
+    "camera_brand": "Caddx",
+    "camera_model": "Loris 4K",
+    "lens_model": "",
+    "camera_setting": "2160p 16by9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-19",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 9,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7801666399418287,
+        "camera_matrix": [
+            [
+                1843.7456038147986,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                1844.6825247328754,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.07343413950283471,
+            -0.004878952888215493,
+            0.00907392232790347,
+            -0.006084702686665423
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

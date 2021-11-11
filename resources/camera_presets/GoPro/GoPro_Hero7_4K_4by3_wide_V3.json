@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero7__4K 4by3 wide",
+    "note": "Bit wonky around the edges",
+    "calibrated_by": "Nicecrash",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero7",
+    "lens_model": "",
+    "camera_setting": "4K 4by3 wide",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-01",
+    "calib_dimension": {
+        "w": 4000,
+        "h": 3000
+    },
+    "num_images": 12,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 2.6397039024838342,
+        "camera_matrix": [
+            [
+                1752.9540682429792,
+                0.0,
+                2000.0
+            ],
+            [
+                0.0,
+                1753.1954733067757,
+                1500.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.06729246222312671,
+            -0.052752075753625456,
+            0.12141442376877552,
+            -0.07741176878513618
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

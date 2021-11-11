@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Ratel_2.1mm_4:3",
+    "note": "Stock camera on Nazgul5 V1, set to 4:3 mode for widest angle",
+    "calibrated_by": "akaKrypt",
+    "camera_brand": "Caddx",
+    "camera_model": "Ratel",
+    "lens_model": "2.1mm",
+    "camera_setting": "4:3",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-03-05",
+    "calib_dimension": {
+        "w": 720,
+        "h": 480
+    },
+    "num_images": 33,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.0635870121048314,
+        "camera_matrix": [
+            [
+                307.87700040762076,
+                0.0,
+                360.0
+            ],
+            [
+                0.0,
+                272.58989904974226,
+                240.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.00576520627195178,
+            0.08742408848332676,
+            -0.05370296068168609,
+            0.0036477532015699128
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

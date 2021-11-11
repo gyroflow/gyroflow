@@ -1,0 +1,32 @@
+set ANDROID_NDK_HOME=D:\Programy\Android\sdk\ndk-bundle
+set PATH=D:\Programy\Qt\6.2.1\android_arm64_v8a\bin;%PATH%
+set QMAKE=D:\Programy\Qt\6.2.1\android_arm64_v8a\bin\qmake.bat
+
+cargo install cargo-ndk
+rustup target add aarch64-linux-android
+
+cargo ndk -t arm64-v8a --platform 26 -o ./jniLibs build --release
+
+# Add to cc/src/lib.rs cmd.arg("-std=c++17"); before run();
+# Add alignment 16 to cpp_macros/src/lib.rs
+
+
+
+
+First of all one should add .cargo/config with paths to ar and linker from android ndk e.g.
+
+[target.armv7-linux-androideabi]
+ar = "/home/leonid/Android/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar"
+linker = "/home/leonid/Android/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi22-clang"
+and one should add in one's $PATH path to qmake for android and set enviroment variable for
+CXX to appropriate android compiler from ndk, because otherwise cxx crate wouldn't be able to build qmetaobject targeting android.
+Also set output as cdylib and add function with following signature
+
+#[no_mangle]
+pub extern fn main(argc: i32, argv: *mut *mut i8) -> i32
+
+
+After compiling source code to .so library you can create library with this https://doc.qt.io/qt-5/deployment-android.html
+I don't find better way to produce apk from .so file than using this https://github.com/LaurentGomila/qt-android-cmake
+
+If there is any better way to produce apk file I would like to know it.

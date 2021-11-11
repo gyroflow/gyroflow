@@ -1,0 +1,40 @@
+{
+    "name": "Camera name",
+    "note": "",
+    "calibrator_version": "0.1.0-alpha",
+    "date": "2020-08-12",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "num_images": 10,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.3243956355556383,
+        "camera_matrix": [
+            [
+                847.6148226238896,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                852.8260246970873,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.01945104325838463,
+            0.1093842438193295,
+            -0.10977045532092518,
+            0.037924531473717875
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

@@ -1,0 +1,45 @@
+{
+    "name": "caddx_tarsier_v2 lens_1440_4:3",
+    "note": "v1cam",
+    "calibrated_by": "trotter",
+    "camera_brand": "caddx",
+    "camera_model": "tarsier",
+    "lens_model": "v2 lens",
+    "camera_setting": "1440_4:3",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-10",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "num_images": 10,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.8112541253286136,
+        "camera_matrix": [
+            [
+                1103.5427594914906,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                1103.3902729967458,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.032102921431251194,
+            -0.06807670595000555,
+            0.08473411721448047,
+            -0.03807689708326849
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_5 Orange__1440p 4by3",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Runcam",
+    "camera_model": "5 Orange",
+    "lens_model": "",
+    "camera_setting": "1440p 4by3",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-06",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "num_images": 31,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7341165766258279,
+        "camera_matrix": [
+            [
+                1030.8062581253432,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                1030.5007924418715,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.032955513981548265,
+            -0.006131172423273541,
+            -0.006502193501841438,
+            0.001466860922502184
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

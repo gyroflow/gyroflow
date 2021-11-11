@@ -1,0 +1,50 @@
+{
+    "name": "Insta360 Go2 2688x2688",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Insta360",
+    "camera_model": "Go2",
+    "lens_model": "",
+    "camera_setting": "2688x2688",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-09-22",
+    "calib_dimension": {
+        "w": 2688,
+        "h": 2688
+    },
+    "orig_dimension": {
+        "w": 2688,
+        "h": 2688
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 41,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7379011609991043,
+        "camera_matrix": [
+            [
+                1313.5060328324446,
+                0.0,
+                1344.0
+            ],
+            [
+                0.0,
+                1313.4803777840043,
+                1344.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.04153796291417958,
+            -0.02546659682760234,
+            0.01988325045880142,
+            -0.011215628080711231
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

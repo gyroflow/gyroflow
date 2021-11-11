@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_Split Mini 1__1080p 16:9",
+    "note": "ver1.0",
+    "calibrated_by": "Diego Carrasco V\u00e1squez",
+    "camera_brand": "Runcam",
+    "camera_model": "Split Mini 1",
+    "lens_model": "",
+    "camera_setting": "1080p 16:9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-12",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 9,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.41999587058936216,
+        "camera_matrix": [
+            [
+                880.1035077662613,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                879.766549506691,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.03739187642722807,
+            -0.02041002669600952,
+            0.01522906759566953,
+            -0.004594216496577972
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

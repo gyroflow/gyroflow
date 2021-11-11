@@ -1,0 +1,7 @@
+_unused/
+_dev/
+_deploy/
+target/
+ext/
+.vscode/
+*.code-workspace

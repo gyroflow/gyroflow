@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero4__1080p 60fps W",
+    "note": "",
+    "calibrated_by": "Nicola",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero4",
+    "lens_model": "",
+    "camera_setting": "1080p 60fps W",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-16",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 37,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.779885579234177,
+        "camera_matrix": [
+            [
+                820.1805003050279,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                801.788012191947,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.129082232264075,
+            -0.02198715676071333,
+            -0.04348505944666127,
+            0.03091593253082981
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

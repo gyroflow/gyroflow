@@ -1,0 +1,45 @@
+{
+    "name": "Xiaomi_Mi Action Camera 4k__2.5k 50fps",
+    "note": "",
+    "calibrated_by": "Sevvefpv",
+    "camera_brand": "Xiaomi",
+    "camera_model": "Mi Action Camera 4k",
+    "lens_model": "",
+    "camera_setting": "2.5k 50fps",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-19",
+    "calib_dimension": {
+        "w": 2560,
+        "h": 1440
+    },
+    "num_images": 13,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.8061307445755265,
+        "camera_matrix": [
+            [
+                1320.852747359381,
+                0.0,
+                1280.0
+            ],
+            [
+                0.0,
+                1335.4398133576651,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.03861150728050466,
+            -0.01829441443202612,
+            0.04103384140101857,
+            -0.03403327874326782
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

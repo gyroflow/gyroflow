@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero 5_2.7K 4:3_2.7K 4:3 wide",
+    "note": "",
+    "calibrated_by": "Mili",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero 5",
+    "lens_model": "2.7K 4:3",
+    "camera_setting": "2.7K 4:3 wide",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-17",
+    "calib_dimension": {
+        "w": 2704,
+        "h": 2028
+    },
+    "num_images": 22,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.5146047820281108,
+        "camera_matrix": [
+            [
+                1188.600003028602,
+                0.0,
+                1352.0
+            ],
+            [
+                0.0,
+                1190.3339459467552,
+                1014.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.05240505785455658,
+            0.020538908192864337,
+            -0.02060787072260824,
+            0.007956870849795088
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

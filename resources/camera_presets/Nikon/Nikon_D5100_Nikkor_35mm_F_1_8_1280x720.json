@@ -1,0 +1,45 @@
+{
+    "name": "Nikon_D5100_Nikkor 35mm F/1.8_1280x720",
+    "note": "Bit of motion blur",
+    "calibrated_by": "Elvin",
+    "camera_brand": "Nikon",
+    "camera_model": "D5100",
+    "lens_model": "Nikkor 35mm F/1.8",
+    "camera_setting": "1280x720",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-01",
+    "calib_dimension": {
+        "w": 1280,
+        "h": 720
+    },
+    "num_images": 18,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.3220755769168915,
+        "camera_matrix": [
+            [
+                1981.4115861437695,
+                0.0,
+                640.0
+            ],
+            [
+                0.0,
+                1981.6627454392265,
+                360.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.07058623089389615,
+            1.66922646990923,
+            -12.468220819690675,
+            24.81783300627311
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

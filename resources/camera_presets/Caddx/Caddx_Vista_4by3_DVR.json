@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Vista__4by3 DVR",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Caddx",
+    "camera_model": "Vista",
+    "lens_model": "",
+    "camera_setting": "4by3 DVR",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-06",
+    "calib_dimension": {
+        "w": 960,
+        "h": 720
+    },
+    "num_images": 9,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.09498401720757603,
+        "camera_matrix": [
+            [
+                445.4189919815953,
+                0.0,
+                480.0
+            ],
+            [
+                0.0,
+                445.702392045044,
+                360.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.028974097870241702,
+            0.0066334819724532135,
+            -0.005661527494451544,
+            0.0010814226577990711
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

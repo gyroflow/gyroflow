@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Tarsier__1080p 60fps",
+    "note": "",
+    "calibrated_by": "jerome",
+    "camera_brand": "Caddx",
+    "camera_model": "Tarsier",
+    "lens_model": "",
+    "camera_setting": "1080p 60fps",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 18,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.47787390952212605,
+        "camera_matrix": [
+            [
+                1102.3102089207946,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                1103.0543812631217,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.04114647581578386,
+            -0.05272857718791978,
+            0.07469956678640267,
+            -0.03904639003443717
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

@@ -1,0 +1,45 @@
+{
+    "name": "Foxeer_Box 2__2.5k 16by9",
+    "note": "can't believe potatoes can record videos",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Foxeer",
+    "camera_model": "Box 2",
+    "lens_model": "",
+    "camera_setting": "2.5k 16by9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-09",
+    "calib_dimension": {
+        "w": 2560,
+        "h": 1440
+    },
+    "num_images": 14,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.44056534899434235,
+        "camera_matrix": [
+            [
+                1329.088248490969,
+                0.0,
+                1280.0
+            ],
+            [
+                0.0,
+                1411.8002984154175,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.0722753994880755,
+            -0.01922644006217567,
+            -0.015940496816575993,
+            0.05765161321143771
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

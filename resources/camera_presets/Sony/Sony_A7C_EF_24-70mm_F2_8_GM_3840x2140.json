@@ -1,0 +1,45 @@
+{
+    "name": "Sony_A7C_EF 24-70mm F2.8 GM_3840 - 2160 30F",
+    "note": "",
+    "calibrated_by": "Gonges",
+    "camera_brand": "Sony",
+    "camera_model": "A7C",
+    "lens_model": "EF 24-70mm F2.8 GM",
+    "camera_setting": "3840 - 2160 30F",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 12,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.8562184388441278,
+        "camera_matrix": [
+            [
+                3050.2903151405612,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                3044.3945315012047,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.20852390610658847,
+            0.07772366659887363,
+            0.41576152725022586,
+            -0.48695838553585674
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

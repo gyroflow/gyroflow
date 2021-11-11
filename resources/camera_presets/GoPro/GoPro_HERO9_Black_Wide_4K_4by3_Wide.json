@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_HERO9 Black_Wide_4K 4by3 Wide",
+    "note": "",
+    "calibrated_by": "KonradIT",
+    "camera_brand": "GoPro",
+    "camera_model": "HERO9 Black",
+    "lens_model": "Wide",
+    "camera_setting": "4K 4by3 Wide",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-08-10",
+    "calib_dimension": {
+        "w": 4000,
+        "h": 3000
+    },
+    "num_images": 19,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.6716735623441477,
+        "camera_matrix": [
+            [
+                1748.369432329846,
+                0.0,
+                2000.0
+            ],
+            [
+                0.0,
+                1751.9211955219268,
+                1500.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.06734379021640052,
+            -0.026232896884669493,
+            0.08646690188907419,
+            -0.06545419117055355
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

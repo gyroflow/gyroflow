@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_BabyTurtle_1.8mm_1080p 16by9",
+    "note": "",
+    "calibrated_by": "kkbin",
+    "camera_brand": "Caddx",
+    "camera_model": "BabyTurtle",
+    "lens_model": "1.8mm",
+    "camera_setting": "1080p 16by9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-27",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 33,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7306463580561853,
+        "camera_matrix": [
+            [
+                881.4725213373014,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                883.1190521501569,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.06059333959781095,
+            0.0374946155353139,
+            -0.05983774981901804,
+            0.027217645267871012
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

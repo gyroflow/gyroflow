@@ -1,0 +1,40 @@
+{
+    "name": "angle",
+    "note": "Calibrated by yours truly.",
+    "calibrator_version": "0.1",
+    "date": "2020-07-15",
+    "calib_dimension": {
+        "w": 4160,
+        "h": 3120
+    },
+    "num_images": 10,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.400204905975822,
+        "camera_matrix": [
+            [
+                1854.4086383874235,
+                0.0,
+                2086.6285731024077
+            ],
+            [
+                0.0,
+                1854.310461320936,
+                1571.697543185522
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.23197409107794778,
+            0.3024265114936694,
+            -0.47513302160412696,
+            0.22667202885019383
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

@@ -1,0 +1,46 @@
+{
+	"name": "BRAND CAMERA 4:3 SETTING",
+	"note": "Short optional description, note and/or name of contributer",
+	"calibrator_version": "0.1",
+	"date": "2020-07-15",
+	
+	"calib_dimension": {
+		"w": 1920,
+		"h": 1440
+	},
+
+	"num_images": 10,
+
+	"use_opencv_fisheye": true,
+	"fisheye_params": {
+		"RMS_error": 0.5,
+		"camera_matrix": [
+			[12.3, 0, 12.3],
+			[0, 12.3, 12.3],
+			[0, 0, 1]
+		],
+		"distortion_coeffs": [
+			0.123,
+			0.234,
+			0.345,
+			0.435
+		]
+	},
+
+	"use_opencv_standard": false,
+	"calib_params": {
+		"RMS_error": 0.5,
+		"camera_matrix": [
+			[12.3, 0, 12.3],
+			[0, 12.3, 12.3],
+			[0, 0, 1]
+		],
+		"distortion_coeffs": [
+			0.123,
+			0.234,
+			0.345,
+			0.435
+		]
+	}
+
+}

@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_ Split 3 Nano HD__1080p/60Hz",
+    "note": "first calibration",
+    "calibrated_by": "WizzX",
+    "camera_brand": "Runcam",
+    "camera_model": " Split 3 Nano HD",
+    "lens_model": "",
+    "camera_setting": "1080p/60Hz",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-28",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 12,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.46074722441145505,
+        "camera_matrix": [
+            [
+                902.6583583981247,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                903.4763246113289,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.06680003341435811,
+            -0.017398668296626122,
+            0.01943341253272281,
+            -0.008160796638932358
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

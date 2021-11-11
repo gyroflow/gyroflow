@@ -1,0 +1,45 @@
+{
+    "name": "RUNCAM_ORANGE 5_145 deg_2160p 16/9",
+    "note": "",
+    "calibrated_by": "Kunnuck",
+    "camera_brand": "RUNCAM",
+    "camera_model": "ORANGE 5",
+    "lens_model": "145 deg",
+    "camera_setting": "2160p 16/9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-07-14",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 31,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.6952006733069784,
+        "camera_matrix": [
+            [
+                2090.2696134841485,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                2090.8916692229673,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.03592238162371496,
+            -0.01233066232277733,
+            0.006476918963199149,
+            0.0025508767828096523
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

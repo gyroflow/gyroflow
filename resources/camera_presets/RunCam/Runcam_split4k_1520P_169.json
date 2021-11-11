@@ -1,0 +1,45 @@
+{
+    "name": "Runcam_split4k__1520P 16*9",
+    "note": "",
+    "calibrated_by": "QUADSwithMODS",
+    "camera_brand": "Runcam",
+    "camera_model": "split4k",
+    "lens_model": "",
+    "camera_setting": "1520P 16*9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-03-28",
+    "calib_dimension": {
+        "w": 2704,
+        "h": 1520
+    },
+    "num_images": 31,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 3.447624346161777,
+        "camera_matrix": [
+            [
+                1318.8012827569014,
+                0.0,
+                1352.0
+            ],
+            [
+                0.0,
+                1194.8190856168435,
+                760.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.12286830750032787,
+            0.5370618217569135,
+            -1.2049868905261603,
+            0.8478057306848227
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

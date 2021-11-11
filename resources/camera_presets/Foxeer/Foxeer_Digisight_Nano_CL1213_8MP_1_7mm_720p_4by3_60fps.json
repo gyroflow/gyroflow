@@ -1,0 +1,45 @@
+{
+    "name": "Foxeer_Digisight Nano_Foxeer CL1213 8MP 1.7mm_720p 4by3 60fps",
+    "note": "",
+    "calibrated_by": "TMac FPV",
+    "camera_brand": "Foxeer",
+    "camera_model": "Digisight Nano",
+    "lens_model": "Foxeer CL1213 8MP 1.7mm",
+    "camera_setting": "720p 4by3 60fps",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 42,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.6874490390913649,
+        "camera_matrix": [
+            [
+                823.6322980201983,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                823.7529078944411,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.1438757138262232,
+            -0.05601189552349059,
+            -0.016350280941339383,
+            0.015451258467793933
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

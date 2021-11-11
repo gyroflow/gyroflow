@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Vista__16by9 DVR",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Caddx",
+    "camera_model": "Vista",
+    "lens_model": "",
+    "camera_setting": "16by9 DVR",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-06",
+    "calib_dimension": {
+        "w": 1280,
+        "h": 720
+    },
+    "num_images": 10,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.13039440913402167,
+        "camera_matrix": [
+            [
+                577.9154252779942,
+                0.0,
+                640.0
+            ],
+            [
+                0.0,
+                577.4626037548595,
+                360.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.024842363393347697,
+            0.006257377547097875,
+            -0.0037898765821426086,
+            0.0006455592915864194
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

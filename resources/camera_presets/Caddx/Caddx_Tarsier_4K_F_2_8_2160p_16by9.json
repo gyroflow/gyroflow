@@ -1,0 +1,45 @@
+{
+    "name": "Caddx_Tarsier 4K_F/2.8_2160p 16by9",
+    "note": "",
+    "calibrated_by": "feeksfpv",
+    "camera_brand": "Caddx",
+    "camera_model": "Tarsier 4K",
+    "lens_model": "F/2.8",
+    "camera_setting": "2160p 16by9",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 21,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.5587125962208049,
+        "camera_matrix": [
+            [
+                2208.7770932588774,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                2207.8433263496718,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            -0.046147102050354126,
+            -0.024398132736836605,
+            0.011790953334617634,
+            0.008717703391938827
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

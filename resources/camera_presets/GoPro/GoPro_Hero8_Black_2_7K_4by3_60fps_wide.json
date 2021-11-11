@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero 8 Black__2.7K_4:3_60fps_wide",
+    "note": "No ND Filter or Hypersmooth",
+    "calibrated_by": "kafie1980",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero 8 Black",
+    "lens_model": "",
+    "camera_setting": "2.7K_4:3_60fps_wide",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-04-30",
+    "calib_dimension": {
+        "w": 2704,
+        "h": 2028
+    },
+    "num_images": 35,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.4341941069520718,
+        "camera_matrix": [
+            [
+                1192.5240930435336,
+                0.0,
+                1352.0
+            ],
+            [
+                0.0,
+                1194.9757313656341,
+                1014.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.02929367567275778,
+            0.10701120126703177,
+            -0.14514827320581092,
+            0.0722108194817768
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

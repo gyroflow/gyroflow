@@ -1,0 +1,45 @@
+{
+    "name": "DJI _DJI FPV Air Unit__1080p 4by3",
+    "note": "Crop 1120x630 with 2x scale for calm flying",
+    "calibrated_by": "Amzd",
+    "camera_brand": "DJI ",
+    "camera_model": "DJI FPV Air Unit",
+    "lens_model": "",
+    "camera_setting": "1080p 4by3",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-12",
+    "calib_dimension": {
+        "w": 1440,
+        "h": 1080
+    },
+    "num_images": 23,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.25794725014483866,
+        "camera_matrix": [
+            [
+                670.6219784099985,
+                0.0,
+                720.0
+            ],
+            [
+                0.0,
+                670.1428484171502,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.028482845243458576,
+            -0.0029467097274915657,
+            0.007385203427571552,
+            -0.004350734400395973
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

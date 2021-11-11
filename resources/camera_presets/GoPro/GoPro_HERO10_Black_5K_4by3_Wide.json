@@ -1,0 +1,50 @@
+{
+    "name": "GoPro HERO10 Black 5K 4:3 Wide",
+    "note": "",
+    "calibrated_by": "KonradIT",
+    "camera_brand": "GoPro",
+    "camera_model": "HERO10 Black",
+    "lens_model": "",
+    "camera_setting": "5K 4:3 Wide",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-09-16",
+    "calib_dimension": {
+        "w": 5120,
+        "h": 3840
+    },
+    "orig_dimension": {
+        "w": 5120,
+        "h": 3840
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 27,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 2.5879207855752435,
+        "camera_matrix": [
+            [
+                2267.254240146926,
+                0.0,
+                2560.0
+            ],
+            [
+                0.0,
+                2263.885454686266,
+                1920.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.05861468327674329,
+            -0.010183176918202525,
+            0.06578923022648271,
+            -0.0578622482060604
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

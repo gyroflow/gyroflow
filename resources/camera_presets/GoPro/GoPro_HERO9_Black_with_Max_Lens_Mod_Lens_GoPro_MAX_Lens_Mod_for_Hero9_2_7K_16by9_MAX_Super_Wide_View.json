@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_HERO9 Black with Max Lens Mod Lens_GoPro MAX Lens Mod for Hero9_2.7K 16by9 MAX Super Wide View",
+    "note": "",
+    "calibrated_by": "KonradIT",
+    "camera_brand": "GoPro",
+    "camera_model": "HERO9 Black with Max Lens Mod Lens",
+    "lens_model": "GoPro MAX Lens Mod for Hero9",
+    "camera_setting": "2.7K 16by9 MAX Super Wide View",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-08-10",
+    "calib_dimension": {
+        "w": 2704,
+        "h": 1520
+    },
+    "num_images": 39,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.5954194220684836,
+        "camera_matrix": [
+            [
+                1107.1267850414686,
+                0.0,
+                1352.0
+            ],
+            [
+                0.0,
+                1106.9273746101276,
+                760.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.2024602180323133,
+            -0.30037297125097906,
+            0.35532398803312554,
+            -0.16698624092324515
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

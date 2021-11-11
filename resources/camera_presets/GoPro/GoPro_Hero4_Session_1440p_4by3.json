@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Hero 4 Session__1440p30fps",
+    "note": "schlechtes Licht",
+    "calibrated_by": "erster-test",
+    "camera_brand": "GoPro",
+    "camera_model": "Hero 4 Session",
+    "lens_model": "",
+    "camera_setting": "1440p30fps",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-17",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "num_images": 11,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.7055093739775621,
+        "camera_matrix": [
+            [
+                825.0542507786654,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                824.9609160082778,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.13786742975264668,
+            -0.09192849226299545,
+            0.06348999695624412,
+            -0.021031118756775557
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

@@ -1,0 +1,45 @@
+{
+    "name": "Xiaomi_Yi_Superview_1080p 16by9 wide",
+    "note": "",
+    "calibrated_by": "kkbin",
+    "camera_brand": "Xiaomi",
+    "camera_model": "Yi",
+    "lens_model": "Superview",
+    "camera_setting": "1080p 16by9 wide",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-11",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 11,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.41309108835113656,
+        "camera_matrix": [
+            [
+                853.7108841209439,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                645.7815134180044,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.036608739176645956,
+            0.06437323099026472,
+            -0.07689756948425472,
+            0.03657649056227499
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

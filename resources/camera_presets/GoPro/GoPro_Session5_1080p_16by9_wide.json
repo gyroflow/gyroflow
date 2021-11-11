@@ -1,0 +1,45 @@
+{
+    "name": "GoPro_Session5__1080p 16by9 wide",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "GoPro",
+    "camera_model": "Session5",
+    "lens_model": "",
+    "camera_setting": "1080p 16by9 wide",
+    "calibrator_version": "0.2.0-alpha",
+    "date": "2021-02-06",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "num_images": 21,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.5019036725083859,
+        "camera_matrix": [
+            [
+                859.8356787440747,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                866.5541525623247,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.13103610249797618,
+            -0.08492189621991687,
+            0.07798049320487314,
+            -0.038198405225966174
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

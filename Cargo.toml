@@ -1,0 +1,54 @@
+[package]
+name = "Gyroflow"
+version = "0.0.1"
+authors = ["Adrian <adrian.eddy@gmail.com>"]
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+qmetaobject = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git" }
+qttypes = { git = "https://github.com/woboq/qmetaobject-rs.git",  version = "*", features = ["qtquick", "qtquickcontrols2"]}
+qml-video-rs = { path = "../qml-video-rs" }
+telemetry-parser = { path = "../telemetry-parser" }
+ahrs = { path = "../ahrs-rs/"}
+
+cstr = "*"
+cpp = "*"
+simd-json = "*"
+nalgebra = "0.29"
+rayon = "*"
+ocl = "*"
+biquad = "*"
+fastrand = "*"
+lazy_static = "*"
+crossbeam-channel = "*"
+parking_lot = "*"
+bincode = "*"
+serde = "*"
+crc32fast = "*"
+byteorder = "*"
+
+akaze = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+sample-consensus = "*"
+arrsac = "*"
+rand_xoshiro = "*"
+image = "*"
+space = { version = "0.17", features = ["alloc"] }
+bitarray = { version = "0.9", features = ["space"] }
+
+walkdir = "*" 
+
+opencv = { version = "0.58", features = ["clang-runtime"] }
+
+ffmpeg-next = { version = "4.4.0-next.2", git = "https://github.com/zmwangx/rust-ffmpeg", features = ["codec", "device", "filter", "format", "software-resampling", "software-scaling", "static"] }
+
+wgpu = "*"
+bytemuck = "*"
+pollster = "*"
+
+[build-dependencies]
+cpp_build = "*"
+winres = "*"

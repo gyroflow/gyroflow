@@ -1,0 +1,45 @@
+{
+    "name": "Sony_A6400_EF 24-70mm F2.8 GM_3580*2140",
+    "note": "",
+    "calibrated_by": "Gonges",
+    "camera_brand": "Sony",
+    "camera_model": "A6400",
+    "lens_model": "EF 24-70mm F2.8 GM",
+    "camera_setting": "3580*2140",
+    "calibrator_version": "0.2.1-alpha",
+    "date": "2021-02-14",
+    "calib_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "num_images": 8,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.8587667843389682,
+        "camera_matrix": [
+            [
+                5365.766247377309,
+                0.0,
+                1920.0
+            ],
+            [
+                0.0,
+                5355.500161167229,
+                1080.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.14528434926818282,
+            0.6499812943029128,
+            -3.2595268662022296,
+            9.232245786824501
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}

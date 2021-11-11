@@ -1,0 +1,137 @@
+use rayon::iter::IntoParallelIterator;
+use std::collections::BTreeMap;
+use rayon::iter::ParallelIterator;
+
+use crate::core::gyro_source::{ GyroSource, TimeIMU };
+
+// TODO: instead of finding offset by comparing gyro lines, how about undistorting points with every offset and find differences in visual features?
+pub fn find_offsets(ranges: &Vec<(usize, usize)>, estimated_gyro: &Vec<TimeIMU>, initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    let mut offsets = Vec::new();
+    if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && gyro.raw_imu.len() > 0 {
+        for (from_frame, to_frame) in ranges {
+            let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
+            let mut gyro_item = Vec::new();
+            // let gyro_step = ((gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0)) / gyro.fps) as usize;
+            for i in 0..gyro.raw_imu.len() {
+                if gyro.raw_imu[i].timestamp >= of_item[0].timestamp && gyro.raw_imu[i].timestamp <= of_item.last().unwrap().timestamp {
+                    gyro_item.push(gyro.raw_imu[i].clone());
+                }
+            }
+
+            let gyro_max = gyro_item.iter().flat_map(|x| x.gyro.iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
+            let of_max = of_item.iter().flat_map(|x| x.gyro.iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
+            for x in of_item.iter_mut() {
+                x.gyro[0] /= of_max;
+                x.gyro[1] /= of_max;
+                x.gyro[2] /= of_max;
+            }
+            for x in gyro_item.iter_mut() {
+                x.gyro[0] /= gyro_max;
+                x.gyro[1] /= gyro_max;
+                x.gyro[2] /= gyro_max;
+            }
+
+            let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
+            let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
+            let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);
+
+            let mut gyro_bintree = BTreeMap::new();
+            for x in &gyro_item {
+                gyro_bintree.insert((x.timestamp * 1000.0) as usize, x.clone());
+            } 
+
+            let resolution = (search_size * 10.0) as usize; // 10 times per ms, so every 0.1 ms
+            let lowest = (0..resolution).into_par_iter().map(|i| {
+                let offs = initial_offset + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
+                let cost = calculate_cost(offs, &of_item, &gyro_bintree);
+                (offs, cost)
+            }).reduce_with(|a, b| {
+                if a.1 < b.1 { a } else { b }
+            });
+            if let Some(lowest) = lowest {
+                let middle_frame = from_frame + (to_frame - from_frame) / 2;
+                let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
+
+                // Only accept offsets that are within 90% of search size range
+                if lowest.0.abs() < (search_size / 2.0) * 0.9 {
+                    offsets.push((middle_timestamp, lowest.0, lowest.1));
+                }
+            }
+        }
+    }
+    offsets
+}
+
+fn gyro_at_timestamp<'a>(ts: f64, gyro: &'a BTreeMap<usize, TimeIMU>) -> Option<&'a TimeIMU> {
+    gyro.range((ts * 1000.0) as usize..).next().map(|x| x.1)
+}
+
+fn calculate_cost(offs: f64, of: &Vec<TimeIMU>, gyro: &BTreeMap<usize, TimeIMU>) -> f64 {
+    let mut sum = 0.0;
+    let mut matches_count = 0;
+    for i in 0..of.len() {
+        let o = &of[i];
+        if let Some(g) = gyro_at_timestamp(o.timestamp - offs, gyro) {
+            matches_count += 1;
+            sum += (g.gyro[0] - o.gyro[0]).powf(2.0) * 70.0;
+            sum += (g.gyro[1] - o.gyro[1]).powf(2.0) * 70.0;
+            sum += (g.gyro[2] - o.gyro[2]).powf(2.0) * 100.0;
+        }
+    }
+    if of.len() > 0 && matches_count > of.len() / 2 {
+        // Return average sum per match, if we tested at least half of the samples
+        sum / matches_count as f64
+    } else {
+        // Otherwise not a good match
+        f64::MAX
+    }
+}
+
+
+/*struct Translation(Vector2<f32>);
+struct TranslationEstimator;
+
+impl sample_consensus::Model<Vector2<f32>> for Translation {
+    fn residual(&self, data: &Vector2<f32>) -> f64 {
+        (self.0 - data).norm() as f64
+    }
+}
+
+impl sample_consensus::Estimator<Vector2<f32>> for TranslationEstimator {
+    type Model = Translation;
+    type ModelIter = std::iter::Once<Translation>;
+    const MIN_SAMPLES: usize = 1;
+    fn estimate<I>(&self, mut data: I) -> Self::ModelIter
+    where
+        I: Iterator<Item = Vector2<f32>> + Clone,
+    {
+        let tr = data.next().unwrap();
+        std::iter::once(Translation(tr))
+    }
+}
+
+/// Return the estimated translation and the inlier matches.
+fn estimate_translation(
+    kp1: &[Vector2<f32>],
+    kp2: &[Vector2<f32>],
+    matches: &[(usize, usize)],
+) -> (Vector2<f32>, Vec<usize>) {
+    let mut arrsac = Arrsac::new(50.0, Xoshiro256PlusPlus::seed_from_u64(0));
+    let data: Vec<_> = matches.iter().map(|(id1, id2)| {
+        kp2[*id2] - kp1[*id1]
+    }).collect();
+
+    // Find inliers with RANSAC.
+    let (_translation, inliers) = arrsac
+        .model_inliers(&TranslationEstimator, data.iter().cloned())
+        .unwrap();
+
+    // Re-estimate translation with inliers only.
+    let mut tr_sum = Vector2::zeros();
+    inliers.iter().for_each(|&i| {
+        tr_sum += data[i];
+    });
+    let tr = tr_sum / inliers.len() as f32;
+
+    (tr, inliers)
+}*/
