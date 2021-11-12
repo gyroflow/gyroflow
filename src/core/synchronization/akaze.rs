@@ -2,7 +2,7 @@ use akaze::Akaze;
 use arrsac::Arrsac;
 use bitarray::{BitArray, Hamming};
 use image::EncodableLayout;
-use nalgebra::{Vector2, Rotation3};
+use nalgebra::{Point2, Vector2, Rotation3};
 use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
@@ -58,8 +58,8 @@ impl ItemAkaze {
         let a2 = &next.features;
 
         let intrinsics = cv_pinhole::CameraIntrinsics {
-            focals: cv_core::nalgebra::Vector2::<f64>::new(focal[0], focal[1]),
-            principal_point: cv_core::nalgebra::Point2::new(principal[0], principal[1]),
+            focals: focal,
+            principal_point: Point2::from(principal),
             skew: 0.0,
         };
 
@@ -78,8 +78,7 @@ impl ItemAkaze {
 
             let eight_point = eight_point::EightPoint::new();
             if let Some(out) = arrsac.model(&eight_point, matches.iter().copied()) {
-                // return Some(out.isometry().rotation); TODO uncomment once Rust-CV updates to nalgebra 0.29
-                return Some(nalgebra::Rotation3::from_matrix_unchecked(nalgebra::SMatrix::<f64, 3, 3>::from(out.isometry().rotation.into_inner().data.0)));
+                return Some(out.isometry().rotation);
                 /*let rotations = cv_pinhole::EssentialMatrix::from(out).possible_rotations(1e-12, 1000).unwrap();
                 if rotations[0].angle() < rotations[1].angle() {
                     Some(rotations[0])

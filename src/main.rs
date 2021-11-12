@@ -13,24 +13,34 @@ pub mod ui { pub mod components { pub mod TimelineGyroChart; } }
 use crate::core::{lens_profile::LensProfile, smoothing::*};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 
-// TODO: frame readout time from metadata for gopro and insta360 
-// TODO: PR to ahrs-rs
-// TODO: Move thread pool to core
-// TODO: separate controller into multiple files
-// TODO: analyze every n-th frame
-    
-// TODO: warning when no lens profile loaded
-// TODO: negative rolling shutter values (bottom to top)
+// Things to do before first public preview:
+// - Sort out all dependencies, submit PRs where needed, publish `qml-video-rs` crate and figure out the MDK download
+// - Move thread pool to core
+// - Separate controller into multiple files and clean it up
+// - Frame readout time from metadata for gopro and insta360 
+// - Analyze every n-th frame
+// - Setup CI for packaging for Windows
+// - Setup CI for packaging for Mac
+// - warning when no lens profile loaded
+// - negative rolling shutter values (bottom to top)
+// - UI fixes, editing offset, double animations etc
+// - output size aspect ratio lock icon
+// - confirm when render output already exists
+// - better output file name, strip extension
+// - When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
+// - When rendering, it should be possible to "minimize" the status and continue to work. Also it should be possible to cancel at any time (and this should produce correct file)
+// - It shouldn't be possible to do syncing without a lens profile
+// - Recompute undistortion only for the trimmed range
+// - Fix ffmpeg GPU acceleration detection and test with different graphic cards
+
 // TODO: more smoothing algorithms
 // TODO: adaptive zoom
+
+// TODO: exporting and loading .gyroflow
 // TODO: output size and correctly fit the undistortion in it
-// TODO: UI fixes, editing offset, double animations etc
-// TODO: output size aspect ratio lock icon
-// TODO: default lens profile and FOV
-// TODO: exporting .gyroflow
+// TODO: video rotation
+// TODO: default lens profile
 // TODO: saving settings, storage
-// TODO: exporting .gyroflow file
-// TODO: loading .gyroflow file (test)
 // TODO: Calibrator
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)
 // TODO: -- Save camera model with calibration and later load lens profile automatically
@@ -38,19 +48,12 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // TODO: languages
 // TODO: something is wrong with Complementary integrator
 // TODO: lens profile param adjustment
-// TODO: confirm when render output already exists
-// TODO: better output name, strip extension
 // TODO: wgpu undistortion add support for different plane types
 // TODO: add lens distortion back after stabilization
-// TODO: video rotation
 // TODO: hyperlapse mode
-
-// DETAILS:
-// TODO: When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
-// TODO: When rendering, it should be possible to "minimize" the status and continue to work. Also it should be possible to cancel at any time (and this should produce correct file)
-// TODO: It shouldn't be possible to do syncing without a lens profile
-// TODO: Recompute undistortion only for the trimmed range
-// TODO: drop mutliple files (video, lens profile, gyro data) at once
+// TODO: Setup CI for packaging for Android
+// TODO: Setup CI for packaging for iOS
+// TODO: drop mutliple files at once (video, lens profile, gyro data)
 // TODO: add elapsed and remaining times when rendering
 
 qrc!(rsrc,
