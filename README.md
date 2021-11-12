@@ -16,6 +16,9 @@ Gyroflow Rust port, based on the original work of ElvinC `https://github.com/Elv
 Visual Studio Code + `rust-analyzer` extension.
 Optionally `CodeLLDB` extension for debugging
 
+For working with QML I recommend to use Qt Creator and load all QML files there, as it has auto-complete and syntax highlighting.
+The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `main.rs` and it should work right away. Now every tim you change any QML file, the app should reload it immediately.
+
 # Building
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install Qt 6.2 or higher: https://www.qt.io/download-qt-installer
