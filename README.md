@@ -2,8 +2,17 @@
 Gyroflow Rust port, based on the original work of ElvinC `https://github.com/ElvinC/gyroflow/`
 
 
+# Code structure
+1. Entire GUI is in the `src/ui` diretory
+2. `controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
+3. `core` directory contains the whole gyroflow engine and doesn't depend on Qt or ffmpeg, and OpenCV is optional
+4. `rendering` contains all FFmpeg related code for rendering final video and processing (for synchronization)
+5. `core/gpu` contains GPU implementations of the undistortion
+6. `mod.rs` in each directory acts as a main entry of the module (directory name is the module name and `mod.rs` is the kind of an entry point)
+
+
 # Dev environment
-Visual Studio Code + `rust-analyzer` extension
+Visual Studio Code + `rust-analyzer` extension.
 Optionally `CodeLLDB` extension for debugging
 
 # Building
