@@ -3,50 +3,6 @@
 version = 3
 
 [[package]]
-name = "Gyroflow"
-version = "0.0.1"
-dependencies = [
- "ahrs",
- "akaze",
- "arrsac",
- "bincode",
- "biquad",
- "bitarray",
- "bytemuck",
- "byteorder",
- "cpp",
- "cpp_build",
- "crc32fast",
- "crossbeam-channel 0.5.1",
- "cstr",
- "cv-core",
- "cv-pinhole",
- "eight-point",
- "fastrand",
- "ffmpeg-next",
- "image",
- "lazy_static",
- "nalgebra 0.29.0",
- "ocl",
- "opencv",
- "parking_lot",
- "pollster",
- "qmetaobject",
- "qml-video-rs",
- "qttypes",
- "rand_xoshiro",
- "rayon",
- "sample-consensus",
- "serde",
- "simd-json",
- "space",
- "telemetry-parser",
- "walkdir",
- "wgpu",
- "winres",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1027,6 +983,50 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "363e3677e55ad168fef68cf9de3a4a310b53124c5e784c53a1d70e92d23f2126"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "gyroflow"
+version = "0.0.1"
+dependencies = [
+ "ahrs",
+ "akaze",
+ "arrsac",
+ "bincode",
+ "biquad",
+ "bitarray",
+ "bytemuck",
+ "byteorder",
+ "cpp",
+ "cpp_build",
+ "crc32fast",
+ "crossbeam-channel 0.4.4",
+ "cstr",
+ "cv-core",
+ "cv-pinhole",
+ "eight-point",
+ "fastrand",
+ "ffmpeg-next",
+ "image",
+ "lazy_static",
+ "nalgebra 0.29.0",
+ "ocl",
+ "opencv",
+ "parking_lot",
+ "pollster",
+ "qmetaobject",
+ "qml-video-rs",
+ "qttypes",
+ "rand_xoshiro",
+ "rayon",
+ "sample-consensus",
+ "serde",
+ "simd-json",
+ "space",
+ "telemetry-parser",
+ "walkdir",
+ "wgpu",
+ "winres",
 ]
 
 [[package]]

@@ -42,6 +42,8 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // TODO: better output name, strip extension
 // TODO: wgpu undistortion add support for different plane types
 // TODO: add lens distortion back after stabilization
+// TODO: video rotation
+// TODO: hyperlapse mode
 
 // DETAILS:
 // TODO: When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
