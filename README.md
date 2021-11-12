@@ -1,7 +1,6 @@
 # gyroflow
 Gyroflow Rust port, based on the original work of ElvinC `https://github.com/ElvinC/gyroflow/`
 
-
 # Code structure
 1. Entire GUI is in the `src/ui` diretory
 2. `controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
@@ -28,6 +27,6 @@ The project also supports UI live reload, it's a super quick way of working with
 6. - https://sourceforge.net/projects/opencvlibrary/files/4.5.4/opencv-4.5.4-vc14_vc15.exe/download
 7. - https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe
 8. Update Qt path in `__env.ps1`
-9. Setup the environment in powershell (or set the same variables in cmd): ./__env.ps1 - I do this in VS Code built-in terminal
+9. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
 10. Compile and run: `cargo run --release`
 
