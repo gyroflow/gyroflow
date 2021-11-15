@@ -150,7 +150,7 @@ pub struct Undistortion<T: Default + Copy + Send + Sync + FloatPixel> {
 
 impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
     pub fn calculate_stab_data(params: &ComputeParams, current_compute_id: &std::sync::atomic::AtomicU64, compute_id: u64) -> Result<Vec<FrameTransform>, ()> {
-        if params.frame_count <= 0 || params.width <= 0 || params.height <= 0 {
+        if params.frame_count == 0 || params.width == 0 || params.height == 0 {
             println!("no params {} {} {} ", params.frame_count, params.width, params.height);
             return Ok(Vec::new());
         }

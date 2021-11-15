@@ -19,12 +19,12 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // - Separate controller into multiple files and clean it up
 // - Frame readout time from metadata for gopro and insta360 
 // - Analyze every n-th frame
+// - output size aspect ratio lock icon
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - warning when no lens profile loaded
 // - negative rolling shutter values (bottom to top)
 // - UI fixes, editing offset, double animations etc
-// - output size aspect ratio lock icon
 // - confirm when render output already exists
 // - better output file name, strip extension
 // - When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
@@ -51,6 +51,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // TODO: wgpu undistortion add support for different plane types
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
+// TODO: Setup CI for packaging for Linux
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)

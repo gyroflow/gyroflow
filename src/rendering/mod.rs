@@ -55,7 +55,7 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
     let mut proc = FfmpegProcessor::from_file(&video_path, use_gpu).unwrap();
 
     dbg!(&proc.gpu_device);
-    proc.video_codec = Some(match_gpu_encoder(&codec, use_gpu, &proc.gpu_device.as_ref().unwrap()).to_owned());
+    proc.video_codec = Some(match_gpu_encoder(&codec, use_gpu, proc.gpu_device.as_ref().unwrap()).to_owned());
     proc.gpu_encoding = use_gpu;
     dbg!(&proc.video_codec);
 
@@ -85,7 +85,7 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
                     plane.init_size(<$t as FloatPixel>::from_rgb_color(stab.background, &$yuvi), &ComputeParams::from_manager(&stab), ($s / $t::COUNT) as usize);
                     $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize| {
                         s /= $t::COUNT;
-                        let processed = plane.process_pixels(frame_id, w, h, s, unsafe { std::slice::from_raw_parts_mut(buffer.as_mut_ptr() as *mut <$t as FloatPixel>::Scalar, s*h*$t::COUNT) });
+                        let processed = plane.process_pixels(frame_id, w, h, s, bytemuck::cast_slice_mut(buffer));
                         if buffer.as_ptr() as *const u8 != processed as *const u8 { 
                             buffer.copy_from_slice(unsafe { std::slice::from_raw_parts(processed as *mut u8, s*h*std::mem::size_of::<<$t as FloatPixel>::Scalar>()*$t::COUNT) });
                         }
@@ -220,7 +220,7 @@ pub fn test() {
 // use std::os::raw::c_void;
         
 pub fn test_decode() {
-    let mut proc = FfmpegProcessor::from_file("E:/clips/GoPro/rs/C0752.MP4".into(), true).unwrap();
+    let mut proc = FfmpegProcessor::from_file("E:/clips/GoPro/rs/C0752.MP4", true).unwrap();
 
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
     proc.on_frame(move |timestamp_us, input_frame, converter| {

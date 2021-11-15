@@ -6,11 +6,13 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-qmetaobject = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git" }
-qttypes = { git = "https://github.com/woboq/qmetaobject-rs.git",  version = "*", features = ["qtquick", "qtquickcontrols2"]}
-qml-video-rs = { path = "../qml-video-rs" }
-telemetry-parser = { path = "../telemetry-parser" }
-ahrs = { path = "../ahrs-rs/"}
+qmetaobject = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git", default-features = false, features = ["log"] }
+qttypes     = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+#qml-video-rs = { path = "../qml-video-rs" }
+#telemetry-parser = { path = "../telemetry-parser" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
+ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git" }
 
 cstr = "*"
 cpp = "*"

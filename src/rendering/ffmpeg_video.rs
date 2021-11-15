@@ -22,11 +22,11 @@ impl<'a> Converter {
             let convert_from = self.convert_from.as_mut().unwrap();
             let convert_to = self.convert_to.as_mut().unwrap();
 
-            convert_from.run(&frame, sw_frame_converted).unwrap();
+            convert_from.run(frame, sw_frame_converted).unwrap();
 
             cb(sw_frame_converted);
 
-            convert_to.run(&sw_frame_converted, frame).unwrap();
+            convert_to.run(sw_frame_converted, frame).unwrap();
         } else {
             cb(frame);
         }
@@ -45,7 +45,7 @@ impl<'a> Converter {
             let sw_frame_converted = self.sw_frame_converted.as_mut().unwrap();
             let convert_to = self.convert_to.as_mut().unwrap();
 
-            convert_to.run(&frame, sw_frame_converted).unwrap();
+            convert_to.run(frame, sw_frame_converted).unwrap();
 
             unsafe { frame::Video::wrap(ffi::av_frame_clone(sw_frame_converted.as_ptr())) }
         } else {
@@ -162,7 +162,7 @@ impl<'a> VideoTranscoder<'a> {
         encoder = ost.codec().encoder().video()?;
         ost.set_parameters(encoder);
         
-        Ok(ost.codec().encoder().video()?)
+        ost.codec().encoder().video()
     }
     
     pub fn receive_and_process_video_frames(&mut self, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, end_ms: Option<usize>) -> Result<Status, Error> {

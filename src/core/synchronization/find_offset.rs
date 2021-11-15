@@ -5,9 +5,9 @@ use rayon::iter::ParallelIterator;
 use crate::core::gyro_source::{ GyroSource, TimeIMU };
 
 // TODO: instead of finding offset by comparing gyro lines, how about undistorting points with every offset and find differences in visual features?
-pub fn find_offsets(ranges: &Vec<(usize, usize)>, estimated_gyro: &Vec<TimeIMU>, initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
-    if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && gyro.raw_imu.len() > 0 {
+    if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
@@ -59,11 +59,11 @@ pub fn find_offsets(ranges: &Vec<(usize, usize)>, estimated_gyro: &Vec<TimeIMU>,
     offsets
 }
 
-fn gyro_at_timestamp<'a>(ts: f64, gyro: &'a BTreeMap<usize, TimeIMU>) -> Option<&'a TimeIMU> {
+fn gyro_at_timestamp(ts: f64, gyro: &BTreeMap<usize, TimeIMU>) -> Option<&TimeIMU> {
     gyro.range((ts * 1000.0) as usize..).next().map(|x| x.1)
 }
 
-fn calculate_cost(offs: f64, of: &Vec<TimeIMU>, gyro: &BTreeMap<usize, TimeIMU>) -> f64 {
+fn calculate_cost(offs: f64, of: &[TimeIMU], gyro: &BTreeMap<usize, TimeIMU>) -> f64 {
     let mut sum = 0.0;
     let mut matches_count = 0;
     for o in of {
@@ -74,7 +74,7 @@ fn calculate_cost(offs: f64, of: &Vec<TimeIMU>, gyro: &BTreeMap<usize, TimeIMU>)
             sum += (g.gyro[2] - o.gyro[2]).powf(2.0) * 100.0;
         }
     }
-    if of.len() > 0 && matches_count > of.len() / 2 {
+    if !of.is_empty() && matches_count > of.len() / 2 {
         // Return average sum per match, if we tested at least half of the samples
         sum / matches_count as f64
     } else {

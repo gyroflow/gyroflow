@@ -127,8 +127,8 @@ fn serialize_features(x: &DetectedFeatures) -> Vec<u8> {
     let out = SerializedFeatures(x.0.iter().map(SerializedKeypoint::from).collect(), x.1.iter().map(|v| v.bytes().to_vec()).collect());
     bincode::serialize(&out).unwrap()
 }
-fn deserialize_features(x: &Vec<u8>) -> DetectedFeatures {
-    let val: SerializedFeatures = bincode::deserialize(&x).unwrap();
+fn deserialize_features(x: &[u8]) -> DetectedFeatures {
+    let val: SerializedFeatures = bincode::deserialize(x).unwrap();
     (
         val.0.into_iter().map(SerializedKeypoint::into).collect(), 
         val.1.into_iter().map(|x| { let mut a = [0u8; 64]; a.copy_from_slice(&x); BitArray::<64>::new(a) }).collect(), 

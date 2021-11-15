@@ -14,7 +14,7 @@ struct Globals {
 unsafe impl Zeroable for Globals {}
 unsafe impl Pod for Globals {}
 
-pub struct WgpuWrapper<T: bytemuck::Pod + std::marker::Sync>  {
+pub struct WgpuWrapper<T: bytemuck::Pod + Sync>  {
     device: wgpu::Device,
     queue: wgpu::Queue,
     staging_buffer: wgpu::Buffer,
@@ -30,7 +30,7 @@ pub struct WgpuWrapper<T: bytemuck::Pod + std::marker::Sync>  {
     _d: std::marker::PhantomData<T>
 }
 
-impl<T: bytemuck::Pod + std::marker::Sync> WgpuWrapper<T>  {
+impl<T: bytemuck::Pod + Sync> WgpuWrapper<T>  {
     pub fn new(width: usize, height: usize, bg: nalgebra::Vector4<f32>) -> Option<Self> {
         let params_count = 9 * (height + 1);
 
@@ -47,7 +47,6 @@ impl<T: bytemuck::Pod + std::marker::Sync> WgpuWrapper<T>  {
             limits: wgpu::Limits::downlevel_defaults(),
         }, None)).ok()?;
 
-        
         let info = adapter.get_info();
         dbg!(&info);
 

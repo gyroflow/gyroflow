@@ -1,5 +1,6 @@
 use nalgebra::{Vector2, Rotation3};
 use std::ops::Range;
+use std::sync::atomic::Ordering::SeqCst;
 use std::vec::Vec;
 use parking_lot::{RwLock};
 use std::sync::Arc;
@@ -36,7 +37,8 @@ pub struct PoseEstimator {
     pub sync_results: Arc<RwLock<BTreeMap<usize, FrameResult>>>,
     pub lens_params: Arc<RwLock<(Vector2<f64>, Vector2<f64>)>>,
     pub estimated_gyro: Arc<RwLock<Vec<TimeIMU>>>,
-    pub lpf: std::sync::atomic::AtomicU32
+    pub lpf: std::sync::atomic::AtomicU32,
+    pub every_nth_frame: std::sync::atomic::AtomicUsize
 }
 
 impl PoseEstimator {
@@ -48,6 +50,21 @@ impl PoseEstimator {
         let _ = opencv::init();
     }
 
+    pub fn insert_empty_result(&self, frame: usize, method: u32) {
+        let item = match method {
+            0 => EstimatorItem::Akaze(ItemAkaze::default()),
+            1 => EstimatorItem::OpenCV(ItemOpenCV::default()),
+            _ => panic!("Inavalid method")
+        };
+        {
+            let mut l = self.sync_results.write();
+            l.entry(frame).or_insert(FrameResult {
+                item,
+                rotation: None,
+                euler: None
+            });
+        }
+    }
     pub fn detect_features(&self, frame: usize, method: u32, img: image::GrayImage) {
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
@@ -56,13 +73,11 @@ impl PoseEstimator {
         };
         {
             let mut l = self.sync_results.write();
-            if !l.contains_key(&frame) {
-                l.insert(frame, FrameResult {
-                    item,
-                    rotation: None,
-                    euler: None
-                });
-            }
+            l.entry(frame).or_insert(FrameResult {
+                item,
+                rotation: None,
+                euler: None
+            });
         }
     }
 
@@ -74,11 +89,12 @@ impl PoseEstimator {
     }
 
     pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64) {
+        let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut frames_to_process = Vec::new();
         {
             let l = self.sync_results.read();
             for frame in 0..frame_count {
-                if l.contains_key(&frame) && l.contains_key(&(frame + 1)) {
+                if l.contains_key(&frame) && l.contains_key(&(frame + every_nth_frame)) {
                     let curr_entry = l.get(&frame).unwrap();
                     if curr_entry.rotation.is_none() {
                         frames_to_process.push(frame);
@@ -90,10 +106,10 @@ impl PoseEstimator {
         let results = self.sync_results.clone();
         frames_to_process.par_iter().for_each(move |frame| {
             let l = results.read();
-            let curr = l.get(&frame).unwrap();
+            let curr = l.get(frame).unwrap();
             if curr.rotation.is_none() {
                 let curr = curr.item.clone();
-                let next = l.get(&(frame + 1)).unwrap().item.clone();
+                let next = l.get(&(frame + every_nth_frame)).unwrap().item.clone();
                 let (focal, principal) = *self.lens_params.read();
 
                 // Unlock the mutex for estimate_pose
@@ -107,13 +123,13 @@ impl PoseEstimator {
 
                 if let Some(rot) = r {
                     let mut l = results.write(); 
-                    let mut x = l.get_mut(&frame).unwrap();
+                    let mut x = l.get_mut(frame).unwrap();
                     x.rotation = Some(rot);
                     x.euler = Some(rot.euler_angles());
                 }
             }
         });
-        self.recalculate_gyro_data(frame_count, duration_ms, fps);
+        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
     }
 
     pub fn get_points_for_frame(&self, frame: &usize) -> (Vec<f32>, Vec<f32>) {
@@ -154,13 +170,14 @@ impl PoseEstimator {
         image::GrayImage::from_raw(width, height, slice[0..(width*height) as usize].to_vec()).unwrap()
     }
     pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
-        self.lpf.store((freq * 100.0) as u32, std::sync::atomic::Ordering::SeqCst);
-        self.recalculate_gyro_data(frame_count, duration_ms, fps);
+        self.lpf.store((freq * 100.0) as u32, SeqCst);
+        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
     }
 
-    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, _fps: f64) {
+    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, _fps: f64, final_pass: bool) {
+        let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut is_akaze = false;
-        for (_, v) in &*self.sync_results.read() {
+        for v in self.sync_results.read().values() {
             if let EstimatorItem::Akaze(_) = v.item {
                 is_akaze = true;
                 break;
@@ -171,7 +188,7 @@ impl PoseEstimator {
             (frame as f64 / frame_count as f64) * duration_ms
         };
 
-        let lpf = self.lpf.load(std::sync::atomic::Ordering::SeqCst) as f64 / 100.0;
+        let lpf = self.lpf.load(SeqCst) as f64 / 100.0;
         
         let mut vec = Vec::new();
         if !self.sync_results.read().is_empty() {
@@ -181,19 +198,23 @@ impl PoseEstimator {
                 // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
                 // TODO: figure out if rolling shutter time can be used to make better calculation here
                 // TODO: figure out why AKAZE and OpenCV have slight difference
+                let next_frame = frame + every_nth_frame;
                 if is_akaze {
-                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + 0.5)
+                    let halfway = (next_frame as f64 - frame as f64) / 2.0;
+                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + halfway);
                 } else {
-                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + 0.3);
+                    let halfway = (next_frame as f64 - frame as f64) / 2.5;
+                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + halfway);
                 }
             }
         }
 
+        let mut update_eulers = BTreeMap::<usize, Option<(f64, f64, f64)>>::new();
         {
             let sync_results = &*self.sync_results.read();
-            for (k, v) in sync_results {
+            for (k, v) in sync_results.iter() {
                 let mut eul = v.euler;
-                if eul.is_none() {
+                if final_pass && eul.is_none() {
                     if let Some(prev_existing) = sync_results.range(..*k).rev().find(|x| x.1.euler.is_some()) {
                         if let Some(next_existing) = sync_results.range(*k..).find(|x| x.1.euler.is_some()) {
                             let ratio = (*k - prev_existing.0) as f64 / (next_existing.0 - prev_existing.0) as f64;
@@ -209,6 +230,7 @@ impl PoseEstimator {
                                 interpolate(prev_euler.1, next_euler.1, ratio),
                                 interpolate(prev_euler.2, next_euler.2, ratio),
                             ));
+                            update_eulers.insert(*k, eul);
                         }
                     }
                 }
@@ -223,6 +245,16 @@ impl PoseEstimator {
                 }
             }
         }
+
+        {
+            let sync_results = &mut *self.sync_results.write();
+            for (k, e) in update_eulers {
+                if let Some(entry) = sync_results.get_mut(&k) {
+                    entry.euler = e;
+                }
+            }
+        }
+
         if lpf > 0.0 && frame_count > 0 && duration_ms > 0.0 {
             let sample_rate = frame_count as f64 / (duration_ms / 1000.0);
             if let Err(e) = crate::core::filtering::Lowpass::filter_gyro_forward_backward(lpf, sample_rate, &mut vec) {
@@ -239,7 +271,7 @@ impl PoseEstimator {
         let mut ranges = Vec::new();
         let mut prev_frame = 0;
         let mut curr_range_start = 0;
-        for (f, _v) in &*self.sync_results.read() {
+        for f in self.sync_results.read().keys() {
             if f - prev_frame > 5 {
                 if curr_range_start != prev_frame {
                     ranges.push((curr_range_start, prev_frame));

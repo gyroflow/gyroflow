@@ -181,7 +181,7 @@ impl TimelineGyroChart {
 
         self.update_data();
     }
-    fn get_serie_vector(vec: &Vec<ChartData>, i: usize) -> Vec<(f64, f64)> {
+    fn get_serie_vector(vec: &[ChartData], i: usize) -> Vec<(f64, f64)> {
         let mut ret = Vec::with_capacity(vec.len());
         for x in vec {
             ret.push((x.timestamp_percent, x.values[i]));

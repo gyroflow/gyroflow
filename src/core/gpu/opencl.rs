@@ -65,7 +65,7 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
     
         Ok(Self {
             pix_element_count,
-            kernel: kernel,
+            kernel,
             src: source_buffer,
             dst: dest_buffer,
             params_buf,

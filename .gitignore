@@ -1,6 +1,7 @@
 _unused/
 _dev/
 _deploy/
+cache/
 target/
 ext/
 .vscode/

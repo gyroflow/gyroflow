@@ -193,7 +193,7 @@ Item {
             onClicked: (index) => {
                 const pos = (root.mapFromVisibleArea(addSyncPointPopup.x / ma.width));
                 switch (index) {
-                    case 0: controller.start_autosync(pos, window.sync.initialOffset.value, window.sync.syncSearchSize.value * 1000, window.sync.timePerSyncpoint, window.videoArea.vid); break;
+                    case 0: controller.start_autosync(pos, window.sync.initialOffset.value, window.sync.syncSearchSize.value * 1000, window.sync.timePerSyncpoint, window.sync.everyNthFrame, window.videoArea.vid); break;
                     case 1: controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs)); break;
                 }
 

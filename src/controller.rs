@@ -8,8 +8,6 @@ use std::sync::atomic::{AtomicUsize, AtomicU64};
 use std::sync::atomic::Ordering::SeqCst;
 
 use qml_video_rs::video_item::MDKVideoItem;
-use qml_video_rs::video_item::QJsonObject;
-use qml_video_rs::video_item::QJsonArray;
 
 use crate::core::StabilizationManager;
 use crate::core::smoothing::*;
@@ -41,7 +39,7 @@ pub struct Controller {
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
-    start_autosync: qt_method!(fn(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, player: QJSValue)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, player: QJSValue)), // QString is workaround for now
     update_chart: qt_method!(fn(&mut self, chart: QJSValue)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool),
@@ -83,9 +81,10 @@ pub struct Controller {
 }
 impl Controller {
     pub fn new() -> Self {
-        let mut ctl = Self::default();
-        ctl.sync_method = 1; // OpenCV
-        ctl
+        Self {
+            sync_method: 1,
+            ..Default::default()
+        }
     }
     fn update_offset_model(&mut self) {
         self.offsets_model = RefCell::new(self.stabilizer.read().gyro.offsets.iter().map(|(k, v)| OffsetItem {
@@ -95,11 +94,11 @@ impl Controller {
 
         let qptr = QPointer::from(&*self);
         qmetaobject::queued_callback(move |_| {
-            qptr.as_pinned().map(|this| {
+            if let Some(this) = qptr.as_pinned() {
                 let this = this.borrow();
                 this.offsets_updated();
                 this.chart_data_changed();
-            });
+            }
         })(());
     }
 
@@ -131,7 +130,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, player: QJSValue) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
@@ -172,25 +171,25 @@ impl Controller {
                     Vector2::new(mtrx[0] / img_ratio, mtrx[4] / img_ratio),
                     Vector2::new(mtrx[2] / img_ratio, mtrx[5] / img_ratio)
                 );
-                let estimator = estimator.clone();
+                estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
                 let stab_clone = self.stabilizer.clone();
                 drop(stab);
 
                 let qptr = QPointer::from(&*self);
                 let frame_status2 = frame_status.clone();
                 let progress = Arc::new(qmetaobject::queued_callback(move |_| {
-                    qptr.as_pinned().map(|this| {
+                    if let Some(this) = qptr.as_pinned() {
                         let l = frame_status2.read();
                         let total = l.len();
                         let ready = l.iter().filter(|e| *e.1).count();
                         drop(l);
                         this.borrow().chart_data_changed();
                         this.borrow().sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
-                    });
+                    }
                 }));
                 let qptr = QPointer::from(&*self);
                 let set_offsets = Arc::new(qmetaobject::queued_callback(move |offsets: Vec<(f64, f64, f64)>| {
-                    qptr.as_pinned().map(|this| {
+                    if let Some(this) = qptr.as_pinned() {
                         let mut this = this.borrow_mut();
                         {
                             let mut stab = this.stabilizer.write();
@@ -203,10 +202,9 @@ impl Controller {
                         this.recompute_threaded();
                         this.chart_data_changed();
                         this.sync_progress(1.0, QString::default());
-                    });
+                    }
                 }));
 
-                let frame_status = frame_status.clone();
                 let total_read_frames = Arc::new(AtomicUsize::new(0));
                 let total_detected_frames = Arc::new(AtomicUsize::new(0));
                 
@@ -216,6 +214,12 @@ impl Controller {
                     let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
                     proc.on_frame(|timestamp_us, input_frame, converter| {
                         let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+                        if frame % every_nth_frame as i32 != 0 {
+                            // Don't analyze this frame
+                            frame_status.write().insert(frame as usize, true);
+                            estimator.insert_empty_result(frame as usize, method);
+                            return;
+                        }
                         let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
 
                         let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
@@ -253,6 +257,7 @@ impl Controller {
                     }
                     println!("finished OF");
                     estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
+                    estimator.recalculate_gyro_data(frame_count as usize, duration_ms, fps, true);
 
                     let offsets = estimator.find_offsets(initial_offset, sync_search_size, &stab_clone.read().gyro);
                     set_offsets(offsets);
@@ -266,7 +271,7 @@ impl Controller {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
             
             let stab = self.stabilizer.read();
-            stab.pose_estimator.recalculate_gyro_data(stab.frame_count.clone(), stab.duration_ms.clone(), stab.fps.clone());
+            stab.pose_estimator.recalculate_gyro_data(stab.frame_count, stab.duration_ms, stab.fps, false);
             chart.setSyncResults(&*stab.pose_estimator.estimated_gyro.read());
 
             chart.setFromGyroSource(&stab.gyro);
@@ -291,12 +296,12 @@ impl Controller {
 
             let qptr = QPointer::from(&*self);
             let finished = qmetaobject::queued_callback(move |params: (bool, QString, QString, QString, bool, bool)| {
-                qptr.as_pinned().map(|this| {
+                if let Some(this) = qptr.as_pinned() { 
                     let mut this = this.borrow_mut();
                     this.recompute_threaded();
                     this.update_offset_model();
                     this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5);    
-                });
+                }
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -384,11 +389,11 @@ impl Controller {
         
         let qptr = QPointer::from(&*self);
         let finished = qmetaobject::queued_callback(move |_| {
-            qptr.as_pinned().map(|this| {
+            if let Some(this) = qptr.as_pinned() { 
                 let mut this = this.borrow_mut();
                 this.chart_data_changed();
                 this.recompute_threaded();
-            });
+            }
         });
         let stab = self.stabilizer.clone();
         THREAD_POOL.spawn(move || {
@@ -405,7 +410,7 @@ impl Controller {
     fn update_sync_lpf(&mut self, lpf: f64) {
         {
             let stab = self.stabilizer.write();
-            stab.pose_estimator.lowpass_filter(lpf, stab.frame_count.clone(), stab.duration_ms.clone(), stab.fps.clone());
+            stab.pose_estimator.lowpass_filter(lpf, stab.frame_count, stab.duration_ms, stab.fps);
         }
         
         self.chart_data_changed();
@@ -496,16 +501,16 @@ impl Controller {
     fn recompute_threaded(&mut self) {
         let stab = self.stabilizer.clone();
         let compute_id = fastrand::u64(..);
-        CURRENT_COMPUTE_ID.store(compute_id, std::sync::atomic::Ordering::SeqCst);
+        CURRENT_COMPUTE_ID.store(compute_id, SeqCst);
 
         self.compute_progress(compute_id, 0.0);
 
         let qptr = QPointer::from(&*self);
         let finished = qmetaobject::queued_callback(move |cid| {
-            qptr.as_pinned().map(|this| {
+            if let Some(this) = qptr.as_pinned() { 
                 println!("compute finish");
                 this.borrow().compute_progress(cid, 1.0);
-            });
+            }
         });
 
         THREAD_POOL.spawn(move || {
@@ -531,9 +536,9 @@ impl Controller {
     fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool) {
         let qptr = QPointer::from(&*self);
         let progress = qmetaobject::queued_callback(move |params: (f64, usize, usize)| {
-            qptr.as_pinned().map(|this| {
+            if let Some(this) = qptr.as_pinned() { 
                 this.borrow().render_progress(params.0, params.1, params.2);
-            });
+            }
         });
 
         let trim_ratio = trim_end - trim_start;
@@ -555,21 +560,21 @@ unsafe impl Send for Controller { }
 unsafe impl Sync for Controller { }
 
 fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
-    let mut arr = Vec::<QJsonObject>::new();
+    let mut arr = QJsonArray::default();
     use simd_json::ValueAccess;
-    for param in v.as_array().unwrap().into_iter() {
-        let mut map = HashMap::new();
+    for param in v.as_array().unwrap() {
+        let mut map = QJsonObject::default();
         for (k, v) in param.as_object().unwrap() {
             match v {
-                simd_json::OwnedValue::Static(simd_json::StaticNode::F64(v)) => { map.insert(k.clone(), QVariant::from(*v)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::I64(v)) => { map.insert(k.clone(), QVariant::from(*v)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::U64(v)) => { map.insert(k.clone(), QVariant::from(*v)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::Bool(v)) => { map.insert(k.clone(), QVariant::from(*v)); },
-                simd_json::OwnedValue::String(v) => { map.insert(k.clone(), QVariant::from(QString::from(v.clone()))); },
+                simd_json::OwnedValue::Static(simd_json::StaticNode::F64(v)) => { map.insert(k, QJsonValue::from(*v)); },
+                simd_json::OwnedValue::Static(simd_json::StaticNode::I64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
+                simd_json::OwnedValue::Static(simd_json::StaticNode::U64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
+                simd_json::OwnedValue::Static(simd_json::StaticNode::Bool(v)) => { map.insert(k, QJsonValue::from(*v)); },
+                simd_json::OwnedValue::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
                 _ => { println!("Unimplemented"); }
             };
         }
-        arr.push(QJsonObject::from(map));
+        arr.push(QJsonValue::from(map));
     }
-    QJsonArray::from(arr)
+    arr
 }

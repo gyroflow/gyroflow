@@ -43,14 +43,14 @@ impl SmoothingAlgorithm for Plain {
         
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
-            q = q.slerp(&x.1, alpha);
+            q = q.slerp(x.1, alpha);
             (*x.0, q)
         }).collect();
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
-            q = q.slerp(&x.1, alpha);
+            q = q.slerp(x.1, alpha);
             (*x.0, q)
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition

@@ -188,16 +188,18 @@ impl StabilizationManager {
     }
 
     pub fn get_render_stabilizator(&self) -> StabilizationManager {
-        let mut stab = StabilizationManager::default();
-        stab.duration_ms = self.duration_ms;
-        stab.fps = self.fps;
-        stab.frame_count = self.frame_count;
-        stab.video_size = self.video_size;
-        stab.gyro = self.gyro.clone();
-        stab.frame_readout_time = self.frame_readout_time;
-        stab.fov = self.fov;
-        stab.background = self.background;
-        stab.lens = self.lens.clone();
+        let mut stab = StabilizationManager {
+            frame_readout_time: self.frame_readout_time,
+            duration_ms: self.duration_ms,
+            frame_count: self.frame_count,
+            video_size:  self.video_size,
+            fps:         self.fps,
+            gyro:        self.gyro.clone(),
+            fov:         self.fov,
+            background:  self.background,
+            lens:        self.lens.clone(),
+            ..Default::default()
+        };
         stab.init_size(self.video_size.0, self.video_size.1);
 
         stab.recompute_undistortion();

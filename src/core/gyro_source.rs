@@ -271,7 +271,7 @@ impl GyroSource {
         let time_delta = (quat2.0 - quat1.0) as f64;
         if time_delta != 0.0 {
             let fract = (lookup_ts - quat1.0) as f64 / time_delta;
-            quat1.1.slerp(&quat2.1, fract)
+            quat1.1.slerp(quat2.1, fract)
         } else {
             *quat1.1
         }

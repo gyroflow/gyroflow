@@ -10,6 +10,7 @@ MenuItem {
     property alias timePerSyncpoint: timePerSyncpoint.value;
     property alias initialOffset: initialOffset.value;
     property alias syncSearchSize: syncSearchSize.value;
+    property alias everyNthFrame: everyNthFrame.value;
 
     Button {
         text: qsTr("Auto sync");
@@ -21,13 +22,12 @@ MenuItem {
             const chunks = 1.0 / points;
             const start = chunks / 2;
             let ranges = [];
-            for (var i = 0; i < points; ++i) {
+            for (let i = 0; i < points; ++i) {
                 const pos = start + (i*chunks);
                 ranges.push(pos);
             }
 
-            console.log('start autosync', ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value);
-            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, window.videoArea.vid);
+            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value, window.videoArea.vid);
             sync.loader = true;
         }
     }
@@ -98,6 +98,7 @@ MenuItem {
             text: qsTr("Analyze every n-th frame");
 
             NumberField {
+                id: everyNthFrame;
                 width: parent.width;
                 height: 25 * dpiScale;
                 value: 1;

@@ -27,8 +27,7 @@ fn main() {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS");
     match target_os.as_ref().map(|x| &**x) {
         Ok("android") => {
-            println!("cargo:rustc-link-search={}", "../qml-video-rs/ext/mdk-sdk-android/lib/arm64-v8a");
-            println!("cargo:rustc-link-search={}", "D:\\Programy\\Qt\\6.2.1\\android_arm64_v8a\\lib");
+            println!("cargo:rustc-link-search=D:\\Programy\\Qt\\6.2.1\\android_arm64_v8a\\lib");
             println!("cargo:rustc-link-lib=Qt6Network_arm64-v8a");
             println!("cargo:rustc-link-lib=Qt6OpenGL_arm64-v8a");
             println!("cargo:rustc-link-lib=Qt6QmlModels_arm64-v8a");
@@ -39,15 +38,12 @@ fn main() {
             println!("cargo:rustc-link-lib=EGL");
         },
         Ok("windows") => {
-            println!("cargo:rustc-link-search=../qml-video-rs/ext/mdk-sdk-windows-desktop/lib/x64");
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
             res.compile().unwrap();
         }
         tos => panic!("unknown target os {:?}!", tos)
     }
-
-    println!("cargo:rustc-link-lib=mdk");
 
     /*println!("cargo:rustc-link-search={}", "ext/ffmpeg-master-windows-desktop-clang-static-lite/lib/x64");
     println!("cargo:rustc-link-lib=avcodec");

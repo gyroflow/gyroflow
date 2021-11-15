@@ -46,8 +46,9 @@ impl ItemOpenCV {
         (pt.x, pt.y)
     }
     
-    pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {    
+    pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {
         let (w, h) = self.size;
+        if self.img_bytes.is_empty() || next.img_bytes.is_empty() || w <= 0 || h <= 0 { return None; }
 
         let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
         let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
@@ -67,11 +68,10 @@ impl ItemOpenCV {
             if *status.at::<u8>(i).unwrap() == 1u8 {
                 let pt1 = a1_pts.at::<Point2f>(i).unwrap();
                 let pt2 = a2_pts.at::<Point2f>(i).unwrap();
-                if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 {
-                    if pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
-                        pts1.push(*pt1);
-                        pts2.push(*pt2);
-                    }
+                if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
+                && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
+                    pts1.push(*pt1);
+                    pts2.push(*pt2);
                 }
             }
         }

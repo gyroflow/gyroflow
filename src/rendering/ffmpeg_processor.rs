@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::os::raw::c_int;
 
 use ffmpeg_next::{ ffi, codec, encoder, format, frame, log, media, Dictionary, Rational, Error, Stream, rescale, rescale::Rescale };
 
@@ -39,11 +38,11 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut input_context = format::input(&path)?;
 
-        format::context::input::dump(&input_context, 0, Some(&path)); // TODO remove
+        format::context::input::dump(&input_context, 0, Some(path)); // TODO remove
 
         let best_video_stream = unsafe {
             let mut decoder = std::ptr::null_mut();
-            let index = ffi::av_find_best_stream(input_context.as_mut_ptr(), media::Type::Video.into(), -1 as c_int, -1 as c_int, &mut decoder, 0);
+            let index = ffi::av_find_best_stream(input_context.as_mut_ptr(), media::Type::Video.into(), -1i32, -1i32, &mut decoder, 0);
             if index >= 0 && !decoder.is_null() {
                 Ok((Stream::wrap(&input_context, index as usize), decoder))
             } else {
@@ -93,7 +92,7 @@ impl<'a> FfmpegProcessor<'a> {
                         }
 
                         (*decoder_ctx.as_mut_ptr()).hw_device_ctx = ffi::av_buffer_ref(hw_device_ctx_ptr);
-                        hw_backend = backend.clone();
+                        hw_backend = backend;
                         break;
                     }
                 }
@@ -152,7 +151,7 @@ impl<'a> FfmpegProcessor<'a> {
                 self.video.input_index = i;
                 self.video.output_index = output_index;
 
-                octx.add_stream(encoder::find_by_name(&self.video_codec.as_ref().unwrap()))?; // TODO unwrap
+                octx.add_stream(encoder::find_by_name(self.video_codec.as_ref().unwrap()))?; // TODO unwrap
 
                 self.video.decoder = Some(stream.codec().decoder().video()?);
 

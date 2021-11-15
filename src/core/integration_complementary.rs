@@ -209,7 +209,7 @@ impl ComplementaryFilter {
             return false;
         }
       
-        return true;
+        true
     }
 
     fn get_prediction(&self, wx: f64, wy: f64, wz: f64, dt: f64) -> (f64, f64, f64, f64) {
