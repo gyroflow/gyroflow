@@ -51,13 +51,14 @@ impl SmoothingAlgorithm for Fixed {
         ])
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat { // TODO Result<>?
+    fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat {
 
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
-        let fixedQuat = UnitQuaternion::from_euler_angles(self.roll * std::f64::consts::PI / 180.0,self.pitch * std::f64::consts::PI / 180.0,self.yaw * std::f64::consts::PI / 180.0);
+        let deg2rad = std::f64::consts::PI / 180.0;
+        let fixed_quat = UnitQuaternion::from_euler_angles(self.yaw * deg2rad,self.roll * deg2rad,self.pitch * deg2rad);
         let mut q = *quats.iter().next().unwrap().1;
         quats.iter().map(|x| {
-            q = fixedQuat;
+            q = fixed_quat;
             (*x.0, q)
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition
