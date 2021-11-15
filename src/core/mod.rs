@@ -37,6 +37,9 @@ pub struct StabilizationManager {
     pub frame_count: usize,
     pub duration_ms: f64,
 
+    pub trim_start: f64,
+    pub trim_end: f64,
+
     pub pose_estimator: Arc<synchronization::PoseEstimator>,    
 
     pub stab_enabled: bool,
@@ -58,6 +61,9 @@ impl Default for StabilizationManager {
             
             size: (0, 0),
             video_size: (0, 0),
+
+            trim_start: 0.0,
+            trim_end: 1.0,
         
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
     

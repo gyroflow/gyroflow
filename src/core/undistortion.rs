@@ -21,7 +21,9 @@ pub struct ComputeParams {
     calib_height: f64,
     camera_matrix: Matrix3<f64>,
     distortion_coeffs: [f32; 4],
-    frame_readout_time: f64
+    frame_readout_time: f64,
+    trim_start_frame: usize,
+    trim_end_frame: usize,
 }
 impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
@@ -55,11 +57,14 @@ impl ComputeParams {
             calib_height,
             camera_matrix,
             distortion_coeffs,
-            frame_readout_time: mgr.frame_readout_time
+            frame_readout_time: mgr.frame_readout_time,
+            trim_start_frame: (mgr.trim_start * mgr.frame_count as f64).floor() as usize,
+            trim_end_frame: (mgr.trim_end * mgr.frame_count as f64).ceil() as usize,
         }
     }
 }
 
+#[derive(Default)]
 pub struct FrameTransform {
     pub params: Vec<[f32; 9]>,
 }
@@ -84,7 +89,6 @@ impl FrameTransform {
         let mut frame_readout_time = params.frame_readout_time;
         frame_readout_time *= params.fov_scale;
         frame_readout_time /= 2.0;
-        //frame_readout_time *= params.height as f64 / params.calib_height; // org_height
         frame_readout_time *= img_dim_ratio;
 
 		let row_readout_time = frame_readout_time / params.height as f64;
@@ -168,7 +172,11 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         let mut vec = Vec::with_capacity(params.frame_count);
         for i in 0..params.frame_count {
             if current_compute_id.load(Relaxed) != compute_id { return Err(()); }
-            vec.push(FrameTransform::at_timestamp(params, (i as f64 + frame_middle) * 1000.0 / params.fps));
+            if i >= params.trim_start_frame && i <= params.trim_end_frame {
+                vec.push(FrameTransform::at_timestamp(params, (i as f64 + frame_middle) * 1000.0 / params.fps));
+            } else {
+                vec.push(FrameTransform::default());
+            }
         }
         Ok(vec)
     }

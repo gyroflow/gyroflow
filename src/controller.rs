@@ -67,10 +67,21 @@ pub struct Controller {
     fov: qt_property!(f64; WRITE set_fov),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
 
+    lens_loaded: qt_property!(bool; NOTIFY lens_changed),
+    lens_changed: qt_signal!(),
+
+    gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
+    gyro_changed: qt_signal!(),
+
     stabilizer: Arc<RwLock<StabilizationManager>>, // TODO generic
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, status: QString),
+
+    set_trim_start: qt_method!(fn(&mut self, trim_start: f64)),
+    set_trim_end: qt_method!(fn(&mut self, trim_end: f64)),
+
+    file_exists: qt_method!(fn(&mut self, path: QString) -> bool),
 
     chart_data_changed: qt_signal!(),
 
@@ -214,7 +225,7 @@ impl Controller {
                     let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
                     proc.on_frame(|timestamp_us, input_frame, converter| {
                         let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
-                        
+
                         if let Some(current_range) = frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
                             if frame % every_nth_frame as i32 != 0 {
                                 // Don't analyze this frame
@@ -299,6 +310,9 @@ impl Controller {
             let finished = qmetaobject::queued_callback(move |params: (bool, QString, QString, QString, bool, bool)| {
                 if let Some(this) = qptr.as_pinned() { 
                     let mut this = this.borrow_mut();
+                    this.gyro_loaded = params.4; // Contains gyro
+                    this.gyro_changed();
+                    
                     this.recompute_threaded();
                     this.update_offset_model();
                     this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5);    
@@ -342,6 +356,8 @@ impl Controller {
             stab.load_lens_profile(&path.to_string()); // TODO errors
             QJsonObject::from(stab.lens.get_info())
         };
+        self.lens_loaded = true;
+        self.lens_changed();
         self.lens_profile_loaded(info);
         self.recompute_threaded();
     }
@@ -553,6 +569,18 @@ impl Controller {
             let stab = stab.read().get_render_stabilizator();
             rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio);
         });
+    }
+    
+    fn set_trim_start(&mut self, v: f64) {
+        self.stabilizer.write().trim_start = v;
+        self.recompute_threaded();
+    }
+    fn set_trim_end(&mut self, v: f64) {
+        self.stabilizer.write().trim_end = v;
+        self.recompute_threaded();
+    }
+    fn file_exists(&self, path: QString) -> bool {
+        std::path::Path::new(&path.to_string()).exists()
     }
 }
 

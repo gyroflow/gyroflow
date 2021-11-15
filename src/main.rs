@@ -14,22 +14,15 @@ use crate::core::{lens_profile::LensProfile, smoothing::*};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 
 // Things to do before first public preview:
-// - Sort out all dependencies, submit PRs where needed, publish `qml-video-rs` crate and figure out the MDK download
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
 // - Frame readout time from metadata for gopro and insta360 
-// - output size aspect ratio lock icon
+// - negative rolling shutter values (bottom to top)
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
-// - warning when no lens profile loaded
-// - negative rolling shutter values (bottom to top)
 // - UI fixes, editing offset, double animations etc
-// - confirm when render output already exists
-// - better output file name, strip extension
 // - When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
 // - When rendering, it should be possible to "minimize" the status and continue to work. Also it should be possible to cancel at any time (and this should produce correct file)
-// - It shouldn't be possible to do syncing without a lens profile
-// - Recompute undistortion only for the trimmed range
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
 // TODO: more smoothing algorithms
@@ -55,6 +48,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)
 // TODO: add elapsed and remaining times when rendering
+// TODO: add vertical labels and scale to gyro chart
 
 qrc!(rsrc,
     "/" {
@@ -98,6 +92,7 @@ qrc!(rsrc,
         "src/ui/components/TimelineRangeIndicator.qml",
         "src/ui/components/TimelineSyncPoint.qml",
         "src/ui/components/ToolTip.qml",
+        "src/ui/components/WarningMessage.qml",
         
         "resources/icon.png",
         "resources/logo_black.svg",

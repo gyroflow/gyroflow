@@ -25,7 +25,9 @@ Item {
         vidInfo.loader = true;
         //vid.url = url;
         controller.load_video(url, vid);
-        window.outputFile = url.toString().replace("file:///", "") + "_stabilized.mp4";
+        const pathParts = url.toString().replace("file:///", "").split(".");
+        pathParts.pop();
+        window.outputFile = pathParts.join(".") + "_stabilized.mp4";
 
         const filename = url.toString().split("/").pop();
         dropText.loadingFile = filename;
@@ -94,6 +96,11 @@ Item {
                     radius: 5 * dpiScale;
                     anchors.fill: parent;
                     anchors.margins: -border.width;
+                }
+
+                WarningMessage {
+                    visible: !controller.lens_loaded;
+                    text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
                 }
             }
         }
@@ -270,8 +277,14 @@ Item {
                 durationMs: vid.duration;
                 anchors.fill: parent;
 
-                onTrimStartChanged: vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
-                onTrimEndChanged: vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
+                onTrimStartChanged: {
+                    controller.set_trim_start(trimStart);
+                    vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
+                }
+                onTrimEndChanged: {
+                    controller.set_trim_end(trimEnd);
+                    vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
+                }
 
                 property bool preventChange: false;
                 onValueChanged: {

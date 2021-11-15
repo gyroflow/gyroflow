@@ -5,6 +5,7 @@ Button {
     id: root;
     // TODO popup direction
     property alias model: popup.model;
+    property alias popup: popup;
 
     rightPadding: 47 * dpiScale;
 

@@ -30,7 +30,6 @@ Rectangle {
         border.width: 1 * dpiScale;
         border.color: styleSliderHandle;
 
-
         Column {
             id: col;
             width: parent.width;
@@ -38,7 +37,8 @@ Rectangle {
             Item { height: 10 * dpiScale; width: 1; }
             BasicText {
                 id: t;
-                width: parent.width;
+                x: 15 * dpiScale;
+                width: parent.width - 2*x;
                 horizontalAlignment: Text.AlignHCenter;
                 wrapMode: Text.WordWrap;
                 font.pixelSize: 14 * dpiScale;

@@ -6,6 +6,7 @@ MenuItem {
     id: sync;
     text: qsTr("Synchronization");
     icon: "sync";
+    enabled: window.videoArea.vid.loaded;
 
     property alias timePerSyncpoint: timePerSyncpoint.value;
     property alias initialOffset: initialOffset.value;
@@ -16,7 +17,9 @@ MenuItem {
         text: qsTr("Auto sync");
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: {
+        enabled: controller.gyro_loaded;
+        tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
+        function doSync() {
             const points = maxSyncPoints.value;
 
             const chunks = 1.0 / points;
@@ -29,6 +32,18 @@ MenuItem {
 
             controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value, window.videoArea.vid);
             sync.loader = true;
+        }
+        onClicked: {
+            if (!controller.lens_loaded) {
+                messageBox(qsTr("Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?"), [
+                    { text: qsTr("Yes"), clicked: function() {
+                        doSync();
+                    }},
+                    { text: qsTr("No"), accent: true },
+                ]);
+            } else {
+                doSync();
+            }
         }
     }
     Connections {

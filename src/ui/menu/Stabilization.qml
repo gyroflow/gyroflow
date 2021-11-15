@@ -5,6 +5,7 @@ import "../components/"
 MenuItem {
     text: qsTr("Stabilization");
     icon: "gyroflow";
+    enabled: window.videoArea.vid.loaded;
 
     Label {
         position: Label.Left;

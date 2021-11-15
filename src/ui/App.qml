@@ -99,10 +99,11 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter;
                     text: qsTr("Export");
                     icon.name: "video";
+                    enabled: window.videoArea.vid.loaded;
 
                     model: [qsTr("Export .gyroflow file")];
 
-                    onClicked: {
+                    function doRender() {
                         controller.render(
                             exportSettings.codec, 
                             outputFile.text, 
@@ -113,6 +114,32 @@ Rectangle {
                             exportSettings.gpu, 
                             exportSettings.audio
                         );
+                    }
+                    function renameOutput() {
+                        const orgOutput = outputFile.text;
+                        let output = orgOutput;
+                        let i = 1;
+                        while (controller.file_exists(output)) {
+                            output = orgOutput.replace(/_stabilized(_\d+)?\.mp4/, "_stabilized_" + i++ + ".mp4");
+                            if (i > 1000) break;
+                        }
+
+                        outputFile.text = output;
+                        clicked(null);
+                    }
+                    onClicked: {
+                        if (controller.file_exists(outputFile.text)) {
+                            messageBox(qsTr("Output file already exists, do you want to override it?"), [
+                                { text: qsTr("Yes"), clicked: doRender },
+                                { text: qsTr("Rename"), clicked: renameOutput },
+                                { text: qsTr("No"), accent: true },
+                            ]);
+                        } else {
+                            doRender();
+                        }
+                    }
+                    popup.onClicked: (index) => {
+                        console.log('clicked', index);
                     }
                     
                     Connections {
@@ -145,19 +172,24 @@ Rectangle {
         }
     }
 
-    /*Modal {
-        id: modal;
-        text: qsTr("Are you sure you want to exit?");
-        buttons: [qsTr("Yes"), qsTr("No")];
-        accentButton: 0;
-        onClicked: (index) => {
-            console.log("clicked", index);
-            modal.opened = false;
+    function messageBox(text, buttons) {
+        const el = Qt.createComponent("components/Modal.qml").createObject(window, { text: text });
+        el.onClicked.connect((index) => {
+            if (buttons[index].clicked)
+                buttons[index].clicked();
+            el.opened = false;
+            el.destroy(1000);
+        });
+        let buttonTexts = [];
+        for (const i in buttons) {
+            buttonTexts.push(buttons[i].text);
+            if (buttons[i].accent) {
+                el.accentButton = i;
+            }
         }
-        Component.onCompleted: {
-            Qt.callLater(function() {
-                modal.opened = true;
-            });
-        }
-    }*/
+        el.buttons = buttonTexts;
+        
+        el.opened = true;
+        return el;
+    }
 }
