@@ -18,7 +18,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
 // - Frame readout time from metadata for gopro and insta360 
-// - Analyze every n-th frame
 // - output size aspect ratio lock icon
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac

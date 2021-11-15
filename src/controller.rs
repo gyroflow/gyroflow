@@ -214,17 +214,18 @@ impl Controller {
                     let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
                     proc.on_frame(|timestamp_us, input_frame, converter| {
                         let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
-                        if frame % every_nth_frame as i32 != 0 {
-                            // Don't analyze this frame
-                            frame_status.write().insert(frame as usize, true);
-                            estimator.insert_empty_result(frame as usize, method);
-                            return;
-                        }
-                        let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
-
-                        let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
-
+                        
                         if let Some(current_range) = frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
+                            if frame % every_nth_frame as i32 != 0 {
+                                // Don't analyze this frame
+                                frame_status.write().insert(frame as usize, true);
+                                estimator.insert_empty_result(frame as usize, method);
+                                return;
+                            }
+                            let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
+    
+                            let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
+    
                             total_read_frames.fetch_add(1, SeqCst);
                             println!("frame: {}, range: {}..{}", frame, current_range.0, current_range.1);
 

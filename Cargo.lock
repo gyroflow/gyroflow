@@ -825,7 +825,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.1.1"
-source = "git+https://github.com/AdrianEddy/fc-blackbox.git?branch=updated#c7c803d5560f1d4fe5f126abaa7e84c8348f2e89"
+source = "git+https://github.com/ilya-epifanov/fc-blackbox.git#bf493a01e7f8c81ff53ab260d341b027c8b21cfc"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2206,7 +2206,6 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#644b91de01c1b77809586358f8428198dd042689"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2778,7 +2777,6 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#36063f103e1c0937f97372906d2543a95eb8a506"
 dependencies = [
  "argh",
  "byteorder",

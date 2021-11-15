@@ -211,7 +211,7 @@ impl PoseEstimator {
 
         let mut update_eulers = BTreeMap::<usize, Option<(f64, f64, f64)>>::new();
         {
-            let sync_results = &*self.sync_results.read();
+            let sync_results = self.sync_results.read();
             for (k, v) in sync_results.iter() {
                 let mut eul = v.euler;
                 if final_pass && eul.is_none() {
@@ -247,7 +247,7 @@ impl PoseEstimator {
         }
 
         {
-            let sync_results = &mut *self.sync_results.write();
+            let mut sync_results = self.sync_results.write();
             for (k, e) in update_eulers {
                 if let Some(entry) = sync_results.get_mut(&k) {
                     entry.euler = e;
