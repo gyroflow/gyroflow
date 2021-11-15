@@ -46,7 +46,7 @@ pub struct TimelineGyroChart {
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
 
-    gyro_max: f64,
+    gyro_max: Option<f64>,
     duration_ms: f64,
 }
 
@@ -96,7 +96,7 @@ impl TimelineGyroChart {
                     let data = serie.data[from_index];
                     let mut prevPoint = QPointF {
                         x: map_to_visible_area(data.0) * rect.width, 
-                        y: (1.0 + data.1 * self.vscale) * half_height
+                        y: (1.0 - data.1 * self.vscale) * half_height
                     };
                     let mut i = from_index + 1;
                     while i <= to_index {
@@ -104,7 +104,7 @@ impl TimelineGyroChart {
                             let data = serie.data[i];
                             let point = QPointF { 
                                 x: map_to_visible_area(data.0) * rect.width, 
-                                y: (1.0 + data.1 * self.vscale) * half_height
+                                y: (1.0 - data.1 * self.vscale) * half_height
                             };
                             
                             serie.lines.push(QLineF { pt1: prevPoint, pt2: point });
@@ -136,7 +136,7 @@ impl TimelineGyroChart {
                 values: [x.gyro[0], x.gyro[1], x.gyro[2], 0.0]
             });
         }
-        Self::normalize_height(&mut self.sync_results, Some(self.gyro_max / (180.0 / std::f64::consts::PI)));
+        Self::normalize_height(&mut self.sync_results, self.gyro_max.map(|x| x / (180.0 / std::f64::consts::PI))); // TODO this max calculation here is wrong
 
         self.update_data();
     }
@@ -177,7 +177,7 @@ impl TimelineGyroChart {
         self.gyro_max = Self::normalize_height(&mut self.gyro, None);
         Self::normalize_height(&mut self.accl, None);
         let qmax = Self::normalize_height(&mut self.quats, None);
-        Self::normalize_height(&mut self.smoothed_quats, Some(qmax));
+        Self::normalize_height(&mut self.smoothed_quats, qmax);
 
         self.update_data();
     }
@@ -226,7 +226,7 @@ impl TimelineGyroChart {
         self.update();
     }
 
-    fn normalize_height(data: &mut Vec<ChartData>, max: Option<f64>) -> f64 {
+    fn normalize_height(data: &mut Vec<ChartData>, max: Option<f64>) -> Option<f64> {
         let max = max.unwrap_or_else(|| {
             let mut max = 0.0;
             for x in data.iter() {
@@ -236,13 +236,14 @@ impl TimelineGyroChart {
             }
             max
         });
-        
-        for x in data.iter_mut() {
-            for i in 0..4 {
-                x.values[i] /= max;
+        if max > 0.0 {
+            for x in data.iter_mut() {
+                for i in 0..4 {
+                    x.values[i] /= max;
+                }
             }
         }
-        max
+        if max > 0.0 { Some(max) } else { None }
     }
 }
 
