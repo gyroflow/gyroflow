@@ -7,6 +7,14 @@ MenuItem {
     icon: "gyroflow";
     enabled: window.videoArea.vid.loaded;
 
+    Connections {
+        target: controller;
+        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
+            shutter.value = frame_readout_time;
+            shutterCb.checked = Math.abs(frame_readout_time) > 0;
+        }
+    }
+
     Label {
         position: Label.Left;
         text: qsTr("FOV");
@@ -62,6 +70,7 @@ MenuItem {
     }
 
     CheckBoxWithContent {
+        id: shutterCb;
         text: qsTr("Rolling shutter correction");
         cb.onCheckedChanged: {
             controller.frame_readout_time = cb.checked? shutter.value : 0.0;

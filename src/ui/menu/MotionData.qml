@@ -22,7 +22,7 @@ MenuItem {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats) {
+        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
             orientation.text = imu_orientation;

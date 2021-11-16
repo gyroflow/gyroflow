@@ -42,7 +42,7 @@ pub struct Controller {
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, player: QJSValue)), // QString is workaround for now
     update_chart: qt_method!(fn(&mut self, chart: QJSValue)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
     lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
 
     set_smoothing_method: qt_method!(fn(&mut self, index: usize) -> QJsonArray),
@@ -338,7 +338,7 @@ impl Controller {
             }
 
             let qptr = QPointer::from(&*self);
-            let finished = qmetaobject::queued_callback(move |params: (bool, QString, QString, QString, bool, bool)| {
+            let finished = qmetaobject::queued_callback(move |params: (bool, QString, QString, QString, bool, bool, f64)| {
                 if let Some(this) = qptr.as_pinned() { 
                     let mut this = this.borrow_mut();
                     this.gyro_loaded = params.4; // Contains gyro
@@ -346,7 +346,7 @@ impl Controller {
                     
                     this.recompute_threaded();
                     this.update_offset_model();
-                    this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5);    
+                    this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
                 }
             });
             
@@ -366,17 +366,18 @@ impl Controller {
                         let orientation = stab.gyro.org_imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
                         let has_gyro = !stab.gyro.quaternions.is_empty();
                         let has_quats = !stab.gyro.org_quaternions.is_empty();
-                        
+                        let frame_readout_time = stab.frame_readout_time;
+
                         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
                             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
                             chart.setDurationMs(duration_ms);
                             chart.setFromGyroSource(&stab.gyro);
                         }
                         
-                        (detected, orientation, has_gyro, has_quats)
+                        (detected, orientation, has_gyro, has_quats, frame_readout_time)
                     };
 
-                    finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3));
+                    finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3, detected.4));
                 });
             }
         }

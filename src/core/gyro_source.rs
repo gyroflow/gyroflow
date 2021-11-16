@@ -2,7 +2,7 @@ use nalgebra::*;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use telemetry_parser::{Input, util};
-use telemetry_parser::tags_impl::{GroupId, TagId, GetWithType};
+use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
 use super::integration::*;
 use std::io::Result;
@@ -11,11 +11,10 @@ pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 
-/*#[derive(Clone, Copy, Default)]
-pub struct TimeQuat {
-    pub timestamp_ms: f64,
-    pub quat: Quat64
-}*/
+#[derive(Default)]
+pub struct FileMetadata {
+    pub frame_readout_time: Option<f64>
+}
 
 #[derive(Default, Clone)]
 pub struct GyroSource {
@@ -45,7 +44,7 @@ pub struct GyroSource {
 }
 
 impl GyroSource {
-    pub fn load_from_file(&mut self, path: &str) -> Result<()> {
+    pub fn load_from_file(&mut self, path: &str) -> Result<FileMetadata> {
         self.quaternions.clear();
         self.org_quaternions.clear();
         self.smoothed_quaternions.clear();
@@ -71,23 +70,35 @@ impl GyroSource {
             v
         });
 
-        // Get IMU orientation
+        // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
+            let mut quats = TimeQuat::new();
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
-                    for (group, map) in tag_map {
-                        if group == &GroupId::Gyroscope || group == &GroupId::Accelerometer {    
-                            let mut io = match map.get_t(TagId::Orientation) as Option<&String> {
-                                Some(v) => v.clone(),
-                                None => "XYZ".into()
-                            };
-                            io = input.normalize_imu_orientation(io);
-                            self.org_imu_orientation = Some(io);
-                            self.imu_orientation = self.org_imu_orientation.clone();
-                            break;
+                    if let Some(map) = tag_map.get(&GroupId::Quaternion) {
+                        if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<TimeQuaternion<f64>>> {
+                            for v in arr {
+                                quats.insert((v.t * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(
+                                    v.v.w, 
+                                    Vector3::new(v.v.x, v.v.y, v.v.z)
+                                )));
+                            }
                         }
                     }
+                    if let Some(map) = tag_map.get(&GroupId::Gyroscope) {
+                        let mut io = match map.get_t(TagId::Orientation) as Option<&String> {
+                            Some(v) => v.clone(),
+                            None => "XYZ".into()
+                        };
+                        io = input.normalize_imu_orientation(io);
+                        self.org_imu_orientation = Some(io);
+                        self.imu_orientation = self.org_imu_orientation.clone();
+                    }
                 }
+            }
+            if !quats.is_empty() {
+                self.quaternions = quats;
+                self.org_quaternions = self.quaternions.clone();
             }
         }
 
@@ -95,74 +106,13 @@ impl GyroSource {
         self.raw_imu = util::normalized_imu(&input, None)?;
         self.org_raw_imu = self.raw_imu.clone();
 
-        fn get_timestamp(info: &telemetry_parser::util::SampleInfo) -> Option<i64> {
-            if let Some(ref grouped_tag_map) = info.tag_map {
-                for (group, map) in grouped_tag_map {
-                    if group == &GroupId::CameraOrientation || group == &GroupId::ImageOrientation {
-                        let timestamp_us = *(map.get_t(TagId::TimestampUs) as Option<&u64>).unwrap_or(&0) as i64;
-                        return Some(timestamp_us);
-                    }
-                }
-            }
-            None
-        }
-        
-        // Load pre-computed quaternions if available
-        // TODO This should be done in telemetry_parser in util
-        if input.camera_type() == "GoPro" {
-            if let Some(ref samples) = input.samples {
-                let mut cori = Vec::new();
-                let mut iori = Vec::new();
-                let mut prev_increment = 0;
-                let mut start_timestamp_us = None;
-                for i in 0..samples.len() {
-                    let info = &samples[i];
-                    if info.tag_map.is_none() { continue; }
-            
-                    let grouped_tag_map = info.tag_map.as_ref().unwrap();
-        
-                    for (group, map) in grouped_tag_map {
-                        if group == &GroupId::CameraOrientation || group == &GroupId::ImageOrientation {
-                            let scale = *(map.get_t(TagId::Scale) as Option<&i16>).unwrap_or(&32767) as f64;
-                            let mut timestamp_us = *(map.get_t(TagId::TimestampUs) as Option<&u64>).unwrap_or(&0) as i64;
-                            // let start_count = *(map.get_t(TagId::Count) as Option<&u32>).unwrap_or(&0);
-                            let next_timestamp_us = samples.get(i + 1).map(get_timestamp).unwrap_or(None);
-                            if start_timestamp_us.is_none() {
-                                start_timestamp_us = Some(timestamp_us);
-                            }
-                            // TODO https://github.com/gopro/gpmf-parser/blob/master/GPMF_utils.c
-                            if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<telemetry_parser::tags_impl::Quaternion<i16>>> {
-                                let sample_count = arr.len() as i64;
-                                let increment = next_timestamp_us.map(|x| ((x - timestamp_us) / sample_count)).unwrap_or(prev_increment);
-                                prev_increment = increment;
-                                for v in arr.iter() {
-                                    let aout = if group == &GroupId::CameraOrientation { &mut cori } else { &mut iori };
-                                    aout.push((
-                                        timestamp_us - start_timestamp_us.unwrap(), 
-                                        Quat64::from_quaternion(Quaternion::from_parts(
-                                            v.w as f64 / scale, 
-                                            Vector3::new(-v.x as f64 / scale, v.y as f64 / scale, v.z as f64 / scale
-                                        )))
-                                    ));
-                                    timestamp_us += increment;
-                                }
-                            }
-                        }
-                    }
-                }
-                if !cori.is_empty() && cori.len() == iori.len() {
-                    // Multiply CORI * IORI
-                    self.quaternions = cori.into_iter().zip(iori.into_iter()).map(|(c, i)| (c.0, c.1 * i.1)).collect();
-                    self.org_quaternions = self.quaternions.clone();
-                }
-            }
-        }
-
         if self.quaternions.is_empty() {
             self.integrate();
         }
     
-        Ok(())
+        Ok(FileMetadata {
+            frame_readout_time: telemetry_parser::util::frame_readout_time(&input)
+        })
     }
     pub fn integrate(&mut self) {
         match self.integration_method {

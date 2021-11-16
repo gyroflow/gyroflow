@@ -17,6 +17,7 @@ use self::{lens_profile::LensProfile, smoothing::{SmoothingAlgorithm, get_smooth
 use simd_json::ValueAccess;
 use nalgebra::{Quaternion, Vector3, Vector4};
 use gyro_source::{GyroSource, Quat64, TimeIMU};
+use telemetry_parser::try_block;
 
 pub struct StabilizationManager {
     pub gyro: GyroSource,
@@ -88,34 +89,37 @@ impl StabilizationManager {
         self.load_gyro_data(path);
     }
 
-    pub fn load_gyro_data(&mut self, path: &str) -> Option<()> {
+    pub fn load_gyro_data(&mut self, path: &str) -> std::io::Result<()> {
         self.gyro.fps = self.fps;
         self.gyro.duration_ms = self.duration_ms;
         self.gyro.offsets.clear();
 
         if path.ends_with(".gyroflow") {
-            let mut data = std::fs::read(path).ok()?;
-            let v = simd_json::to_borrowed_value(&mut data).ok()?;
+            let mut data = std::fs::read(path)?;
+            let v = simd_json::to_borrowed_value(&mut data)?;
     
             self.lens.load_from_json_value(&v["calibration_data"]);
 
             let to_f64_array = |x: &simd_json::borrowed::Value| -> Option<Vec<f64>> { Some(x.as_array()?.iter().filter_map(|x| x.as_f64()).collect()) };
 
-            self.gyro.smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
-                .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3], Vector3::new(x[4], x[5], x[6])))))
-                .collect();
-    
-            self.gyro.quaternions = v["frame_orientation"].as_array()?.iter().filter_map(to_f64_array)
-                .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3-1], Vector3::new(x[4-1], x[5-1], x[6-1])))))
-                .collect();
-    
-            self.gyro.raw_imu = v["raw_imu"].as_array()?.iter().filter_map(to_f64_array)
-                .map(|x| TimeIMU { timestamp: 0.0/*TODO*/, gyro: [x[0], x[1], x[2]], accl: [x[3], x[4], x[6]] }) // TODO IMU orientation
-                .collect();
-            Some(())
+            try_block!({
+                self.gyro.smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
+                    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3], Vector3::new(x[4], x[5], x[6])))))
+                    .collect();
+        
+                self.gyro.quaternions = v["frame_orientation"].as_array()?.iter().filter_map(to_f64_array)
+                    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3-1], Vector3::new(x[4-1], x[5-1], x[6-1])))))
+                    .collect();
+        
+                self.gyro.raw_imu = v["raw_imu"].as_array()?.iter().filter_map(to_f64_array)
+                    .map(|x| TimeIMU { timestamp: 0.0/*TODO*/, gyro: [x[0], x[1], x[2]], accl: [x[3], x[4], x[6]] }) // TODO IMU orientation
+                    .collect();
+            });
         } else {
-            self.gyro.load_from_file(path).ok()
+            let md = self.gyro.load_from_file(path)?;
+            self.frame_readout_time = md.frame_readout_time.unwrap_or_default();
         }
+        Ok(())
     }
 
     pub fn load_lens_profile(&mut self, path: &str) {

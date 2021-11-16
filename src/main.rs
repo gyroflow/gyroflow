@@ -16,7 +16,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // Things to do before first public preview:
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
-// - Frame readout time from metadata for gopro and insta360 
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - UI fixes, editing offset, double animations etc
