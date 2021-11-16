@@ -6,8 +6,8 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-qmetaobject = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git", default-features = false, features = ["log"] }
-qttypes     = { version = "*", git = "https://github.com/woboq/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
+qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 #qml-video-rs = { path = "../qml-video-rs" }
 #telemetry-parser = { path = "../telemetry-parser" }
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
