@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use parking_lot::RwLock;
 use std::cell::RefCell;
-use std::sync::atomic::{AtomicUsize, AtomicU64};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize};
 use std::sync::atomic::Ordering::SeqCst;
 
 use qml_video_rs::video_item::MDKVideoItem;
@@ -88,7 +88,16 @@ pub struct Controller {
     render: qt_method!(fn(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool)),
     render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize),
 
+    cancel_current_operation: qt_method!(fn(&mut self)),
+
+    sync_in_progress: qt_property!(bool; NOTIFY sync_in_progress_changed),
+    sync_in_progress_changed: qt_signal!(),
+
+    export_gyroflow: qt_method!(fn(&self)),
+
     video_path: String,
+
+    cancel_flag: Arc<AtomicBool>,
 }
 impl Controller {
     pub fn new() -> Self {
@@ -148,6 +157,9 @@ impl Controller {
             let frame_count = vid.frameCount;
             let fps = vid.frameRate;
             let method = self.sync_method;
+
+            self.sync_in_progress = true;
+            self.sync_in_progress_changed();
             
             {
                 let stab = self.stabilizer.read(); 
@@ -194,8 +206,12 @@ impl Controller {
                         let total = l.len();
                         let ready = l.iter().filter(|e| *e.1).count();
                         drop(l);
-                        this.borrow().chart_data_changed();
-                        this.borrow().sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
+
+                        let mut this = this.borrow_mut();
+                        this.sync_in_progress = ready < total;
+                        this.sync_in_progress_changed();
+                        this.chart_data_changed();
+                        this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
                     }
                 }));
                 let qptr = QPointer::from(&*self);
@@ -213,6 +229,8 @@ impl Controller {
                         this.recompute_threaded();
                         this.chart_data_changed();
                         this.sync_progress(1.0, QString::default());
+                        this.sync_in_progress = false;
+                        this.sync_in_progress_changed();
                     }
                 }));
 
@@ -221,6 +239,10 @@ impl Controller {
                 
                 let video_path = QString::from(vid.url.clone()).to_string().replace("file:///", "");
                 let (sw, sh) = (vid.surfaceWidth, vid.surfaceHeight);
+
+                self.cancel_flag.store(false, SeqCst);
+                let cancel_flag = self.cancel_flag.clone();
+                let cancel_flag2 = self.cancel_flag.clone();
                 THREAD_POOL.spawn(move || {
                     let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
                     proc.on_frame(|timestamp_us, input_frame, converter| {
@@ -242,11 +264,16 @@ impl Controller {
 
                             let img = PoseEstimator::yuv_to_gray(width, height, pixels);
         
+                            let cancel_flag = cancel_flag2.clone();
                             let estimator = estimator.clone();
                             let progress = progress.clone();
                             let frame_status = frame_status.clone();
                             let total_detected_frames = total_detected_frames.clone();
                             THREAD_POOL.spawn(move || {
+                                if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                                    total_detected_frames.fetch_add(1, SeqCst);
+                                    return;
+                                }
                                 estimator.detect_features(frame as usize, method, img);
                                 total_detected_frames.fetch_add(1, SeqCst);
 
@@ -260,7 +287,7 @@ impl Controller {
                             });
                         }
                     });
-                    if let Err(e) = proc.start_decoder_only(ranges) {
+                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag) {
                         eprintln!("ffmpeg error: {:?}", e);
                     }
 
@@ -271,6 +298,10 @@ impl Controller {
                     estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
                     estimator.recalculate_gyro_data(frame_count as usize, duration_ms, fps, true);
 
+                    for v in frame_status.write().values_mut() {
+                        *v = true;
+                    }
+                    progress(());
                     let offsets = estimator.find_offsets(initial_offset, sync_search_size, &stab_clone.read().gyro);
                     set_offsets(offsets);
                 });
@@ -564,10 +595,13 @@ impl Controller {
 
         progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize));
 
+        self.cancel_flag.store(false, SeqCst);
+        let cancel_flag = self.cancel_flag.clone();
+
         let stab = self.stabilizer.clone();
         THREAD_POOL.spawn(move || {
             let stab = stab.read().get_render_stabilizator();
-            rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio);
+            rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio, cancel_flag);
         });
     }
     
@@ -581,6 +615,14 @@ impl Controller {
     }
     fn file_exists(&self, path: QString) -> bool {
         std::path::Path::new(&path.to_string()).exists()
+    }
+    
+    fn cancel_current_operation(&mut self) {
+        self.cancel_flag.store(true, SeqCst);
+    }
+
+    fn export_gyroflow(&self) {
+        // TODO
     }
 }
 

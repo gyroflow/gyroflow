@@ -129,7 +129,7 @@ Rectangle {
                     }
                     onClicked: {
                         if (controller.file_exists(outputFile.text)) {
-                            messageBox(qsTr("Output file already exists, do you want to override it?"), [
+                            messageBox(qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: doRender },
                                 { text: qsTr("Rename"), clicked: renameOutput },
                                 { text: qsTr("No"), accent: true },
@@ -139,7 +139,7 @@ Rectangle {
                         }
                     }
                     popup.onClicked: (index) => {
-                        console.log('clicked', index);
+                        controller.export_gyroflow();
                     }
                     
                     Connections {
@@ -148,6 +148,7 @@ Rectangle {
                             videoArea.videoLoader.active = progress < 1;
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
                             videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
+                            videoArea.videoLoader.cancelable = true;
                         }
                     }
                 }

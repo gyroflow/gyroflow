@@ -71,6 +71,7 @@ MenuItem {
             text: qsTr("Frame readout time");
             Slider {
                 id: shutter;
+                from: -to;
                 to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
                 width: parent.width;
                 unit: "ms";
@@ -82,6 +83,7 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         text: qsTr("Adaptive zoom");
         width: parent.width;
+        enabled: false;
 
         Label {
             text: qsTr("Smoothing window FOV");

@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
+use std::sync::atomic::Ordering::Relaxed;
+use std::sync::Arc;
 
 use ffmpeg_next::{ ffi, codec, encoder, format, frame, log, media, Dictionary, Rational, Error, Stream, rescale, rescale::Rescale };
 
@@ -125,7 +127,7 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, output_path: &str) -> Result<(), Error> {
+    pub fn render(&mut self, output_path: &str, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
@@ -233,7 +235,7 @@ impl<'a> FfmpegProcessor<'a> {
                                 }
                             }
                         }
-                        if encoding_status == Status::Finish {
+                        if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                             break;
                         }
                     },
@@ -274,7 +276,7 @@ impl<'a> FfmpegProcessor<'a> {
         Ok(())
     }
 
-    pub fn start_decoder_only(&mut self, mut ranges: Vec<(usize, usize)>) -> Result<(), Error> {
+    pub fn start_decoder_only(&mut self, mut ranges: Vec<(usize, usize)>, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
         if !ranges.is_empty() {
             let next_range = ranges.remove(0);
             self.start_ms = Some(next_range.0);
@@ -316,7 +318,7 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                     match self.video.receive_and_process_video_frames(None, &mut self.ost_time_bases, self.end_ms) {
                         Ok(encoding_status) => {
-                            if encoding_status == Status::Finish {
+                            if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                                 break;
                             }
                         },

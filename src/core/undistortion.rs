@@ -99,10 +99,10 @@ impl FrameTransform {
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
 
         // Only compute 1 matrix if not using rolling shutter correction
-        let rows = if frame_readout_time > 0.0 { params.height } else { 1 };
+        let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
 
         let mut transform_params = (0..rows).into_par_iter().map(|y| {
-            let quat_time = if frame_readout_time > 0.0 && timestamp_ms > 0.0 {
+            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {
                 timestamp_ms

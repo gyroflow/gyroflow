@@ -2,12 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC
 
 Item {
+    id: root;
     property bool active: false;
     property real progress: -1;
     opacity: active? 1 : 0;
     Ease on opacity { duration: 1000; }
     property alias text: t.text;
     property alias t: t;
+    property bool cancelable: true;
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
         if (!active) {
@@ -15,6 +17,8 @@ Item {
             t.text = "";
         }
     }
+
+    signal cancel();
 
     Rectangle {
         anchors.fill: parent;
@@ -36,5 +40,14 @@ Item {
         horizontalAlignment: Text.AlignHCenter;
         topPadding: 8 * dpiScale;
         bottomPadding: 8 * dpiScale;
+    }
+
+    LinkButton {
+        transparent: true;
+        visible: progress > -1 && cancelable;
+        text: qsTr("Cancel");
+        anchors.horizontalCenter: parent.horizontalCenter;
+        anchors.top: t.bottom;
+        onClicked: root.cancel();
     }
 }

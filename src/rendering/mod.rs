@@ -7,6 +7,7 @@ use crate::core::{StabilizationManager, undistortion::*};
 use ffmpeg_next::format::Pixel;
 use ffmpeg_next::frame::Video;
 use ffmpeg_next::codec;
+use std::sync::{Arc, atomic::AtomicBool};
 
 pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> &'static str {
     if use_gpu {
@@ -36,7 +37,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> 
     }
 }
 
-pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool)
+pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -173,7 +174,7 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
         }
     });
 
-    proc.render(&output_path).unwrap(); // TODO errors
+    proc.render(&output_path, cancel_flag).unwrap(); // TODO errors
 
     progress((1.0, render_frame_count, render_frame_count));
 }
@@ -213,7 +214,8 @@ pub fn test() {
         video_size.0,
         video_size.1,
         true, 
-        true
+        true,
+        Arc::new(AtomicBool::new(false))
     );
 }
 // use opencv::core::{Mat, Size, CV_8UC1};
@@ -237,5 +239,5 @@ pub fn test_decode() {
         (100, 2000),
         (3000, 5000),
         (11000, 999999)
-    ]);
+    ], Arc::new(AtomicBool::new(false)));
 }

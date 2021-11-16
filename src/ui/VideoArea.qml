@@ -151,17 +151,22 @@ Item {
             }
             onDropped: (drop) => root.loadFile(drop.urls[0])
         }
-        LoaderOverlay { id: videoLoader; }
+        LoaderOverlay {
+            id: videoLoader;
+            onCancel: controller.cancel_current_operation();
+        }
 
         Connections {
             target: controller;
             function onCompute_progress(id, progress) {
                 videoLoader.active = progress < 1;
+                videoLoader.cancelable = false;
             }
             function onSync_progress(progress, text) {
                 videoLoader.active = progress < 1;
                 videoLoader.progress = videoLoader.active? progress : -1;
                 videoLoader.text = videoLoader.active? qsTr("Analyzing %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + text + ")</font>") : "";
+                videoLoader.cancelable = true;
             }
         }
     }

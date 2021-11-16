@@ -14,14 +14,16 @@ QQC.Button {
     font.underline: true;
     font.capitalization: Font.Normal
     hoverEnabled: enabled;
+    property bool transparent: false;
 
     leftPadding: 15 * dpiScale;
     rightPadding: 15 * dpiScale;
     topPadding: 4 * dpiScale;
     bottomPadding: 5 * dpiScale;
+    opacity: root.hovered && transparent? 0.8 : 1.0;
 
     background: Rectangle {
-        color: root.hovered? Qt.lighter(styleButtonColor, 1.2) : "transparent";
+        color: root.hovered && !root.transparent? Qt.lighter(styleButtonColor, 1.2) : "transparent";
         opacity: root.down || !parent.enabled? 0.1 : 0.3;
         Ease on opacity { duration: 100; }
         radius: 5 * dpiScale;

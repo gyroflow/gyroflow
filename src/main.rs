@@ -17,13 +17,11 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
 // - Frame readout time from metadata for gopro and insta360 
-// - negative rolling shutter values (bottom to top)
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - UI fixes, editing offset, double animations etc
-// - When syncing it shouldn't be possible to change any sync settings, but it should be possible to cancel
-// - When rendering, it should be possible to "minimize" the status and continue to work. Also it should be possible to cancel at any time (and this should produce correct file)
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
+// - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 
 // TODO: more smoothing algorithms
 // TODO: adaptive zoom
@@ -49,6 +47,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // TODO: drop mutliple files at once (video, lens profile, gyro data)
 // TODO: add elapsed and remaining times when rendering
 // TODO: add vertical labels and scale to gyro chart
+// TODO: When rendering, it should be possible to "minimize" the status and continue to work. 
 
 qrc!(rsrc,
     "/" {

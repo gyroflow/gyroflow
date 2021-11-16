@@ -6,7 +6,8 @@ MenuItem {
     id: sync;
     text: qsTr("Synchronization");
     icon: "sync";
-    enabled: window.videoArea.vid.loaded;
+    enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
+    loader: controller.sync_in_progress;
 
     property alias timePerSyncpoint: timePerSyncpoint.value;
     property alias initialOffset: initialOffset.value;
@@ -31,7 +32,6 @@ MenuItem {
             }
 
             controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value, window.videoArea.vid);
-            sync.loader = true;
         }
         onClicked: {
             if (!controller.lens_loaded) {
@@ -46,12 +46,7 @@ MenuItem {
             }
         }
     }
-    Connections {
-        target: controller;
-        function onSync_progress(progress, text) {
-            sync.loader = progress < 1;
-        }
-    }
+    
     Label {
         position: Label.Left;
         text: qsTr("Rough gyro offset");
