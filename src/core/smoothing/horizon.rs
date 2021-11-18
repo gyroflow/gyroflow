@@ -1,9 +1,16 @@
+use std::ops::Mul;
+
 use super::*;
 use nalgebra::*;
 use crate::core::gyro_source::TimeQuat;
 
+pub struct HorizonLock { pub time_constant: f64,  pub roll: f64, pub pitch: f64, pub yaw: f64 }
 
-// Alternative implementation, TODO: figure out horizon lock math for the used coordinate system
+impl Default for HorizonLock {
+    fn default() -> Self { Self { time_constant: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 } }
+}
+
+// Alternative implementation for "standard" order
 fn from_euler_angles(roll: f64, pitch: f64, yaw: f64) -> UnitQuaternion<f64> {
     let (sr, cr) = (roll * 0.5f64).simd_sin_cos();
     let (sp, cp) = (pitch * 0.5f64).simd_sin_cos();
@@ -28,13 +35,11 @@ fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
 
     // pitch (y-axis rotation)
     let sinp = 2. * (q.w * q.j - q.k * q.i);
-    let mut pitch;
-    if (sinp.abs() >= 1.) {
-        pitch = std::f64::consts::FRAC_PI_2.simd_copysign(sinp); // use 90 degrees if out of range
-    }
-    else {
-        pitch = sinp.asin();
-    }
+    let pitch = if sinp.abs() >= 1. {
+        std::f64::consts::FRAC_PI_2.simd_copysign(sinp) // use 90 degrees if out of range
+    } else {
+        sinp.asin()
+    };
 
     // yaw (z-axis rotation)
     let siny_cosp = 2. * (q.w * q.k + q.i * q.j);
@@ -44,17 +49,35 @@ fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
     (roll, pitch, yaw)
 }
 
-fn lock_horizon_angle(q: UnitQuaternion<f64>) -> UnitQuaternion<f64> {
-    let euler = to_euler_angles(q);
-    println!("{:?}", euler);
-    from_euler_angles(euler.0, euler.1, euler.2)
+// "correct" euler angle order
+fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
+    let x_axis = nalgebra::Vector3::<f64>::x_axis();
+    let y_axis = nalgebra::Vector3::<f64>::y_axis();
+    let z_axis = nalgebra::Vector3::<f64>::z_axis();
+    
+    let rot_x = Rotation3::from_axis_angle(&x_axis, x);
+    let rot_y = Rotation3::from_axis_angle(&y_axis, y);
+    let rot_z = Rotation3::from_axis_angle(&z_axis, z);
+
+    // Z rotation corresponds to body-centric roll, so placed last
+    // using x as second rotation corresponds gives the usual pan/tilt combination
+    let combined_rotation = rot_y * rot_x * rot_z;
+    UnitQuaternion::from_rotation_matrix(&combined_rotation)
 }
 
-pub struct HorizonLock { pub time_constant: f64 }
+fn lock_horizon_angle(q: UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
+    // z axis points in view direction, use as reference
+    let z_axis = nalgebra::Vector3::<f64>::z_axis();
+    
+    // since this coincides with roll axis, the roll is neglected when transformed back
+    let z_transformed = q.transform_vector(&z_axis);
 
-impl Default for HorizonLock {
-    fn default() -> Self { Self { time_constant: 0.2 } }
+    let pitch = (-z_transformed.y).asin();
+    let yaw = z_transformed.x.simd_atan2(z_transformed.z);
+
+    from_euler_yxz(pitch, yaw,roll_correction)
 }
+
 
 impl SmoothingAlgorithm for HorizonLock {
     fn get_name(&self) -> String { "Lock horizon".to_owned() }
@@ -62,6 +85,9 @@ impl SmoothingAlgorithm for HorizonLock {
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
             "time_constant" => self.time_constant = val,
+            "roll" => self.roll = val,
+            "pitch" => self.pitch = val,
+            "yaw" => self.yaw = val,
             _ => eprintln!("Invalid parameter name: {}", name)
         }
     }
@@ -75,7 +101,34 @@ impl SmoothingAlgorithm for HorizonLock {
                 "to": 10.0,
                 "value": 0.25,
                 "unit": "s"
-            }
+            },
+            {
+                "name": "roll",
+                "description": "Roll angle correction",
+                "type": "Slider",
+                "from": -180,
+                "to": 180,
+                "value": 0,
+                "unit": "deg"
+            },
+            {
+                "name": "pitch",
+                "description": "Pitch angle correction (todo)",
+                "type": "Slider",
+                "from": -90,
+                "to": 90,
+                "value": 0,
+                "unit": "deg"
+            },
+            {
+                "name": "yaw",
+                "description": "Yaw angle correction (todo)",
+                "type": "Slider",
+                "from": -180,
+                "to": 180,
+                "value": 0,
+                "unit": "deg"
+            },
         ])
     }
 
@@ -88,7 +141,9 @@ impl SmoothingAlgorithm for HorizonLock {
         if self.time_constant > 0.0 {
             alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
         }
-        
+        let deg2rad = std::f64::consts::PI / 180.0;
+        // This should be applied to the raw orientations as well. Alternatively the transform needs to be cancelled out
+        //let correction_quat = from_euler_yxz(self.pitch * deg2rad, self.yaw * deg2rad, self.roll * deg2rad);
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
             q = q.slerp(x.1, alpha);
@@ -99,7 +154,7 @@ impl SmoothingAlgorithm for HorizonLock {
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
             q = q.slerp(x.1, alpha);
-            q = lock_horizon_angle(q);
+            q = lock_horizon_angle(q, self.roll * deg2rad);
             (*x.0, q)
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition
