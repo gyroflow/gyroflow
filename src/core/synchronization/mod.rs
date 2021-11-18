@@ -201,10 +201,10 @@ impl PoseEstimator {
                 let next_frame = frame + every_nth_frame;
                 if is_akaze {
                     let halfway = (next_frame as f64 - frame as f64) / 2.0;
-                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + halfway);
+                    vec[frame].timestamp_ms = timestamp_at_frame(frame as f64 + halfway);
                 } else {
                     let halfway = (next_frame as f64 - frame as f64) / 2.5;
-                    vec[frame].timestamp = timestamp_at_frame(frame as f64 + halfway);
+                    vec[frame].timestamp_ms = timestamp_at_frame(frame as f64 + halfway);
                 }
             }
         }

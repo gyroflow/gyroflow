@@ -8,10 +8,10 @@ build = "build.rs"
 [dependencies]
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-#qml-video-rs = { path = "../qml-video-rs" }
-#telemetry-parser = { path = "../telemetry-parser" }
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
+qml-video-rs = { path = "../qml-video-rs" }
+telemetry-parser = { path = "../telemetry-parser" }
+#qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
+#telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git" }
 
 cstr = "*"
@@ -29,6 +29,7 @@ bincode = "*"
 serde = "*"
 crc32fast = "*"
 byteorder = "*"
+#pyo3 = "*"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git" }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git" }
@@ -41,7 +42,7 @@ image = "*"
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 
-walkdir = "*" 
+walkdir = "*"
 
 opencv = { version = "0.58", features = ["clang-runtime"] }
 

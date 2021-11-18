@@ -11,7 +11,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                if x.timestamp >= of_item[0].timestamp && x.timestamp <= of_item.last().unwrap().timestamp {
+                if x.timestamp_ms >= of_item[0].timestamp_ms && x.timestamp_ms <= of_item.last().unwrap().timestamp_ms {
                     Some(x.clone())
                 } else {
                     None
@@ -35,7 +35,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
             let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
             let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);
 
-            let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp * 1000.0) as usize, x)).collect();
+            let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 
             let resolution = (search_size * 10.0) as usize; // 10 times per ms, so every 0.1 ms
             let lowest = (0..resolution).into_par_iter().map(|i| {
@@ -67,7 +67,7 @@ fn calculate_cost(offs: f64, of: &[TimeIMU], gyro: &BTreeMap<usize, TimeIMU>) ->
     let mut sum = 0.0;
     let mut matches_count = 0;
     for o in of {
-        if let Some(g) = gyro_at_timestamp(o.timestamp - offs, gyro) {
+        if let Some(g) = gyro_at_timestamp(o.timestamp_ms - offs, gyro) {
             matches_count += 1;
             sum += (g.gyro[0] - o.gyro[0]).powf(2.0) * 70.0;
             sum += (g.gyro[1] - o.gyro[1]).powf(2.0) * 70.0;

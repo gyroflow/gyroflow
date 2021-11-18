@@ -19,7 +19,7 @@ impl AudioTranscoder {
         let mut output = octx.add_stream(codec)?;
         let mut encoder = output.codec().encoder().audio()?;
 
-        let channel_layout = codec.channel_layouts().map(|cls| cls.best(decoder.channel_layout().channels())).unwrap_or(ChannelLayout::STEREO);
+        let channel_layout = codec.channel_layouts().map_or(ChannelLayout::STEREO, |cls| cls.best(decoder.channel_layout().channels()));
 
         if global {
             encoder.set_flags(codec::flag::Flags::GLOBAL_HEADER);

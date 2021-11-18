@@ -132,7 +132,7 @@ impl TimelineGyroChart {
 
         for x in data {
             self.sync_results.push(ChartData {
-                timestamp_percent: x.timestamp / self.duration_ms,
+                timestamp_percent: x.timestamp_ms / self.duration_ms,
                 values: [x.gyro[0], x.gyro[1], x.gyro[2], 0.0]
             });
         }
@@ -149,11 +149,11 @@ impl TimelineGyroChart {
 
         for x in &gyro.raw_imu {
             self.gyro.push(ChartData {
-                timestamp_percent: (x.timestamp + gyro.offset_at_timestamp(x.timestamp)) / self.duration_ms,
+                timestamp_percent: (x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) / self.duration_ms,
                 values: [x.gyro[0], x.gyro[1], x.gyro[2], 0.0]
             });
             self.accl.push(ChartData {
-                timestamp_percent: (x.timestamp + gyro.offset_at_timestamp(x.timestamp)) / self.duration_ms,
+                timestamp_percent: (x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) / self.duration_ms,
                 values: [x.accl[0], x.accl[1], x.accl[2], 0.0]
             });
         }

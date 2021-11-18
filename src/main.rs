@@ -16,11 +16,14 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 // Things to do before first public preview:
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
+// - Fix mutex locking for too long
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - UI fixes, editing offset, double animations etc
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
+// - Some basic error handling, check for all unwrap()'s
+// - Add font using QFontDatabase
 
 // TODO: more smoothing algorithms
 // TODO: adaptive zoom
@@ -211,11 +214,11 @@ fn main() {
     theme.borrow().set_theme("dark".into());
 
     // Get camera profiles list
-    let lens_profiles = QVariantList::from_iter(LensProfile::get_profiles_list().unwrap_or_default().into_iter().map(QString::from));
+    let lens_profiles: QVariantList = LensProfile::get_profiles_list().unwrap_or_default().into_iter().map(QString::from).collect();
     engine.set_property("lensProfilesList".into(), QVariant::from(lens_profiles));
 
     // Get smoothing algorithms
-    let algorithms = QVariantList::from_iter(get_smoothing_algorithms().into_iter().map(|x| QString::from(x.get_name())));
+    let algorithms: QVariantList = get_smoothing_algorithms().into_iter().map(|x| QString::from(x.get_name())).collect();
     engine.set_property("smoothingAlgorithms".into(), QVariant::from(algorithms));
 
     let engine_ptr = engine.cpp_ptr();

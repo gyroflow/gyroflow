@@ -26,7 +26,7 @@ impl GyroIntegrator for MadgwickIntegrator {
             let accl = Vector3::new(-v.accl[1], v.accl[0], v.accl[2]);
             //let magn = Vector3::new(v.magn[0], v.magn[1], v.magn[2]);
             match ahrs.update_imu(&gyro, &accl) {
-                Ok(quat) => { quats.insert((v.timestamp * 1000.0) as i64, *quat); },
+                Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
                 Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
             }
         }
@@ -51,7 +51,7 @@ impl GyroIntegrator for MahonyIntegrator {
             let accl = Vector3::new(-v.accl[1], v.accl[0], v.accl[2]);
             //let magn = Vector3::new(v.magn[0], v.magn[1], v.magn[2]);
             match ahrs.update_imu(&gyro, &accl) {
-                Ok(quat) => { quats.insert((v.timestamp * 1000.0) as i64, *quat); },
+                Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
                 Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
             }
         }
@@ -105,7 +105,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
             // rotate orientation by this quaternion
             orientation = Quat64::from_quaternion(orientation.quaternion() * delta_q);
 
-            quats.insert((v.timestamp * 1000.0) as i64, orientation);
+            quats.insert((v.timestamp_ms * 1000.0) as i64, orientation);
 
             // i += 1;
         }
@@ -137,7 +137,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
                      -v.gyro[1] * deg2rad, v.gyro[0] * deg2rad, v.gyro[2] * deg2rad, 
                      sample_time_s);
             let x = f.get_orientation();
-            quats.insert((v.timestamp * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x.0, Vector3::new(x.1, x.2, x.3))));
+            quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x.0, Vector3::new(x.1, x.2, x.3))));
         }
 
         quats

@@ -366,7 +366,6 @@ impl Controller {
                         let orientation = stab.gyro.org_imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
                         let has_gyro = !stab.gyro.quaternions.is_empty();
                         let has_quats = !stab.gyro.org_quaternions.is_empty();
-                        let frame_readout_time = stab.frame_readout_time;
 
                         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
                             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
@@ -374,7 +373,7 @@ impl Controller {
                             chart.setFromGyroSource(&stab.gyro);
                         }
                         
-                        (detected, orientation, has_gyro, has_quats, frame_readout_time)
+                        (detected, orientation, has_gyro, has_quats, stab.frame_readout_time)
                     };
 
                     finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3, detected.4));

@@ -37,6 +37,9 @@ fn main() {
             println!("cargo:rustc-link-lib=GLESv2");
             println!("cargo:rustc-link-lib=EGL");
         },
+        Ok("macos") => {
+            
+        }
         Ok("windows") => {
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
