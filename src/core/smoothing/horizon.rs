@@ -1,5 +1,3 @@
-use std::ops::Mul;
-
 use super::*;
 use nalgebra::*;
 use crate::core::gyro_source::TimeQuat;
@@ -10,7 +8,8 @@ impl Default for HorizonLock {
     fn default() -> Self { Self { time_constant: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 } }
 }
 
-// Alternative implementation for "standard" order
+// Alternative implementation adapted from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles for the "standard" order
+/*
 fn from_euler_angles(roll: f64, pitch: f64, yaw: f64) -> UnitQuaternion<f64> {
     let (sr, cr) = (roll * 0.5f64).simd_sin_cos();
     let (sp, cp) = (pitch * 0.5f64).simd_sin_cos();
@@ -26,7 +25,7 @@ fn from_euler_angles(roll: f64, pitch: f64, yaw: f64) -> UnitQuaternion<f64> {
 
     UnitQuaternion::<f64>::from_quaternion(q)
 }
-// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
 fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
     // roll (x-axis rotation)
     let sinr_cosp = 2. * (q.w * q.i + q.j * q.k);
@@ -48,6 +47,7 @@ fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
 
     (roll, pitch, yaw)
 }
+*/
 
 // "correct" euler angle order
 fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
@@ -142,7 +142,8 @@ impl SmoothingAlgorithm for HorizonLock {
             alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
         }
         let deg2rad = std::f64::consts::PI / 180.0;
-        // This should be applied to the raw orientations as well. Alternatively the transform needs to be cancelled out
+
+        // TODO: This correction should be applied to the raw orientations as well. Alternatively the transform needs to be cancelled out
         //let correction_quat = from_euler_yxz(self.pitch * deg2rad, self.yaw * deg2rad, self.roll * deg2rad);
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
@@ -150,11 +151,10 @@ impl SmoothingAlgorithm for HorizonLock {
             (*x.0, q)
         }).collect();
 
-        // Reverse pass
+        // Reverse pass, while leveling horizon
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
-            q = q.slerp(x.1, alpha);
-            q = lock_horizon_angle(q, self.roll * deg2rad);
+            q = lock_horizon_angle(q.slerp(x.1, alpha), self.roll * deg2rad);
             (*x.0, q)
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition
