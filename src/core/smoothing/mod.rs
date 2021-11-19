@@ -1,4 +1,6 @@
 pub mod plain;
+pub mod horizon;
+pub mod fixed;
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
 
@@ -25,6 +27,8 @@ pub fn get_smoothing_algorithms() -> Vec<Box<dyn SmoothingAlgorithm>> {
     vec![
         Box::new(None { }),
         Box::new(self::plain::Plain::default()),
+        Box::new(self::horizon::HorizonLock::default()),
+        Box::new(self::fixed::Fixed::default())
     ]
 }
 
