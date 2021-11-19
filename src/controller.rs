@@ -139,10 +139,22 @@ impl Controller {
         self.stabilizer.read().gyro.offset_at_timestamp(timestamp_ms)
     }
 
+    fn url_to_path(url: &str) -> &str {
+        if url.starts_with("file://") {
+            if cfg!(target_os = "windows") {
+                url.strip_prefix("file:///").unwrap()
+            } else {
+                url.strip_prefix("file://").unwrap()
+            }
+        } else {
+            url
+        }
+    }
+
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.write().pose_estimator.clear();
         self.chart_data_changed();
-        self.video_path = QString::from(url.clone()).to_string().replace("file:///", "");
+        self.video_path = Self::url_to_path(&QString::from(url.clone()).to_string()).to_string();
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -237,7 +249,7 @@ impl Controller {
                 let total_read_frames = Arc::new(AtomicUsize::new(0));
                 let total_detected_frames = Arc::new(AtomicUsize::new(0));
                 
-                let video_path = QString::from(vid.url.clone()).to_string().replace("file:///", "");
+                let video_path = Self::url_to_path(&QString::from(vid.url.clone()).to_string()).to_string();
                 let (sw, sh) = (vid.surfaceWidth, vid.surfaceHeight);
 
                 self.cancel_flag.store(false, SeqCst);
@@ -322,7 +334,7 @@ impl Controller {
     }
 
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue) {
-        let s = QString::from(url).to_string().replace("file:///", "");
+        let s = Self::url_to_path(&QString::from(url).to_string()).to_string();
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap());
 
@@ -384,7 +396,7 @@ impl Controller {
     fn load_lens_profile(&mut self, path: QString) {
         let info = {
             let mut stab = self.stabilizer.write();
-            stab.load_lens_profile(&path.to_string()); // TODO errors
+            stab.load_lens_profile(&Self::url_to_path(&path.to_string()).to_string()); // TODO errors
             QJsonObject::from(stab.lens.get_info())
         };
         self.lens_loaded = true;

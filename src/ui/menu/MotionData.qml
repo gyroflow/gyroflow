@@ -15,8 +15,7 @@ MenuItem {
         title: qsTr("Choose a motion data file")
         nameFilters: [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
         onAccepted: {
-            const path = selectedFile.toString().replace("file:///", "");
-            controller.load_telemetry(path, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+            controller.load_telemetry(selectedFile, false, window.videoArea.vid, window.videoArea.timeline.getChart());
         }
     }
 
@@ -144,8 +143,7 @@ MenuItem {
         anchors.bottomMargin: -35 * dpiScale;
         extensions: fileDialog.extensions;
         onLoadFile: (url) => {
-            const path = url.toString().replace("file:///", "");
-            controller.load_telemetry(path, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+            controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
         }
     }
 }

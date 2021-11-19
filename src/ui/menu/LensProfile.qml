@@ -14,7 +14,7 @@ MenuItem {
 
         title: qsTr("Choose a lens profile")
         nameFilters: [qsTr("Lens profiles") + " (*.json)"];
-        onAccepted: controller.load_lens_profile((fileDialog.selectedFile + "").replace("file:///", ""));
+        onAccepted: controller.load_lens_profile((fileDialog.selectedFile + ""));
     }
 
     Component.onCompleted: {
@@ -134,7 +134,7 @@ MenuItem {
         anchors.bottomMargin: -35 * dpiScale;
         extensions: fileDialog.extensions;
         onLoadFile: (url) => {
-            const path = url.toString().replace("file:///", "");
+            const path = url.toString();
             onAccepted: controller.load_lens_profile(path);
         }
     }

@@ -96,6 +96,8 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
         }
 
         if planes.is_empty() {
+            // Good reference about video formats: https://source.chromium.org/chromium/chromium/src/+/master:media/base/video_frame.cc
+            // https://gist.github.com/Jim-Bar/3cbba684a71d1a9d468a6711a6eddbeb
             match input_frame.format() {
                 Pixel::NV12 => {
                     create_planes_proc!(planes, 

@@ -19,13 +19,17 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
+    function toLocalFile(u) {
+        const s = u.toString();
+        return s.substring(s.charAt(9) === ':'? 8 : 7);
+    }
     function loadFile(url) {
         vid.loaded = false;
         videoLoader.active = true;
         vidInfo.loader = true;
         //vid.url = url;
         controller.load_video(url, vid);
-        const pathParts = url.toString().replace("file:///", "").split(".");
+        const pathParts = toLocalFile(url).split(".");
         pathParts.pop();
         window.outputFile = pathParts.join(".") + "_stabilized.mp4";
 

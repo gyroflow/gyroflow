@@ -91,8 +91,8 @@ impl FrameTransform {
         frame_readout_time /= 2.0;
         frame_readout_time *= img_dim_ratio;
 
-		let row_readout_time = frame_readout_time / params.height as f64;
-		let start_ts = timestamp_ms - (frame_readout_time / 2.0);
+        let row_readout_time = frame_readout_time / params.height as f64;
+        let start_ts = timestamp_ms - (frame_readout_time / 2.0);
 
         // ----------- Rolling shutter correction -----------
 
@@ -112,6 +112,11 @@ impl FrameTransform {
                      * params.gyro.smoothed_quat_at_timestamp(quat_time);
 
             let mut r = *quat.to_rotation_matrix().matrix();
+            // Need to benchmark performance of the .mirror() function for OpenGL
+            // If it's a problem we can use this inverted matrix here and invert the drawing of feature points and rolling shutter time
+            // We only need to do this for image read from OpenGL, so this code should be conditional only for live preview, not for rendering
+            // r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+            // r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
             r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             

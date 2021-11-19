@@ -8,6 +8,11 @@ fn main() {
     if cfg!(target_os = "macos") {
         config.flag("-F");
         config.flag(&qt_library_path);
+        println!("cargo:rustc-link-lib=z");
+        println!("cargo:rustc-link-lib=bz2");
+        println!("cargo:rustc-link-lib=xml2");
+        println!("cargo:rustc-link-lib=framework=VideoToolbox");
+        println!("cargo:rustc-link-lib=framework=CoreAudio");
     }
 
     let mut public_include = |name| { config.include(format!("{}/{}", qt_include_path, name)); };
