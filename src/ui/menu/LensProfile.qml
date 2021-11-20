@@ -14,7 +14,13 @@ MenuItem {
 
         title: qsTr("Choose a lens profile")
         nameFilters: [qsTr("Lens profiles") + " (*.json)"];
-        onAccepted: controller.load_lens_profile((fileDialog.selectedFile + ""));
+        onAccepted: loadFile(fileDialog.selectedFile);
+    }
+    function loadFile(url) {
+        if (Qt.platform.os == "android") {
+            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
+        }
+        controller.load_lens_profile(url.toString());
     }
 
     Component.onCompleted: {
@@ -133,9 +139,6 @@ MenuItem {
         anchors.topMargin: 35 * dpiScale;
         anchors.bottomMargin: -35 * dpiScale;
         extensions: fileDialog.extensions;
-        onLoadFile: (url) => {
-            const path = url.toString();
-            onAccepted: controller.load_lens_profile(path);
-        }
+        onLoadFile: (url) => root.loadFile(url);
     }
 }

@@ -48,7 +48,7 @@ pub struct Controller {
     set_smoothing_method: qt_method!(fn(&mut self, index: usize) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&mut self, name: QString, val: f64)),
     set_preview_resolution: qt_method!(fn(&self, target_height: i32, player: QJSValue)),
-    set_background_color: qt_method!(fn(&mut self, color: QColor, player: QJSValue)),
+    set_background_color: qt_method!(fn(&mut self, color: QString, player: QJSValue)),
     set_integration_method: qt_method!(fn(&mut self, index: usize)),
 
     set_offset: qt_method!(fn(&mut self, timestamp_us: i64, offset_ms: f64)),
@@ -94,6 +94,8 @@ pub struct Controller {
     sync_in_progress_changed: qt_signal!(),
 
     export_gyroflow: qt_method!(fn(&self)),
+
+    resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
 
     video_path: String,
 
@@ -481,7 +483,7 @@ impl Controller {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
-            let bg_color = vid.getBackgroundColor().get_rgba();
+            let bg_color = vid.getBackgroundColor().get_rgba_f();
             self.stabilizer.write().background = Vector4::new(bg_color.0 as f32 * 255.0, bg_color.1 as f32 * 255.0, bg_color.2 as f32 * 255.0, bg_color.3 as f32 * 255.0);
 
             let stab = self.stabilizer.clone();
@@ -501,13 +503,14 @@ impl Controller {
         }
     }
 
-    fn set_background_color(&mut self, color: QColor, player: QJSValue) {
+    fn set_background_color(&mut self, color: QString, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
+            let color = QColor::from_name(&color.to_string());
             vid.setBackgroundColor(color);
 
-            let bg = color.get_rgba();
+            let bg = color.get_rgba_f();
             let bg = Vector4::new(bg.0 as f32 * 255.0, bg.1 as f32 * 255.0, bg.2 as f32 * 255.0, bg.3 as f32 * 255.0);
             
             let mut stab = self.stabilizer.write();
@@ -660,4 +663,37 @@ fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
         arr.push(QJsonValue::from(map));
     }
     arr
+}
+
+
+use cpp::*;
+cpp! {{
+    #ifdef Q_OS_ANDROID
+    #   include <QJniObject>
+    #endif
+}}
+impl Controller {
+    fn resolve_android_url(&mut self, url: QString) -> QString {
+        QString::from(cpp!(unsafe [url as "QString"] -> QString as "QString" {
+            #ifdef Q_OS_ANDROID
+                QVariant res = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([url] {
+                    QJniObject jniPath = QJniObject::fromString(url);
+                    QJniObject jniUri = QJniObject::callStaticObjectMethod("android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", jniPath.object());
+
+                    QJniObject activity(QNativeInterface::QAndroidApplication::context());
+
+                    QString url = QJniObject::callStaticObjectMethod("org/ekkescorner/utils/QSharePathResolver", 
+                        "getRealPathFromURI",
+                        "(Landroid/content/Context;Landroid/net/Uri;)Ljava/lang/String;",
+                        activity.object(), jniUri.object()
+                    ).toString();
+                    
+                    return QVariant::fromValue(url);
+                }).result();
+                return res.toString();
+            #else
+                return url;
+            #endif
+        }))
+    }
 }

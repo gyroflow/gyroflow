@@ -24,6 +24,9 @@ Item {
         return s.substring(s.charAt(9) === ':'? 8 : 7);
     }
     function loadFile(url) {
+        if (Qt.platform.os == "android") {
+            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
+        }
         vid.loaded = false;
         videoLoader.active = true;
         vidInfo.loader = true;

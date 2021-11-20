@@ -14,9 +14,13 @@ MenuItem {
 
         title: qsTr("Choose a motion data file")
         nameFilters: [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
-        onAccepted: {
-            controller.load_telemetry(selectedFile, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+        onAccepted: loadFile(selectedFile);
+    }
+    function loadFile(url) {
+        if (Qt.platform.os == "android") {
+            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
+        controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
     }
 
     Connections {
@@ -142,8 +146,6 @@ MenuItem {
         anchors.topMargin: 35 * dpiScale;
         anchors.bottomMargin: -35 * dpiScale;
         extensions: fileDialog.extensions;
-        onLoadFile: (url) => {
-            controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
-        }
+        onLoadFile: (url) => root.loadFile(url)
     }
 }

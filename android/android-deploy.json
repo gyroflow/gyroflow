@@ -1,0 +1,19 @@
+{
+   "description": "",
+   "qt": "D:/Programy/Qt/6.2.1/android_arm64_v8a",
+   "sdk": "D:/Programy/Android/sdk",
+   "sdkBuildToolsRevision": "30.0.3",
+   "ndk": "D:/Programy/Android/sdk/ndk-bundle",
+   "toolchain-prefix": "llvm",
+   "tool-prefix": "llvm",
+   "ndk-host": "windows-x86_64",
+   "architectures": {"arm64-v8a":"aarch64-linux-android"},
+   "android-min-sdk-version": "23",
+   "android-target-sdk-version": "30",
+   "qml-importscanner-binary": "D:/Programy/Qt/6.2.1/mingw81_64/bin/qmlimportscanner",
+   "rcc-binary": "D:/Programy/Qt/6.2.1/mingw81_64/bin/rcc",
+   "qml-root-path": "D:/programowanie/projekty/Rust/gyroflow",
+   "stdcpp-path": "D:/Programy/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib",
+   "qrcFiles": "",
+   "application-binary": "gyroflow"
+}

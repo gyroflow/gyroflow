@@ -12,7 +12,7 @@ QQC.CheckBox {
         implicitHeight: 20 * dpiScale
         x: cb.leftPadding
         y: parent.height / 2 - height / 2
-        radius: 5;
+        radius: 5 * dpiScale;
         color: cb.checked? styleAccentColor : "transparent";
         Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo; } }
         border.color: cb.checked? styleAccentColor : "#999999";

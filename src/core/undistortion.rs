@@ -4,6 +4,7 @@ use nalgebra::*;
 use rayon::prelude::*;
 
 use super::GyroSource;
+#[cfg(feature = "opencl")]
 use super::gpu::opencl;
 use super::gpu::wgpu;
 use super::StabilizationManager;
@@ -151,7 +152,9 @@ pub struct Undistortion<T: Default + Copy + Send + Sync + FloatPixel> {
     size: (usize, usize, usize), // width, height, stride
     pub background: Vector4<f32>,
 
+    #[cfg(feature = "opencl")]
     cl: Option<opencl::OclWrapper<T::Scalar>>,
+
     wgpu: Option<wgpu::WgpuWrapper<T::Scalar>>,
 
     tmp_buffer: Vec<T>,
@@ -197,7 +200,10 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         self.background = bg;
 
         //self.wgpu = wgpu::WgpuWrapper::new(params.width, params.height, self.background);
-        self.cl = Some(opencl::OclWrapper::new(params.width, params.height, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
+        #[cfg(feature = "opencl")]
+        {
+            self.cl = Some(opencl::OclWrapper::new(params.width, params.height, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
+        }
 
         self.size = (params.width, params.height, stride);
 
@@ -208,7 +214,9 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         self.background = bg;
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.set_background(bg);
-        } else if let Some(ref mut cl) = self.cl {
+        }
+        #[cfg(feature = "opencl")]
+        if let Some(ref mut cl) = self.cl {
             let _ = cl.set_background(bg);
         }
     }
@@ -220,14 +228,19 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
 
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.undistort_image(pixels, itm);
-        } else if let Some(ref mut cl) = self.cl {
-            cl.undistort_image(pixels, itm).unwrap();
-        } else {
-            Self::undistort_image_cpu( unsafe { std::mem::transmute(pixels) }, &mut self.tmp_buffer, width, height, stride, &itm.params, self.background);
-            return self.tmp_buffer.as_mut_ptr() as *mut T::Scalar;
+            return pixels.as_mut_ptr();
         }
 
-        pixels.as_mut_ptr()
+        // OpenCL path
+        #[cfg(feature = "opencl")]
+        if let Some(ref mut cl) = self.cl {
+            cl.undistort_image(pixels, itm).unwrap();
+            return pixels.as_mut_ptr();
+        }
+
+        // CPU path
+        Self::undistort_image_cpu( unsafe { std::mem::transmute(pixels) }, &mut self.tmp_buffer, width, height, stride, &itm.params, self.background);
+        return self.tmp_buffer.as_mut_ptr() as *mut T::Scalar;
     }
 
     // TODO: optimize further with SIMD
@@ -314,6 +327,11 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         });
     }
 }
+
+//#[cfg(feature = "opencl")]
+//pub trait ScalarTrait: Sync + ocl::OclPrm + bytemuck::Pod {}
+//#[cfg(not(feature = "opencl"))]
+//pub trait ScalarTrait: bytemuck::Pod {}
 
 pub trait FloatPixel {
     const COUNT: usize = 1;
