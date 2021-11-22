@@ -28,7 +28,7 @@ mkdir "$PSScriptRoot\target\android-build" -ErrorAction SilentlyContinue
 mkdir "$PSScriptRoot\target\android-build\libs" -ErrorAction SilentlyContinue
 Copy-Item -Path "$PSScriptRoot\target\release\apk\lib\*" -Destination "$PSScriptRoot\target\android-build\libs\" -Recurse -Force
 Copy-Item -Path "$PSScriptRoot\android\src" -Destination "$PSScriptRoot\target\android-build\" -Recurse -Force
-Copy-Item -Path "$PSScriptRoot\\target\aarch64-linux-android\release\libffmpeg.so" -Destination "$PSScriptRoot\target\android-build\libs\" -Force
+Copy-Item -Path "$PSScriptRoot\target\aarch64-linux-android\release\libffmpeg.so" -Destination "$PSScriptRoot\target\android-build\libs\" -Force
 Move-Item -Path "$PSScriptRoot\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$PSScriptRoot\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
 androiddeployqt --input "$PSScriptRoot\android\android-deploy.json" `

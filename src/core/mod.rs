@@ -4,6 +4,7 @@ pub mod integration_complementary; // TODO add this to `ahrs` crate
 pub mod lens_profile;
 pub mod synchronization;
 pub mod undistortion;
+pub mod adaptive_zoom;
 
 pub mod smoothing;
 pub mod filtering;
@@ -33,7 +34,9 @@ pub struct StabilizationManager {
     pub background: Vector4<f32>,
 
     pub frame_readout_time: f64,
+    pub adaptive_zoom_window: f64,
     pub fov: f64,
+    pub fovs: Vec<f64>,
     pub fps: f64,
     pub frame_count: usize,
     pub duration_ms: f64,
@@ -53,9 +56,11 @@ impl Default for StabilizationManager {
             smoothing_id: 0,
             smoothing_algs: get_smoothing_algorithms(),
             fov: 1.0,
+            fovs: vec![],
             stab_enabled: true,
             show_detected_features: true,
             frame_readout_time: 0.0, 
+            adaptive_zoom_window: 0.0, 
             undistortion: Undistortion::<undistortion::RGBA8>::default(),
             gyro: GyroSource::default(),
             lens: LensProfile::default(),
@@ -143,6 +148,29 @@ impl StabilizationManager {
 
         let params = undistortion::ComputeParams::from_manager(self);
         self.undistortion.init_size(self.background, &params, self.size.0);
+    }
+
+    pub fn recompute_adaptive_zoom(&mut self) {
+        let mut quats = Vec::with_capacity(self.frame_count);
+        for i in 0..self.frame_count {
+            quats.push(self.gyro.smoothed_quat_at_timestamp(i as f64 * 1000.0 / self.fps));
+        }
+
+        let zoom = adaptive_zoom::AdaptiveZoom::from_manager(self);
+        if self.adaptive_zoom_window > 0.0 {
+            // TODO trim values
+            let fovs = zoom.compute(
+                &quats, 
+                self.video_size, 
+                self.fps, 
+                Some(self.adaptive_zoom_window), 
+                Some(self.trim_start), 
+                Some(self.trim_end)
+            );
+            self.fovs = fovs.iter().map(|v| v.0).collect();
+        } else {
+            self.fovs.clear();
+        }
     }
 
     pub fn recompute_smoothness(&mut self) {

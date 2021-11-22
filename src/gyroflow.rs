@@ -28,7 +28,7 @@ use ui::theme::Theme;
 // - Add font using QFontDatabase
 
 // TODO: more smoothing algorithms
-// TODO: adaptive zoom
+// TODO: adaptive zoom: -1 and -2 modes
 
 // TODO: exporting and loading .gyroflow
 // TODO: output size and correctly fit the undistortion in it

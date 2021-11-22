@@ -66,6 +66,7 @@ pub struct Controller {
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     fov: qt_property!(f64; WRITE set_fov),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
+    adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
 
     lens_loaded: qt_property!(bool; NOTIFY lens_changed),
     lens_changed: qt_signal!(),
@@ -580,6 +581,7 @@ impl Controller {
             let params = {
                 let mut stab = stab.write();
                 stab.recompute_smoothness();
+                stab.recompute_adaptive_zoom();
                 undistortion::ComputeParams::from_manager(&stab)
             };
             if let Ok(stab_data) = undistortion::Undistortion::<undistortion::RGBA8>::calculate_stab_data(&params, &CURRENT_COMPUTE_ID, compute_id) {
@@ -592,6 +594,12 @@ impl Controller {
     }
     fn set_frame_readout_time(&mut self, v: f64) {
         self.stabilizer.write().frame_readout_time = v;
+        
+        self.recompute_threaded();
+    }
+
+    fn set_adaptive_zoom(&mut self, v: f64) {
+        self.stabilizer.write().adaptive_zoom_window = v;
         
         self.recompute_threaded();
     }
@@ -674,7 +682,7 @@ cpp! {{
 }}
 impl Controller {
     fn resolve_android_url(&mut self, url: QString) -> QString {
-        QString::from(cpp!(unsafe [url as "QString"] -> QString as "QString" {
+        cpp!(unsafe [url as "QString"] -> QString as "QString" {
             #ifdef Q_OS_ANDROID
                 QVariant res = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([url] {
                     QJniObject jniPath = QJniObject::fromString(url);
@@ -694,6 +702,6 @@ impl Controller {
             #else
                 return url;
             #endif
-        }))
+        })
     }
 }

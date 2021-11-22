@@ -171,7 +171,7 @@ impl<'a> VideoTranscoder<'a> {
         let mut decoder = self.decoder.as_mut().unwrap();
         
         let mut frame = frame::Video::empty();
-        let mut sw_frame = &mut self.buffers.sw_frame;
+        let sw_frame = &mut self.buffers.sw_frame;
         let mut hw_frame = frame::Video::empty();
         
         while decoder.receive_frame(&mut frame).is_ok() {
@@ -225,7 +225,7 @@ impl<'a> VideoTranscoder<'a> {
 
                             // Process frame
                             if let Some(ref mut cb) = self.on_frame_callback {
-                                cb(timestamp_us, &mut sw_frame, &mut self.converter);
+                                cb(timestamp_us, sw_frame, &mut self.converter);
                             }
 
                             if !self.decode_only {
@@ -282,7 +282,7 @@ impl<'a> VideoTranscoder<'a> {
 
         if !self.decode_only && self.encoder.is_some() {
             let ost_time_base = ost_time_bases[self.output_index];
-            let octx = octx.as_deref_mut().unwrap();
+            let octx = octx.unwrap();
             self.receive_and_process_encoded_packets(octx, ost_time_base);
         }
 

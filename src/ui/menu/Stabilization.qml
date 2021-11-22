@@ -89,24 +89,23 @@ MenuItem {
         }
     }
     CheckBoxWithContent {
+        id: adaptiveZoomCb;
         anchors.horizontalCenter: parent.horizontalCenter;
         text: qsTr("Adaptive zoom");
         width: parent.width;
-        enabled: false;
+        cb.onCheckedChanged: {
+            controller.adaptive_zoom = cb.checked? adaptiveZoom.value : 0.0;
+        }
 
         Label {
-            text: qsTr("Smoothing window FOV");
+            text: qsTr("Smoothing window");
             Slider {
+                id: adaptiveZoom;
+                value: 2;
                 to: 15;
+                unit: "s";
                 width: parent.width;
-            }
-        }
-        Label {
-            text: qsTr("Zoom factor");
-            Slider {
-                from: 0.5;
-                to: 7.0;
-                width: parent.width;
+                onValueChanged: controller.adaptive_zoom = value;
             }
         }
     }
