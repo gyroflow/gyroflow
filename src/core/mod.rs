@@ -13,11 +13,11 @@ pub mod gpu;
 
 use std::sync::Arc;
 
-use self::{lens_profile::LensProfile, smoothing::{SmoothingAlgorithm, get_smoothing_algorithms}, undistortion::Undistortion};
+use self::{ lens_profile::LensProfile, smoothing::{ SmoothingAlgorithm, get_smoothing_algorithms }, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
 
 use simd_json::ValueAccess;
-use nalgebra::{Quaternion, Vector3, Vector4};
-use gyro_source::{GyroSource, Quat64, TimeIMU};
+use nalgebra::{ Quaternion, Vector3, Vector4 };
+use gyro_source::{ GyroSource, Quat64, TimeIMU };
 use telemetry_parser::try_block;
 
 pub struct StabilizationManager {
@@ -151,22 +151,20 @@ impl StabilizationManager {
     }
 
     pub fn recompute_adaptive_zoom(&mut self) {
-        let mut quats = Vec::with_capacity(self.frame_count);
-        for i in 0..self.frame_count {
-            quats.push(self.gyro.smoothed_quat_at_timestamp(i as f64 * 1000.0 / self.fps));
-        }
+        if self.adaptive_zoom_window > 0.0 || self.adaptive_zoom_window < -0.9 {
+            let mut quats = Vec::with_capacity(self.frame_count);
+            for i in 0..self.frame_count {
+                quats.push(self.gyro.smoothed_quat_at_timestamp(i as f64 * 1000.0 / self.fps));
+            }
+    
+            let mode = if self.adaptive_zoom_window < 0.0 {
+                adaptive_zoom::Mode::StaticZoom
+            } else {
+                adaptive_zoom::Mode::DynamicZoom(self.adaptive_zoom_window)
+            };
 
-        let zoom = adaptive_zoom::AdaptiveZoom::from_manager(self);
-        if self.adaptive_zoom_window > 0.0 {
-            // TODO trim values
-            let fovs = zoom.compute(
-                &quats, 
-                self.video_size, 
-                self.fps, 
-                Some(self.adaptive_zoom_window), 
-                Some(self.trim_start), 
-                Some(self.trim_end)
-            );
+            let zoom = AdaptiveZoom::from_manager(self);
+            let fovs = zoom.compute(&quats, self.video_size, self.fps, mode, (self.trim_start, self.trim_end));
             self.fovs = fovs.iter().map(|v| v.0).collect();
         } else {
             self.fovs.clear();

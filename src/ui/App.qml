@@ -22,7 +22,7 @@ Rectangle {
         property var extensions: ["mp4", "mov", "mxf", "mkv", "webm"];
 
         title: qsTr("Choose a video file")
-        //nameFilters: [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];
+        nameFilters: [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];
         onAccepted: videoArea.loadFile(fileDialog.selectedFile);
     }
 

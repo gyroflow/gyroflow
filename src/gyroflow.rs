@@ -26,7 +26,6 @@ use ui::theme::Theme;
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
 // - Add font using QFontDatabase
-// - adaptive zoom: -1 and -2 modes
 
 // TODO: more smoothing algorithms
 
@@ -112,7 +111,7 @@ pub fn entry() {
     let engine_ptr = engine.cpp_ptr();
 
     // Load main UI
-    let live_reload = false;
+    let live_reload = true;
     if !live_reload {
         engine.load_file("qrc:/src/ui/main_window.qml".into());
     } else {

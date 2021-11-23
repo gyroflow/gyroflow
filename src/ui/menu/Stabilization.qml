@@ -88,25 +88,31 @@ MenuItem {
             }
         }
     }
-    CheckBoxWithContent {
-        id: adaptiveZoomCb;
-        anchors.horizontalCenter: parent.horizontalCenter;
-        text: qsTr("Adaptive zoom");
+    
+    ComboBox {
+        id: croppingMode;
+        font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        cb.onCheckedChanged: {
-            controller.adaptive_zoom = cb.checked? adaptiveZoom.value : 0.0;
-        }
-
-        Label {
-            text: qsTr("Smoothing window");
-            Slider {
-                id: adaptiveZoom;
-                value: 4;
-                to: 15;
-                unit: "s";
-                width: parent.width;
-                onValueChanged: controller.adaptive_zoom = value;
+        model: [qsTr("No cropping"), qsTr("Dynamic cropping"), qsTr("Static crop")];
+        onCurrentIndexChanged: {
+            switch (currentIndex) {
+                case 0: controller.adaptive_zoom = 0.0; break;
+                case 1: controller.adaptive_zoom = adaptiveZoom.value; break;
+                case 2: controller.adaptive_zoom = -1.0; break;
             }
+        }
+    }
+    Label {
+        text: qsTr("Smoothing window");
+        visible: croppingMode.currentIndex == 1;
+        Slider {
+            id: adaptiveZoom;
+            value: 4;
+            from: 0.1;
+            to: 15;
+            unit: "s";
+            width: parent.width;
+            onValueChanged: controller.adaptive_zoom = value;
         }
     }
 }

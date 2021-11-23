@@ -19,12 +19,19 @@ pub struct AdaptiveZoom {
     distortion_coeffs: Vec<f64>
 }
 
+pub enum Mode {
+    DynamicZoom(f64), // f64 - smoothing focus window in seconds
+    StaticZoom
+}
+
 impl AdaptiveZoom {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
+        let calib_dimension = if mgr.lens.calib_dimension.0 > 0.0 { mgr.lens.calib_dimension } else { (mgr.video_size.0 as f64, mgr.video_size.1 as f64) };
+        let distortion_coeffs = if mgr.lens.distortion_coeffs.len() >= 4 { mgr.lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
         Self {
-            calib_dimension: mgr.lens.calib_dimension,
+            calib_dimension,
             camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),
-            distortion_coeffs: mgr.lens.distortion_coeffs.clone()
+            distortion_coeffs
         }
     }
 
@@ -104,11 +111,7 @@ impl AdaptiveZoom {
         1.0 / fcorr.max(fcorr_i)
     }
     
-    pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, smoothing_focus: Option<f64>, tstart: Option<f64>, tend: Option<f64>) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
-        let smoothing_focus = smoothing_focus.unwrap_or(2.0);
-        // if smoothing_focus == -1: Totally disable
-        // if smoothing_focus == -2: Find minimum sufficient crop
-
+    pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, mode: Mode, range: (f64, f64)) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
         let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9)).collect();
         // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
@@ -132,33 +135,34 @@ impl AdaptiveZoom {
                                                                 self.find_fov(center, polygon, output_dim)
                                                             ).collect();
 
-        if tstart.is_some() || tend.is_some() {
+        if range.0 > 0.0 || range.1 < 1.0 {
             // Only within render range.
             let max_fov = fov_values.iter().copied().reduce(f64::max).unwrap();
             let l = (quaternions.len() - 1) as f64;
-            let first_ind = (l * tstart.unwrap_or(0.0)).floor() as usize;
-            let last_ind  = (l * tend.unwrap_or(1.0)).ceil() as usize;
+            let first_ind = (l * range.0).floor() as usize;
+            let last_ind  = (l * range.1).ceil() as usize;
             fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
             fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
         }
 
-        if smoothing_focus > 0.0 {
-            let mut smoothing_focus_frames = (smoothing_focus * fps).floor() as usize;
-            if smoothing_focus_frames % 2 == 0 {
-                smoothing_focus_frames += 1;
+        match mode {
+            Mode::DynamicZoom(window_s) => {
+                let mut frames = (window_s * fps).floor() as usize;
+                if frames % 2 == 0 {
+                    frames += 1;
+                }
+    
+                let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
+                let fov_min = min_rolling(&fov_values_pad, frames);
+                let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
+    
+                let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
+                fov_values = convolve(&fov_min_pad, &gaussian);
+            },
+            Mode::StaticZoom => {
+                let max_f = fov_values.iter().copied().reduce(f64::min).unwrap();
+                fov_values.iter_mut().for_each(|v| *v = max_f);
             }
-
-            let fov_values_pad = pad_edge(&fov_values, (smoothing_focus_frames / 2, smoothing_focus_frames / 2));
-            let fov_min = min_rolling(&fov_values_pad, smoothing_focus_frames);
-            let fov_min_pad = pad_edge(&fov_min, (smoothing_focus_frames / 2, smoothing_focus_frames / 2));
-
-            let gaussian = gaussian_window_normalized(smoothing_focus_frames, smoothing_focus_frames as f64 / 6.0);
-            fov_values = convolve(&fov_min_pad, &gaussian);
-        } else if smoothing_focus == -1.0 { // disabled
-            let max_f = fov_values.iter().copied().reduce(f64::min).unwrap();
-            fov_values.iter_mut().for_each(|v| *v = max_f);
-        } else if smoothing_focus == -2.0 { // apply nothing
-            fov_values.iter_mut().for_each(|v| *v = 1.0);
         }
 
         fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
