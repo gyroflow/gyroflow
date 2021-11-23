@@ -32,12 +32,6 @@ impl AdaptiveZoom {
         }
     }
 
-    fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {
-        a.windows(window).map(|window| {
-            window.iter().copied().reduce(f64::min).unwrap()
-        }).collect()
-    }
-
     fn find_fcorr(&self, center: Point2D, polygon: &[Point2D], output_dim: (usize, usize)) -> (f64, usize) {
         let (output_width, output_height) = (output_dim.0 as f64, output_dim.1 as f64);
         let angle_output = (output_height as f64 / 2.0).atan2(output_width / 2.0);
@@ -53,7 +47,7 @@ impl AdaptiveZoom {
         // ax.plot(distP*np.cos(angles), distP*np.sin(angles), 'ro')
         // ax.plot(distP[mask]*np.cos(angles[mask]), distP[mask]*np.sin(angles[mask]), 'yo')
         // ax.add_patch(matplotlib.patches.Rectangle((-output_width/2,-output_height/2), output_width, output_height,color="yellow"))
-        let d_width : Vec<f64> = angles.iter().map(|a| ((output_width / 2.0) / a.cos()).abs()).collect();
+        let d_width:  Vec<f64> = angles.iter().map(|a| ((output_width  / 2.0) / a.cos()).abs()).collect();
         let d_height: Vec<f64> = angles.iter().map(|a| ((output_height / 2.0) / a.sin()).abs()).collect();
 
         let mut ffactor: Vec<f64> = d_width.iter().zip(dist_p.iter()).map(|(v, d)| v / d).collect();
@@ -65,9 +59,8 @@ impl AdaptiveZoom {
         });
 
         // Find max value and it's index
-        let max = ffactor.iter().enumerate().fold((0, 0.0), |max, (ind, &val)| if val > max.1 { (ind, val) } else { max });
-
-        (max.1, max.0)
+        ffactor.iter().enumerate()
+               .fold((0.0, 0), |max, (ind, &val)| if val > max.0 { (val, ind) } else { max })
     }
 
     fn find_fov(&self, center: Point2D, polygon: &[Point2D], output_dim: (usize, usize)) -> f64 {
@@ -81,7 +74,7 @@ impl AdaptiveZoom {
             polygon[(idx + 1) % n_p]
         ];
 
-        // TODO: `distance` is not used for the interpolation. It should be used for more accurate results. It's the x axis for `scipy.interp1d`
+        // TODO: `distance` should be used in interpolation for more accurate results. It's the x axis for `scipy.interp1d`
         // let distance = {
         //     let mut sum = 0.0;
         //     let mut d: Vec<f64> = relevant_p[1..].iter().enumerate().map(|(i, v)| {
@@ -120,53 +113,47 @@ impl AdaptiveZoom {
         // if smoothing_focus == -1: Totally disable
         // if smoothing_focus == -2: Find minimum sufficient crop
 
-        // let mut smoothing_num_frames = (smoothing_center * fps).floor() as usize;
-        // if smoothing_num_frames % 2 == 0 {
-        //     smoothing_num_frames += 1;
-        // }
-
-        let mut smoothing_focus_frames = (smoothing_focus * fps).floor() as usize;
-        if smoothing_focus_frames % 2 == 0 {
-            smoothing_focus_frames += 1;
-        }
-
-        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(*q, 9)).collect();
+        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|&q| self.bounding_polygon(q, 9)).collect();
         // let focus_windows: Vec<Point2D> = boundaryBoxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
         let crop_center_positions: Vec<Point2D> = quaternions.iter().map(|_| Point2D(self.calib_dimension.0 / 2.0, self.calib_dimension.1 / 2.0)).collect();
 
         // if smoothing_center > 0 {
-        //     let mut focus_windows_pad = pad_edge(&focus_windows, (smoothing_num_frames / 2, smoothing_num_frames / 2));
-        //     let mut filter_coeff = gaussian_window(smoothing_num_frames, smoothing_num_frames as f64 / 6.0);
-        //     let sum: f64 = filter_coeff.iter().sum();
-        //     filter_coeff.iter_mut().for_each(|v| *v /= sum);
-        //     focus_windows = convolve(&focus_windows_pad.map(|v| v.0).collect(), &filter_coeff).iter().zip(
-        //         convolve(&focus_windows_pad.map(|v| v.1).collect(), &filter_coeff).iter()
-        //     ).collect()
+        //     let mut smoothing_num_frames = (smoothing_center * fps).floor() as usize;
+        //     if smoothing_num_frames % 2 == 0 {
+        //         smoothing_num_frames += 1;
+        //     }
+        //     let focus_windows_pad = pad_edge(&focus_windows, (smoothing_num_frames / 2, smoothing_num_frames / 2));
+        //     let gaussian = gaussian_window_normalized(smoothing_num_frames, smoothing_num_frames as f64 / 6.0);
+        //     focus_windows = convolve(&focus_windows_pad.map(|v| v.0).collect(), &gaussian).iter().zip(
+        //         convolve(&focus_windows_pad.map(|v| v.1).collect(), &gaussian).iter()
+        //     ).map(|v| Point2D(v.0, v.1)).collect()
         // }
-        let mut fov_values: Vec<f64> = crop_center_positions.iter().zip(boundary_polygons.iter()).map(|(center, polygon)| self.find_fov(*center, polygon, output_dim)).collect();
+        let mut fov_values: Vec<f64> = crop_center_positions.iter().zip(boundary_polygons.iter()).map(|(&center, polygon)| self.find_fov(center, polygon, output_dim)).collect();
 
-        if tend.is_some() {
+        if tstart.is_some() || tend.is_some() {
             // Only within render range.
             let max_fov = fov_values.iter().copied().reduce(f64::max).unwrap();
             let l = (quaternions.len() - 1) as f64;
-            let first_ind = (l * tstart.unwrap()) as usize;
-            let last_ind  = (l * tend.unwrap()) as usize;
+            let first_ind = (l * tstart.unwrap_or(0.0)).floor() as usize;
+            let last_ind  = (l * tend.unwrap_or(1.0)).ceil() as usize;
             fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
             fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
         }
 
         if smoothing_focus > 0.0 {
-            let mut filter_coeff_focus = gaussian_window(smoothing_focus_frames, smoothing_focus_frames as f64 / 6.0);
-            let sum: f64 = filter_coeff_focus.iter().sum();
-            filter_coeff_focus.iter_mut().for_each(|v| *v /= sum);
+            let mut smoothing_focus_frames = (smoothing_focus * fps).floor() as usize;
+            if smoothing_focus_frames % 2 == 0 {
+                smoothing_focus_frames += 1;
+            }
 
             let fov_values_pad = pad_edge(&fov_values, (smoothing_focus_frames / 2, smoothing_focus_frames / 2));
-            let fov_min = Self::min_rolling(&fov_values_pad, smoothing_focus_frames);
+            let fov_min = min_rolling(&fov_values_pad, smoothing_focus_frames);
             let fov_min_pad = pad_edge(&fov_min, (smoothing_focus_frames / 2, smoothing_focus_frames / 2));
 
-            fov_values = convolve(&fov_min_pad, &filter_coeff_focus);
+            let gaussian = gaussian_window_normalized(smoothing_focus_frames, smoothing_focus_frames as f64 / 6.0);
+            fov_values = convolve(&fov_min_pad, &gaussian);
         } else if smoothing_focus == -1.0 { // disabled
             let max_f = fov_values.iter().copied().reduce(f64::min).unwrap();
             fov_values.iter_mut().for_each(|v| *v = max_f);
@@ -202,37 +189,42 @@ impl AdaptiveZoom {
         let (mleft, mright, mtop, mbottom) = box_;
         let (mut window_width, mut window_height) = (output_dim.0 as f64, output_dim.1 as f64);
 
-        let maxX = mright - mleft;
-        let maxY = mbottom - mtop;
+        let max_x = mright - mleft;
+        let max_y = mbottom - mtop;
 
-        let ratio = maxX / maxY;
+        let ratio = max_x / max_y;
         let output_ratio = output_dim.0 as f64 / output_dim.1 as f64;
 
-        let mut fX = 0.0;
-        let mut fY = 0.0;
-        if maxX / output_ratio < maxY {
-            window_width = maxX;
-            window_height = maxX / output_ratio;
-            fX = mleft + window_width / 2.0;
-            fY = self.calib_dimension.1 as f64 / 2.0;
-            if fY + window_height / 2.0 > mbottom {
-                fY = mbottom - window_height / 2.0;
-            } else if fY - window_height / 2.0 < mtop {
-                fY = mtop + window_height / 2.0;
+        if max_x / output_ratio < max_y {
+            window_width = max_x;
+            window_height = max_x / output_ratio;
+            let mut f_x = mleft + window_width / 2.0;
+            let mut f_y = self.calib_dimension.1 as f64 / 2.0;
+            if f_y + window_height / 2.0 > mbottom {
+                f_y = mbottom - window_height / 2.0;
+            } else if f_y - window_height / 2.0 < mtop {
+                f_y = mtop + window_height / 2.0;
             }
+            Point2D(f_x, f_y)
         } else {
-            window_height = maxY;
-            window_width = maxY * output_ratio;
-            fY = mtop + window_height / 2.0;
-            fX = self.calib_dimension.0 as f64 / 2.0;
-            if fX + window_width / 2.0 > mright {
-                fX = mright - window_width / 2.0;
-            } else if fX - window_width / 2.0 < mleft {
-                fX = mleft + window_width / 2.0;
+            window_height = max_y;
+            window_width = max_y * output_ratio;
+            let mut f_y = mtop + window_height / 2.0;
+            let mut f_x = self.calib_dimension.0 as f64 / 2.0;
+            if f_x + window_width / 2.0 > mright {
+                f_x = mright - window_width / 2.0;
+            } else if f_x - window_width / 2.0 < mleft {
+                f_x = mleft + window_width / 2.0;
             }
+            Point2D(f_x, f_y)
         }
-        Point2D(fX, fY) //, window_width, window_height)
     }*/
+}
+
+fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {
+    a.windows(window).map(|window| {
+        window.iter().copied().reduce(f64::min).unwrap()
+    }).collect()
 }
 
 fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
@@ -246,6 +238,12 @@ fn gaussian_window(m: usize, std: f64) -> Vec<f64> {
     let n: Vec<f64> = (0..m).map(|i| (i as f64 * step) - (m as f64 - 1.0) / 2.0).collect();
     let sig2 = 2.0 * std * std;
     n.iter().map(|v| (-*v).powf(2.0) / sig2).collect()
+}
+fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
+    let mut w = gaussian_window(m, std);
+    let sum: f64 = w.iter().sum();
+    w.iter_mut().for_each(|v| *v /= sum);
+    w
 }
 
 fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {

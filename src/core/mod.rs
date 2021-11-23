@@ -234,6 +234,7 @@ impl StabilizationManager {
             fps:         self.fps,
             gyro:        self.gyro.clone(),
             fov:         self.fov,
+            fovs:        self.fovs.clone(),
             background:  self.background,
             lens:        self.lens.clone(),
             ..Default::default()
