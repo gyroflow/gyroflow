@@ -101,7 +101,7 @@ MenuItem {
             text: qsTr("Smoothing window");
             Slider {
                 id: adaptiveZoom;
-                value: 2;
+                value: 4;
                 to: 15;
                 unit: "s";
                 width: parent.width;

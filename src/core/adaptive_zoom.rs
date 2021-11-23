@@ -1,9 +1,5 @@
-use enterpolation::{ Curve, Merge };
-use enterpolation::bspline::BSpline;
-
-use crate::core::StabilizationManager;
-use crate::core::Undistortion as Undistortion;
-type Quat64 = nalgebra::UnitQuaternion<f64>;
+use enterpolation::{ Curve, Merge, bspline::BSpline };
+use crate::core::{ StabilizationManager, Undistortion, Quat64 };
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f64, f64);
@@ -108,13 +104,13 @@ impl AdaptiveZoom {
         1.0 / fcorr.max(fcorr_i)
     }
     
-    pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, smoothing_focus: Option<f64>, tstart: Option<f64>, tend: Option<f64>) -> Vec<(f64, Point2D)> { // Vec<fovValues, focalCenters>
+    pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, smoothing_focus: Option<f64>, tstart: Option<f64>, tend: Option<f64>) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
         let smoothing_focus = smoothing_focus.unwrap_or(2.0);
         // if smoothing_focus == -1: Totally disable
         // if smoothing_focus == -2: Find minimum sufficient crop
 
-        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|&q| self.bounding_polygon(q, 9)).collect();
-        // let focus_windows: Vec<Point2D> = boundaryBoxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
+        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9)).collect();
+        // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
         let crop_center_positions: Vec<Point2D> = quaternions.iter().map(|_| Point2D(self.calib_dimension.0 / 2.0, self.calib_dimension.1 / 2.0)).collect();
@@ -130,7 +126,11 @@ impl AdaptiveZoom {
         //         convolve(&focus_windows_pad.map(|v| v.1).collect(), &gaussian).iter()
         //     ).map(|v| Point2D(v.0, v.1)).collect()
         // }
-        let mut fov_values: Vec<f64> = crop_center_positions.iter().zip(boundary_polygons.iter()).map(|(&center, polygon)| self.find_fov(center, polygon, output_dim)).collect();
+        let mut fov_values: Vec<f64> = crop_center_positions.iter()
+                                                            .zip(boundary_polygons.iter())
+                                                            .map(|(&center, polygon)| 
+                                                                self.find_fov(center, polygon, output_dim)
+                                                            ).collect();
 
         if tstart.is_some() || tend.is_some() {
             // Only within render range.
@@ -164,7 +164,7 @@ impl AdaptiveZoom {
         fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
     }
 
-    fn bounding_polygon(&self, quat: nalgebra::UnitQuaternion<f64>, num_points: usize) -> Vec<Point2D> {
+    fn bounding_polygon(&self, quat: &nalgebra::UnitQuaternion<f64>, num_points: usize) -> Vec<Point2D> {
         let (w, h) = (self.calib_dimension.0, self.calib_dimension.1);
 
         let mut r = *quat.to_rotation_matrix().matrix();
@@ -237,7 +237,7 @@ fn gaussian_window(m: usize, std: f64) -> Vec<f64> {
     let step = 1.0 / m as f64;
     let n: Vec<f64> = (0..m).map(|i| (i as f64 * step) - (m as f64 - 1.0) / 2.0).collect();
     let sig2 = 2.0 * std * std;
-    n.iter().map(|v| (-*v).powf(2.0) / sig2).collect()
+    n.iter().map(|&v| (-v).powf(2.0) / sig2).collect()
 }
 fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
     let mut w = gaussian_window(m, std);

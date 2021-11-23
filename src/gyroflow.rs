@@ -26,9 +26,9 @@ use ui::theme::Theme;
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
 // - Add font using QFontDatabase
+// - adaptive zoom: -1 and -2 modes
 
 // TODO: more smoothing algorithms
-// TODO: adaptive zoom: -1 and -2 modes
 
 // TODO: exporting and loading .gyroflow
 // TODO: output size and correctly fit the undistortion in it
@@ -38,6 +38,9 @@ use ui::theme::Theme;
 // TODO: Calibrator
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)
 // TODO: -- Save camera model with calibration and later load lens profile automatically
+// TODO: -- Save frame readout time
+// TODO: -- Save lens parameters (gopro: linear, wide, narrow), sony: lens model and zoom position
+// TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
 // TODO: languages
 // TODO: something is wrong with Complementary integrator
