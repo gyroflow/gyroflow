@@ -51,8 +51,15 @@ Item {
             }
         }
         function onChart_data_changed() {
-            controller.update_chart(timeline.getChart());
+            chartUpdateTimer.start();
         }
+    }
+    Timer {
+        id: chartUpdateTimer;
+        repeat: false;
+        running: false;
+        interval: 100;
+        onTriggered: controller.update_chart(timeline.getChart());
     }
 
     Item {

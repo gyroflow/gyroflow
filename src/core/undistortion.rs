@@ -31,38 +31,41 @@ impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let camera_matrix = Matrix3::from_row_slice(&mgr.camera_matrix_or_default());
 
-        let distortion_coeffs = if mgr.lens.distortion_coeffs.len() >= 4 {
+        let params = mgr.params.read();
+        let lens = mgr.lens.read();
+
+        let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 {
             [
-                mgr.lens.distortion_coeffs[0] as f32, 
-                mgr.lens.distortion_coeffs[1] as f32, 
-                mgr.lens.distortion_coeffs[2] as f32, 
-                mgr.lens.distortion_coeffs[3] as f32
+                lens.distortion_coeffs[0] as f32, 
+                lens.distortion_coeffs[1] as f32, 
+                lens.distortion_coeffs[2] as f32, 
+                lens.distortion_coeffs[3] as f32
             ]
         } else {
             [0.0, 0.0, 0.0, 0.0]
         };
-        let (calib_width, calib_height) = if mgr.lens.calib_dimension.0 > 0.0 && mgr.lens.calib_dimension.1 > 0.0 {
-            mgr.lens.calib_dimension
+        let (calib_width, calib_height) = if lens.calib_dimension.0 > 0.0 && lens.calib_dimension.1 > 0.0 {
+            lens.calib_dimension
         } else {
-            (mgr.size.0 as f64, mgr.size.1 as f64)
+            (params.size.0 as f64, params.size.1 as f64)
         };
 
         Self {
-            gyro: mgr.gyro.clone(), // TODO: maybe not clone?
+            gyro: mgr.gyro.read().clone(), // TODO: maybe not clone?
 
-            frame_count: mgr.frame_count,
-            fps: mgr.fps,
-            fov_scale: mgr.fov / (mgr.size.0 as f64 / calib_width),
-            fovs: mgr.fovs.clone(),
-            width: mgr.size.0,
-            height: mgr.size.1,
+            frame_count: params.frame_count,
+            fps: params.fps,
+            fov_scale: params.fov / (params.size.0 as f64 / calib_width),
+            fovs: params.fovs.clone(),
+            width: params.size.0,
+            height: params.size.1,
             calib_width,
             calib_height,
             camera_matrix,
             distortion_coeffs,
-            frame_readout_time: mgr.frame_readout_time,
-            trim_start_frame: (mgr.trim_start * mgr.frame_count as f64).floor() as usize,
-            trim_end_frame: (mgr.trim_end * mgr.frame_count as f64).ceil() as usize,
+            frame_readout_time: params.frame_readout_time,
+            trim_start_frame: (params.trim_start * params.frame_count as f64).floor() as usize,
+            trim_end_frame: (params.trim_end * params.frame_count as f64).ceil() as usize,
         }
     }
 }
@@ -171,6 +174,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
             return Ok(Vec::new());
         }
 
+        assert!(params.frame_count > 0);
         assert!(params.width > 0);
         assert!(params.height > 0);
         assert!(params.calib_width > 0.0);
@@ -182,9 +186,11 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         //dbg!(frame_middle);
 
         let mut vec = Vec::with_capacity(params.frame_count);
+        let start_frame = (params.trim_start_frame as i32 - 120).max(0) as usize;
+        let end_frame = (params.trim_end_frame as i32 + 120) as usize;
         for i in 0..params.frame_count {
             if current_compute_id.load(Relaxed) != compute_id { return Err(()); }
-            if i >= params.trim_start_frame && i <= params.trim_end_frame {
+            if i >= start_frame && i <= end_frame {
                 vec.push(FrameTransform::at_timestamp(params, (i as f64 + frame_middle) * 1000.0 / params.fps, i));
             } else {
                 vec.push(FrameTransform::default());
@@ -198,20 +204,20 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         let a = std::sync::atomic::AtomicU64::new(0);
         self.stab_data = Self::calculate_stab_data(params, &a, 0).unwrap();
 
-        println!("Computed in {:.3}ms", _time.elapsed().as_micros() as f64 / 1000.0);
+        println!("Computed in {:.3}ms, len: {}", _time.elapsed().as_micros() as f64 / 1000.0, self.stab_data.len());
     }
-    pub fn init_size(&mut self, bg: Vector4<f32>, params: &ComputeParams, stride: usize) {
+    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize) {
         self.background = bg;
 
-        //self.wgpu = wgpu::WgpuWrapper::new(params.width, params.height, self.background);
+        //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1, self.background);
         #[cfg(feature = "opencl")]
         {
-            self.cl = Some(opencl::OclWrapper::new(params.width, params.height, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
+            self.cl = Some(opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
         }
 
-        self.size = (params.width, params.height, stride);
+        self.size = (size.0, size.1, stride);
 
-        self.recompute(params);
+        //self.recompute(params);
     }
 
     pub fn set_background(&mut self, bg: Vector4<f32>) {
@@ -495,3 +501,7 @@ impl FloatPixel for () {
     #[inline] fn from_rgb_color(_: Vector4<f32>, _: &[usize]) -> Vector4<f32> { Vector4::new(0.0, 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("", "", "", "") }
 }
+
+
+unsafe impl<T: Default + Copy + Send + Sync + FloatPixel> Send for Undistortion<T> { }
+unsafe impl<T: Default + Copy + Send + Sync + FloatPixel> Sync for Undistortion<T> { }

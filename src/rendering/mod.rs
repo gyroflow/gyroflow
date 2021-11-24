@@ -37,7 +37,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> 
     }
 }
 
-pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
+pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -45,13 +45,16 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
     // decoders: h264 h264_qsv h264_cuvid / encoders: libx264 h264_amf h264_nvenc h264_qsv
     // decoders: hevc hevc_qsv hevc_cuvid / encoders: libx265 hevc_amf hevc_nvenc hevc_qsv
     
+    let params = stab.params.read();
     let trim_ratio = trim_end - trim_start;
-    let total_frame_count = stab.frame_count;
+    let total_frame_count = params.frame_count;
 
-    let duration_ms = stab.duration_ms;
+    let duration_ms = params.duration_ms;
 
-    let render_duration = stab.duration_ms * trim_ratio;
+    let render_duration = params.duration_ms * trim_ratio;
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
+
+    drop(params);
 
     let mut proc = FfmpegProcessor::from_file(&video_path, use_gpu).unwrap();
 
@@ -60,8 +63,8 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
     proc.gpu_encoding = use_gpu;
     dbg!(&proc.video_codec);
 
-    if trim_start > 0.0 { proc.start_ms = Some((trim_start * stab.duration_ms) as usize); }
-    if trim_end   < 1.0 { proc.end_ms   = Some((trim_end   * stab.duration_ms) as usize); }
+    if trim_start > 0.0 { proc.start_ms = Some((trim_start * duration_ms) as usize); }
+    if trim_end   < 1.0 { proc.end_ms   = Some((trim_end   * duration_ms) as usize); }
 
     //proc.video.codec_options.set("preset", "medium");
 
@@ -81,9 +84,14 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
         macro_rules! create_planes_proc {
             ($planes:ident, $(($t:tt, $w:expr, $h:expr, $s:expr, $yuvi:expr), )*) => {
                 $({
+                    let bg = {
+                        let mut params = stab.params.write();
+                        params.size = ($w as usize, $h as usize);
+                        params.background
+                    };
                     let mut plane = Undistortion::<$t>::default();
-                    stab.size = ($w as usize, $h as usize);
-                    plane.init_size(<$t as FloatPixel>::from_rgb_color(stab.background, &$yuvi), &ComputeParams::from_manager(&stab), ($s / $t::COUNT) as usize);
+                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), ($w as usize, $h as usize), ($s / $t::COUNT) as usize);
+                    plane.recompute(&ComputeParams::from_manager(&stab));
                     $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize| {
                         s /= $t::COUNT;
                         let processed = plane.process_pixels(frame_id, w, h, s, bytemuck::cast_slice_mut(buffer));
@@ -180,7 +188,7 @@ pub fn render<F>(mut stab: StabilizationManager, progress: F, video_path: String
 
     progress((1.0, render_frame_count, render_frame_count));
 }
-
+/*
 pub fn test() {
     dbg!(FfmpegProcessor::supported_gpu_backends());
 
@@ -201,7 +209,7 @@ pub fn test() {
     stab.frame_readout_time = 8.9;
     stab.fov = 1.0;
     stab.background = nalgebra::Vector4::new(0.0, 0.0, 0.0, 0.0);
-    stab.recompute();
+    stab.recompute_blocking();
 
     render(
         stab, 
@@ -243,3 +251,4 @@ pub fn test_decode() {
         (11000, 999999)
     ], Arc::new(AtomicBool::new(false)));
 }
+*/

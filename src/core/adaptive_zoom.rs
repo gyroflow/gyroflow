@@ -26,8 +26,13 @@ pub enum Mode {
 
 impl AdaptiveZoom {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
-        let calib_dimension = if mgr.lens.calib_dimension.0 > 0.0 { mgr.lens.calib_dimension } else { (mgr.video_size.0 as f64, mgr.video_size.1 as f64) };
-        let distortion_coeffs = if mgr.lens.distortion_coeffs.len() >= 4 { mgr.lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
+        let lens = mgr.lens.read();
+        let params = mgr.params.read();
+
+        let calib_dimension = if lens.calib_dimension.0 > 0.0 { lens.calib_dimension } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
+        let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 { lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
+        drop(lens);
+        drop(params);
         Self {
             calib_dimension,
             camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),

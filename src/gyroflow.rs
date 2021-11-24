@@ -18,7 +18,6 @@ use ui::theme::Theme;
 // Things to do before first public preview:
 // - Move thread pool to core
 // - Separate controller into multiple files and clean it up
-// - Fix mutex locking for too long
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - UI fixes, editing offset, double animations etc
@@ -102,7 +101,7 @@ pub fn entry() {
     engine.set_property("lensProfilesList".into(), QVariant::from(lens_profiles));
 
     // Get smoothing algorithms
-    let algorithms: QVariantList = get_smoothing_algorithms().into_iter().map(|x| QString::from(x.get_name())).collect();
+    let algorithms: QVariantList = ctl.borrow().stabilizer.smoothing.read().get_names().into_iter().map(QString::from).collect();
     engine.set_property("smoothingAlgorithms".into(), QVariant::from(algorithms));
 
     let engine_ptr = engine.cpp_ptr();

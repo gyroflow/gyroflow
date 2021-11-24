@@ -18,23 +18,6 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
                 }
             }).collect();
 
-            let gyro_max = gyro_item.iter().flat_map(|x| x.gyro.as_ref().unwrap().iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
-            let of_max = of_item.iter().flat_map(|x| x.gyro.as_ref().unwrap().iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
-            for x in of_item.iter_mut() {
-                if let Some(g) = x.gyro.as_mut() {
-                    g[0] /= of_max;
-                    g[1] /= of_max;
-                    g[2] /= of_max;
-                }
-            }
-            for x in gyro_item.iter_mut() {
-                if let Some(g) = x.gyro.as_mut() {
-                    g[0] /= gyro_max;
-                    g[1] /= gyro_max;
-                    g[2] /= gyro_max;
-                }
-            }
-
             let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
             let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
             let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);

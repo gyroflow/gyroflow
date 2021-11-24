@@ -69,26 +69,6 @@ MenuItem {
         visible: children.length > 0;
     }
 
-    CheckBoxWithContent {
-        id: shutterCb;
-        text: qsTr("Rolling shutter correction");
-        cb.onCheckedChanged: {
-            controller.frame_readout_time = cb.checked? shutter.value : 0.0;
-        }
-
-        Label {
-            text: qsTr("Frame readout time");
-            Slider {
-                id: shutter;
-                from: -to;
-                to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
-                width: parent.width;
-                unit: "ms";
-                onValueChanged: controller.frame_readout_time = value;
-            }
-        }
-    }
-    
     ComboBox {
         id: croppingMode;
         font.pixelSize: 12 * dpiScale;
@@ -115,4 +95,29 @@ MenuItem {
             onValueChanged: controller.adaptive_zoom = value;
         }
     }
+
+    CheckBoxWithContent {
+        id: shutterCb;
+        text: qsTr("Rolling shutter correction");
+        cb.onCheckedChanged: {
+            controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+        }
+
+        Label {
+            text: qsTr("Frame readout time");
+            Slider {
+                id: shutter;
+                to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
+                width: parent.width;
+                unit: "ms";
+                onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
+            }
+        }
+        CheckBox {
+            id: bottomToTop;
+            text: qsTr("Bottom to top");
+            onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+        }
+    }
+    
 }

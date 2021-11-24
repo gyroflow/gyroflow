@@ -1,6 +1,8 @@
 use nalgebra::*;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
+use std::fs::File;
+use std::path::Path;
 use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
@@ -13,6 +15,10 @@ pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 
 #[derive(Default)]
 pub struct FileMetadata {
+    pub imu_orientation: Option<String>,
+    pub raw_imu:  Option<Vec<TimeIMU>>,
+    pub quaternions:  Option<TimeQuat>,
+    pub detected_source: Option<String>,
     pub frame_readout_time: Option<f64>
 }
 
@@ -44,31 +50,19 @@ pub struct GyroSource {
 }
 
 impl GyroSource {
-    pub fn load_from_file(&mut self, path: &str) -> Result<FileMetadata> {
-        self.quaternions.clear();
-        self.org_quaternions.clear();
-        self.smoothed_quaternions.clear();
-        self.org_smoothed_quaternions.clear();
-        self.offsets.clear();
-        self.raw_imu.clear();
-        self.org_raw_imu.clear();
-        self.detected_source = None;
-
-        assert!(self.duration_ms > 0.0);
-        assert!(self.fps > 0.0);
-        
-        let mut stream = std::fs::File::open(path)?;
+    pub fn parse_telemetry_file(path: &str) -> Result<FileMetadata> {
+        let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
     
-        let filename = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
+        let filename = Path::new(&path).file_name().unwrap().to_str().unwrap();
     
         let input = Input::from_stream(&mut stream, filesize, filename)?;
     
-        self.detected_source = Some({
-            let mut v = input.camera_type();
-            if let Some(m) = input.camera_model() { v.push(' '); v.push_str(m); }
-            v
-        });
+        let mut detected_source = input.camera_type();
+        if let Some(m) = input.camera_model() { detected_source.push(' '); detected_source.push_str(m); }
+
+        let mut imu_orientation = None;
+        let mut quaternions = None;
 
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
@@ -91,28 +85,54 @@ impl GyroSource {
                             None => "XYZ".into()
                         };
                         io = input.normalize_imu_orientation(io);
-                        self.org_imu_orientation = Some(io);
-                        self.imu_orientation = self.org_imu_orientation.clone();
+                        imu_orientation = Some(io);
                     }
                 }
             }
             if !quats.is_empty() {
-                self.quaternions = quats;
-                self.org_quaternions = self.quaternions.clone();
+                quaternions = Some(quats);
             }
         }
 
-        // Always load raw IMU data
-        self.raw_imu = util::normalized_imu(&input, None)?;
-        self.org_raw_imu = self.raw_imu.clone();
+        let raw_imu = util::normalized_imu(&input, None).ok();
+
+        Ok(FileMetadata {
+            imu_orientation,
+            detected_source: Some(detected_source),
+            quaternions,
+            raw_imu,
+            frame_readout_time: telemetry_parser::util::frame_readout_time(&input)
+        })
+    }
+
+    pub fn load_from_telemetry(&mut self, telemetry: &FileMetadata) {
+        assert!(self.duration_ms > 0.0);
+        assert!(self.fps > 0.0);
+
+        self.quaternions.clear();
+        self.org_quaternions.clear();
+        self.smoothed_quaternions.clear();
+        self.org_smoothed_quaternions.clear();
+        self.offsets.clear();
+        self.raw_imu.clear();
+        self.org_raw_imu.clear();
+
+        self.imu_orientation = telemetry.imu_orientation.clone();
+        self.org_imu_orientation = self.imu_orientation.clone();
+        self.detected_source = telemetry.detected_source.clone();
+
+        if let Some(imu) = &telemetry.raw_imu {
+            self.raw_imu = imu.clone();
+            self.org_raw_imu = self.raw_imu.clone();
+        }
+        if let Some(quats) = &telemetry.quaternions {
+            self.quaternions = quats.clone();
+            self.org_quaternions = self.quaternions.clone();
+        }
 
         if self.quaternions.is_empty() {
             self.integrate();
         }
-    
-        Ok(FileMetadata {
-            frame_readout_time: telemetry_parser::util::frame_readout_time(&input)
-        })
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
@@ -134,6 +154,17 @@ impl GyroSource {
             }
         }
     }
+
+    pub fn recompute_smoothness(&mut self, alg: &dyn crate::SmoothingAlgorithm, duration_ms: f64) {
+        self.smoothed_quaternions = alg.smooth(&self.quaternions, duration_ms);
+        self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
+
+        for (sq, q) in self.smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {
+            // rotation quaternion from smooth motion -> raw motion to counteract it
+            *sq.1 = sq.1.inverse() * q.1;
+        }
+    }
+
     pub fn remove_offset(&mut self, timestamp_us: i64) {
         self.offsets.remove(&timestamp_us);
     }

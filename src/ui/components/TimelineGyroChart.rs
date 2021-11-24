@@ -125,20 +125,22 @@ impl TimelineGyroChart {
         }
     }
 
-    pub fn setSyncResults(&mut self, data: &[TimeIMU], fps: f64) {
-        self.sync_results = Vec::with_capacity(data.len());
+    pub fn setSyncResults(&mut self, data: &[TimeIMU]) {
+        if self.viewMode == 0 {
+            self.sync_results = Vec::with_capacity(data.len());
 
-        for x in data {
-            if let Some(g) = x.gyro.as_ref() {
-                self.sync_results.push(ChartData {
-                    timestamp_us: (x.timestamp_ms * 1000.0) as i64,
-                    values: [g[0], g[1], g[2], 0.0]
-                });
+            for x in data {
+                if let Some(g) = x.gyro.as_ref() {
+                    self.sync_results.push(ChartData {
+                        timestamp_us: (x.timestamp_ms * 1000.0) as i64,
+                        values: [g[0], g[1], g[2], 0.0]
+                    });
+                }
             }
-        }
-        Self::normalize_height(&mut self.sync_results, self.gyro_max.map(|x| x / fps)); 
+            Self::normalize_height(&mut self.sync_results, self.gyro_max);
 
-        self.update_data();
+            self.update_data();
+        }
     }
 
     pub fn setFromGyroSource(&mut self, gyro: &GyroSource) {
@@ -148,41 +150,51 @@ impl TimelineGyroChart {
         self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
 
         for x in &gyro.raw_imu {
-            if let Some(g) = x.gyro.as_ref() {
-                self.gyro.push(ChartData {
-                    timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                    values: [g[0], g[1], g[2], 0.0]
-                });
+            if self.viewMode == 0 {
+                if let Some(g) = x.gyro.as_ref() {
+                    self.gyro.push(ChartData {
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        values: [g[0], g[1], g[2], 0.0]
+                    });
+                }
             }
-            if let Some(a) = x.accl.as_ref() {
-                self.accl.push(ChartData {
-                    timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                    values: [a[0], a[1], a[2], 0.0]
-                });
+            if self.viewMode == 1 {
+                if let Some(a) = x.accl.as_ref() {
+                    self.accl.push(ChartData {
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        values: [a[0], a[1], a[2], 0.0]
+                    });
+                }
             }
         }
 
-        let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
-            for x in quats {
-                let mut ts = *x.0 as f64 / 1000.0;
-                ts += gyro.offset_at_timestamp(ts);
-    
-                let q = x.1.quaternion().as_vector();
+        if self.viewMode == 2 {
+            let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
+                for x in quats {
+                    let mut ts = *x.0 as f64 / 1000.0;
+                    ts += gyro.offset_at_timestamp(ts);
+        
+                    let q = x.1.quaternion().as_vector();
 
-                out_quats.push(ChartData {
-                    timestamp_us: (ts * 1000.0) as i64,
-                    values: [q[0], q[1], q[2], q[3]]
-                });
-            }
-        };
-        add_quats(&gyro.quaternions, &mut self.quats);
-        add_quats(&gyro.org_smoothed_quaternions, &mut self.smoothed_quats);
+                    out_quats.push(ChartData {
+                        timestamp_us: (ts * 1000.0) as i64,
+                        values: [q[0], q[1], q[2], q[3]]
+                    });
+                }
+            };
+            add_quats(&gyro.quaternions, &mut self.quats);
+            add_quats(&gyro.org_smoothed_quaternions, &mut self.smoothed_quats);
+        }
 
-        self.gyro_max = Self::normalize_height(&mut self.gyro, None);
-        Self::normalize_height(&mut self.accl, None);
-        let qmax = Self::normalize_height(&mut self.quats, None);
-        Self::normalize_height(&mut self.smoothed_quats, qmax);
-
+        match self.viewMode {
+            0 => { self.gyro_max = Self::normalize_height(&mut self.gyro, None); },
+            1 => { Self::normalize_height(&mut self.accl, None); },
+            2 => {
+                let qmax = Self::normalize_height(&mut self.quats, None);
+                Self::normalize_height(&mut self.smoothed_quats, qmax);
+            },
+            _ => { }
+        }
         self.update_data();
     }
     fn get_serie_vector(vec: &[ChartData], i: usize) -> BTreeMap<i64, f64> {

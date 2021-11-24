@@ -47,6 +47,7 @@ impl PoseEstimator {
     }
     pub fn clear(&self) {
         self.sync_results.write().clear();
+        self.estimated_gyro.write().clear();
         let _ = opencv::init();
     }
 
@@ -125,7 +126,7 @@ impl PoseEstimator {
                     let mut l = results.write(); 
                     let mut x = l.get_mut(frame).unwrap();
                     x.rotation = Some(rot);
-                    let rotvec = rot.scaled_axis();
+                    let rotvec = rot.scaled_axis() * fps;
                     x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                 }
             }
@@ -175,7 +176,7 @@ impl PoseEstimator {
         self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
     }
 
-    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, _fps: f64, final_pass: bool) {
+    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, fps: f64, final_pass: bool) {
         let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut is_akaze = false;
         for v in self.sync_results.read().values() {
@@ -265,8 +266,6 @@ impl PoseEstimator {
             }
         }
 
-        self.get_ranges();
-
         *self.estimated_gyro.write() = vec;
     }
 
@@ -289,7 +288,7 @@ impl PoseEstimator {
         ranges
     }
 
-    pub fn find_offsets(&self, initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset::find_offsets(&self.get_ranges(), &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
+    pub fn find_offsets(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset::find_offsets(&ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
     }
 }

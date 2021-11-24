@@ -40,6 +40,7 @@ MenuItem {
             onCurrentIndexChanged: {
                 const chart = window.videoArea.timeline.getChart();
                 chart.viewMode = currentIndex;
+                controller.update_chart(chart);
             }
         }
     }
