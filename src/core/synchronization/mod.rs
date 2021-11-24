@@ -125,7 +125,8 @@ impl PoseEstimator {
                     let mut l = results.write(); 
                     let mut x = l.get_mut(frame).unwrap();
                     x.rotation = Some(rot);
-                    x.euler = Some(rot.euler_angles());
+                    let rotvec = rot.scaled_axis();
+                    x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                 }
             }
         });

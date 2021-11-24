@@ -81,7 +81,6 @@ impl TimelineGyroChart {
                 let resolution = rect.width * 10.0;
                 let mut range = serie.data.range(from_timestamp..=to_timestamp);
                 let num_samples = range.clone().count();
-                let time_per_pixel = ((to_timestamp - from_timestamp) / resolution as i64).max(1);
                 
                 serie.lines.clear();
                 if num_samples > 1 {
@@ -93,11 +92,11 @@ impl TimelineGyroChart {
                         });
                         let step = (num_samples / resolution as usize).max(1);
                         for data in range.step_by(step) {
-                            let point = QPointF { 
+                            let point = QPointF {
                                 x: map_to_visible_area((*data.0 as f64 / 1000.0) / self.duration_ms) * rect.width, 
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
-                            if *data.0 - prev_point.0 > 100_000 { // if more than 100 ms difference
+                            if *data.0 - prev_point.0 > 100_000 { // if more than 100 ms difference, create a new line
                                 serie.lines.push(line);
                                 line = Vec::new();
                             } else {
@@ -126,7 +125,7 @@ impl TimelineGyroChart {
         }
     }
 
-    pub fn setSyncResults(&mut self, data: &[TimeIMU]) {
+    pub fn setSyncResults(&mut self, data: &[TimeIMU], fps: f64) {
         self.sync_results = Vec::with_capacity(data.len());
 
         for x in data {
@@ -137,7 +136,7 @@ impl TimelineGyroChart {
                 });
             }
         }
-        Self::normalize_height(&mut self.sync_results, self.gyro_max.map(|x| x / (180.0 / std::f64::consts::PI))); // TODO this max calculation here is wrong
+        Self::normalize_height(&mut self.sync_results, self.gyro_max.map(|x| x / fps)); 
 
         self.update_data();
     }

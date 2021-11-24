@@ -325,7 +325,7 @@ impl Controller {
             
             let stab = self.stabilizer.read();
             stab.pose_estimator.recalculate_gyro_data(stab.frame_count, stab.duration_ms, stab.fps, false);
-            chart.setSyncResults(&*stab.pose_estimator.estimated_gyro.read());
+            chart.setSyncResults(&*stab.pose_estimator.estimated_gyro.read(), stab.fps);
 
             chart.setFromGyroSource(&stab.gyro);
         }
