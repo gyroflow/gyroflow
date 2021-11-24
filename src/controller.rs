@@ -39,7 +39,7 @@ pub struct Controller {
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
-    start_autosync: qt_method!(fn(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, player: QJSValue)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32)), // QString is workaround for now
     update_chart: qt_method!(fn(&mut self, chart: QJSValue)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
@@ -69,6 +69,7 @@ pub struct Controller {
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
 
     lens_loaded: qt_property!(bool; NOTIFY lens_changed),
+    set_lens_param: qt_method!(fn(&mut self, param: QString, value: f64)),
     lens_changed: qt_signal!(),
 
     gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
@@ -165,163 +166,157 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, player: QJSValue) {
-        if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
-            let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-
-            let frame_count = vid.frameCount;
-            let fps = vid.frameRate;
-            let method = self.sync_method;
-
-            self.sync_in_progress = true;
-            self.sync_in_progress_changed();
-            
-            {
-                let stab = self.stabilizer.read(); 
-                let duration_ms = stab.duration_ms;
-                let ranges: Vec<(usize, usize)> = timestamps_fract.to_string().split(';').map(|x| {
-                    let x = x.parse::<f64>().unwrap();
-                    let range = (
-                        ((x * duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
-                        ((x * duration_ms) + (sync_duration_ms / 2.0)).min(duration_ms)
-                    );
-                    (range.0 as usize, range.1 as usize)
-                }).collect();
-
-                let frame_ranges: Vec<(usize, usize)> = ranges.iter().map(|(from, to)| (stab.frame_at_timestamp(*from as f64), stab.frame_at_timestamp(*to as f64))).collect();
-                dbg!(&frame_ranges);
-                let mut frame_status = HashMap::<usize, bool>::new();
-                for x in &frame_ranges {
-                    for frame in x.0..x.1-1 {
-                        frame_status.insert(frame, false);
-                    }
-                }
-                let frame_status = Arc::new(RwLock::new(frame_status));
-
-                let estimator = stab.pose_estimator.clone();
-                 
-                let mut img_ratio = stab.lens.calib_dimension.0 / vid.surfaceWidth as f64;
-                if img_ratio < 0.1 || !img_ratio.is_finite() {
-                    img_ratio = 1.0;
-                }
-                let mtrx = stab.camera_matrix_or_default();
-                estimator.set_lens_params(
-                    Vector2::new(mtrx[0] / img_ratio, mtrx[4] / img_ratio),
-                    Vector2::new(mtrx[2] / img_ratio, mtrx[5] / img_ratio)
-                );
-                estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
-                let stab_clone = self.stabilizer.clone();
-                drop(stab);
-
-                let qptr = QPointer::from(&*self);
-                let frame_status2 = frame_status.clone();
-                let progress = Arc::new(qmetaobject::queued_callback(move |_| {
-                    if let Some(this) = qptr.as_pinned() {
-                        let l = frame_status2.read();
-                        let total = l.len();
-                        let ready = l.iter().filter(|e| *e.1).count();
-                        drop(l);
-
-                        let mut this = this.borrow_mut();
-                        this.sync_in_progress = ready < total;
-                        this.sync_in_progress_changed();
-                        this.chart_data_changed();
-                        this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
-                    }
-                }));
-                let qptr = QPointer::from(&*self);
-                let set_offsets = Arc::new(qmetaobject::queued_callback(move |offsets: Vec<(f64, f64, f64)>| {
-                    if let Some(this) = qptr.as_pinned() {
-                        let mut this = this.borrow_mut();
-                        {
-                            let mut stab = this.stabilizer.write();
-                            for x in offsets {
-                                println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                                stab.gyro.set_offset((x.0 * 1000.0) as i64, x.1);
-                            }
-                        }
-                        this.update_offset_model();
-                        this.recompute_threaded();
-                        this.chart_data_changed();
-                        this.sync_progress(1.0, QString::default());
-                        this.sync_in_progress = false;
-                        this.sync_in_progress_changed();
-                    }
-                }));
-
-                let total_read_frames = Arc::new(AtomicUsize::new(0));
-                let total_detected_frames = Arc::new(AtomicUsize::new(0));
-                
-                let video_path = Self::url_to_path(&QString::from(vid.url.clone()).to_string()).to_string();
-                let (sw, sh) = (vid.surfaceWidth, vid.surfaceHeight);
-
-                self.cancel_flag.store(false, SeqCst);
-                let cancel_flag = self.cancel_flag.clone();
-                let cancel_flag2 = self.cancel_flag.clone();
-                THREAD_POOL.spawn(move || {
-                    let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
-                    proc.on_frame(|timestamp_us, input_frame, converter| {
-                        let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
-
-                        if let Some(current_range) = frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
-                            if frame % every_nth_frame as i32 != 0 {
-                                // Don't analyze this frame
-                                frame_status.write().insert(frame as usize, true);
-                                estimator.insert_empty_result(frame as usize, method);
-                                return;
-                            }
-                            let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
-    
-                            let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
-    
-                            total_read_frames.fetch_add(1, SeqCst);
-                            println!("frame: {}, range: {}..{}", frame, current_range.0, current_range.1);
-
-                            let img = PoseEstimator::yuv_to_gray(width, height, pixels);
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) {
+        let method = self.sync_method;
+        self.sync_in_progress = true;
+        self.sync_in_progress_changed();
         
-                            let cancel_flag = cancel_flag2.clone();
-                            let estimator = estimator.clone();
-                            let progress = progress.clone();
-                            let frame_status = frame_status.clone();
-                            let total_detected_frames = total_detected_frames.clone();
-                            THREAD_POOL.spawn(move || {
-                                if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                                    total_detected_frames.fetch_add(1, SeqCst);
-                                    return;
-                                }
-                                estimator.detect_features(frame as usize, method, img);
-                                total_detected_frames.fetch_add(1, SeqCst);
+        let stab = self.stabilizer.read(); 
+        let frame_count = stab.frame_count;
+        let fps = stab.fps;
+    
+        let duration_ms = stab.duration_ms;
+        let ranges: Vec<(usize, usize)> = timestamps_fract.to_string().split(';').map(|x| {
+            let x = x.parse::<f64>().unwrap();
+            let range = (
+                ((x * duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
+                ((x * duration_ms) + (sync_duration_ms / 2.0)).min(duration_ms)
+            );
+            (range.0 as usize, range.1 as usize)
+        }).collect();
 
-                                if frame % 7 == 0 {
-                                    estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
-                                }
-
-                                let processed_frames = estimator.processed_frames(current_range.0..current_range.1);
-                                for x in processed_frames { frame_status.write().insert(x, true); }
-                                progress(());
-                            });
-                        }
-                    });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag) {
-                        eprintln!("ffmpeg error: {:?}", e);
-                    }
-
-                    while total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
-                        std::thread::sleep(Duration::from_millis(100));
-                    }
-                    println!("finished OF");
-                    estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
-                    estimator.recalculate_gyro_data(frame_count as usize, duration_ms, fps, true);
-
-                    for v in frame_status.write().values_mut() {
-                        *v = true;
-                    }
-                    progress(());
-                    let offsets = estimator.find_offsets(initial_offset, sync_search_size, &stab_clone.read().gyro);
-                    set_offsets(offsets);
-                });
+        let frame_ranges: Vec<(usize, usize)> = ranges.iter().map(|(from, to)| (stab.frame_at_timestamp(*from as f64), stab.frame_at_timestamp(*to as f64))).collect();
+        dbg!(&frame_ranges);
+        let mut frame_status = HashMap::<usize, bool>::new();
+        for x in &frame_ranges {
+            for frame in x.0..x.1-1 {
+                frame_status.insert(frame, false);
             }
         }
+        let frame_status = Arc::new(RwLock::new(frame_status));
+
+        let estimator = stab.pose_estimator.clone();
+         
+        let mut img_ratio = stab.lens.calib_dimension.0 / stab.size.0 as f64;
+        if img_ratio < 0.1 || !img_ratio.is_finite() {
+            img_ratio = 1.0;
+        }
+        let mtrx = stab.camera_matrix_or_default();
+        estimator.set_lens_params(
+            Vector2::new(mtrx[0] / img_ratio, mtrx[4] / img_ratio),
+            Vector2::new(mtrx[2] / img_ratio, mtrx[5] / img_ratio)
+        );
+        estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
+        let stab_clone = self.stabilizer.clone();
+        let (sw, sh) = (stab.size.0 as u32, stab.size.1 as u32);
+        drop(stab);
+
+        let qptr = QPointer::from(&*self);
+        let frame_status2 = frame_status.clone();
+        let progress = Arc::new(qmetaobject::queued_callback(move |_| {
+            if let Some(this) = qptr.as_pinned() {
+                let l = frame_status2.read();
+                let total = l.len();
+                let ready = l.iter().filter(|e| *e.1).count();
+                drop(l);
+
+                let mut this = this.borrow_mut();
+                this.sync_in_progress = ready < total;
+                this.sync_in_progress_changed();
+                this.chart_data_changed();
+                this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
+            }
+        }));
+        let qptr = QPointer::from(&*self);
+        let set_offsets = Arc::new(qmetaobject::queued_callback(move |offsets: Vec<(f64, f64, f64)>| {
+            if let Some(this) = qptr.as_pinned() {
+                let mut this = this.borrow_mut();
+                {
+                    let mut stab = this.stabilizer.write();
+                    for x in offsets {
+                        println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                        stab.gyro.set_offset((x.0 * 1000.0) as i64, x.1);
+                    }
+                }
+                this.update_offset_model();
+                this.recompute_threaded();
+                this.chart_data_changed();
+                this.sync_progress(1.0, QString::default());
+                this.sync_in_progress = false;
+                this.sync_in_progress_changed();
+            }
+        }));
+
+        let total_read_frames = Arc::new(AtomicUsize::new(0));
+        let total_detected_frames = Arc::new(AtomicUsize::new(0));
+        
+        let video_path = self.video_path.clone();
+
+        self.cancel_flag.store(false, SeqCst);
+        let cancel_flag = self.cancel_flag.clone();
+        let cancel_flag2 = self.cancel_flag.clone();
+        THREAD_POOL.spawn(move || {
+            let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
+            proc.on_frame(|timestamp_us, input_frame, converter| {
+                let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+
+                if let Some(current_range) = frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
+                    if frame % every_nth_frame as i32 != 0 {
+                        // Don't analyze this frame
+                        frame_status.write().insert(frame as usize, true);
+                        estimator.insert_empty_result(frame as usize, method);
+                        return;
+                    }
+                    let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
+    
+                    let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
+    
+                    total_read_frames.fetch_add(1, SeqCst);
+                    println!("frame: {}, range: {}..{}", frame, current_range.0, current_range.1);
+
+                    let img = PoseEstimator::yuv_to_gray(width, height, pixels);
+    
+                    let cancel_flag = cancel_flag2.clone();
+                    let estimator = estimator.clone();
+                    let progress = progress.clone();
+                    let frame_status = frame_status.clone();
+                    let total_detected_frames = total_detected_frames.clone();
+                    THREAD_POOL.spawn(move || {
+                        if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
+                            total_detected_frames.fetch_add(1, SeqCst);
+                            return;
+                        }
+                        estimator.detect_features(frame as usize, method, img);
+                        total_detected_frames.fetch_add(1, SeqCst);
+
+                        if frame % 7 == 0 {
+                            estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
+                        }
+
+                        let processed_frames = estimator.processed_frames(current_range.0..current_range.1);
+                        for x in processed_frames { frame_status.write().insert(x, true); }
+                        progress(());
+                    });
+                }
+            });
+            if let Err(e) = proc.start_decoder_only(ranges, cancel_flag) {
+                eprintln!("ffmpeg error: {:?}", e);
+            }
+
+            while total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
+                std::thread::sleep(Duration::from_millis(100));
+            }
+            println!("finished OF");
+            estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
+            estimator.recalculate_gyro_data(frame_count as usize, duration_ms, fps, true);
+
+            for v in frame_status.write().values_mut() {
+                *v = true;
+            }
+            progress(());
+            let offsets = estimator.find_offsets(initial_offset, sync_search_size, &stab_clone.read().gyro);
+            set_offsets(offsets);
+        });
     }
 
     fn update_chart(&mut self, chart: QJSValue) {
@@ -405,6 +400,23 @@ impl Controller {
         self.lens_loaded = true;
         self.lens_changed();
         self.lens_profile_loaded(info);
+        self.recompute_threaded();
+    }
+    fn set_lens_param(&mut self, param: QString, value: f64) {
+        {
+            let mut stab = self.stabilizer.write();
+            if stab.lens.distortion_coeffs.len() >= 4 && stab.lens.camera_matrix.len() >= 9 {
+                match param.to_string().as_str() {
+                    "fx" => stab.lens.camera_matrix[0] = value,
+                    "fy" => stab.lens.camera_matrix[4] = value,
+                    "k1" => stab.lens.distortion_coeffs[0] = value,
+                    "k2" => stab.lens.distortion_coeffs[1] = value,
+                    "k3" => stab.lens.distortion_coeffs[2] = value,
+                    "k4" => stab.lens.distortion_coeffs[3] = value,
+                    _ => { }
+                }
+            }
+        }
         self.recompute_threaded();
     }
     

@@ -238,9 +238,11 @@ impl PoseEstimator {
                     let frame = *k;
                     if frame < vec.len() {
                         // Swap X and Y
-                        vec[frame].gyro[0] = e.1 * 180.0 / std::f64::consts::PI;
-                        vec[frame].gyro[1] = e.0 * 180.0 / std::f64::consts::PI;
-                        vec[frame].gyro[2] = e.2 * 180.0 / std::f64::consts::PI;
+                        vec[frame].gyro = Some([
+                            e.1 * 180.0 / std::f64::consts::PI,
+                            e.0 * 180.0 / std::f64::consts::PI,
+                            e.2 * 180.0 / std::f64::consts::PI
+                        ]);
                     }
                 }
             }

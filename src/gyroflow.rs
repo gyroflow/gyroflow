@@ -25,7 +25,6 @@ use ui::theme::Theme;
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
-// - Add font using QFontDatabase
 
 // TODO: more smoothing algorithms
 
@@ -42,8 +41,6 @@ use ui::theme::Theme;
 // TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
 // TODO: languages
-// TODO: something is wrong with Complementary integrator
-// TODO: lens profile param adjustment
 // TODO: wgpu undistortion add support for different plane types
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode

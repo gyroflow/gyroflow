@@ -1,19 +1,21 @@
 
 #![allow(non_snake_case)]
 
+use std::collections::BTreeMap;
+
 use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
 
 #[derive(Default, Debug)]
 pub struct ChartData {
-    pub timestamp_percent: f64,
+    pub timestamp_us: i64,
     pub values: [f64; 4]
 }
 
 #[derive(Default)]
 struct Series {
-    data: Vec<(f64, f64)>, // timestamp, value
-    lines: Vec<QLineF>,
+    data: BTreeMap<i64, f64>, // timestamp, value
+    lines: Vec<Vec<QLineF>>,
     visible: bool,
 }
 
@@ -63,54 +65,47 @@ impl TimelineGyroChart {
         self.calculate_lines();
         (self as &dyn QQuickItem).update()
     }
-
     fn calculate_lines(&mut self) {
         let rect = (self as &dyn QQuickItem).bounding_rect();
         let half_height = rect.height / 2.0;
+        if rect.width <= 0.0 || rect.height <= 0.0 { return; }
 
         let map_to_visible_area = |v: f64| -> f64 { (v - self.visibleAreaLeft) / (self.visibleAreaRight - self.visibleAreaLeft) };
 
         for serie in &mut self.series  {
             if serie.visible && !serie.data.is_empty() {
-                let length = serie.data.len();
-
-                // TODO: take into account offset here, otherwise it picks the wrong range
-
-                let from_index = (self.visibleAreaLeft * length as f64).floor() as usize;
-                let mut to_index = (self.visibleAreaRight * (length - 1) as f64).ceil() as usize;
-                if from_index >= to_index { to_index = from_index + 1; }
+                let from_timestamp = ((self.visibleAreaLeft - 0.01) * self.duration_ms * 1000.0).floor() as i64;
+                let mut to_timestamp = ((self.visibleAreaRight + 0.01) * self.duration_ms * 1000.0).ceil() as i64;
+                if from_timestamp >= to_timestamp { to_timestamp = from_timestamp + 1; }
     
-                let visible_length = to_index - from_index;
-                let mut index_step = 1;
-                     if visible_length > 200000 { index_step = 32; }
-                else if visible_length > 100000 { index_step = 16; }
-                else if visible_length > 50000 { index_step = 8; }
-                else if visible_length > 20000 { index_step = 4; }
-                else if visible_length > 10000 { index_step = 2; }
-    
-                //let step = rect.width / (visible_length as f64 / index_step as f64);
-
+                let resolution = rect.width * 10.0;
+                let mut range = serie.data.range(from_timestamp..=to_timestamp);
+                let num_samples = range.clone().count();
+                let time_per_pixel = ((to_timestamp - from_timestamp) / resolution as i64).max(1);
+                
                 serie.lines.clear();
-                serie.lines.reserve(length);
-                if serie.data.len() > from_index {
-                    let data = serie.data[from_index];
-                    let mut prevPoint = QPointF {
-                        x: map_to_visible_area(data.0) * rect.width, 
-                        y: (1.0 - data.1 * self.vscale) * half_height
-                    };
-                    let mut i = from_index + 1;
-                    while i <= to_index {
-                        if serie.data.len() > i {
-                            let data = serie.data[i];
+                if num_samples > 1 {
+                    if let Some(first_item) = range.next() {
+                        let mut line = Vec::new();
+                        let mut prev_point = (*first_item.0, QPointF {
+                            x: map_to_visible_area((*first_item.0 as f64 / 1000.0) / self.duration_ms) * rect.width, 
+                            y: (1.0 - *first_item.1 * self.vscale) * half_height
+                        });
+                        let step = (num_samples / resolution as usize).max(1);
+                        for data in range.step_by(step) {
                             let point = QPointF { 
-                                x: map_to_visible_area(data.0) * rect.width, 
-                                y: (1.0 - data.1 * self.vscale) * half_height
+                                x: map_to_visible_area((*data.0 as f64 / 1000.0) / self.duration_ms) * rect.width, 
+                                y: (1.0 - *data.1 * self.vscale) * half_height
                             };
-                            
-                            serie.lines.push(QLineF { pt1: prevPoint, pt2: point });
-                            prevPoint = point;
+                            if *data.0 - prev_point.0 > 100_000 { // if more than 100 ms difference
+                                serie.lines.push(line);
+                                line = Vec::new();
+                            } else {
+                                line.push(QLineF { pt1: prev_point.1, pt2: point });
+                            }
+                            prev_point = (*data.0, point);
                         }
-                        i += index_step;
+                        serie.lines.push(line);
                     }
                 }
             } else {
@@ -124,17 +119,23 @@ impl TimelineGyroChart {
         pen.set_width_f(1.5); // TODO * dpiScale
         p.set_pen(pen);
         
-        p.draw_lines(self.series[a].lines.as_slice());
+        for l in &self.series[a].lines {
+            if !l.is_empty() {
+                p.draw_lines(l.as_slice());
+            }
+        }
     }
 
     pub fn setSyncResults(&mut self, data: &[TimeIMU]) {
         self.sync_results = Vec::with_capacity(data.len());
 
         for x in data {
-            self.sync_results.push(ChartData {
-                timestamp_percent: x.timestamp_ms / self.duration_ms,
-                values: [x.gyro[0], x.gyro[1], x.gyro[2], 0.0]
-            });
+            if let Some(g) = x.gyro.as_ref() {
+                self.sync_results.push(ChartData {
+                    timestamp_us: (x.timestamp_ms * 1000.0) as i64,
+                    values: [g[0], g[1], g[2], 0.0]
+                });
+            }
         }
         Self::normalize_height(&mut self.sync_results, self.gyro_max.map(|x| x / (180.0 / std::f64::consts::PI))); // TODO this max calculation here is wrong
 
@@ -148,14 +149,18 @@ impl TimelineGyroChart {
         self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
 
         for x in &gyro.raw_imu {
-            self.gyro.push(ChartData {
-                timestamp_percent: (x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) / self.duration_ms,
-                values: [x.gyro[0], x.gyro[1], x.gyro[2], 0.0]
-            });
-            self.accl.push(ChartData {
-                timestamp_percent: (x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) / self.duration_ms,
-                values: [x.accl[0], x.accl[1], x.accl[2], 0.0]
-            });
+            if let Some(g) = x.gyro.as_ref() {
+                self.gyro.push(ChartData {
+                    timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                    values: [g[0], g[1], g[2], 0.0]
+                });
+            }
+            if let Some(a) = x.accl.as_ref() {
+                self.accl.push(ChartData {
+                    timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                    values: [a[0], a[1], a[2], 0.0]
+                });
+            }
         }
 
         let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
@@ -166,7 +171,7 @@ impl TimelineGyroChart {
                 let q = x.1.quaternion().as_vector();
 
                 out_quats.push(ChartData {
-                    timestamp_percent: ts / self.duration_ms,
+                    timestamp_us: (ts * 1000.0) as i64,
                     values: [q[0], q[1], q[2], q[3]]
                 });
             }
@@ -181,10 +186,10 @@ impl TimelineGyroChart {
 
         self.update_data();
     }
-    fn get_serie_vector(vec: &[ChartData], i: usize) -> Vec<(f64, f64)> {
-        let mut ret = Vec::with_capacity(vec.len());
+    fn get_serie_vector(vec: &[ChartData], i: usize) -> BTreeMap<i64, f64> {
+        let mut ret = BTreeMap::new();
         for x in vec {
-            ret.push((x.timestamp_percent, x.values[i]));
+            ret.insert(x.timestamp_us, x.values[i]);
         }
         ret
     }

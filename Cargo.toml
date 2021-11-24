@@ -12,7 +12,7 @@ qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-
 #telemetry-parser = { path = "../telemetry-parser" }
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
-ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git" }
+ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", features = ["field_access"] }
 
 cstr = "*"
 cpp = "*"
@@ -28,7 +28,6 @@ bincode = "*"
 serde = "*"
 crc32fast = "*"
 byteorder = "*"
-#pyo3 = "*"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git" }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git" }
@@ -63,7 +62,7 @@ cpp_build = "*"
 winres = "*"
 
 [[bin]]
-name = "gyroflow"
+name = "Gyroflow"
 path = "src/gyroflow.rs"
 
 # -------------------------- Android stuff --------------------------

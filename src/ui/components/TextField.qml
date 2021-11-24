@@ -37,6 +37,7 @@ QQC.TextField {
         }
     }
     color: styleTextColor;
+    opacity: enabled? 1.0 : 0.5;
     verticalAlignment: Text.AlignVCenter;
     font.family: styleFont;
     font.pixelSize: 13 * dpiScale;

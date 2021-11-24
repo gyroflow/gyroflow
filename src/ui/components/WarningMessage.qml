@@ -12,10 +12,12 @@ Rectangle {
     Text {
         id: infotxt2;
         font.pixelSize: 13 * dpiScale;
+        font.family: styleFont;
         color: "#000";
         x: 15 * dpiScale;
         width: parent.width - 2*x;
         horizontalAlignment: Text.AlignHCenter;
         anchors.verticalCenter: parent.verticalCenter;
+        wrapMode: Text.WordWrap;
     }
 }

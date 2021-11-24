@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15 as QQC
 QQC.Slider {
     id: slider;
     height: 20 * dpiScale;
+    opacity: enabled? 1.0 : 0.5;
     property string unit: "";
     property int precision: 3;
     background: Rectangle {

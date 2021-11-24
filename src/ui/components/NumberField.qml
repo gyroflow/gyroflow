@@ -12,11 +12,13 @@ TextField {
 
     Keys.onDownPressed: (e) => {
              if (e.modifiers & Qt.AltModifier) value -= 0.001;
+        else if (e.modifiers & Qt.ControlModifier) value -= 0.1;
         else if (e.modifiers & Qt.ShiftModifier) value -= 1;
         else value -= 0.01;
     }
-    Keys.onUpPressed:(e) => {
+    Keys.onUpPressed: (e) => {
              if (e.modifiers & Qt.AltModifier) value += 0.001;
+        else if (e.modifiers & Qt.ControlModifier) value += 0.1;
         else if (e.modifiers & Qt.ShiftModifier) value += 1;
         else value += 0.01;
     }

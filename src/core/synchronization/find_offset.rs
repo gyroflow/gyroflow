@@ -18,17 +18,21 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
                 }
             }).collect();
 
-            let gyro_max = gyro_item.iter().flat_map(|x| x.gyro.iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
-            let of_max = of_item.iter().flat_map(|x| x.gyro.iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
+            let gyro_max = gyro_item.iter().flat_map(|x| x.gyro.as_ref().unwrap().iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
+            let of_max = of_item.iter().flat_map(|x| x.gyro.as_ref().unwrap().iter()).copied().map(f64::abs).reduce(f64::max).unwrap();
             for x in of_item.iter_mut() {
-                x.gyro[0] /= of_max;
-                x.gyro[1] /= of_max;
-                x.gyro[2] /= of_max;
+                if let Some(g) = x.gyro.as_mut() {
+                    g[0] /= of_max;
+                    g[1] /= of_max;
+                    g[2] /= of_max;
+                }
             }
             for x in gyro_item.iter_mut() {
-                x.gyro[0] /= gyro_max;
-                x.gyro[1] /= gyro_max;
-                x.gyro[2] /= gyro_max;
+                if let Some(g) = x.gyro.as_mut() {
+                    g[0] /= gyro_max;
+                    g[1] /= gyro_max;
+                    g[2] /= gyro_max;
+                }
             }
 
             let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
@@ -69,9 +73,13 @@ fn calculate_cost(offs: f64, of: &[TimeIMU], gyro: &BTreeMap<usize, TimeIMU>) ->
     for o in of {
         if let Some(g) = gyro_at_timestamp(o.timestamp_ms - offs, gyro) {
             matches_count += 1;
-            sum += (g.gyro[0] - o.gyro[0]).powf(2.0) * 70.0;
-            sum += (g.gyro[1] - o.gyro[1]).powf(2.0) * 70.0;
-            sum += (g.gyro[2] - o.gyro[2]).powf(2.0) * 100.0;
+            if let Some(gg) = g.gyro.as_ref() {
+                if let Some(og) = o.gyro.as_ref() {
+                    sum += (gg[0] - og[0]).powf(2.0) * 70.0;
+                    sum += (gg[1] - og[1]).powf(2.0) * 70.0;
+                    sum += (gg[2] - og[2]).powf(2.0) * 100.0;
+                }
+            }
         }
     }
     if !of.is_empty() && matches_count > of.len() / 2 {

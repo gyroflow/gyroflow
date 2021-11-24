@@ -13,7 +13,7 @@ MenuItem {
         property var extensions: ["csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "360", "gyroflow"];
 
         title: qsTr("Choose a motion data file")
-        nameFilters: [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
+        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url) {

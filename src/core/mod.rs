@@ -117,7 +117,7 @@ impl StabilizationManager {
                     .collect();
         
                 self.gyro.raw_imu = v["raw_imu"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| TimeIMU { timestamp_ms: 0.0/*TODO*/, gyro: [x[0], x[1], x[2]], accl: [x[3], x[4], x[6]], magn: [0.0, 0.0, 0.0] }) // TODO IMU orientation
+                    .map(|x| TimeIMU { timestamp_ms: 0.0/*TODO*/, gyro: Some([x[0], x[1], x[2]]), accl: Some([x[3], x[4], x[6]]), magn: None }) // TODO IMU orientation
                     .collect();
             });
         } else {

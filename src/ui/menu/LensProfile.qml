@@ -13,7 +13,7 @@ MenuItem {
         property var extensions: ["json"];
 
         title: qsTr("Choose a lens profile")
-        nameFilters: [qsTr("Lens profiles") + " (*.json)"];
+        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         onAccepted: loadFile(fileDialog.selectedFile);
     }
     function loadFile(url) {
@@ -47,12 +47,12 @@ MenuItem {
             };
             const coeffs = obj.coefficients.split(";").map(parseFloat);
             const mtrx = obj.matrix.split(";").map(parseFloat);
-            d0.value = coeffs[0];
-            d1.value = coeffs[1];
-            d2.value = coeffs[2];
-            d3.value = coeffs[3];
-            fc0.value = mtrx[0]
-            fc1.value = mtrx[4]
+            k1.setInitialValue(coeffs[0]);
+            k2.setInitialValue(coeffs[1]);
+            k3.setInitialValue(coeffs[2]);
+            k4.setInitialValue(coeffs[3]);
+            fx.setInitialValue(mtrx[0]);
+            fy.setInitialValue(mtrx[4]);
         }
     }
 
@@ -97,37 +97,51 @@ MenuItem {
         Ease on height { }
         //clip: true;
 
-        Label {
-            text: qsTr("Focal center");
-
-            Column {
-                spacing: 4 * dpiScale;
-                width: parent.width;
-                NumberField { id: fc0; width: parent.width; precision: 12; }
-                NumberField { id: fc1; width: parent.width; precision: 12; }
+        component SmallNumberField: NumberField {
+            property bool preventChange2: true;
+            width: parent.width / 2;
+            precision: 12;
+            property string param: "  ";
+            tooltip: param[0] + "<font size=\"1\">" + param[1] + "</font>"
+            font.pixelSize: 11 * dpiScale;
+            onValueChanged: {
+                if (!preventChange2) controller.set_lens_param(param, value);
+            }
+            function setInitialValue(v) {
+                preventChange2 = true;
+                value = v;
+                preventChange2 = false;
             }
         }
-        /*
-        Label {
-            text: qsTr("Focal center");
 
-            Column {
+        Label {
+            text: qsTr("Pixel focal length");
+
+            Row {
                 spacing: 4 * dpiScale;
                 width: parent.width;
-                NumberField { width: parent.width; precision: 6; }
-                NumberField { width: parent.width; precision: 6; }
+                SmallNumberField { id: fx; param: "fx"; }
+                SmallNumberField { id: fy; param: "fy"; }
             }
-        }*/
+        }
         Label {
             text: qsTr("Distortion coefficients");
 
             Column {
                 spacing: 4 * dpiScale;
                 width: parent.width;
-                NumberField { id: d0; width: parent.width; precision: 16; }
-                NumberField { id: d1; width: parent.width; precision: 16; }
-                NumberField { id: d2; width: parent.width; precision: 16; }
-                NumberField { id: d3; width: parent.width; precision: 16; }
+                Row {
+                    spacing: 4 * dpiScale;
+                    width: parent.width;
+                    SmallNumberField { id: k1; param: "k1"; precision: 16; }
+                    SmallNumberField { id: k2; param: "k2"; precision: 16; }
+                }
+                Row {
+                    spacing: 4 * dpiScale;
+                    width: parent.width;
+                    SmallNumberField { id: k3; param: "k3"; precision: 16; }
+                    SmallNumberField { id: k4; param: "k4"; precision: 16; } 
+                }
             }
         }
     }

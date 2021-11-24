@@ -168,7 +168,7 @@ impl GyroSource {
             }
         }
         if let Some(ref orientation) = self.imu_orientation {
-            pub fn orient(inp: [f64; 3], io: &[u8]) -> [f64; 3] {
+            pub fn orient(inp: &[f64; 3], io: &[u8]) -> [f64; 3] {
                 let map = |o: u8| -> f64 {
                     match o as char {
                         'X' => inp[0], 'x' => -inp[0],
@@ -181,23 +181,26 @@ impl GyroSource {
             }
             for x in &mut self.raw_imu {
                 if let Some(ref org_orientation) = self.org_imu_orientation {
-                    x.gyro = orient(x.gyro, org_orientation.as_bytes());
-                    x.accl = orient(x.accl, org_orientation.as_bytes());
+                    if let Some(g) = x.gyro.as_mut() { *g = orient(g, org_orientation.as_bytes()); }
+                    if let Some(a) = x.accl.as_mut() { *a = orient(a, org_orientation.as_bytes()); }
+                    if let Some(m) = x.magn.as_mut() { *m = orient(m, org_orientation.as_bytes()); }
                 }
                 // Change orientation
-                x.gyro = orient(x.gyro, orientation.as_bytes());
-                x.accl = orient(x.accl, orientation.as_bytes());
+                if let Some(g) = x.gyro.as_mut() { *g = orient(g, orientation.as_bytes()); }
+                if let Some(a) = x.accl.as_mut() { *a = orient(a, orientation.as_bytes()); }
+                if let Some(m) = x.magn.as_mut() { *m = orient(m, orientation.as_bytes()); }
             }
         }
         // Rotate
         if let Some(rotation) = self.imu_rotation {
-            let rotate = |inp: [f64; 3]| -> [f64; 3] {
+            let rotate = |inp: &[f64; 3]| -> [f64; 3] {
                 let rotated = rotation.transform_vector(&Vector3::new(inp[0], inp[1], inp[2]));
                 [rotated[0], rotated[1], rotated[2]]
             };
             for x in &mut self.raw_imu {
-                x.gyro = rotate(x.gyro);
-                x.accl = rotate(x.accl);
+                if let Some(g) = x.gyro.as_mut() { *g = rotate(g); } 
+                if let Some(a) = x.accl.as_mut() { *a = rotate(a); } 
+                if let Some(m) = x.magn.as_mut() { *m = rotate(m); } 
             }
         }
 
