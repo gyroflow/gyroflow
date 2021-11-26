@@ -59,7 +59,7 @@ Item {
         repeat: false;
         running: false;
         interval: 100;
-        onTriggered: controller.update_chart(timeline.getChart());
+        onTriggered: Qt.callLater(() => controller.update_chart(timeline.getChart())); 
     }
 
     Item {
@@ -98,7 +98,7 @@ Item {
                     vidInfo.loader = false;
                     timeline.trimStart = 0.0;
                     timeline.trimEnd = 1.0;
-                    //for (var i in md) console.log(i, md[i]);
+                    // for (var i in md) console.log(i, md[i]);
                 }
 
                 backgroundColor: "#111111";

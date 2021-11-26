@@ -53,17 +53,23 @@ pub struct TimelineGyroChart {
 }
 
 impl TimelineGyroChart {
-    pub fn setDurationMs(&mut self, v: f64) { self.duration_ms = v; self.update(); }
+    pub fn setDurationMs(&mut self, v: f64) { self.duration_ms = v; }
     fn setVisibleAreaLeft (&mut self, v: f64) { self.visibleAreaLeft = v; self.update(); }
     fn setVisibleAreaRight(&mut self, v: f64) { self.visibleAreaRight = v; self.update(); }
     fn setAxisVisible     (&mut self, a: usize, v: bool) { self.series[a].visible = v; self.update(); self.axisVisibleChanged(); }
     fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
     fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(); }
-    
+
     pub fn update(&mut self) {
         self.calculate_lines();
-        (self as &dyn QQuickItem).update()
+        let qptr = QPointer::from(&*self);
+        qmetaobject::queued_callback(move |_| {
+            if let Some(this) = qptr.as_pinned() {
+                let this = this.borrow();
+                (this as &dyn QQuickItem).update()
+            }
+        })(());
     }
     fn calculate_lines(&mut self) {
         let rect = (self as &dyn QQuickItem).bounding_rect();
@@ -77,23 +83,23 @@ impl TimelineGyroChart {
                 let from_timestamp = ((self.visibleAreaLeft - 0.01) * self.duration_ms * 1000.0).floor() as i64;
                 let mut to_timestamp = ((self.visibleAreaRight + 0.01) * self.duration_ms * 1000.0).ceil() as i64;
                 if from_timestamp >= to_timestamp { to_timestamp = from_timestamp + 1; }
-    
+
                 let resolution = rect.width * 10.0;
                 let mut range = serie.data.range(from_timestamp..=to_timestamp);
                 let num_samples = range.clone().count();
-                
+
                 serie.lines.clear();
                 if num_samples > 1 {
                     if let Some(first_item) = range.next() {
                         let mut line = Vec::new();
                         let mut prev_point = (*first_item.0, QPointF {
-                            x: map_to_visible_area((*first_item.0 as f64 / 1000.0) / self.duration_ms) * rect.width, 
+                            x: map_to_visible_area((*first_item.0 as f64 / 1000.0) / self.duration_ms) * rect.width,
                             y: (1.0 - *first_item.1 * self.vscale) * half_height
                         });
                         let step = (num_samples / resolution as usize).max(1);
                         for data in range.step_by(step) {
                             let point = QPointF {
-                                x: map_to_visible_area((*data.0 as f64 / 1000.0) / self.duration_ms) * rect.width, 
+                                x: map_to_visible_area((*data.0 as f64 / 1000.0) / self.duration_ms) * rect.width,
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
                             if *data.0 - prev_point.0 > 100_000 { // if more than 100 ms difference, create a new line
@@ -117,7 +123,7 @@ impl TimelineGyroChart {
         let mut pen = QPen::from_color(QColor::from_name(color));
         pen.set_width_f(1.5); // TODO * dpiScale
         p.set_pen(pen);
-        
+
         for l in &self.series[a].lines {
             if !l.is_empty() {
                 p.draw_lines(l.as_slice());
@@ -173,7 +179,7 @@ impl TimelineGyroChart {
                 for x in quats {
                     let mut ts = *x.0 as f64 / 1000.0;
                     ts += gyro.offset_at_timestamp(ts);
-        
+
                     let q = x.1.quaternion().as_vector();
 
                     out_quats.push(ChartData {

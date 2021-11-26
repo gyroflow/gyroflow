@@ -112,12 +112,17 @@ MenuItem {
                 unit: "ms";
                 onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
             }
-        }
-        CheckBox {
-            id: bottomToTop;
-            text: qsTr("Bottom to top");
-            onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+            CheckBox {
+                id: bottomToTop;
+                anchors.right: parent.right;
+                anchors.top: parent.top;
+                anchors.topMargin: -30 * dpiScale;
+                anchors.rightMargin: -10 * dpiScale;
+                contentItem.visible: false;
+                scale: 0.7;
+                tooltip: qsTr("Bottom to top")
+                onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+            }
         }
     }
-    
 }

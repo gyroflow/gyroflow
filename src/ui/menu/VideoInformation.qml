@@ -18,6 +18,7 @@ MenuItem {
             QT_TR_NOOP("Codec"),
             QT_TR_NOOP("Pixel format"),
             QT_TR_NOOP("Audio"),
+            QT_TR_NOOP("Rotation"),
             QT_TR_NOOP("Contains gyro")
         ];
         let model = {};
@@ -41,6 +42,7 @@ MenuItem {
         list.model["Frame rate"]   = framerate? framerate.toFixed(3) + " fps" : "---";
         list.model["Codec"]        = getCodec(md) || "---";
         list.model["Pixel format"] = getPixelFormat(md) || "---";
+        list.model["Rotation"]     = (md["stream.video[0].rotation"] || 0) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
         list.modelChanged();
     }

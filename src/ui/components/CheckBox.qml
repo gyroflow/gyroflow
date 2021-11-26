@@ -4,7 +4,6 @@ import QtQuick.Controls 2.15 as QQC
 QQC.CheckBox {
     id: cb;
     onCheckedChanged: if (checked) { cm1.width = 0; cm2.width = 0; cbanim.start(); }
-    hoverEnabled: false; // FIXME: shows system checkbox when theme set to Basic
     implicitHeight: 30 * dpiScale;
 
     indicator: Rectangle {
@@ -73,4 +72,7 @@ QQC.CheckBox {
         leftPadding: cb.indicator.width + cb.spacing
     }
     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton; }
+
+    property alias tooltip: tt.text;
+    ToolTip { id: tt; visible: text.length > 0 && cb.hovered; }
 }

@@ -48,7 +48,7 @@ MenuItem {
     }
     CheckBoxWithContent {
         text: qsTr("Low pass filter");
-        onCheckedChanged: controller.update_lpf(checked? lpf.value : 0);
+        onCheckedChanged: controller.set_imu_lpf(checked? lpf.value : 0);
 
         NumberField {
             id: lpf;
@@ -58,7 +58,7 @@ MenuItem {
             from: 0;
             width: parent.width;
             onValueChanged: {
-                controller.update_lpf(value);
+                controller.set_imu_lpf(value);
             }
         }
     }
@@ -68,7 +68,7 @@ MenuItem {
         //inner.visible: true;
         function update_rotation() {
             console.log('update_rotation', p.value, r.value, y.value);
-            controller.update_imu_rotation(p.value, r.value, y.value);
+            controller.set_imu_rotation(p.value, r.value, y.value);
         }
 
         Flow {
@@ -117,7 +117,7 @@ MenuItem {
             text: "XYZ";
             validator: RegularExpressionValidator { regularExpression: /[XYZxyz]{3}/; }
             tooltip: qsTr("Uppercase is positive, lowercase is negative. eg. zYX");
-            onTextChanged: if (acceptableInput) controller.update_imu_orientation(text);
+            onTextChanged: if (acceptableInput) controller.set_imu_orientation(text);
         }
     }
     Label {

@@ -144,7 +144,7 @@ MenuItem {
         }
         CheckBoxWithContent {
             text: qsTr("Low pass filter");
-            onCheckedChanged: controller.update_sync_lpf(checked? lpf.value : 0);
+            onCheckedChanged: controller.set_sync_lpf(checked? lpf.value : 0);
 
             NumberField {
                 id: lpf;
@@ -154,7 +154,7 @@ MenuItem {
                 from: 0;
                 width: parent.width;
                 onValueChanged: {
-                    controller.update_sync_lpf(value);
+                    controller.set_sync_lpf(value);
                 }
             }
         }

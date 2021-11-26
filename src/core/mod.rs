@@ -268,11 +268,60 @@ impl StabilizationManager {
         }
     }
 
-    pub fn timestamp_at_frame(&self, frame: usize, fps: f64) -> f64 {
-        frame as f64 * fps * 1000.0
+    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; }
+    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; }
+
+    pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
+    pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
+    pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
+    pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
+    pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
+
+    pub fn remove_offset      (&self, timestamp_us: i64)                 { self.gyro.write().remove_offset(timestamp_us); }
+    pub fn set_offset         (&self, timestamp_us: i64, offset_ms: f64) { self.gyro.write().set_offset(timestamp_us, offset_ms); }
+    pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64          { self.gyro.read() .offset_at_timestamp(timestamp_us as f64 / 1000.0) }
+
+    pub fn set_imu_lpf(&self, lpf: f64) { self.gyro.write().set_lowpass_filter(lpf); }
+    pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) { self.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg); }
+    pub fn set_imu_orientation(&self, orientation: String) { self.gyro.write().set_imu_orientation(orientation); }
+    pub fn set_sync_lpf(&self, lpf: f64) {
+        let params = self.params.read();
+        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
     }
-    pub fn frame_at_timestamp(&self, ts: f64, fps: f64) -> usize {
-        (ts / 1000.0 * fps).ceil() as usize
+
+    pub fn timestamp_at_frame(&self, frame: usize, fps: f64) -> f64   { frame as f64 * fps * 1000.0 }
+    pub fn frame_at_timestamp(&self, ts: f64,      fps: f64) -> usize { (ts / 1000.0 * fps).ceil() as usize }
+
+    pub fn set_lens_param(&self, param: &str, value: f64) {
+        let mut lens = self.lens.write();
+        if lens.distortion_coeffs.len() >= 4 && lens.camera_matrix.len() >= 9 {
+            match param{
+                "fx" => lens.camera_matrix[0] = value,
+                "fy" => lens.camera_matrix[4] = value,
+                "k1" => lens.distortion_coeffs[0] = value,
+                "k2" => lens.distortion_coeffs[1] = value,
+                "k3" => lens.distortion_coeffs[2] = value,
+                "k4" => lens.distortion_coeffs[3] = value,
+                _ => { }
+            }
+        }
+    }
+
+    pub fn set_background_color(&self, bg: Vector4<f32>) {
+        self.params.write().background = bg;
+        self.undistortion.write().set_background(bg);
+    }
+
+    pub fn set_smoothing_method(&self, index: usize) -> simd_json::owned::Value {
+        let mut smooth = self.smoothing.write();
+        smooth.set_current(index);
+        smooth.current().get_parameters_json()
+    }
+    pub fn set_smoothing_param(&self, name: &str, val: f64) {
+        self.smoothing.write().current().as_mut().set_parameter(name, val);
+    }
+    pub fn get_smoothing_algs(&self) -> Vec<String> {
+        self.smoothing.read().get_names()
     }
 
     pub fn get_render_stabilizator(&self) -> StabilizationManager {
@@ -288,5 +337,9 @@ impl StabilizationManager {
         stab.recompute_undistortion();
 
         stab
+    }
+
+    pub fn spawn_on_threadpool<F>(cb: F) where F: FnOnce() + Send + 'static {
+        THREAD_POOL.spawn(cb);
     }
 }

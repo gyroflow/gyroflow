@@ -17,15 +17,22 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - Separate controller into multiple files and clean it up
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - UI fixes, editing offset, double animations etc
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
+// - Show error when movie is invalid
 // - output size and correctly fit the undistortion in it
 // - video rotation
+// - new sync method
+// - warning when adaptive zoom is enabled and fov > 1.0
+// - Fix OF analysis of rotated videos
+// - Fix gyro sometimes not loading (Contains gyro: No and autosync button disabled)
+// - Fix gyro not cleared after loading another video
+// - Fix crash in the graphics pipeline when loading some files
+// - Port Aphobius 2.0
 
 // TODO: more smoothing algorithms
 
@@ -52,6 +59,8 @@ use ui::theme::Theme;
 // TODO: add vertical labels and scale to gyro chart
 // TODO: When rendering, it should be possible to "minimize" the status and continue to work. 
 // TODO: keyframes for stabilization params
+// TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
+// TODO: mask for optical flow
 
 cpp! {{
     #include <QQuickStyle>
@@ -66,7 +75,7 @@ cpp! {{
     #endif
 }}
 
-pub fn entry() {
+fn entry() {
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
@@ -103,8 +112,7 @@ pub fn entry() {
     engine.set_property("lensProfilesList".into(), QVariant::from(lens_profiles));
 
     // Get smoothing algorithms
-    let algorithms: QVariantList = ctl.borrow().stabilizer.smoothing.read().get_names().into_iter().map(QString::from).collect();
-    engine.set_property("smoothingAlgorithms".into(), QVariant::from(algorithms));
+    engine.set_property("smoothingAlgorithms".into(), QVariant::from(ctl.borrow().get_smoothing_algs()));
 
     let engine_ptr = engine.cpp_ptr();
 

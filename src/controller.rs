@@ -9,7 +9,6 @@ use qml_video_rs::video_item::MDKVideoItem;
 
 use crate::core::StabilizationManager;
 use crate::core::synchronization::AutosyncProcess;
-use crate::core;
 use crate::rendering;
 use crate::util;
 use crate::rendering::FfmpegProcessor;
@@ -45,14 +44,14 @@ pub struct Controller {
 
     set_offset: qt_method!(fn(&self, timestamp_us: i64, offset_ms: f64)),
     remove_offset: qt_method!(fn(&self, timestamp_us: i64)),
-    offset_at_timestamp: qt_method!(fn(&self, timestamp_ms: f64) -> f64),
+    offset_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
 
-    update_lpf: qt_method!(fn(&self, lpf: f64)),
-    update_sync_lpf: qt_method!(fn(&self, lpf: f64)),
-    update_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
-    update_imu_orientation: qt_method!(fn(&self, orientation: String)),
+    set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
+    set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
+    set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
+    set_imu_orientation: qt_method!(fn(&self, orientation: String)),
 
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
@@ -67,7 +66,7 @@ pub struct Controller {
     gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
     gyro_changed: qt_signal!(),
 
-    pub stabilizer: Arc<StabilizationManager>, // TODO generic
+    stabilizer: Arc<StabilizationManager>, // TODO generic
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, status: QString),
@@ -95,44 +94,34 @@ pub struct Controller {
 
     cancel_flag: Arc<AtomicBool>,
 }
+
+macro_rules! wrap_simple_method {
+    ($name:ident, $($param:ident:$type:ty),*) => {
+        fn $name(&self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+        }
+    };
+    ($name:ident, $($param:ident:$type:ty),*; recompute) => {
+        fn $name(&self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+            self.recompute_threaded();
+        }
+    };
+    ($name:ident, $($param:ident:$type:ty),*; recompute; $extra_call:ident) => {
+        fn $name(&mut self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+            self.recompute_threaded();
+            self.$extra_call();
+        }
+    };
+}
+
 impl Controller {
     pub fn new() -> Self {
         Self {
             sync_method: 1,
             ..Default::default()
         }
-    }
-    fn update_offset_model(&mut self) {
-        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
-            timestamp_us: *k, 
-            offset_ms: *v
-        }).collect());
-
-        let qptr = QPointer::from(&*self);
-        qmetaobject::queued_callback(move |_| {
-            if let Some(this) = qptr.as_pinned() {
-                let this = this.borrow();
-                this.offsets_updated();
-                this.chart_data_changed();
-            }
-        })(());
-    }
-
-    fn remove_offset(&mut self, timestamp_us: i64) {
-        self.stabilizer.gyro.write().remove_offset(timestamp_us);
-
-        self.update_offset_model();
-        self.recompute_threaded();
-    }
-    fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {
-        self.stabilizer.gyro.write().set_offset(timestamp_us, offset_ms);
-
-        self.update_offset_model();
-        self.recompute_threaded();
-    }
-    
-    fn offset_at_timestamp(&self, timestamp_ms: f64) -> f64 {
-        self.stabilizer.gyro.read().offset_at_timestamp(timestamp_ms)
     }
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
@@ -199,7 +188,7 @@ impl Controller {
         
         let video_path = self.video_path.clone();
         let (sw, sh) = (size.0 as u32, size.1 as u32);
-        core::THREAD_POOL.spawn(move || {
+        StabilizationManager::spawn_on_threadpool(move || {
             let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
             proc.on_frame(|timestamp_us, input_frame, converter| {
                 let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
@@ -229,6 +218,22 @@ impl Controller {
         }
     }
 
+    fn update_offset_model(&mut self) {
+        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
+            timestamp_us: *k, 
+            offset_ms: *v
+        }).collect());
+
+        let qptr = QPointer::from(&*self);
+        qmetaobject::queued_callback(move |_| {
+            if let Some(this) = qptr.as_pinned() {
+                let this = this.borrow();
+                this.offsets_updated();
+                this.chart_data_changed();
+            }
+        })(());
+    }
+
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue) {
         let s = util::url_to_path(&QString::from(url).to_string()).to_string();
         let stab = self.stabilizer.clone();
@@ -254,12 +259,13 @@ impl Controller {
                     
                     this.recompute_threaded();
                     this.update_offset_model();
+                    //this.chart_data_changed();
                     this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
                 }
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
-                core::THREAD_POOL.spawn(move || {
+                StabilizationManager::spawn_on_threadpool(move || {
                     let detected = {
                         if is_main_video {
                             stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size);
@@ -273,11 +279,11 @@ impl Controller {
                         let orientation = gyro.org_imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
                         let has_gyro = !gyro.quaternions.is_empty();
                         let has_quats = !gyro.org_quaternions.is_empty();
+                        drop(gyro);
 
                         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
                             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
                             chart.setDurationMs(duration_ms);
-                            chart.setFromGyroSource(&gyro);
                         }
                         
                         (detected, orientation, has_gyro, has_quats, stab.params.read().frame_readout_time)
@@ -296,23 +302,6 @@ impl Controller {
         self.lens_loaded = true;
         self.lens_changed();
         self.lens_profile_loaded(info);
-        self.recompute_threaded();
-    }
-    fn set_lens_param(&self, param: QString, value: f64) {
-        {
-            let mut lens = self.stabilizer.lens.write();
-            if lens.distortion_coeffs.len() >= 4 && lens.camera_matrix.len() >= 9 {
-                match param.to_string().as_str() {
-                    "fx" => lens.camera_matrix[0] = value,
-                    "fy" => lens.camera_matrix[4] = value,
-                    "k1" => lens.distortion_coeffs[0] = value,
-                    "k2" => lens.distortion_coeffs[1] = value,
-                    "k3" => lens.distortion_coeffs[2] = value,
-                    "k4" => lens.distortion_coeffs[3] = value,
-                    _ => { }
-                }
-            }
-        }
         self.recompute_threaded();
     }
     
@@ -336,28 +325,7 @@ impl Controller {
         }
     }
 
-    fn update_lpf(&mut self, lpf: f64) {
-        self.stabilizer.gyro.write().set_lowpass_filter(lpf);
-        
-        self.chart_data_changed();
-        self.recompute_threaded();
-    }
-
-    fn update_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.stabilizer.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
-
-        self.chart_data_changed();
-        self.recompute_threaded();
-    }
-    fn update_imu_orientation(&mut self, orientation: String) {
-        self.stabilizer.gyro.write().set_imu_orientation(orientation);
-
-        self.chart_data_changed();
-        self.recompute_threaded();
-    }
     fn set_integration_method(&mut self, index: usize) {
-        println!("set_integration_method {}", index);
-        
         let qptr = QPointer::from(&*self);
         let finished = qmetaobject::queued_callback(move |_| {
             if let Some(this) = qptr.as_pinned() { 
@@ -367,7 +335,7 @@ impl Controller {
             }
         });
         let stab = self.stabilizer.clone();
-        core::THREAD_POOL.spawn(move || {
+        StabilizationManager::spawn_on_threadpool(move || {
             {
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
@@ -376,16 +344,6 @@ impl Controller {
             stab.recompute_smoothness();
             finished(());
         });
-    }
-
-    fn update_sync_lpf(&mut self, lpf: f64) {
-        {
-            let params = self.stabilizer.params.read();
-            self.stabilizer.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
-        }
-        
-        self.chart_data_changed();
-        self.recompute_threaded();
     }
 
     fn init_player(&mut self, player: QJSValue) {
@@ -421,48 +379,30 @@ impl Controller {
             vid.setBackgroundColor(color);
 
             let bg = color.get_rgba_f();
-            let bg = Vector4::new(bg.0 as f32 * 255.0, bg.1 as f32 * 255.0, bg.2 as f32 * 255.0, bg.3 as f32 * 255.0);
-            
-            self.stabilizer.params.write().background = bg;
-            self.stabilizer.undistortion.write().set_background(bg);
+            self.stabilizer.set_background_color(Vector4::new(bg.0 as f32 * 255.0, bg.1 as f32 * 255.0, bg.2 as f32 * 255.0, bg.3 as f32 * 255.0));
         }
     }
 
     fn set_smoothing_method(&mut self, index: usize) -> QJsonArray {
-        let ret = {
-            let mut smooth = self.stabilizer.smoothing.write();
-            smooth.set_current(index);
-            let algorithm = smooth.current();
-
-            util::simd_json_to_qt(&algorithm.get_parameters_json())
-        };
+        let params = util::simd_json_to_qt(&self.stabilizer.set_smoothing_method(index));
         self.recompute_threaded();
         self.chart_data_changed();
-        ret
+        params
     }
     fn set_smoothing_param(&mut self, name: QString, val: f64) {
-        {
-            self.stabilizer.smoothing.write().current().as_mut().set_parameter(&name.to_string(), val);
-        }
+        self.stabilizer.set_smoothing_param(&name.to_string(), val);
         self.chart_data_changed();
         self.recompute_threaded();
     }
+    pub fn get_smoothing_algs(&self) -> QVariantList {
+        self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
+    }
 
-    fn set_stab_enabled(&mut self, enabled: bool) {
-        self.stabilizer.params.write().stab_enabled = enabled;
-    }
-    fn set_show_detected_features(&mut self, enabled: bool) {
-        self.stabilizer.params.write().show_detected_features = enabled;
-    }
     fn set_sync_method(&mut self, v: u32) {
         self.sync_method = v;
 
         self.stabilizer.pose_estimator.clear();
         self.chart_data_changed();
-    }
-    fn set_fov(&mut self, fov: f64) {
-        self.stabilizer.params.write().fov = fov;
-        self.recompute_threaded();
     }
 
     fn recompute_threaded(&self) {
@@ -473,18 +413,6 @@ impl Controller {
             }
         }));
         self.compute_progress(id, 0.0);
-    }
-
-    fn set_frame_readout_time(&self, v: f64) {
-        self.stabilizer.params.write().frame_readout_time = v;
-        
-        self.recompute_threaded();
-    }
-
-    fn set_adaptive_zoom(&self, v: f64) {
-        self.stabilizer.params.write().adaptive_zoom_window = v;
-        
-        self.recompute_threaded();
     }
 
     fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool) {
@@ -505,32 +433,45 @@ impl Controller {
         let cancel_flag = self.cancel_flag.clone();
 
         let stab = self.stabilizer.clone();
-        core::THREAD_POOL.spawn(move || {
+        StabilizationManager::spawn_on_threadpool(move || {
             let stab = stab.get_render_stabilizator();
             rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio, cancel_flag);
         });
     }
     
-    fn set_trim_start(&self, v: f64) {
-        self.stabilizer.params.write().trim_start = v;
-        self.recompute_threaded();
-    }
-    fn set_trim_end(&self, v: f64) {
-        self.stabilizer.params.write().trim_end = v;
-        self.recompute_threaded();
-    }
-    fn file_exists(&self, path: QString) -> bool {
-        std::path::Path::new(&path.to_string()).exists()
-    }
-    
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
-    }
-    fn resolve_android_url(&mut self, url: QString) -> QString {
-        util::resolve_android_url(url)
     }
 
     fn export_gyroflow(&self) {
         // TODO
     }
+
+    wrap_simple_method!(set_stab_enabled,           v: bool);
+    wrap_simple_method!(set_show_detected_features, v: bool);
+    wrap_simple_method!(set_fov,                v: f64; recompute);
+    wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
+    wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
+    wrap_simple_method!(set_trim_start,         v: f64; recompute);
+    wrap_simple_method!(set_trim_end,           v: f64; recompute);
+
+    wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
+    wrap_simple_method!(remove_offset, timestamp_us: i64; recompute; update_offset_model);
+
+    wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_imu_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);
+    wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
+
+    fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
+        self.stabilizer.offset_at_timestamp(timestamp_us)
+    }
+    fn set_lens_param(&self, param: QString, value: f64) {
+        self.stabilizer.set_lens_param(param.to_string().as_str(), value);
+        self.recompute_threaded();
+    }
+
+    // Utilities
+    fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
+    fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
 }
