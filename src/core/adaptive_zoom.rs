@@ -49,7 +49,7 @@ impl AdaptiveZoom {
         let polygon: Vec<Point2D> = polygon.iter().map(|p| Point2D(p.0 - center.0, p.1 - center.1)).collect();
         // ax.scatter(polygon[:,0], polygon[:,1])
 
-        let dist_p: Vec<f64> = polygon.iter().map(|pt| nalgebra::Vector2::new(pt.0, pt.1).norm()).collect();
+        let dist_p: Vec<f64> = polygon.iter().map(|pt| ((pt.0*pt.0) + (pt.1*pt.1)).sqrt()).collect();
         let angles: Vec<f64> = polygon.iter().map(|pt| pt.1.atan2(pt.0).abs()).collect();
 
         // ax.plot(distP*np.cos(angles), distP*np.sin(angles), 'ro')

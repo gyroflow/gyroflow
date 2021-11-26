@@ -235,6 +235,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height { return pixels.as_mut_ptr(); }
 
         let itm = &self.stab_data[frame];
+        if itm.params.is_empty() { return pixels.as_mut_ptr(); }
 
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.undistort_image(pixels, itm);

@@ -24,12 +24,13 @@ use ui::theme::Theme;
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
+// - output size and correctly fit the undistortion in it
+// - video rotation
 
 // TODO: more smoothing algorithms
 
 // TODO: exporting and loading .gyroflow
-// TODO: output size and correctly fit the undistortion in it
-// TODO: video rotation
+// TODO: wgpu undistortion add support for different plane types
 // TODO: default lens profile
 // TODO: saving settings, storage
 // TODO: Calibrator
@@ -40,7 +41,6 @@ use ui::theme::Theme;
 // TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
 // TODO: languages
-// TODO: wgpu undistortion add support for different plane types
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
 // TODO: Setup CI for packaging for Linux

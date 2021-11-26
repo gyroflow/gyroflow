@@ -96,6 +96,8 @@ Item {
                     loaded = frameCount > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
+                    timeline.trimStart = 0.0;
+                    timeline.trimEnd = 1.0;
                     //for (var i in md) console.log(i, md[i]);
                 }
 

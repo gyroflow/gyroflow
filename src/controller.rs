@@ -229,12 +229,10 @@ impl Controller {
         let set_offsets = Arc::new(qmetaobject::queued_callback(move |offsets: Vec<(f64, f64, f64)>| {
             if let Some(this) = qptr.as_pinned() {
                 let mut this = this.borrow_mut();
-                for x in &offsets {
-                    println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                }
                 {
                     let mut gyro = this.stabilizer.gyro.write();
                     for x in offsets {
+                        println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                         gyro.set_offset((x.0 * 1000.0) as i64, x.1);
                     }
                 }
@@ -608,9 +606,7 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         THREAD_POOL.spawn(move || {
-            println!("render start");
             let stab = stab.get_render_stabilizator();
-            println!("params computed");
             rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio, cancel_flag);
         });
     }
