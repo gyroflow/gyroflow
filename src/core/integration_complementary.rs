@@ -1,6 +1,3 @@
-
-//use nalgebra::*;
-
 // Based on "Keeping a Good Attitude: A Quaternion-Based Orientation Filter for IMUs and MARGs"
 // https://www.mdpi.com/1424-8220/15/8/19302
 

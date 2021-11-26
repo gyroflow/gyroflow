@@ -6,6 +6,7 @@ use qmetaobject::*;
 use std::cell::RefCell;
 
 pub mod core;
+pub mod util;
 pub mod controller;
 pub mod rendering;
 pub mod resources;
@@ -16,7 +17,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - Move thread pool to core
 // - Separate controller into multiple files and clean it up
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
@@ -37,8 +37,9 @@ use ui::theme::Theme;
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)
 // TODO: -- Save camera model with calibration and later load lens profile automatically
 // TODO: -- Save frame readout time
-// TODO: -- Save lens parameters (gopro: linear, wide, narrow), sony: lens model and zoom position
+// TODO: -- Save lens parameters (gopro: linear, wide, narrow, also hypersmooth on/off), sony: lens model and zoom position
 // TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
+// TODO: -- Recommended output size (eg. 4:3 to 16:9)
 // TODO: UI: activeFocus indicators
 // TODO: languages
 // TODO: add lens distortion back after stabilization
@@ -50,6 +51,7 @@ use ui::theme::Theme;
 // TODO: add elapsed and remaining times when rendering
 // TODO: add vertical labels and scale to gyro chart
 // TODO: When rendering, it should be possible to "minimize" the status and continue to work. 
+// TODO: keyframes for stabilization params
 
 cpp! {{
     #include <QQuickStyle>

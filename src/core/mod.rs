@@ -24,7 +24,7 @@ use gyro_source::{ GyroSource, Quat64, TimeIMU };
 use telemetry_parser::try_block;
 
 lazy_static::lazy_static! {
-    static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
+    pub static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
     static ref CURRENT_COMPUTE_ID: AtomicU64 = AtomicU64::new(0);
 }
 
