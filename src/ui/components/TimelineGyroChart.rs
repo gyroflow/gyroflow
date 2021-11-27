@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 
 use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
+use crate::util;
 
 #[derive(Default, Debug)]
 pub struct ChartData {
@@ -63,12 +64,8 @@ impl TimelineGyroChart {
 
     pub fn update(&mut self) {
         self.calculate_lines();
-        let qptr = QPointer::from(&*self);
-        qmetaobject::queued_callback(move |_| {
-            if let Some(this) = qptr.as_pinned() {
-                let this = this.borrow();
-                (this as &dyn QQuickItem).update()
-            }
+        util::qt_queued_callback(self, |this, _| {
+            (this as &dyn QQuickItem).update();
         })(());
     }
     fn calculate_lines(&mut self) {

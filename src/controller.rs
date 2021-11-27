@@ -11,6 +11,7 @@ use crate::core::StabilizationManager;
 use crate::core::synchronization::AutosyncProcess;
 use crate::rendering;
 use crate::util;
+use crate::wrap_simple_method;
 use crate::rendering::FfmpegProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
 
@@ -95,27 +96,6 @@ pub struct Controller {
     cancel_flag: Arc<AtomicBool>,
 }
 
-macro_rules! wrap_simple_method {
-    ($name:ident, $($param:ident:$type:ty),*) => {
-        fn $name(&self, $($param:$type,)*) {
-            self.stabilizer.$name($($param,)*);
-        }
-    };
-    ($name:ident, $($param:ident:$type:ty),*; recompute) => {
-        fn $name(&self, $($param:$type,)*) {
-            self.stabilizer.$name($($param,)*);
-            self.recompute_threaded();
-        }
-    };
-    ($name:ident, $($param:ident:$type:ty),*; recompute; $extra_call:ident) => {
-        fn $name(&mut self, $($param:$type,)*) {
-            self.stabilizer.$name($($param,)*);
-            self.recompute_threaded();
-            self.$extra_call();
-        }
-    };
-}
-
 impl Controller {
     pub fn new() -> Self {
         Self {
@@ -147,30 +127,22 @@ impl Controller {
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
-        let qptr = QPointer::from(&*self);
-        let progress = qmetaobject::queued_callback(move |(ready, total): (usize, usize)| {
-            if let Some(this) = qptr.as_pinned() {
-                let mut this = this.borrow_mut();
-                this.sync_in_progress = ready < total;
-                this.sync_in_progress_changed();
-                this.chart_data_changed();
-                this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
-            }
+        let progress = util::qt_queued_callback_mut(self, |this, (ready, total): (usize, usize)| {
+            this.sync_in_progress = ready < total;
+            this.sync_in_progress_changed();
+            this.chart_data_changed();
+            this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
         });
-        let qptr = QPointer::from(&*self);
-        let set_offsets = qmetaobject::queued_callback(move |offsets: Vec<(f64, f64, f64)>| {
-            if let Some(this) = qptr.as_pinned() {
-                let mut this = this.borrow_mut();
-                {
-                    let mut gyro = this.stabilizer.gyro.write();
-                    for x in offsets {
-                        println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                        gyro.set_offset((x.0 * 1000.0) as i64, x.1);
-                    }
+        let set_offsets = util::qt_queued_callback_mut(self, |this, offsets: Vec<(f64, f64, f64)>| {
+            {
+                let mut gyro = this.stabilizer.gyro.write();
+                for x in offsets {
+                    println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                    gyro.set_offset((x.0 * 1000.0) as i64, x.1);
                 }
-                this.update_offset_model();
-                this.recompute_threaded();
             }
+            this.update_offset_model();
+            this.recompute_threaded();
         });
 
         let mut sync = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame);
@@ -224,13 +196,9 @@ impl Controller {
             offset_ms: *v
         }).collect());
 
-        let qptr = QPointer::from(&*self);
-        qmetaobject::queued_callback(move |_| {
-            if let Some(this) = qptr.as_pinned() {
-                let this = this.borrow();
-                this.offsets_updated();
-                this.chart_data_changed();
-            }
+        util::qt_queued_callback(self, |this, _| {
+            this.offsets_updated();
+            this.chart_data_changed();
         })(());
     }
 
@@ -250,18 +218,14 @@ impl Controller {
                 self.set_preview_resolution(720, player);
             }
 
-            let qptr = QPointer::from(&*self);
-            let finished = qmetaobject::queued_callback(move |params: (bool, QString, QString, QString, bool, bool, f64)| {
-                if let Some(this) = qptr.as_pinned() { 
-                    let mut this = this.borrow_mut();
-                    this.gyro_loaded = params.4; // Contains gyro
-                    this.gyro_changed();
-                    
-                    this.recompute_threaded();
-                    this.update_offset_model();
-                    //this.chart_data_changed();
-                    this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
-                }
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64)| {
+                this.gyro_loaded = params.4; // Contains gyro
+                this.gyro_changed();
+                
+                this.recompute_threaded();
+                this.update_offset_model();
+                this.chart_data_changed();
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -326,14 +290,11 @@ impl Controller {
     }
 
     fn set_integration_method(&mut self, index: usize) {
-        let qptr = QPointer::from(&*self);
-        let finished = qmetaobject::queued_callback(move |_| {
-            if let Some(this) = qptr.as_pinned() { 
-                let this = this.borrow();
-                this.chart_data_changed();
-                this.recompute_threaded();
-            }
+        let finished = util::qt_queued_callback(self, |this, _| {
+            this.chart_data_changed();
+            this.recompute_threaded();
         });
+
         let stab = self.stabilizer.clone();
         StabilizationManager::spawn_on_threadpool(move || {
             {
@@ -406,21 +367,15 @@ impl Controller {
     }
 
     fn recompute_threaded(&self) {
-        let qptr = QPointer::from(&*self);
-        let id = self.stabilizer.recompute_threaded(qmetaobject::queued_callback(move |id: u64| {
-            if let Some(this) = qptr.as_pinned() { 
-                this.borrow().compute_progress(id, 1.0);
-            }
+        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback(self, |this, id: u64| {
+            this.compute_progress(id, 1.0);
         }));
         self.compute_progress(id, 0.0);
     }
 
     fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool) {
-        let qptr = QPointer::from(&*self);
-        let progress = qmetaobject::queued_callback(move |params: (f64, usize, usize)| {
-            if let Some(this) = qptr.as_pinned() { 
-                this.borrow().render_progress(params.0, params.1, params.2);
-            }
+        let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize)| {
+            this.render_progress(params.0, params.1, params.2);
         });
 
         let trim_ratio = trim_end - trim_start;

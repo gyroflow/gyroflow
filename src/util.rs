@@ -33,6 +33,47 @@ pub fn url_to_path(url: &str) -> &str {
     }
 }
 
+pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
+    let qptr = QPointer::from(&*qobj);
+    qmetaobject::queued_callback(move |arg| {
+        if let Some(this) = qptr.as_pinned() {
+            let this = this.borrow();
+            cb(&this, arg);
+        }
+    })
+}
+pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send, F: FnMut(&mut T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
+    let qptr = QPointer::from(&*qobj);
+    qmetaobject::queued_callback(move |arg| {
+        if let Some(this) = qptr.as_pinned() {
+            let mut this = this.borrow_mut();
+            cb(&mut this, arg);
+        }
+    })
+}
+
+#[macro_export]
+macro_rules! wrap_simple_method {
+    ($name:ident, $($param:ident:$type:ty),*) => {
+        fn $name(&self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+        }
+    };
+    ($name:ident, $($param:ident:$type:ty),*; recompute) => {
+        fn $name(&self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+            self.recompute_threaded();
+        }
+    };
+    ($name:ident, $($param:ident:$type:ty),*; recompute; $extra_call:ident) => {
+        fn $name(&mut self, $($param:$type,)*) {
+            self.stabilizer.$name($($param,)*);
+            self.recompute_threaded();
+            self.$extra_call();
+        }
+    };
+}
+
 cpp! {{
     #ifdef Q_OS_ANDROID
     #   include <QJniObject>

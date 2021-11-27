@@ -10,8 +10,19 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
-            shutter.value = frame_readout_time;
-            shutterCb.checked = Math.abs(frame_readout_time) > 0;
+            setShutterTimer.pending = frame_readout_time;
+            setShutterTimer.start();
+        }
+    }
+    Timer {
+        id: setShutterTimer;
+        property real pending: 0;
+        interval: 2000;
+        repeat: false;
+        running: false;
+        onTriggered: {
+            shutter.value = pending;
+            shutterCb.checked = Math.abs(pending) > 0;
         }
     }
 
