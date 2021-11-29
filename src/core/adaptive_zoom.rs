@@ -1,5 +1,5 @@
 use enterpolation::{ Curve, Merge, bspline::BSpline };
-use crate::core::{ StabilizationManager, Undistortion, Quat64 };
+use crate::{ StabilizationManager, Undistortion, Quat64 };
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f64, f64);

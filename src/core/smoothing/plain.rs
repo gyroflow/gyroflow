@@ -1,6 +1,6 @@
 use super::*;
 
-use crate::core::gyro_source::TimeQuat;
+use crate::gyro_source::TimeQuat;
 
 pub struct Plain { pub time_constant: f64 }
 

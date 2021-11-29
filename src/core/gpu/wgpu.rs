@@ -101,7 +101,7 @@ impl<T: bytemuck::Pod> WgpuWrapper<T>  {
         self.globals.bg = [bg[0], bg[1], bg[2], bg[3]];
     }
 
-    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::core::undistortion::FrameTransform) {
+    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::undistortion::FrameTransform) {
         let size = (self.globals.width * self.globals.height * 4.0 * std::mem::size_of::<T>() as f32) as wgpu::BufferAddress;
 
         self.queue.write_buffer(&self.params_buffer, 0, bytemuck::cast_slice(&itm.params));

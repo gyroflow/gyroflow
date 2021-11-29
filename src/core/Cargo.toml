@@ -1,0 +1,54 @@
+[package]
+name = "gyroflow-core"
+version = "0.0.1"
+authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
+edition = "2021"
+
+[lib]
+name = "gyroflow_core"
+path = "lib.rs"
+
+[dependencies]
+#telemetry-parser = { path = "../telemetry-parser" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
+ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", features = ["field_access"] }
+
+simd-json = "*"
+nalgebra = "0.29"
+rayon = "*"
+biquad = "*"
+fastrand = "*"
+lazy_static = "*"
+crossbeam-channel = "*"
+parking_lot = "*"
+bincode = "*"
+serde = "*"
+crc32fast = "*"
+byteorder = "*"
+
+akaze = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+sample-consensus = "*"
+arrsac = "*"
+rand_xoshiro = "*"
+image = "*"
+space = { version = "0.17", features = ["alloc"] }
+bitarray = { version = "0.9", features = ["space"] }
+enterpolation = "*"
+
+walkdir = "*"
+
+opencv = { version = "0.58", features = ["clang-runtime"], optional = true }
+
+wgpu = "*"
+bytemuck = "*"
+pollster = "*"
+
+ocl = { version = "*", optional = true }
+
+[features]
+default = ["use-opencl", "use-opencv"]
+use-opencl = ["ocl"]
+use-opencv = ["opencv"]

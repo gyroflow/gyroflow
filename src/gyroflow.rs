@@ -5,7 +5,7 @@ use cpp::*;
 use qmetaobject::*;
 use std::cell::RefCell;
 
-pub mod core;
+pub use gyroflow_core as core;
 pub mod util;
 pub mod controller;
 pub mod rendering;

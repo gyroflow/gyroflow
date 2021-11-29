@@ -82,7 +82,7 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
         };
         Ok(())
     }
-    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::core::undistortion::FrameTransform) -> ocl::Result<()> {
+    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::undistortion::FrameTransform) -> ocl::Result<()> {
         self.src.write(pixels as &[T]).enq()?;
 
         let flattened_params = unsafe { std::slice::from_raw_parts(itm.params.as_ptr() as *const f32, itm.params.len() * 9 ) };

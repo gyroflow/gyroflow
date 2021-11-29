@@ -2,7 +2,7 @@ use rayon::iter::IntoParallelIterator;
 use std::collections::BTreeMap;
 use rayon::iter::ParallelIterator;
 
-use crate::core::gyro_source::{ GyroSource, TimeIMU };
+use crate::gyro_source::{ GyroSource, TimeIMU };
 
 // TODO: instead of finding offset by comparing gyro lines, how about undistorting points with every offset and find differences in visual features?
 pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
@@ -19,8 +19,8 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
             }).collect();
 
             let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
-            let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
-            let _ = crate::core::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);
+            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
+            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);
 
             let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 

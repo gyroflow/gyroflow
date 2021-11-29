@@ -1,6 +1,6 @@
 use super::*;
 use nalgebra::*;
-use crate::core::gyro_source::TimeQuat;
+use crate::gyro_source::TimeQuat;
 
 pub struct Fixed { pub roll: f64, pub pitch: f64, pub yaw: f64}
 

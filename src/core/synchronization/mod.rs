@@ -11,18 +11,21 @@ use std::collections::BTreeMap;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 
+#[cfg(feature = "use-opencv")]
 use self::opencv::ItemOpenCV;
 use self::akaze::ItemAkaze;
 
 use super::StabilizationManager;
 use super::gyro_source::{ GyroSource, TimeIMU };
 
+#[cfg(feature = "use-opencv")]
 mod opencv;
 mod akaze;
 mod find_offset;
 
 #[derive(Clone)]
 enum EstimatorItem {
+    #[cfg(feature = "use-opencv")]
     OpenCV(ItemOpenCV),
     Akaze(ItemAkaze)
 }
@@ -52,14 +55,16 @@ impl PoseEstimator {
     pub fn clear(&self) {
         self.sync_results.write().clear();
         self.estimated_gyro.write().clear();
+        #[cfg(feature = "use-opencv")]
         let _ = opencv::init();
     }
 
     pub fn insert_empty_result(&self, frame: usize, method: u32) {
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::default()),
+            #[cfg(feature = "use-opencv")]
             1 => EstimatorItem::OpenCV(ItemOpenCV::default()),
-            _ => panic!("Inavalid method")
+            _ => panic!("Invalid method {}", method) // TODO change to Result<>
         };
         {
             let mut l = self.sync_results.write();
@@ -73,8 +78,9 @@ impl PoseEstimator {
     pub fn detect_features(&self, frame: usize, method: u32, img: image::GrayImage) {
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
+            #[cfg(feature = "use-opencv")]
             1 => EstimatorItem::OpenCV(ItemOpenCV::detect_features(frame, img)),
-            _ => panic!("Inavalid method")
+            _ => panic!("Invalid method {}", method) // TODO change to Result<>
         };
         {
             let mut l = self.sync_results.write();
@@ -121,6 +127,7 @@ impl PoseEstimator {
                 drop(l);
 
                 let r = match (curr, next) {
+                    #[cfg(feature = "use-opencv")]
                     (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, focal, principal) }
                     (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, focal, principal) }
                     _ => None
@@ -145,11 +152,13 @@ impl PoseEstimator {
             let l = self.sync_results.read();
             if let Some(entry) = l.get(frame) {
                 let count = match &entry.item {
+                    #[cfg(feature = "use-opencv")]
                     EstimatorItem::OpenCV(x) => x.get_features_count(),
                     EstimatorItem::Akaze(x) => x.get_features_count()
                 };
                 for i in 0..count {
                     let pt = match &entry.item {
+                        #[cfg(feature = "use-opencv")]
                         EstimatorItem::OpenCV(x) => x.get_feature_at_index(i),
                         EstimatorItem::Akaze(x) => x.get_feature_at_index(i)
                     };
@@ -265,7 +274,7 @@ impl PoseEstimator {
 
         if lpf > 0.0 && frame_count > 0 && duration_ms > 0.0 {
             let sample_rate = frame_count as f64 / (duration_ms / 1000.0);
-            if let Err(e) = crate::core::filtering::Lowpass::filter_gyro_forward_backward(lpf, sample_rate, &mut vec) {
+            if let Err(e) = crate::filtering::Lowpass::filter_gyro_forward_backward(lpf, sample_rate, &mut vec) {
                 eprintln!("Filter error {:?}", e);
             }
         }
@@ -405,7 +414,7 @@ impl AutosyncProcess {
         let fps = self.fps;
         if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
             println!("frame: {}, range: {}..{}", frame, current_range.0, current_range.1);
-            crate::core::THREAD_POOL.spawn(move || {
+            crate::THREAD_POOL.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     total_detected_frames.fetch_add(1, SeqCst);
                     return;

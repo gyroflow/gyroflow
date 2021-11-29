@@ -1,5 +1,4 @@
 $Env:Path += ";D:\Programy\Qt\6.2.1\msvc2019_64\bin"
-$Env:Path += ";$PSScriptRoot\..\qml-video-rs\ext\mdk-sdk-windows-desktop\bin\x64"
 
 
 $Env:Path += ";$PSScriptRoot\ext\ffmpeg-4.4.1-full_build-shared\bin"

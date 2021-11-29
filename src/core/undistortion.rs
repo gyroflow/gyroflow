@@ -4,7 +4,7 @@ use nalgebra::*;
 use rayon::prelude::*;
 
 use super::GyroSource;
-#[cfg(feature = "opencl")]
+#[cfg(feature = "use-opencl")]
 use super::gpu::opencl;
 use super::gpu::wgpu;
 use super::StabilizationManager;
@@ -159,7 +159,7 @@ pub struct Undistortion<T: Default + Copy + Send + Sync + FloatPixel> {
     size: (usize, usize, usize), // width, height, stride
     pub background: Vector4<f32>,
 
-    #[cfg(feature = "opencl")]
+    #[cfg(feature = "use-opencl")]
     cl: Option<opencl::OclWrapper<T::Scalar>>,
 
     wgpu: Option<wgpu::WgpuWrapper<T::Scalar>>,
@@ -210,7 +210,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         self.background = bg;
 
         //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1, self.background);
-        #[cfg(feature = "opencl")]
+        #[cfg(feature = "use-opencl")]
         {
             self.cl = Some(opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
         }
@@ -225,7 +225,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.set_background(bg);
         }
-        #[cfg(feature = "opencl")]
+        #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
             let _ = cl.set_background(bg);
         }
@@ -243,7 +243,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         }
 
         // OpenCL path
-        #[cfg(feature = "opencl")]
+        #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
             cl.undistort_image(pixels, itm).unwrap();
             return pixels.as_mut_ptr();
@@ -418,9 +418,9 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
 pub trait FloatPixel {
     const COUNT: usize = 1;
 
-    #[cfg(feature = "opencl")]
+    #[cfg(feature = "use-opencl")]
     type Scalar: ocl::OclPrm + bytemuck::Pod;
-    #[cfg(not(feature = "opencl"))]
+    #[cfg(not(feature = "use-opencl"))]
     type Scalar: bytemuck::Pod;
 
     fn to_float(v: Self) -> Vector4<f32>;

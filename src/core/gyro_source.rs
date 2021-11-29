@@ -7,6 +7,7 @@ use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
 use super::integration::*;
+use super::smoothing::SmoothingAlgorithm;
 use std::io::Result;
 
 pub type Quat64 = UnitQuaternion<f64>;
@@ -155,7 +156,7 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &dyn crate::SmoothingAlgorithm, duration_ms: f64) {
+    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, duration_ms: f64) {
         self.smoothed_quaternions = alg.smooth(&self.quaternions, duration_ms);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
 
