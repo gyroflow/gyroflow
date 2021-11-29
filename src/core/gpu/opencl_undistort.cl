@@ -39,7 +39,7 @@ float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
     return (float2)(xDistort, yDistort);
 }*/
 
-__kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TYPE *dstptr, ushort width, ushort height, ushort stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
+__kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TYPE *dstptr, ushort width, ushort height, ushort stride, ushort output_width, ushort output_height, ushort output_stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
     int x = get_global_id(0);
     int y = get_global_id(1);
 
@@ -93,9 +93,9 @@ __kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TY
                 src_index += stride;
             }
 
-            dstptr[x + y*stride] = DATA_CONVERT(sum);
+            dstptr[x + y*output_stride] = DATA_CONVERT(sum);
         } else {
-            dstptr[x + y*stride] = DATA_CONVERT(bg);
+            dstptr[x + y*output_stride] = DATA_CONVERT(bg);
         }
     }
 }

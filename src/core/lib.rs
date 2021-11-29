@@ -24,14 +24,15 @@ use gyro_source::{ GyroSource, Quat64, TimeIMU };
 use telemetry_parser::try_block;
 
 lazy_static::lazy_static! {
-    pub static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
+    static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
     static ref CURRENT_COMPUTE_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 #[derive(Clone)]
 pub struct BasicParams {
     pub size: (usize, usize),
-    pub video_size: (usize, usize),
+    pub output_size: (usize, usize),
+    pub video_size: (usize, usize), // Input size
 
     pub background: Vector4<f32>,
 
@@ -45,9 +46,38 @@ pub struct BasicParams {
 
     pub trim_start: f64,
     pub trim_end: f64,
+
+    pub video_rotation: f64,
     
     pub stab_enabled: bool,
     pub show_detected_features: bool,
+}
+impl Default for BasicParams {
+    fn default() -> Self {
+        Self {
+            fov: 1.0,
+            fovs: vec![],
+            stab_enabled: true,
+            show_detected_features: true,
+            frame_readout_time: 0.0, 
+            adaptive_zoom_window: 0.0, 
+
+            size: (0, 0),
+            output_size: (0, 0),
+            video_size: (0, 0),
+
+            video_rotation: 0.0,
+
+            trim_start: 0.0,
+            trim_end: 1.0,
+        
+            background: Vector4::new(0.0, 0.0, 0.0, 0.0),
+    
+            fps: 0.0,
+            frame_count: 0,
+            duration_ms: 0.0,
+        }
+    }
 }
 pub struct StabilizationManager {
     pub gyro: Arc<RwLock<GyroSource>>,
@@ -66,29 +96,10 @@ impl Default for StabilizationManager {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
-            params: Arc::new(RwLock::new(BasicParams {
-                fov: 1.0,
-                fovs: vec![],
-                stab_enabled: true,
-                show_detected_features: true,
-                frame_readout_time: 0.0, 
-                adaptive_zoom_window: 0.0, 
-
-                size: (0, 0),
-                video_size: (0, 0),
-    
-                trim_start: 0.0,
-                trim_end: 1.0,
-            
-                background: Vector4::new(0.0, 0.0, 0.0, 0.0),
-        
-                fps: 0.0,
-                frame_count: 0,
-                duration_ms: 0.0,
-            })),
+            params: Arc::new(RwLock::new(BasicParams::default())),
             
             undistortion: Arc::new(RwLock::new(Undistortion::<undistortion::RGBA8>::default())),
-            gyro: Arc::new(RwLock::new(GyroSource::default())),
+            gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
             
             pose_estimator: Arc::new(synchronization::PoseEstimator::default())
@@ -174,11 +185,16 @@ impl StabilizationManager {
     }
 
     pub fn init_size(&self, width: usize, height: usize) {
-        self.params.write().size = (width, height);
+        // TODO: output size
+        {
+            let mut params = self.params.write();
+            params.size = (width, height);
+            params.output_size = (width, height);
+        }
         let bg = self.params.read().background;
-        let stride = self.params.read().size.0;
+        let stride = width;
 
-        self.undistortion.write().init_size(bg, (width, height), stride);
+        self.undistortion.write().init_size(bg, (width, height), stride, (width, height), stride);
     }
 
     pub fn recompute_adaptive_zoom(&self) {
@@ -253,20 +269,24 @@ impl StabilizationManager {
                     for xstep in -1..=1i32 {
                         for ystep in -1..=1i32 {
                             let pos = ((ys[i] as i32 + ystep) * stride as i32 + (xs[i] as i32 + xstep)) as usize * 4;
-                            pixels[pos + 0] = 0x0c;
-                            pixels[pos + 1] = 0xff;
-                            pixels[pos + 2] = 0x00;
+                            if pixels.len() > pos + 2 { 
+                                pixels[pos + 0] = 0x0c;
+                                pixels[pos + 1] = 0xff;
+                                pixels[pos + 2] = 0x00;
+                            }
                         }
                     }
                 }
                 //////////////////////////// Draw detected features ////////////////////////////
             }
 
-            self.undistortion.write().process_pixels(frame, width, height, stride, pixels)
+            self.undistortion.write().process_pixels(frame, width, height, stride, width, height, stride, pixels)
         } else {
             pixels.as_mut_ptr()
         }
     }
+
+    pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
 
     pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; }
     pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; }
@@ -327,9 +347,9 @@ impl StabilizationManager {
     pub fn get_render_stabilizator(&self) -> StabilizationManager {
         let size = self.params.read().video_size;
         let stab = StabilizationManager {
-            params:      Arc::new(RwLock::new(self.params.read().clone())),
-            gyro:        Arc::new(RwLock::new(self.gyro.read().clone())),
-            lens:        Arc::new(RwLock::new(self.lens.read().clone())),
+            params: Arc::new(RwLock::new(self.params.read().clone())),
+            gyro:   Arc::new(RwLock::new(self.gyro.read().clone())),
+            lens:   Arc::new(RwLock::new(self.lens.read().clone())),
             ..Default::default()
         };
         stab.init_size(size.0, size.1);
@@ -341,5 +361,11 @@ impl StabilizationManager {
 
     pub fn spawn_on_threadpool<F>(cb: F) where F: FnOnce() + Send + 'static {
         THREAD_POOL.spawn(cb);
+    }
+
+    pub fn clear(&self) {
+        *self.params.write() = BasicParams::default();
+        *self.gyro.write() = GyroSource::new();
+        self.pose_estimator.clear();
     }
 }

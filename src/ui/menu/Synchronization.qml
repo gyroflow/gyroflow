@@ -31,7 +31,7 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value);
+            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value, window.videoArea.vid.rotation);
         }
         onClicked: {
             if (!controller.lens_loaded) {

@@ -25,12 +25,8 @@ use ui::theme::Theme;
 // - Some basic error handling, check for all unwrap()'s
 // - Show error when movie is invalid
 // - output size and correctly fit the undistortion in it
-// - video rotation
 // - new sync method
 // - warning when adaptive zoom is enabled and fov > 1.0
-// - Fix OF analysis of rotated videos
-// - Fix gyro sometimes not loading (Contains gyro: No and autosync button disabled)
-// - Fix gyro not cleared after loading another video
 // - Port Aphobius 2.0
 
 // TODO: more smoothing algorithms
@@ -60,6 +56,7 @@ use ui::theme::Theme;
 // TODO: keyframes for stabilization params
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
+// TODO: auto updater
 
 cpp! {{
     #include <QQuickStyle>

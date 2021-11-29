@@ -19,8 +19,11 @@ pub struct ComputeParams {
     fovs: Vec<f64>,
     width: usize,
     height: usize, 
+    output_width: usize,
+    output_height: usize,
     calib_width: f64,
     calib_height: f64,
+    video_rotation: f64,
     camera_matrix: Matrix3<f64>,
     distortion_coeffs: [f32; 4],
     frame_readout_time: f64,
@@ -59,9 +62,12 @@ impl ComputeParams {
             fovs: params.fovs.clone(),
             width: params.size.0,
             height: params.size.1,
+            output_width: params.output_size.0,
+            output_height: params.output_size.1,
             calib_width,
             calib_height,
             camera_matrix,
+            video_rotation: params.video_rotation,
             distortion_coeffs,
             frame_readout_time: params.frame_readout_time,
             trim_start_frame: (params.trim_start * params.frame_count as f64).floor() as usize,
@@ -77,12 +83,12 @@ pub struct FrameTransform {
 
 impl FrameTransform {
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
-        let img_dim_ratio = params.width as f64 / params.calib_width;
+        let img_dim_ratio = params.output_width as f64 / params.calib_width;
     
         let k = params.camera_matrix;
         let scaled_k = k * img_dim_ratio;
         
-        let out_dim = (params.width as f64, params.height as f64);
+        let out_dim = (params.output_width as f64, params.output_height as f64);
         let focal_center = (params.calib_width / 2.0, params.calib_height / 2.0);
 
         let fov = if params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale };
@@ -104,6 +110,8 @@ impl FrameTransform {
 
         // ----------- Rolling shutter correction -----------
 
+        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
 
         // Only compute 1 matrix if not using rolling shutter correction
@@ -119,7 +127,7 @@ impl FrameTransform {
                      * params.gyro.org_quat_at_timestamp(quat_time)
                      * params.gyro.smoothed_quat_at_timestamp(quat_time);
 
-            let mut r = *quat.to_rotation_matrix().matrix();
+            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             // Need to benchmark performance of the .mirror() function for OpenGL
             // If it's a problem we can use this inverted matrix here and invert the drawing of feature points and rolling shutter time
             // We only need to do this for image read from OpenGL, so this code should be conditional only for live preview, not for rendering
@@ -157,6 +165,7 @@ pub struct Undistortion<T: Default + Copy + Send + Sync + FloatPixel> {
     pub stab_data: Vec<FrameTransform>,
 
     size: (usize, usize, usize), // width, height, stride
+    output_size: (usize, usize, usize), // width, height, stride
     pub background: Vector4<f32>,
 
     #[cfg(feature = "use-opencl")]
@@ -206,16 +215,17 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
 
         println!("Computed in {:.3}ms, len: {}", _time.elapsed().as_micros() as f64 / 1000.0, self.stab_data.len());
     }
-    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize) {
+    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
 
-        //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1, self.background);
+        //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1,stride, output_size.0, output_size.1, output_stride, self.background);
         #[cfg(feature = "use-opencl")]
         {
-            self.cl = Some(opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO ok()
+            self.cl = Some(opencl::OclWrapper::new(size.0, size.1, stride, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO: .ok()
         }
 
         self.size = (size.0, size.1, stride);
+        self.output_size = (output_size.0, output_size.1, output_stride);
 
         //self.recompute(params);
     }
@@ -231,8 +241,8 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         }
     }
 
-    pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, pixels: &mut [T::Scalar]) -> *mut T::Scalar {
-        if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height { return pixels.as_mut_ptr(); }
+    pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [T::Scalar]) -> *mut T::Scalar {
+        if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return pixels.as_mut_ptr(); }
 
         let itm = &self.stab_data[frame];
         if itm.params.is_empty() { return pixels.as_mut_ptr(); }
@@ -245,18 +255,17 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         // OpenCL path
         #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
-            cl.undistort_image(pixels, itm).unwrap();
-            return pixels.as_mut_ptr();
+            return cl.undistort_image(pixels, itm).unwrap().as_mut_ptr();
         }
 
         // CPU path
-        Self::undistort_image_cpu( unsafe { std::mem::transmute(pixels) }, &mut self.tmp_buffer, width, height, stride, &itm.params, self.background);
+        Self::undistort_image_cpu( unsafe { std::mem::transmute(pixels) }, &mut self.tmp_buffer, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background);
         self.tmp_buffer.as_mut_ptr() as *mut T::Scalar
     }
 
     // TODO: optimize further with SIMD
-    fn undistort_image_cpu(pixels: &mut [T], out_pixels: &mut Vec<T>, width: usize, height: usize, stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>) {
-        out_pixels.resize_with(stride*height, T::default);
+    fn undistort_image_cpu(pixels: &mut [T], out_pixels: &mut Vec<T>, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>) {
+        out_pixels.resize_with(output_stride*output_height, T::default);
 
         let bg_t = FloatPixel::from_float(bg);
         
@@ -276,7 +285,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         let c = &undistortion_params[0][2..4];
         let k = &undistortion_params[0][4..];
 
-        out_pixels.par_chunks_mut(stride).enumerate().for_each(|(y, row)| {
+        out_pixels.par_chunks_mut(output_stride).enumerate().for_each(|(y, row)| {
             row.iter_mut().enumerate().for_each(|(x, pix_out)| {
                 if x < width {
                     let undistortion_params = undistortion_params[(y + 1).min(undistortion_params.len() - 1)];

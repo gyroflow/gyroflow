@@ -1,6 +1,5 @@
-use rayon::iter::IntoParallelIterator;
+use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use std::collections::BTreeMap;
-use rayon::iter::ParallelIterator;
 
 use crate::gyro_source::{ GyroSource, TimeIMU };
 
@@ -10,6 +9,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
+            // TODO: gyro_item should really be `search_size` from the range, not the same timestamps as OF item, otherwise we may not find a match with larger offsets
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
                 if x.timestamp_ms >= of_item[0].timestamp_ms && x.timestamp_ms <= of_item.last().unwrap().timestamp_ms {
                     Some(x.clone())

@@ -51,6 +51,12 @@ pub struct GyroSource {
 }
 
 impl GyroSource {
+    pub fn new() -> Self {
+        Self {
+            integration_method: 1,
+            ..Default::default()
+        }
+    }
     pub fn parse_telemetry_file(path: &str) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;

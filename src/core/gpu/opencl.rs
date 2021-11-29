@@ -6,11 +6,13 @@ pub struct OclWrapper<T: ocl::OclPrm> {
     dst: Buffer<T>,
     pix_element_count: usize,
 
+    out_buffer: Vec<T>,
+
     params_buf: Buffer<f32>,
 }
 
 impl<T: ocl::OclPrm> OclWrapper<T> {
-    pub fn new(width: usize, height: usize, stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
+    pub fn new(width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
         let platform = Platform::default();
         let device = Device::first(platform)?;
         println!("Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
@@ -34,22 +36,27 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
         let source_buffer = Buffer::builder().queue(queue.clone()).len(stride*height*pix_element_count)
             .flags(MemFlags::new().read_only().host_write_only()).build()?;
 
-        let dest_buffer = Buffer::builder().queue(queue.clone()).len(stride*height*pix_element_count)
+        let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height*pix_element_count)
             .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
 
         let params_len = 9 * (height + 1);
         let params_buf = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(params_len).build()?;
 
+        let out_buffer = vec![T::default(); output_stride * output_height * pix_element_count];
+
         let mut builder = Kernel::builder();
         unsafe {
             builder.program(&program).name("undistort_image").queue(queue)
-            .global_work_size((width, height))
+            .global_work_size((output_width, output_height))
             .disable_arg_type_check()
             .arg(&source_buffer)
             .arg(&dest_buffer)
             .arg(ocl::prm::Ushort::new(width as u16))
             .arg(ocl::prm::Ushort::new(height as u16))
             .arg(ocl::prm::Ushort::new(stride as u16))
+            .arg(ocl::prm::Ushort::new(output_width as u16))
+            .arg(ocl::prm::Ushort::new(output_height as u16))
+            .arg(ocl::prm::Ushort::new(output_stride as u16))
             .arg(&params_buf)
             .arg(ocl::prm::Ushort::new(2));
         }
@@ -66,6 +73,7 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
         Ok(Self {
             pix_element_count,
             kernel,
+            out_buffer,
             src: source_buffer,
             dst: dest_buffer,
             params_buf,
@@ -74,27 +82,26 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
     
     pub fn set_background(&mut self, bg: nalgebra::Vector4<f32>) -> ocl::Result<()> {
         match self.pix_element_count {
-            1 => self.kernel.set_arg(7, ocl::prm::Float::new(bg[0]))?,
-            2 => self.kernel.set_arg(7, ocl::prm::Float2::new(bg[0], bg[1]))?,
-            3 => self.kernel.set_arg(7, ocl::prm::Float3::new(bg[0], bg[1], bg[2]))?,
-            4 => self.kernel.set_arg(7, ocl::prm::Float4::new(bg[0], bg[1], bg[2], bg[3]))?,
+            1 => self.kernel.set_arg(10, ocl::prm::Float::new(bg[0]))?,
+            2 => self.kernel.set_arg(10, ocl::prm::Float2::new(bg[0], bg[1]))?,
+            3 => self.kernel.set_arg(10, ocl::prm::Float3::new(bg[0], bg[1], bg[2]))?,
+            4 => self.kernel.set_arg(10, ocl::prm::Float4::new(bg[0], bg[1], bg[2], bg[3]))?,
             _ => panic!("Unknown pix_element_count {}", self.pix_element_count)
         };
         Ok(())
     }
-    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::undistortion::FrameTransform) -> ocl::Result<()> {
+    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::undistortion::FrameTransform) -> ocl::Result<&mut [T]> {
         self.src.write(pixels as &[T]).enq()?;
 
         let flattened_params = unsafe { std::slice::from_raw_parts(itm.params.as_ptr() as *const f32, itm.params.len() * 9 ) };
 
         self.params_buf.write(flattened_params).enq()?;
 
-        self.kernel.set_arg(6, ocl::prm::Ushort::new(itm.params.len() as u16))?;
+        self.kernel.set_arg(9, ocl::prm::Ushort::new(itm.params.len() as u16))?;
 
         unsafe { self.kernel.enq()?; }
 
-        self.dst.read(pixels).enq()?;
-
-        Ok(())
+        self.dst.read(&mut self.out_buffer).enq()?;
+        Ok(&mut self.out_buffer)
     }
 }

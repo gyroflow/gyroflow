@@ -170,19 +170,20 @@ impl PoseEstimator {
         (xs, ys)
     }
 
-    pub fn rgba_to_gray(width: u32, height: u32, slice: &[u8]) -> GrayImage {
+    pub fn rgba_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> GrayImage {
         use image::Pixel;
         let mut img = image::GrayImage::new(width, height);
         for x in 0..width {
             for y in 0..height {
-                let pix_pos = ((y * width + x) * 4) as usize;
+                let pix_pos = ((y * stride + x) * 4) as usize;
                 img.put_pixel(x, y, image::Rgba::from_slice(&slice[pix_pos..pix_pos + 4]).to_luma());
             }
         }
         img
     }
-    pub fn yuv_to_gray(width: u32, height: u32, slice: &[u8]) -> GrayImage {
-        image::GrayImage::from_raw(width, height, slice[0..(width*height) as usize].to_vec()).unwrap()
+    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> GrayImage {
+        // TODO: maybe a better way than using stride as width?
+        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec()).unwrap()
     }
     pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -399,10 +400,10 @@ impl AutosyncProcess {
         }
         return false;
     }
-    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
+    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], video_rotation: i32, cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
-        let img = PoseEstimator::yuv_to_gray(width, height, pixels);
+        let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);
     
         let method = self.method;
         let estimator = self.estimator.clone();

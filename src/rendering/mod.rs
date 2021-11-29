@@ -74,7 +74,7 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
         proc.audio_codec = codec::Id::None;
     }
 
-    let mut planes = Vec::<Box<dyn FnMut(usize, &mut [u8], usize, usize, usize)>>::new();
+    let mut planes = Vec::<Box<dyn FnMut(usize, &mut [u8], usize, usize, usize, usize, usize, usize)>>::new();
 
     let progress2 = progress.clone();
     proc.on_frame(move |timestamp_us, input_frame, converter| {
@@ -84,19 +84,22 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
         macro_rules! create_planes_proc {
             ($planes:ident, $(($t:tt, $w:expr, $h:expr, $s:expr, $yuvi:expr), )*) => {
                 $({
+                    let out_size = ($w as usize, $h as usize, ($s / $t::COUNT) as usize); // TODO: output size
                     let bg = {
                         let mut params = stab.params.write();
                         params.size = ($w as usize, $h as usize);
+                        params.output_size = (out_size.0, out_size.1);
                         params.background
                     };
                     let mut plane = Undistortion::<$t>::default();
-                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), ($w as usize, $h as usize), ($s / $t::COUNT) as usize);
+                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), ($w as usize, $h as usize), ($s / $t::COUNT) as usize, (out_size.0, out_size.1), out_size.2);
                     plane.recompute(&ComputeParams::from_manager(&stab));
-                    $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize| {
+                    $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize, ow: usize, oh: usize, mut os: usize| {
                         s /= $t::COUNT;
-                        let processed = plane.process_pixels(frame_id, w, h, s, bytemuck::cast_slice_mut(buffer));
+                        os /= $t::COUNT;
+                        let processed = plane.process_pixels(frame_id, w, h, s, ow, oh, os, bytemuck::cast_slice_mut(buffer)); // TODO output size
                         if buffer.as_ptr() as *const u8 != processed as *const u8 { 
-                            buffer.copy_from_slice(unsafe { std::slice::from_raw_parts(processed as *mut u8, s*h*std::mem::size_of::<<$t as FloatPixel>::Scalar>()*$t::COUNT) });
+                            buffer.copy_from_slice(unsafe { std::slice::from_raw_parts(processed as *mut u8, os*oh*std::mem::size_of::<<$t as FloatPixel>::Scalar>()*$t::COUNT) });
                         }
                     }));
                 })*
@@ -161,10 +164,14 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
                 let w = frame.plane_width(i) as usize;
                 let h = frame.plane_height(i) as usize;
                 let s = frame.stride(i) as usize / bytes_per_scalar;
+                
+                let ow = w; // TODO: output size
+                let oh = h;
+                let os = s;
         
                 let data = frame.data_mut(i);
                 
-                (*cb)(absolute_frame_id, data, w, h, s);
+                (*cb)(absolute_frame_id, data, w, h, s, ow, oh, os);
             }
             progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count));
         };

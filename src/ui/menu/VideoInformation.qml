@@ -8,6 +8,8 @@ MenuItem {
     text: qsTr("Video information");
     icon: "info";
 
+    property real videoRotation: 0;
+
     Component.onCompleted: {
         const fields = [
             QT_TR_NOOP("File name"),
@@ -45,6 +47,9 @@ MenuItem {
         list.model["Rotation"]     = (md["stream.video[0].rotation"] || 0) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
         list.modelChanged();
+
+        root.videoRotation = +(md["stream.video[0].rotation"] || 0);
+        // controller.set_video_rotation(-root.videoRotation);
     }
     function updateEntry(key, value) {
         list.updateEntry(key, value);
@@ -85,7 +90,60 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: root.selectFileRequest();
     }
-    TableList { id: list; }
+
+    Item {
+        id: editRotationControl;
+        height: parent.height;
+        LinkButton {
+            anchors.verticalCenter: parent.verticalCenter;
+            icon.name: newRotation.visible? "checkmark" : "pencil";
+            icon.height: parent.height * 0.8;
+            icon.width: parent.height * 0.8;
+            height: newRotation.visible? newRotation.height + 5 * dpiScale : undefined;
+            leftPadding: newRotation.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
+            x: (newRotation.visible? newRotation.width + 5 * dpiScale : parent.parent.paintedWidth + 15 * dpiScale);
+            onClicked: {
+                if (newRotation.visible) {
+                    newRotation.accepted();
+                } else {
+                    newRotation.value = root.videoRotation;
+                    newRotation.visible = true;
+                }
+            }
+        } 
+        NumberField {
+            id: newRotation;
+            visible: false;
+            x: 5 * dpiScale;
+            y: (parent.parent.height - height) / 2;
+            from: -360;
+            to: 360;
+            unit: "°";
+            height: parent.parent.height + 8 * dpiScale;
+            topPadding: 0; bottomPadding: 0;
+            width: 50 * dpiScale;
+            font.pixelSize: 12 * dpiScale;
+            onAccepted: {
+                visible = false;
+                root.videoRotation = value;
+                root.updateEntry("Rotation", root.videoRotation + " °");
+                controller.set_video_rotation(root.videoRotation);
+            }
+        }
+    }
+
+    TableList {
+        id: list;
+        onModelChanged: {
+            Qt.callLater(function() {
+                if (list) {
+                    const rotObj = list.col2.children[list.col2.children.length - 3];
+                    editRotationControl.parent = rotObj;
+                    editRotationControl.enabled = rotObj.text != '---';
+                }
+            });
+        }
+    }
 
     DropTarget {
         parent: root.innerItem;

@@ -31,7 +31,7 @@ pub struct Controller {
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
@@ -72,6 +72,8 @@ pub struct Controller {
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, status: QString),
 
+    set_video_rotation: qt_method!(fn(&self, angle: f64)),
+
     set_trim_start: qt_method!(fn(&self, trim_start: f64)),
     set_trim_end: qt_method!(fn(&self, trim_end: f64)),
 
@@ -105,7 +107,7 @@ impl Controller {
     }
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
-        self.stabilizer.pose_estimator.clear();
+        self.stabilizer.clear();
         self.chart_data_changed();
         self.video_path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
 
@@ -115,7 +117,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32) {
         let method = self.sync_method;
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
@@ -141,6 +143,8 @@ impl Controller {
                     gyro.set_offset((x.0 * 1000.0) as i64, x.1);
                 }
             }
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
             this.update_offset_model();
             this.recompute_threaded();
         });
@@ -168,9 +172,9 @@ impl Controller {
                 if sync.is_frame_wanted(frame) {
                     let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
 
-                    let (width, height, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.data_mut(0));
+                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
 
-                    sync.feed_frame(frame, width, height, pixels, cancel_flag.clone());
+                    sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
                 }
             });
             if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
@@ -273,18 +277,19 @@ impl Controller {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
-            fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
+            // fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
 
             let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
             let ratio = vid.videoHeight as f64 / h as f64;
-            let new_w = aligned_to_8((vid.videoWidth as f64 / ratio).floor() as u32);
-            let new_h = aligned_to_8((vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32);
+            let new_w = ((vid.videoWidth as f64 / ratio).floor() as u32);
+            let new_h = ((vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32);
             println!("surface size: {}x{}", new_w, new_h);
 
             self.stabilizer.pose_estimator.clear();
             self.chart_data_changed();
 
             vid.setSurfaceSize(new_w, new_h);
+            vid.setRotation(vid.getRotation());
             vid.setCurrentFrame(vid.currentFrame)
         }
     }
@@ -402,6 +407,7 @@ impl Controller {
         // TODO
     }
 
+    wrap_simple_method!(set_video_rotation,         v: f64; recompute);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_fov,                v: f64; recompute);
