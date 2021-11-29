@@ -34,7 +34,7 @@ Move-Item -Path "$PSScriptRoot\target\android-build\libs\arm64-v8a\libgyroflow.s
 androiddeployqt --input "$PSScriptRoot\android\android-deploy.json" `
                 --output "$PSScriptRoot\target\android-build" `
                 --deployment bundled `
-                --android-platform android-30 `
+                --android-platform android-29 `
                 --jdk ${Env:JAVA_HOME} `
                 --gradle
 

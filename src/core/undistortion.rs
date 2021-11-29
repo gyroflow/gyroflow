@@ -415,15 +415,15 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
 
 }
 
-//#[cfg(feature = "opencl")]
-//pub trait ScalarTrait: Sync + ocl::OclPrm + bytemuck::Pod {}
-//#[cfg(not(feature = "opencl"))]
-//pub trait ScalarTrait: bytemuck::Pod {}
-
 pub trait FloatPixel {
     const COUNT: usize = 1;
+
+    #[cfg(feature = "opencl")]
     type Scalar: ocl::OclPrm + bytemuck::Pod;
-    fn to_float(v: Self) -> Vector4<f32>; 
+    #[cfg(not(feature = "opencl"))]
+    type Scalar: bytemuck::Pod;
+
+    fn to_float(v: Self) -> Vector4<f32>;
     fn from_float(v: Vector4<f32>) -> Self;
     fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32>;
     fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str);

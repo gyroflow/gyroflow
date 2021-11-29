@@ -16,8 +16,15 @@ import android.os.Environment;
 import android.content.ContentResolver;
 import java.io.File;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import java.io.FileOutputStream;
 import android.util.Log;
+import java.io.OutputStream;
 import java.lang.NumberFormatException;
 
 public class QSharePathResolver {
@@ -45,6 +52,24 @@ public class QSharePathResolver {
                 Log.d("ekkescorner"," isDownloadsDocument");
                 final String id = DocumentsContract.getDocumentId(uri);
                 Log.d("ekkescorner"," getDocumentId "+id);
+
+                if (id != null && id.startsWith("msf:")) {
+                    final File file = new File(context.getCacheDir(), "tmpfile" + Objects.requireNonNull(context.getContentResolver().getType(uri)).split("/")[1]);
+                    try (final InputStream inputStream = context.getContentResolver().openInputStream(uri); OutputStream output = new FileOutputStream(file)) {
+                        final byte[] buffer = new byte[4 * 1024]; // or other buffer size
+                        int read;
+
+                        while ((read = inputStream.read(buffer)) != -1) {
+                            output.write(buffer, 0, read);
+                        }
+
+                        output.flush();
+                        return file.getPath();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    return null;
+                }
                 long longId = 0;
                 try
                   {
@@ -220,4 +245,14 @@ public class QSharePathResolver {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
+    public static void deleteTempFiles(final Context context) {
+        final File[] files = context.getCacheDir().listFiles();
+        if (files != null) {
+            for (final File file : files) {
+                if (file.getName().contains("tmpfile")) {
+                    file.delete();
+                }
+            }
+        }
+    }
 }

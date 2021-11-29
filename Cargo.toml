@@ -77,11 +77,12 @@ build_targets = [ "aarch64-linux-android" ]
 
 [package.metadata.android.sdk]
 min_sdk_version = 21
-target_sdk_version = 30
+target_sdk_version = 29
 
 [[package.metadata.android.uses_permission]]
 name = "android.permission.WRITE_EXTERNAL_STORAGE"
 
-# [target.'cfg(target_os = "android")'.dependencies]
+[target.'cfg(target_os = "android")'.dependencies]
 # ndk = { version = "*", features = ["trace"] }
-# ndk-glue = { version = "*",features = ["logger"] }
+# ndk-glue = { version = "*", features = ["logger"] }
+ndk-sys = { version = "*" }

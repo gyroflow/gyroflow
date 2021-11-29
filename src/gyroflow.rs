@@ -31,7 +31,6 @@ use ui::theme::Theme;
 // - Fix OF analysis of rotated videos
 // - Fix gyro sometimes not loading (Contains gyro: No and autosync button disabled)
 // - Fix gyro not cleared after loading another video
-// - Fix crash in the graphics pipeline when loading some files
 // - Port Aphobius 2.0
 
 // TODO: more smoothing algorithms
@@ -117,7 +116,7 @@ fn entry() {
     let engine_ptr = engine.cpp_ptr();
 
     // Load main UI
-    let live_reload = true;
+    let live_reload = false;
     if !live_reload {
         engine.load_file("qrc:/src/ui/main_window.qml".into());
     } else {
@@ -143,6 +142,7 @@ pub extern fn main(_argc: i32, _argv: *mut *mut i8) -> i32 {
     entry();
     0
 }
+
 #[cfg(not(target_os = "android"))]
 fn main() {
     entry();
