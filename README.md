@@ -5,10 +5,10 @@ Gyroflow Rust port, based on the original work of ElvinC `https://github.com/Elv
 1. Entire GUI is in the `src/ui` diretory
 2. `controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
 3. `core` directory contains the whole gyroflow engine and doesn't depend on Qt or ffmpeg, and OpenCV is optional
-4. `rendering` contains all FFmpeg related code for rendering final video and processing (for synchronization)
+4. `rendering` contains all FFmpeg related code for rendering final video and processing for synchronization
 5. `core/gpu` contains GPU implementations of the undistortion
-6. `mod.rs` in each directory acts as a main entry of the module (directory name is the module name and `mod.rs` is the kind of an entry point)
-7. `gyroflow.rs` contains a TODO list of things that still need to be done. Also there's a ton of TODO commends throughout the code
+6. `mod.rs` in each directory acts as a main entry of the module (directory name is the module name and `mod.rs` is kind of an entry point)
+7. `gyroflow.rs` contains a TODO list of things that still need to be done. Also there's a ton of TODO comments throughout the code
 
 
 # Dev environment
@@ -16,7 +16,7 @@ Visual Studio Code + `rust-analyzer` extension.
 Optionally `CodeLLDB` extension for debugging
 
 For working with QML I recommend to use Qt Creator and load all QML files there, as it has auto-complete and syntax highlighting.
-The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `main.rs` and it should work right away. Now every tim you change any QML file, the app should reload it immediately.
+The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `main.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
 
 # Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
