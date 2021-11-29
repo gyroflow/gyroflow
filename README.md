@@ -8,7 +8,7 @@ Gyroflow Rust port, based on the original work of ElvinC `https://github.com/Elv
 4. `rendering` contains all FFmpeg related code for rendering final video and processing (for synchronization)
 5. `core/gpu` contains GPU implementations of the undistortion
 6. `mod.rs` in each directory acts as a main entry of the module (directory name is the module name and `mod.rs` is the kind of an entry point)
-7. `main.rs` contains a TODO list of things that still need to be done. Also there's a ton of TODO commends throughout the code
+7. `gyroflow.rs` contains a TODO list of things that still need to be done. Also there's a ton of TODO commends throughout the code
 
 
 # Dev environment
