@@ -303,7 +303,7 @@ impl StabilizationManager {
             }
             let os = ow; // TODO stride
             
-            (ow as u32, oh as u32, os as u32, self.undistortion.write().process_pixels(frame, width, height, stride, ow, oh, os, pixels))
+            self.undistortion.write().process_pixels(frame, width, height, stride, ow, oh, os, pixels)
         } else {
             (width as u32, height as u32, stride as u32, pixels.as_mut_ptr())
         }

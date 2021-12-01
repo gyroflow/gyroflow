@@ -97,7 +97,7 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
                     $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize, ow: usize, oh: usize, mut os: usize| {
                         s /= $t::COUNT;
                         os /= $t::COUNT;
-                        let processed = plane.process_pixels(frame_id, w, h, s, ow, oh, os, bytemuck::cast_slice_mut(buffer)); // TODO output size
+                        let (pw, ph, ps, processed) = plane.process_pixels(frame_id, w, h, s, ow, oh, os, bytemuck::cast_slice_mut(buffer)); // TODO output size
                         if buffer.as_ptr() as *const u8 != processed as *const u8 { 
                             buffer.copy_from_slice(unsafe { std::slice::from_raw_parts(processed as *mut u8, os*oh*std::mem::size_of::<<$t as FloatPixel>::Scalar>()*$t::COUNT) });
                         }

@@ -240,26 +240,26 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
         }
     }
 
-    pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [T::Scalar]) -> *mut T::Scalar {
-        if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return pixels.as_mut_ptr(); }
+    pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [T::Scalar]) -> (u32, u32, u32, *mut T::Scalar) {
+        if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return (width as u32, height as u32, stride as u32, pixels.as_mut_ptr()); }
 
         let itm = &self.stab_data[frame];
-        if itm.params.is_empty() { return pixels.as_mut_ptr(); }
+        if itm.params.is_empty() { return (width as u32, height as u32, stride as u32, pixels.as_mut_ptr()); }
 
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.undistort_image(pixels, itm);
-            return pixels.as_mut_ptr();
+            return (output_width as u32, output_height as u32, output_stride as u32, pixels.as_mut_ptr());
         }
 
         // OpenCL path
         #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
-            return cl.undistort_image(pixels, itm).unwrap().as_mut_ptr();
+            return (output_width as u32, output_height as u32, output_stride as u32, cl.undistort_image(pixels, itm).unwrap().as_mut_ptr());
         }
 
         // CPU path
         Self::undistort_image_cpu( unsafe { std::mem::transmute(pixels) }, &mut self.tmp_buffer, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background);
-        self.tmp_buffer.as_mut_ptr() as *mut T::Scalar
+        (output_width as u32, output_height as u32, output_stride as u32, self.tmp_buffer.as_mut_ptr() as *mut T::Scalar)
     }
 
     // TODO: optimize further with SIMD

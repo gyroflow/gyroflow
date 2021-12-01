@@ -28,6 +28,12 @@ use ui::theme::Theme;
 // - new sync method
 // - warning when adaptive zoom is enabled and fov > 1.0
 // - Port Aphobius 2.0
+// - Add tooltip to timeline with zoom info
+// - Move "timeline chart" type selection to timeline context menu
+// - improve colors on timeline chart
+// - double click to reset timeline zoom
+// - Figure out what to do with the console output window/log
+// - Pick a license
 
 // TODO: more smoothing algorithms
 
@@ -44,6 +50,7 @@ use ui::theme::Theme;
 // TODO: -- Recommended output size (eg. 4:3 to 16:9)
 // TODO: UI: activeFocus indicators
 // TODO: languages
+// TODO: timeline panning
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
 // TODO: Setup CI for packaging for Linux
