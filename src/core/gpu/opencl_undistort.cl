@@ -47,7 +47,7 @@ __kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TY
     float2 c = vload2(0, &undistortion_params[2]);
     float4 k = vload4(0, &undistortion_params[4]);
 
-    if (x < width && y < height) {
+    if (x < output_width && y < output_height) {
         __global const float *params = &undistortion_params[min((y + 1), params_count - 1) * 9];
 
         float _x = y * params[1] + params[2] + (x * params[0]);

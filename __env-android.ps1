@@ -10,12 +10,12 @@
 #      .clang_arg("--target=aarch64-linux-android")
 # to ffmpeg-sys-next-4.4.0-next.2\build.rs
 
-$Env:Path += ";D:\Programy\Qt\6.2.1\android_arm64_v8a\bin"
-$Env:Path += ";D:\Programy\Qt\6.2.1\mingw81_64\bin\"
+$Env:Path += ";D:\Programy\Qt\6.2.2\android_arm64_v8a\bin"
+$Env:Path += ";D:\Programy\Qt\6.2.2\mingw81_64\bin\"
 $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk-bundle"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk1.8.0_141"
-$Env:QMAKE = "D:\Programy\Qt\6.2.1\android_arm64_v8a\bin\qmake.bat"
+$Env:QMAKE = "D:\Programy\Qt\6.2.2\android_arm64_v8a\bin\qmake.bat"
 $Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-4.4-android-lite"
 $Env:LIBCLANG_PATH = "$PSScriptRoot\ext\llvm-13-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"

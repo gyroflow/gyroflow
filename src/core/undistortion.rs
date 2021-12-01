@@ -83,7 +83,7 @@ pub struct FrameTransform {
 
 impl FrameTransform {
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
-        let img_dim_ratio = params.output_width as f64 / params.calib_width;
+        let img_dim_ratio = params.width as f64 / params.calib_width;
     
         let k = params.camera_matrix;
         let scaled_k = k * img_dim_ratio;
@@ -107,7 +107,6 @@ impl FrameTransform {
 
         let row_readout_time = frame_readout_time / params.height as f64;
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
-
         // ----------- Rolling shutter correction -----------
 
         let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
@@ -287,7 +286,7 @@ impl<T: Default + Copy + Send + Sync + FloatPixel> Undistortion<T> {
 
         out_pixels.par_chunks_mut(output_stride).enumerate().for_each(|(y, row)| {
             row.iter_mut().enumerate().for_each(|(x, pix_out)| {
-                if x < width {
+                if x < output_width {
                     let undistortion_params = undistortion_params[(y + 1).min(undistortion_params.len() - 1)];
                     let _x = y as f32 * undistortion_params[1] + undistortion_params[2] + (x as f32 * undistortion_params[0]);
                     let _y = y as f32 * undistortion_params[4] + undistortion_params[5] + (x as f32 * undistortion_params[3]);

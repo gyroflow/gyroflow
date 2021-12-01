@@ -184,23 +184,41 @@ impl StabilizationManager {
         }
     }
 
-    pub fn init_size(&self, width: usize, height: usize) {
-        // TODO: output size
+    fn init_size(&self) {
+        let (w, h, ow, oh, bg) = {
+            let params = self.params.read();
+            (params.size.0, params.size.1, params.output_size.0, params.output_size.1, params.background)
+        };
+
+        // TODO strides
+        let s = w;
+        let os = ow;
+
+        if w > 0 && ow > 0 && h > 0 && oh > 0 {
+            self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
+        }
+    }
+
+    pub fn set_size(&self, width: usize, height: usize) {
         {
             let mut params = self.params.write();
             params.size = (width, height);
             params.output_size = (width, height);
         }
-        let bg = self.params.read().background;
-        let stride = width;
-
-        self.undistortion.write().init_size(bg, (width, height), stride, (width, height), stride);
+        self.init_size();
+    }
+    pub fn set_output_size(&self, width: usize, height: usize) {
+        {
+            let mut params = self.params.write();
+            params.output_size = (width, height);
+        }
+        self.init_size();
     }
 
     pub fn recompute_adaptive_zoom(&self) {
-        let (window, frames, video_size, fps, trim) = {
+        let (window, frames, video_size, img_dim_ratio, fps, trim) = {
             let params = self.params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.video_size, params.fps, (params.trim_start, params.trim_end))
+            (params.adaptive_zoom_window, params.frame_count, params.output_size, params.size.0 as f64 / params.video_size.0 as f64, params.fps, (params.trim_start, params.trim_end))
         };
         if window > 0.0 || window < -0.9 {
             let mut quats = Vec::with_capacity(frames);
@@ -219,7 +237,7 @@ impl StabilizationManager {
 
             let zoom = AdaptiveZoom::from_manager(self);
             let fovs = zoom.compute(&quats, video_size, fps, mode, trim);
-            self.params.write().fovs = fovs.iter().map(|v| v.0).collect();
+            self.params.write().fovs = fovs.iter().map(|v| v.0 * img_dim_ratio).collect();
         } else {
             self.params.write().fovs.clear();
         }
@@ -260,9 +278,13 @@ impl StabilizationManager {
         compute_id
     }
 
-    pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, pixels: &mut [u8]) -> *mut u8 { // TODO: generic
-        if self.params.read().stab_enabled {
-            if self.params.read().show_detected_features {
+    pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, pixels: &mut [u8]) -> (u32, u32, u32, *mut u8) { // TODO: generic
+        let (enabled, show_features, ow, oh) = {
+            let params = self.params.read();
+            (params.stab_enabled, params.show_detected_features, params.output_size.0, params.output_size.1)
+        };
+        if enabled {
+            if show_features {
                 //////////////////////////// Draw detected features ////////////////////////////
                 let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
                 for i in 0..xs.len() {
@@ -279,10 +301,11 @@ impl StabilizationManager {
                 }
                 //////////////////////////// Draw detected features ////////////////////////////
             }
-
-            self.undistortion.write().process_pixels(frame, width, height, stride, width, height, stride, pixels)
+            let os = ow; // TODO stride
+            
+            (ow as u32, oh as u32, os as u32, self.undistortion.write().process_pixels(frame, width, height, stride, ow, oh, os, pixels))
         } else {
-            pixels.as_mut_ptr()
+            (width as u32, height as u32, stride as u32, pixels.as_mut_ptr())
         }
     }
 
@@ -344,7 +367,7 @@ impl StabilizationManager {
         self.smoothing.read().get_names()
     }
 
-    pub fn get_render_stabilizator(&self) -> StabilizationManager {
+    pub fn get_render_stabilizator(&self, output_size: (usize, usize)) -> StabilizationManager {
         let size = self.params.read().video_size;
         let stab = StabilizationManager {
             params: Arc::new(RwLock::new(self.params.read().clone())),
@@ -352,7 +375,8 @@ impl StabilizationManager {
             lens:   Arc::new(RwLock::new(self.lens.read().clone())),
             ..Default::default()
         };
-        stab.init_size(size.0, size.1);
+        stab.set_size(size.0, size.1);
+        stab.set_output_size(output_size.0, output_size.1);
 
         stab.recompute_undistortion();
 

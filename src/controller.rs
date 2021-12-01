@@ -77,6 +77,8 @@ pub struct Controller {
     set_trim_start: qt_method!(fn(&self, trim_start: f64)),
     set_trim_end: qt_method!(fn(&self, trim_end: f64)),
 
+    set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
+
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
 
     chart_data_changed: qt_signal!(),
@@ -321,18 +323,19 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
             vid.onResize(Box::new(move |width, height| {
-                stab.init_size(width as usize, height as usize);
+                stab.set_size(width as usize, height as usize);
                 stab.recompute_threaded(|_|());
             }));
 
             let stab = self.stabilizer.clone();
-            vid.onProcessPixels(Box::new(move |frame, width, height, pixels: &mut [u8]| -> *mut u8 {
+            vid.onProcessPixels(Box::new(move |frame, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
                 // let _time = std::time::Instant::now();
 
-                let ptr = stab.process_pixels(frame as usize, width as usize, height as usize, width as usize, pixels);
-
-                //println!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
-                ptr
+                // Assume RGBA8 - 4 bytes per pixel
+                let mut ret = stab.process_pixels(frame as usize, width as usize, height as usize, stride as usize / 4, pixels);
+                ret.2 *= 4;
+                // println!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
+                ret
             }));
         }
     }
@@ -394,7 +397,7 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         StabilizationManager::spawn_on_threadpool(move || {
-            let stab = stab.get_render_stabilizator();
+            let stab = stab.get_render_stabilizator((output_width, output_height));
             rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio, cancel_flag);
         });
     }
@@ -407,6 +410,7 @@ impl Controller {
         // TODO
     }
 
+    wrap_simple_method!(set_output_size,            w: usize, h: usize; recompute);
     wrap_simple_method!(set_video_rotation,         v: f64; recompute);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);

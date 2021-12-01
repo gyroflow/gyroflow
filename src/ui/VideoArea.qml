@@ -66,9 +66,11 @@ Item {
         width: parent.width;
         height: parent.height - tlcol.height;
         Item {
-            property real ratio: vid.videoWidth / Math.max(1, vid.videoHeight);
-            property real w: (vid.rotation === 90 || vid.rotation === -90? parent.height : parent.width) - 20 * dpiScale;
-            property real h: (vid.rotation === 90 || vid.rotation === -90? parent.width  : parent.height) - 20 * dpiScale;
+            property real orgW: window.exportSettings.outWidth || vid.videoWidth;
+            property real orgH: window.exportSettings.outHeight || vid.videoHeight;
+            property real ratio: orgW / Math.max(1, orgH);
+            property real w: parent.width - 20 * dpiScale;
+            property real h: parent.height - 20 * dpiScale;
 
             width:  (ratio * h) > w? w : (ratio * h);
             height: (w / ratio) > h? h : (w / ratio);

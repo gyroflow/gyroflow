@@ -9,6 +9,7 @@ TextField {
     property bool preventChange: false;
     property alias from: validator.bottom;
     property alias to: validator.top;
+    property bool live: true;
 
     Keys.onDownPressed: (e) => {
              if (e.modifiers & Qt.AltModifier) value -= 0.001;
@@ -27,11 +28,14 @@ TextField {
         if (preventChange) return;
         text = value.toLocaleString(Qt.locale(), "f", precision);
     }
-    onTextChanged: {
+    function updateValue() {
         preventChange = true;
         value = Number.fromLocaleString(Qt.locale(), text);
         preventChange = false;
     }
+    onTextChanged: if (live) updateValue();
+    onEditingFinished: updateValue();
+    
     Component.onCompleted: valueChanged();
     onAccepted: valueChanged();
     onFocusChanged: if (!activeFocus) valueChanged();

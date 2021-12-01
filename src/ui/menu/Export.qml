@@ -35,6 +35,8 @@ MenuItem {
                 outputWidth.preventChange2 = false;
             }
         }
+        const ratio = Math.max(window.videoArea.vid.surfaceWidth / window.videoArea.vid.videoWidth, window.videoArea.vid.surfaceHeight / window.videoArea.vid.videoHeight);;
+        controller.set_output_size(outWidth * ratio, outHeight * ratio);
     }
 
     ComboBox {
@@ -49,21 +51,21 @@ MenuItem {
         Row {
             spacing: 5 * dpiScale;
             NumberField {
-                enabled: false; // TODO implement output size
                 property bool preventChange2: false;
                 id: outputWidth;
                 tooltip: qsTr("Width");
                 width: 60 * dpiScale;
                 onValueChanged: if (!preventChange2) root.updateOutputSize(true);
+                live: false;
             }
             BasicText { leftPadding: 0; text: "x"; anchors.verticalCenter: parent.verticalCenter; }
             NumberField {
-                enabled: false; // TODO implement output size
                 property bool preventChange2: false;
                 id: outputHeight;
                 tooltip: qsTr("Height");
                 width: 60 * dpiScale;
                 onValueChanged: if (!preventChange2) root.updateOutputSize(false);
+                live: false;
             }
             LinkButton {
                 id: lockAspectRatio;

@@ -54,18 +54,26 @@ MenuItem {
                 let qml = "import QtQuick 2.15; import '../components/'; Column { width: parent.width; ";
                 for (const x of opt_json) {
                     // TODO figure out a better way than constructing a string
-                    qml += `Label {
-                        width: parent.width;
-                        text: qsTr("${x.description}")
-                        Slider {
-                            width: parent.width;
-                            from: ${x.from};
-                            to: ${x.to};
-                            value: ${x.value};
-                            unit: "${x.unit}";
-                            onValueChanged: controller.set_smoothing_param("${x.name}", value);
-                        }
-                    }`;
+                    switch (x.type) {
+                        case 'Slider': 
+                        case 'NumberField': 
+                            qml += `Label {
+                                width: parent.width;
+                                text: qsTr("${x.description}")
+                                ${x.type} {
+                                    width: parent.width;
+                                    from: ${x.from};
+                                    to: ${x.to};
+                                    value: ${x.value};
+                                    unit: "${x.unit}";
+                                    live: false;
+                                    ${x.type == "NumberField"? "precision: " + x.precision : ""}
+                                    onValueChanged: controller.set_smoothing_param("${x.name}", value);
+                                }
+                            }`;
+                        break;
+                        case 'QML': qml += x.custom_qml; break;
+                    }
                 }
                 qml += "}";
 

@@ -37,18 +37,7 @@ fn main() {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS");
     match target_os.as_ref().map(|x| &**x) {
         Ok("android") => {
-            //println!("cargo:rustc-link-search=D:/Programy/Qt/6.2.1/android_arm64_v8a/lib");
             println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-lite/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
-            //println!("cargo:rustc-link-lib=Qt6Network_arm64-v8a");
-            //println!("cargo:rustc-link-lib=Qt6OpenGL_arm64-v8a");
-            //println!("cargo:rustc-link-lib=Qt6QmlModels_arm64-v8a");
-            //println!("cargo:rustc-link-lib=Qt6QuickTemplates2_arm64-v8a");
-            ////println!("cargo:rustc-link-lib=Qt6Svg_arm64-v8a");
-            ////println!("cargo:rustc-link-lib=Qt6Widgets_arm64-v8a");
-            //println!("cargo:rustc-link-lib=android");
-            //println!("cargo:rustc-link-lib=OpenSLES");
-            //println!("cargo:rustc-link-lib=GLESv2");
-            //println!("cargo:rustc-link-lib=EGL");
         },
         Ok("macos") => {
             
