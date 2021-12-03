@@ -104,7 +104,7 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_format(decoder.format());
         encoder.set_frame_rate(decoder.frame_rate());
         encoder.set_time_base(decoder.frame_rate().unwrap().invert());
-        encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or(decoder.bit_rate()));
+        encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
         encoder.set_color_range(decoder.color_range());
         encoder.set_colorspace(decoder.color_space());
         unsafe {
@@ -295,7 +295,7 @@ impl<'a> VideoTranscoder<'a> {
                             final_sw_frame.set_color_range(frame.color_range());
                             final_sw_frame.set_color_space(frame.color_space());
                             final_sw_frame.set_color_transfer_characteristic(frame.color_transfer_characteristic());
-                            encoder.send_frame(&final_sw_frame).unwrap();
+                            encoder.send_frame(final_sw_frame).unwrap();
                         }
                     }
                 }

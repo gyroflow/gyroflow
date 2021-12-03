@@ -27,7 +27,7 @@ pub enum Mode {
 }
 
 impl AdaptiveZoom {
-    pub fn from_manager<T: crate::FloatPixel>(mgr: &StabilizationManager<T>) -> Self {
+    pub fn from_manager<T: crate::PixelType>(mgr: &StabilizationManager<T>) -> Self {
         let lens = mgr.lens.read();
         let params = mgr.params.read();
 

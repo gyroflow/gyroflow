@@ -15,7 +15,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use parking_lot::RwLock;
-pub use undistortion::FloatPixel;
+pub use undistortion::PixelType;
 
 use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
 
@@ -82,7 +82,7 @@ impl Default for BasicParams {
         }
     }
 }
-pub struct StabilizationManager<T: FloatPixel> {
+pub struct StabilizationManager<T: PixelType> {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
     pub smoothing: Arc<RwLock<Smoothing>>,
@@ -94,7 +94,7 @@ pub struct StabilizationManager<T: FloatPixel> {
     pub params: Arc<RwLock<BasicParams>>
 }
 
-impl<T: FloatPixel> Default for StabilizationManager<T> {
+impl<T: PixelType> Default for StabilizationManager<T> {
     fn default() -> Self {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
@@ -110,7 +110,7 @@ impl<T: FloatPixel> Default for StabilizationManager<T> {
     }
 }
 
-impl<T: FloatPixel> StabilizationManager<T> {
+impl<T: PixelType> StabilizationManager<T> {
     pub fn init_from_video_data(&self, path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) {
         {
             let mut params = self.params.write();

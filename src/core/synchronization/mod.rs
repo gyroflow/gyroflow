@@ -327,7 +327,7 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::undistortion::FloatPixel>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Self {
+    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Self {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
         let fps = params.fps;

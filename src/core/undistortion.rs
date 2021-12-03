@@ -31,7 +31,7 @@ pub struct ComputeParams {
     trim_end_frame: usize,
 }
 impl ComputeParams {
-    pub fn from_manager<T: FloatPixel>(mgr: &StabilizationManager<T>) -> Self {
+    pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
         let camera_matrix = Matrix3::from_row_slice(&mgr.camera_matrix_or_default());
 
         let params = mgr.params.read();
@@ -160,7 +160,7 @@ impl FrameTransform {
 }
 
 #[derive(Default)]
-pub struct Undistortion<T: FloatPixel> {
+pub struct Undistortion<T: PixelType> {
     pub stab_data: Vec<FrameTransform>,
 
     size: (usize, usize, usize), // width, height, stride
@@ -173,7 +173,7 @@ pub struct Undistortion<T: FloatPixel> {
     wgpu: Option<wgpu::WgpuWrapper<T::Scalar>>,
 }
 
-impl<T: FloatPixel> Undistortion<T> {
+impl<T: PixelType> Undistortion<T> {
     pub fn calculate_stab_data(params: &ComputeParams, current_compute_id: &std::sync::atomic::AtomicU64, compute_id: u64) -> Result<Vec<FrameTransform>, ()> {
         if params.frame_count == 0 || params.width == 0 || params.height == 0 {
             println!("no params {} {} {} ", params.frame_count, params.width, params.height);
@@ -266,7 +266,7 @@ impl<T: FloatPixel> Undistortion<T> {
 
     // TODO: optimize further with SIMD
     fn undistort_image_cpu(pixels: &mut [u8], out_pixels: &mut [u8], width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>) {
-        let bg_t: T = FloatPixel::from_float(bg);
+        let bg_t: T = PixelType::from_float(bg);
         
         const INTER_BITS: usize = 5;
         const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
@@ -333,11 +333,11 @@ impl<T: FloatPixel> Undistortion<T> {
                                 let xsum = 
                                     if sx >= 0 && sx < width as i32 {
                                         let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize..src_index as usize + bytes_per_pixel]); 
-                                        FloatPixel::to_float(*px1)
+                                        PixelType::to_float(*px1)
                                     } else { bg } * coeffs_x[0]
                                 +  if sx + 1 >= 0 && sx + 1 < width as i32 {
                                         let px2: &T = bytemuck::from_bytes(&pixels[src_index as usize + bytes_per_pixel..src_index as usize + bytes_per_pixel*2]);
-                                        FloatPixel::to_float(*px2)
+                                        PixelType::to_float(*px2)
                                     } else { bg } * coeffs_x[1];
 
                                 sum += xsum * coeffs_y[yp as usize];
@@ -346,7 +346,7 @@ impl<T: FloatPixel> Undistortion<T> {
                             }
                             src_index += stride as isize;
                         }
-                        *pix_out = FloatPixel::from_float(sum);
+                        *pix_out = PixelType::from_float(sum);
                     } else {
                         *pix_out = bg_t;
                     }
@@ -432,14 +432,10 @@ impl<T: FloatPixel> Undistortion<T> {
 
 }
 
-pub trait FloatPixel: Default + Copy + Send + Sync + bytemuck::Pod {
+pub trait PixelType: Default + Copy + Send + Sync + bytemuck::Pod {
     const COUNT: usize = 1;
     const SCALAR_BYTES: usize = 1;
-
-    #[cfg(feature = "use-opencl")]
-    type Scalar: ocl::OclPrm + bytemuck::Pod;
-    #[cfg(not(feature = "use-opencl"))]
-    type Scalar: bytemuck::Pod;
+    type Scalar: Default + bytemuck::Pod;
 
     fn to_float(v: Self) -> Vector4<f32>;
     fn from_float(v: Vector4<f32>) -> Self;
@@ -465,7 +461,7 @@ fn rgb_to_yuv(v: Vector4<f32>) -> Vector4<f32> {
 
 unsafe impl bytemuck::Zeroable for Luma8 { }
 unsafe impl bytemuck::Pod for Luma8 { }
-impl FloatPixel for Luma8 {
+impl PixelType for Luma8 {
     const COUNT: usize = 1;
     const SCALAR_BYTES: usize = 1;
     type Scalar = u8;
@@ -476,7 +472,7 @@ impl FloatPixel for Luma8 {
 }
 unsafe impl bytemuck::Zeroable for Luma16 { }
 unsafe impl bytemuck::Pod for Luma16 { }
-impl FloatPixel for Luma16 {
+impl PixelType for Luma16 {
     const COUNT: usize = 1;
     const SCALAR_BYTES: usize = 2;
     type Scalar = u16;
@@ -487,7 +483,7 @@ impl FloatPixel for Luma16 {
 }
 unsafe impl bytemuck::Zeroable for RGBA8 { }
 unsafe impl bytemuck::Pod for RGBA8 { }
-impl FloatPixel for RGBA8 {
+impl PixelType for RGBA8 {
     const COUNT: usize = 4;
     const SCALAR_BYTES: usize = 1;
     type Scalar = u8;
@@ -498,7 +494,7 @@ impl FloatPixel for RGBA8 {
 }
 unsafe impl bytemuck::Zeroable for RGBAf { }
 unsafe impl bytemuck::Pod for RGBAf { }
-impl FloatPixel for RGBAf {
+impl PixelType for RGBAf {
     const COUNT: usize = 4;
     const SCALAR_BYTES: usize = 4;
     type Scalar = f32;
@@ -509,7 +505,7 @@ impl FloatPixel for RGBAf {
 }
 unsafe impl bytemuck::Zeroable for UV8 { }
 unsafe impl bytemuck::Pod for UV8 { }
-impl FloatPixel for UV8 {
+impl PixelType for UV8 {
     const COUNT: usize = 2;
     const SCALAR_BYTES: usize = 1;
     type Scalar = u8;
@@ -520,7 +516,7 @@ impl FloatPixel for UV8 {
 }
 unsafe impl bytemuck::Zeroable for UV16 { }
 unsafe impl bytemuck::Pod for UV16 { }
-impl FloatPixel for UV16 {
+impl PixelType for UV16 {
     const COUNT: usize = 2;
     const SCALAR_BYTES: usize = 2;
     type Scalar = u16;
@@ -530,7 +526,7 @@ impl FloatPixel for UV16 {
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort2", "convert_ushort2", "float2", "convert_float2") }
 }
 
-impl FloatPixel for () {
+impl PixelType for () {
     const COUNT: usize = 0;
     const SCALAR_BYTES: usize = 1;
     type Scalar = u8;
@@ -541,5 +537,5 @@ impl FloatPixel for () {
 }
 
 
-unsafe impl<T: Default + Copy + Send + Sync + FloatPixel + bytemuck::Pod> Send for Undistortion<T> { }
-unsafe impl<T: Default + Copy + Send + Sync + FloatPixel + bytemuck::Pod> Sync for Undistortion<T> { }
+unsafe impl<T: PixelType> Send for Undistortion<T> { }
+unsafe impl<T: PixelType> Sync for Undistortion<T> { }

@@ -37,7 +37,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> 
     }
 }
 
-pub fn render<T: FloatPixel, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
+pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -95,10 +95,10 @@ pub fn render<T: FloatPixel, F>(stab: StabilizationManager<T>, progress: F, vide
                         params.background
                     };
                     let mut plane = Undistortion::<$t>::default();
-                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
+                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
                     plane.recompute(&ComputeParams::from_manager(&stab));
                     $planes.push(Box::new(move |frame_id: usize, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
-                        let (w, h, s)    = (in_frame_data .plane_width(plane_index) as usize, in_frame_data .plane_height(plane_index) as usize, in_frame_data .stride(plane_index) as usize);
+                        let (w, h, s)    = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
                         let (ow, oh, os) = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));

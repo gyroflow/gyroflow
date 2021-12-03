@@ -38,7 +38,7 @@ pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'st
     qmetaobject::queued_callback(move |arg| {
         if let Some(this) = qptr.as_pinned() {
             let this = this.borrow();
-            cb(&this, arg);
+            cb(this, arg);
         }
     })
 }
