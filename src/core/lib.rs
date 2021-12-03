@@ -15,6 +15,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use parking_lot::RwLock;
+pub use undistortion::FloatPixel;
 
 use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
 
@@ -30,9 +31,10 @@ lazy_static::lazy_static! {
 
 #[derive(Clone)]
 pub struct BasicParams {
-    pub size: (usize, usize),
-    pub output_size: (usize, usize),
-    pub video_size: (usize, usize), // Input size
+    pub size: (usize, usize), // Processing input size
+    pub output_size: (usize, usize), // Processing output size
+    pub video_size: (usize, usize), // Full resolution input size
+    pub video_output_size: (usize, usize), // Full resoution output size
 
     pub background: Vector4<f32>,
 
@@ -65,6 +67,7 @@ impl Default for BasicParams {
             size: (0, 0),
             output_size: (0, 0),
             video_size: (0, 0),
+            video_output_size: (0, 0),
 
             video_rotation: 0.0,
 
@@ -79,26 +82,26 @@ impl Default for BasicParams {
         }
     }
 }
-pub struct StabilizationManager {
+pub struct StabilizationManager<T: FloatPixel> {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
     pub smoothing: Arc<RwLock<Smoothing>>,
 
-    pub undistortion: Arc<RwLock<Undistortion<undistortion::RGBA8>>>, // TODO generic
+    pub undistortion: Arc<RwLock<Undistortion<T>>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
 
     pub params: Arc<RwLock<BasicParams>>
 }
 
-impl Default for StabilizationManager {
+impl<T: FloatPixel> Default for StabilizationManager<T> {
     fn default() -> Self {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
             params: Arc::new(RwLock::new(BasicParams::default())),
             
-            undistortion: Arc::new(RwLock::new(Undistortion::<undistortion::RGBA8>::default())),
+            undistortion: Arc::new(RwLock::new(Undistortion::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
             
@@ -107,7 +110,7 @@ impl Default for StabilizationManager {
     }
 }
 
-impl StabilizationManager {
+impl<T: FloatPixel> StabilizationManager<T> {
     pub fn init_from_video_data(&self, path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) {
         {
             let mut params = self.params.write();
@@ -190,9 +193,8 @@ impl StabilizationManager {
             (params.size.0, params.size.1, params.output_size.0, params.output_size.1, params.background)
         };
 
-        // TODO strides
-        let s = w;
-        let os = ow;
+        let s = w * T::COUNT * T::SCALAR_BYTES;
+        let os = ow * T::COUNT * T::SCALAR_BYTES;
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
             self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
@@ -203,20 +205,24 @@ impl StabilizationManager {
         {
             let mut params = self.params.write();
             params.size = (width, height);
-            params.output_size = (width, height);
+
+            let ratio = params.size.0 as f64 / params.video_size.0 as f64;
+            params.output_size = ((params.video_output_size.0 as f64 * ratio) as usize, (params.video_output_size.1 as f64 * ratio) as usize);
         }
         self.init_size();
     }
     pub fn set_output_size(&self, width: usize, height: usize) {
         {
             let mut params = self.params.write();
-            params.output_size = (width, height);
+            let ratio = params.size.0 as f64 / params.video_size.0 as f64;
+            params.output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
+            params.video_output_size = (width, height);
         }
         self.init_size();
     }
 
     pub fn recompute_adaptive_zoom(&self) {
-        let (window, frames, video_size, img_dim_ratio, fps, trim) = {
+        let (window, frames, video_size, ratio, fps, trim) = {
             let params = self.params.read();
             (params.adaptive_zoom_window, params.frame_count, params.output_size, params.size.0 as f64 / params.video_size.0 as f64, params.fps, (params.trim_start, params.trim_end))
         };
@@ -237,7 +243,7 @@ impl StabilizationManager {
 
             let zoom = AdaptiveZoom::from_manager(self);
             let fovs = zoom.compute(&quats, video_size, fps, mode, trim);
-            self.params.write().fovs = fovs.iter().map(|v| v.0 * img_dim_ratio).collect();
+            self.params.write().fovs = fovs.iter().map(|v| v.0 * ratio).collect();
         } else {
             self.params.write().fovs.clear();
         }
@@ -269,7 +275,7 @@ impl StabilizationManager {
 
         let undistortion = self.undistortion.clone();
         THREAD_POOL.spawn(move || {
-            if let Ok(stab_data) = undistortion::Undistortion::<undistortion::RGBA8>::calculate_stab_data(&params, &CURRENT_COMPUTE_ID, compute_id) {
+            if let Ok(stab_data) = undistortion::Undistortion::<T>::calculate_stab_data(&params, &CURRENT_COMPUTE_ID, compute_id) {
                 undistortion.write().stab_data = stab_data;
 
                 cb(compute_id);
@@ -278,34 +284,36 @@ impl StabilizationManager {
         compute_id
     }
 
-    pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, pixels: &mut [u8]) -> (u32, u32, u32, *mut u8) { // TODO: generic
+    pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool { // TODO: generic
         let (enabled, show_features, ow, oh) = {
             let params = self.params.read();
             (params.stab_enabled, params.show_detected_features, params.output_size.0, params.output_size.1)
         };
-        if enabled {
+        if enabled && ow == out_width && oh == out_height {
             if show_features {
                 //////////////////////////// Draw detected features ////////////////////////////
-                let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
-                for i in 0..xs.len() {
-                    for xstep in -1..=1i32 {
-                        for ystep in -1..=1i32 {
-                            let pos = ((ys[i] as i32 + ystep) * stride as i32 + (xs[i] as i32 + xstep)) as usize * 4;
-                            if pixels.len() > pos + 2 { 
-                                pixels[pos + 0] = 0x0c;
-                                pixels[pos + 1] = 0xff;
-                                pixels[pos + 2] = 0x00;
+                // TODO: maybe handle other types than RGBA8?
+                if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+                    let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
+                    for i in 0..xs.len() {
+                        for xstep in -1..=1i32 {
+                            for ystep in -1..=1i32 {
+                                let pos = ((ys[i] as i32 + ystep) * stride as i32 + (xs[i] as i32 + xstep) * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                                if pixels.len() > pos + 2 { 
+                                    pixels[pos + 0] = 0x0c; // R
+                                    pixels[pos + 1] = 0xff; // G
+                                    pixels[pos + 2] = 0x00; // B
+                                }
                             }
                         }
                     }
                 }
                 //////////////////////////// Draw detected features ////////////////////////////
             }
-            let os = ow; // TODO stride
             
-            self.undistortion.write().process_pixels(frame, width, height, stride, ow, oh, os, pixels)
+            self.undistortion.write().process_pixels(frame, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels)
         } else {
-            (width as u32, height as u32, stride as u32, pixels.as_mut_ptr())
+            false
         }
     }
 
@@ -367,7 +375,7 @@ impl StabilizationManager {
         self.smoothing.read().get_names()
     }
 
-    pub fn get_render_stabilizator(&self, output_size: (usize, usize)) -> StabilizationManager {
+    pub fn get_render_stabilizator(&self, output_size: (usize, usize)) -> StabilizationManager<T> {
         let size = self.params.read().video_size;
         let stab = StabilizationManager {
             params: Arc::new(RwLock::new(self.params.read().clone())),
@@ -383,7 +391,7 @@ impl StabilizationManager {
         stab
     }
 
-    pub fn spawn_on_threadpool<F>(cb: F) where F: FnOnce() + Send + 'static {
+    pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
         THREAD_POOL.spawn(cb);
     }
 

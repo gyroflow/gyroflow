@@ -151,17 +151,23 @@ Item {
         MouseArea {
             id: ma;
             anchors.fill: parent;
+            hoverEnabled: true;
             onMouseXChanged: {
-                root.value = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
+                if (pressed) root.value = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
             }
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
-                    addSyncPointPopup.x = mouse.x;
-                    addSyncPointPopup.y = mouse.y - addSyncPointPopup.height - 5;
-                    addSyncPointPopup.open();
+                    timelineContextMenu.x = mouse.x;
+                    timelineContextMenu.y = mouse.y - timelineContextMenu.height - 5;
+                    timelineContextMenu.open();
                 }
+            }
+            onDoubleClicked: (mouse) => {
+                root.visibleAreaLeft  = 0.0;
+                root.visibleAreaRight = 1.0;
+                chart.vscale = 1.0;
             }
             onWheel: (wheel) => {
                 if (wheel.modifiers & Qt.ControlModifier) {
@@ -182,7 +188,7 @@ Item {
         }
 
         Popup {
-            id: addSyncPointPopup;
+            id: timelineContextMenu;
             width: maxItemWidth + 10 * dpiScale;
             y: -height - 5 * dpiScale;
             currentIndex: -1;
@@ -191,13 +197,13 @@ Item {
             itemHeight: 27 * dpiScale;
             font.pixelSize: 11.5 * dpiScale;
             onClicked: (index) => {
-                const pos = (root.mapFromVisibleArea(addSyncPointPopup.x / ma.width));
+                const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
                 switch (index) {
                     case 0: controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint, window.sync.everyNthFrame, window.videoArea.vid.rotation); break;
                     case 1: controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000)); break;
                 }
 
-                addSyncPointPopup.close();
+                timelineContextMenu.close();
             }
         }
 
@@ -356,4 +362,9 @@ Item {
     }
     LoaderOverlay { anchors.topMargin: 10 * dpiScale; }
 
+    Item {
+        width: parent.width; 
+        anchors.bottom: parent.bottom;
+        ToolTip { text: qsTr("Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom"); visible: ma.containsMouse; delay: 2000; }
+    }
 }

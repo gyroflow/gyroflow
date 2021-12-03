@@ -26,10 +26,22 @@ MenuItem {
         }
     }
 
+    WarningMessage {
+        id: fovWarning;
+        visible: opacity > 0;
+        opacity: fov.value > 1.0 && croppingMode.currentIndex > 0? 1 : 0;
+        Ease on opacity { }
+        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
+        t.font.pixelSize: 12 * dpiScale;
+        t.x: 5 * dpiScale;
+        text: qsTr("FOV is greater than 1.0, you may see black borders"); 
+    }
+
     Label {
         position: Label.Left;
         text: qsTr("FOV");
         Slider {
+            id: fov;
             from: 0.1;
             to: 3;
             value: 1.0;

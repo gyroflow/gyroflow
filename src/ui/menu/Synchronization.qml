@@ -100,8 +100,16 @@ MenuItem {
         opacity: opened? 1 : 0;
         height: opened? implicitHeight : -10 * dpiScale;
         Ease on opacity { }
-        Ease on height { }
-        //clip: true;
+        Ease on height { id: anim; }
+        onOpenedChanged: {
+            anim.enabled = true;
+            timer.start();
+        }
+        Timer {
+            id: timer;
+            interval: 700;
+            onTriggered: anim.enabled = false;
+        }
 
         Label {
             position: Label.Left;

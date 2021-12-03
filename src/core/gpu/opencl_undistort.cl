@@ -39,7 +39,7 @@ float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
     return (float2)(xDistort, yDistort);
 }*/
 
-__kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TYPE *dstptr, ushort width, ushort height, ushort stride, ushort output_width, ushort output_height, ushort output_stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
+__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, ushort width, ushort height, ushort stride, ushort output_width, ushort output_height, ushort output_stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
     int x = get_global_id(0);
     int y = get_global_id(1);
 
@@ -54,6 +54,7 @@ __kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TY
         float _y = y * params[4] + params[5] + (x * params[3]);
         float _w = y * params[7] + params[8] + (x * params[6]);
 
+        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * output_stride];
         if (_w > 0) {
 
             float2 pos = (float2)(_x, _y) / _w;
@@ -79,13 +80,13 @@ __kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TY
             __constant float *coeffs_y = &coeffs[((convert_int_rte(uv.y * INTER_TAB_SIZE) & (INTER_TAB_SIZE - 1)) << 1)];
 
             DATA_TYPEF sum = 0;
-            int src_index = sy * stride + sx;
+            int src_index = sy * stride + sx * PIXEL_BYTES;
 
             #pragma unroll
             for (int yp = 0; yp < 2; ++yp) {
                 if (sy + yp >= 0 && sy + yp < height) {
-                    DATA_TYPEF xsum = ((sx + 0 >= 0 && sx + 0 < width? DATA_CONVERTF(srcptr[src_index + 0]) : bg) * coeffs_x[0]) + 
-                                      ((sx + 1 >= 0 && sx + 1 < width? DATA_CONVERTF(srcptr[src_index + 1]) : bg) * coeffs_x[1]);
+                    DATA_TYPEF xsum = ((sx + 0 >= 0 && sx + 0 < width? DATA_CONVERTF(*(__global const DATA_TYPE *)&srcptr[src_index]) : bg) * coeffs_x[0]) + 
+                                      ((sx + 1 >= 0 && sx + 1 < width? DATA_CONVERTF(*(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES]) : bg) * coeffs_x[1]);
                     sum += xsum * coeffs_y[yp];
                 } else {
                     sum += bg * coeffs_y[yp];
@@ -93,9 +94,9 @@ __kernel void undistort_image(__global const DATA_TYPE *srcptr, __global DATA_TY
                 src_index += stride;
             }
 
-            dstptr[x + y*output_stride] = DATA_CONVERT(sum);
+            *out_pix = DATA_CONVERT(sum);
         } else {
-            dstptr[x + y*output_stride] = DATA_CONVERT(bg);
+            *out_pix = DATA_CONVERT(bg);
         }
     }
 }

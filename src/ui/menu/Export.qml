@@ -12,8 +12,11 @@ MenuItem {
     property int orgWidth: 0;
     property int orgHeight: 0;
 
-    onOrgWidthChanged: outputWidth.value = orgWidth;
-    onOrgHeightChanged: outputHeight.value = orgHeight;
+    property int ratioWidth: orgWidth;
+    property int ratioHeight: orgHeight;
+
+    onOrgWidthChanged: { outputWidth.value = orgWidth; ratioWidth = orgWidth; }
+    onOrgHeightChanged: { outputHeight.value = orgHeight; ratioHeight = orgHeight; }
 
     property alias outWidth: outputWidth.value;
     property alias outHeight: outputHeight.value;
@@ -23,8 +26,8 @@ MenuItem {
     property alias audio: audio.checked;
 
     function updateOutputSize(isWidth) {
-        if (lockAspectRatio.checked && orgWidth > 0) {
-            const ratio = orgWidth / orgHeight;
+        if (lockAspectRatio.checked && ratioHeight > 0) {
+            const ratio = ratioWidth / ratioHeight;
             if (isWidth) {
                 outputHeight.preventChange2 = true;
                 outputHeight.value = outputWidth.value / ratio;
@@ -35,8 +38,7 @@ MenuItem {
                 outputWidth.preventChange2 = false;
             }
         }
-        const ratio = Math.max(window.videoArea.vid.surfaceWidth / window.videoArea.vid.videoWidth, window.videoArea.vid.surfaceHeight / window.videoArea.vid.videoHeight);;
-        controller.set_output_size(outWidth * ratio, outHeight * ratio);
+        controller.set_output_size(outWidth, outHeight);
     }
 
     ComboBox {
@@ -81,6 +83,7 @@ MenuItem {
                 textColor: checked? styleAccentColor : styleTextColor;
                 display: QQC.Button.IconOnly;
                 tooltip: qsTr("Lock aspect ratio");
+                onCheckedChanged: if (checked) { ratioWidth = outWidth; ratioHeight = outHeight; }
             }
         }
     }

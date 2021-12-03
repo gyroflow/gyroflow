@@ -1,3 +1,4 @@
+use gyroflow_core::undistortion;
 use qmetaobject::*;
 use nalgebra::{Vector4};
 use std::sync::Arc;
@@ -67,7 +68,7 @@ pub struct Controller {
     gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
     gyro_changed: qt_signal!(),
 
-    stabilizer: Arc<StabilizationManager>, // TODO generic
+    stabilizer: Arc<StabilizationManager<undistortion::RGBA8>>,
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, status: QString),
@@ -83,7 +84,7 @@ pub struct Controller {
 
     chart_data_changed: qt_signal!(),
 
-    render: qt_method!(fn(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool)),
+    render: qt_method!(fn(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
     render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
@@ -166,10 +167,12 @@ impl Controller {
         
         let video_path = self.video_path.clone();
         let (sw, sh) = (size.0 as u32, size.1 as u32);
-        StabilizationManager::spawn_on_threadpool(move || {
+        StabilizationManager::<()>::run_threaded(move || {
             let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
-            proc.on_frame(|timestamp_us, input_frame, converter| {
+            proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                 let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+
+                assert!(_output_frame.is_none());
 
                 if sync.is_frame_wanted(frame) {
                     let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
@@ -235,10 +238,11 @@ impl Controller {
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
-                StabilizationManager::spawn_on_threadpool(move || {
+                StabilizationManager::<()>::run_threaded(move || {
                     let detected = {
                         if is_main_video {
                             stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size);
+                            stab.set_output_size(video_size.0, video_size.1);
                         } else {
                             stab.load_gyro_data(&s);
                         }
@@ -283,8 +287,8 @@ impl Controller {
 
             let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
             let ratio = vid.videoHeight as f64 / h as f64;
-            let new_w = ((vid.videoWidth as f64 / ratio).floor() as u32);
-            let new_h = ((vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32);
+            let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
+            let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
             println!("surface size: {}x{}", new_w, new_h);
 
             self.stabilizer.pose_estimator.clear();
@@ -292,7 +296,8 @@ impl Controller {
 
             vid.setSurfaceSize(new_w, new_h);
             vid.setRotation(vid.getRotation());
-            vid.setCurrentFrame(vid.currentFrame)
+            vid.setCurrentFrame(vid.currentFrame + 1);
+            vid.setCurrentFrame(vid.currentFrame);
         }
     }
 
@@ -303,7 +308,7 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        StabilizationManager::spawn_on_threadpool(move || {
+        StabilizationManager::<()>::run_threaded(move || {
             {
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
@@ -328,14 +333,28 @@ impl Controller {
             }));
 
             let stab = self.stabilizer.clone();
+            let out_pixels = RefCell::new(Vec::new());
             vid.onProcessPixels(Box::new(move |frame, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
                 // let _time = std::time::Instant::now();
 
-                // Assume RGBA8 - 4 bytes per pixel
-                let mut ret = stab.process_pixels(frame as usize, width as usize, height as usize, stride as usize / 4, pixels);
-                ret.2 *= 4;
+                // TODO: cache in atomics instead of locking the mutex every time
+                let (ow, oh) = {
+                    let params = stab.params.read();
+                    params.output_size
+                };
+                let os = ow * 4; // Assume RGBA8 - 4 bytes per pixel
+
+                let mut out_pixels = out_pixels.borrow_mut();
+                out_pixels.resize_with(os*oh, u8::default);
+
+                let ret = stab.process_pixels(frame as usize, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
+                
                 // println!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
-                ret
+                if ret {
+                    (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
+                } else {
+                    (0, 0, 0, std::ptr::null_mut())
+                }
             }));
         }
     }
@@ -381,7 +400,7 @@ impl Controller {
         self.compute_progress(id, 0.0);
     }
 
-    fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool) {
+    fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize)| {
             this.render_progress(params.0, params.1, params.2);
         });
@@ -396,9 +415,9 @@ impl Controller {
         let cancel_flag = self.cancel_flag.clone();
 
         let stab = self.stabilizer.clone();
-        StabilizationManager::spawn_on_threadpool(move || {
+        StabilizationManager::<()>::run_threaded(move || {
             let stab = stab.get_render_stabilizator((output_width, output_height));
-            rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, use_gpu, audio, cancel_flag);
+            rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag);
         });
     }
     

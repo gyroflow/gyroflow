@@ -15,8 +15,10 @@ impl Merge<f64> for Point2D {
 #[derive(Default, Clone)]
 pub struct AdaptiveZoom {
     calib_dimension: (f64, f64),
+    size: (usize, usize),
     camera_matrix: nalgebra::Matrix3<f64>,
-    distortion_coeffs: Vec<f64>
+    distortion_coeffs: Vec<f64>,
+    image_rotation: nalgebra::Matrix3<f64>,
 }
 
 pub enum Mode {
@@ -25,16 +27,21 @@ pub enum Mode {
 }
 
 impl AdaptiveZoom {
-    pub fn from_manager(mgr: &StabilizationManager) -> Self {
+    pub fn from_manager<T: crate::FloatPixel>(mgr: &StabilizationManager<T>) -> Self {
         let lens = mgr.lens.read();
         let params = mgr.params.read();
 
+        let image_rotation = nalgebra::Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
         let calib_dimension = if lens.calib_dimension.0 > 0.0 { lens.calib_dimension } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
         let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 { lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
+        let size = params.size;
         drop(lens);
         drop(params);
+        
         Self {
             calib_dimension,
+            size,
+            image_rotation, 
             camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),
             distortion_coeffs
         }
@@ -117,7 +124,7 @@ impl AdaptiveZoom {
     }
     
     pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, mode: Mode, range: (f64, f64)) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
-        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9)).collect();
+        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9, output_dim)).collect();
         // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
@@ -173,10 +180,10 @@ impl AdaptiveZoom {
         fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
     }
 
-    fn bounding_polygon(&self, quat: &nalgebra::UnitQuaternion<f64>, num_points: usize) -> Vec<Point2D> {
+    fn bounding_polygon(&self, quat: &nalgebra::UnitQuaternion<f64>, num_points: usize, _output_dim: (usize, usize)) -> Vec<Point2D> {
         let (w, h) = (self.calib_dimension.0, self.calib_dimension.1);
 
-        let mut r = *quat.to_rotation_matrix().matrix();
+        let mut r = self.image_rotation * *quat.to_rotation_matrix().matrix();
         r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
         r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
 
@@ -188,8 +195,7 @@ impl AdaptiveZoom {
         for i in 0..pts { distorted_points.push(((pts - i) as f64 * dim_ratio.0,      h)); }
         for i in 0..pts { distorted_points.push((0.0,                                 (pts - i) as f64 * dim_ratio.1)); }
 
-        let k = self.camera_matrix;
-        let undistorted_points = Undistortion::<()>::undistort_points(&distorted_points, k, &self.distortion_coeffs, r, k);
+        let undistorted_points = Undistortion::<()>::undistort_points(&distorted_points, self.camera_matrix, &self.distortion_coeffs, r, self.camera_matrix);
 
         undistorted_points.into_iter().map(|v| Point2D(v.0, v.1)).collect()
     }

@@ -12,26 +12,22 @@ pub mod rendering;
 pub mod resources;
 pub mod ui { pub mod theme; pub mod components { pub mod TimelineGyroChart; } }
 
-use crate::core::{lens_profile::LensProfile, smoothing::*};
+use crate::core::{lens_profile::LensProfile};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
-// - UI fixes, editing offset, double animations etc
+// - UI fixes, editing offset etc
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Some basic error handling, check for all unwrap()'s
 // - Show error when movie is invalid
-// - output size and correctly fit the undistortion in it
 // - new sync method
-// - warning when adaptive zoom is enabled and fov > 1.0
+// - Warning when adding sync points and it's a GoPro with quaternions
 // - Port Aphobius 2.0
-// - Add tooltip to timeline with zoom info
 // - Move "timeline chart" type selection to timeline context menu
-// - improve colors on timeline chart
-// - double click to reset timeline zoom
 // - Figure out what to do with the console output window/log
 // - Pick a license
 
@@ -107,6 +103,7 @@ fn entry() {
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_object_property("controller".into(), ctlpinned);
     engine.set_object_property("theme".into(), themepinned);
+    engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
     theme.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
     theme.borrow().set_theme("dark".into());
 

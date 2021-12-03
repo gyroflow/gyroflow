@@ -295,14 +295,10 @@ impl QQuickPaintedItem for TimelineGyroChart {
         if self.series[2].visible { self.drawAxis(p, 2, "#4c7c8f"); } // Z
         if self.series[3].visible { self.drawAxis(p, 3, "#8f4c8f"); } // Angle
 
-        if self.series[4].visible { self.drawAxis(p, 4, "#f1e427"); } // Sync X d5ce67
-        if self.series[5].visible { self.drawAxis(p, 5, "#f7aa0f"); } // Sync Y c9bd4b
-        if self.series[6].visible { self.drawAxis(p, 6, "#d3f511"); } // Sync Z a89c30
-        if self.series[7].visible { self.drawAxis(p, 7, "#11f2f5"); } // Sync Angle
+        if self.series[4].visible { self.drawAxis(p, 4, "#ff8888"); } // Sync X
+        if self.series[5].visible { self.drawAxis(p, 5, "#88ff88"); } // Sync Y
+        if self.series[6].visible { self.drawAxis(p, 6, "#88deff"); } // Sync Z
+        if self.series[7].visible { self.drawAxis(p, 7, "#ff88ff"); } // Sync Angle
 
-        //if self.series[8].visible { self.drawAxis(p, 8, "#67d793"); } // Smoothed X
-        //if self.series[9].visible { self.drawAxis(p, 9, "#4aca7d"); } // Smoothed Y
-        //if self.series[10].visible { self.drawAxis(p, 10, "#30a860"); } // Smoothed Z
-        //if self.series[11].visible { self.drawAxis(p, 11, "#00cc51"); } // Smoothed Angle
     }
 }

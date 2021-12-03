@@ -127,7 +127,7 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, output_path: &str, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
+    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
@@ -171,7 +171,6 @@ impl<'a> FfmpegProcessor<'a> {
             }
             output_index += 1;
         }
-
 
         octx.set_metadata(self.input_context.metadata().to_owned());
         // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder
@@ -224,7 +223,7 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 }
  
-                match self.video.receive_and_process_video_frames(Some(&mut octx), &mut self.ost_time_bases, self.end_ms) {
+                match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.end_ms) {
                     Ok(encoding_status) => {
                         if self.video.encoder.is_some() {
                             video_inited = true;
@@ -257,7 +256,7 @@ impl<'a> FfmpegProcessor<'a> {
         {
             let ost_time_base = self.ost_time_bases[self.video.output_index];
             self.video.decoder.as_mut().unwrap().send_eof()?;
-            self.video.receive_and_process_video_frames(Some(&mut octx), &mut self.ost_time_bases, self.end_ms)?;
+            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.end_ms)?;
             self.video.encoder.as_mut().unwrap().send_eof()?;
             self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base);
         }
@@ -316,7 +315,7 @@ impl<'a> FfmpegProcessor<'a> {
                     if let Err(err) = decoder.send_packet(&packet) {
                         eprintln!("Decoder error {:?}", err);
                     }
-                    match self.video.receive_and_process_video_frames(None, &mut self.ost_time_bases, self.end_ms) {
+                    match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms) {
                         Ok(encoding_status) => {
                             if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                                 break;
@@ -341,12 +340,12 @@ impl<'a> FfmpegProcessor<'a> {
     
         // Flush decoder.
         self.video.decoder.as_mut().unwrap().send_eof()?;
-        self.video.receive_and_process_video_frames(None, &mut self.ost_time_bases, self.end_ms)?;
+        self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms)?;
 
         Ok(())
     }
 
-    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, &mut ffmpeg_video::Converter) + 'a {
+    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video::Converter) + 'a {
         self.video.on_frame_callback = Some(Box::new(cb));
     }
 

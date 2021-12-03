@@ -111,6 +111,7 @@ Rectangle {
                             videoArea.trimEnd, 
                             exportSettings.outWidth, 
                             exportSettings.outHeight, 
+                            exportSettings.bitrate, 
                             exportSettings.gpu, 
                             exportSettings.audio
                         );

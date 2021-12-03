@@ -327,7 +327,7 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager(stab: &StabilizationManager, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Self {
+    pub fn from_manager<T: crate::undistortion::FloatPixel>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Self {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
         let fps = params.fps;
@@ -400,7 +400,7 @@ impl AutosyncProcess {
         }
         return false;
     }
-    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], video_rotation: i32, cancel_flag: Arc<AtomicBool>) {
+    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], _video_rotation: i32, cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);

@@ -37,7 +37,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> 
     }
 }
 
-pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
+pub fn render<T: FloatPixel, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -74,33 +74,36 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
         proc.audio_codec = codec::Id::None;
     }
 
-    let mut planes = Vec::<Box<dyn FnMut(usize, &mut [u8], usize, usize, usize, usize, usize, usize)>>::new();
+    let mut planes = Vec::<Box<dyn FnMut(usize, &mut Video, &mut Video, usize)>>::new();
 
     let progress2 = progress.clone();
-    proc.on_frame(move |timestamp_us, input_frame, converter| {
+    proc.on_frame(move |timestamp_us, input_frame, output_frame, converter| {
         let absolute_frame_id = ((timestamp_us as f64 / 1000.0 / duration_ms) * total_frame_count as f64).round() as usize;
         let process_frame = ((((timestamp_us as f64 / 1000.0) - start_ms as f64) / render_duration) * render_frame_count as f64).round() as usize + 1;
 
+        let output_frame = output_frame.unwrap();
+
         macro_rules! create_planes_proc {
-            ($planes:ident, $(($t:tt, $w:expr, $h:expr, $s:expr, $yuvi:expr), )*) => {
+            ($planes:ident, $(($t:tt, $in_frame:expr, $out_frame:expr, $ind:expr, $yuvi:expr), )*) => {
                 $({
-                    let out_size = ($w as usize, $h as usize, ($s / $t::COUNT) as usize); // TODO: output size
+                    let in_size  = ($in_frame .plane_width($ind) as usize, $in_frame .plane_height($ind) as usize, $in_frame .stride($ind) as usize);
+                    let out_size = ($out_frame.plane_width($ind) as usize, $out_frame.plane_height($ind) as usize, $out_frame.stride($ind) as usize);
                     let bg = {
                         let mut params = stab.params.write();
-                        params.size = ($w as usize, $h as usize);
+                        params.size        = (in_size.0,  in_size.1);
                         params.output_size = (out_size.0, out_size.1);
                         params.background
                     };
                     let mut plane = Undistortion::<$t>::default();
-                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), ($w as usize, $h as usize), ($s / $t::COUNT) as usize, (out_size.0, out_size.1), out_size.2);
+                    plane.init_size(<$t as FloatPixel>::from_rgb_color(bg, &$yuvi), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
                     plane.recompute(&ComputeParams::from_manager(&stab));
-                    $planes.push(Box::new(move |frame_id: usize, buffer: &mut [u8], w: usize, h: usize, mut s: usize, ow: usize, oh: usize, mut os: usize| {
-                        s /= $t::COUNT;
-                        os /= $t::COUNT;
-                        let (pw, ph, ps, processed) = plane.process_pixels(frame_id, w, h, s, ow, oh, os, bytemuck::cast_slice_mut(buffer)); // TODO output size
-                        if buffer.as_ptr() as *const u8 != processed as *const u8 { 
-                            buffer.copy_from_slice(unsafe { std::slice::from_raw_parts(processed as *mut u8, os*oh*std::mem::size_of::<<$t as FloatPixel>::Scalar>()*$t::COUNT) });
-                        }
+                    $planes.push(Box::new(move |frame_id: usize, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
+                        let (w, h, s)    = (in_frame_data .plane_width(plane_index) as usize, in_frame_data .plane_height(plane_index) as usize, in_frame_data .stride(plane_index) as usize);
+                        let (ow, oh, os) = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
+
+                        let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
+
+                        plane.process_pixels(frame_id, w, h, s, ow, oh, os, buffer, out_buffer);
                     }));
                 })*
             };
@@ -112,44 +115,44 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
             match input_frame.format() {
                 Pixel::NV12 => {
                     create_planes_proc!(planes, 
-                        (Luma8, input_frame.plane_width(0), input_frame.plane_height(0), input_frame.stride(0), [0]),
-                        (UV8,   input_frame.plane_width(1), input_frame.plane_height(1), input_frame.stride(1), [1,2]),
+                        (Luma8, input_frame, output_frame, 0, [0]),
+                        (UV8,   input_frame, output_frame, 1, [1,2]),
                     );
                 },
                 Pixel::NV21 => {
                     create_planes_proc!(planes, 
-                        (Luma8, input_frame.plane_width(0), input_frame.plane_height(0), input_frame.stride(0), [0]),
-                        (UV8,   input_frame.plane_width(1), input_frame.plane_height(1), input_frame.stride(1), [2,1]),
+                        (Luma8, input_frame, output_frame, 0, [0]),
+                        (UV8,   input_frame, output_frame, 1, [2,1]),
                     );
                 },
                 Pixel::P010LE | Pixel::P016LE => {
                     create_planes_proc!(planes, 
-                        (Luma16, input_frame.plane_width(0), input_frame.plane_height(0), input_frame.stride(0) / 2/*bytes*/, [0]),
-                        (UV16,   input_frame.plane_width(1), input_frame.plane_height(1), input_frame.stride(1) / 2/*bytes*/, [1,2]),
+                        (Luma16, input_frame, output_frame, 0, [0]),
+                        (UV16,   input_frame, output_frame, 1, [1,2]),
                     );
                 },
                 Pixel::YUV420P | Pixel::YUVJ420P => {
                     create_planes_proc!(planes, 
-                        (Luma8, input_frame.plane_width(0), input_frame.plane_height(0), input_frame.stride(0), [0]),
-                        (Luma8, input_frame.plane_width(1), input_frame.plane_height(1), input_frame.stride(1), [1]),
-                        (Luma8, input_frame.plane_width(2), input_frame.plane_height(2), input_frame.stride(2), [2]),
+                        (Luma8, input_frame, output_frame, 0, [0]),
+                        (Luma8, input_frame, output_frame, 1, [1]),
+                        (Luma8, input_frame, output_frame, 2, [2]),
                     );
                 },
                 Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
                     create_planes_proc!(planes, 
-                        (Luma16, input_frame.plane_width(0), input_frame.plane_height(0), input_frame.stride(0) / 2/*bytes*/, [0]),
-                        (Luma16, input_frame.plane_width(1), input_frame.plane_height(1), input_frame.stride(1) / 2/*bytes*/, [1]),
-                        (Luma16, input_frame.plane_width(2), input_frame.plane_height(2), input_frame.stride(2) / 2/*bytes*/, [2]),
+                        (Luma16, input_frame, output_frame, 0, [0]),
+                        (Luma16, input_frame, output_frame, 1, [1]),
+                        (Luma16, input_frame, output_frame, 2, [2]),
                     );
                 },
                 format => { // All other convert to YUV444P16LE
                     println!("Unknown format {:?}, converting to YUV444P16LE", format);
                     // Go through 4:4:4 because of even plane dimensions
-                    converter.convert_pixel_format(input_frame, Pixel::YUV444P16LE, |converted_frame| {
+                    converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
                         create_planes_proc!(planes, 
-                            (Luma16, converted_frame.plane_width(0), converted_frame.plane_height(0), converted_frame.stride(0) / 2/*bytes*/, [0]), 
-                            (Luma16, converted_frame.plane_width(1), converted_frame.plane_height(1), converted_frame.stride(1) / 2/*bytes*/, [1]), 
-                            (Luma16, converted_frame.plane_width(2), converted_frame.plane_height(2), converted_frame.stride(2) / 2/*bytes*/, [2]), 
+                            (Luma16, converted_frame, converted_output, 0, [0]), 
+                            (Luma16, converted_frame, converted_output, 1, [1]), 
+                            (Luma16, converted_frame, converted_output, 2, [2]), 
                         );
                     });
                 }
@@ -159,39 +162,26 @@ pub fn render<F>(stab: StabilizationManager, progress: F, video_path: String, co
             panic!("Unknown pixel format {:?}", input_frame.format());
         }
 
-        let mut undistort_frame = |frame: &mut Video, bytes_per_scalar: usize| {
+        let mut undistort_frame = |frame: &mut Video, out_frame: &mut Video| {
             for (i, cb) in planes.iter_mut().enumerate() {
-                let w = frame.plane_width(i) as usize;
-                let h = frame.plane_height(i) as usize;
-                let s = frame.stride(i) as usize / bytes_per_scalar;
-                
-                let ow = w; // TODO: output size
-                let oh = h;
-                let os = s;
-        
-                let data = frame.data_mut(i);
-                
-                (*cb)(absolute_frame_id, data, w, h, s, ow, oh, os);
+                (*cb)(absolute_frame_id, frame, out_frame, i);
             }
             progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count));
         };
 
         match input_frame.format() {
-            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P => {
-                undistort_frame(input_frame, 1)
-            },
-            Pixel::P010LE | Pixel::P016LE | Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
-                undistort_frame(input_frame, 2)
+            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P | Pixel::P010LE | Pixel::P016LE | Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
+                undistort_frame(input_frame, output_frame)
             },
             _ => {
-                converter.convert_pixel_format(input_frame, Pixel::YUV444P16LE, |converted_frame| {
-                    undistort_frame(converted_frame, 2);
+                converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
+                    undistort_frame(converted_frame, converted_output);
                 });
             }
         }
     });
 
-    proc.render(&output_path, cancel_flag).unwrap(); // TODO errors
+    proc.render(&output_path, (output_width as u32, output_height as u32), if bitrate > 0.0 { Some(bitrate) } else { None }, cancel_flag).unwrap(); // TODO errors
 
     progress((1.0, render_frame_count, render_frame_count));
 }

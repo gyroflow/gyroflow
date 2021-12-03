@@ -45,7 +45,7 @@ QQC.Slider {
         delay: 0;
         parent: handle;
         visible: slider.pressed;
-        text: slider.value.toFixed(slider.precision) + (slider.unit? " " + slider.unit : "");
+        text: slider.valueAt(slider.position).toFixed(slider.precision) + (slider.unit? " " + slider.unit : "");
         bottomMargin: 5 * dpiScale;
     }
 }

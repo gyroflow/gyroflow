@@ -1,18 +1,16 @@
 use ocl::*;
 
-pub struct OclWrapper<T: ocl::OclPrm> {
+pub struct OclWrapper {
     kernel: Kernel,
-    src: Buffer<T>,
-    dst: Buffer<T>,
+    src: Buffer<u8>,
+    dst: Buffer<u8>,
     pix_element_count: usize,
-
-    out_buffer: Vec<T>,
 
     params_buf: Buffer<f32>,
 }
 
-impl<T: ocl::OclPrm> OclWrapper<T> {
-    pub fn new(width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
+impl OclWrapper {
+    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
         let platform = Platform::default();
         let device = Device::first(platform)?;
         println!("Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
@@ -30,19 +28,18 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
             .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERT" .into(), val: ocl_names.1.into() })
             .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPEF"   .into(), val: ocl_names.2.into() })
             .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERTF".into(), val: ocl_names.3.into() })
+            .bo(builders::BuildOpt::CmplrDefine { ident: "PIXEL_BYTES"  .into(), val: format!("{}", bytes_per_pixel) })
             .devices(device)
             .build(&context)?;
 
-        let source_buffer = Buffer::builder().queue(queue.clone()).len(stride*height*pix_element_count)
+        let source_buffer = Buffer::builder().queue(queue.clone()).len(stride*height)
             .flags(MemFlags::new().read_only().host_write_only()).build()?;
 
-        let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height*pix_element_count)
+        let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height)
             .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
 
         let params_len = 9 * (height + 1);
         let params_buf = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(params_len).build()?;
-
-        let out_buffer = vec![T::default(); output_stride * output_height * pix_element_count];
 
         let mut builder = Kernel::builder();
         unsafe {
@@ -73,7 +70,6 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
         Ok(Self {
             pix_element_count,
             kernel,
-            out_buffer,
             src: source_buffer,
             dst: dest_buffer,
             params_buf,
@@ -90,8 +86,8 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
         };
         Ok(())
     }
-    pub fn undistort_image(&mut self, pixels: &mut [T], itm: &crate::undistortion::FrameTransform) -> ocl::Result<&mut [T]> {
-        self.src.write(pixels as &[T]).enq()?;
+    pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) -> ocl::Result<()> {
+        self.src.write(pixels as &[u8]).enq()?;
 
         let flattened_params = unsafe { std::slice::from_raw_parts(itm.params.as_ptr() as *const f32, itm.params.len() * 9 ) };
 
@@ -101,7 +97,7 @@ impl<T: ocl::OclPrm> OclWrapper<T> {
 
         unsafe { self.kernel.enq()?; }
 
-        self.dst.read(&mut self.out_buffer).enq()?;
-        Ok(&mut self.out_buffer)
+        self.dst.read(out_pixels).enq()?;
+        Ok(())
     }
 }

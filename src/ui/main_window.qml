@@ -9,7 +9,7 @@ Window {
     visible: true;
     color: styleBackground;
 
-    title: "Gyroflow"
+    title: "Gyroflow v" + version;
     
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
