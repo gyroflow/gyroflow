@@ -13,6 +13,8 @@ Rectangle {
     color: styleBackground;
     anchors.fill: parent;
     property alias videoArea: videoArea;
+    property alias motionData: motionData;
+    property alias lensProfile: lensProfile;
     property alias exportSettings: exportSettings;
     property alias outputFile: outputFile.text;
     property alias sync: sync;

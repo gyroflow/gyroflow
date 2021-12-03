@@ -25,7 +25,6 @@ use ui::theme::Theme;
 // - Some basic error handling, check for all unwrap()'s
 // - Show error when movie is invalid
 // - new sync method
-// - Warning when adding sync points and it's a GoPro with quaternions
 // - Port Aphobius 2.0
 // - Move "timeline chart" type selection to timeline context menu
 // - Figure out what to do with the console output window/log
@@ -60,6 +59,7 @@ use ui::theme::Theme;
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: auto updater
+// TODO: portrait layout
 
 cpp! {{
     #include <QQuickStyle>

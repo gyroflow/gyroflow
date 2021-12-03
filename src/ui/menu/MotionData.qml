@@ -8,6 +8,9 @@ MenuItem {
     text: qsTr("Motion data");
     icon: "chart";
 
+    property alias hasQuaternions: integrator.hasQuaternions;
+    property alias integrationMethod: integrator.currentIndex;
+
     FileDialog {
         id: fileDialog;
         property var extensions: ["csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "360", "gyroflow"];

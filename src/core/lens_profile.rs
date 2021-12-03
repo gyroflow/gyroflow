@@ -68,6 +68,8 @@ impl LensProfile {
         ret.insert("camera_setting" .into(), self.camera_setting.clone());
         ret.insert("calibrated_by"  .into(), self.calibrated_by.clone());
         ret.insert("calib_dimension".into(), format!("{}x{}", self.calib_dimension.0, self.calib_dimension.1));
+        ret.insert("calib_width"    .into(), format!("{}", self.calib_dimension.0));
+        ret.insert("calib_height"   .into(), format!("{}", self.calib_dimension.1));
         ret.insert("coefficients"   .into(), self.distortion_coeffs.iter().map(f64::to_string).collect::<Vec<String>>().join(";"));
         ret.insert("matrix"         .into(), self.camera_matrix.iter().map(f64::to_string).collect::<Vec<String>>().join(";"));
         ret

@@ -35,8 +35,10 @@ MenuItem {
         const w = md["stream.video[0].codec.width"];
         const h = md["stream.video[0].codec.height"];
 
-        window.exportSettings.orgWidth = w;
-        window.exportSettings.orgHeight = h;
+        window.exportSettings.orgWidth  = w || 0;
+        window.exportSettings.orgHeight = h || 0;
+        window.lensProfile.videoWidth   = w || 0;
+        window.lensProfile.videoHeight  = h || 0;
         window.exportSettings.bitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
 
         list.model["Dimensions"]   = w && h? w + "x" + h : "---";

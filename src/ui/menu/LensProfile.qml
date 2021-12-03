@@ -8,6 +8,12 @@ MenuItem {
     text: qsTr("Lens profile");
     icon: "lens";
 
+    property real calibWidth: 0;
+    property real calibHeight: 0;
+
+    property real videoWidth: 0;
+    property real videoHeight: 0;
+
     FileDialog {
         id: fileDialog;
         property var extensions: ["json"];
@@ -45,6 +51,8 @@ MenuItem {
                 "Dimensions": obj.calib_dimension,
                 "Calibrated by": obj.calibrated_by
             };
+            root.calibWidth = obj.calib_width;
+            root.calibHeight = obj.calib_height;
             const coeffs = obj.coefficients.split(";").map(parseFloat);
             const mtrx = obj.matrix.split(";").map(parseFloat);
             k1.setInitialValue(coeffs[0]);
@@ -72,6 +80,20 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: fileDialog.open();
     }
+    
+    WarningMessage {
+        visible: opacity > 0;
+        opacity: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight)? 1 : 0 
+        Ease on opacity { }
+        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
+        t.font.pixelSize: 12 * dpiScale;
+        t.x: 5 * dpiScale;
+        property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(5);
+        property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(5);
+        text: lensRatio != videoRatio? qsTr("Lens profile aspect ratio doesn't match the file aspect ratio. The result will not look correct.") : 
+                                       qsTr("Lens profile dimensions don't match the file dimensions. The result may not look correct."); 
+    }
+
     TableList {
         id: info;
         model: ({ })

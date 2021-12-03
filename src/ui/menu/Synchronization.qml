@@ -46,7 +46,17 @@ MenuItem {
             }
         }
     }
-    
+
+    WarningMessage {
+        visible: opacity > 0;
+        opacity: window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && controller.offsets_model.rowCount() > 0? 1 : 0;
+        Ease on opacity { }
+        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
+        t.font.pixelSize: 12 * dpiScale;
+        t.x: 5 * dpiScale;
+        text: qsTr("This file uses synced motion data, additional sync points are not needed and can make the output look worse."); 
+    }
+
     Label {
         position: Label.Left;
         text: qsTr("Rough gyro offset");
