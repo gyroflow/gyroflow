@@ -122,7 +122,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.pose_estimator.sync_results.write().clear();
 
-        self.load_gyro_data(path)?;
+        let _ = self.load_gyro_data(path); // Ignore the error here, video file may not contain the telemetry and it's ok
         
         Ok(())
     }
