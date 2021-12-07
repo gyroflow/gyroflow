@@ -120,7 +120,7 @@ fn entry() {
     let engine_ptr = engine.cpp_ptr();
 
     // Load main UI
-    let live_reload = true;
+    let live_reload = false;
     if !live_reload {
         engine.load_file("qrc:/src/ui/main_window.qml".into());
     } else {

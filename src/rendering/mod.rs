@@ -209,7 +209,7 @@ lazy_static::lazy_static! {
 }
 
 #[allow(improper_ctypes_definitions)]
-unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: [u64; 4]) {
+unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: ffi::va_list) {
     if level <= ffi::av_log_get_level() {
         let mut line = vec![0u8; 2048];
         let mut prefix: i32 = *LAST_PREFIX.read();
