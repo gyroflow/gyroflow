@@ -34,7 +34,6 @@ pub struct GyroSource {
     pub org_raw_imu: Vec<TimeIMU>,
 
     pub imu_orientation: Option<String>,
-    pub org_imu_orientation: Option<String>,
 
     pub imu_rotation: Option<Rotation3<f64>>,
     pub imu_lpf: f64,
@@ -101,7 +100,7 @@ impl GyroSource {
             }
         }
 
-        let raw_imu = util::normalized_imu(&input, None).ok();
+        let raw_imu = util::normalized_imu(&input, Some("XYZ".into())).ok();
 
         Ok(FileMetadata {
             imu_orientation,
@@ -125,12 +124,11 @@ impl GyroSource {
         self.org_raw_imu.clear();
 
         self.imu_orientation = telemetry.imu_orientation.clone();
-        self.org_imu_orientation = self.imu_orientation.clone();
         self.detected_source = telemetry.detected_source.clone();
 
         if let Some(imu) = &telemetry.raw_imu {
-            self.raw_imu = imu.clone();
-            self.org_raw_imu = self.raw_imu.clone();
+            self.org_raw_imu = imu.clone();
+            self.apply_transforms();
         }
         if let Some(quats) = &telemetry.quaternions {
             self.quaternions = quats.clone();
@@ -218,11 +216,6 @@ impl GyroSource {
                 [map(io[0]), map(io[1]), map(io[2]) ]
             }
             for x in &mut self.raw_imu {
-                if let Some(ref org_orientation) = self.org_imu_orientation {
-                    if let Some(g) = x.gyro.as_mut() { *g = orient(g, org_orientation.as_bytes()); }
-                    if let Some(a) = x.accl.as_mut() { *a = orient(a, org_orientation.as_bytes()); }
-                    if let Some(m) = x.magn.as_mut() { *m = orient(m, org_orientation.as_bytes()); }
-                }
                 // Change orientation
                 if let Some(g) = x.gyro.as_mut() { *g = orient(g, orientation.as_bytes()); }
                 if let Some(a) = x.accl.as_mut() { *a = orient(a, orientation.as_bytes()); }

@@ -31,11 +31,11 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value, everyNthFrame.value, window.videoArea.vid.rotation);
+            controller.start_autosync(ranges.join(";"), initialOffset.value, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, window.videoArea.vid.rotation);
         }
         onClicked: {
             if (!controller.lens_loaded) {
-                messageBox(qsTr("Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?"), [
+                messageBox(Modal.Warning, qsTr("Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?"), [
                     { text: qsTr("Yes"), clicked: function() {
                         doSync();
                     }},
@@ -47,13 +47,8 @@ MenuItem {
         }
     }
 
-    WarningMessage {
-        visible: opacity > 0;
-        opacity: window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && controller.offsets_model.rowCount() > 0? 1 : 0;
-        Ease on opacity { }
-        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
-        t.font.pixelSize: 12 * dpiScale;
-        t.x: 5 * dpiScale;
+    InfoMessageSmall {
+        show: window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && controller.offsets_model.rowCount() > 0;
         text: qsTr("This file uses synced motion data, additional sync points are not needed and can make the output look worse."); 
     }
 
@@ -141,8 +136,9 @@ MenuItem {
                 id: timePerSyncpoint;
                 width: parent.width;
                 height: 25 * dpiScale;
-                value: 1500;
-                unit: "ms";
+                value: 1.5;
+                precision: 1;
+                unit: "s";
                 from: 1;
             }
         }

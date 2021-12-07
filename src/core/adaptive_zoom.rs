@@ -15,7 +15,7 @@ impl Merge<f64> for Point2D {
 #[derive(Default, Clone)]
 pub struct AdaptiveZoom {
     calib_dimension: (f64, f64),
-    size: (usize, usize),
+    _size: (usize, usize),
     camera_matrix: nalgebra::Matrix3<f64>,
     distortion_coeffs: Vec<f64>,
     image_rotation: nalgebra::Matrix3<f64>,
@@ -34,13 +34,13 @@ impl AdaptiveZoom {
         let image_rotation = nalgebra::Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
         let calib_dimension = if lens.calib_dimension.0 > 0.0 { lens.calib_dimension } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
         let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 { lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
-        let size = params.size;
+        let _size = params.size;
         drop(lens);
         drop(params);
         
         Self {
             calib_dimension,
-            size,
+            _size,
             image_rotation, 
             camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),
             distortion_coeffs

@@ -14,10 +14,12 @@ Rectangle {
     property real lastHeight: implicitHeight;
     property real minWidth: 100 * dpiScale;
     property real minHeight: 100 * dpiScale;
-    width: (rp.direction === 2 || rp.direction === 3? Math.max(minWidth, (rpd.active? (rpd.activeTranslation.x * (rp.direction === 3? -1 : 1)) : 0) + lastWidth + additionalWidth) : lastWidth);
-    height: (rp.direction === 0 || rp.direction === 1? Math.max(minHeight, (rpd.active? (rpd.activeTranslation.y * (rp.direction === 0? -1 : 1)) : 0) + lastHeight + additionalHeight) : lastHeight);
+    width:  fixedWidth  > 0? fixedWidth  : (rp.direction === 2 || rp.direction === 3? Math.max(minWidth,  (rpd.active? (rpd.activeTranslation.x * (rp.direction === 3? -1 : 1)) : 0) + lastWidth  + additionalWidth)  : lastWidth);
+    height: fixedHeight > 0? fixedHeight : (rp.direction === 0 || rp.direction === 1? Math.max(minHeight, (rpd.active? (rpd.activeTranslation.y * (rp.direction === 0? -1 : 1)) : 0) + lastHeight + additionalHeight) : lastHeight);
     property real additionalWidth: 0;
     property real additionalHeight: 0;
+    property real fixedWidth: 0;
+    property real fixedHeight: 0;
 
     property alias hr: rphr;
 

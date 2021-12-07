@@ -111,7 +111,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
 }
 
 impl<T: PixelType> StabilizationManager<T> {
-    pub fn init_from_video_data(&self, path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) {
+    pub fn init_from_video_data(&self, path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) -> std::io::Result<()> {
         {
             let mut params = self.params.write();
             params.fps = fps;
@@ -122,7 +122,9 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.pose_estimator.sync_results.write().clear();
 
-        self.load_gyro_data(path);
+        self.load_gyro_data(path)?;
+        
+        Ok(())
     }
 
     pub fn load_gyro_data(&self, path: &str) -> std::io::Result<()> {

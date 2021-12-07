@@ -4,25 +4,30 @@ pub mod ffmpeg_processor;
 
 pub use self::ffmpeg_processor::FfmpegProcessor;
 use crate::core::{StabilizationManager, undistortion::*};
-use ffmpeg_next::format::Pixel;
-use ffmpeg_next::frame::Video;
-use ffmpeg_next::codec;
+use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
+use std::ffi::c_void;
+use std::os::raw::c_char;
 use std::sync::{Arc, atomic::AtomicBool};
+use parking_lot::RwLock;
 
-pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> &'static str {
+pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: Option<&str>) -> &'static str {
     if use_gpu {
         match codec {
             "x264" => match selected_backend {
-                "cuda" => "h264_nvenc",
-                "qsv"  => "h264_qsv",
-                "amf"  => "h264_amf",
-                _      => "libx264"
+                Some("cuda") => "h264_nvenc",
+                Some("qsv")  => "h264_qsv",
+                Some("amf")  => "h264_amf",
+                Some("dxva2")   => "h264_mf",
+                Some("d3d11va") => "h264_mf",
+                _            => "libx264"
             },
             "x265" => match selected_backend {
-                "cuda" => "hevc_nvenc",
-                "qsv"  => "hevc_qsv",
-                "amf"  => "hevc_amf",
-                _      => "libx265"
+                Some("cuda") => "hevc_nvenc",
+                Some("qsv")  => "hevc_qsv",
+                Some("amf")  => "hevc_amf",
+                Some("dxva2")   => "hevc_mf",
+                Some("d3d11va") => "hevc_mf",
+                _            => "libx265"
             },
             "ProRes" => "prores", // TODO
             _        => ""
@@ -37,7 +42,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: &str) -> 
     }
 }
 
-pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>)
+pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), Error>
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -56,10 +61,10 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     drop(params);
 
-    let mut proc = FfmpegProcessor::from_file(&video_path, use_gpu).unwrap();
+    let mut proc = FfmpegProcessor::from_file(&video_path, use_gpu)?;
 
     dbg!(&proc.gpu_device);
-    proc.video_codec = Some(match_gpu_encoder(&codec, use_gpu, proc.gpu_device.as_ref().unwrap()).to_owned());
+    proc.video_codec = Some(match_gpu_encoder(&codec, use_gpu, proc.gpu_device.as_deref()).to_owned());
     proc.gpu_encoding = use_gpu;
     dbg!(&proc.video_codec);
 
@@ -154,12 +159,13 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
                             (Luma16, converted_frame, converted_output, 1, [1]), 
                             (Luma16, converted_frame, converted_output, 2, [2]), 
                         );
-                    });
+                    })?;
                 }
             }
         }
         if planes.is_empty() {
-            panic!("Unknown pixel format {:?}", input_frame.format());
+            eprintln!("Unknown pixel format {:?}", input_frame.format());
+            return Err(Error::Other { errno: 0 });
         }
 
         let mut undistort_frame = |frame: &mut Video, out_frame: &mut Video| {
@@ -176,15 +182,64 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
             _ => {
                 converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
                     undistort_frame(converted_frame, converted_output);
-                });
+                })?;
             }
         }
+        Ok(())
     });
 
-    proc.render(&output_path, (output_width as u32, output_height as u32), if bitrate > 0.0 { Some(bitrate) } else { None }, cancel_flag).unwrap(); // TODO errors
+    proc.render(&output_path, (output_width as u32, output_height as u32), if bitrate > 0.0 { Some(bitrate) } else { None }, cancel_flag)?;
 
     progress((1.0, render_frame_count, render_frame_count));
+
+    Ok(())
 }
+
+pub fn init() -> Result<(), Error> {
+	unsafe { 
+        ffi::av_log_set_callback(Some(ffmpeg_log));
+    }
+
+    Ok(())
+}
+
+lazy_static::lazy_static! {
+    pub static ref FFMPEG_LOG: Arc<RwLock<String>> = Arc::new(RwLock::new(String::new()));
+    pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
+}
+
+#[allow(improper_ctypes_definitions)]
+unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: [u64; 4]) {
+    if level <= ffi::av_log_get_level() {
+        let mut line = vec![0u8; 2048];
+        let mut prefix: i32 = *LAST_PREFIX.read();
+        
+        ffi::av_log_default_callback(avcl, level, fmt, vl);
+        let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
+        if written > 0 { 
+            line.resize(written as usize, 0u8);
+        }
+
+        *LAST_PREFIX.write() = prefix;
+
+        if let Ok(mut line) = String::from_utf8(line) {
+            match level {
+                ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
+                    line = format!("<font color=\"#d82626\">{}</font>", line);
+                },
+                ffi::AV_LOG_WARNING => {
+                    line = format!("<font color=\"#f6a10c\">{}</font>", line);
+                },
+                _ => { }
+            }
+            FFMPEG_LOG.write().push_str(&line);
+        }
+    }
+}
+
+pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
+pub fn clear_log() { FFMPEG_LOG.write().clear() }
+
 /*
 pub fn test() {
     dbg!(FfmpegProcessor::supported_gpu_backends());

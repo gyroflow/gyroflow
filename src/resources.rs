@@ -42,7 +42,8 @@ qrc!(pub rsrc,
         "src/ui/components/TimelineRangeIndicator.qml",
         "src/ui/components/TimelineSyncPoint.qml",
         "src/ui/components/ToolTip.qml",
-        "src/ui/components/WarningMessage.qml",
+        "src/ui/components/InfoMessage.qml",
+        "src/ui/components/InfoMessageSmall.qml",
         
         "resources/icon.png",
         "resources/logo_black.svg",
@@ -72,5 +73,8 @@ qrc!(pub rsrc,
         "resources/icons/svg/sync.svg",
         "resources/icons/svg/unlocked.svg",
         "resources/icons/svg/video.svg",
+        "resources/icons/svg/confirmed.svg",
+        "resources/icons/svg/error.svg",
+        "resources/icons/svg/warning.svg",
     }
 );

@@ -81,13 +81,8 @@ MenuItem {
         onClicked: fileDialog.open();
     }
     
-    WarningMessage {
-        visible: opacity > 0;
-        opacity: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight)? 1 : 0 
-        Ease on opacity { }
-        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
-        t.font.pixelSize: 12 * dpiScale;
-        t.x: 5 * dpiScale;
+    InfoMessageSmall {
+        show: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight);
         property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(5);
         property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(5);
         text: lensRatio != videoRatio? qsTr("Lens profile aspect ratio doesn't match the file aspect ratio. The result will not look correct.") : 

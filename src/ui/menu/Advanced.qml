@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import Qt.labs.settings 1.0
 
 import "../components/"
 
@@ -7,11 +8,19 @@ MenuItem {
     icon: "settings";
     opened: false;
 
+    // Settings {
+    //     property alias timelineChart: timelineChart.currentIndex;
+    //     property alias previewResolution: previewResolution.currentIndex;
+    //     property alias renderBackground: renderBackground.text;
+    //     property alias theme: themeList.currentIndex;
+    // }
+
     Label {
         position: Label.Left;
         text: qsTr("Preview resolution");
 
         ComboBox {
+            id: previewResolution;
             model: [qsTr("Full"), "1080p", "720p", "480p"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
@@ -61,6 +70,7 @@ MenuItem {
         text: qsTr("Render background");
 
         TextField {
+            id: renderBackground;
             text: "#111111";
             width: parent.width;
             onTextChanged: {
@@ -73,6 +83,7 @@ MenuItem {
         text: qsTr("Theme");
 
         ComboBox {
+            id: themeList;
             model: [qsTr("Light"), qsTr("Dark")];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
@@ -83,7 +94,4 @@ MenuItem {
             }
         }
     }
-
-    // Video decoder:
-    // Video encoder:
 }

@@ -11,9 +11,9 @@ Rectangle {
     width: Math.max(10, parent.width * mapToVisibleArea(Math.min(1.0, trimEnd + trimEndAdjustment)) - x);
     y: 35 * dpiScale;
     height: parent.height - y;
-    color: "#20ffffff";
+    color: "#19ffffff";
     border.width: 2 * dpiScale;
-    border.color:  Qt.darker(styleAccentColor, 1.3);
+    border.color: styleAccentColor;
     radius: 3 * dpiScale;
     clip: true;
     function mapToVisibleArea(v) { return parent.parent.parent.mapToVisibleArea(v); }

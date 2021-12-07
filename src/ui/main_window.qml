@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Window 2.10
 import QtQuick.Controls.Material 2.12
+import Qt.labs.settings 1.0
 
 Window {
     id: main_window;
@@ -19,7 +20,7 @@ Window {
     property bool closeConfirmationModal: false;
     onClosing: (close) => {
         if (!closeConfirmationModal) {
-            app.messageBox(qsTr("Are you sure you want to exit?"), [
+            app.messageBox(Modal.NoIcon, qsTr("Are you sure you want to exit?"), [
                 { text: qsTr("Yes"), accent: true, clicked: () => main_window.close() },
                 { text: qsTr("No"), clicked: () => main_window.closeConfirmationModal = false },
             ]);
@@ -28,5 +29,5 @@ Window {
         }
     }
     
-    App { objectName: "App" }
+    App { objectName: "App"; }
 }

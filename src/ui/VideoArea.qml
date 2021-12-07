@@ -31,6 +31,7 @@ Item {
         videoLoader.active = true;
         vidInfo.loader = true;
         //vid.url = url;
+        vid.errorShown = false;
         controller.load_video(url, vid);
         const pathParts = toLocalFile(url).split(".");
         pathParts.pop();
@@ -41,6 +42,7 @@ Item {
         vidInfo.updateEntry("File name", filename);
         vidInfo.updateEntry("Detected camera", "---");
         vidInfo.updateEntry("Contains gyro", "---");
+        timeline.editingSyncPoint = false;
     }
     Connections {
         target: controller;
@@ -102,6 +104,19 @@ Item {
                     timeline.trimEnd = 1.0;
                     // for (var i in md) console.log(i, md[i]);
                 }
+                property bool errorShown: false;
+                onMetadataChanged: {
+                    console.log('metadata changed', vid.frameCount);
+                    if (vid.frameCount > 0) {
+                        // Trigger seek to buffer the video frames
+                        vid.currentFrame++;
+                        vid.currentFrame--;
+                    } else if (!errorShown) {
+                        messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
+                        errorShown = true;
+                        dropText.loadingFile = "";
+                    }
+                }
 
                 backgroundColor: "#111111";
                 Component.onCompleted: {
@@ -116,7 +131,8 @@ Item {
                     anchors.margins: -border.width;
                 }
 
-                WarningMessage {
+                InfoMessage {
+                    type: InfoMessage.Warning;
                     visible: !controller.lens_loaded;
                     text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
                 }

@@ -40,7 +40,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut input_context = format::input(&path)?;
 
-        format::context::input::dump(&input_context, 0, Some(path)); // TODO remove
+        // format::context::input::dump(&input_context, 0, Some(path));
 
         let best_video_stream = unsafe {
             let mut decoder = std::ptr::null_mut();
@@ -136,7 +136,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         if let Some(start_ms) = self.start_ms {
             let position = (start_ms as i64).rescale((1, 1000), rescale::TIME_BASE);
-            self.input_context.seek(position, ..position).unwrap();
+            self.input_context.seek(position, ..position)?;
         }
 
         let mut octx = format::output(&output_path)?;
@@ -153,14 +153,14 @@ impl<'a> FfmpegProcessor<'a> {
                 self.video.input_index = i;
                 self.video.output_index = output_index;
 
-                octx.add_stream(encoder::find_by_name(self.video_codec.as_ref().unwrap()))?; // TODO unwrap
+                octx.add_stream(encoder::find_by_name(self.video_codec.as_ref().ok_or(Error::EncoderNotFound)?))?;
 
                 self.video.decoder = Some(stream.codec().decoder().video()?);
 
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
                 if stream.codec().id() == self.audio_codec {
                     // Direct stream copy
-                    let mut ost = octx.add_stream(encoder::find(codec::Id::None)).unwrap();
+                    let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
                     ost.set_parameters(stream.parameters());
                     // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format. 
                     unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = 0; }
@@ -187,7 +187,7 @@ impl<'a> FfmpegProcessor<'a> {
                 Some(atranscoder) => {
                     packet.rescale_ts(stream.time_base(), atranscoder.decoder.time_base());
                     atranscoder.decoder.send_packet(&packet)?;
-                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base);
+                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base)?;
                 }
                 None => {
                     // Direct stream copy
@@ -207,6 +207,7 @@ impl<'a> FfmpegProcessor<'a> {
             Ok(())
         };
 
+        let mut any_encoded = false;
         for (stream, mut packet) in self.input_context.packets() {
             let ist_index = stream.index();
             let ost_index = stream_mapping[ist_index];
@@ -216,10 +217,13 @@ impl<'a> FfmpegProcessor<'a> {
             
             if ist_index == self.video.input_index {
                 {
-                    let decoder = self.video.decoder.as_mut().unwrap();
+                    let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                     packet.rescale_ts(stream.time_base(), decoder.time_base());
                     if let Err(err) = decoder.send_packet(&packet) {
                         eprintln!("Decoder error {:?}", err);
+                        if !any_encoded {
+                            return Err(err);
+                        }
                     }
                 }
  
@@ -233,6 +237,7 @@ impl<'a> FfmpegProcessor<'a> {
                                     process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base)?;
                                 }
                             }
+                            any_encoded = true;
                         }
                         if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                             break;
@@ -240,6 +245,9 @@ impl<'a> FfmpegProcessor<'a> {
                     },
                     Err(e) => {
                         eprintln!("Encoder error {:?}", e);
+                        if !any_encoded {
+                            return Err(e);
+                        }
                     }
                 }
             } else if self.audio_codec != codec::Id::None {
@@ -255,18 +263,18 @@ impl<'a> FfmpegProcessor<'a> {
         // Flush encoders and decoders.
         {
             let ost_time_base = self.ost_time_bases[self.video.output_index];
-            self.video.decoder.as_mut().unwrap().send_eof()?;
+            self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.end_ms)?;
-            self.video.encoder.as_mut().unwrap().send_eof()?;
-            self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base);
+            self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
+            self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
         }
         if self.audio_codec != codec::Id::None {
             for (ost_index, transcoder) in atranscoders.iter_mut() {
                 let ost_time_base = self.ost_time_bases[*ost_index];
                 transcoder.decoder.send_eof()?;
-                transcoder.receive_and_process_decoded_frames(&mut octx, ost_time_base);
+                transcoder.receive_and_process_decoded_frames(&mut octx, ost_time_base)?;
                 transcoder.encoder.send_eof()?;
-                transcoder.receive_and_process_encoded_packets(&mut octx, ost_time_base);
+                transcoder.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
             }
         }    
 
@@ -284,7 +292,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         if let Some(start_ms) = self.start_ms {
             let position = (start_ms as i64).rescale((1, 1000), rescale::TIME_BASE);
-            self.input_context.seek(position, ..position).unwrap();
+            self.input_context.seek(position, ..position)?;
         }
 
         self.video.decode_only = true;
@@ -304,25 +312,33 @@ impl<'a> FfmpegProcessor<'a> {
             }
         }
 
+        let mut any_encoded = false;
         loop {
             for (stream, mut packet) in self.input_context.packets() {
                 let ist_index = stream.index();
 
                 if ist_index == self.video.input_index {
-                    let decoder = self.video.decoder.as_mut().unwrap();
+                    let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                     packet.rescale_ts(stream.time_base(), decoder.time_base());
 
                     if let Err(err) = decoder.send_packet(&packet) {
                         eprintln!("Decoder error {:?}", err);
+                        if !any_encoded {
+                            return Err(err);
+                        }
                     }
                     match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms) {
                         Ok(encoding_status) => {
+                            any_encoded = true;
                             if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                                 break;
                             }
                         },
                         Err(e) => {
                             eprintln!("Encoder error {:?}", e);
+                            if !any_encoded {
+                                return Err(e);
+                            }
                         }
                     }
                 }
@@ -330,7 +346,7 @@ impl<'a> FfmpegProcessor<'a> {
             if !ranges.is_empty() {
                 let next_range = ranges.remove(0);
                 let position = (next_range.0 as i64).rescale((1, 1000), rescale::TIME_BASE);
-                self.input_context.seek(position, ..position).unwrap();
+                self.input_context.seek(position, ..position)?;
                 self.end_ms = Some(next_range.1);
                 continue;
             } else {
@@ -339,13 +355,13 @@ impl<'a> FfmpegProcessor<'a> {
         }
     
         // Flush decoder.
-        self.video.decoder.as_mut().unwrap().send_eof()?;
+        self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
         self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms)?;
 
         Ok(())
     }
 
-    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video::Converter) + 'a {
+    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video::Converter) -> Result<(), Error> + 'a {
         self.video.on_frame_callback = Some(Box::new(cb));
     }
 

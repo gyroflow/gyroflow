@@ -40,7 +40,7 @@ enterpolation = "*"
 
 walkdir = "*"
 
-opencv = { version = "0.58", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.61", features = ["clang-runtime"], optional = true }
 
 wgpu = "*"
 bytemuck = "*"

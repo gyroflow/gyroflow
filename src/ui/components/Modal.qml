@@ -1,4 +1,6 @@
 import QtQuick 2.15
+import QtQuick.Controls 2.15 as QQC
+import QtQuick.Controls.impl 2.15 as QQCI
 
 Rectangle {
     id: root;
@@ -6,6 +8,16 @@ Rectangle {
     property alias buttons: btns.model;
     property bool opened: false;
     property int accentButton: -1;
+    onTextChanged: {
+        if (text.indexOf("<") > -1) {
+            text = text.replace(/\n/g, "<br>");
+            t.textFormat = Text.StyledText;
+        }
+    }
+
+    enum IconType { NoIcon, Info, Warning, Error, Success }
+
+    property int iconType: Modal.Warning;
 
     signal clicked(int index);
 
@@ -13,6 +25,21 @@ Rectangle {
     color: "#80000000";
     opacity: pp.opacity;
     visible: opacity > 0;
+    onVisibleChanged: {
+        if (visible && iconType != Modal.NoIcon) {
+            switch (iconType) {
+                case Modal.Info:    icon.name = "info";      icon.color = styleAccentColor; break;
+                case Modal.Warning: icon.name = "warning";   icon.color = "#f6a10c"; break;
+                case Modal.Error:   icon.name = "error";     icon.color = "#d82626"; break;
+                case Modal.Success: icon.name = "confirmed"; icon.color = "#3cc42f"; break;
+            }
+            icon.visible = true;
+            ease.enabled = false;
+            icon.scale = 0.4;
+            ease.enabled = true;
+            icon.scale = 1;
+        }
+    }
 
     MouseArea { visible: root.opened; anchors.fill: parent; preventStealing: true; hoverEnabled: true; }
     Rectangle {
@@ -22,7 +49,7 @@ Rectangle {
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: 400;
+        width: root.text.length > 250? parent.width * 0.8 : 400 * dpiScale;
         height: col.height + 30 * dpiScale;
         property real offs: 0;
         color: styleBackground2;
@@ -34,6 +61,20 @@ Rectangle {
             id: col;
             width: parent.width;
             anchors.centerIn: parent;
+
+            QQCI.IconImage {
+                id: icon;
+                visible: false;
+                color: styleTextColor;
+                height: 70 * dpiScale;
+                width: height;
+                anchors.horizontalCenter: parent.horizontalCenter;
+                layer.enabled: true;
+                layer.textureSize: Qt.size(height*2, height*2);
+                layer.smooth: true;
+                Ease on scale { id: ease; type: Easing.OutElastic; duration: 1000; }
+            }
+
             Item { height: 10 * dpiScale; width: 1; }
             BasicText {
                 id: t;

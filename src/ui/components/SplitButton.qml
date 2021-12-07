@@ -8,9 +8,11 @@ Button {
     property alias popup: popup;
 
     rightPadding: 47 * dpiScale;
+    layer.enabled: true;
 
     Button {
         id: splitbtn;
+        textColor: root.textColor;
         anchors.right: parent.right;
         width: 35 * dpiScale;
         height: parent.height;

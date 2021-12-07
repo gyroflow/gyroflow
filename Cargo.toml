@@ -20,6 +20,8 @@ qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "4.4.0-next.2", git = "https://github.com/zmwangx/rust-ffmpeg", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+lazy_static = "*"
+parking_lot = "*"
 
 [build-dependencies]
 cpp_build = "*"

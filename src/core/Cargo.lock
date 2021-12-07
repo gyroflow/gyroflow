@@ -56,7 +56,7 @@ dependencies = [
 [[package]]
 name = "akaze"
 version = "0.7.0"
-source = "git+https://github.com/rust-cv/cv.git#8de92f581c9f25c93614475e77a94a9cd3f3232d"
+source = "git+https://github.com/rust-cv/cv.git#25d34e4c685c9bc45665e7399b1fd70c32f3cb44"
 dependencies = [
  "bitarray",
  "cv-core",
@@ -510,7 +510,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-utils 0.8.5",
  "lazy_static",
- "memoffset 0.6.4",
+ "memoffset 0.6.5",
  "scopeguard",
 ]
 
@@ -577,7 +577,7 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cv-core"
 version = "0.15.0"
-source = "git+https://github.com/rust-cv/cv.git#8de92f581c9f25c93614475e77a94a9cd3f3232d"
+source = "git+https://github.com/rust-cv/cv.git#25d34e4c685c9bc45665e7399b1fd70c32f3cb44"
 dependencies = [
  "derive_more",
  "nalgebra",
@@ -588,7 +588,7 @@ dependencies = [
 [[package]]
 name = "cv-pinhole"
 version = "0.6.0"
-source = "git+https://github.com/rust-cv/cv.git#8de92f581c9f25c93614475e77a94a9cd3f3232d"
+source = "git+https://github.com/rust-cv/cv.git#25d34e4c685c9bc45665e7399b1fd70c32f3cb44"
 dependencies = [
  "cv-core",
  "derive_more",
@@ -646,7 +646,7 @@ checksum = "453440c271cf5577fd2a40e4942540cb7d0d2f85e27c8d07dd0023c925a67541"
 [[package]]
 name = "eight-point"
 version = "0.8.0"
-source = "git+https://github.com/rust-cv/cv.git#8de92f581c9f25c93614475e77a94a9cd3f3232d"
+source = "git+https://github.com/rust-cv/cv.git#25d34e4c685c9bc45665e7399b1fd70c32f3cb44"
 dependencies = [
  "arrayvec 0.7.2",
  "cv-core",
@@ -1037,9 +1037,9 @@ checksum = "90c11140ffea82edce8dcd74137ce9324ec24b3cf0175fc9d7e29164da9915b8"
 
 [[package]]
 name = "itertools"
-version = "0.10.1"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69ddb889f9d0d08a67338271fa9b62996bc788c7796a5c18cf057420aaed5eaf"
+checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
 dependencies = [
  "either",
 ]
@@ -1108,9 +1108,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.108"
+version = "0.2.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8521a1b57e76b1ec69af7599e75e38e7b7fad6610f037db8c79b127201b5d119"
+checksum = "f98a04dce437184842841303488f70d0188c5f51437d2a834dc097eafa909a01"
 
 [[package]]
 name = "libloading"
@@ -1199,9 +1199,9 @@ dependencies = [
 
 [[package]]
 name = "memoffset"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59accc507f1338036a0477ef61afdae33cde60840f4dfe481319ce3ad116ddf9"
+checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
 dependencies = [
  "autocfg",
 ]
@@ -1256,9 +1256,9 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eda66d09f712e1f0a6ab436137da4fac312f78301f6d4ac7cb8bfe96e988734f"
+checksum = "63765d243f5d32ece09b2ff95c1f50ec7353266024a2ce89619a09e1b6aa4cce"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -1556,9 +1556,9 @@ checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "opencv"
-version = "0.58.0"
+version = "0.61.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e11f886b17e2339ccdd8232216d5a9ab1dbae15ad93238987142826b4719240a"
+checksum = "82e082dcac84a91b99cf3f332167eb215effd924e595dfab129d47baf095237c"
 dependencies = [
  "cc",
  "clang",
@@ -1577,9 +1577,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.33.0"
+version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea6d6fb7ac8593eb1774fd4142bf5cdab6b9a555662a0e904baf8b84802c1399"
+checksum = "632c0f0d8bdec1bcd141d3e537a2216fe9e802708459e66bdd79f164e50b96bc"
 dependencies = [
  "clang",
  "clang-sys",
@@ -1629,9 +1629,9 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "pkg-config"
-version = "0.3.22"
+version = "0.3.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12295df4f294471248581bc09bef3c38a5e46f1e36d6a37353621a0c6c357e1f"
+checksum = "d1a3ea4f0dd7f1f3e512cf97bf100819aa547f36a6eccac8dbaae839eb92363e"
 
 [[package]]
 name = "png"
@@ -1705,9 +1705,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
+checksum = "fb37d2df5df740e582f28f8560cf425f52bb267d872fe58358eadb554909f07a"
 dependencies = [
  "unicode-xid",
 ]
@@ -2139,8 +2139,8 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "telemetry-parser"
-version = "0.1.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#86e9559d77ac2cb442593cba11e8358c5f5474f2"
+version = "0.1.8"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#661002235c20ce0b82908a0456951c8d46d53e93"
 dependencies = [
  "argh",
  "byteorder",
@@ -2365,9 +2365,9 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 
 [[package]]
 name = "wgpu"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1577ecc4f6992b9e965878ac594efb24eed2bdf089c11f45b3d1c5f216e2e30"
+checksum = "eae7181fe6ba5f4b632a9079cc9e922a64555156c87def72c063f94b180c7d68"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2385,9 +2385,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bdcbfa4885b32c2b1feb2faeb8b6a76065b752b8f08751b82f994e937687f46"
+checksum = "35600627b6c718ad0e23ed75fb6140bfe32cdf21c8f539ce3c9ab8180e2cb38e"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2407,9 +2407,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.11.4"
+version = "0.11.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e493835d9edb153d5c8a9d8d016e1811dbe32ddb707a110be1453c7b051d3ec"
+checksum = "af28b29ef0b44cd22dd9895d4349b9d5a687df42f58da234871198637eabe328"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",

@@ -130,6 +130,9 @@ pub fn init() -> Result<(), opencv::Error> {
 }
 
 fn cv_to_rot2(r1: Mat) -> Rotation3<f64> {
+    if r1.typ() != opencv::core::CV_64FC1 {
+        return Rotation3::from_matrix_unchecked(nalgebra::Matrix3::from_element(0.0));
+    }
     Rotation3::from_matrix_unchecked(nalgebra::Matrix3::new(
         *r1.at_2d::<f64>(0, 0).unwrap(), *r1.at_2d::<f64>(0, 1).unwrap(), *r1.at_2d::<f64>(0, 2).unwrap(),
         *r1.at_2d::<f64>(1, 0).unwrap(), *r1.at_2d::<f64>(1, 1).unwrap(), *r1.at_2d::<f64>(1, 2).unwrap(),

@@ -32,11 +32,6 @@ Item {
         return new Date(time).toISOString().substr(11, 8);
     }
 
-    //anchors.topMargin: 15 * dpiScale;
-    //anchors.bottomMargin: 30 * dpiScale;
-    //anchors.leftMargin: 30 * dpiScale;
-    //anchors.rightMargin: 10 * dpiScale;
-
     Column {
         x: 3 * dpiScale;
         y: 50 * dpiScale;
@@ -70,7 +65,7 @@ Item {
             radius: 4 * dpiScale;
             color: Qt.lighter(styleButtonColor, 1.1)
             height: parent.height - 35 * dpiScale;
-            opacity: root.trimActive? 0.6 : 1.0;
+            opacity: root.trimActive? 0.9 : 1.0;
 
             TimelineGyroChart {
                 id: chart;
@@ -79,7 +74,7 @@ Item {
                 anchors.fill: parent;
                 anchors.topMargin: 5 * dpiScale;
                 anchors.bottomMargin: 5 * dpiScale;
-                opacity: root.trimActive? 0.8 : 1.0;
+                opacity: root.trimActive? 0.9 : 1.0;
                 onAxisVisibleChanged: {
                     a0.checked = chart.getAxisVisible(0);
                     a1.checked = chart.getAxisVisible(1);
@@ -130,18 +125,19 @@ Item {
 
                     onPaint: {
                         let ctx = context;
-
-                        ctx.reset();
-                        for (let j = 0; j < lines; j++) {
-                            const x = Math.round(j * 20 * dpiScale);
-                            ctx.beginPath();
-                            ctx.moveTo(x, (j % 10 == 0)? 0 : height / 2);
-                            ctx.lineTo(x, height);
-                            ctx.strokeStyle = "#444444";
-                            ctx.lineWidth = 1;
-                            ctx.closePath();
-                            ctx.lineCap = "round";
-                            ctx.stroke();
+                        if (ctx) {
+                            ctx.reset();
+                            for (let j = 0; j < lines; j++) {
+                                const x = Math.round(j * 20 * dpiScale);
+                                ctx.beginPath();
+                                ctx.moveTo(x, (j % 10 == 0)? 0 : height / 2);
+                                ctx.lineTo(x, height);
+                                ctx.strokeStyle = "#444444";
+                                ctx.lineWidth = 1;
+                                ctx.closePath();
+                                ctx.lineCap = "round";
+                                ctx.stroke();
+                            }
                         }
                     }
                 }
@@ -199,7 +195,7 @@ Item {
             onClicked: (index) => {
                 const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
                 switch (index) {
-                    case 0: controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint, window.sync.everyNthFrame, window.videoArea.vid.rotation); break;
+                    case 0: controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.videoArea.vid.rotation); break;
                     case 1: controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000)); break;
                 }
 
@@ -267,7 +263,6 @@ Item {
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 offsetMs: offset_ms;
                 onEdit: (ts_ns, offs) => {
-                    console.log("edit sync point", ts_ns, offs);
                     root.editingSyncPoint = true;
                     syncPointSlider.timestamp_us = ts_ns;
                     syncPointSlider.from = offs - Math.max(15, Math.abs(offs));
@@ -275,6 +270,7 @@ Item {
                     syncPointSlider.value = offs;
                 }
                 onRemove: (ts_ns) => {
+                    root.editingSyncPoint = false;
                     controller.remove_offset(ts_ns);
                 }
             }

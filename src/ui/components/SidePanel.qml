@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC
 
 ResizablePanel {
-    height: parent.height;
+    height: parent? parent.height : 0;
     default property alias data: col.data;
     implicitWidth: 300 * dpiScale;
     property real topPadding: 0;

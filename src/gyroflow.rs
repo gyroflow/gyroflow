@@ -17,16 +17,17 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
+// - Move "timeline chart" type selection to timeline context menu
+// - saving settings, storage
+// - ProRes and PNG sequence
+// - Fix rendering with OpenGL
+// - Some basic error handling, check for all unwrap()'s
+// - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
-// - UI fixes, editing offset etc
-// - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
-// - Some basic error handling, check for all unwrap()'s
-// - Show error when movie is invalid
 // - new sync method
 // - Port Aphobius 2.0
-// - Move "timeline chart" type selection to timeline context menu
 // - Figure out what to do with the console output window/log
 // - Pick a license
 
@@ -35,7 +36,6 @@ use ui::theme::Theme;
 // TODO: exporting and loading .gyroflow
 // TODO: wgpu undistortion add support for different plane types
 // TODO: default lens profile
-// TODO: saving settings, storage
 // TODO: Calibrator
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)
 // TODO: -- Save camera model with calibration and later load lens profile automatically
@@ -59,7 +59,6 @@ use ui::theme::Theme;
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: auto updater
-// TODO: portrait layout
 
 cpp! {{
     #include <QQuickStyle>
@@ -84,10 +83,14 @@ fn entry() {
     // let icons_path = QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")));
     let icons_path = QString::from(":/resources/icons/");
     cpp!(unsafe [icons_path as "QString"] {
+        QGuiApplication::setOrganizationName("Gyroflow");
+        QGuiApplication::setOrganizationDomain("gyroflow.xyz");
+        QGuiApplication::setApplicationName("Gyroflow");
+
         QQuickStyle::setStyle("Material");
         QIcon::setThemeName(QStringLiteral("Gyroflow"));
         QIcon::setThemeSearchPaths(QStringList() << icons_path);
-        
+
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
@@ -117,7 +120,7 @@ fn entry() {
     let engine_ptr = engine.cpp_ptr();
 
     // Load main UI
-    let live_reload = false;
+    let live_reload = true;
     if !live_reload {
         engine.load_file("qrc:/src/ui/main_window.qml".into());
     } else {
@@ -132,6 +135,8 @@ fn entry() {
             QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
         #endif
     });
+
+    rendering::init().unwrap();
 
     engine.exec();
 }

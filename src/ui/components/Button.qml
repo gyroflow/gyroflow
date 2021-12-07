@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC
 import QtQuick.Controls.Material 2.15 as QQCM
+import QtQuick.Controls.Material.impl 2.15 as QQCMI
 
 QQC.Button {
     id: root;
@@ -8,6 +9,14 @@ QQC.Button {
     property bool accent: false;
     property color textColor: root.accent? styleTextColorOnAccent : styleTextColor;
     QQCM.Material.foreground: textColor;
+    Component.onCompleted: {
+        if (accent) {
+            icon.color = Qt.binding(() => root.textColor);
+            if (contentItem.color) contentItem.color = Qt.binding(() => root.textColor);
+        }
+    }
+
+    property bool fadeWhenDisabled: true;
 
     height: 35 * dpiScale;
     leftPadding: 15 * dpiScale;
@@ -20,7 +29,7 @@ QQC.Button {
 
     background: Rectangle {
         color: root.accent? root.hovered? Qt.lighter(styleAccentColor, 1.1) : styleAccentColor : root.hovered? Qt.lighter(styleButtonColor, 1.2) : styleButtonColor;
-        opacity: root.down || !parent.enabled? 0.75 : 1.0;
+        opacity: !parent.enabled && fadeWhenDisabled? 0.75 : root.down? 0.75 : 1.0;
         Ease on opacity { duration: 100; }
         radius: 6 * dpiScale;
         anchors.fill: parent;

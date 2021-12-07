@@ -52,7 +52,7 @@ impl AudioTranscoder {
         })
     }
 
-    pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational) {
+    pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational) -> Result<(), Error> {
         let mut frame = frame::Audio::empty();
         let mut out_frame = frame::Audio::empty();
         
@@ -68,23 +68,25 @@ impl AudioTranscoder {
                     frame.set_pts(Some(ts));
                     frame.set_channel_layout(self.resampler.input().channel_layout);
         
-                    let _ = self.resampler.run(&frame, &mut out_frame).unwrap();
+                    let _ = self.resampler.run(&frame, &mut out_frame)?;
         
                     out_frame.set_pts(Some(ts));
-                    self.encoder.send_frame(&out_frame).unwrap();
+                    self.encoder.send_frame(&out_frame)?;
         
-                    self.receive_and_process_encoded_packets(octx, ost_time_base);
+                    self.receive_and_process_encoded_packets(octx, ost_time_base)?;
                 }
             }
         }
+        Ok(())
     }
 
-    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut Output, ost_time_base: Rational) {
+    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut Output, ost_time_base: Rational) -> Result<(), Error> {
         let mut encoded = Packet::empty();
         while self.encoder.receive_packet(&mut encoded).is_ok() {
             encoded.set_stream(self.ost_index);
             encoded.rescale_ts(self.decoder.time_base(), ost_time_base);
-            encoded.write_interleaved(octx).unwrap();
+            encoded.write_interleaved(octx)?;
         }
+        Ok(())
     }
 }

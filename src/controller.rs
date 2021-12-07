@@ -80,8 +80,6 @@ pub struct Controller {
 
     set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
 
-    file_exists: qt_method!(fn(&self, path: QString) -> bool),
-
     chart_data_changed: qt_signal!(),
 
     render: qt_method!(fn(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
@@ -94,7 +92,11 @@ pub struct Controller {
 
     export_gyroflow: qt_method!(fn(&self)),
 
+    file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
+    open_file_externally: qt_method!(fn(&self, path: QString)),
+
+    error: qt_signal!(text: QString, arg: QString, callback: QString),
 
     video_path: String,
 
@@ -121,6 +123,8 @@ impl Controller {
     }
 
     fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32) {
+        rendering::clear_log();
+
         let method = self.sync_method;
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
@@ -151,6 +155,17 @@ impl Controller {
             this.update_offset_model();
             this.recompute_threaded();
         });
+        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+            arg.push_str("\n\n");
+            arg.push_str(&rendering::get_log());
+
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
+            this.update_offset_model();
+            this.recompute_threaded();
+        });
 
         let mut sync = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame);
         sync.on_progress(move |ready, total| {
@@ -168,24 +183,36 @@ impl Controller {
         let video_path = self.video_path.clone();
         let (sw, sh) = (size.0 as u32, size.1 as u32);
         StabilizationManager::<()>::run_threaded(move || {
-            let mut proc = FfmpegProcessor::from_file(&video_path, true).unwrap();
-            proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+            match FfmpegProcessor::from_file(&video_path, true) {
+                Ok(mut proc) => {
+                    proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                        let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
 
-                assert!(_output_frame.is_none());
+                        assert!(_output_frame.is_none());
 
-                if sync.is_frame_wanted(frame) {
-                    let mut small_frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh);
-
-                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
-
-                    sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
+                        if sync.is_frame_wanted(frame) {
+                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                Ok(mut small_frame) => {
+                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+        
+                                    sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
+                                },
+                                Err(e) => {
+                                    err(("An error occured: %1".to_string(), e.to_string()))
+                                }
+                            }
+                        }
+                        Ok(())
+                    });
+                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                        err(("An error occured: %1".to_string(), e.to_string()))
+                    }
+                    sync.finished_feeding_frames();
                 }
-            });
-            if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                eprintln!("ffmpeg error: {:?}", e);
+                Err(error) => {
+                    err(("An error occured: %1".to_string(), error.to_string()))
+                }
             }
-            sync.finished_feeding_frames();
         });
     }
 
@@ -227,6 +254,10 @@ impl Controller {
                 self.set_preview_resolution(720, player);
             }
 
+            let err = util::qt_queued_callback_mut(self, |this, (msg, arg): (String, String)| {
+                this.error(QString::from(msg), QString::from(arg), QString::default());
+            });
+
             let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
@@ -241,16 +272,21 @@ impl Controller {
                 StabilizationManager::<()>::run_threaded(move || {
                     let detected = {
                         if is_main_video {
-                            stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size);
-                            stab.set_output_size(video_size.0, video_size.1);
+                            if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
+                                err(("An error occured: %1".to_string(), e.to_string()));
+                            } else {
+                                stab.set_output_size(video_size.0, video_size.1);
+                            }
                         } else {
-                            stab.load_gyro_data(&s);
+                            if let Err(e) = stab.load_gyro_data(&s) {
+                                err(("An error occured: %1".to_string(), e.to_string()));
+                            }
                         }
                         stab.recompute_smoothness();
 
                         let gyro = stab.gyro.read();
                         let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                        let orientation = gyro.org_imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
+                        let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
                         let has_gyro = !gyro.quaternions.is_empty();
                         let has_quats = !gyro.org_quaternions.is_empty();
                         drop(gyro);
@@ -296,7 +332,6 @@ impl Controller {
 
             vid.setSurfaceSize(new_w, new_h);
             vid.setRotation(vid.getRotation());
-            vid.setCurrentFrame(vid.currentFrame + 1);
             vid.setCurrentFrame(vid.currentFrame);
         }
     }
@@ -319,7 +354,7 @@ impl Controller {
         });
     }
 
-    fn init_player(&mut self, player: QJSValue) {
+    fn init_player(&self, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
@@ -401,8 +436,17 @@ impl Controller {
     }
 
     fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
+        rendering::clear_log();
+
         let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize)| {
             this.render_progress(params.0, params.1, params.2);
+        });
+
+        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+            arg.push_str("\n\n");
+            arg.push_str(&rendering::get_log());
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+            this.render_progress(1.0, 0, 0);
         });
 
         let trim_ratio = trim_end - trim_start;
@@ -417,7 +461,9 @@ impl Controller {
         let stab = self.stabilizer.clone();
         StabilizationManager::<()>::run_threaded(move || {
             let stab = stab.get_render_stabilizator((output_width, output_height));
-            rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag);
+            if let Err(e) = rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag) {
+                err(("An error occured: %1".to_string(), e.to_string()))
+            }
         });
     }
     
@@ -458,4 +504,5 @@ impl Controller {
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
+    fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
 }

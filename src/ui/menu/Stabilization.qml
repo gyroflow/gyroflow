@@ -21,19 +21,15 @@ MenuItem {
         repeat: false;
         running: false;
         onTriggered: {
-            shutter.value = pending;
+            shutter.value = Math.abs(pending);
             shutterCb.checked = Math.abs(pending) > 0;
+            bottomToTop.checked = pending < 0;
         }
     }
 
-    WarningMessage {
+    InfoMessageSmall {
         id: fovWarning;
-        visible: opacity > 0;
-        opacity: fov.value > 1.0 && croppingMode.currentIndex > 0? 1 : 0;
-        Ease on opacity { }
-        height: (t.height + 10 * dpiScale) * opacity - parent.spacing * (1.0 - opacity);
-        t.font.pixelSize: 12 * dpiScale;
-        t.x: 5 * dpiScale;
+        show: fov.value > 1.0 && croppingMode.currentIndex > 0;
         text: qsTr("FOV is greater than 1.0, you may see black borders"); 
     }
 

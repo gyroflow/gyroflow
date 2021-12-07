@@ -10,51 +10,52 @@ pub struct Converter {
     pub sw_frame_converted_out: Option<frame::Video>,
 }
 impl<'a> Converter {
-    pub fn convert_pixel_format<F>(&mut self, frame: &mut frame::Video, out_frame: &mut frame::Video, format: format::Pixel, mut cb: F) where F: FnMut(&mut frame::Video, &mut frame::Video) + 'a {
+    pub fn convert_pixel_format<F>(&mut self, frame: &mut frame::Video, out_frame: &mut frame::Video, format: format::Pixel, mut cb: F) -> Result<(), Error> where F: FnMut(&mut frame::Video, &mut frame::Video) + 'a {
         if frame.format() != format {
             if self.sw_frame_converted.is_none() {
                 self.sw_frame_converted = Some(frame::Video::new(format, frame.width(), frame.height()));
-                self.convert_from = Some(software::converter((frame.width(), frame.height()), frame.format(), format).unwrap());
+                self.convert_from = Some(software::converter((frame.width(), frame.height()), frame.format(), format)?);
             }
 
             if self.sw_frame_converted_out.is_none() {
                 self.sw_frame_converted_out = Some(frame::Video::new(format, out_frame.width(), out_frame.height()));
-                self.convert_to = Some(software::converter((out_frame.width(), out_frame.height()), format, out_frame.format()).unwrap());
+                self.convert_to = Some(software::converter((out_frame.width(), out_frame.height()), format, out_frame.format())?);
             }
 
-            let sw_frame_converted = self.sw_frame_converted.as_mut().unwrap();
-            let sw_frame_converted_out = self.sw_frame_converted_out.as_mut().unwrap();
-            let convert_from = self.convert_from.as_mut().unwrap();
-            let convert_to = self.convert_to.as_mut().unwrap();
+            let sw_frame_converted = self.sw_frame_converted.as_mut().ok_or(Error::OptionNotFound)?;
+            let sw_frame_converted_out = self.sw_frame_converted_out.as_mut().ok_or(Error::OptionNotFound)?;
+            let convert_from = self.convert_from.as_mut().ok_or(Error::OptionNotFound)?;
+            let convert_to = self.convert_to.as_mut().ok_or(Error::OptionNotFound)?;
 
-            convert_from.run(frame, sw_frame_converted).unwrap();
+            convert_from.run(frame, sw_frame_converted)?;
 
             cb(sw_frame_converted, sw_frame_converted_out);
             
-            convert_to.run(sw_frame_converted_out, out_frame).unwrap();
+            convert_to.run(sw_frame_converted_out, out_frame)?;
         } else {
             cb(frame, out_frame);
         }
+        Ok(())
     }
-    pub fn scale(&mut self, frame: &mut frame::Video, format: format::Pixel, width: u32, height: u32) -> frame::Video {
+    pub fn scale(&mut self, frame: &mut frame::Video, format: format::Pixel, width: u32, height: u32) -> Result<frame::Video, Error> {
         if frame.width() != width || frame.height() != height || frame.format() != format {
             if self.sw_frame_converted.is_none() {
                 self.sw_frame_converted = Some(frame::Video::new(format, width, height));
                 self.convert_to = Some(
                     software::scaling::Context::get(
                         frame.format(), frame.width(), frame.height(), format, width, height, software::scaling::Flags::BILINEAR,
-                    ).unwrap()
+                    )?
                 );
             }
 
-            let sw_frame_converted = self.sw_frame_converted.as_mut().unwrap();
-            let convert_to = self.convert_to.as_mut().unwrap();
+            let sw_frame_converted = self.sw_frame_converted.as_mut().ok_or(Error::OptionNotFound)?;
+            let convert_to = self.convert_to.as_mut().ok_or(Error::OptionNotFound)?;
 
-            convert_to.run(frame, sw_frame_converted).unwrap();
+            convert_to.run(frame, sw_frame_converted)?;
 
-            unsafe { frame::Video::wrap(ffi::av_frame_clone(sw_frame_converted.as_ptr())) }
+            Ok(unsafe { frame::Video::wrap(ffi::av_frame_clone(sw_frame_converted.as_ptr())) })
         } else {
-            unsafe { frame::Video::wrap(ffi::av_frame_clone(frame.as_ptr())) }
+            Ok(unsafe { frame::Video::wrap(ffi::av_frame_clone(frame.as_ptr())) })
         }
     }
 }
@@ -85,7 +86,7 @@ pub struct VideoTranscoder<'a> {
 
     pub buffers: FrameBuffers,
 
-    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) + 'a>>,
+    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) -> Result<(), Error> + 'a>>,
 
     pub first_frame_ts: Option<i64>,
 
@@ -175,7 +176,7 @@ impl<'a> VideoTranscoder<'a> {
     pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, end_ms: Option<usize>) -> Result<Status, Error> {
         let mut status = Status::Continue;
         
-        let mut decoder = self.decoder.as_mut().unwrap();
+        let mut decoder = self.decoder.as_mut().ok_or(Error::OptionNotFound)?;
         
         let mut frame = frame::Video::empty();
         let sw_frame = &mut self.buffers.sw_frame;
@@ -184,7 +185,7 @@ impl<'a> VideoTranscoder<'a> {
         while decoder.receive_frame(&mut frame).is_ok() {
 
             if !self.decode_only && self.encoder.is_none() {
-                let octx = octx.as_deref_mut().unwrap();
+                let octx = octx.as_deref_mut().ok_or(Error::OptionNotFound)?;
                 self.encoder = Some(Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.gpu_pixel_format, self.codec_options.to_owned())?);  
 
                 octx.write_header()?;
@@ -236,14 +237,14 @@ impl<'a> VideoTranscoder<'a> {
 
                             // Process frame
                             if let Some(ref mut cb) = self.on_frame_callback {
-                                cb(timestamp_us, sw_frame, self.output_frame.as_mut(), &mut self.converter);
+                                cb(timestamp_us, sw_frame, self.output_frame.as_mut(), &mut self.converter)?;
                             }
 
                             if !self.decode_only {
                                 // TODO: only if encoder is GPU
-                                let encoder = self.encoder.as_mut().unwrap();
+                                let encoder = self.encoder.as_mut().ok_or(Error::OptionNotFound)?;
 
-                                let output_frame = self.output_frame.as_mut().unwrap();
+                                let output_frame = self.output_frame.as_mut().ok_or(Error::OptionNotFound)?;
                                 hw_frame.set_width(output_frame.width());
                                 hw_frame.set_height(output_frame.height());
 
@@ -268,7 +269,7 @@ impl<'a> VideoTranscoder<'a> {
                                 hw_frame.set_color_range(frame.color_range());
                                 hw_frame.set_color_space(frame.color_space());
                                 hw_frame.set_color_transfer_characteristic(frame.color_transfer_characteristic());
-                                encoder.send_frame(&hw_frame).unwrap();
+                                encoder.send_frame(&hw_frame)?;
                             }
                         }
                     } else {
@@ -282,20 +283,20 @@ impl<'a> VideoTranscoder<'a> {
                         }
 
                         if let Some(ref mut cb) = self.on_frame_callback {
-                            cb(timestamp_us, &mut sw_frame, self.output_frame.as_mut(), &mut self.converter);
+                            cb(timestamp_us, &mut sw_frame, self.output_frame.as_mut(), &mut self.converter)?;
                         }
                         
                         if !self.decode_only {
                             let final_sw_frame = if let Some(ref mut fr) = self.output_frame { fr } else { &mut sw_frame };
     
-                            let encoder = self.encoder.as_mut().unwrap();
+                            let encoder = self.encoder.as_mut().ok_or(Error::OptionNotFound)?;
                             final_sw_frame.set_pts(timestamp);
                             final_sw_frame.set_kind(picture::Type::None);
                             final_sw_frame.set_color_primaries(frame.color_primaries());
                             final_sw_frame.set_color_range(frame.color_range());
                             final_sw_frame.set_color_space(frame.color_space());
                             final_sw_frame.set_color_transfer_characteristic(frame.color_transfer_characteristic());
-                            encoder.send_frame(final_sw_frame).unwrap();
+                            encoder.send_frame(final_sw_frame)?;
                         }
                     }
                 }
@@ -305,21 +306,22 @@ impl<'a> VideoTranscoder<'a> {
         if !self.decode_only && self.encoder.is_some() {
             let ost_time_base = ost_time_bases[self.output_index];
             let octx = octx.unwrap();
-            self.receive_and_process_encoded_packets(octx, ost_time_base);
+            self.receive_and_process_encoded_packets(octx, ost_time_base)?;
         }
 
         Ok(status)
     }
 
-    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_base: Rational) {
+    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_base: Rational) -> Result<(), Error> {
         if !self.decode_only {
-            let time_base = self.decoder.as_ref().unwrap().time_base();
+            let time_base = self.decoder.as_ref().ok_or(Error::OptionNotFound)?.time_base();
             let mut encoded = Packet::empty();
-            while self.encoder.as_mut().unwrap().receive_packet(&mut encoded).is_ok() {
+            while self.encoder.as_mut().ok_or(Error::OptionNotFound)?.receive_packet(&mut encoded).is_ok() {
                 encoded.set_stream(self.output_index);
                 encoded.rescale_ts(time_base, ost_time_base);
-                encoded.write_interleaved(octx).unwrap();
+                encoded.write_interleaved(octx)?;
             }
         }
+        Ok(())
     }
 }

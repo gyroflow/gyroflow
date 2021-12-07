@@ -9,14 +9,33 @@ MenuItem {
     icon: "save";
     enabled: window.videoArea.vid.loaded;
 
+    property var exportFormats: [
+        { "name": "x264",         "max_size": [4096, 2160], "options": { } },
+        { "name": "x265",         "max_size": [8192, 4320], "options": { } },
+        { "name": "ProRes",       "max_size": [8192, 4320], "options": { } },
+        { "name": "PNG Sequence", "max_size": false,        "options": { } },
+    ];
+
     property int orgWidth: 0;
     property int orgHeight: 0;
 
     property int ratioWidth: orgWidth;
     property int ratioHeight: orgHeight;
 
-    onOrgWidthChanged: { outputWidth.value = orgWidth; ratioWidth = orgWidth; }
-    onOrgHeightChanged: { outputHeight.value = orgHeight; ratioHeight = orgHeight; }
+    onOrgWidthChanged: {
+        outputWidth.preventChange2 = true;
+        outputWidth.value = orgWidth;
+        ratioWidth = orgWidth;
+        outputWidth.preventChange2 = false;
+    }
+    onOrgHeightChanged: {
+        outputHeight.preventChange2 = true;
+        outputHeight.value = orgHeight;
+        ratioHeight = orgHeight;
+        outputHeight.preventChange2 = false;
+    }
+
+    property bool canExport: !resolutionWarning.visible;
 
     property alias outWidth: outputWidth.value;
     property alias outHeight: outputHeight.value;
@@ -43,7 +62,7 @@ MenuItem {
 
     ComboBox {
         id: codec;
-        model: ["x264", "x265", "ProRes", "PNG sequence"];
+        model: exportFormats.map(x => x.name);
         width: parent.width;
         currentIndex: 1;
     }
@@ -87,6 +106,16 @@ MenuItem {
             }
         }
     }
+
+    InfoMessageSmall {
+        id: resolutionWarning;
+        type: InfoMessage.Error;
+        property var maxSize: exportFormats[codec.currentIndex].max_size;
+        show: maxSize && (outWidth > maxSize[0] || outHeight > maxSize[1]);
+        text: qsTr("This resolution is not supported by the selected codec.") + "\n" + 
+              qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("x") : ""); 
+    }
+
     Label {
         position: Label.Left;
         text: qsTr("Bitrate");
@@ -103,6 +132,9 @@ MenuItem {
         id: gpu;
         text: qsTr("Use GPU encoding");
         checked: true;
+        tooltip: qsTr("GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.") + "\n" + 
+                 qsTr("They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.") + "\n" + 
+                 qsTr("Uncheck this option for maximum possible quality.");
     }
     CheckBox {
         id: audio;

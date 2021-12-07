@@ -78,6 +78,7 @@ cpp! {{
     #ifdef Q_OS_ANDROID
     #   include <QJniObject>
     #endif
+    #include <QDesktopServices>
 }}
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
@@ -103,10 +104,14 @@ pub fn resolve_android_url(url: QString) -> QString {
     })
 }
 
+pub fn open_file_externally(path: QString) {
+    cpp!(unsafe [path as "QString"] { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
+}
+
 #[cfg(target_os = "android")]
 pub fn android_log(v: String) {
     use std::ffi::{CStr, CString};
-    let tag = CStr::from_bytes_with_nul(b"RustStdoutStderr\0").unwrap();
+    let tag = CStr::from_bytes_with_nul(b"Gyroflow\0").unwrap();
     if let Ok(msg) = CString::new(v) {
         unsafe {
             ndk_sys::__android_log_write(ndk_sys::android_LogPriority_ANDROID_LOG_DEBUG as std::os::raw::c_int, tag.as_ptr(), msg.as_ptr());

@@ -12,6 +12,30 @@ Rectangle {
     visible: true
     color: styleBackground;
     anchors.fill: parent;
+
+    property bool isLandscape: width > height;
+    onIsLandscapeChanged: {
+        videoAreaCol.parent = null;
+        if (!isLandscape) {
+            videoAreaCol.x = 0;
+            videoAreaCol.width = Qt.binding(() => window.width);
+            videoAreaCol.height = Qt.binding(() => window.height * 0.5);
+            leftPanel.fixedWidth = Qt.binding(() => window.width * 0.4);
+            rightPanel.fixedWidth = Qt.binding(() => window.width * 0.6);
+            mainLayout.y = Qt.binding(() => videoAreaCol.height);
+
+            videoAreaCol.parent = window;
+        } else {
+            videoAreaCol.parent = mainLayout;
+            videoAreaCol.width = Qt.binding(() => mainLayout.width - leftPanel.width - rightPanel.width);
+            videoAreaCol.height = Qt.binding(() => mainLayout.height);
+            leftPanel.fixedWidth = 0;
+            rightPanel.fixedWidth = 0;
+            mainLayout.y = 0;
+            rightPanel.parent = null;
+            rightPanel.parent = mainLayout;
+        }
+    }
     property alias videoArea: videoArea;
     property alias motionData: motionData;
     property alias lensProfile: lensProfile;
@@ -29,8 +53,9 @@ Rectangle {
     }
 
     Row {
+        id: mainLayout;
         width: parent.width;
-        height: parent.height;
+        height: parent.height - y;
 
         SidePanel {
             id: leftPanel;
@@ -62,8 +87,9 @@ Rectangle {
         }
 
         Column {
-            width: parent.width - leftPanel.width - rightPanel.width;
-            height: parent.height;
+            id: videoAreaCol;
+            width: parent? parent.width - leftPanel.width - rightPanel.width : 0;
+            height: parent? parent.height : 0;
             VideoArea {
                 id: videoArea;
                 height: parent.height - exportbar.height;
@@ -101,7 +127,10 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter;
                     text: qsTr("Export");
                     icon.name: "video";
-                    enabled: window.videoArea.vid.loaded;
+                    enabled: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
+                    opacity: enabled? 1.0 : 0.6;
+                    Ease on opacity { }
+                    fadeWhenDisabled: false;
 
                     model: [qsTr("Export .gyroflow file")];
 
@@ -132,7 +161,7 @@ Rectangle {
                     }
                     onClicked: {
                         if (controller.file_exists(outputFile.text)) {
-                            messageBox(qsTr("Output file already exists, do you want to overwrite it?"), [
+                            messageBox(Modal.NoIcon, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: doRender },
                                 { text: qsTr("Rename"), clicked: renameOutput },
                                 { text: qsTr("No"), accent: true },
@@ -147,11 +176,21 @@ Rectangle {
                     
                     Connections {
                         target: controller;
+                        property bool successShown: false;
                         function onRender_progress(progress, frame, total_frames) {
                             videoArea.videoLoader.active = progress < 1;
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
                             videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
                             videoArea.videoLoader.cancelable = true;
+                            if (progress == 1 && !successShown && frame > 0) {
+                                messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + outputFile.text + "</b>"), [
+                                    { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(outputFile.text) },
+                                    { text: qsTr("Ok") }
+                                ]);
+                                successShown = true;
+                            } else {
+                                successShown = false;
+                            }
                         }
                     }
                 }
@@ -176,8 +215,8 @@ Rectangle {
         }
     }
 
-    function messageBox(text, buttons) {
-        const el = Qt.createComponent("components/Modal.qml").createObject(window, { text: text });
+    function messageBox(type, text, buttons) {
+        const el = Qt.createComponent("components/Modal.qml").createObject(window, { text: text, iconType: type });
         el.onClicked.connect((index) => {
             if (buttons[index].clicked)
                 buttons[index].clicked();
@@ -195,5 +234,12 @@ Rectangle {
         
         el.opened = true;
         return el;
+    }
+
+    Connections {
+        target: controller;
+        function onError(text, arg, callback) {
+            messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+        }
     }
 }
