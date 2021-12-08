@@ -35,10 +35,12 @@ MenuItem {
         outputHeight.preventChange2 = false;
     }
 
-    property bool canExport: !resolutionWarning.visible;
+    property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
-    property alias outWidth: outputWidth.value;
-    property alias outHeight: outputHeight.value;
+    property int outWidth: outputWidth.value;
+    property int outHeight: outputHeight.value;
+    onOutWidthChanged: console.log('outWidth', outWidth)
+    onOutHeightChanged: console.log('outHeight', outHeight)
     property alias codec: codec.currentText;
     property alias bitrate: bitrate.value;
     property alias gpu: gpu.checked;
@@ -49,11 +51,11 @@ MenuItem {
             const ratio = ratioWidth / ratioHeight;
             if (isWidth) {
                 outputHeight.preventChange2 = true;
-                outputHeight.value = outputWidth.value / ratio;
+                outputHeight.value = Math.round(outputWidth.value / ratio);
                 outputHeight.preventChange2 = false;
             } else {
                 outputWidth.preventChange2 = true;
-                outputWidth.value = outputHeight.value * ratio;
+                outputWidth.value = Math.round(outputHeight.value * ratio);
                 outputWidth.preventChange2 = false;
             }
         }
@@ -114,6 +116,12 @@ MenuItem {
         show: maxSize && (outWidth > maxSize[0] || outHeight > maxSize[1]);
         text: qsTr("This resolution is not supported by the selected codec.") + "\n" + 
               qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("x") : ""); 
+    }
+    InfoMessageSmall {
+        id: resolutionWarning2;
+        type: InfoMessage.Error;
+        show: (outWidth % 2) != 0 || (outHeight % 2) != 0;
+        text: qsTr("Resolution must be divisible by 2."); 
     }
 
     Label {

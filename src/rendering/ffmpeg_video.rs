@@ -186,7 +186,17 @@ impl<'a> VideoTranscoder<'a> {
 
             if !self.decode_only && self.encoder.is_none() {
                 let octx = octx.as_deref_mut().ok_or(Error::OptionNotFound)?;
-                self.encoder = Some(Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.gpu_pixel_format, self.codec_options.to_owned())?);  
+
+                // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
+
+                let result = Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.gpu_pixel_format, self.codec_options.to_owned());
+
+                // let mut output = String::new();
+                // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
+                // drop(stderr_buf);
+                // println!("output: {:?}", output);
+                
+                self.encoder = Some(result?);  
 
                 octx.write_header()?;
                 //format::context::output::dump(&octx, 0, Some(&output_path));

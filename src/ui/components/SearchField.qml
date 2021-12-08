@@ -56,6 +56,9 @@ TextField {
         popup.model = m;
         popup.indexMapping = indexMapping;
         popup.currentIndex = -1;
+        // Trigger reposition
+        popup.topMargin = 1;
+        popup.topMargin = 0;
     }
     Keys.onDownPressed: popup.highlightedIndex = Math.min(popup.model.length - 1, popup.highlightedIndex + 1);
     Keys.onUpPressed: popup.highlightedIndex = Math.max(0, popup.highlightedIndex - 1);

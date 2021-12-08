@@ -3,6 +3,8 @@ import QtQuick.Window 2.10
 import QtQuick.Controls.Material 2.12
 import Qt.labs.settings 1.0
 
+import "components/"
+
 Window {
     id: main_window;
     width: 1450;
