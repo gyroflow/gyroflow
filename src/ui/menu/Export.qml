@@ -39,8 +39,6 @@ MenuItem {
 
     property int outWidth: outputWidth.value;
     property int outHeight: outputHeight.value;
-    onOutWidthChanged: console.log('outWidth', outWidth)
-    onOutHeightChanged: console.log('outHeight', outHeight)
     property alias codec: codec.currentText;
     property alias bitrate: bitrate.value;
     property alias gpu: gpu.checked;

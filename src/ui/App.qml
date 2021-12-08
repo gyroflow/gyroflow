@@ -121,6 +121,7 @@ Rectangle {
                 }
 
                 SplitButton {
+                    id: renderBtn;
                     accent: true;
                     anchors.right: parent.right;
                     anchors.rightMargin: 15 * dpiScale;
@@ -131,10 +132,12 @@ Rectangle {
                     opacity: enabled? 1.0 : 0.6;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
+                    property bool successShown: false;
 
                     model: [qsTr("Export .gyroflow file")];
 
                     function doRender() {
+                        successShown = false;
                         controller.render(
                             exportSettings.codec, 
                             outputFile.text, 
@@ -176,20 +179,17 @@ Rectangle {
                     
                     Connections {
                         target: controller;
-                        property bool successShown: false;
                         function onRender_progress(progress, frame, total_frames) {
                             videoArea.videoLoader.active = progress < 1;
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
                             videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
                             videoArea.videoLoader.cancelable = true;
-                            if (progress == 1 && !successShown && frame > 0) {
+                            if (frame > 0 && frame == total_frames && !renderBtn.successShown) {
+                                renderBtn.successShown = true;
                                 messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + outputFile.text + "</b>"), [
                                     { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(outputFile.text) },
                                     { text: qsTr("Ok") }
                                 ]);
-                                successShown = true;
-                            } else {
-                                successShown = false;
                             }
                         }
                     }
