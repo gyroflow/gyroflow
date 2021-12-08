@@ -1,5 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC
+import QtQuick.Controls.Material 2.15 as QQCM
+import Qt.labs.settings 1.0
 
 import Gyroflow 1.0
 
@@ -30,6 +32,10 @@ Item {
     function timeAtPosition(pos) {
         const time = Math.max(0, durationMs * pos);
         return new Date(time).toISOString().substr(11, 8);
+    }
+
+    Settings {
+        property alias timelineChart: chart.viewMode;
     }
 
     Column {
@@ -153,11 +159,13 @@ Item {
             }
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
+            onPressAndHold: (mouse) => {
+                if (mouse.source === Qt.MouseEventNotSynthesized)
+                    timelineContextMenu.popup()
+            }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
-                    timelineContextMenu.x = mouse.x;
-                    timelineContextMenu.y = mouse.y - timelineContextMenu.height - 5;
-                    timelineContextMenu.open();
+                    timelineContextMenu.popup();
                 }
             }
             onDoubleClicked: (mouse) => {
@@ -183,23 +191,38 @@ Item {
             }
         }
 
-        Popup {
+        Menu {
             id: timelineContextMenu;
-            width: maxItemWidth + 10 * dpiScale;
-            y: -height - 5 * dpiScale;
-            currentIndex: -1;
-            model: [qsTr("Auto sync here"), qsTr("Add manual sync point here")];
-            icons: ["spinner", "plus"];
-            itemHeight: 27 * dpiScale;
-            font.pixelSize: 11.5 * dpiScale;
-            onClicked: (index) => {
-                const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
-                switch (index) {
-                    case 0: controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.videoArea.vid.rotation); break;
-                    case 1: controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000)); break;
-                }
 
-                timelineContextMenu.close();
+            font.pixelSize: 11.5 * dpiScale;
+            function setDisplayMode(i) {
+                chart.viewMode = i;
+                controller.update_chart(chart);
+            }
+            Menu {
+                font.pixelSize: 11.5 * dpiScale;
+                title: qsTr("Chart display mode")
+                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: timelineContextMenu.setDisplayMode(0); }
+                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
+                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
+                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
+            }
+            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+            Action {
+                icon.name: "spinner";
+                text: qsTr("Auto sync here");
+                onTriggered: {
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.videoArea.vid.rotation);
+                }
+            }
+            Action {
+                icon.name: "plus";
+                text: qsTr("Add manual sync point here");
+                onTriggered: {
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
+                }
             }
         }
 

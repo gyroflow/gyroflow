@@ -398,7 +398,14 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn clear(&self) {
-        *self.params.write() = BasicParams::default();
+        let (stab_enabled, show_detected_features, background) = {
+            let params = self.params.read();
+            (params.stab_enabled, params.show_detected_features, params.background)
+        };
+
+        *self.params.write() = BasicParams {
+            stab_enabled, show_detected_features, background, ..Default::default()
+        };
         *self.gyro.write() = GyroSource::new();
         self.pose_estimator.clear();
     }

@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC
+import Qt.labs.settings 1.0
 
 import "../components/"
 
@@ -7,7 +8,7 @@ MenuItem {
     id: root;
     text: qsTr("Export settings");
     icon: "save";
-    enabled: window.videoArea.vid.loaded;
+    innerItem.enabled: window.videoArea.vid.loaded;
 
     property var exportFormats: [
         { "name": "x264",         "max_size": [4096, 2160], "options": { } },
@@ -15,6 +16,12 @@ MenuItem {
         { "name": "ProRes",       "max_size": [8192, 4320], "options": { } },
         { "name": "PNG Sequence", "max_size": false,        "options": { } },
     ];
+
+    Settings {
+        property alias defaultCodec: codec.currentIndex;
+        property alias exportGpu: gpu.checked;
+        property alias exportAudio: audio.checked;
+    }
 
     property int orgWidth: 0;
     property int orgHeight: 0;

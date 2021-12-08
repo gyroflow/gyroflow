@@ -327,13 +327,15 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Self {
+    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Result<Self, ()> {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
         let fps = params.fps;
         let size = params.size;
         let duration_ms = params.duration_ms;
         drop(params);
+
+        if duration_ms < 10.0 || frame_count < 2 || sync_duration_ms < 10.0 || sync_search_size < 10.0 { return Err(()); }
 
         let ranges: Vec<(usize, usize)> = timestamps_fract.iter().map(|x| {
             let range = (
@@ -366,7 +368,7 @@ impl AutosyncProcess {
         );
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
 
-        Self {
+        Ok(Self {
             frame_count,
             duration_ms,
             fps,
@@ -382,7 +384,7 @@ impl AutosyncProcess {
             gyro: stab.gyro.clone(),
             finished_cb: None,
             progress_cb: None,
-        }
+        })
     }
 
     pub fn get_ranges(&self) -> Vec<(usize, usize)> {

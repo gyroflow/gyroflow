@@ -35,13 +35,15 @@ Item {
         height: 36 * dpiScale;
         hoverEnabled: true;
 
-        QQCM.Material.foreground: styleTextColor;
-
         leftPadding: 8 * dpiScale;
         rightPadding: 0;
         topPadding: 0;
         bottomPadding: 0;
         Component.onCompleted: {
+            if (contentItem.color) {
+                contentItem.color = Qt.binding(() => styleTextColor);
+                contentItem.icon.color = Qt.binding(() => styleTextColor);
+            }
             contentItem.alignment = Qt.AlignLeft;
         }
 

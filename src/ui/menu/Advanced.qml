@@ -8,12 +8,11 @@ MenuItem {
     icon: "settings";
     opened: false;
 
-    // Settings {
-    //     property alias timelineChart: timelineChart.currentIndex;
-    //     property alias previewResolution: previewResolution.currentIndex;
-    //     property alias renderBackground: renderBackground.text;
-    //     property alias theme: themeList.currentIndex;
-    // }
+    Settings {
+        property alias previewResolution: previewResolution.currentIndex;
+        property alias renderBackground: renderBackground.text;
+        property alias theme: themeList.currentIndex;
+    }
 
     Label {
         position: Label.Left;
@@ -35,33 +34,6 @@ MenuItem {
 
                 controller.set_preview_resolution(target_height, window.videoArea.vid);
             }
-        }
-    }
-    Label {
-        position: Label.Left;
-        text: qsTr("Timeline chart");
-
-        ComboBox {
-            id: timelineChart;
-            model: [qsTr("Gyroscope"), qsTr("Accelerometer"), qsTr("Quaternions")]; // TODO qsTr("Magnetometer")
-            font.pixelSize: 12 * dpiScale;
-            width: parent.width;
-            onCurrentIndexChanged: {
-                const chart = window.videoArea.timeline.getChart();
-                chart.viewMode = currentIndex;
-                controller.update_chart(chart);
-            }
-        }
-    }
-    CheckBox {
-        visible: timelineChart.currentIndex == 2;
-        text: qsTr("Show smoothed quaternions");
-        onCheckedChanged: {
-            const chart = window.videoArea.timeline.getChart();
-            chart.setAxisVisible(4, checked);
-            chart.setAxisVisible(5, checked);
-            chart.setAxisVisible(6, checked);
-            chart.setAxisVisible(7, checked);
         }
     }
 

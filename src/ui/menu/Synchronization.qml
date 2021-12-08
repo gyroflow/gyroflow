@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import Qt.labs.settings 1.0
 
 import "../components/"
 
@@ -6,8 +7,20 @@ MenuItem {
     id: sync;
     text: qsTr("Synchronization");
     icon: "sync";
-    enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
+    innerItem.enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
     loader: controller.sync_in_progress;
+
+    Settings {
+        property alias initialOffset: initialOffset.value;
+        property alias syncSearchSize: syncSearchSize.value;
+        property alias maxSyncPoints: maxSyncPoints.value;
+        property alias timePerSyncpoint: timePerSyncpoint.value;
+        property alias sync_lpf: lpf.value;
+        property alias syncMethod: syncMethod.currentIndex;
+        property alias showFeatures: showFeatures.checked;
+        // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
+        //property alias everyNthFrame: everyNthFrame.value; 
+    }
 
     property alias timePerSyncpoint: timePerSyncpoint.value;
     property alias initialOffset: initialOffset.value;
@@ -147,6 +160,7 @@ MenuItem {
             text: qsTr("Method");
 
             ComboBox {
+                id: syncMethod;
                 model: ["AKAZE", "OpenCV"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
@@ -173,6 +187,7 @@ MenuItem {
             }
         }
         CheckBox {
+            id: showFeatures;
             text: qsTr("Show detected features");
             checked: true;
             onCheckedChanged: controller.show_detected_features = checked;

@@ -24,8 +24,9 @@ struct Series {
 // viewMode 0: Gyro only
 // viewMode 0: Gyro + sync results
 // viewMode 1: Accel only
-// viewMode 2: Quaternions
-// viewMode 2: Quaternions + smoothed quaternions
+// viewMode 2: Magn only
+// viewMode 3: Quaternions
+// viewMode 3: Quaternions + smoothed quaternions
 
 #[derive(Default, QObject)]
 pub struct TimelineGyroChart {
@@ -38,13 +39,15 @@ pub struct TimelineGyroChart {
     setAxisVisible: qt_method!(fn(&mut self, a: usize, v: bool)),
     getAxisVisible: qt_method!(fn(&self, a: usize) -> bool),
     axisVisibleChanged: qt_signal!(),
+    viewModeChanged: qt_signal!(),
 
-    viewMode: qt_property!(u32; WRITE setViewMode),
+    viewMode: qt_property!(u32; WRITE setViewMode NOTIFY viewModeChanged),
 
     series: [Series; 4+4],
 
     gyro: Vec<ChartData>,
     accl: Vec<ChartData>,
+    magn: Vec<ChartData>,
     quats: Vec<ChartData>,
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
@@ -60,7 +63,7 @@ impl TimelineGyroChart {
     fn setAxisVisible     (&mut self, a: usize, v: bool) { self.series[a].visible = v; self.update(); self.axisVisibleChanged(); }
     fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
-    fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(); }
+    fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(); self.viewModeChanged(); }
 
     pub fn update(&mut self) {
         self.calculate_lines();
@@ -149,6 +152,7 @@ impl TimelineGyroChart {
     pub fn setFromGyroSource(&mut self, gyro: &GyroSource) {
         self.gyro = Vec::with_capacity(gyro.raw_imu.len());
         self.accl = Vec::with_capacity(gyro.raw_imu.len());
+        self.magn = Vec::with_capacity(gyro.raw_imu.len());
         self.quats = Vec::with_capacity(gyro.quaternions.len());
         self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
 
@@ -169,9 +173,17 @@ impl TimelineGyroChart {
                     });
                 }
             }
+            if self.viewMode == 2 {
+                if let Some(m) = x.magn.as_ref() {
+                    self.magn.push(ChartData {
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        values: [m[0], m[1], m[2], 0.0]
+                    });
+                }
+            }
         }
 
-        if self.viewMode == 2 {
+        if self.viewMode == 3 {
             let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
                 for x in quats {
                     let mut ts = *x.0 as f64 / 1000.0;
@@ -192,7 +204,8 @@ impl TimelineGyroChart {
         match self.viewMode {
             0 => { self.gyro_max = Self::normalize_height(&mut self.gyro, None); },
             1 => { Self::normalize_height(&mut self.accl, None); },
-            2 => {
+            2 => { Self::normalize_height(&mut self.magn, None); },
+            3 => {
                 let qmax = Self::normalize_height(&mut self.quats, None);
                 Self::normalize_height(&mut self.smoothed_quats, qmax);
             },
@@ -227,7 +240,12 @@ impl TimelineGyroChart {
                 self.series[1].data = Self::get_serie_vector(&self.accl, 1);
                 self.series[2].data = Self::get_serie_vector(&self.accl, 2);
             }
-            2 => { // Quaternions
+            2 => { // Magnetometer
+                self.series[0].data = Self::get_serie_vector(&self.magn, 0);
+                self.series[1].data = Self::get_serie_vector(&self.magn, 1);
+                self.series[2].data = Self::get_serie_vector(&self.magn, 2);
+            }
+            3 => { // Quaternions
                 self.series[0].data = Self::get_serie_vector(&self.quats, 0);
                 self.series[1].data = Self::get_serie_vector(&self.quats, 1);
                 self.series[2].data = Self::get_serie_vector(&self.quats, 2);

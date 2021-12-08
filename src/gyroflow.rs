@@ -17,8 +17,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - Move "timeline chart" type selection to timeline context menu
-// - saving settings, storage
 // - ProRes and PNG sequence
 // - Fix rendering with OpenGL
 // - Some basic error handling, check for all unwrap()'s
@@ -30,11 +28,12 @@ use ui::theme::Theme;
 // - Port Aphobius 2.0
 // - Figure out what to do with the console output window/log
 // - Pick a license
+// - wgpu undistortion add support for different plane types
 
 // TODO: more smoothing algorithms
 
 // TODO: exporting and loading .gyroflow
-// TODO: wgpu undistortion add support for different plane types
+// TODO: smoothing presets
 // TODO: default lens profile
 // TODO: Calibrator
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)

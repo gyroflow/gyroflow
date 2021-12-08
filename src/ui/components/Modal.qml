@@ -49,7 +49,7 @@ Rectangle {
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: root.text.length > 250? parent.width * 0.8 : 400 * dpiScale;
+        width: root.text.length > 200? parent.width * 0.8 : 400 * dpiScale;
         height: col.height + 30 * dpiScale;
         property real offs: 0;
         color: styleBackground2;

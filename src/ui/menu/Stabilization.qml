@@ -1,11 +1,18 @@
 import QtQuick 2.15
+import Qt.labs.settings 1.0
 
 import "../components/"
 
 MenuItem {
     text: qsTr("Stabilization");
     icon: "gyroflow";
-    enabled: window.videoArea.vid.loaded;
+    innerItem.enabled: window.videoArea.vid.loaded;
+
+    Settings {
+        property alias smoothingMethod: smoothingMethod.currentIndex;
+        property alias croppingMode: croppingMode.currentIndex;
+        property alias adaptiveZoom: adaptiveZoom.value;
+    }
 
     Connections {
         target: controller;
@@ -47,10 +54,12 @@ MenuItem {
     }
 
     ComboBox {
+        id: smoothingMethod;
         model: smoothingAlgorithms;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        Component.onCompleted: currentIndex = 1;
+        currentIndex: 1;
+        Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             // Clear current params
             for (let i = smoothingOptions.children.length; i > 0; --i) {

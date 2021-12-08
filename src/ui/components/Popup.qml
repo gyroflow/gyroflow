@@ -1,10 +1,10 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15 as QQC;
-import QtQuick.Controls.impl 2.15 as QQCI;
+import QtQuick.Controls 2.15 as QQC
+import QtQuick.Controls.impl 2.15 as QQCI
+import QtQuick.Controls.Material.impl 2.15 as QQCMI
 
 QQC.Popup {
     id: popup;
-    //y: parent.height - 1 * dpiScale;
     width: parent.width;
     implicitHeight: contentItem.implicitHeight + 4 * dpiScale;
     padding: 2 * dpiScale;
@@ -80,8 +80,6 @@ QQC.Popup {
         keyNavigationEnabled: true;
         highlight: Rectangle {
             color: styleHighlightColor;
-            //anchors.fill: parent;
-            //anchors.margins: 2 * dpiScale;
             radius: 4 * dpiScale;
         }
     }
@@ -92,12 +90,6 @@ QQC.Popup {
         border.color: stylePopupBorder
         radius: 4 * dpiScale;
         layer.enabled: true;
-    }
-
-    enter: Transition {
-        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.OutExpo; duration: 300; }
-    }
-    exit: Transition {
-        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; easing.type: Easing.OutExpo; duration: 300; }
+        layer.effect: QQCMI.ElevationEffect { elevation: 8 }
     }
 }

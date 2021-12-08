@@ -10,9 +10,12 @@ QQC.Button {
     property color textColor: root.accent? styleTextColorOnAccent : styleTextColor;
     QQCM.Material.foreground: textColor;
     Component.onCompleted: {
-        if (accent) {
-            icon.color = Qt.binding(() => root.textColor);
-            if (contentItem.color) contentItem.color = Qt.binding(() => root.textColor);
+        if (contentItem.color) {
+            contentItem.color = Qt.binding(() => root.textColor);
+            contentItem.icon.color = Qt.binding(() => root.textColor);
+            if (fadeWhenDisabled) {
+                contentItem.opacity = Qt.binding(() => !root.enabled? 0.75 : 1.0);
+            }
         }
     }
 

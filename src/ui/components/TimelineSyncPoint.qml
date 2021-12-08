@@ -49,8 +49,12 @@ Rectangle {
                 if (mouse.button === Qt.LeftButton) {
                     root.edit(root.org_timestamp_us, root.offsetMs);
                 } else {
-                    popup.open();
+                    menu.popup();
                 }
+            }
+            onPressAndHold: (mouse) => {
+                if (mouse.source === Qt.MouseEventNotSynthesized)
+                    menu.popup()
             }
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
@@ -62,22 +66,17 @@ Rectangle {
             font.pixelSize: 11 * dpiScale;
         }
 
-        Popup {
-            id: popup;
-            width: maxItemWidth + 10 * dpiScale;
-            y: -height - 5 * dpiScale;
-            currentIndex: -1;
-            model: [qsTr("Edit offset"), qsTr("Delete sync point")];
-            icons: ["pencil", "bin"];
-            colors: [styleTextColor, "#f67575"];
-            itemHeight: 27 * dpiScale;
-            font.pixelSize: 11.5 * dpiScale;
-            onClicked: (index) => {
-                popup.close();
-                switch (index) {
-                    case 0: root.edit(root.org_timestamp_us, root.offsetMs); break;
-                    case 1: root.remove(root.org_timestamp_us); break;
-                }
+        Menu {
+            id: menu;
+            Action {
+                text: qsTr("Edit offset");
+                icon.name: "pencil";
+                onTriggered: root.edit(root.org_timestamp_us, root.offsetMs);
+            }
+            Action {
+                text: qsTr("Delete sync point");
+                icon.name: "bin;#f67575";
+                onTriggered: root.remove(root.org_timestamp_us);
             }
         }
     }

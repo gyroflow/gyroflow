@@ -40,7 +40,7 @@ pub struct Controller {
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
-    set_preview_resolution: qt_method!(fn(&self, target_height: i32, player: QJSValue)),
+    set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
     set_integration_method: qt_method!(fn(&self, index: usize)),
 
@@ -100,6 +100,8 @@ pub struct Controller {
 
     video_path: String,
 
+    preview_resolution: i32,
+
     cancel_flag: Arc<AtomicBool>,
 }
 
@@ -107,6 +109,7 @@ impl Controller {
     pub fn new() -> Self {
         Self {
             sync_method: 1,
+            preview_resolution: 720,
             ..Default::default()
         }
     }
@@ -167,53 +170,56 @@ impl Controller {
             this.recompute_threaded();
         });
 
-        let mut sync = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame);
-        sync.on_progress(move |ready, total| {
-            progress((ready, total));
-        });
-        sync.on_finished(move |offsets| {
-            set_offsets(offsets);
-        });
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame) {
+            sync.on_progress(move |ready, total| {
+                progress((ready, total));
+            });
+            sync.on_finished(move |offsets| {
+                set_offsets(offsets);
+            });
 
-        let ranges = sync.get_ranges();
+            let ranges = sync.get_ranges();
 
-        self.cancel_flag.store(false, SeqCst);
-        let cancel_flag = self.cancel_flag.clone();
-        
-        let video_path = self.video_path.clone();
-        let (sw, sh) = (size.0 as u32, size.1 as u32);
-        StabilizationManager::<()>::run_threaded(move || {
-            match FfmpegProcessor::from_file(&video_path, true) {
-                Ok(mut proc) => {
-                    proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                        let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+            self.cancel_flag.store(false, SeqCst);
+            let cancel_flag = self.cancel_flag.clone();
+            
+            let video_path = self.video_path.clone();
+            let (sw, sh) = (size.0 as u32, size.1 as u32);
+            StabilizationManager::<()>::run_threaded(move || {
+                match FfmpegProcessor::from_file(&video_path, true) {
+                    Ok(mut proc) => {
+                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                            let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
 
-                        assert!(_output_frame.is_none());
+                            assert!(_output_frame.is_none());
 
-                        if sync.is_frame_wanted(frame) {
-                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                Ok(mut small_frame) => {
-                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
-        
-                                    sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
-                                },
-                                Err(e) => {
-                                    err(("An error occured: %1".to_string(), e.to_string()))
+                            if sync.is_frame_wanted(frame) {
+                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                    Ok(mut small_frame) => {
+                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+            
+                                        sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
+                                    },
+                                    Err(e) => {
+                                        err(("An error occured: %1".to_string(), e.to_string()))
+                                    }
                                 }
                             }
+                            Ok(())
+                        });
+                        if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                            err(("An error occured: %1".to_string(), e.to_string()));
                         }
-                        Ok(())
-                    });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                        err(("An error occured: %1".to_string(), e.to_string()))
+                        sync.finished_feeding_frames();
                     }
-                    sync.finished_feeding_frames();
+                    Err(error) => {
+                        err(("An error occured: %1".to_string(), error.to_string()));
+                    }
                 }
-                Err(error) => {
-                    err(("An error occured: %1".to_string(), error.to_string()))
-                }
-            }
-        });
+            });
+        } else {
+            err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+        }
     }
 
     fn update_chart(&mut self, chart: QJSValue) {
@@ -251,7 +257,7 @@ impl Controller {
             let video_size = (vid.videoWidth as usize, vid.videoHeight as usize);
 
             if is_main_video {
-                self.set_preview_resolution(720, player);
+                self.set_preview_resolution(self.preview_resolution, player);
             }
 
             let err = util::qt_queued_callback_mut(self, |this, (msg, arg): (String, String)| {
@@ -315,24 +321,27 @@ impl Controller {
         self.recompute_threaded();
     }
     
-    fn set_preview_resolution(&self, target_height: i32, player: QJSValue) {
+    fn set_preview_resolution(&mut self, target_height: i32, player: QJSValue) {
+        self.preview_resolution = target_height;
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
             // fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
 
-            let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
-            let ratio = vid.videoHeight as f64 / h as f64;
-            let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
-            let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
-            println!("surface size: {}x{}", new_w, new_h);
+            if !self.video_path.is_empty() {
+                let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
+                let ratio = vid.videoHeight as f64 / h as f64;
+                let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
+                let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
+                println!("surface size: {}x{}", new_w, new_h);
 
-            self.stabilizer.pose_estimator.clear();
-            self.chart_data_changed();
+                self.stabilizer.pose_estimator.clear();
+                self.chart_data_changed();
 
-            vid.setSurfaceSize(new_w, new_h);
-            vid.setRotation(vid.getRotation());
-            vid.setCurrentFrame(vid.currentFrame);
+                vid.setSurfaceSize(new_w, new_h);
+                vid.setRotation(vid.getRotation());
+                vid.setCurrentFrame(vid.currentFrame);
+            }
         }
     }
 

@@ -206,11 +206,11 @@ Rectangle {
             Menu.Stabilization {
                 id: stab;
             }
-            Menu.Advanced {
-
-            }
             Menu.Export {
                 id: exportSettings;
+            }
+            Menu.Advanced {
+
             }
         }
     }
