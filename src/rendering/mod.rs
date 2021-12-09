@@ -11,6 +11,7 @@ use std::sync::{Arc, atomic::AtomicBool};
 use parking_lot::RwLock;
 
 pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: Option<&str>) -> &'static str {
+    if codec.contains("PNG") || codec.contains("png") { return "png"; }
     if use_gpu {
         match codec {
             "x264" => match selected_backend {
@@ -29,20 +30,20 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: Option<&s
                 Some("d3d11va") => "hevc_mf",
                 _            => "libx265"
             },
-            "ProRes" => "prores", // TODO
+            "ProRes" => "prores_ks",
             _        => ""
         }
     } else {
         match codec {
             "x264"   => "libx264",
             "x265"   => "libx265",
-            "ProRes" => "prores", // TODO
+            "ProRes" => "prores_ks",
             _        => ""
         }
     }
 }
 
-pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), Error>
+pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), Error>
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
     dbg!(FfmpegProcessor::supported_gpu_backends());
@@ -70,6 +71,25 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     if trim_start > 0.0 { proc.start_ms = Some((trim_start * duration_ms) as usize); }
     if trim_end   < 1.0 { proc.end_ms   = Some((trim_end   * duration_ms) as usize); }
+
+    match proc.video_codec.as_deref() {
+        Some("prores_ks") => {
+            let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
+            let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
+            if let Some(profile) = profiles.iter().position(|&x| x == &codec_options) {
+                proc.video.codec_options.set("profile", &format!("{}", profile));
+                proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+            }
+        }
+        Some("png") => {
+            if codec_options.contains("16-bit") {
+                proc.video.encoder_pixel_format = Some(Pixel::RGB48BE);
+            } else {
+                proc.video.encoder_pixel_format = Some(Pixel::RGB24);
+            }
+        }
+        _ => { }
+    }
 
     //proc.video.codec_options.set("preset", "medium");
 

@@ -62,10 +62,12 @@ impl<'a> Converter {
 
 pub struct FrameBuffers {
     pub sw_frame: frame::Video,
+    pub encoder_frame: frame::Video,
 }
 impl Default for FrameBuffers {
     fn default() -> Self { Self {
         sw_frame: frame::Video::empty(),
+        encoder_frame: frame::Video::empty(),
     } }
 }
 
@@ -79,6 +81,9 @@ pub struct VideoTranscoder<'a> {
     pub codec_options: Dictionary<'a>,
 
     pub gpu_pixel_format: Option<ffi::AVPixelFormat>,
+
+    pub encoder_pixel_format: Option<format::Pixel>,
+    pub encoder_converter: Option<software::scaling::Context>,
 
     pub decode_only: bool,
 
@@ -94,7 +99,7 @@ pub struct VideoTranscoder<'a> {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_format: Option<ffi::AVPixelFormat>, codec_options: Dictionary) -> Result<encoder::video::Video, Error> {
+    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_format: Option<ffi::AVPixelFormat>, codec_options: Dictionary, format: Option<format::Pixel>) -> Result<encoder::video::Video, Error> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         //let mut ost = octx.add_stream(encoder::find_by_name(&video_params.codec))?;
         let mut ost = octx.stream_mut(0).unwrap();//octx.add_stream(encoder::find_by_name("hevc_nvenc"))?;
@@ -102,7 +107,7 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_height(size.1);
         encoder.set_width(size.0);
         encoder.set_aspect_ratio(decoder.aspect_ratio());
-        encoder.set_format(decoder.format());
+        encoder.set_format(format.unwrap_or_else(|| decoder.format()));
         encoder.set_frame_rate(decoder.frame_rate());
         encoder.set_time_base(decoder.frame_rate().unwrap().invert());
         encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
@@ -189,7 +194,7 @@ impl<'a> VideoTranscoder<'a> {
 
                 // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                let result = Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.gpu_pixel_format, self.codec_options.to_owned());
+                let result = Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.gpu_pixel_format, self.codec_options.to_owned(), self.encoder_pixel_format);
 
                 // let mut output = String::new();
                 // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -222,13 +227,16 @@ impl<'a> VideoTranscoder<'a> {
 
                     let timestamp = Some(ts);
 
-                    // TODO: add more hardware formats
                     if frame.format() == format::Pixel::CUDA || 
                        frame.format() == format::Pixel::DXVA2_VLD || 
                        //frame.format() == format::Pixel::VAAPI || 
+                       frame.format() == format::Pixel::VDPAU || 
+                       frame.format() == format::Pixel::D3D11 || 
                        frame.format() == format::Pixel::D3D11VA_VLD || 
                        frame.format() == format::Pixel::VIDEOTOOLBOX || 
                        frame.format() == format::Pixel::MEDIACODEC || 
+                       frame.format() == format::Pixel::OPENCL || 
+                       frame.format() == format::Pixel::VULKAN || 
                        frame.format() == format::Pixel::QSV || 
                        frame.format() == format::Pixel::MMAL || 
                        frame.format() == format::Pixel::D3D11 {
@@ -297,7 +305,19 @@ impl<'a> VideoTranscoder<'a> {
                         }
                         
                         if !self.decode_only {
-                            let final_sw_frame = if let Some(ref mut fr) = self.output_frame { fr } else { &mut sw_frame };
+                            let mut final_sw_frame = if let Some(ref mut fr) = self.output_frame { fr } else { &mut sw_frame };
+
+                            // TODO: do we need this also in the HW path?
+                            if let Some(target_format) = self.encoder_pixel_format {
+                                if self.encoder_converter.is_none() {
+                                    self.buffers.encoder_frame = frame::Video::new(target_format, final_sw_frame.width(), final_sw_frame.height());
+                                    self.encoder_converter = Some(software::converter((final_sw_frame.width(), final_sw_frame.height()), final_sw_frame.format(), target_format)?);
+                                }
+                                let conv = self.encoder_converter.as_mut().ok_or(Error::OptionNotFound)?;
+                                let buff = &mut self.buffers.encoder_frame;
+                                conv.run(final_sw_frame, buff)?;
+                                final_sw_frame = buff;
+                            }
     
                             let encoder = self.encoder.as_mut().ok_or(Error::OptionNotFound)?;
                             final_sw_frame.set_pts(timestamp);
@@ -329,7 +349,11 @@ impl<'a> VideoTranscoder<'a> {
             while self.encoder.as_mut().ok_or(Error::OptionNotFound)?.receive_packet(&mut encoded).is_ok() {
                 encoded.set_stream(self.output_index);
                 encoded.rescale_ts(time_base, ost_time_base);
-                encoded.write_interleaved(octx)?;
+                if octx.format().name().contains("image") {
+                    encoded.write(octx)?;
+                } else {
+                    encoded.write_interleaved(octx)?;
+                }
             }
         }
         Ok(())

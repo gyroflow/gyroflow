@@ -21,7 +21,6 @@ MenuItem {
         controller.set_smoothing_param(name, value);
     }
     function getSmoothingParam(name, defaultValue) {
-        console.log( settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue), defaultValue);
         return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
 

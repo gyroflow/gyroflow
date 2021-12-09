@@ -36,6 +36,7 @@ Item {
         const pathParts = toLocalFile(url).split(".");
         pathParts.pop();
         window.outputFile = pathParts.join(".") + "_stabilized.mp4";
+        window.exportSettings.updateCodecParams();
 
         const filename = url.toString().split("/").pop();
         dropText.loadingFile = filename;

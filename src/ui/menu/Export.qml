@@ -10,11 +10,15 @@ MenuItem {
     icon: "save";
     innerItem.enabled: window.videoArea.vid.loaded;
 
+    function updateCodecParams() {
+        codec.currentIndexChanged();
+    }
+
     property var exportFormats: [
-        { "name": "x264",         "max_size": [4096, 2160], "options": { } },
-        { "name": "x265",         "max_size": [8192, 4320], "options": { } },
-        { "name": "ProRes",       "max_size": [8192, 4320], "options": { } },
-        { "name": "PNG Sequence", "max_size": false,        "options": { } },
+        { "name": "x264",          "max_size": [4096, 2160], "variants": [ ] },
+        { "name": "x265",          "max_size": [8192, 4320], "variants": [ ] },
+        { "name": "ProRes",        "max_size": [8192, 4320], "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
+        { "name": "PNG Sequence",  "max_size": false,        "variants": ["8-bit", "16-bit"] },
     ];
 
     Settings {
@@ -50,6 +54,7 @@ MenuItem {
     property alias bitrate: bitrate.value;
     property alias gpu: gpu.checked;
     property alias audio: audio.checked;
+    property string codecOptions: "";
 
     function updateOutputSize(isWidth) {
         if (lockAspectRatio.checked && ratioHeight > 0) {
@@ -72,6 +77,26 @@ MenuItem {
         model: exportFormats.map(x => x.name);
         width: parent.width;
         currentIndex: 1;
+        function updateExtension(ext) {
+            window.outputFile = window.outputFile.replace(/(_%.+)?\.[a-z0-9]+$/i, ext);
+        }
+        onCurrentIndexChanged: {
+            gpu.enabled = currentIndex == 0 || currentIndex == 1;
+            audio.enabled = currentIndex != 3;
+            if (!gpu.enabled) gpu.checked = false;
+            if (!audio.enabled) audio.checked = false;
+
+            if (currentIndex == 2) updateExtension(".mov");
+            else if (currentIndex == 3) updateExtension("_%05d.png");
+            else updateExtension(".mp4");
+        }
+    }
+    ComboBox {
+        model: exportFormats[codec.currentIndex].variants;
+        width: parent.width;
+        visible: model.length > 0;
+        onVisibleChanged: if (!visible) { root.codecOptions = ""; } else { root.codecOptions = currentText; }
+        onCurrentTextChanged: root.codecOptions = currentText;
     }
     Label {
         position: Label.Left;

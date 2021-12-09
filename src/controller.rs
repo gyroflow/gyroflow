@@ -82,7 +82,7 @@ pub struct Controller {
 
     chart_data_changed: qt_signal!(),
 
-    render: qt_method!(fn(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
+    render: qt_method!(fn(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
     render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
@@ -444,7 +444,7 @@ impl Controller {
         self.compute_progress(id, 0.0);
     }
 
-    fn render(&self, codec: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
+    fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         rendering::clear_log();
 
         let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize)| {
@@ -470,7 +470,7 @@ impl Controller {
         let stab = self.stabilizer.clone();
         StabilizationManager::<()>::run_threaded(move || {
             let stab = stab.get_render_stabilizator((output_width, output_height));
-            if let Err(e) = rendering::render(stab, progress, video_path, codec, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag) {
+            if let Err(e) = rendering::render(stab, progress, video_path, codec, codec_options, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag) {
                 err(("An error occured: %1".to_string(), e.to_string()))
             }
         });

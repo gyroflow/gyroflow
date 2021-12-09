@@ -140,6 +140,7 @@ Rectangle {
                         successShown = false;
                         controller.render(
                             exportSettings.codec, 
+                            exportSettings.codecOptions, 
                             outputFile.text, 
                             videoArea.trimStart, 
                             videoArea.trimEnd, 

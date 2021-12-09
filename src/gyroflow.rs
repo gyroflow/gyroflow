@@ -17,7 +17,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - ProRes and PNG sequence
 // - Some basic error handling, check for all unwrap()'s
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Setup CI for packaging for Windows
@@ -57,6 +56,7 @@ use ui::theme::Theme;
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: auto updater
+// TODO: Add cache for the undistortion if the video is not playing
 
 cpp! {{
     #include <QQuickStyle>

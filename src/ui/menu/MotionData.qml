@@ -70,7 +70,6 @@ MenuItem {
         text: qsTr("Rotation");
         //inner.visible: true;
         function update_rotation() {
-            console.log('update_rotation', p.value, r.value, y.value);
             controller.set_imu_rotation(p.value, r.value, y.value);
         }
 
