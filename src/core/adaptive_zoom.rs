@@ -262,8 +262,8 @@ fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
 }
 
 fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {
-    let first = *arr.first().unwrap();
-    let last = *arr.last().unwrap();
+    let first = *arr.first().unwrap_or(&0.0);
+    let last = *arr.last().unwrap_or(&0.0);
 
     let mut new_arr = vec![0.0; arr.len() + pad_to.0 + pad_to.1];
     new_arr[pad_to.0..pad_to.0 + arr.len()].copy_from_slice(arr);

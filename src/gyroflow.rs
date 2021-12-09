@@ -18,7 +18,6 @@ use ui::theme::Theme;
 
 // Things to do before first public preview:
 // - ProRes and PNG sequence
-// - Fix rendering with OpenGL
 // - Some basic error handling, check for all unwrap()'s
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Setup CI for packaging for Windows
@@ -62,6 +61,7 @@ use ui::theme::Theme;
 cpp! {{
     #include <QQuickStyle>
     #include <QQuickWindow>
+    #include <QQmlContext>
     #include <QtGui/QGuiApplication>
     #include <QIcon>
 
@@ -103,9 +103,10 @@ fn entry() {
     let mut engine = QmlEngine::new();
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
+    engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
+    engine.set_property("isOpenGl".into(), QVariant::from(false));
     engine.set_object_property("controller".into(), ctlpinned);
     engine.set_object_property("theme".into(), themepinned);
-    engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
     theme.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
     theme.borrow().set_theme("dark".into());
 
@@ -129,7 +130,9 @@ fn entry() {
     }
 
     cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *"] {
-        qobject_cast<QQuickWindow *>(engine_ptr->rootObjects().first())->setIcon(QIcon(":/resources/icon.png"));
+        auto wnd = qobject_cast<QQuickWindow *>(engine_ptr->rootObjects().first());
+        engine_ptr->rootContext()->setContextProperty("isOpenGl", wnd->rendererInterface()->graphicsApi() == QSGRendererInterface::OpenGLRhi);
+        wnd->setIcon(QIcon(":/resources/icon.png"));
         #ifdef Q_OS_ANDROID
             QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
         #endif

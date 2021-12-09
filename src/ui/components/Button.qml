@@ -12,7 +12,7 @@ QQC.Button {
     Component.onCompleted: {
         if (contentItem.color) {
             contentItem.color = Qt.binding(() => root.textColor);
-            contentItem.icon.color = Qt.binding(() => root.textColor);
+            icon.color = Qt.binding(() => root.textColor);
             if (fadeWhenDisabled) {
                 contentItem.opacity = Qt.binding(() => !root.enabled? 0.75 : 1.0);
             }

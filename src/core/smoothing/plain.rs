@@ -21,10 +21,10 @@ impl SmoothingAlgorithm for Plain {
         simd_json::json!([
             {
                 "name": "time_constant",
-                "description": "Time constant",
-                "type": "Slider",
+                "description": "Smoothness",
+                "type": "SliderWithField",
                 "from": 0.01,
-                "to": 10.0,
+                "to": 1.0,
                 "value": 0.25,
                 "unit": "s"
             }

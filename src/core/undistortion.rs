@@ -223,8 +223,6 @@ impl<T: PixelType> Undistortion<T> {
 
         self.size = (size.0, size.1, stride);
         self.output_size = (output_size.0, output_size.1, output_stride);
-
-        //self.recompute(params);
     }
 
     pub fn set_background(&mut self, bg: Vector4<f32>) {

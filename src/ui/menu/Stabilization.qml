@@ -4,14 +4,25 @@ import Qt.labs.settings 1.0
 import "../components/"
 
 MenuItem {
+    id: root;
     text: qsTr("Stabilization");
     icon: "gyroflow";
     innerItem.enabled: window.videoArea.vid.loaded;
 
     Settings {
+        id: settings;
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
+    }
+
+    function setSmoothingParam(name, value) {
+        settings.setValue("smoothing-" + smoothingMethod.currentIndex + "-" + name, value);
+        controller.set_smoothing_param(name, value);
+    }
+    function getSmoothingParam(name, defaultValue) {
+        console.log( settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue), defaultValue);
+        return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
 
     Connections {
@@ -70,22 +81,25 @@ MenuItem {
             if (opt_json.length > 0) {
                 let qml = "import QtQuick 2.15; import '../components/'; Column { width: parent.width; ";
                 for (const x of opt_json) {
-                    // TODO figure out a better way than constructing a string
+                    // TODO: figure out a better way than constructing a string
                     switch (x.type) {
                         case 'Slider': 
+                        case 'SliderWithField': 
                         case 'NumberField': 
                             qml += `Label {
                                 width: parent.width;
+                                spacing: 2 * dpiScale;
                                 text: qsTr("${x.description}")
                                 ${x.type} {
                                     width: parent.width;
                                     from: ${x.from};
                                     to: ${x.to};
-                                    value: ${x.value};
+                                    value: root.getSmoothingParam("${x.name}", ${x.value});
+                                    defaultValue: ${x.value};
                                     unit: "${x.unit}";
                                     live: false;
-                                    ${x.type == "NumberField"? "precision: " + x.precision : ""}
-                                    onValueChanged: controller.set_smoothing_param("${x.name}", value);
+                                    precision: ${x.precision} || 2;
+                                    onValueChanged: root.setSmoothingParam("${x.name}", value);
                                 }
                             }`;
                         break;
@@ -110,6 +124,7 @@ MenuItem {
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
         model: [qsTr("No cropping"), qsTr("Dynamic cropping"), qsTr("Static crop")];
+        Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             switch (currentIndex) {
                 case 0: controller.adaptive_zoom = 0.0; break;

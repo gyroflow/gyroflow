@@ -7,6 +7,9 @@ QQC.Slider {
     opacity: enabled? 1.0 : 0.5;
     property string unit: "";
     property int precision: 3;
+    property real defaultValue: 0;
+    Component.onCompleted: defaultValue = value;
+    
     background: Rectangle {
         x: parent.leftPadding
         y: parent.topPadding + parent.availableHeight / 2 - height / 2
