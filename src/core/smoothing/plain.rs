@@ -2,6 +2,7 @@ use super::*;
 
 use crate::gyro_source::TimeQuat;
 
+#[derive(Clone)]
 pub struct Plain { pub time_constant: f64 }
 
 impl Default for Plain {

@@ -2,6 +2,8 @@ use super::*;
 use nalgebra::*;
 use crate::gyro_source::TimeQuat;
 
+
+#[derive(Clone)]
 pub struct HorizonLock { pub time_constant: f64,  pub roll: f64, pub pitch: f64, pub yaw: f64 }
 
 impl Default for HorizonLock {

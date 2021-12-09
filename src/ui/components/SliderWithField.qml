@@ -32,7 +32,6 @@ Row {
         font.pixelSize: 11 * dpiScale;
         anchors.verticalCenter: parent.verticalCenter;
         onValueChanged: {
-            console.log('val changed', value, slider.value);
             slider.preventChange = true;
             slider.value = value;
             Qt.callLater(() => slider.preventChange = false);

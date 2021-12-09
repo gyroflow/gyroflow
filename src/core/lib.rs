@@ -223,15 +223,15 @@ impl<T: PixelType> StabilizationManager<T> {
         self.init_size();
     }
 
-    pub fn recompute_adaptive_zoom(&self) {
+    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>, gyro: &RwLock<GyroSource>) -> Vec<f64> {
         let (window, frames, video_size, ratio, fps, trim) = {
-            let params = self.params.read();
+            let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.output_size, params.size.0 as f64 / params.video_size.0 as f64, params.fps, (params.trim_start, params.trim_end))
         };
         if window > 0.0 || window < -0.9 {
             let mut quats = Vec::with_capacity(frames);
             {
-                let g = self.gyro.read();
+                let g = gyro.read();
                 for i in 0..frames {
                     quats.push(g.smoothed_quat_at_timestamp(i as f64 * 1000.0 / fps));
                 }
@@ -243,17 +243,21 @@ impl<T: PixelType> StabilizationManager<T> {
                 adaptive_zoom::Mode::DynamicZoom(window)
             };
 
-            let zoom = AdaptiveZoom::from_manager(self);
             let fovs = zoom.compute(&quats, video_size, fps, mode, trim);
-            self.params.write().fovs = fovs.iter().map(|v| v.0 * ratio).collect();
+            fovs.iter().map(|v| v.0 * ratio).collect()
         } else {
-            self.params.write().fovs.clear();
+            Vec::new()
         }
+    }
+    pub fn recompute_adaptive_zoom(&self) {
+        let mut zoom = AdaptiveZoom::from_manager(self);
+        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.gyro);
+        self.params.write().fovs = fovs;
     }
 
     pub fn recompute_smoothness(&self) {
-        let params = self.params.read();
-        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_ref(), params.duration_ms);
+        let duration_ms = self.params.read().duration_ms;
+        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_ref(), duration_ms);
     }
 
     pub fn recompute_undistortion(&self) {
@@ -268,15 +272,27 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     
     pub fn recompute_threaded<F: Fn(u64) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
-        self.recompute_smoothness();
-        self.recompute_adaptive_zoom();
-        let params = undistortion::ComputeParams::from_manager(self);
+        //self.recompute_smoothness();
+        //self.recompute_adaptive_zoom();
+        let mut params = undistortion::ComputeParams::from_manager(self);
+
+        let smoothing = self.smoothing.clone();
+        let basic_params = self.params.clone();
+        let mut zoom = AdaptiveZoom::from_manager(self);
 
         let compute_id = fastrand::u64(..);
         CURRENT_COMPUTE_ID.store(compute_id, SeqCst);
 
         let undistortion = self.undistortion.clone();
         THREAD_POOL.spawn(move || {
+            let smoothing = smoothing.write().current().clone();
+            params.gyro.recompute_smoothness(smoothing.as_ref(), params.duration_ms);
+
+            {
+                let lock = RwLock::new(params.gyro.clone());
+                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params, &lock);
+            }
+
             if let Ok(stab_data) = undistortion::Undistortion::<T>::calculate_stab_data(&params, &CURRENT_COMPUTE_ID, compute_id) {
                 undistortion.write().stab_data = stab_data;
 

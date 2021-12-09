@@ -3,8 +3,9 @@ pub mod horizon;
 pub mod fixed;
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
+use dyn_clone::{clone_trait_object, DynClone};
 
-pub trait SmoothingAlgorithm {
+pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
     
     fn get_parameters_json(&self) -> simd_json::owned::Value;
@@ -13,6 +14,9 @@ pub trait SmoothingAlgorithm {
     fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat;
 }
 
+clone_trait_object!(SmoothingAlgorithm);
+
+#[derive(Clone)]
 pub struct None { }
 impl SmoothingAlgorithm for None {
     fn get_name(&self) -> String { "No smoothing".to_owned() }

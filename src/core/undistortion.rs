@@ -11,12 +11,13 @@ use super::StabilizationManager;
 
 #[derive(Clone)]
 pub struct ComputeParams {
-    gyro: GyroSource, // TODO: ref? threading?
+    pub gyro: GyroSource,
+    pub fovs: Vec<f64>,
 
+    pub duration_ms: f64,
     frame_count: usize, 
     fps: f64,
     fov_scale: f64,
-    fovs: Vec<f64>,
     width: usize,
     height: usize, 
     output_width: usize,
@@ -54,6 +55,7 @@ impl ComputeParams {
         };
 
         Self {
+            duration_ms: params.duration_ms,
             gyro: mgr.gyro.read().clone(), // TODO: maybe not clone?
 
             frame_count: params.frame_count,
