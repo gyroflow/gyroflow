@@ -11,7 +11,6 @@ use super::ffmpeg_audio::*;
 
 pub struct FfmpegProcessor<'a> {
     pub gpu_decoding: bool,
-    pub gpu_encoding: bool,
     pub gpu_device: Option<String>,
     pub video_codec: Option<String>,
 
@@ -53,60 +52,21 @@ impl<'a> FfmpegProcessor<'a> {
         };
 
         let strm = best_video_stream?;
-        let stream = strm.0;
+        let mut stream = strm.0;
         let decoder = strm.1;
 
-        let mut hw_format = None;
         let mut hw_backend = String::new();
-
         if gpu_decoding {
-            let mut hw_type = ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE;
             // --------------------------- GPU ---------------------------
-            let supported_backends = Self::supported_gpu_backends();
-            // TODO proper detection and selection
-            for backend in supported_backends {
-                unsafe {
-                    let c_name = CString::new(backend.clone()).unwrap();
-                    hw_type = ffi::av_hwdevice_find_type_by_name(c_name.as_ptr());
-                
-                    if hw_type != ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE  {
-                        for i in 0..100 { // Better 100 than infinity
-                            let config = ffi::avcodec_get_hw_config(decoder, i);
-                            if config.is_null() {
-                                eprintln!("Decoder {} does not support device type {}.", CStr::from_ptr((*decoder).name).to_string_lossy(), CStr::from_ptr(ffi::av_hwdevice_get_type_name(hw_type)).to_string_lossy());
-                                return Err(Error::DecoderNotFound);
-                            }
-                            if ((*config).methods & ffi::AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX as i32) > 0 && (*config).device_type == hw_type {
-                                hw_format = Some((*config).pix_fmt);
-                                break;
-                            }
-                        }
-                        dbg!(hw_format);
-
-                        let mut decoder_ctx = stream.codec().decoder();
-                        //(*decoder_ctx.as_mut_ptr()).get_format = Some(get_hw_format);
-
-                        let mut hw_device_ctx_ptr = std::ptr::null_mut();
-                        let err = ffi::av_hwdevice_ctx_create(&mut hw_device_ctx_ptr, hw_type, std::ptr::null(), std::ptr::null_mut(), 0);
-                        if err < 0 {
-                            eprintln!("Failed to create specified HW device: {:?}", hw_type);
-                            continue;
-                        }
-
-                        (*decoder_ctx.as_mut_ptr()).hw_device_ctx = ffi::av_buffer_ref(hw_device_ctx_ptr);
-                        hw_backend = backend;
-                        break;
-                    }
-                }
-            }
-            println!("Selected backend {:?}", hw_type);
+            let hw = ffmpeg_hw::init_device_for_decoding(decoder, &mut stream)?;
+            hw_backend = hw.1;
+            super::append_log(&format!("Selected HW backend {:?} with format {:?}\n", hw.0, hw.2));
             // --------------------------- GPU ---------------------------
         }
 
         Ok(Self {
             gpu_decoding,
-            gpu_encoding: true,
-            gpu_device: Some(hw_backend/*format!("{:?}", hw_type)*/),
+            gpu_device: Some(hw_backend/*format!("{:?}", hw_type)*/), // TODO: Should be None if empty
             video_codec: None,
 
             audio_codec: codec::Id::AAC,
@@ -117,7 +77,7 @@ impl<'a> FfmpegProcessor<'a> {
             end_ms: None,
         
             video: VideoTranscoder {
-                gpu_pixel_format: hw_format,
+                gpu_encoding: true,
                 input_index: stream.index(),
                 codec_options: Dictionary::new(),
                 ..VideoTranscoder::default()
@@ -220,7 +180,6 @@ impl<'a> FfmpegProcessor<'a> {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                     packet.rescale_ts(stream.time_base(), decoder.time_base());
                     if let Err(err) = decoder.send_packet(&packet) {
-                        eprintln!("Decoder error {:?}", err);
                         if !any_encoded {
                             return Err(err);
                         }
@@ -244,7 +203,6 @@ impl<'a> FfmpegProcessor<'a> {
                         }
                     },
                     Err(e) => {
-                        eprintln!("Encoder error {:?}", e);
                         if !any_encoded {
                             return Err(e);
                         }
@@ -365,22 +323,6 @@ impl<'a> FfmpegProcessor<'a> {
         self.video.on_frame_callback = Some(Box::new(cb));
     }
 
-    pub fn supported_gpu_backends() -> Vec<String> {
-        let mut ret = Vec::new();
-        let mut hw_type = ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE;
-        for _ in 0..100 { // Better 100 than infinity
-            unsafe {
-                hw_type = ffi::av_hwdevice_iterate_types(hw_type);
-                if hw_type == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
-                    break;
-                }
-                // returns a pointer to static string, shouldn't be freed
-                let name_ptr = ffi::av_hwdevice_get_type_name(hw_type);
-                ret.push(CStr::from_ptr(name_ptr).to_string_lossy().into());
-            }
-        }
-        ret
-    }
 }
 
 /* unsafe extern "C" fn get_hw_format(ctx: *mut ffi::AVCodecContext, pix_fmts: *const ffi::AVPixelFormat) -> ffi::AVPixelFormat {

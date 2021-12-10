@@ -160,8 +160,11 @@ Item {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
             onPressAndHold: (mouse) => {
-                if (mouse.source === Qt.MouseEventNotSynthesized)
+                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
                     timelineContextMenu.popup()
+                } else {
+                    mouse.accepted = false;
+                }
             }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {

@@ -39,7 +39,7 @@ MenuItem {
         window.exportSettings.orgHeight = h || 0;
         window.lensProfile.videoWidth   = w || 0;
         window.lensProfile.videoHeight  = h || 0;
-        window.exportSettings.bitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
+        window.exportSettings.outBitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
 
         list.model["Dimensions"]   = w && h? w + "x" + h : "---";
         list.model["Duration"]     = getDuration(md) || "---";

@@ -1,6 +1,7 @@
 mod ffmpeg_audio;
 mod ffmpeg_video;
 pub mod ffmpeg_processor;
+pub mod ffmpeg_hw;
 
 pub use self::ffmpeg_processor::FfmpegProcessor;
 use crate::core::{StabilizationManager, undistortion::*};
@@ -10,35 +11,37 @@ use std::os::raw::c_char;
 use std::sync::{Arc, atomic::AtomicBool};
 use parking_lot::RwLock;
 
-pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: Option<&str>) -> &'static str {
-    if codec.contains("PNG") || codec.contains("png") { return "png"; }
+pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> name, is_gpu
+    if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
     if use_gpu {
         match codec {
-            "x264" => match selected_backend {
-                Some("cuda") => "h264_nvenc",
-                Some("qsv")  => "h264_qsv",
-                Some("amf")  => "h264_amf",
-                Some("dxva2")   => "h264_mf",
-                Some("d3d11va") => "h264_mf",
-                _            => "libx264"
-            },
-            "x265" => match selected_backend {
-                Some("cuda") => "hevc_nvenc",
-                Some("qsv")  => "hevc_qsv",
-                Some("amf")  => "hevc_amf",
-                Some("dxva2")   => "hevc_mf",
-                Some("d3d11va") => "hevc_mf",
-                _            => "libx265"
-            },
-            "ProRes" => "prores_ks",
-            _        => ""
+            "x264" => vec![
+                ("h264_nvenc",        true),
+                ("h264_amf",          true),
+                ("h264_mf",           true),
+                ("h264_videotoolbox", true),
+                ("h264_vaapi",        true),
+                ("h264_qsv",          true),
+                ("libx264",           false),
+            ],
+            "x265" => vec![
+                ("hevc_nvenc",        true),
+                ("hevc_amf",          true),
+                ("hevc_mf",           true),
+                ("hevc_videotoolbox", true),
+                ("hevc_vaapi",        true),
+                ("hevc_qsv",          true),
+                ("libx265",           false),
+            ],
+            "ProRes" => vec![("prores_ks", false)],
+            _        => vec![]
         }
     } else {
         match codec {
-            "x264"   => "libx264",
-            "x265"   => "libx265",
-            "ProRes" => "prores_ks",
-            _        => ""
+            "x264"   => vec![("libx264", false)],
+            "x265"   => vec![("libx265", false)],
+            "ProRes" => vec![("prores_ks", false)],
+            _        => vec![]
         }
     }
 }
@@ -46,7 +49,7 @@ pub fn match_gpu_encoder(codec: &str, use_gpu: bool, selected_backend: Option<&s
 pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), Error>
     where F: Fn((f64, usize, usize)) + Send + Sync + Clone
 {
-    dbg!(FfmpegProcessor::supported_gpu_backends());
+    dbg!(ffmpeg_hw::supported_gpu_backends());
 
     // decoders: h264 h264_qsv h264_cuvid / encoders: libx264 h264_amf h264_nvenc h264_qsv
     // decoders: hevc hevc_qsv hevc_cuvid / encoders: libx265 hevc_amf hevc_nvenc hevc_qsv
@@ -62,11 +65,13 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     drop(params);
 
-    let mut proc = FfmpegProcessor::from_file(&video_path, use_gpu)?;
+    let mut proc = FfmpegProcessor::from_file(&video_path, true)?;
 
     dbg!(&proc.gpu_device);
-    proc.video_codec = Some(match_gpu_encoder(&codec, use_gpu, proc.gpu_device.as_deref()).to_owned());
-    proc.gpu_encoding = use_gpu;
+    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&codec, use_gpu));
+    proc.video_codec = Some(encoder.0.to_owned());
+    proc.video.gpu_encoding = encoder.1;
+    proc.video.hw_device_type = encoder.2;
     dbg!(&proc.video_codec);
 
     if trim_start > 0.0 { proc.start_ms = Some((trim_start * duration_ms) as usize); }
@@ -216,7 +221,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 }
 
 pub fn init() -> Result<(), Error> {
-	unsafe { 
+	unsafe {
         ffi::av_log_set_callback(Some(ffmpeg_log));
     }
 
@@ -257,6 +262,7 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
     }
 }
 
+pub fn append_log(msg: &str) { eprintln!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
 pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
 pub fn clear_log() { FFMPEG_LOG.write().clear() }
 

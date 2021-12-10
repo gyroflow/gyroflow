@@ -139,16 +139,16 @@ Rectangle {
                     function doRender() {
                         successShown = false;
                         controller.render(
-                            exportSettings.codec, 
-                            exportSettings.codecOptions, 
+                            exportSettings.outCodec, 
+                            exportSettings.outCodecOptions, 
                             outputFile.text, 
                             videoArea.trimStart, 
                             videoArea.trimEnd, 
                             exportSettings.outWidth, 
                             exportSettings.outHeight, 
-                            exportSettings.bitrate, 
-                            exportSettings.gpu, 
-                            exportSettings.audio
+                            exportSettings.outBitrate, 
+                            exportSettings.outGpu, 
+                            exportSettings.outAudio
                         );
                     }
                     function renameOutput() {
@@ -242,5 +242,27 @@ Rectangle {
         function onError(text, arg, callback) {
             messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
+    }
+
+    function checkUpdate() {
+        const xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                const obj = JSON.parse(xhr.responseText.toString());
+                if (obj && obj.length) {
+                    const latestVersion = obj[0].name.replace("v", "");
+                    console.log('Latest version:', latestVersion, '. Current: ', version);
+                    if (version != latestVersion) {
+                        const body = obj[0].body? "\n\n" + obj[0].body : "";
+                        messageBox(Modal.Info, qsTr("There's a newer version available.") + body, [ { text: qsTr("Download"), clicked: () => Qt.openUrlExternally("https://github.com/AdrianEddy/gyroflow/releases") }, { text: qsTr("Close") }])
+                    }
+                }
+            }
+        }
+        xhr.open("GET", "https://api.github.com/repos/AdrianEddy/gyroflow/releases")
+        xhr.send()
+    }
+    Component.onCompleted: {
+        checkUpdate();
     }
 }

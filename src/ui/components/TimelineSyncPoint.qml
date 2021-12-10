@@ -53,8 +53,11 @@ Rectangle {
                 }
             }
             onPressAndHold: (mouse) => {
-                if (mouse.source === Qt.MouseEventNotSynthesized)
+                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
                     menu.popup()
+                } else {
+                    mouse.accepted = false;
+                }
             }
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }

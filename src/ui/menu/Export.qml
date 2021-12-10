@@ -15,10 +15,10 @@ MenuItem {
     }
 
     property var exportFormats: [
-        { "name": "x264",          "max_size": [4096, 2160], "variants": [ ] },
-        { "name": "x265",          "max_size": [8192, 4320], "variants": [ ] },
-        { "name": "ProRes",        "max_size": [8192, 4320], "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
-        { "name": "PNG Sequence",  "max_size": false,        "variants": ["8-bit", "16-bit"] },
+        { "name": "x264",          "max_size": [4096, 2160], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+        { "name": "x265",          "max_size": [8192, 4320], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+        { "name": "ProRes",        "max_size": [8192, 4320], "extension": ".mov",      "gpu": false, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
+        { "name": "PNG Sequence",  "max_size": false,        "extension": "_%05d.png", "gpu": false, "audio": false, "variants": ["8-bit", "16-bit"] },
     ];
 
     Settings {
@@ -50,11 +50,11 @@ MenuItem {
 
     property int outWidth: outputWidth.value;
     property int outHeight: outputHeight.value;
-    property alias codec: codec.currentText;
-    property alias bitrate: bitrate.value;
-    property alias gpu: gpu.checked;
-    property alias audio: audio.checked;
-    property string codecOptions: "";
+    property alias outCodec: codec.currentText;
+    property alias outBitrate: bitrate.value;
+    property alias outGpu: gpu.checked;
+    property alias outAudio: audio.checked;
+    property string outCodecOptions: "";
 
     function updateOutputSize(isWidth) {
         if (lockAspectRatio.checked && ratioHeight > 0) {
@@ -78,25 +78,24 @@ MenuItem {
         width: parent.width;
         currentIndex: 1;
         function updateExtension(ext) {
-            window.outputFile = window.outputFile.replace(/(_%.+)?\.[a-z0-9]+$/i, ext);
+            window.outputFile = window.outputFile.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext);
         }
         onCurrentIndexChanged: {
-            gpu.enabled = currentIndex == 0 || currentIndex == 1;
-            audio.enabled = currentIndex != 3;
-            if (!gpu.enabled) gpu.checked = false;
-            if (!audio.enabled) audio.checked = false;
+            const format = exportFormats[currentIndex];
+            gpu.enabled2 = format.gpu;
+            audio.enabled2 = format.audio;
+            if (!gpu.enabled2) gpu.checked = false;
+            if (!audio.enabled2) audio.checked = false;
 
-            if (currentIndex == 2) updateExtension(".mov");
-            else if (currentIndex == 3) updateExtension("_%05d.png");
-            else updateExtension(".mp4");
+            updateExtension(format.extension);
         }
     }
     ComboBox {
         model: exportFormats[codec.currentIndex].variants;
         width: parent.width;
         visible: model.length > 0;
-        onVisibleChanged: if (!visible) { root.codecOptions = ""; } else { root.codecOptions = currentText; }
-        onCurrentTextChanged: root.codecOptions = currentText;
+        onVisibleChanged: if (!visible) { root.outCodecOptions = ""; } else { root.outCodecOptions = currentText; }
+        onCurrentTextChanged: root.outCodecOptions = currentText;
     }
     Label {
         position: Label.Left;
@@ -170,6 +169,8 @@ MenuItem {
         id: gpu;
         text: qsTr("Use GPU encoding");
         checked: true;
+        property bool enabled2: true;
+        enabled: enabled2;
         tooltip: qsTr("GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.") + "\n" + 
                  qsTr("They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.") + "\n" + 
                  qsTr("Uncheck this option for maximum possible quality.");
@@ -178,5 +179,7 @@ MenuItem {
         id: audio;
         text: qsTr("Export audio");
         checked: true;
+        property bool enabled2: true;
+        enabled: enabled2;
     }
 }

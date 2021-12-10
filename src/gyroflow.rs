@@ -27,6 +27,8 @@ use ui::theme::Theme;
 // - Figure out what to do with the console output window/log
 // - Pick a license
 // - wgpu undistortion add support for different plane types
+// - Add zoom in function to sync point context menu
+// - Sync only within trim range
 
 // TODO: more smoothing algorithms
 
@@ -55,8 +57,9 @@ use ui::theme::Theme;
 // TODO: keyframes for stabilization params
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
-// TODO: auto updater
 // TODO: Add cache for the undistortion if the video is not playing
+// TODO: OpenFX plugin
+// TODO: Adobe plugin
 
 cpp! {{
     #include <QQuickStyle>
