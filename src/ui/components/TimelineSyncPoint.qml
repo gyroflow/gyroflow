@@ -18,6 +18,7 @@ Rectangle {
 
     signal edit(real timestamp_us, real offset_ms);
     signal remove(real timestamp_us);
+    signal zoomIn(real timestamp_us);
 
     Rectangle {
         height: 12 * dpiScale;
@@ -59,6 +60,7 @@ Rectangle {
                     mouse.accepted = false;
                 }
             }
+            onDoubleClicked: root.zoomIn(root.org_timestamp_us); 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
         BasicText {
@@ -80,6 +82,11 @@ Rectangle {
                 text: qsTr("Delete sync point");
                 icon.name: "bin;#f67575";
                 onTriggered: root.remove(root.org_timestamp_us);
+            }
+            Action {
+                text: qsTr("Zoom in");
+                icon.name: "search";
+                onTriggered: root.zoomIn(root.org_timestamp_us);
             }
         }
     }

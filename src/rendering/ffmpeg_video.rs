@@ -125,7 +125,9 @@ impl<'a> VideoTranscoder<'a> {
 
         if let Some(hw_type) = hw_device_type {
             unsafe {
-                super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size);
+                if let Err(_) = super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size) {
+                    super::append_log("Failed to create encoder HW context.\n");
+                }
             }
         }
 

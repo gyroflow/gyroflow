@@ -36,8 +36,10 @@ MenuItem {
         function doSync() {
             const points = maxSyncPoints.value;
 
-            const chunks = 1.0 / points;
-            const start = chunks / 2;
+            const trimmed = videoArea.trimEnd - videoArea.trimStart;
+
+            const chunks = trimmed / points;
+            const start = videoArea.trimStart + (chunks / 2);
             let ranges = [];
             for (let i = 0; i < points; ++i) {
                 const pos = start + (i*chunks);

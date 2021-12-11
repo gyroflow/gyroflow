@@ -36,6 +36,7 @@ pub struct TimelineGyroChart {
     visibleAreaRight: qt_property!(f64; WRITE setVisibleAreaRight),
     vscale: qt_property!(f64; WRITE setVScale),
 
+    setVScaleToVisibleArea: qt_method!(fn(&mut self)),
     setAxisVisible: qt_method!(fn(&mut self, a: usize, v: bool)),
     getAxisVisible: qt_method!(fn(&self, a: usize) -> bool),
     axisVisibleChanged: qt_signal!(),
@@ -64,6 +65,34 @@ impl TimelineGyroChart {
     fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
     fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(); self.viewModeChanged(); }
+
+    pub fn setVScaleToVisibleArea(&mut self) {
+        let rect = (self as &dyn QQuickItem).bounding_rect();
+        let mut min_height = f64::MAX;
+        let mut max_height = 0.0;
+        for serie in &mut self.series  {
+            if serie.visible && !serie.lines.is_empty() {
+                for a in &serie.lines {
+                    for b in a {
+                        if b.pt1.x > 0.0 && b.pt1.x < rect.width &&
+                           b.pt2.x > 0.0 && b.pt2.x < rect.width {
+                            if b.pt1.y < min_height { min_height = b.pt1.y; }
+                            if b.pt2.y < min_height { min_height = b.pt2.y; }
+                            if b.pt1.y > max_height { max_height = b.pt1.y; }
+                            if b.pt2.y > max_height { max_height = b.pt2.y; }
+                        }
+                    }
+                }
+            }
+        }
+
+        let min_element = (-(min_height / (rect.height / 2.0)) + 1.0) / self.vscale;
+        let max_element = (-(max_height / (rect.height / 2.0)) + 1.0) / self.vscale;
+
+        self.vscale = 0.9 / min_element.abs().max(max_element.abs());
+
+        self.update();
+    }
 
     pub fn update(&mut self) {
         self.calculate_lines();

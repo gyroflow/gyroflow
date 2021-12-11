@@ -1,8 +1,7 @@
-use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, software, Dictionary, Stream, Packet, Rational, Error, rescale::Rescale };
+use ffmpeg_next::{ ffi, encoder, Stream, Error };
 
 use std::collections::HashMap;
 use std::ffi::CStr;
-use std::ffi::CString;
 use parking_lot::Mutex;
 
 type DeviceType = ffi::AVHWDeviceType;
@@ -37,17 +36,7 @@ impl HWDevice {
             }
         }
     }
-    // pub unsafe fn from_codec(codec: *mut ffi::AVCodec) -> Result<Self, ()> {
-    //     for i in 0..100 {
-    //         let config = ffi::avcodec_get_hw_config(codec, i);
-    //         if !config.is_null() {
-    //             if let Ok(dev) = Self::from_type((*config).device_type) {
-    //                 return Ok(dev);
-    //             }
-    //         }
-    //     }
-    //     Err(())
-    // }
+
     pub fn add_ref(&self) -> *mut ffi::AVBufferRef {
         unsafe { ffi::av_buffer_ref(self.device_ref) }
     }
@@ -124,70 +113,7 @@ pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -
         }
     }
     Ok((ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))
-/*
-
-
-    let supported_backends = supported_gpu_backends();
-    for backend in supported_backends {
-        unsafe {
-            let c_name = CString::new(backend.clone()).unwrap();
-            let hw_type = ffi::av_hwdevice_find_type_by_name(c_name.as_ptr());
-            let mut hw_format = None;
-        
-            if hw_type != ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE  {
-                for i in 0..100 { // Better 100 than infinity
-                    let config = ffi::avcodec_get_hw_config(codec, i);
-                    if config.is_null() {
-                        super::append_log(&format!("Decoder {} does not support device type {}.\n", CStr::from_ptr((*codec).name).to_string_lossy(), CStr::from_ptr(ffi::av_hwdevice_get_type_name(hw_type)).to_string_lossy()));
-                        return Err(Error::DecoderNotFound);
-                    }
-                    if /*((*config).methods & ffi::AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX as i32) > 0 && */(*config).device_type == hw_type {
-                        hw_format = Some((*config).pix_fmt);
-                        break;
-                    }
-                }
-                dbg!(hw_format);
-
-                let mut decoder_ctx = stream.codec().decoder();
-                //(*decoder_ctx.as_mut_ptr()).get_format = Some(get_hw_format);
-
-                let mut hw_device_ctx_ptr = std::ptr::null_mut();
-                let err = ffi::av_hwdevice_ctx_create(&mut hw_device_ctx_ptr, hw_type, std::ptr::null(), std::ptr::null_mut(), 0);
-                if err < 0 {
-                    super::append_log(&format!("Failed to create specified HW device: {:?}\n", hw_type));
-                    continue;
-                }
-
-                let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(hw_device_ctx_ptr, std::ptr::null());
-                dbg!(constraints);
-                if !constraints.is_null() {
-                    dbg!(pix_formats_to_vec((*constraints).valid_hw_formats));
-                    dbg!(pix_formats_to_vec((*constraints).valid_sw_formats));
-                    dbg!((*constraints).min_width);
-                    dbg!((*constraints).min_height);
-                    dbg!((*constraints).max_width);
-                    dbg!((*constraints).max_height);
-        
-                    ffi::av_hwframe_constraints_free(&mut constraints);
-                }
-
-                (*decoder_ctx.as_mut_ptr()).hw_device_ctx = ffi::av_buffer_ref(hw_device_ctx_ptr);
-                return Ok((hw_type, backend, hw_format));
-            }
-        }
-    }
-    Ok((ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))*/
 }
-
-// pub fn get_supported_pixel_formats(name: &str) -> Vec<ffi::AVPixelFormat> {
-//     if let Some(mut codec) = encoder::find_by_name(name) {
-//         unsafe {
-//             pix_formats_to_vec((*codec.as_mut_ptr()).pix_fmts)
-//         }
-//     } else {
-//         Vec::new()
-//     }
-// }
 
 pub fn find_working_encoder(encoders: &Vec<(&'static str, bool)>) -> (&'static str, bool, Option<DeviceType>) {
     if encoders.is_empty() { return ("", false, None); } // TODO: should be Result<>
@@ -321,3 +247,13 @@ pub fn find_best_matching_codec(codec: ffi::AVPixelFormat, supported: &[ffi::AVP
 
     *supported.first().unwrap()
 }
+
+// pub fn get_supported_pixel_formats(name: &str) -> Vec<ffi::AVPixelFormat> {
+//     if let Some(mut codec) = encoder::find_by_name(name) {
+//         unsafe {
+//             pix_formats_to_vec((*codec.as_mut_ptr()).pix_fmts)
+//         }
+//     } else {
+//         Vec::new()
+//     }
+// }

@@ -27,8 +27,6 @@ use ui::theme::Theme;
 // - Figure out what to do with the console output window/log
 // - Pick a license
 // - wgpu undistortion add support for different plane types
-// - Add zoom in function to sync point context menu
-// - Sync only within trim range
 
 // TODO: more smoothing algorithms
 

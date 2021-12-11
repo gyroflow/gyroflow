@@ -202,15 +202,6 @@ Item {
                 chart.viewMode = i;
                 controller.update_chart(chart);
             }
-            Menu {
-                font.pixelSize: 11.5 * dpiScale;
-                title: qsTr("Chart display mode")
-                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: timelineContextMenu.setDisplayMode(0); }
-                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
-                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
-                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
-            }
-            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Action {
                 icon.name: "spinner";
                 text: qsTr("Auto sync here");
@@ -226,6 +217,15 @@ Item {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
                     controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
                 }
+            }
+            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+            Menu {
+                font.pixelSize: 11.5 * dpiScale;
+                title: qsTr("Chart display mode")
+                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: timelineContextMenu.setDisplayMode(0); }
+                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
+                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
+                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
             }
         }
 
@@ -288,16 +288,23 @@ Item {
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 offsetMs: offset_ms;
-                onEdit: (ts_ns, offs) => {
+                onEdit: (ts_us, offs) => {
                     root.editingSyncPoint = true;
-                    syncPointSlider.timestamp_us = ts_ns;
-                    syncPointSlider.from = offs - Math.max(15, Math.abs(offs));
-                    syncPointSlider.to = offs + Math.max(15, Math.abs(offs));
+                    syncPointSlider.timestamp_us = ts_us;
+                    syncPointSlider.from  = offs - Math.max(15, Math.abs(offs));
+                    syncPointSlider.to    = offs + Math.max(15, Math.abs(offs));
                     syncPointSlider.value = offs;
                 }
-                onRemove: (ts_ns) => {
+                onRemove: (ts_us) => {
                     root.editingSyncPoint = false;
-                    controller.remove_offset(ts_ns);
+                    controller.remove_offset(ts_us);
+                }
+                onZoomIn: (ts_us) => {
+                    const start_ts = ts_us - (window.sync.timePerSyncpoint * 1000000 / 2) * 1.05;
+                    const end_ts   = ts_us + (window.sync.timePerSyncpoint * 1000000 / 2) * 1.05;
+                    root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
+                    root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
+                    chart.setVScaleToVisibleArea();
                 }
             }
         }

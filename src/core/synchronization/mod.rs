@@ -417,7 +417,6 @@ impl AutosyncProcess {
         let duration_ms = self.duration_ms;
         let fps = self.fps;
         if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
-            println!("frame: {}, range: {}..{}", frame, current_range.0, current_range.1);
             crate::THREAD_POOL.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     total_detected_frames.fetch_add(1, SeqCst);
