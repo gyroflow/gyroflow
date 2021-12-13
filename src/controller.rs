@@ -55,6 +55,9 @@ pub struct Controller {
     set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
 
+    recompute_threaded: qt_method!(fn(&self)),
+    request_recompute: qt_signal!(),
+
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     fov: qt_property!(f64; WRITE set_fov),
@@ -156,7 +159,7 @@ impl Controller {
             this.sync_in_progress = false;
             this.sync_in_progress_changed();
             this.update_offset_model();
-            this.recompute_threaded();
+            this.request_recompute();
         });
         let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
             arg.push_str("\n\n");
@@ -167,7 +170,7 @@ impl Controller {
             this.sync_in_progress = false;
             this.sync_in_progress_changed();
             this.update_offset_model();
-            this.recompute_threaded();
+            this.request_recompute();
         });
 
         if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame) {
@@ -268,7 +271,7 @@ impl Controller {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
                 
-                this.recompute_threaded();
+                this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
                 this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
@@ -318,7 +321,7 @@ impl Controller {
         self.lens_loaded = true;
         self.lens_changed();
         self.lens_profile_loaded(info);
-        self.recompute_threaded();
+        self.request_recompute();
     }
     
     fn set_preview_resolution(&mut self, target_height: i32, player: QJSValue) {
@@ -348,7 +351,7 @@ impl Controller {
     fn set_integration_method(&mut self, index: usize) {
         let finished = util::qt_queued_callback(self, |this, _| {
             this.chart_data_changed();
-            this.recompute_threaded();
+            this.request_recompute();
         });
 
         let stab = self.stabilizer.clone();
@@ -357,6 +360,7 @@ impl Controller {
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
                 gyro.integrate();
+                stab.smoothing.write().update_quats_checksum(&gyro.quaternions);
             }
             stab.recompute_smoothness();
             finished(());
@@ -417,14 +421,14 @@ impl Controller {
 
     fn set_smoothing_method(&mut self, index: usize) -> QJsonArray {
         let params = util::simd_json_to_qt(&self.stabilizer.set_smoothing_method(index));
-        self.recompute_threaded();
+        self.request_recompute();
         self.chart_data_changed();
         params
     }
     fn set_smoothing_param(&mut self, name: QString, val: f64) {
         self.stabilizer.set_smoothing_param(&name.to_string(), val);
         self.chart_data_changed();
-        self.recompute_threaded();
+        self.request_recompute();
     }
     pub fn get_smoothing_algs(&self) -> QVariantList {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
@@ -507,7 +511,7 @@ impl Controller {
     }
     fn set_lens_param(&self, param: QString, value: f64) {
         self.stabilizer.set_lens_param(param.to_string().as_str(), value);
-        self.recompute_threaded();
+        self.request_recompute();
     }
 
     // Utilities

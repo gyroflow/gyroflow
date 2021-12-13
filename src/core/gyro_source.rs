@@ -183,11 +183,12 @@ impl GyroSource {
         self.apply_transforms();
     }
     pub fn set_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
             self.imu_rotation = Some(Rotation3::from_euler_angles(
-                roll_deg * 180.0 / std::f64::consts::PI, 
-                pitch_deg * 180.0 / std::f64::consts::PI, 
-                yaw_deg * 180.0 / std::f64::consts::PI
+                roll_deg * DEG2RAD, 
+                pitch_deg * DEG2RAD, 
+                yaw_deg * DEG2RAD
             ))
         } else {
             self.imu_rotation = None;

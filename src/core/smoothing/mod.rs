@@ -1,9 +1,13 @@
 pub mod plain;
 pub mod horizon;
 pub mod fixed;
+
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
-use dyn_clone::{clone_trait_object, DynClone};
+use dyn_clone::{ clone_trait_object, DynClone };
+
+use std::hash::Hasher;
+use std::collections::hash_map::DefaultHasher;
 
 pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
@@ -11,9 +15,10 @@ pub trait SmoothingAlgorithm: DynClone {
     fn get_parameters_json(&self) -> simd_json::owned::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
 
+    fn get_checksum(&self) -> u64;
+
     fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat;
 }
-
 clone_trait_object!(SmoothingAlgorithm);
 
 #[derive(Clone)]
@@ -24,12 +29,15 @@ impl SmoothingAlgorithm for None {
     fn get_parameters_json(&self) -> simd_json::owned::Value { simd_json::json!([]) }
     fn set_parameter(&mut self, _name: &str, _val: f64) { }
 
+    fn get_checksum(&self) -> u64 { 0 }
+
     fn smooth(&self, quats: &TimeQuat, _duration: f64) -> TimeQuat { quats.clone() }
 }
 
 pub struct Smoothing {
     algs: Vec<Box<dyn SmoothingAlgorithm>>,
-    current_id: usize
+    current_id: usize,
+    quats_checksum: u64
 }
 unsafe impl Send for Smoothing { }
 unsafe impl Sync for Smoothing { }
@@ -43,6 +51,7 @@ impl Default for Smoothing {
                 Box::new(self::horizon::HorizonLock::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
+            quats_checksum: 0,
             current_id: 1
         }
     }
@@ -53,14 +62,33 @@ impl Smoothing {
         assert!(id < self.algs.len());
         self.current_id = id;
     }
+
     pub fn current(&mut self) -> &mut Box<dyn SmoothingAlgorithm> {
         &mut self.algs[self.current_id]
     }
+
+    pub fn get_state_checksum(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        hasher.write_u64(self.quats_checksum);
+        hasher.write_usize(self.current_id);
+        hasher.write_u64(self.algs[self.current_id].get_checksum());
+        hasher.finish()
+    }
+
+    pub fn update_quats_checksum(&mut self, quats: &TimeQuat) {
+        let mut hasher = DefaultHasher::new();
+        for (&k, v) in quats {
+            hasher.write_i64(k);
+            let vec = v.quaternion().as_vector();
+            hasher.write_u64(vec[0].to_bits());
+            hasher.write_u64(vec[1].to_bits());
+            hasher.write_u64(vec[2].to_bits());
+            hasher.write_u64(vec[3].to_bits());
+        }
+        self.quats_checksum = hasher.finish();
+    }
+
     pub fn get_names(&self) -> Vec<String> {
         self.algs.iter().map(|x| x.get_name()).collect()
     }
 }
-
-// "Yaw pitch roll smoothing", 
-// "Horizon lock", 
-// "Smooth angle limit (Aphobious)"

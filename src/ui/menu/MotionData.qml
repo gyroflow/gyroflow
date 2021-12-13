@@ -61,7 +61,7 @@ MenuItem {
             from: 0;
             width: parent.width;
             onValueChanged: {
-                controller.set_imu_lpf(value);
+                controller.set_imu_lpf(parent.checked? value : 0);
             }
         }
     }
@@ -69,8 +69,9 @@ MenuItem {
         id: rot;
         text: qsTr("Rotation");
         //inner.visible: true;
+        onCheckedChanged: update_rotation();
         function update_rotation() {
-            controller.set_imu_rotation(p.value, r.value, y.value);
+            controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
         }
 
         Flow {

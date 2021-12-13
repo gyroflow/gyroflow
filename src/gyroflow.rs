@@ -17,16 +17,18 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
+// - new sync method
+// - wgpu undistortion add support for different plane types
+
 // - Some basic error handling, check for all unwrap()'s
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
+
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
-// - new sync method
 // - Port Aphobius 2.0
 // - Figure out what to do with the console output window/log
 // - Pick a license
-// - wgpu undistortion add support for different plane types
 
 // TODO: more smoothing algorithms
 

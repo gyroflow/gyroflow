@@ -1,3 +1,6 @@
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
+
 use enterpolation::{ Curve, Merge, bspline::BSpline };
 use crate::{ StabilizationManager, Undistortion, Quat64 };
 
@@ -12,18 +15,27 @@ impl Merge<f64> for Point2D {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(PartialEq, Clone)]
+enum Mode {
+    Disabled,
+    DynamicZoom(f64), // f64 - smoothing focus window in seconds
+    StaticZoom
+}
+
+#[derive(Clone)]
 pub struct AdaptiveZoom {
     calib_dimension: (f64, f64),
     _size: (usize, usize),
     camera_matrix: nalgebra::Matrix3<f64>,
     distortion_coeffs: Vec<f64>,
     image_rotation: nalgebra::Matrix3<f64>,
-}
+    image_rotation_angle: f64,
 
-pub enum Mode {
-    DynamicZoom(f64), // f64 - smoothing focus window in seconds
-    StaticZoom
+    output_dim: (usize, usize), 
+    fps: f64, 
+    mode: Mode, 
+    range: (f64, f64),
+    img_scale_ratio: f64
 }
 
 impl AdaptiveZoom {
@@ -34,17 +46,54 @@ impl AdaptiveZoom {
         let image_rotation = nalgebra::Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
         let calib_dimension = if lens.calib_dimension.0 > 0.0 { lens.calib_dimension } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
         let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 { lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
-        let _size = params.size;
-        drop(lens);
-        drop(params);
         
         Self {
             calib_dimension,
-            _size,
             image_rotation, 
+            image_rotation_angle: params.video_rotation,
             camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),
-            distortion_coeffs
+            distortion_coeffs,
+
+            _size: params.size,
+            output_dim: params.output_size,
+            fps: params.fps,
+            range : (params.trim_start, params.trim_end),
+
+            img_scale_ratio: params.size.0 as f64 / params.video_size.0 as f64,
+
+            mode: if params.adaptive_zoom_window < -0.9 {
+                Mode::StaticZoom
+            } else if params.adaptive_zoom_window > 0.0001 {
+                Mode::DynamicZoom(params.adaptive_zoom_window)
+            } else {
+                Mode::Disabled
+            }
         }
+    }
+
+    pub fn get_state_checksum(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        hasher.write_u64(self.calib_dimension.0.to_bits());
+        hasher.write_u64(self.calib_dimension.1.to_bits());
+        if self.distortion_coeffs.len() >= 4 {
+            hasher.write_u64(self.distortion_coeffs[0].to_bits());
+            hasher.write_u64(self.distortion_coeffs[1].to_bits());
+            hasher.write_u64(self.distortion_coeffs[2].to_bits());
+            hasher.write_u64(self.distortion_coeffs[3].to_bits());
+        }
+        hasher.write_usize(self.output_dim.0);
+        hasher.write_usize(self.output_dim.1);
+        hasher.write_u64(self.image_rotation_angle.to_bits());
+        hasher.write_u64(self.fps.to_bits());
+        hasher.write_u64(self.range.0.to_bits());
+        hasher.write_u64(self.range.1.to_bits());
+        hasher.write_u64(self.img_scale_ratio.to_bits());
+        match self.mode {
+            Mode::Disabled => hasher.write_u64(0),
+            Mode::StaticZoom => hasher.write_u64(1),
+            Mode::DynamicZoom(w) => hasher.write_u64(w.to_bits())
+        }
+        hasher.finish()
     }
 
     fn find_fcorr(&self, center: Point2D, polygon: &[Point2D], output_dim: (usize, usize)) -> (f64, usize) {
@@ -123,8 +172,11 @@ impl AdaptiveZoom {
         1.0 / fcorr.max(fcorr_i)
     }
     
-    pub fn compute(&self, quaternions: &[Quat64], output_dim: (usize, usize), fps: f64, mode: Mode, range: (f64, f64)) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
-        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9, output_dim)).collect();
+    pub fn compute(&self, quaternions: &[Quat64]) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
+        if self.mode == Mode::Disabled || quaternions.is_empty() {
+            return Vec::new();
+        }
+        let boundary_polygons: Vec<Vec<Point2D>> = quaternions.iter().map(|q| self.bounding_polygon(q, 9, self.output_dim)).collect();
         // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
@@ -144,22 +196,22 @@ impl AdaptiveZoom {
         let mut fov_values: Vec<f64> = crop_center_positions.iter()
                                                             .zip(boundary_polygons.iter())
                                                             .map(|(&center, polygon)| 
-                                                                self.find_fov(center, polygon, output_dim)
+                                                                self.find_fov(center, polygon, self.output_dim)
                                                             ).collect();
 
-        if range.0 > 0.0 || range.1 < 1.0 {
+        if self.range.0 > 0.0 || self.range.1 < 1.0 {
             // Only within render range.
             let max_fov = fov_values.iter().copied().reduce(f64::max).unwrap();
             let l = (quaternions.len() - 1) as f64;
-            let first_ind = (l * range.0).floor() as usize;
-            let last_ind  = (l * range.1).ceil() as usize;
+            let first_ind = (l * self.range.0).floor() as usize;
+            let last_ind  = (l * self.range.1).ceil() as usize;
             fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
             fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
         }
 
-        match mode {
+        match self.mode {
             Mode::DynamicZoom(window_s) => {
-                let mut frames = (window_s * fps).floor() as usize;
+                let mut frames = (window_s * self.fps).floor() as usize;
                 if frames % 2 == 0 {
                     frames += 1;
                 }
@@ -175,9 +227,10 @@ impl AdaptiveZoom {
                 let max_f = fov_values.iter().copied().reduce(f64::min).unwrap();
                 fov_values.iter_mut().for_each(|v| *v = max_f);
             }
+            _ => { }
         }
 
-        fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
+        fov_values.iter().map(|&v| v * self.img_scale_ratio).zip(crop_center_positions.iter().copied()).collect()
     }
 
     fn bounding_polygon(&self, quat: &nalgebra::UnitQuaternion<f64>, num_points: usize, _output_dim: (usize, usize)) -> Vec<Point2D> {

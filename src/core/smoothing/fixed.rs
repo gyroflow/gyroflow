@@ -53,24 +53,32 @@ impl SmoothingAlgorithm for Fixed {
         ])
     }
 
+    fn get_checksum(&self) -> u64 {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        hasher.write_u64(self.roll.to_bits());
+        hasher.write_u64(self.pitch.to_bits());
+        hasher.write_u64(self.yaw.to_bits());
+        hasher.finish()
+    }
+
     fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat {
 
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
-        let deg2rad = std::f64::consts::PI / 180.0;
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();
         let z_axis = nalgebra::Vector3::<f64>::z_axis();
         
-        let rot_x = Rotation3::from_axis_angle(&x_axis, self.pitch * deg2rad);
-        let rot_y = Rotation3::from_axis_angle(&y_axis, self.yaw * deg2rad);
-        let rot_z = Rotation3::from_axis_angle(&z_axis, self.roll * deg2rad);
+        let rot_x = Rotation3::from_axis_angle(&x_axis, self.pitch * DEG2RAD);
+        let rot_y = Rotation3::from_axis_angle(&y_axis, self.yaw * DEG2RAD);
+        let rot_z = Rotation3::from_axis_angle(&z_axis, self.roll * DEG2RAD);
 
         // Z rotation corresponds to body-centric roll, so placed last
         // using x as second rotation corresponds gives the usual pan/tilt combination
         let combined_rot = rot_y * rot_x * rot_z;
         let fixed_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
         
-        //let fixed_quat = UnitQuaternion::from_euler_angles(self.yaw * deg2rad,self.roll * deg2rad,self.pitch * deg2rad);
+        //let fixed_quat = UnitQuaternion::from_euler_angles(self.yaw * DEG2RAD,self.roll * DEG2RAD,self.pitch * DEG2RAD);
         
         quats.iter().map(|x| {
             (*x.0, fixed_quat)

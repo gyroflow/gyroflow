@@ -97,8 +97,8 @@ impl SmoothingAlgorithm for HorizonLock {
         simd_json::json!([
             {
                 "name": "time_constant",
-                "description": "Time constant",
-                "type": "Slider",
+                "description": "Smoothness",
+                "type": "SliderWithField",
                 "from": 0.01,
                 "to": 10.0,
                 "value": 0.25,
@@ -107,7 +107,7 @@ impl SmoothingAlgorithm for HorizonLock {
             {
                 "name": "roll",
                 "description": "Roll angle correction",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
                 "value": 0,
@@ -116,7 +116,7 @@ impl SmoothingAlgorithm for HorizonLock {
             {
                 "name": "pitch",
                 "description": "Pitch angle correction (todo)",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -90,
                 "to": 90,
                 "value": 0,
@@ -125,13 +125,22 @@ impl SmoothingAlgorithm for HorizonLock {
             {
                 "name": "yaw",
                 "description": "Yaw angle correction (todo)",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
                 "value": 0,
                 "unit": "deg"
             },
         ])
+    }
+
+    fn get_checksum(&self) -> u64 {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        hasher.write_u64(self.time_constant.to_bits());
+        hasher.write_u64(self.roll.to_bits());
+        hasher.write_u64(self.pitch.to_bits());
+        hasher.write_u64(self.yaw.to_bits());
+        hasher.finish()
     }
 
     fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat { // TODO Result<>?
@@ -143,10 +152,10 @@ impl SmoothingAlgorithm for HorizonLock {
         if self.time_constant > 0.0 {
             alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
         }
-        let deg2rad = std::f64::consts::PI / 180.0;
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
         // TODO: This correction should be applied to the raw orientations as well. Alternatively the transform needs to be cancelled out
-        //let correction_quat = from_euler_yxz(self.pitch * deg2rad, self.yaw * deg2rad, self.roll * deg2rad);
+        //let correction_quat = from_euler_yxz(self.pitch * DEG2RAD, self.yaw * DEG2RAD, self.roll * DEG2RAD);
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
             q = q.slerp(x.1, alpha);
@@ -156,7 +165,7 @@ impl SmoothingAlgorithm for HorizonLock {
         // Reverse pass, while leveling horizon
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
-            q = lock_horizon_angle(q.slerp(x.1, alpha), self.roll * deg2rad);
+            q = lock_horizon_angle(q.slerp(x.1, alpha), self.roll * DEG2RAD);
             (*x.0, q)
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition

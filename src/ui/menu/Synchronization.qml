@@ -186,7 +186,7 @@ MenuItem {
                 from: 0;
                 width: parent.width;
                 onValueChanged: {
-                    controller.set_sync_lpf(value);
+                    controller.set_sync_lpf(parent.checked? lpf.value : 0);
                 }
             }
         }

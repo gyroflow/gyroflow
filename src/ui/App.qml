@@ -242,6 +242,9 @@ Rectangle {
         function onError(text, arg, callback) {
             messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
+        function onRequest_recompute() {
+            Qt.callLater(controller.recompute_threaded);
+        }
     }
 
     function checkUpdate() {

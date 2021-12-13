@@ -11,7 +11,7 @@ pub mod filtering;
 
 pub mod gpu;
 
-use std::sync::Arc;
+use std::sync::{ Arc, atomic::Ordering::Relaxed };
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use parking_lot::RwLock;
@@ -26,7 +26,6 @@ use telemetry_parser::try_block;
 
 lazy_static::lazy_static! {
     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
-    static ref CURRENT_COMPUTE_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 #[derive(Clone)]
@@ -82,6 +81,7 @@ impl Default for BasicParams {
         }
     }
 }
+
 pub struct StabilizationManager<T: PixelType> {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
@@ -90,6 +90,10 @@ pub struct StabilizationManager<T: PixelType> {
     pub undistortion: Arc<RwLock<Undistortion<T>>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
+
+    pub current_compute_id: Arc<AtomicU64>,
+    pub smoothness_checksum: Arc<AtomicU64>,
+    pub adaptive_zoom_checksum: Arc<AtomicU64>,
 
     pub params: Arc<RwLock<BasicParams>>
 }
@@ -104,6 +108,10 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             undistortion: Arc::new(RwLock::new(Undistortion::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
+            
+            current_compute_id: Arc::new(AtomicU64::new(0)),
+            smoothness_checksum: Arc::new(AtomicU64::new(0)),
+            adaptive_zoom_checksum: Arc::new(AtomicU64::new(0)),
             
             pose_estimator: Arc::new(synchronization::PoseEstimator::default())
         }
@@ -161,12 +169,14 @@ impl<T: PixelType> StabilizationManager<T> {
                     gyro.smoothed_quaternions = smoothed_quaternions;
                     gyro.quaternions = quaternions;
                     gyro.raw_imu = raw_imu;
+                    self.smoothing.write().update_quats_checksum(&gyro.quaternions);
                 }
             });
         } else {
             let md = GyroSource::parse_telemetry_file(path)?;
             self.gyro.write().load_from_telemetry(&md);
             self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
+            self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
         }
         Ok(())
     }
@@ -224,9 +234,9 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>, gyro: &RwLock<GyroSource>) -> Vec<f64> {
-        let (window, frames, video_size, ratio, fps, trim) = {
+        let (window, frames, fps) = {
             let params = params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.output_size, params.size.0 as f64 / params.video_size.0 as f64, params.fps, (params.trim_start, params.trim_end))
+            (params.adaptive_zoom_window, params.frame_count, params.fps)
         };
         if window > 0.0 || window < -0.9 {
             let mut quats = Vec::with_capacity(frames);
@@ -236,15 +246,9 @@ impl<T: PixelType> StabilizationManager<T> {
                     quats.push(g.smoothed_quat_at_timestamp(i as f64 * 1000.0 / fps));
                 }
             }
-    
-            let mode = if window < 0.0 {
-                adaptive_zoom::Mode::StaticZoom
-            } else {
-                adaptive_zoom::Mode::DynamicZoom(window)
-            };
 
-            let fovs = zoom.compute(&quats, video_size, fps, mode, trim);
-            fovs.iter().map(|v| v.0 * ratio).collect()
+            let fovs = zoom.compute(&quats);
+            fovs.iter().map(|v| v.0).collect()
         } else {
             Vec::new()
         }
@@ -278,24 +282,47 @@ impl<T: PixelType> StabilizationManager<T> {
 
         let smoothing = self.smoothing.clone();
         let basic_params = self.params.clone();
+        let gyro = self.gyro.clone();
         let mut zoom = AdaptiveZoom::from_manager(self);
 
         let compute_id = fastrand::u64(..);
-        CURRENT_COMPUTE_ID.store(compute_id, SeqCst);
+        self.current_compute_id.store(compute_id, SeqCst);
+
+        let current_compute_id = self.current_compute_id.clone();
+        let smoothness_checksum = self.smoothness_checksum.clone();
+        let adaptive_zoom_checksum = self.adaptive_zoom_checksum.clone();
 
         let undistortion = self.undistortion.clone();
         THREAD_POOL.spawn(move || {
-            let smoothing = smoothing.write().current().clone();
-            params.gyro.recompute_smoothness(smoothing.as_ref(), params.duration_ms);
+            // std::thread::sleep(std::time::Duration::from_millis(20));
+            if current_compute_id.load(Relaxed) != compute_id { return; }
 
-            {
+            let mut smoothing_changed = false;
+            if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
+                let smoothing = smoothing.write().current().clone();
+                params.gyro.recompute_smoothness(smoothing.as_ref(), params.duration_ms);
+
+                let mut lib_gyro = gyro.write();
+                lib_gyro.quaternions = params.gyro.quaternions.clone();
+                lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
+                smoothing_changed = true;
+            }
+            
+            if current_compute_id.load(Relaxed) != compute_id { return; }
+
+            if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
                 let lock = RwLock::new(params.gyro.clone());
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params, &lock);
+                basic_params.write().fovs = params.fovs.clone();
             }
+            
+            if current_compute_id.load(Relaxed) != compute_id { return; }
 
-            if let Ok(stab_data) = undistortion::Undistortion::<T>::calculate_stab_data(&params, &CURRENT_COMPUTE_ID, compute_id) {
+            if let Ok(stab_data) = undistortion::Undistortion::<T>::calculate_stab_data(&params, &current_compute_id, compute_id) {
                 undistortion.write().stab_data = stab_data;
 
+                smoothness_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
+                adaptive_zoom_checksum.store(zoom.get_state_checksum(), SeqCst);
                 cb(compute_id);
             }
         });

@@ -9,18 +9,26 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
-            // TODO: gyro_item should really be `search_size` from the range, not the same timestamps as OF item, otherwise we may not find a match with larger offsets
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                if x.timestamp_ms >= of_item[0].timestamp_ms && x.timestamp_ms <= of_item.last().unwrap().timestamp_ms {
+                if x.timestamp_ms >= of_item[0].timestamp_ms - (search_size / 2.0) && x.timestamp_ms <= of_item.last().unwrap().timestamp_ms + (search_size / 2.0) {
                     Some(x.clone())
                 } else {
                     None
                 }
             }).collect();
 
+            println!("OF item timestamp range: {}..{}", of_item.first().unwrap().timestamp_ms, of_item.last().unwrap().timestamp_ms);
+            println!("Gyro item timestamp range: {}..{}", gyro_item.first().unwrap().timestamp_ms, gyro_item.last().unwrap().timestamp_ms);
+
+            let max_angle = get_max_angle(&of_item);
+            if max_angle < 6.0 {
+                println!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
+                continue;
+            }
+
             let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
-            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(7.0, gyro.fps, &mut of_item);
-            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(7.0, sample_rate, &mut gyro_item);
+            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(20.0, gyro.fps, &mut of_item);
+            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(20.0, sample_rate, &mut gyro_item);
 
             let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 
@@ -46,6 +54,18 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
     offsets
 }
 
+fn get_max_angle(item: &[TimeIMU]) -> f64 {
+    let mut max = 0.0;
+    for x in item {
+        if let Some(g) = x.gyro {
+            if g[0].abs() > max { max = g[0].abs(); }
+            if g[1].abs() > max { max = g[1].abs(); }
+            if g[2].abs() > max { max = g[2].abs(); }
+        }
+    }
+    max
+}
+
 fn gyro_at_timestamp(ts: f64, gyro: &BTreeMap<usize, TimeIMU>) -> Option<&TimeIMU> {
     gyro.range((ts * 1000.0) as usize..).next().map(|x| x.1)
 }
@@ -55,9 +75,9 @@ fn calculate_cost(offs: f64, of: &[TimeIMU], gyro: &BTreeMap<usize, TimeIMU>) ->
     let mut matches_count = 0;
     for o in of {
         if let Some(g) = gyro_at_timestamp(o.timestamp_ms - offs, gyro) {
-            matches_count += 1;
             if let Some(gg) = g.gyro.as_ref() {
                 if let Some(og) = o.gyro.as_ref() {
+                    matches_count += 1;
                     sum += (gg[0] - og[0]).powf(2.0) * 70.0;
                     sum += (gg[1] - og[1]).powf(2.0) * 70.0;
                     sum += (gg[2] - og[2]).powf(2.0) * 100.0;
