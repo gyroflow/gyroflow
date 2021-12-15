@@ -2,7 +2,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
 use enterpolation::{ Curve, Merge, bspline::BSpline };
-use crate::{ StabilizationManager, Undistortion, Quat64 };
+use crate::{ StabilizationManager, Quat64, undistortion };
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f64, f64);
@@ -248,7 +248,7 @@ impl AdaptiveZoom {
         for i in 0..pts { distorted_points.push(((pts - i) as f64 * dim_ratio.0,      h)); }
         for i in 0..pts { distorted_points.push((0.0,                                 (pts - i) as f64 * dim_ratio.1)); }
 
-        let undistorted_points = Undistortion::<()>::undistort_points(&distorted_points, self.camera_matrix, &self.distortion_coeffs, r, self.camera_matrix);
+        let undistorted_points = undistortion::undistort_points(&distorted_points, self.camera_matrix, &self.distortion_coeffs, r, self.camera_matrix, None);
 
         undistorted_points.into_iter().map(|v| Point2D(v.0, v.1)).collect()
     }

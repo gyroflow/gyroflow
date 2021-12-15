@@ -17,7 +17,9 @@ MenuItem {
         property alias timePerSyncpoint: timePerSyncpoint.value;
         property alias sync_lpf: lpf.value;
         property alias syncMethod: syncMethod.currentIndex;
+        property alias offsetMethod: offsetMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
+        property alias showOF: showOF.checked;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
         //property alias everyNthFrame: everyNthFrame.value; 
     }
@@ -161,7 +163,7 @@ MenuItem {
         }
         Label {
             position: Label.Left;
-            text: qsTr("Method");
+            text: qsTr("Optical flow method");
 
             ComboBox {
                 id: syncMethod;
@@ -169,12 +171,25 @@ MenuItem {
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 1;
-                onCurrentIndexChanged: {
-                    controller.sync_method = currentIndex;
-                }
+                onCurrentIndexChanged: controller.sync_method = currentIndex;
+            }
+        }
+        Label {
+            text: qsTr("Offset calculation method");
+
+            ComboBox {
+                id: offsetMethod;
+                model: [qsTr("Using essential matrix"), qsTr("Using visual features")];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                onCurrentIndexChanged: controller.offset_method = currentIndex;
+                tooltip: currentIndex == 0? 
+                    qsTr("Calculate camera transformation matrix from optical flow. This gives us the rotation of the camera to the next frame. Then try to match these angles to gyroscope angles.")
+                  : qsTr("Undistort optical flow points using gyro and candidate offset. Then calculate lengths of the optical flow lines. Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.");
             }
         }
         CheckBoxWithContent {
+            id: lpfcb;
             text: qsTr("Low pass filter");
             onCheckedChanged: controller.set_sync_lpf(checked? lpf.value : 0);
 
@@ -186,7 +201,7 @@ MenuItem {
                 from: 0;
                 width: parent.width;
                 onValueChanged: {
-                    controller.set_sync_lpf(parent.checked? lpf.value : 0);
+                    controller.set_sync_lpf(lpfcb.checked? lpf.value : 0);
                 }
             }
         }
@@ -195,6 +210,12 @@ MenuItem {
             text: qsTr("Show detected features");
             checked: true;
             onCheckedChanged: controller.show_detected_features = checked;
+        }
+        CheckBox {
+            id: showOF;
+            text: qsTr("Show optical flow");
+            checked: true;
+            onCheckedChanged: controller.show_optical_flow = checked;
         }
     }
 }

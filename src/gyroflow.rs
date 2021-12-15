@@ -17,7 +17,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - new sync method
+// - Estimate rolling shutter
 // - wgpu undistortion add support for different plane types
 
 // - Some basic error handling, check for all unwrap()'s

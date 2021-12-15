@@ -1,6 +1,6 @@
 use std::sync::atomic::Ordering::Relaxed;
 
-use nalgebra::*;
+use nalgebra::{Matrix3, Vector4};
 use rayon::prelude::*;
 
 use super::GyroSource;
@@ -15,21 +15,21 @@ pub struct ComputeParams {
     pub fovs: Vec<f64>,
 
     pub duration_ms: f64,
-    frame_count: usize, 
-    fps: f64,
-    fov_scale: f64,
-    width: usize,
-    height: usize, 
-    output_width: usize,
-    output_height: usize,
-    calib_width: f64,
-    calib_height: f64,
-    video_rotation: f64,
-    camera_matrix: Matrix3<f64>,
-    distortion_coeffs: [f32; 4],
-    frame_readout_time: f64,
-    trim_start_frame: usize,
-    trim_end_frame: usize,
+    pub frame_count: usize, 
+    pub fps: f64,
+    pub fov_scale: f64,
+    pub width: usize,
+    pub height: usize, 
+    pub output_width: usize,
+    pub output_height: usize,
+    pub calib_width: f64,
+    pub calib_height: f64,
+    pub video_rotation: f64,
+    pub camera_matrix: Matrix3<f64>,
+    pub distortion_coeffs: [f64; 4],
+    pub frame_readout_time: f64,
+    pub trim_start_frame: usize,
+    pub trim_end_frame: usize,
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
@@ -40,10 +40,10 @@ impl ComputeParams {
 
         let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 {
             [
-                lens.distortion_coeffs[0] as f32, 
-                lens.distortion_coeffs[1] as f32, 
-                lens.distortion_coeffs[2] as f32, 
-                lens.distortion_coeffs[3] as f32
+                lens.distortion_coeffs[0], 
+                lens.distortion_coeffs[1], 
+                lens.distortion_coeffs[2], 
+                lens.distortion_coeffs[3]
             ]
         } else {
             [0.0, 0.0, 0.0, 0.0]
@@ -159,6 +159,65 @@ impl FrameTransform {
 
         Self { params: transform_params }
     }
+
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+        let img_dim_ratio = params.width as f64 / params.calib_width;
+    
+        let k = params.camera_matrix;
+        let scaled_k = k * img_dim_ratio;
+        
+        let out_dim = (params.output_width as f64, params.output_height as f64);
+        let focal_center = (params.calib_width / 2.0, params.calib_height / 2.0);
+
+        let fov = params.fov_scale;
+
+        let mut new_k = k;
+        new_k[(0, 0)] = new_k[(0, 0)] * 1.0 / fov;
+        new_k[(1, 1)] = new_k[(1, 1)] * 1.0 / fov;
+        new_k[(0, 2)] = (params.calib_width  / 2.0 - focal_center.0) * img_dim_ratio / fov + out_dim.0 / 2.0;
+        new_k[(1, 2)] = (params.calib_height / 2.0 - focal_center.1) * img_dim_ratio / fov + out_dim.1 / 2.0;
+
+        // ----------- Rolling shutter correction -----------
+        let mut frame_readout_time = params.frame_readout_time;
+        frame_readout_time *= fov;
+        frame_readout_time /= 2.0;
+        frame_readout_time *= img_dim_ratio;
+
+        let row_readout_time = frame_readout_time / params.height as f64;
+        let start_ts = timestamp_ms - (frame_readout_time / 2.0);
+        // ----------- Rolling shutter correction -----------
+
+        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+
+        let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+
+        // Only compute 1 matrix if not using rolling shutter correction
+        let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
+
+        let rotations: Vec<Matrix3<f64>> = points_iter.into_iter().map(|&(_, y)| {
+            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
+                start_ts + row_readout_time * y as f64
+            } else {
+                timestamp_ms
+            };
+            let quat = quat1
+                     * params.gyro.org_quat_at_timestamp(quat_time)
+                     * params.gyro.smoothed_quat_at_timestamp(quat_time);
+
+            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
+            // Need to benchmark performance of the .mirror() function for OpenGL
+            // If it's a problem we can use this inverted matrix here and invert the drawing of feature points and rolling shutter time
+            // We only need to do this for image read from OpenGL, so this code should be conditional only for live preview, not for rendering
+            // r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+            // r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            
+            new_k * r
+        }).collect();
+
+        (scaled_k, params.distortion_coeffs, new_k, rotations)
+    }
 }
 
 #[derive(Default)]
@@ -219,9 +278,9 @@ impl<T: PixelType> Undistortion<T> {
         //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1,stride, output_size.0, output_size.1, output_stride, self.background);
         #[cfg(feature = "use-opencl")]
         {
-            self.cl = Some(opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background).unwrap()); // TODO: .ok()
+            self.cl = opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background).ok();
         }
-
+        
         self.size = (size.0, size.1, stride);
         self.output_size = (output_size.0, output_size.1, output_stride);
     }
@@ -353,82 +412,97 @@ impl<T: PixelType> Undistortion<T> {
             });
         });
     }
+}
 
-    pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: nalgebra::Matrix3<f64>, distortion_coeffs: &[f64], rotation: nalgebra::Matrix3<f64>, p: nalgebra::Matrix3<f64>) -> Vec<(f64, f64)> {
-        let mut undistorted = Vec::with_capacity(distorted.len());
-        
-        let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
-        let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
-        let k = distortion_coeffs;
-        
-        let mut rr = rotation;
-        if !p.is_empty() { // PP
-            rr = p * rr;
-        }
+pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f64, f64)> {
+    if distorted.is_empty() { return Vec::new(); }
+    let (camera_matrix, distortion_coeffs, p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-        // TODO: parallel?
-        for pi in distorted {
-            let pw = ((pi.0 - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], p, Some(rotations))
+}
 
-            let mut theta_d = (pw.0 * pw.0 + pw.1 * pw.1).sqrt();
-
-            // the current camera model is only valid up to 180 FOV
-            // for larger FOV the loop below does not converge
-            // clip values so we still get plausible results for super fisheye images > 180 grad
-            theta_d = theta_d.max(-std::f64::consts::FRAC_PI_2).min(std::f64::consts::FRAC_PI_2);
-
-            let mut converged = false;
-            let mut theta = theta_d;
-
-            let mut scale = 0.0;
-
-            if theta_d.abs() > 1e-8 {
-                // compensate distortion iteratively
-                for _ in 0..10 {
-                    let theta2 = theta*theta;
-                    let theta4 = theta2*theta2;
-                    let theta6 = theta4*theta2;
-                    let theta8 = theta6*theta2;
-                    let k0_theta2 = k[0] * theta2;
-                    let k1_theta4 = k[1] * theta4;
-                    let k2_theta6 = k[2] * theta6;
-                    let k3_theta8 = k[3] * theta8;
-                    // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-                    let theta_fix = (theta * (1.0 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
-                                    /
-                                    (1.0 + 3.0 * k0_theta2 + 5.0 * k1_theta4 + 7.0 * k2_theta6 + 9.0 * k3_theta8);
-
-                    theta -= theta_fix;
-                    if theta_fix.abs() < 1e-8 {
-                        converged = true;
-                        break;
-                    }
-                }
-
-                scale = theta.tan() / theta_d;
-            } else {
-                converged = true;
-            }
-
-            // theta is monotonously increasing or decreasing depending on the sign of theta
-            // if theta has flipped, it might converge due to symmetry but on the opposite of the camera center
-            // so we can check whether theta has changed the sign during the optimization
-            let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
-
-            if converged && !theta_flipped {
-                let pu = (pw.0 * scale, pw.1 * scale); // undistorted point
-
-                // reproject
-                let pr = rr * nalgebra::Vector3::new(pu.0, pu.1, 1.0); // rotated point optionally multiplied by new camera matrix
-
-                undistorted.push((pr[0] / pr[2], pr[1] / pr[2]));
-            } else {
-                undistorted.push((-1000000.0, -1000000.0));
-            }
-        }
-        undistorted
+pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Matrix3<f64>, rot_per_point: Option<Vec<Matrix3<f64>>>) -> Vec<(f64, f64)> {
+    let _time = std::time::Instant::now();
+    
+    let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
+    let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
+    let k = distortion_coeffs;
+    
+    let mut rr = rotation;
+    if !p.is_empty() { // PP
+        rr = p * rr;
     }
 
+    // TODO: into_par_iter?
+    distorted.into_iter().enumerate().map(|(index, pi)| {
+        let pw = ((pi.0 - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
+
+        let mut theta_d = (pw.0 * pw.0 + pw.1 * pw.1).sqrt();
+
+        // the current camera model is only valid up to 180 FOV
+        // for larger FOV the loop below does not converge
+        // clip values so we still get plausible results for super fisheye images > 180 grad
+        theta_d = theta_d.max(-std::f64::consts::FRAC_PI_2).min(std::f64::consts::FRAC_PI_2);
+
+        let mut converged = false;
+        let mut theta = theta_d;
+
+        let mut scale = 0.0;
+
+        if theta_d.abs() > 1e-8 {
+            // compensate distortion iteratively
+            for _ in 0..10 {
+                let theta2 = theta*theta;
+                let theta4 = theta2*theta2;
+                let theta6 = theta4*theta2;
+                let theta8 = theta6*theta2;
+                let k0_theta2 = k[0] * theta2;
+                let k1_theta4 = k[1] * theta4;
+                let k2_theta6 = k[2] * theta6;
+                let k3_theta8 = k[3] * theta8;
+                // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
+                let theta_fix = (theta * (1.0 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
+                                /
+                                (1.0 + 3.0 * k0_theta2 + 5.0 * k1_theta4 + 7.0 * k2_theta6 + 9.0 * k3_theta8);
+
+                theta -= theta_fix;
+                if theta_fix.abs() < 1e-8 {
+                    converged = true;
+                    break;
+                }
+            }
+
+            scale = theta.tan() / theta_d;
+        } else {
+            converged = true;
+        }
+
+        // theta is monotonously increasing or decreasing depending on the sign of theta
+        // if theta has flipped, it might converge due to symmetry but on the opposite of the camera center
+        // so we can check whether theta has changed the sign during the optimization
+        let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
+
+        if converged && !theta_flipped {
+            let pu = (pw.0 * scale, pw.1 * scale); // undistorted point
+
+            let rot = match &rot_per_point {
+                Some(v) => {
+                    if index < v.len() {
+                        v[index]                   
+                    } else {
+                        v[0]
+                    }
+                },
+                None => rr
+            };
+            // reproject
+            let pr = rot * nalgebra::Vector3::new(pu.0, pu.1, 1.0); // rotated point optionally multiplied by new camera matrix
+
+            (pr[0] / pr[2], pr[1] / pr[2])
+        } else {
+            (-1000000.0, -1000000.0)
+        }
+    }).collect()
 }
 
 pub trait PixelType: Default + Copy + Send + Sync + bytemuck::Pod {
@@ -524,17 +598,6 @@ impl PixelType for UV16 {
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * Self::Scalar::MAX as f32, yuv[ind[1]] * Self::Scalar::MAX as f32, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort2", "convert_ushort2", "float2", "convert_float2") }
 }
-
-impl PixelType for () {
-    const COUNT: usize = 0;
-    const SCALAR_BYTES: usize = 1;
-    type Scalar = u8;
-    #[inline] fn to_float(_: Self) -> Vector4<f32> { Vector4::new(0.0, 0.0, 0.0, 0.0) }
-    #[inline] fn from_float(_: Vector4<f32>) -> Self { () }
-    #[inline] fn from_rgb_color(_: Vector4<f32>, _: &[usize]) -> Vector4<f32> { Vector4::new(0.0, 0.0, 0.0, 0.0) }
-    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("", "", "", "") }
-}
-
 
 unsafe impl<T: PixelType> Send for Undistortion<T> { }
 unsafe impl<T: PixelType> Sync for Undistortion<T> { }

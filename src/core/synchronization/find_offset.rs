@@ -32,13 +32,22 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
 
             let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 
-            let resolution = (search_size * 10.0) as usize; // 10 times per ms, so every 0.1 ms
+            let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
+
+            // First search every 1 ms
+            let resolution = (search_size) as usize;
             let lowest = (0..resolution).into_par_iter().map(|i| {
                 let offs = initial_offset + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
-                let cost = calculate_cost(offs, &of_item, &gyro_bintree);
-                (offs, cost)
-            }).reduce_with(|a, b| {
-                if a.1 < b.1 { a } else { b }
+                (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+            }).reduce_with(find_min)
+               .and_then(|lowest| {
+              // Then refine to 0.01 ms accuracy
+              let search_size = 2.0; // ms
+              let resolution = (search_size * 100.0) as usize; // 100 times per ms
+              (0..resolution).into_par_iter().map(|i| {
+                  let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
+                  (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+              }).reduce_with(find_min)
             });
             if let Some(lowest) = lowest {
                 let middle_frame = from_frame + (to_frame - from_frame) / 2;

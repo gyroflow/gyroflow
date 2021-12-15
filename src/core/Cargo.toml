@@ -25,6 +25,7 @@ bincode = "*"
 serde = "*"
 crc32fast = "*"
 byteorder = "*"
+bresenham = "*"
 
 dyn-clone = "*"
 

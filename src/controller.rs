@@ -8,6 +8,7 @@ use std::sync::atomic::Ordering::SeqCst;
 
 use qml_video_rs::video_item::MDKVideoItem;
 
+use crate::core;
 use crate::core::StabilizationManager;
 use crate::core::synchronization::AutosyncProcess;
 use crate::rendering;
@@ -32,6 +33,7 @@ pub struct Controller {
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
+    offset_method: qt_property!(u32),
     start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
 
@@ -60,6 +62,7 @@ pub struct Controller {
 
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
+    show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
@@ -112,6 +115,7 @@ impl Controller {
     pub fn new() -> Self {
         Self {
             sync_method: 1,
+            offset_method: 0,
             preview_resolution: 720,
             ..Default::default()
         }
@@ -132,6 +136,7 @@ impl Controller {
         rendering::clear_log();
 
         let method = self.sync_method;
+        let offset_method = self.offset_method;
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
@@ -156,8 +161,6 @@ impl Controller {
                     gyro.set_offset((x.0 * 1000.0) as i64, x.1);
                 }
             }
-            this.sync_in_progress = false;
-            this.sync_in_progress_changed();
             this.update_offset_model();
             this.request_recompute();
         });
@@ -188,11 +191,11 @@ impl Controller {
             
             let video_path = self.video_path.clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
-            StabilizationManager::<()>::run_threaded(move || {
+            core::run_threaded(move || {
                 match FfmpegProcessor::from_file(&video_path, true) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                            let frame = ((timestamp_us as f64 / 1000.0) * fps / 1000.0).round() as i32;
+                            let frame = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
 
                             assert!(_output_frame.is_none());
 
@@ -213,7 +216,7 @@ impl Controller {
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         }
-                        sync.finished_feeding_frames();
+                        sync.finished_feeding_frames(offset_method);
                     }
                     Err(error) => {
                         err(("An error occured: %1".to_string(), error.to_string()));
@@ -278,7 +281,7 @@ impl Controller {
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
-                StabilizationManager::<()>::run_threaded(move || {
+                core::run_threaded(move || {
                     let detected = {
                         if is_main_video {
                             if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
@@ -355,7 +358,7 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        StabilizationManager::<()>::run_threaded(move || {
+        core::run_threaded(move || {
             {
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
@@ -382,7 +385,7 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
             let out_pixels = RefCell::new(Vec::new());
-            vid.onProcessPixels(Box::new(move |frame, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
+            vid.onProcessPixels(Box::new(move |frame, _timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
                 // let _time = std::time::Instant::now();
 
                 // TODO: cache in atomics instead of locking the mutex every time
@@ -472,7 +475,7 @@ impl Controller {
         let cancel_flag = self.cancel_flag.clone();
 
         let stab = self.stabilizer.clone();
-        StabilizationManager::<()>::run_threaded(move || {
+        core::run_threaded(move || {
             let stab = stab.get_render_stabilizator((output_width, output_height));
             if let Err(e) = rendering::render(stab, progress, video_path, codec, codec_options, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag) {
                 err(("An error occured: %1".to_string(), e.to_string()))
@@ -492,6 +495,7 @@ impl Controller {
     wrap_simple_method!(set_video_rotation,         v: f64; recompute);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
+    wrap_simple_method!(set_show_optical_flow,      v: bool);
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);

@@ -34,7 +34,9 @@ impl ItemAkaze {
         let features = if let Ok(bytes) = std::fs::read(&frame_path) {
             deserialize_features(&bytes)
         } else {
-            let features = Akaze::new(0.0007).extract(&image::DynamicImage::ImageLuma8(img));
+            let mut akz = Akaze::new(0.0007);
+            akz.maximum_features = 500;
+            let features = akz.extract(&image::DynamicImage::ImageLuma8(img));
             let encoded: Vec<u8> = serialize_features(&features);
             THREAD_POOL.spawn(move || {
                 let _ = std::fs::create_dir("cache");
@@ -91,13 +93,21 @@ impl ItemAkaze {
         None
     }
 
-    fn match_descriptors(ds1: &[Descriptor], ds2: &[Descriptor]) -> Vec<(usize, usize)> {
+    pub fn match_descriptors(ds1: &[Descriptor], ds2: &[Descriptor]) -> Vec<(usize, usize)> {
         if ds1.len() < 2 || ds2.len() < 2 { return Vec::new() }
         let two_neighbors = ds1.iter().map(|d1| LinearKnn { metric: Hamming, iter: ds2.iter() }.knn(d1, 2)).enumerate();
         let satisfies_lowes_ratio = two_neighbors.filter(|(_, neighbors)| {
             (neighbors[0].distance as f32) < neighbors[1].distance as f32 * LOWES_RATIO
         });
         satisfies_lowes_ratio.map(|(ix1, neighbors)| (ix1, neighbors[0].index)).collect()
+    }
+
+    pub fn get_matched_features_pair(&mut self, next: &mut Self, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+        let matched = Self::match_descriptors(&self.features.1, &next.features.1);
+        Some((
+            matched.iter().map(|(i1, _)| { let pt = self.features.0[*i1].point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
+            matched.iter().map(|(_, i2)| { let pt = next.features.0[*i2].point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
+        ))
     }
 }
 

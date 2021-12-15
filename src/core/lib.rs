@@ -52,6 +52,7 @@ pub struct BasicParams {
     
     pub stab_enabled: bool,
     pub show_detected_features: bool,
+    pub show_optical_flow: bool,
 }
 impl Default for BasicParams {
     fn default() -> Self {
@@ -60,6 +61,7 @@ impl Default for BasicParams {
             fovs: vec![],
             stab_enabled: true,
             show_detected_features: true,
+            show_optical_flow: true,
             frame_readout_time: 0.0, 
             adaptive_zoom_window: 0.0, 
 
@@ -330,15 +332,15 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool { // TODO: generic
-        let (enabled, show_features, ow, oh) = {
+        let (enabled, show_features, show_of, ow, oh) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.output_size.0, params.output_size.1)
+            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.output_size.0, params.output_size.1)
         };
         if enabled && ow == out_width && oh == out_height {
-            if show_features {
-                //////////////////////////// Draw detected features ////////////////////////////
-                // TODO: maybe handle other types than RGBA8?
-                if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+            //////////////////////////// Draw detected features ////////////////////////////
+            // TODO: maybe handle other types than RGBA8?
+            if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+                if show_features {
                     let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
                     for i in 0..xs.len() {
                         for xstep in -1..=1i32 {
@@ -353,8 +355,26 @@ impl<T: PixelType> StabilizationManager<T> {
                         }
                     }
                 }
-                //////////////////////////// Draw detected features ////////////////////////////
+                if show_of {
+                    for i in 0..3 {
+                        let a = (3 - i) as f64 / 3.0;
+                        if let Some(lines) = self.pose_estimator.get_of_lines_for_frame(&(frame + i), 1.0, 1) {
+                            lines.0.into_iter().zip(lines.1.into_iter()).for_each(|(p1, p2)| {
+                                let line = bresenham::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
+                                for point in line {
+                                    let pos = (point.1 * stride as isize + point.0 * (T::COUNT * T::SCALAR_BYTES) as isize) as usize;
+                                    if pixels.len() > pos + 2 {
+                                        pixels[pos + 0] = (pixels[pos + 0] as f64 * (1.0 - a) + 0xfe as f64 * a) as u8; // R
+                                        pixels[pos + 1] = (pixels[pos + 1] as f64 * (1.0 - a) + 0xfb as f64 * a) as u8; // G
+                                        pixels[pos + 2] = (pixels[pos + 2] as f64 * (1.0 - a) + 0x47 as f64 * a) as u8; // B
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
             }
+            //////////////////////////// Draw detected features ////////////////////////////
             
             self.undistortion.write().process_pixels(frame, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels)
         } else {
@@ -368,6 +388,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; }
 
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
+    pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
@@ -436,20 +457,20 @@ impl<T: PixelType> StabilizationManager<T> {
         stab
     }
 
-    pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
-        THREAD_POOL.spawn(cb);
-    }
-
     pub fn clear(&self) {
-        let (stab_enabled, show_detected_features, background, adaptive_zoom_window) = {
+        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.background, params.adaptive_zoom_window)
+            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window)
         };
 
         *self.params.write() = BasicParams {
-            stab_enabled, show_detected_features, background, adaptive_zoom_window, ..Default::default()
+            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, ..Default::default()
         };
         *self.gyro.write() = GyroSource::new();
         self.pose_estimator.clear();
     }
+}
+
+pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
+    THREAD_POOL.spawn(cb);
 }

@@ -50,6 +50,7 @@ MenuItem {
         })
     }
     CheckBoxWithContent {
+        id: lpfcb;
         text: qsTr("Low pass filter");
         onCheckedChanged: controller.set_imu_lpf(checked? lpf.value : 0);
 
@@ -61,7 +62,7 @@ MenuItem {
             from: 0;
             width: parent.width;
             onValueChanged: {
-                controller.set_imu_lpf(parent.checked? value : 0);
+                controller.set_imu_lpf(lpfcb.checked? value : 0);
             }
         }
     }

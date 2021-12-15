@@ -8,8 +8,9 @@ use std::vec::Vec;
 use parking_lot::{RwLock};
 use std::sync::Arc;
 use std::collections::BTreeMap;
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
+use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
+
+use crate::undistortion::ComputeParams;
 
 #[cfg(feature = "use-opencv")]
 use self::opencv::ItemOpenCV;
@@ -22,6 +23,7 @@ use super::gyro_source::{ GyroSource, TimeIMU };
 mod opencv;
 mod akaze;
 mod find_offset;
+mod find_offset_visually;
 
 #[derive(Clone)]
 enum EstimatorItem {
@@ -149,25 +151,62 @@ impl PoseEstimator {
         let mut xs = Vec::new();
         let mut ys = Vec::new();
         {
-            let l = self.sync_results.read();
-            if let Some(entry) = l.get(frame) {
-                let count = match &entry.item {
-                    #[cfg(feature = "use-opencv")]
-                    EstimatorItem::OpenCV(x) => x.get_features_count(),
-                    EstimatorItem::Akaze(x) => x.get_features_count()
-                };
-                for i in 0..count {
-                    let pt = match &entry.item {
+            if let Some(l) = self.sync_results.try_read() {
+                if let Some(entry) = l.get(frame) {
+                    let count = match &entry.item {
                         #[cfg(feature = "use-opencv")]
-                        EstimatorItem::OpenCV(x) => x.get_feature_at_index(i),
-                        EstimatorItem::Akaze(x) => x.get_feature_at_index(i)
+                        EstimatorItem::OpenCV(x) => x.get_features_count(),
+                        EstimatorItem::Akaze(x) => x.get_features_count()
                     };
-                    xs.push(pt.0);
-                    ys.push(pt.1);
+                    for i in 0..count {
+                        let pt = match &entry.item {
+                            #[cfg(feature = "use-opencv")]
+                            EstimatorItem::OpenCV(x) => x.get_feature_at_index(i),
+                            EstimatorItem::Akaze(x) => x.get_feature_at_index(i)
+                        };
+                        xs.push(pt.0);
+                        ys.push(pt.1);
+                    }
                 }
             }
         }
         (xs, ys)
+    }
+
+    pub fn filter_of_lines(lines: Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)>) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+        let lines = lines?;
+
+        let mut sum_angles = 0.0;
+        lines.0.iter().zip(lines.1.iter()).for_each(|(p1, p2)| {
+            sum_angles += (p2.1 - p1.1).atan2(p2.0 - p1.0)
+        });
+        let avg_angle = sum_angles / lines.0.len() as f64;
+
+        Some(lines.0.iter().zip(lines.1.iter()).filter(|(p1, p2)| {
+            let angle = (p2.1 - p1.1).atan2(p2.0 - p1.0);
+            let diff = (angle - avg_angle).abs();
+            diff < 30.0 * (std::f64::consts::PI / 180.0) // 30 degrees 
+        }).unzip())
+    }
+
+    pub fn get_of_lines_for_frame(&self, frame: &usize, scale: f64, num_frames: usize) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+        if let Some(l) = self.sync_results.try_read() {
+            if let Some(curr) = l.get(&frame) {
+                if let Some(next) = l.get(&(frame + num_frames)) {
+                    let mut curr = curr.item.clone();
+                    let mut next = next.item.clone();
+                    drop(l);
+
+                    return match (&mut curr, &mut next) {
+                        #[cfg(feature = "use-opencv")]
+                        (EstimatorItem::OpenCV(curr), EstimatorItem::OpenCV(next)) => { Self::filter_of_lines(curr.get_matched_features_pair(next, scale)) }
+                        (EstimatorItem::Akaze (curr),  EstimatorItem::Akaze (next))  => { Self::filter_of_lines(curr.get_matched_features_pair(next, scale)) }
+                        _ => None
+                    };
+                }
+            }
+        }
+        None
     }
 
     pub fn rgba_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> GrayImage {
@@ -305,8 +344,11 @@ impl PoseEstimator {
     pub fn find_offsets(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         find_offset::find_offsets(&ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
     }
-}
 
+    pub fn find_offsets_visually(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset_visually::find_offsets(&ranges, &self, initial_offset, search_size, params)
+    }
+}
 
 pub struct AutosyncProcess {
     method: u32,
@@ -321,7 +363,7 @@ pub struct AutosyncProcess {
     frame_status: Arc<RwLock<HashMap<usize, bool>>>,
     total_read_frames: Arc<AtomicUsize>,
     total_detected_frames: Arc<AtomicUsize>,
-    gyro: Arc<RwLock<GyroSource>>,
+    compute_params: Arc<RwLock<ComputeParams>>,
     progress_cb: Option<Arc<Box<dyn Fn(usize, usize) + Send + Sync + 'static>>>,
     finished_cb: Option<Arc<Box<dyn Fn(Vec<(f64, f64, f64)>) + Send + Sync + 'static>>>,
 }
@@ -367,6 +409,9 @@ impl AutosyncProcess {
             Vector2::new(mtrx[2] / img_ratio, mtrx[5] / img_ratio)
         );
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
+        
+        let mut comp_params = ComputeParams::from_manager(stab);
+        comp_params.gyro.offsets.clear();
 
         Ok(Self {
             frame_count,
@@ -381,7 +426,7 @@ impl AutosyncProcess {
             sync_search_size,
             total_read_frames: Arc::new(AtomicUsize::new(0)),
             total_detected_frames: Arc::new(AtomicUsize::new(0)),
-            gyro: stab.gyro.clone(),
+            compute_params: Arc::new(RwLock::new(comp_params)),
             finished_cb: None,
             progress_cb: None,
         })
@@ -446,7 +491,7 @@ impl AutosyncProcess {
         }
     }
 
-    pub fn finished_feeding_frames(&self) {
+    pub fn finished_feeding_frames(&self, method: u32) {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
@@ -454,13 +499,17 @@ impl AutosyncProcess {
         self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.fps);
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.fps, true);
 
+        if let Some(cb) = &self.finished_cb {
+            let offsets = match method {
+                0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read().gyro),
+                1 => self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
+                _ => { panic!("Unsupported offset method: {}", method); }
+            };
+            cb(offsets);
+        }
         if let Some(cb) = &self.progress_cb {
             let len = self.frame_status.read().len();
             cb(len, len);
-        }
-        if let Some(cb) = &self.finished_cb {
-            let offsets = self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.gyro.read());
-            cb(offsets);
         }
     }
 

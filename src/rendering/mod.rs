@@ -10,6 +10,7 @@ use std::ffi::c_void;
 use std::os::raw::c_char;
 use std::sync::{Arc, atomic::AtomicBool};
 use parking_lot::RwLock;
+use crate::util;
 
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> name, is_gpu
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
@@ -57,10 +58,10 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
     let params = stab.params.read();
     let trim_ratio = trim_end - trim_start;
     let total_frame_count = params.frame_count;
+    let fps = params.fps;
 
     let duration_ms = params.duration_ms;
 
-    let render_duration = params.duration_ms * trim_ratio;
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
 
     drop(params);
@@ -108,8 +109,8 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     let progress2 = progress.clone();
     proc.on_frame(move |timestamp_us, input_frame, output_frame, converter| {
-        let absolute_frame_id = ((timestamp_us as f64 / 1000.0 / duration_ms) * total_frame_count as f64).round() as usize;
-        let process_frame = ((((timestamp_us as f64 / 1000.0) - start_ms as f64) / render_duration) * render_frame_count as f64).round() as usize + 1;
+        let absolute_frame_id = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize;
+        let process_frame = util::timestamp_to_frame((timestamp_us as f64 / 1000.0) - start_ms as f64, fps) as usize;
 
         let output_frame = output_frame.unwrap();
 
@@ -197,7 +198,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
             for (i, cb) in planes.iter_mut().enumerate() {
                 (*cb)(absolute_frame_id, frame, out_frame, i);
             }
-            progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count));
+            progress2(((process_frame + 1) as f64 / render_frame_count as f64, process_frame + 1, render_frame_count));
         };
 
         match input_frame.format() {

@@ -28,7 +28,7 @@ impl ItemOpenCV {
         //let inp = inp.get_umat(ACCESS_READ, UMatUsageFlags::USAGE_DEFAULT).unwrap();
         //let mut pts = UMat::new(UMatUsageFlags::USAGE_DEFAULT);
 
-        let _ = opencv::imgproc::good_features_to_track(&inp, &mut pts, 1000, 0.01, 10.0, &Mat::default(), 3, false, 0.04);
+        let _ = opencv::imgproc::good_features_to_track(&inp, &mut pts, 500, 0.01, 10.0, &Mat::default(), 3, false, 0.04);
 
         //let pts = pts.get_mat(ACCESS_READ).unwrap().clone();
         Self {
@@ -47,6 +47,35 @@ impl ItemOpenCV {
     }
     
     pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {
+        let (pts1, pts2) = self.get_matched_features(next)?;
+        let a1_pts = Mat::from_slice(&pts1).unwrap();
+        let a2_pts = Mat::from_slice(&pts2).unwrap();
+        
+        let scaled_k = Mat::from_slice_2d(&[
+            [focal.x, 0.0, principal.x],
+            [0.0, focal.y, principal.y],
+            [0.0, 0.0, 1.0]
+        ]).unwrap();
+
+        // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default()).unwrap();
+        let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, opencv::calib3d::RANSAC, 0.999, 0.1, 1000, &mut Mat::default()).unwrap();
+    
+        let mut r1 = Mat::default();
+        let mut r2 = Mat::default();
+        let mut t = Mat::default();
+        let _ = opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t);
+        
+        let r1 = cv_to_rot2(r1);
+        let r2 = cv_to_rot2(r2);
+    
+        Some(if r1.angle() < r2.angle() {
+            r1
+        } else {
+            r2
+        })
+    }
+
+    pub fn get_matched_features(&mut self, next: &mut Self) -> Option<(Vec<Point2f>, Vec<Point2f>)> {
         let (w, h) = self.size;
         if self.img_bytes.is_empty() || next.img_bytes.is_empty() || w <= 0 || h <= 0 { return None; }
 
@@ -75,31 +104,14 @@ impl ItemOpenCV {
                 }
             }
         }
-        let a1_pts = Mat::from_slice(&pts1).unwrap();
-        let a2_pts = Mat::from_slice(&pts2).unwrap();
-        
-        let scaled_k = Mat::from_slice_2d(&[
-            [focal.x, 0.0, principal.x],
-            [0.0, focal.y, principal.y],
-            [0.0, 0.0, 1.0]
-        ]).unwrap();
-
-        // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default()).unwrap();
-        let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, opencv::calib3d::RANSAC, 0.999, 0.1, 1000, &mut Mat::default()).unwrap();
-    
-        let mut r1 = Mat::default();
-        let mut r2 = Mat::default();
-        let mut t = Mat::default();
-        let _ = opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t);
-        
-        let r1 = cv_to_rot2(r1);
-        let r2 = cv_to_rot2(r2);
-    
-        Some(if r1.angle() < r2.angle() {
-            r1
-        } else {
-            r2
-        })
+        Some((pts1, pts2))
+    }
+    pub fn get_matched_features_pair(&mut self, next: &mut Self, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+        let pts = self.get_matched_features(next)?;
+        Some((
+            pts.0.iter().map(|x| (x.x as f64 * scale, x.y as f64 * scale )).collect::<Vec<(f64, f64)>>(),
+            pts.1.iter().map(|x| (x.x as f64 * scale, x.y as f64 * scale )).collect::<Vec<(f64, f64)>>()
+        ))
     }
 }
 
