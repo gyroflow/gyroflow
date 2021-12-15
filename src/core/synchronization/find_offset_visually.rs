@@ -53,20 +53,27 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
         let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
         // First search every 1 ms
-        let resolution = search_size as usize;
-        let lowest = (0..resolution).into_par_iter().map(|i| {
-            let offs = initial_offset + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
-            (offs, calculate_distance(offs))
-        }).reduce_with(find_min)
-          .and_then(|lowest| {
-            // Refine to 0.01 ms accuracy
-            let search_size = 2.0; // ms
-            let resolution = (search_size * 100.0) as usize; // 100 times per ms, so every 0.01 ms
-            (0..resolution).into_par_iter().map(|i| {
-                let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
+        let steps = search_size as usize;
+        let lowest = (0..steps)
+            .into_par_iter()
+            .map(|i| {
+                let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
                 (offs, calculate_distance(offs))
-            }).reduce_with(find_min)
-        });
+            })
+            .reduce_with(find_min)
+            .and_then(|lowest| {
+                // Then refine to 0.01 ms
+                let search_size = 2.0; // ms
+                let steps = (search_size * 100.0) as usize; // 100 times per ms
+                let step = search_size / steps as f64;
+                (0..steps)
+                    .into_par_iter()
+                    .map(|i| {
+                        let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * step));
+                        (offs, calculate_distance(offs))
+                    })
+                    .reduce_with(find_min)
+            });
 
         dbg!(&lowest);
         if let Some(lowest) = lowest {

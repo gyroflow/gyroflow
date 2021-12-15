@@ -184,8 +184,8 @@ MenuItem {
                 width: parent.width;
                 onCurrentIndexChanged: controller.offset_method = currentIndex;
                 tooltip: currentIndex == 0? 
-                    qsTr("Calculate camera transformation matrix from optical flow. This gives us the rotation of the camera to the next frame. Then try to match these angles to gyroscope angles.")
-                  : qsTr("Undistort optical flow points using gyro and candidate offset. Then calculate lengths of the optical flow lines. Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.");
+                    qsTr("Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.\nThen try to match these angles to gyroscope angles.")
+                  : qsTr("Undistort optical flow points using gyro and candidate offset.\nThen calculate lengths of the optical flow lines.\nResulting offset is the one where lines were the shortest, meaning the video was moving the least visually.");
             }
         }
         CheckBoxWithContent {

@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 
 use crate::gyro_source::{ GyroSource, TimeIMU };
 
-// TODO: instead of finding offset by comparing gyro lines, how about undistorting points with every offset and find differences in visual features?
 pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
@@ -35,20 +34,28 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
             let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
             // First search every 1 ms
-            let resolution = (search_size) as usize;
-            let lowest = (0..resolution).into_par_iter().map(|i| {
-                let offs = initial_offset + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
-                (offs, calculate_cost(offs, &of_item, &gyro_bintree))
-            }).reduce_with(find_min)
-               .and_then(|lowest| {
-              // Then refine to 0.01 ms accuracy
-              let search_size = 2.0; // ms
-              let resolution = (search_size * 100.0) as usize; // 100 times per ms
-              (0..resolution).into_par_iter().map(|i| {
-                  let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * (search_size / resolution as f64)));
-                  (offs, calculate_cost(offs, &of_item, &gyro_bintree))
-              }).reduce_with(find_min)
-            });
+            let steps = search_size as usize;
+            let lowest = (0..steps)
+                .into_par_iter()
+                .map(|i| {
+                    let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
+                    (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+                })
+                .reduce_with(find_min)
+                .and_then(|lowest| {
+                    // Then refine to 0.01 ms accuracy
+                    let search_size = 2.0; // ms
+                    let steps = (search_size * 100.0) as usize; // 100 times per ms
+                    let step = (search_size / steps as f64);
+                    (0..steps)
+                        .into_par_iter()
+                        .map(|i| {
+                            let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * step));
+                            (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+                        })
+                        .reduce_with(find_min)
+                });
+
             if let Some(lowest) = lowest {
                 let middle_frame = from_frame + (to_frame - from_frame) / 2;
                 let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
