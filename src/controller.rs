@@ -34,8 +34,10 @@ pub struct Controller {
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
     offset_method: qt_property!(u32),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
+    estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32)),
+    rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
     lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
@@ -132,7 +134,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, video_rotation: i32) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) {
         rendering::clear_log();
 
         let method = self.sync_method;
@@ -153,8 +155,12 @@ impl Controller {
             this.chart_data_changed();
             this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
         });
-        let set_offsets = util::qt_queued_callback_mut(self, |this, offsets: Vec<(f64, f64, f64)>| {
-            {
+        let set_offsets = util::qt_queued_callback_mut(self, move |this, offsets: Vec<(f64, f64, f64)>| {
+            if for_rs {
+                if let Some(offs) = offsets.first() {
+                    this.rolling_shutter_estimated(offs.1);
+                }
+            } else {
                 let mut gyro = this.stabilizer.gyro.write();
                 for x in offsets {
                     println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
@@ -176,7 +182,7 @@ impl Controller {
             this.request_recompute();
         });
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame) {
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
             sync.on_progress(move |ready, total| {
                 progress((ready, total));
             });
@@ -204,7 +210,7 @@ impl Controller {
                                     Ok(mut small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
             
-                                        sync.feed_frame(frame, width, height, stride, pixels, video_rotation, cancel_flag.clone());
+                                        sync.feed_frame(frame, width, height, stride, pixels, cancel_flag.clone());
                                     },
                                     Err(e) => {
                                         err(("An error occured: %1".to_string(), e.to_string()))
@@ -481,6 +487,10 @@ impl Controller {
                 err(("An error occured: %1".to_string(), e.to_string()))
             }
         });
+    }
+
+    fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32) {
+        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, 11.0, sync_duration_ms, every_nth_frame, true);
     }
     
     fn cancel_current_operation(&mut self) {

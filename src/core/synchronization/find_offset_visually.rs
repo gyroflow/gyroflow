@@ -2,12 +2,13 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ undistortion, undistortion::ComputeParams };
 use super::PoseEstimator;
 
-pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
 
     let next_frame_no = 2;
+    let fps = params.fps;
 
     for (from_frame, to_frame) in ranges {
         let mut matched_points = Vec::new();
@@ -21,15 +22,22 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
             }
         }
 
-        let calculate_distance = |offs| -> f64 {
+        let calculate_distance = |offs, rs: Option<f64>| -> f64 {
             let mut total_dist = 0.0;
+            let mut params_ref = params;
+            let mut _params2 = None;
+            if let Some(rs) = rs {
+                _params2 = Some(params.clone());
+                _params2.as_mut().unwrap().frame_readout_time = rs;
+                params_ref = _params2.as_ref().unwrap();
+            }
 
             for (frame, pts) in &matched_points {
-                let timestamp_ms  = *frame as f64 * 1000.0 / params.fps;
-                let timestamp_ms2 = (*frame + next_frame_no) as f64 * 1000.0 / params.fps;
+                let timestamp_ms  = *frame as f64 * 1000.0 / fps;
+                let timestamp_ms2 = (*frame + next_frame_no) as f64 * 1000.0 / fps;
 
-                let undistorted_points1 = undistortion::undistort_points_with_rolling_shutter(&pts.0, timestamp_ms - offs, &params);
-                let undistorted_points2 = undistortion::undistort_points_with_rolling_shutter(&pts.1, timestamp_ms2 - offs, &params);
+                let undistorted_points1 = undistortion::undistort_points_with_rolling_shutter(&pts.0, timestamp_ms - offs, params_ref);
+                let undistorted_points2 = undistortion::undistort_points_with_rolling_shutter(&pts.1, timestamp_ms2 - offs, params_ref);
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
@@ -52,37 +60,60 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
 
         let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
-        // First search every 1 ms
-        let steps = search_size as usize;
-        let lowest = (0..steps)
-            .into_par_iter()
-            .map(|i| {
-                let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
-                (offs, calculate_distance(offs))
-            })
-            .reduce_with(find_min)
-            .and_then(|lowest| {
-                // Then refine to 0.01 ms
-                let search_size = 2.0; // ms
-                let steps = (search_size * 100.0) as usize; // 100 times per ms
-                let step = search_size / steps as f64;
-                (0..steps)
-                    .into_par_iter()
-                    .map(|i| {
-                        let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * step));
-                        (offs, calculate_distance(offs))
-                    })
-                    .reduce_with(find_min)
-            });
+        if for_rs { // Estimate rolling shutter
+            // First search every 1 ms
+            let max_rs = 1000.0 / fps;
+            let steps = max_rs as isize;
+            let lowest = (-steps..steps)
+                .into_par_iter()
+                .map(|i| {
+                    (i as f64, calculate_distance(0.0, Some(i as f64)))
+                })
+                .reduce_with(find_min)
+                .and_then(|lowest| {
+                    // Then refine to 0.01 ms
+                    (0..200)
+                        .into_par_iter()
+                        .map(|i| {
+                            let rs = lowest.0 - 1.0 + (i as f64 * 0.01);
+                            (rs, calculate_distance(0.0, Some(rs)))
+                        })
+                        .reduce_with(find_min)
+                });
+            dbg!(lowest);
+            if let Some(lowest) = lowest {
+                final_offsets.push((0.0, lowest.0, lowest.1));
+            }
+        } else {
+            // First search every 1 ms
+            let steps = search_size as usize;
+            let lowest = (0..steps)
+                .into_par_iter()
+                .map(|i| {
+                    let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
+                    (offs, calculate_distance(offs, None))
+                })
+                .reduce_with(find_min)
+                .and_then(|lowest| {
+                    // Then refine to 0.01 ms
+                    (0..200)
+                        .into_par_iter()
+                        .map(|i| {
+                            let offs = lowest.0 - 1.0 + (i as f64 * 0.01);
+                            (offs, calculate_distance(offs, None))
+                        })
+                        .reduce_with(find_min)
+                });
 
-        dbg!(&lowest);
-        if let Some(lowest) = lowest {
-            let middle_frame = from_frame + (to_frame - from_frame) / 2;
-            let middle_timestamp = (middle_frame as f64 * 1000.0) / params.fps;
+            dbg!(&lowest);
+            if let Some(lowest) = lowest {
+                let middle_frame = from_frame + (to_frame - from_frame) / 2;
+                let middle_timestamp = (middle_frame as f64 * 1000.0) / fps;
 
-            // Only accept offsets that are within 90% of search size range
-            if lowest.0.abs() < (search_size / 2.0) * 0.9 {
-                final_offsets.push((middle_timestamp, lowest.0, lowest.1));
+                // Only accept offsets that are within 90% of search size range
+                if lowest.0.abs() < (search_size / 2.0) * 0.9 {
+                    final_offsets.push((middle_timestamp, lowest.0, lowest.1));
+                }
             }
         }
     }

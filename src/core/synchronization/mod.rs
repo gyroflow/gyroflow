@@ -345,8 +345,8 @@ impl PoseEstimator {
         find_offset::find_offsets(&ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
     }
 
-    pub fn find_offsets_visually(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset_visually::find_offsets(&ranges, &self, initial_offset, search_size, params)
+    pub fn find_offsets_visually(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset_visually::find_offsets(&ranges, &self, initial_offset, search_size, params, for_rs)
     }
 }
 
@@ -357,6 +357,7 @@ pub struct AutosyncProcess {
     frame_count: usize,
     duration_ms: f64,
     fps: f64,
+    for_rs: bool, // for rolling shutter estimation
     ranges: Vec<(usize, usize)>,
     frame_ranges: Vec<(usize, usize)>,
     estimator: Arc<PoseEstimator>,
@@ -369,7 +370,7 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32) -> Result<Self, ()> {
+    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
         let fps = params.fps;
@@ -411,12 +412,15 @@ impl AutosyncProcess {
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
         
         let mut comp_params = ComputeParams::from_manager(stab);
-        comp_params.gyro.offsets.clear();
+        if !for_rs {
+            comp_params.gyro.offsets.clear();
+        }
 
         Ok(Self {
             frame_count,
             duration_ms,
             fps,
+            for_rs,
             method,
             ranges,
             frame_ranges,
@@ -447,7 +451,7 @@ impl AutosyncProcess {
         }
         return false;
     }
-    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], _video_rotation: i32, cancel_flag: Arc<AtomicBool>) {
+    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);
@@ -500,12 +504,16 @@ impl AutosyncProcess {
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.fps, true);
 
         if let Some(cb) = &self.finished_cb {
-            let offsets = match method {
-                0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read().gyro),
-                1 => self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
-                _ => { panic!("Unsupported offset method: {}", method); }
-            };
-            cb(offsets);
+            if self.for_rs {
+                cb(self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true));
+            } else {
+                let offsets = match method {
+                    0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read().gyro),
+                    1 => self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
+                    _ => { panic!("Unsupported offset method: {}", method); }
+                };
+                cb(offsets);
+            }
         }
         if let Some(cb) = &self.progress_cb {
             let len = self.frame_status.read().len();

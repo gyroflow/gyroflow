@@ -30,6 +30,11 @@ MenuItem {
             setShutterTimer.pending = frame_readout_time;
             setShutterTimer.start();
         }
+        function onRolling_shutter_estimated(rolling_shutter) {
+            shutter.value = Math.abs(rolling_shutter);
+            shutterCb.checked = Math.abs(rolling_shutter) > 0;
+            bottomToTop.checked = rolling_shutter < 0;
+        }
     }
     Timer {
         id: setShutterTimer;
@@ -155,11 +160,12 @@ MenuItem {
 
         Label {
             text: qsTr("Frame readout time");
-            Slider {
+            SliderWithField {
                 id: shutter;
                 to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
                 width: parent.width;
                 unit: "ms";
+                precision: 2;
                 onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
             }
             CheckBox {

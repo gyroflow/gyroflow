@@ -219,7 +219,7 @@ Item {
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.videoArea.vid.rotation);
+                    controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
                 }
             }
             Action {
@@ -228,6 +228,14 @@ Item {
                 onTriggered: {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
                     controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
+                }
+            }
+            Action {
+                icon.name: "readout_time";
+                text: qsTr("Estimate rolling shutter here");
+                onTriggered: {
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame);
                 }
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
