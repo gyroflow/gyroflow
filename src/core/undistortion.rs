@@ -416,9 +416,9 @@ impl<T: PixelType> Undistortion<T> {
 
 pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f64, f64)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
+    let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], p, Some(rotations))
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Matrix3::identity(), Some(rotations))
 }
 
 pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Matrix3<f64>, rot_per_point: Option<Vec<Matrix3<f64>>>) -> Vec<(f64, f64)> {
@@ -485,16 +485,7 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
         if converged && !theta_flipped {
             let pu = (pw.0 * scale, pw.1 * scale); // undistorted point
 
-            let rot = match &rot_per_point {
-                Some(v) => {
-                    if index < v.len() {
-                        v[index]                   
-                    } else {
-                        v[0]
-                    }
-                },
-                None => rr
-            };
+            let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
             // reproject
             let pr = rot * nalgebra::Vector3::new(pu.0, pu.1, 1.0); // rotated point optionally multiplied by new camera matrix
 

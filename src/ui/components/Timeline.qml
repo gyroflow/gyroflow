@@ -38,6 +38,18 @@ Item {
         property alias timelineChart: chart.viewMode;
     }
 
+    focus: true;
+    Keys.onPressed: (e) => {
+        const vid = window.videoArea.vid;
+        switch (e.key) {
+            case Qt.Key_Space:        if (vid.playing) vid.pause(); else vid.play();                  e.accepted = true; break;
+            case Qt.Key_PageUp:       vid.currentFrame -= (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
+            case Qt.Key_PageDown:     vid.currentFrame += (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
+            case Qt.Key_BracketLeft:  root.trimStart = root.value;                                    e.accepted = true; break;
+            case Qt.Key_BracketRight: root.trimEnd   = root.value;                                    e.accepted = true; break;
+        }
+    }
+
     Column {
         x: 3 * dpiScale;
         y: 50 * dpiScale;

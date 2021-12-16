@@ -46,7 +46,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
                     // Then refine to 0.01 ms accuracy
                     let search_size = 2.0; // ms
                     let steps = (search_size * 100.0) as usize; // 100 times per ms
-                    let step = (search_size / steps as f64);
+                    let step = search_size / steps as f64;
                     (0..steps)
                         .into_par_iter()
                         .map(|i| {
