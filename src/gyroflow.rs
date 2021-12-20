@@ -11,13 +11,13 @@ pub mod controller;
 pub mod rendering;
 pub mod resources;
 pub mod ui { pub mod theme; pub mod components { pub mod TimelineGyroChart; } }
+pub mod qt_gpu { pub mod qrhi_undistort; }
 
 use crate::core::{lens_profile::LensProfile};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - Estimate rolling shutter
 // - wgpu undistortion add support for different plane types
 
 // - Some basic error handling, check for all unwrap()'s
@@ -28,7 +28,6 @@ use ui::theme::Theme;
 // - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Port Aphobius 2.0
 // - Figure out what to do with the console output window/log
-// - Pick a license
 
 // TODO: more smoothing algorithms
 
@@ -132,14 +131,17 @@ fn entry() {
         cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *", ui_path as "QString"] { init_live_reload(engine_ptr, ui_path); });
     }
 
-    cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *"] {
+    let is_opengl = cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *"] -> bool as "bool" {
         auto wnd = qobject_cast<QQuickWindow *>(engine_ptr->rootObjects().first());
-        engine_ptr->rootContext()->setContextProperty("isOpenGl", wnd->rendererInterface()->graphicsApi() == QSGRendererInterface::OpenGLRhi);
+        bool isOpenGl = wnd->rendererInterface()->graphicsApi() == QSGRendererInterface::OpenGLRhi;
+        engine_ptr->rootContext()->setContextProperty("isOpenGl", QVariant::fromValue(isOpenGl));
         wnd->setIcon(QIcon(":/resources/icon.png"));
         #ifdef Q_OS_ANDROID
             QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
         #endif
+        return isOpenGl;
     });
+    ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
 
     rendering::init().unwrap();
 

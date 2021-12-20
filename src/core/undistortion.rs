@@ -30,6 +30,7 @@ pub struct ComputeParams {
     pub frame_readout_time: f64,
     pub trim_start_frame: usize,
     pub trim_end_frame: usize,
+    pub framebuffer_inverted: bool,
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
@@ -71,14 +72,15 @@ impl ComputeParams {
             camera_matrix,
             video_rotation: params.video_rotation,
             distortion_coeffs,
-            frame_readout_time: params.frame_readout_time,
+            framebuffer_inverted: params.framebuffer_inverted,
+            frame_readout_time: if params.framebuffer_inverted { -params.frame_readout_time } else { params.frame_readout_time },
             trim_start_frame: (params.trim_start * params.frame_count as f64).floor() as usize,
             trim_end_frame: (params.trim_end * params.frame_count as f64).ceil() as usize,
         }
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct FrameTransform {
     pub params: Vec<[f32; 9]>,
 }
@@ -129,13 +131,13 @@ impl FrameTransform {
                      * params.gyro.smoothed_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
-            // Need to benchmark performance of the .mirror() function for OpenGL
-            // If it's a problem we can use this inverted matrix here and invert the drawing of feature points and rolling shutter time
-            // We only need to do this for image read from OpenGL, so this code should be conditional only for live preview, not for rendering
-            // r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
-            // r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
-            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
-            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            if params.framebuffer_inverted {
+                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+            } else {
+                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            }
             
             let i_r: Matrix3<f32> = nalgebra::convert((new_k * r).pseudo_inverse(0.000001).unwrap());
             [
@@ -205,13 +207,13 @@ impl FrameTransform {
                      * params.gyro.smoothed_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
-            // Need to benchmark performance of the .mirror() function for OpenGL
-            // If it's a problem we can use this inverted matrix here and invert the drawing of feature points and rolling shutter time
-            // We only need to do this for image read from OpenGL, so this code should be conditional only for live preview, not for rendering
-            // r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
-            // r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
-            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
-            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            if params.framebuffer_inverted {
+                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+            } else {
+                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            }
             
             new_k * r
         }).collect();
@@ -231,7 +233,9 @@ pub struct Undistortion<T: PixelType> {
     #[cfg(feature = "use-opencl")]
     cl: Option<opencl::OclWrapper>,
 
-    wgpu: Option<wgpu::WgpuWrapper<T::Scalar>>,
+    wgpu: Option<wgpu::WgpuWrapper>,
+
+    _d: std::marker::PhantomData<T>
 }
 
 impl<T: PixelType> Undistortion<T> {
@@ -275,10 +279,14 @@ impl<T: PixelType> Undistortion<T> {
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
 
-        //self.wgpu = wgpu::WgpuWrapper::new(size.0, size.1,stride, output_size.0, output_size.1, output_stride, self.background);
         #[cfg(feature = "use-opencl")]
         {
             self.cl = opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background).ok();
+        }
+        
+        // TODO: Support other pixel types
+        if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+            self.wgpu = Some(wgpu::WgpuWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, self.background).unwrap());
         }
         
         self.size = (size.0, size.1, stride);
@@ -296,16 +304,17 @@ impl<T: PixelType> Undistortion<T> {
         }
     }
 
+    pub fn get_undistortion_data(&self, frame: usize) -> Option<&FrameTransform> {
+        if self.stab_data.is_empty() || frame >= self.stab_data.len() { return None; }
+
+        Some(&self.stab_data[frame])
+    }
+
     pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
         if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return false; }
 
         let itm = &self.stab_data[frame];
         if itm.params.is_empty() { return false; }
-
-        /*if let Some(ref mut wgpu) = self.wgpu {
-            wgpu.undistort_image(pixels, itm);
-            return pixels.as_mut_ptr();
-        }*/
 
         // OpenCL path
         #[cfg(feature = "use-opencl")]
@@ -315,6 +324,11 @@ impl<T: PixelType> Undistortion<T> {
             } else {
                 return true;
             }
+        }
+
+        if let Some(ref mut wgpu) = self.wgpu {
+            wgpu.undistort_image(pixels, out_pixels, itm);
+            return true;
         }
 
         // CPU path

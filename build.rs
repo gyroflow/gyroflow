@@ -26,6 +26,9 @@ fn main() {
     let mut private_include = |name| { config.include(format!("{}/{}/{}",    qt_include_path, name, qt_version))
                                              .include(format!("{}/{}/{}/{}", qt_include_path, name, qt_version, name)); };
     private_include("QtCore");
+    private_include("QtGui");
+    private_include("QtQuick");
+    private_include("QtQml");
 
     config
         .include(&qt_include_path)

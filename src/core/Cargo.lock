@@ -285,9 +285,9 @@ checksum = "8f1e260c3a9040a7c19a12468758f4c16f31a81a1fe087482be9570ec864bb6c"
 
 [[package]]
 name = "bytemuck"
-version = "1.7.2"
+version = "1.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72957246c41db82b8ef88a5486143830adeb8227ef9837740bdec67724cf2c5b"
+checksum = "439989e6b8c38d1b6570a384ef1e49c8848128f5a97f3914baef02920842712f"
 
 [[package]]
 name = "byteorder"
@@ -731,18 +731,18 @@ dependencies = [
 
 [[package]]
 name = "fallible_collections"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eaefd4190151d458f16f0793d3452d7f13aeb3701566a4cefc4c37598876cc00"
+checksum = "52db5973b6a19247baf19b30f41c23a1bfffc2e9ce0a5db2f60e3cd5dc8895f7"
 dependencies = [
  "hashbrown",
 ]
 
 [[package]]
 name = "fastrand"
-version = "1.5.0"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b394ed3d285a429378d3b384b9eb1285267e7df4b166df24b7a6939a04dc392e"
+checksum = "779d043b6a0b90cc4c0ed7ee380a6504394cee7efd7db050e3774eee387324b2"
 dependencies = [
  "instant",
 ]
@@ -1276,18 +1276,18 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.7.3"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "806f448a7ce662ca79ef5484ef8f451a9b7c51b8166c95f5a667228b3825a6ca"
+checksum = "bc7216bec6be822a562dda435236539c7fb5aa5e5ceecc8c565e81139ed1d4b0"
 dependencies = [
  "bit-set",
  "bitflags",
  "codespan-reporting",
- "fxhash",
  "hexf-parse",
  "indexmap",
  "log",
  "num-traits 0.2.14",
+ "rustc-hash",
  "spirv",
  "thiserror",
 ]
@@ -1576,9 +1576,9 @@ checksum = "da32515d9f6e6e489d7bc9d84c71b060db7247dc035bbe44eac88cf87486d8d5"
 
 [[package]]
 name = "opencv"
-version = "0.61.2"
+version = "0.61.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7a088019140331e8228f6d2049b0872f31ae88d623a146e994e382ef66b4774"
+checksum = "506c8ad1878c48f2c6549a1c6f449efc3f295dfadfb9a37ff2961c6a5e86fa52"
 dependencies = [
  "cc",
  "clang",
@@ -1597,9 +1597,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.38.1"
+version = "0.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "983428727c0d53eb2e6020a37ee4bf8c9b9f1e2cb3f8696b13d44d77fc91102d"
+checksum = "3363b72f9dc5f8d94b5cafae6d991c254f33784c7a5fcac3db0c8b203900df60"
 dependencies = [
  "clang",
  "clang-sys",
@@ -1837,16 +1837,6 @@ checksum = "63e935c45e09cc6dcf00d2f0b2d630a58f4095320223d47fc68918722f0538b6"
 
 [[package]]
 name = "raw-window-handle"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e28f55143d0548dad60bb4fbdc835a3d7ac6acc3324506450c5fdd6e42903a76"
-dependencies = [
- "libc",
- "raw-window-handle 0.4.2",
-]
-
-[[package]]
-name = "raw-window-handle"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fba75eee94a9d5273a68c9e1e105d9cffe1ef700532325788389e5a83e2522b7"
@@ -1939,6 +1929,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ef03e0a2b150c7a90d01faf6254c9c48a41e95fb2a8c2ac1c6f0d2b9aefc342"
 
 [[package]]
+name = "rustc-hash"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
 name = "rustc-serialize"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2018,18 +2014,18 @@ checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
 
 [[package]]
 name = "serde"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4ad69dfbd3e45369132cc64e6748c2d65cdfb001a2b1c232d128b4ad60561c1"
+checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b710a83c4e0dff6a3d511946b95274ad9ca9e5d3ae497b63fda866ac955358d2"
+checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2385,15 +2381,15 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 
 [[package]]
 name = "wgpu"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eae7181fe6ba5f4b632a9079cc9e922a64555156c87def72c063f94b180c7d68"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
  "log",
+ "naga",
  "parking_lot",
- "raw-window-handle 0.3.4",
+ "raw-window-handle",
  "smallvec",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -2405,20 +2401,20 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35600627b6c718ad0e23ed75fb6140bfe32cdf21c8f539ce3c9ab8180e2cb38e"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
  "cfg_aliases",
+ "codespan-reporting",
  "copyless",
  "fxhash",
  "log",
  "naga",
  "parking_lot",
  "profiling",
- "raw-window-handle 0.3.4",
+ "raw-window-handle",
  "smallvec",
  "thiserror",
  "wgpu-hal",
@@ -2427,9 +2423,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.11.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af28b29ef0b44cd22dd9895d4349b9d5a687df42f58da234871198637eabe328"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2454,7 +2449,7 @@ dependencies = [
  "parking_lot",
  "profiling",
  "range-alloc",
- "raw-window-handle 0.3.4",
+ "raw-window-handle",
  "renderdoc-sys",
  "thiserror",
  "wasm-bindgen",
@@ -2465,9 +2460,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e15e44ba88ec415466e18e91881319e7c9e96cb905dc623305168aea65b85ccc"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
 dependencies = [
  "bitflags",
 ]

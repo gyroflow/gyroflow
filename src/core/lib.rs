@@ -49,6 +49,8 @@ pub struct BasicParams {
     pub trim_end: f64,
 
     pub video_rotation: f64,
+
+    pub framebuffer_inverted: bool,
     
     pub stab_enabled: bool,
     pub show_detected_features: bool,
@@ -71,6 +73,8 @@ impl Default for BasicParams {
             video_output_size: (0, 0),
 
             video_rotation: 0.0,
+            
+            framebuffer_inverted: false,
 
             trim_start: 0.0,
             trim_end: 1.0,
@@ -331,45 +335,87 @@ impl<T: PixelType> StabilizationManager<T> {
         compute_id
     }
 
+    pub fn get_features_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+        if self.params.read().show_detected_features {
+            let mut pixels = Vec::new();
+            let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
+            for i in 0..xs.len() {
+                for xstep in -1..=1i32 {
+                    for ystep in -1..=1i32 {
+                        pixels.push((xs[i] as i32 + xstep, ys[i] as i32 + ystep, 1.0));
+                    }
+                }
+            }
+            return Some(pixels);
+        }
+        None
+    }
+    pub fn get_opticalflow_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+        if self.params.read().show_optical_flow {
+            let mut pixels = Vec::new();
+            for i in 0..3 {
+                let a = (3 - i) as f32 / 3.0;
+                if let Some(lines) = self.pose_estimator.get_of_lines_for_frame(&(frame + i), 1.0, 1) {
+                    lines.0.into_iter().zip(lines.1.into_iter()).for_each(|(p1, p2)| {
+                        let line = bresenham::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
+                        for point in line {
+                            pixels.push((point.0 as i32, point.1 as i32, a));
+                        }
+                    });
+                }
+            }
+            return Some(pixels);
+        }
+        None
+    }
+
+    pub unsafe fn fill_undistortion_data_padded(&self, frame: usize, out_ptr: *mut f32, out_size: usize) -> bool {
+        if self.params.read().stab_enabled {
+            let lock = self.undistortion.read();
+            if let Some(itm) = lock.get_undistortion_data(frame) {
+                let params_count = itm.params.len() * 9;
+                if params_count <= out_size {
+                    let src_ptr = itm.params.as_ptr() as *const f32;
+                    std::ptr::copy_nonoverlapping(src_ptr, out_ptr, 8);
+
+                    let mut j = 2;
+                    for i in (9..params_count).step_by(3) {
+                        std::ptr::copy_nonoverlapping(src_ptr.offset(i as isize), out_ptr.offset(j * 4), 3);
+                        j += 1;
+                    }
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool { // TODO: generic
-        let (enabled, show_features, show_of, ow, oh) = {
+        let (enabled, ow, oh) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.output_size.0, params.output_size.1)
+            (params.stab_enabled, params.output_size.0, params.output_size.1)
         };
         if enabled && ow == out_width && oh == out_height {
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-                if show_features {
-                    let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
-                    for i in 0..xs.len() {
-                        for xstep in -1..=1i32 {
-                            for ystep in -1..=1i32 {
-                                let pos = ((ys[i] as i32 + ystep) * stride as i32 + (xs[i] as i32 + xstep) * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                                if pixels.len() > pos + 2 { 
-                                    pixels[pos + 0] = 0x0c; // R
-                                    pixels[pos + 1] = 0xff; // G
-                                    pixels[pos + 2] = 0x00; // B
-                                }
-                            }
+                if let Some(pxs) = self.get_features_pixels(frame) {
+                    for (x, y, _) in pxs {
+                        let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                        if pixels.len() > pos + 2 { 
+                            pixels[pos + 0] = 0x0c; // R
+                            pixels[pos + 1] = 0xff; // G
+                            pixels[pos + 2] = 0x00; // B
                         }
                     }
                 }
-                if show_of {
-                    for i in 0..3 {
-                        let a = (3 - i) as f64 / 3.0;
-                        if let Some(lines) = self.pose_estimator.get_of_lines_for_frame(&(frame + i), 1.0, 1) {
-                            lines.0.into_iter().zip(lines.1.into_iter()).for_each(|(p1, p2)| {
-                                let line = bresenham::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
-                                for point in line {
-                                    let pos = (point.1 * stride as isize + point.0 * (T::COUNT * T::SCALAR_BYTES) as isize) as usize;
-                                    if pixels.len() > pos + 2 {
-                                        pixels[pos + 0] = (pixels[pos + 0] as f64 * (1.0 - a) + 0xfe as f64 * a) as u8; // R
-                                        pixels[pos + 1] = (pixels[pos + 1] as f64 * (1.0 - a) + 0xfb as f64 * a) as u8; // G
-                                        pixels[pos + 2] = (pixels[pos + 2] as f64 * (1.0 - a) + 0x47 as f64 * a) as u8; // B
-                                    }
-                                }
-                            });
+                if let Some(pxs) = self.get_opticalflow_pixels(frame) {
+                    for (x, y, a) in pxs {
+                        let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                        if pixels.len() > pos + 2 { 
+                            pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
+                            pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
+                            pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
                         }
                     }
                 }
@@ -458,13 +504,13 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn clear(&self) {
-        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window) = {
+        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window)
+            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted)
         };
 
         *self.params.write() = BasicParams {
-            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, ..Default::default()
+            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, ..Default::default()
         };
         *self.gyro.write() = GyroSource::new();
         self.pose_estimator.clear();

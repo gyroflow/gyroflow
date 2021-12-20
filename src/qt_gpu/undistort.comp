@@ -1,0 +1,98 @@
+#version 440
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+const int INTER_BITS = 5;
+const int INTER_TAB_SIZE = 1 << INTER_BITS;
+
+const float COEFFS[64] = float[64](
+    1.000000, 0.000000, 0.968750, 0.031250, 0.937500, 0.062500, 0.906250, 0.093750, 0.875000, 0.125000, 0.843750, 0.156250,
+    0.812500, 0.187500, 0.781250, 0.218750, 0.750000, 0.250000, 0.718750, 0.281250, 0.687500, 0.312500, 0.656250, 0.343750,
+    0.625000, 0.375000, 0.593750, 0.406250, 0.562500, 0.437500, 0.531250, 0.468750, 0.500000, 0.500000, 0.468750, 0.531250,
+    0.437500, 0.562500, 0.406250, 0.593750, 0.375000, 0.625000, 0.343750, 0.656250, 0.312500, 0.687500, 0.281250, 0.718750,
+    0.250000, 0.750000, 0.218750, 0.781250, 0.187500, 0.812500, 0.156250, 0.843750, 0.125000, 0.875000, 0.093750, 0.906250,
+    0.062500, 0.937500, 0.031250, 0.968750
+);
+
+layout (binding = 0, rgba8) uniform readonly image2D texIn;
+layout (binding = 1, rgba8) uniform writeonly image2D texOut;
+
+layout(std140, binding = 2) uniform UniformBuffer {
+    uint params_count;
+    uint width;
+    uint height;
+    uint _padding;
+    vec4 bg;
+} uniforms;
+
+layout(std140, binding = 3) buffer StorageBuffer { vec4 params[]; } ssbo;
+
+layout(std140, binding = 4) buffer StorageBuffer1 { vec4 pixels[]; } features;
+layout(std140, binding = 5) buffer StorageBuffer2 { vec4 pixels[]; } opticalflow;
+
+void main() {
+    ivec2 texPos = ivec2(gl_GlobalInvocationID.xy);
+
+    vec2 f = vec2(ssbo.params[0].xy);
+    vec2 c = vec2(ssbo.params[0].zw);
+    vec4 k = vec4(ssbo.params[1].xyzw);
+
+    int idx = 2 + int(min(texPos.y, uniforms.params_count - 1)) * 3;
+
+    float _x = (float(texPos.y) * ssbo.params[idx + 0].y) + ssbo.params[idx + 0].z + (float(texPos.x) * ssbo.params[idx + 0].x);
+    float _y = (float(texPos.y) * ssbo.params[idx + 1].y) + ssbo.params[idx + 1].z + (float(texPos.x) * ssbo.params[idx + 1].x);
+    float _w = (float(texPos.y) * ssbo.params[idx + 2].y) + ssbo.params[idx + 2].z + (float(texPos.x) * ssbo.params[idx + 2].x);
+
+    vec4 finalColor = uniforms.bg;
+
+    if (_w > 0) {
+        vec2 pos = vec2(_x, _y) / _w;
+
+        float r = length(pos);
+
+        float theta = atan(r);
+
+        float theta2 = theta*theta; float theta4 = theta2*theta2; float theta6 = theta4*theta2; float theta8 = theta4*theta4;
+
+        float theta_d = theta * (1.0 + dot(k, vec4(theta2, theta4, theta6, theta8)));
+
+        float scale = r == 0? 1.0 : theta_d / r;
+        vec2 uv = f * pos * scale + c;
+        
+        int sx = int(floor(0.5 + uv.x * INTER_TAB_SIZE)) >> INTER_BITS;
+        int sy = int(floor(0.5 + uv.y * INTER_TAB_SIZE)) >> INTER_BITS;
+
+        int coeffs_x = int(int(floor(uv.x * float(INTER_TAB_SIZE) + 0.5)) & (INTER_TAB_SIZE - 1)) << 1;
+        int coeffs_y = int(int(floor(uv.y * float(INTER_TAB_SIZE) + 0.5)) & (INTER_TAB_SIZE - 1)) << 1;
+
+        vec4 sum = vec4(0.0);
+
+        for (int yp = 0; yp < 2; ++yp) {
+            if (sy + yp >= 0 && sy + yp < uniforms.height) {
+                vec4 xsum = ((sx + 0 >= 0 && sx + 0 < uniforms.width? imageLoad(texIn, ivec2(sx + 0, sy + yp)) : uniforms.bg) * COEFFS[coeffs_x + 0]) + 
+                            ((sx + 1 >= 0 && sx + 1 < uniforms.width? imageLoad(texIn, ivec2(sx + 1, sy + yp)) : uniforms.bg) * COEFFS[coeffs_x + 1]);
+                sum += xsum * COEFFS[coeffs_y + yp];
+            } else {
+                sum += uniforms.bg * COEFFS[coeffs_y + yp];
+            }
+        }
+
+        finalColor = sum;
+    }
+
+    // Inefficient, but what can you do
+    for (int i = 0; i < features.pixels.length(); ++i) {
+        if (ivec2(features.pixels[i].xy) == texPos || ivec2(features.pixels[i].zw) == texPos) {
+            finalColor = vec4(0.047, 1.0, 0.0, 1.0);
+            break;
+        }
+    }
+    for (int i = 0; i < opticalflow.pixels.length(); ++i) {
+        if (ivec2(opticalflow.pixels[i].xy) == texPos) {
+            finalColor = finalColor * (1.0 - opticalflow.pixels[i].z) + vec4(0.99, 0.98, 0.27, 1.0) * opticalflow.pixels[i].z;
+            break;
+        }
+    }
+
+    imageStore(texOut, texPos, finalColor);
+}

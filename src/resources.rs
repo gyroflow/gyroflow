@@ -80,5 +80,9 @@ qrc!(pub rsrc,
         "resources/icons/svg/error.svg",
         "resources/icons/svg/warning.svg",
         "resources/icons/svg/readout_time.svg",
+
+        "src/qt_gpu/compiled/undistort.comp.qsb",
+        "src/qt_gpu/compiled/texture.frag.qsb",
+        "src/qt_gpu/compiled/texture.vert.qsb",
     }
 );

@@ -76,8 +76,6 @@ pub struct Controller {
     gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
     gyro_changed: qt_signal!(),
 
-    stabilizer: Arc<StabilizationManager<undistortion::RGBA8>>,
-
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, status: QString),
 
@@ -111,6 +109,8 @@ pub struct Controller {
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
+
+    pub stabilizer: Arc<StabilizationManager<undistortion::RGBA8>>,
 }
 
 impl Controller {
@@ -413,6 +413,8 @@ impl Controller {
                     (0, 0, 0, std::ptr::null_mut())
                 }
             }));
+
+            // crate::qt_gpu::qrhi_undistort::init_player(vid.get_mdkplayer(), self.stabilizer.clone());
         }
     }
 

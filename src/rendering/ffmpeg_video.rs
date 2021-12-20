@@ -155,6 +155,10 @@ impl<'a> VideoTranscoder<'a> {
                 if self.encoder_pixel_format.is_none() {
                     unsafe {
                         let dl_formats = super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr());
+                        if dl_formats.is_empty() {
+                            super::append_log(&format!("No HW transfer formats.\n"));
+                            return Err(Error::OptionNotFound);
+                        }
                         let codec = octx.stream(0).unwrap().codec().as_mut_ptr();
                         if !(*codec).codec.is_null() {
                             let sw_formats = super::ffmpeg_hw::pix_formats_to_vec((*(*codec).codec).pix_fmts);
