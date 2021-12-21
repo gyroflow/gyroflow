@@ -20,8 +20,8 @@ pub struct FfmpegProcessor<'a> {
 
     pub video: VideoTranscoder<'a>,
 
-    pub start_ms: Option<usize>,
-    pub end_ms: Option<usize>,
+    pub start_ms: Option<f64>,
+    pub end_ms: Option<f64>,
 
     ost_time_bases: Vec<Rational>,
 }
@@ -238,7 +238,7 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 }
  
-                match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.end_ms) {
+                match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms) {
                     Ok(encoding_status) => {
                         if self.video.encoder.is_some() {
                             video_inited = true;
@@ -274,7 +274,7 @@ impl<'a> FfmpegProcessor<'a> {
         {
             let ost_time_base = self.ost_time_bases[self.video.output_index];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
-            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.end_ms)?;
+            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
             self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
         }
@@ -293,7 +293,7 @@ impl<'a> FfmpegProcessor<'a> {
         Ok(())
     }
 
-    pub fn start_decoder_only(&mut self, mut ranges: Vec<(usize, usize)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+    pub fn start_decoder_only(&mut self, mut ranges: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         if !ranges.is_empty() {
             let next_range = ranges.remove(0);
             self.start_ms = Some(next_range.0);
@@ -337,7 +337,7 @@ impl<'a> FfmpegProcessor<'a> {
                             return Err(err.into());
                         }
                     }
-                    match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms) {
+                    match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms) {
                         Ok(encoding_status) => {
                             any_encoded = true;
                             if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
@@ -366,7 +366,7 @@ impl<'a> FfmpegProcessor<'a> {
     
         // Flush decoder.
         self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
-        self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms)?;
+        self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
 
         Ok(())
     }

@@ -366,7 +366,7 @@ pub struct AutosyncProcess {
     duration_ms: f64,
     fps: f64,
     for_rs: bool, // for rolling shutter estimation
-    ranges: Vec<(usize, usize)>,
+    ranges_ms: Vec<(f64, f64)>,
     frame_ranges: Vec<(usize, usize)>,
     estimator: Arc<PoseEstimator>,
     frame_status: Arc<RwLock<HashMap<usize, bool>>>,
@@ -388,15 +388,15 @@ impl AutosyncProcess {
 
         if duration_ms < 10.0 || frame_count < 2 || sync_duration_ms < 10.0 || sync_search_size < 10.0 { return Err(()); }
 
-        let ranges: Vec<(usize, usize)> = timestamps_fract.iter().map(|x| {
+        let ranges_ms: Vec<(f64, f64)> = timestamps_fract.iter().map(|x| {
             let range = (
                 ((x * duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
                 ((x * duration_ms) + (sync_duration_ms / 2.0)).min(duration_ms)
             );
-            (range.0 as usize, range.1 as usize)
+            (range.0, range.1)
         }).collect();
 
-        let frame_ranges: Vec<(usize, usize)> = ranges.iter().map(|(from, to)| (stab.frame_at_timestamp(*from as f64, fps), stab.frame_at_timestamp(*to as f64, fps))).collect();
+        let frame_ranges: Vec<(usize, usize)> = ranges_ms.iter().map(|(from, to)| (stab.frame_at_timestamp(*from, fps), stab.frame_at_timestamp(*to, fps))).collect();
         log::debug!("frame_ranges: {:?}", &frame_ranges);
         let mut frame_status = HashMap::<usize, bool>::new();
         for x in &frame_ranges {
@@ -430,7 +430,7 @@ impl AutosyncProcess {
             fps,
             for_rs,
             method,
-            ranges,
+            ranges_ms,
             frame_ranges,
             frame_status,
             estimator,
@@ -444,8 +444,8 @@ impl AutosyncProcess {
         })
     }
 
-    pub fn get_ranges(&self) -> Vec<(usize, usize)> {
-        self.ranges.clone()
+    pub fn get_ranges(&self) -> Vec<(f64, f64)> {
+        self.ranges_ms.clone()
     }
     pub fn is_frame_wanted(&self, frame: i32) -> bool {
         if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))) {

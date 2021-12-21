@@ -140,7 +140,7 @@ impl<'a> VideoTranscoder<'a> {
         Ok(ost.codec().encoder().video()?)
     }
     
-    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, end_ms: Option<usize>) -> Result<Status, FFmpegError> {
+    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>) -> Result<Status, FFmpegError> {
         let mut status = Status::Continue;
         
         let mut decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
@@ -188,20 +188,21 @@ impl<'a> VideoTranscoder<'a> {
                 }
             }
 
-            if self.first_frame_ts.is_none() {
-                self.first_frame_ts = frame.timestamp();
-            }
-
             if let Some(mut ts) = frame.timestamp() {
                 let timestamp_us = ts.rescale(decoder.time_base(), (1, 1000000));
-                ts -= self.first_frame_ts.unwrap();
+                let timestamp_ms = timestamp_us as f64 / 1000.0;
 
-                if ts >= 0 {
-                    if end_ms.is_some() && timestamp_us / 1000 > end_ms.unwrap() as i64 {
+                if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
+                    if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
                         status = Status::Finish;
                         break;
                     }
 
+                    if self.first_frame_ts.is_none() {
+                        self.first_frame_ts = frame.timestamp();
+                    }
+                    ts -= self.first_frame_ts.unwrap();
+        
                     let frame_timestamp = frame.timestamp();
                     let frame_color_primaries = frame.color_primaries();
                     let frame_color_range = frame.color_range();

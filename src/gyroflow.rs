@@ -19,15 +19,13 @@ use ui::theme::Theme;
 
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
-
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
-// - Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // - Port Aphobius 2.0
-// - Figure out what to do with the console output window/log
 
 // TODO: more smoothing algorithms
 
+// TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // TODO: base all frames on timestamps, build a mapping frame->timestamp
 // TODO: wgpu convert to using textures
 // TODO: exporting and loading .gyroflow
@@ -74,6 +72,13 @@ cpp! {{
 }}
 
 fn entry() {
+    #[cfg(target_os = "windows")]
+    /*if std::env::args().any(|x| x == "--console")*/ {
+        unsafe {
+            winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS);
+        }
+    }
+
     simplelog::TermLogger::init(simplelog::LevelFilter::Debug, simplelog::ConfigBuilder::new()
         .add_filter_ignore_str("mp4parse")
         .add_filter_ignore_str("wgpu")
@@ -82,13 +87,6 @@ fn entry() {
         .build(), simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
 
     qmetaobject::log::init_qt_to_rust();
-
-    #[cfg(target_os = "windows")]
-    /*if std::env::args().any(|x| x == "--console")*/ {
-        unsafe {
-            winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS);
-        }
-    }
 
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();

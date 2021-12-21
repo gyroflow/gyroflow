@@ -76,8 +76,8 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
     proc.video.hw_device_type = encoder.2;
     log::debug!("proc.video_codec: {:?}", &proc.video_codec);
 
-    if trim_start > 0.0 { proc.start_ms = Some((trim_start * duration_ms) as usize); }
-    if trim_end   < 1.0 { proc.end_ms   = Some((trim_end   * duration_ms) as usize); }
+    if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
+    if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
 
     match proc.video_codec.as_deref() {
         Some("prores_ks") => {
@@ -106,6 +106,8 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
         proc.audio_codec = codec::Id::None;
     }
 
+    log::debug!("start_ms: {}, render_duration: {}, render_frame_count: {}", start_ms, render_duration, render_frame_count);
+
     let mut planes = Vec::<Box<dyn FnMut(usize, &mut Video, &mut Video, usize)>>::new();
 
     let progress2 = progress.clone();
@@ -114,6 +116,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
         let process_frame = ((((timestamp_us as f64 / 1000.0) - start_ms as f64) / render_duration) * render_frame_count as f64).round() as usize + 1;
         //let absolute_frame_id = crate::util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize;
         //let process_frame = crate::util::timestamp_to_frame((timestamp_us as f64 / 1000.0) - start_ms as f64, fps) as usize;
+        log::debug!("process_frame: {}, absolute_frame: {}, timestamp_us: {}", process_frame, absolute_frame_id, timestamp_us);
 
         let output_frame = output_frame.unwrap();
 
