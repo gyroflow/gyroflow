@@ -119,28 +119,34 @@ impl PoseEstimator {
         let results = self.sync_results.clone();
         frames_to_process.par_iter().for_each(move |frame| {
             let l = results.read();
-            let curr = l.get(frame).unwrap();
-            if curr.rotation.is_none() {
-                let curr = curr.item.clone();
-                let next = l.get(&(frame + every_nth_frame)).unwrap().item.clone();
-                let (focal, principal) = *self.lens_params.read();
+            if let Some(curr) = l.get(frame) {
+                if curr.rotation.is_none() {
+                    let curr = curr.item.clone();
+                    if let Some(next) = l.get(&(frame + every_nth_frame)) {
+                        let next = next.item.clone();
+                        let (focal, principal) = *self.lens_params.read();
 
-                // Unlock the mutex for estimate_pose
-                drop(l);
+                        // Unlock the mutex for estimate_pose
+                        drop(l);
 
-                let r = match (curr, next) {
-                    #[cfg(feature = "use-opencv")]
-                    (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, focal, principal) }
-                    (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, focal, principal) }
-                    _ => None
-                };
+                        let r = match (curr, next) {
+                            #[cfg(feature = "use-opencv")]
+                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, focal, principal) }
+                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, focal, principal) }
+                            _ => None
+                        };
 
-                if let Some(rot) = r {
-                    let mut l = results.write(); 
-                    let mut x = l.get_mut(frame).unwrap();
-                    x.rotation = Some(rot);
-                    let rotvec = rot.scaled_axis() * fps;
-                    x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
+                        if let Some(rot) = r {
+                            let mut l = results.write(); 
+                            if let Some(x) = l.get_mut(frame) {
+                                x.rotation = Some(rot);
+                                let rotvec = rot.scaled_axis() * fps;
+                                x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
+                            } else {
+                                log::warn!("Failed to get frame {}", frame);
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -220,9 +226,9 @@ impl PoseEstimator {
         }
         img
     }
-    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> GrayImage {
+    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
         // TODO: maybe a better way than using stride as width?
-        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec()).unwrap()
+        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
     }
     pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -278,14 +284,16 @@ impl PoseEstimator {
                                 prev + (next - prev) * ratio
                             }
 
-                            let prev_euler = prev_existing.1.euler.as_ref().unwrap();
-                            let next_euler = next_existing.1.euler.as_ref().unwrap();
-                            eul = Some((
-                                interpolate(prev_euler.0, next_euler.0, ratio),
-                                interpolate(prev_euler.1, next_euler.1, ratio),
-                                interpolate(prev_euler.2, next_euler.2, ratio),
-                            ));
-                            update_eulers.insert(*k, eul);
+                            if let Some(prev_euler) = prev_existing.1.euler.as_ref() {
+                                if let Some(next_euler) = next_existing.1.euler.as_ref() {
+                                    eul = Some((
+                                        interpolate(prev_euler.0, next_euler.0, ratio),
+                                        interpolate(prev_euler.1, next_euler.1, ratio),
+                                        interpolate(prev_euler.2, next_euler.2, ratio),
+                                    ));
+                                    update_eulers.insert(*k, eul);
+                                }
+                            }
                         }
                     }
                 }
@@ -315,7 +323,7 @@ impl PoseEstimator {
         if lpf > 0.0 && frame_count > 0 && duration_ms > 0.0 {
             let sample_rate = frame_count as f64 / (duration_ms / 1000.0);
             if let Err(e) = crate::filtering::Lowpass::filter_gyro_forward_backward(lpf, sample_rate, &mut vec) {
-                eprintln!("Filter error {:?}", e);
+                log::error!("Filter error {:?}", e);
             }
         }
 
@@ -389,7 +397,7 @@ impl AutosyncProcess {
         }).collect();
 
         let frame_ranges: Vec<(usize, usize)> = ranges.iter().map(|(from, to)| (stab.frame_at_timestamp(*from as f64, fps), stab.frame_at_timestamp(*to as f64, fps))).collect();
-        dbg!(&frame_ranges);
+        log::debug!("frame_ranges: {:?}", &frame_ranges);
         let mut frame_status = HashMap::<usize, bool>::new();
         for x in &frame_ranges {
             for frame in x.0..x.1-1 {
@@ -471,25 +479,29 @@ impl AutosyncProcess {
                     total_detected_frames.fetch_add(1, SeqCst);
                     return;
                 }
-                estimator.detect_features(frame as usize, method, img);
-                total_detected_frames.fetch_add(1, SeqCst);
+                if let Some(img) = img {
+                    estimator.detect_features(frame as usize, method, img);
+                    total_detected_frames.fetch_add(1, SeqCst);
 
-                if frame % 7 == 0 {
-                    estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
-                    estimator.recalculate_gyro_data(frame_count, duration_ms, fps, false);
-                }
-
-                let processed_frames = estimator.processed_frames(current_range.0..current_range.1);
-                for x in processed_frames { frame_status.write().insert(x, true); }
-
-                if total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
-                    if let Some(cb) = &progress_cb {
-                        let l = frame_status.read();
-                        let total = l.len();
-                        let ready = l.iter().filter(|e| *e.1).count();
-                        drop(l);
-                        cb(ready, total);
+                    if frame % 7 == 0 {
+                        estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
+                        estimator.recalculate_gyro_data(frame_count, duration_ms, fps, false);
                     }
+
+                    let processed_frames = estimator.processed_frames(current_range.0..current_range.1);
+                    for x in processed_frames { frame_status.write().insert(x, true); }
+
+                    if total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
+                        if let Some(cb) = &progress_cb {
+                            let l = frame_status.read();
+                            let total = l.len();
+                            let ready = l.iter().filter(|e| *e.1).count();
+                            drop(l);
+                            cb(ready, total);
+                        }
+                    }
+                } else {
+                    log::warn!("Failed to get image {:?}", img);
                 }
             });
         }
@@ -499,7 +511,6 @@ impl AutosyncProcess {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        println!("finished OF");
         self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.fps);
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.fps, true);
 

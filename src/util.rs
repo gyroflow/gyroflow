@@ -6,35 +6,43 @@ pub fn timestamp_to_frame(ts: f64, fps: f64) -> i32 {
 }
 
 pub fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
-    let mut arr = QJsonArray::default();
+    let mut ret = QJsonArray::default();
     use simd_json::ValueAccess;
-    for param in v.as_array().unwrap() {
-        let mut map = QJsonObject::default();
-        for (k, v) in param.as_object().unwrap() {
-            match v {
-                simd_json::OwnedValue::Static(simd_json::StaticNode::F64(v)) => { map.insert(k, QJsonValue::from(*v)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::I64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::U64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
-                simd_json::OwnedValue::Static(simd_json::StaticNode::Bool(v)) => { map.insert(k, QJsonValue::from(*v)); },
-                simd_json::OwnedValue::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
-                _ => { println!("Unimplemented"); }
-            };
+    if let Some(arr) = v.as_array() {
+        for param in arr {
+            if let Some(obj) = param.as_object() {
+                let mut map = QJsonObject::default();
+                for (k, v) in obj {
+                    match v {
+                        simd_json::OwnedValue::Static(simd_json::StaticNode::F64(v)) => { map.insert(k, QJsonValue::from(*v)); },
+                        simd_json::OwnedValue::Static(simd_json::StaticNode::I64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
+                        simd_json::OwnedValue::Static(simd_json::StaticNode::U64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
+                        simd_json::OwnedValue::Static(simd_json::StaticNode::Bool(v)) => { map.insert(k, QJsonValue::from(*v)); },
+                        simd_json::OwnedValue::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
+                        _ => { ::log::warn!("Unimplemented"); }
+                    };
+                }
+                ret.push(QJsonValue::from(map));
+            }
         }
-        arr.push(QJsonValue::from(map));
     }
-    arr
+    ret
 }
 
 pub fn url_to_path(url: &str) -> &str {
     if url.starts_with("file://") {
         if cfg!(target_os = "windows") {
-            url.strip_prefix("file:///").unwrap()
+            if let Some(stripped) = url.strip_prefix("file:///") {
+                return stripped;
+            }
         } else {
-            url.strip_prefix("file://").unwrap()
+            if let Some(stripped) = url.strip_prefix("file://") {
+                return stripped;
+            }
         }
-    } else {
-        url
     }
+    url
+    
 }
 
 pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {

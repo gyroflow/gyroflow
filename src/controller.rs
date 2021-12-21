@@ -89,7 +89,7 @@ pub struct Controller {
     chart_data_changed: qt_signal!(),
 
     render: qt_method!(fn(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
-    render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize),
+    render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize, finished: bool),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
 
@@ -142,9 +142,9 @@ impl Controller {
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (fps, size) = {
+        let (fps, size, duration_ms, frame_count) = {
             let params = self.stabilizer.params.read(); 
-            (params.fps, params.size)
+            (params.fps, params.size, params.duration_ms, params.frame_count)
         };
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
@@ -163,7 +163,7 @@ impl Controller {
             } else {
                 let mut gyro = this.stabilizer.gyro.write();
                 for x in offsets {
-                    println!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                    ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                     gyro.set_offset((x.0 * 1000.0) as i64, x.1);
                 }
             }
@@ -201,8 +201,10 @@ impl Controller {
                 match FfmpegProcessor::from_file(&video_path, true) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                            let frame = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
-
+                            //let frame0 = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
+                            let frame = ((timestamp_us as f64 / 1000.0 / duration_ms) * frame_count as f64).round() as i32;
+                            //::log::debug!("frame1: {} ({:.5}), frame2: {} ({:.5})", frame0, (timestamp_us as f64 / 1000.0) * (fps / 1000.0), frame, ((timestamp_us as f64 / 1000.0 / duration_ms) * frame_count as f64));
+      
                             assert!(_output_frame.is_none());
 
                             if sync.is_frame_wanted(frame) {
@@ -259,7 +261,7 @@ impl Controller {
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue) {
         let s = util::url_to_path(&QString::from(url).to_string()).to_string();
         let stab = self.stabilizer.clone();
-        let filename = QString::from(s.split('/').last().unwrap());
+        let filename = QString::from(s.split('/').last().unwrap_or_default());
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -345,7 +347,7 @@ impl Controller {
                 let ratio = vid.videoHeight as f64 / h as f64;
                 let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
                 let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
-                println!("surface size: {}x{}", new_w, new_h);
+                ::log::info!("surface size: {}x{}", new_w, new_h);
 
                 self.stabilizer.pose_estimator.clear();
                 self.chart_data_changed();
@@ -406,7 +408,7 @@ impl Controller {
 
                 let ret = stab.process_pixels(frame as usize, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
                 
-                // println!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
+                // ::log::info!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {
                     (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                 } else {
@@ -462,22 +464,22 @@ impl Controller {
     fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         rendering::clear_log();
 
-        let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize)| {
-            this.render_progress(params.0, params.1, params.2);
+        let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize, bool)| {
+            this.render_progress(params.0, params.1, params.2, params.3);
         });
 
         let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
             arg.push_str("\n\n");
             arg.push_str(&rendering::get_log());
             this.error(QString::from(msg), QString::from(arg), QString::default());
-            this.render_progress(1.0, 0, 0);
+            this.render_progress(1.0, 0, 0, false);
         });
 
         let trim_ratio = trim_end - trim_start;
         let total_frame_count = self.stabilizer.params.read().frame_count;
         let video_path = self.video_path.clone();
 
-        progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize));
+        progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false));
 
         self.cancel_flag.store(false, SeqCst);
         let cancel_flag = self.cancel_flag.clone();

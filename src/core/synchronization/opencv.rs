@@ -19,7 +19,7 @@ impl ItemOpenCV {
     pub fn detect_features(_frame: usize, img: image::GrayImage) -> Self {
         let (w, h) = (img.width() as i32, img.height() as i32);
         let mut bytes = img.into_raw();
-        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
+        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, bytes.as_mut_ptr() as *mut c_void, w as usize) };
         
         // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
         
@@ -28,7 +28,11 @@ impl ItemOpenCV {
         //let inp = inp.get_umat(ACCESS_READ, UMatUsageFlags::USAGE_DEFAULT).unwrap();
         //let mut pts = UMat::new(UMatUsageFlags::USAGE_DEFAULT);
 
-        let _ = opencv::imgproc::good_features_to_track(&inp, &mut pts, 500, 0.01, 10.0, &Mat::default(), 3, false, 0.04);
+        if let Err(e) = inp.and_then(|inp| {
+            opencv::imgproc::good_features_to_track(&inp, &mut pts, 500, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
+        }) {
+            log::error!("OpenCV error {:?}", e);
+        }
 
         //let pts = pts.get_mat(ACCESS_READ).unwrap().clone();
         Self {
@@ -42,69 +46,93 @@ impl ItemOpenCV {
         self.features.rows() as usize
     }
     pub fn get_feature_at_index(&self, i: usize) -> (f32, f32) {
-        let pt = self.features.at::<Point2f>(i as i32).unwrap();
-        (pt.x, pt.y)
+        if let Ok(pt) = self.features.at::<Point2f>(i as i32) {
+            (pt.x, pt.y)
+        } else {
+            (0.0, 0.0)
+        }
     }
     
     pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
-        let a1_pts = Mat::from_slice(&pts1).unwrap();
-        let a2_pts = Mat::from_slice(&pts2).unwrap();
-        
-        let scaled_k = Mat::from_slice_2d(&[
-            [focal.x, 0.0, principal.x],
-            [0.0, focal.y, principal.y],
-            [0.0, 0.0, 1.0]
-        ]).unwrap();
 
-        // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default()).unwrap();
-        let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, opencv::calib3d::RANSAC, 0.999, 0.1, 1000, &mut Mat::default()).unwrap();
-    
-        let mut r1 = Mat::default();
-        let mut r2 = Mat::default();
-        let mut t = Mat::default();
-        let _ = opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t);
+        let result = || -> Result<Rotation3<f64>, opencv::Error> {
+            let a1_pts = Mat::from_slice(&pts1)?;
+            let a2_pts = Mat::from_slice(&pts2)?;
+            
+            let scaled_k = Mat::from_slice_2d(&[
+                [focal.x, 0.0, principal.x],
+                [0.0, focal.y, principal.y],
+                [0.0, 0.0, 1.0]
+            ])?;
+
+            // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default())?;
+            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, opencv::calib3d::RANSAC, 0.999, 0.1, 1000, &mut Mat::default())?;
         
-        let r1 = cv_to_rot2(r1);
-        let r2 = cv_to_rot2(r2);
-    
-        Some(if r1.angle() < r2.angle() {
-            r1
-        } else {
-            r2
-        })
+            let mut r1 = Mat::default();
+            let mut r2 = Mat::default();
+            let mut t = Mat::default();
+            opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
+            
+            let r1 = cv_to_rot2(r1)?;
+            let r2 = cv_to_rot2(r2)?;
+        
+            Ok(if r1.angle() < r2.angle() {
+                r1
+            } else {
+                r2
+            })
+        }();
+
+        match result {
+            Ok(res) => Some(res),
+            Err(e) => {
+                log::error!("OpenCV error: {:?}", e);
+                None
+            }
+        }
     }
 
     pub fn get_matched_features(&mut self, next: &mut Self) -> Option<(Vec<Point2f>, Vec<Point2f>)> {
         let (w, h) = self.size;
         if self.img_bytes.is_empty() || next.img_bytes.is_empty() || w <= 0 || h <= 0 { return None; }
 
-        let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
-        let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
-        
-        let a1_pts = &self.features;
-        //let a2_pts = a2.features;
-        
-        let mut a2_pts = Mat::default();
-        let mut status = Mat::default();
-        let mut err = Mat::default();
+        let result = || -> Result<(Vec<Point2f>, Vec<Point2f>), opencv::Error> {
+            let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }?;
+            let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }?;
+            
+            let a1_pts = &self.features;
+            //let a2_pts = a2.features;
+            
+            let mut a2_pts = Mat::default();
+            let mut status = Mat::default();
+            let mut err = Mat::default();
 
-        let _ = opencv::video::calc_optical_flow_pyr_lk(&a1_img, &a2_img, &a1_pts, &mut a2_pts, &mut status, &mut err, Size::new(21, 21), 3, TermCriteria::new(3/*count+eps*/,30,0.01).unwrap(), 0, 1e-4);
+            opencv::video::calc_optical_flow_pyr_lk(&a1_img, &a2_img, &a1_pts, &mut a2_pts, &mut status, &mut err, Size::new(21, 21), 3, TermCriteria::new(3/*count+eps*/,30,0.01)?, 0, 1e-4)?;
 
-        let mut pts1: Vec<Point2f> = Vec::new();
-        let mut pts2: Vec<Point2f> = Vec::new();
-        for i in 0..status.rows() {
-            if *status.at::<u8>(i).unwrap() == 1u8 {
-                let pt1 = a1_pts.at::<Point2f>(i).unwrap();
-                let pt2 = a2_pts.at::<Point2f>(i).unwrap();
-                if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
-                && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
-                    pts1.push(*pt1);
-                    pts2.push(*pt2);
+            let mut pts1: Vec<Point2f> = Vec::new();
+            let mut pts2: Vec<Point2f> = Vec::new();
+            for i in 0..status.rows() {
+                if *status.at::<u8>(i)? == 1u8 {
+                    let pt1 = a1_pts.at::<Point2f>(i)?;
+                    let pt2 = a2_pts.at::<Point2f>(i)?;
+                    if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
+                    && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
+                        pts1.push(*pt1);
+                        pts2.push(*pt2);
+                    }
                 }
             }
+            Ok((pts1, pts2))
+        }();
+
+        match result {
+            Ok(res) => Some(res),
+            Err(e) => {
+                log::error!("OpenCV error: {:?}", e);
+                None
+            }
         }
-        Some((pts1, pts2))
     }
     pub fn get_matched_features_pair(&mut self, next: &mut Self, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
         let pts = self.get_matched_features(next)?;
@@ -116,24 +144,24 @@ impl ItemOpenCV {
 }
 
 pub fn init() -> Result<(), opencv::Error> {
-    /*let opencl_have = opencv::core::have_opencl().unwrap();
+    /*let opencl_have = opencv::core::have_opencl()?;
     if opencl_have {
         opencv::core::set_use_opencl(true)?;
         let mut platforms = opencv::types::VectorOfPlatformInfo::new();
         opencv::core::get_platfoms_info(&mut platforms)?;
         for (platf_num, platform) in platforms.into_iter().enumerate() {
-            println!("Platform #{}: {}", platf_num, platform.name()?);
+            ::log::info!("Platform #{}: {}", platf_num, platform.name()?);
             for dev_num in 0..platform.device_number()? {
                 let mut dev = opencv::core::Device::default();
                 platform.get_device(&mut dev, dev_num)?;
-                println!("  OpenCL device #{}: {}", dev_num, dev.name()?);
-                println!("    vendor:  {}", dev.vendor_name()?);
-                println!("    version: {}", dev.version()?);
+                ::log::info!("  OpenCL device #{}: {}", dev_num, dev.name()?);
+                ::log::info!("    vendor:  {}", dev.vendor_name()?);
+                ::log::info!("    version: {}", dev.version()?);
             }
         }
     }
     let opencl_use = opencv::core::use_opencl()?;
-    println!(
+    ::log::info!(
         "OpenCL is {} and {}",
         if opencl_have { "available" } else { "not available" },
         if opencl_use { "enabled" } else { "disabled" },
@@ -141,13 +169,13 @@ pub fn init() -> Result<(), opencv::Error> {
     Ok(())
 }
 
-fn cv_to_rot2(r1: Mat) -> Rotation3<f64> {
+fn cv_to_rot2(r1: Mat) -> Result<Rotation3<f64>, opencv::Error> {
     if r1.typ() != opencv::core::CV_64FC1 {
-        return Rotation3::from_matrix_unchecked(nalgebra::Matrix3::from_element(0.0));
+        return Err(opencv::Error::new(0, "Invalid matrix type".into()));
     }
-    Rotation3::from_matrix_unchecked(nalgebra::Matrix3::new(
-        *r1.at_2d::<f64>(0, 0).unwrap(), *r1.at_2d::<f64>(0, 1).unwrap(), *r1.at_2d::<f64>(0, 2).unwrap(),
-        *r1.at_2d::<f64>(1, 0).unwrap(), *r1.at_2d::<f64>(1, 1).unwrap(), *r1.at_2d::<f64>(1, 2).unwrap(),
-        *r1.at_2d::<f64>(2, 0).unwrap(), *r1.at_2d::<f64>(2, 1).unwrap(), *r1.at_2d::<f64>(2, 2).unwrap()
-    ))
+    Ok(Rotation3::from_matrix_unchecked(nalgebra::Matrix3::new(
+        *r1.at_2d::<f64>(0, 0)?, *r1.at_2d::<f64>(0, 1)?, *r1.at_2d::<f64>(0, 2)?,
+        *r1.at_2d::<f64>(1, 0)?, *r1.at_2d::<f64>(1, 1)?, *r1.at_2d::<f64>(1, 2)?,
+        *r1.at_2d::<f64>(2, 0)?, *r1.at_2d::<f64>(2, 1)?, *r1.at_2d::<f64>(2, 2)?
+    )))
 }

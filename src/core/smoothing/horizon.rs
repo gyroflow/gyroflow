@@ -90,7 +90,7 @@ impl SmoothingAlgorithm for HorizonLock {
             "roll" => self.roll = val,
             "pitch" => self.pitch = val,
             "yaw" => self.yaw = val,
-            _ => eprintln!("Invalid parameter name: {}", name)
+            _ => log::error!("Invalid parameter name: {}", name)
         }
     }
     fn get_parameters_json(&self) -> simd_json::owned::Value {

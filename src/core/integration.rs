@@ -37,12 +37,12 @@ impl GyroIntegrator for MadgwickIntegrator {
 
                     match ahrs.update(&gyro, &accl, &magn) {
                         Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
                     }
                 } else {
                     match ahrs.update_imu(&gyro, &accl) {
                         Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
                     }
                 }
                 prev_time = v.timestamp_ms;
@@ -80,12 +80,12 @@ impl GyroIntegrator for MahonyIntegrator {
 
                     match ahrs.update(&gyro, &accl, &magn) {
                         Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
                     }
                 } else {
                     match ahrs.update_imu(&gyro, &accl) {
                         Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => eprintln!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
                     }
                 }
                 prev_time = v.timestamp_ms;

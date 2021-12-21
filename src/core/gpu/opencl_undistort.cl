@@ -43,6 +43,8 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     int x = get_global_id(0);
     int y = get_global_id(1);
 
+    if (!undistortion_params || params_count - 1 < 1) return;
+
     float2 f = vload2(0, &undistortion_params[0]);
     float2 c = vload2(0, &undistortion_params[2]);
     float4 k = vload4(0, &undistortion_params[4]);
@@ -60,10 +62,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             float2 pos = (float2)(_x, _y) / _w;
 
             float r = length(pos);
-            /*if (r > 3.0) { // TODO check this
-                dstptr[x + y*width] = convert_uchar4(bg);
-                return;
-            }*/
+            
             float theta = atan(r);
 
             float theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;

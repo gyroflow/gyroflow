@@ -80,7 +80,8 @@ void main() {
         finalColor = sum;
     }
 
-    // Inefficient, but what can you do
+    // Inefficient
+    // We can do this in another compute layer, after undistortion
     for (int i = 0; i < features.pixels.length(); ++i) {
         if (ivec2(features.pixels[i].xy) == texPos || ivec2(features.pixels[i].zw) == texPos) {
             finalColor = vec4(0.047, 1.0, 0.0, 1.0);

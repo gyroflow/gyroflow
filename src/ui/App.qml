@@ -132,12 +132,10 @@ Rectangle {
                     opacity: enabled? 1.0 : 0.6;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
-                    property bool successShown: false;
 
                     model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
                     function doRender() {
-                        successShown = false;
                         controller.render(
                             exportSettings.outCodec, 
                             exportSettings.outCodecOptions, 
@@ -180,13 +178,12 @@ Rectangle {
                     
                     Connections {
                         target: controller;
-                        function onRender_progress(progress, frame, total_frames) {
-                            videoArea.videoLoader.active = progress < 1;
+                        function onRender_progress(progress, frame, total_frames, finished) {
+                            videoArea.videoLoader.active = !finished;
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
                             videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
                             videoArea.videoLoader.cancelable = true;
-                            if (frame > 0 && frame == total_frames && !renderBtn.successShown) {
-                                renderBtn.successShown = true;
+                            if (finished) {
                                 messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + outputFile.text + "</b>"), [
                                     { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(outputFile.text) },
                                     { text: qsTr("Ok") }
@@ -254,7 +251,7 @@ Rectangle {
                 const obj = JSON.parse(xhr.responseText.toString());
                 if (obj && obj.length) {
                     const latestVersion = obj[0].name.replace("v", "");
-                    console.log('Latest version:', latestVersion, '. Current: ', version);
+                    console.info('Latest version:', latestVersion, '. Current: ', version);
                     if (version != latestVersion) {
                         const body = obj[0].body? "\n\n" + obj[0].body : "";
                         messageBox(Modal.Info, qsTr("There's a newer version available.") + body, [ { text: qsTr("Download"), clicked: () => Qt.openUrlExternally("https://github.com/AdrianEddy/gyroflow/releases") }, { text: qsTr("Close") }])

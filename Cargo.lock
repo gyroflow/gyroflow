@@ -1039,7 +1039,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "0.0.1"
+version = "0.4.0"
 dependencies = [
  "bytemuck",
  "cpp",
@@ -1048,6 +1048,7 @@ dependencies = [
  "ffmpeg-next",
  "gyroflow-core",
  "lazy_static",
+ "log",
  "nalgebra",
  "ndk-sys",
  "parking_lot",
@@ -1055,12 +1056,14 @@ dependencies = [
  "qml-video-rs",
  "qttypes",
  "simd-json",
+ "simplelog",
+ "winapi",
  "winres",
 ]
 
 [[package]]
 name = "gyroflow-core"
-version = "0.0.1"
+version = "0.4.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -1081,6 +1084,7 @@ dependencies = [
  "fastrand",
  "image",
  "lazy_static",
+ "log",
  "nalgebra",
  "ocl",
  "opencv",
@@ -2002,7 +2006,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#1d1f73717a9ecc8a0f6be7c57e784975eaff1249"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#8322a32eaff73375aa6bd619bac33239a56b9399"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2380,6 +2384,17 @@ name = "simdutf8"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c970da16e7c682fa90a261cf0724dee241c9f7831635ecc4e988ae8f3b505559"
+
+[[package]]
+name = "simplelog"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecabc0118918611790b8615670ab79296272cbe09496b6884b02b1e929c20886"
+dependencies = [
+ "chrono",
+ "log",
+ "termcolor",
+]
 
 [[package]]
 name = "slotmap"

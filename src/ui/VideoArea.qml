@@ -103,11 +103,10 @@ Item {
                     vidInfo.loader = false;
                     timeline.trimStart = 0.0;
                     timeline.trimEnd = 1.0;
-                    // for (var i in md) console.log(i, md[i]);
+                    // for (var i in md) console.info(i, md[i]);
                 }
                 property bool errorShown: false;
                 onMetadataChanged: {
-                    console.log('metadata changed', vid.frameCount);
                     if (vid.frameCount > 0) {
                         // Trigger seek to buffer the video frames
                         vid.currentFrame++;

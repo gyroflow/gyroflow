@@ -8,20 +8,18 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initi
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
+            let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                if x.timestamp_ms >= of_item[0].timestamp_ms - (search_size / 2.0) && x.timestamp_ms <= of_item.last().unwrap().timestamp_ms + (search_size / 2.0) {
+                if x.timestamp_ms >= of_item[0].timestamp_ms - (search_size / 2.0) && x.timestamp_ms <= last_of_timestamp + (search_size / 2.0) {
                     Some(x.clone())
                 } else {
                     None
                 }
             }).collect();
 
-            println!("OF item timestamp range: {}..{}", of_item.first().unwrap().timestamp_ms, of_item.last().unwrap().timestamp_ms);
-            println!("Gyro item timestamp range: {}..{}", gyro_item.first().unwrap().timestamp_ms, gyro_item.last().unwrap().timestamp_ms);
-
             let max_angle = get_max_angle(&of_item);
             if max_angle < 6.0 {
-                println!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
+                ::log::info!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
                 continue;
             }
 

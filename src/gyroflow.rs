@@ -1,5 +1,5 @@
 #![recursion_limit="4096"]
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 use cpp::*;
 use qmetaobject::*;
@@ -18,9 +18,6 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::theme::Theme;
 
 // Things to do before first public preview:
-// - wgpu undistortion add support for different plane types
-
-// - Some basic error handling, check for all unwrap()'s
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
 // - Setup CI for packaging for Windows
@@ -31,6 +28,8 @@ use ui::theme::Theme;
 
 // TODO: more smoothing algorithms
 
+// TODO: base all frames on timestamps, build a mapping frame->timestamp
+// TODO: wgpu convert to using textures
 // TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
 // TODO: default lens profile
@@ -75,6 +74,22 @@ cpp! {{
 }}
 
 fn entry() {
+    simplelog::TermLogger::init(simplelog::LevelFilter::Debug, simplelog::ConfigBuilder::new()
+        .add_filter_ignore_str("mp4parse")
+        .add_filter_ignore_str("wgpu")
+        .add_filter_ignore_str("naga")
+        .add_filter_ignore_str("akaze")
+        .build(), simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
+
+    qmetaobject::log::init_qt_to_rust();
+
+    #[cfg(target_os = "windows")]
+    /*if std::env::args().any(|x| x == "--console")*/ {
+        unsafe {
+            winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS);
+        }
+    }
+
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));

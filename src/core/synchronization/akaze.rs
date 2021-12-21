@@ -1,7 +1,7 @@
 use akaze::Akaze;
 use arrsac::Arrsac;
 use bitarray::{BitArray, Hamming};
-use image::EncodableLayout;
+//use image::EncodableLayout;
 use nalgebra::{Point2, Vector2, Rotation3};
 use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
 use rand_xoshiro::Xoshiro256PlusPlus;
@@ -12,9 +12,9 @@ use space::{Knn, LinearKnn};
 
 const LOWES_RATIO: f32 = 0.5;
 
-lazy_static::lazy_static! {
-    static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().num_threads(2).build().unwrap();
-}
+// lazy_static::lazy_static! {
+//     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().num_threads(2).build().unwrap();
+// }
 
 pub type Descriptor = BitArray<64>;
 pub type Match = FeatureMatch;
@@ -25,9 +25,15 @@ pub struct ItemAkaze {
     features: DetectedFeatures
 }
 
+// TODO: add caching checkbox to the UI
+
 impl ItemAkaze {
-    pub fn detect_features(frame: usize, img: image::GrayImage) -> Self {
-        let mut hasher = crc32fast::Hasher::new();
+    pub fn detect_features(_frame: usize, img: image::GrayImage) -> Self {
+        let mut akz = Akaze::new(0.0007);
+        akz.maximum_features = 500;
+        let features = akz.extract(&image::DynamicImage::ImageLuma8(img));
+
+        /*let mut hasher = crc32fast::Hasher::new();
         hasher.update(img.as_bytes());
         let frame_path = format!("cache/{}-{}.bin", frame, hasher.finalize());
 
@@ -44,7 +50,7 @@ impl ItemAkaze {
             });
 
             features
-        };
+        };*/
 
         Self { features }
     }
@@ -89,7 +95,7 @@ impl ItemAkaze {
                 }*/
             }
         }
-        println!("couldn't find model");
+        ::log::warn!("couldn't find model");
         None
     }
 
@@ -111,7 +117,7 @@ impl ItemAkaze {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+/*#[derive(serde::Serialize, serde::Deserialize)]
 struct SerializedKeypoint {
     pub point: (f32, f32),
     pub response: f32,
@@ -143,4 +149,4 @@ fn deserialize_features(x: &[u8]) -> DetectedFeatures {
         val.0.into_iter().map(SerializedKeypoint::into).collect(), 
         val.1.into_iter().map(|x| { let mut a = [0u8; 64]; a.copy_from_slice(&x); BitArray::<64>::new(a) }).collect(), 
     )
-}
+}*/

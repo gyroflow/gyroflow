@@ -4,6 +4,7 @@ pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
 
 pub use self::ffmpeg_processor::FfmpegProcessor;
+pub use self::ffmpeg_processor::FFmpegError;
 use crate::core::{StabilizationManager, undistortion::*};
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
 use std::ffi::c_void;
@@ -12,7 +13,7 @@ use std::sync::{Arc, atomic::AtomicBool};
 use parking_lot::RwLock;
 use crate::util;
 
-pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> name, is_gpu
+pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
     if use_gpu {
         match codec {
@@ -47,10 +48,10 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     }
 }
 
-pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), Error>
-    where F: Fn((f64, usize, usize)) + Send + Sync + Clone
+pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
+    where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone
 {
-    dbg!(ffmpeg_hw::supported_gpu_backends());
+    log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
     // decoders: h264 h264_qsv h264_cuvid / encoders: libx264 h264_amf h264_nvenc h264_qsv
     // decoders: hevc hevc_qsv hevc_cuvid / encoders: libx265 hevc_amf hevc_nvenc hevc_qsv
@@ -62,18 +63,19 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     let duration_ms = params.duration_ms;
 
+    let render_duration = params.duration_ms * trim_ratio;
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
 
     drop(params);
 
     let mut proc = FfmpegProcessor::from_file(&video_path, true)?;
 
-    dbg!(&proc.gpu_device);
+    log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&codec, use_gpu));
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
     proc.video.hw_device_type = encoder.2;
-    dbg!(&proc.video_codec);
+    log::debug!("proc.video_codec: {:?}", &proc.video_codec);
 
     if trim_start > 0.0 { proc.start_ms = Some((trim_start * duration_ms) as usize); }
     if trim_end   < 1.0 { proc.end_ms   = Some((trim_end   * duration_ms) as usize); }
@@ -109,8 +111,10 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     let progress2 = progress.clone();
     proc.on_frame(move |timestamp_us, input_frame, output_frame, converter| {
-        let absolute_frame_id = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize;
-        let process_frame = util::timestamp_to_frame((timestamp_us as f64 / 1000.0) - start_ms as f64, fps) as usize;
+        let absolute_frame_id = ((timestamp_us as f64 / 1000.0 / duration_ms) * total_frame_count as f64).round() as usize;
+        let process_frame = ((((timestamp_us as f64 / 1000.0) - start_ms as f64) / render_duration) * render_frame_count as f64).round() as usize + 1;
+        //let absolute_frame_id = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize;
+        //let process_frame = util::timestamp_to_frame((timestamp_us as f64 / 1000.0) - start_ms as f64, fps) as usize;
 
         let output_frame = output_frame.unwrap();
 
@@ -177,7 +181,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
                     );
                 },
                 format => { // All other convert to YUV444P16LE
-                    println!("Unknown format {:?}, converting to YUV444P16LE", format);
+                    ::log::info!("Unknown format {:?}, converting to YUV444P16LE", format);
                     // Go through 4:4:4 because of even plane dimensions
                     converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
                         create_planes_proc!(planes, 
@@ -190,15 +194,14 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
             }
         }
         if planes.is_empty() {
-            eprintln!("Unknown pixel format {:?}", input_frame.format());
-            return Err(Error::Other { errno: 0 });
+            return Err(FFmpegError::UnknownPixelFormat(input_frame.format()));
         }
 
         let mut undistort_frame = |frame: &mut Video, out_frame: &mut Video| {
             for (i, cb) in planes.iter_mut().enumerate() {
                 (*cb)(absolute_frame_id, frame, out_frame, i);
             }
-            progress2(((process_frame + 1) as f64 / render_frame_count as f64, process_frame + 1, render_frame_count));
+            progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count, false));
         };
 
         match input_frame.format() {
@@ -216,7 +219,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     proc.render(&output_path, (output_width as u32, output_height as u32), if bitrate > 0.0 { Some(bitrate) } else { None }, cancel_flag)?;
 
-    progress((1.0, render_frame_count, render_frame_count));
+    progress((1.0, render_frame_count, render_frame_count, true));
 
     Ok(())
 }
@@ -263,13 +266,13 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
     }
 }
 
-pub fn append_log(msg: &str) { eprintln!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
+pub fn append_log(msg: &str) { ::log::warn!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
 pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
 pub fn clear_log() { FFMPEG_LOG.write().clear() }
 
 /*
 pub fn test() {
-    dbg!(FfmpegProcessor::supported_gpu_backends());
+    log::debug!("FfmpegProcessor::supported_gpu_backends: {:?}", FfmpegProcessor::supported_gpu_backends());
 
     let mut stab = StabilizationManager::default();
     let duration_ms = 15015.0;
@@ -293,7 +296,7 @@ pub fn test() {
     render(
         stab, 
         move |params: (f64, usize, usize)| {
-            println!("frame {}/{}", params.1, params.2);
+            ::log::debug!("frame {}/{}", params.1, params.2);
         }, 
         "E:/clips/GoPro/rs/C0752.MP4".into(),
         "x265".into(),
@@ -316,7 +319,7 @@ pub fn test_decode() {
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
     proc.on_frame(move |timestamp_us, input_frame, converter| {
         let small_frame = converter.scale(input_frame, Pixel::GRAY8, 1280, 720);
-        println!("ts: {} width: {}", timestamp_us, small_frame.plane_width(0));
+        ::log::debug!("ts: {} width: {}", timestamp_us, small_frame.plane_width(0));
 
         /*let (w, h) = (small_frame.plane_width(0) as i32, small_frame.plane_height(0) as i32);
         let mut bytes = small_frame.data_mut(0);

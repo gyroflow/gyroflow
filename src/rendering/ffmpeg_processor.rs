@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
+use std::error;
 
-use ffmpeg_next::{ ffi, codec, encoder, format, frame, log, media, Dictionary, Rational, Error, Stream, rescale, rescale::Rescale };
+use ffmpeg_next::{ ffi, codec, encoder, format, frame, log, media, Dictionary, Rational, Stream, rescale, rescale::Rescale };
 
 use super::*;
 use super::ffmpeg_video::*;
@@ -31,8 +32,58 @@ pub enum Status {
     Finish
 }
 
+#[derive(Debug)]
+pub enum FFmpegError {
+    EncoderNotFound,
+    DecoderNotFound,
+    NoSupportedFormats,
+    NoOutputContext,
+    EncoderConverterEmpty,
+    ConverterEmpty,
+    FrameEmpty,
+    NoHWTransferFormats,
+    FromHWTransferError(i32),
+    ToHWTransferError(i32),
+    NoFramesContext,
+    ToHWBufferError(i32),
+    UnknownPixelFormat(format::Pixel),
+    InternalError(ffmpeg_next::Error),
+}
+
+impl std::fmt::Display for FFmpegError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            FFmpegError::EncoderNotFound             => write!(f, "Encoder not found"),
+            FFmpegError::DecoderNotFound             => write!(f, "Decoder not found"),
+            FFmpegError::NoSupportedFormats          => write!(f, "No supported formats"),
+            FFmpegError::NoOutputContext             => write!(f, "No output context"),
+            FFmpegError::EncoderConverterEmpty       => write!(f, "Encoder converter is null"),
+            FFmpegError::ConverterEmpty              => write!(f, "Converter is null"),
+            FFmpegError::FrameEmpty                  => write!(f, "Frame is null"),
+            FFmpegError::NoHWTransferFormats         => write!(f, "No hardware transfer formats"),
+            FFmpegError::FromHWTransferError(i)  => write!(f, "Error transferring frame from the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
+            FFmpegError::ToHWTransferError(i)    => write!(f, "Error transferring frame to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
+            FFmpegError::ToHWBufferError(i)      => write!(f, "Error getting HW transfer buffer to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
+            FFmpegError::NoFramesContext             => write!(f, "Empty hw frames context"),
+            FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
+            FFmpegError::InternalError(e)      => write!(f, "ffmpeg error: {:?}", e),
+        }
+    }
+}
+impl error::Error for FFmpegError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        match *self {
+            FFmpegError::InternalError(ref e) => Some(e),
+            _ => None
+        }
+    }
+}
+impl From<ffmpeg_next::Error> for FFmpegError {
+    fn from(err: ffmpeg_next::Error) -> FFmpegError { FFmpegError::InternalError(err) }
+}
+
 impl<'a> FfmpegProcessor<'a> {
-    pub fn from_file(path: &str, gpu_decoding: bool) -> Result<Self, Error> {
+    pub fn from_file(path: &str, mut gpu_decoding: bool) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
         log::set_level(log::Level::Info);
 
@@ -62,10 +113,11 @@ impl<'a> FfmpegProcessor<'a> {
             super::append_log(&format!("Selected HW backend {:?} with format {:?}\n", hw.0, hw.2));
             // --------------------------- GPU ---------------------------
         }
+        gpu_decoding = !hw_backend.is_empty();
 
         Ok(Self {
             gpu_decoding,
-            gpu_device: Some(hw_backend/*format!("{:?}", hw_type)*/), // TODO: Should be None if empty
+            gpu_device: if !gpu_decoding { None } else { Some(hw_backend) },
             video_codec: None,
 
             audio_codec: codec::Id::AAC,
@@ -77,6 +129,7 @@ impl<'a> FfmpegProcessor<'a> {
         
             video: VideoTranscoder {
                 gpu_encoding: true,
+                gpu_decoding,
                 input_index: stream.index(),
                 codec_options: Dictionary::new(),
                 ..VideoTranscoder::default()
@@ -86,7 +139,7 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
+    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
@@ -180,7 +233,7 @@ impl<'a> FfmpegProcessor<'a> {
                     packet.rescale_ts(stream.time_base(), decoder.time_base());
                     if let Err(err) = decoder.send_packet(&packet) {
                         if !any_encoded {
-                            return Err(err);
+                            return Err(err.into());
                         }
                     }
                 }
@@ -240,7 +293,7 @@ impl<'a> FfmpegProcessor<'a> {
         Ok(())
     }
 
-    pub fn start_decoder_only(&mut self, mut ranges: Vec<(usize, usize)>, cancel_flag: Arc<AtomicBool>) -> Result<(), Error> {
+    pub fn start_decoder_only(&mut self, mut ranges: Vec<(usize, usize)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         if !ranges.is_empty() {
             let next_range = ranges.remove(0);
             self.start_ms = Some(next_range.0);
@@ -279,9 +332,9 @@ impl<'a> FfmpegProcessor<'a> {
                     packet.rescale_ts(stream.time_base(), decoder.time_base());
 
                     if let Err(err) = decoder.send_packet(&packet) {
-                        eprintln!("Decoder error {:?}", err);
+                        ::log::error!("Decoder error {:?}", err);
                         if !any_encoded {
-                            return Err(err);
+                            return Err(err.into());
                         }
                     }
                     match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.end_ms) {
@@ -292,9 +345,9 @@ impl<'a> FfmpegProcessor<'a> {
                             }
                         },
                         Err(e) => {
-                            eprintln!("Encoder error {:?}", e);
+                            ::log::error!("Encoder error {:?}", e);
                             if !any_encoded {
-                                return Err(e);
+                                return Err(e.into());
                             }
                         }
                     }
@@ -318,10 +371,9 @@ impl<'a> FfmpegProcessor<'a> {
         Ok(())
     }
 
-    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video::Converter) -> Result<(), Error> + 'a {
+    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video::Converter) -> Result<(), FFmpegError> + 'a {
         self.video.on_frame_callback = Some(Box::new(cb));
     }
-
 }
 
 /* unsafe extern "C" fn get_hw_format(ctx: *mut ffi::AVCodecContext, pix_fmts: *const ffi::AVPixelFormat) -> ffi::AVPixelFormat {
@@ -337,6 +389,6 @@ impl<'a> FfmpegProcessor<'a> {
         i += 1;
     }
 
-    eprintln!("Failed to get HW surface format.");
+    ::log::error!("Failed to get HW surface format.");
     ffi::AVPixelFormat::AV_PIX_FMT_NONE
 } */

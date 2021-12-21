@@ -1,6 +1,6 @@
 [package]
 name = "gyroflow-core"
-version = "0.0.1"
+version = "0.4.0"
 authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
 edition = "2021"
 
@@ -48,6 +48,8 @@ opencv = { version = "0.61", features = ["clang-runtime"], optional = true }
 wgpu = "*"
 bytemuck = "*"
 pollster = "*"
+
+log = "*"
 
 ocl = { version = "*", optional = true }
 

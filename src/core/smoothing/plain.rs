@@ -15,7 +15,7 @@ impl SmoothingAlgorithm for Plain {
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
             "time_constant" => self.time_constant = val,
-            _ => eprintln!("Invalid parameter name: {}", name)
+            _ => log::error!("Invalid parameter name: {}", name)
         }
     }
     fn get_parameters_json(&self) -> simd_json::owned::Value {

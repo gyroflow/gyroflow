@@ -904,7 +904,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "0.0.1"
+version = "0.4.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -925,6 +925,7 @@ dependencies = [
  "fastrand",
  "image",
  "lazy_static",
+ "log",
  "nalgebra",
  "ocl",
  "opencv",
@@ -1493,9 +1494,9 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "1.13.0"
+version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05499f3756671c15885fee9034446956fff3f243d6077b91e5767df161f766b3"
+checksum = "19e64526ebdee182341572e50e9ad03965aa510cd94427a4549448f285e957a1"
 dependencies = [
  "hermit-abi",
  "libc",
@@ -2382,7 +2383,8 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b97cd781ff044d6d697b632a2e212032c2e957d1afaa21dbf58069cbb8f78567"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2402,7 +2404,8 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "659a371d93a66fd0c15f0a5a730d0877416c82e0c539fd46741673a49f02afad"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2424,7 +2427,8 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1abbd51f4f3d61db9c02dd776f643437823b6fa85e8642b4bb6d278b74335fc1"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2461,7 +2465,8 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#54f20bedef2db9f1c7806cb0878feb8f48206758"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "549533d9e1cdd4b4cda7718d33ff500fc4c34b5467b71d76b547ae0324f3b2a2"
 dependencies = [
  "bitflags",
 ]

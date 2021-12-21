@@ -127,7 +127,7 @@ impl AdaptiveZoom {
                .fold((0.0, 0), |max, (ind, &val)| if val > max.0 { (val, ind) } else { max })
     }
 
-    fn find_fov(&self, center: Point2D, polygon: &[Point2D], output_dim: (usize, usize)) -> f64 {
+    fn find_fov(&self, center: Point2D, polygon: &[Point2D], output_dim: (usize, usize)) -> Option<f64> {
         let num_int_points = 20;
         // let (original_width, original_height) = self.calib_dimension;
         let (fcorr, idx) = self.find_fcorr(center, polygon, output_dim);
@@ -157,7 +157,11 @@ impl AdaptiveZoom {
                     .degree(2) // 1 - linear, 2 - quadratic, 3 - cubic
                     .normalized()
                     .constant::<3>()
-                    .build().unwrap();
+                    .build();
+        if let Err(ref err) = bspline {
+            log::error!("{:?}", err);
+        }
+        let bspline = bspline.ok()?;
 
         // let alpha: Vec<f64> = (0..numIntPoints).map(|i| i as f64 * (1.0 / numIntPoints as f64)).collect();
         let interpolated_points: Vec<Point2D> = bspline.take(num_int_points).collect();
@@ -169,7 +173,7 @@ impl AdaptiveZoom {
         // plt.plot(interpolated_points[:,0], interpolated_points[:,1], 'yo')
         // plt.show()
 
-        1.0 / fcorr.max(fcorr_i)
+        Some(1.0 / fcorr.max(fcorr_i))
     }
     
     pub fn compute(&self, quaternions: &[Quat64]) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
@@ -195,18 +199,19 @@ impl AdaptiveZoom {
         // }
         let mut fov_values: Vec<f64> = crop_center_positions.iter()
                                                             .zip(boundary_polygons.iter())
-                                                            .map(|(&center, polygon)| 
+                                                            .filter_map(|(&center, polygon)| 
                                                                 self.find_fov(center, polygon, self.output_dim)
                                                             ).collect();
 
         if self.range.0 > 0.0 || self.range.1 < 1.0 {
             // Only within render range.
-            let max_fov = fov_values.iter().copied().reduce(f64::max).unwrap();
-            let l = (quaternions.len() - 1) as f64;
-            let first_ind = (l * self.range.0).floor() as usize;
-            let last_ind  = (l * self.range.1).ceil() as usize;
-            fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
-            fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+            if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
+                let l = (quaternions.len() - 1) as f64;
+                let first_ind = (l * self.range.0).floor() as usize;
+                let last_ind  = (l * self.range.1).ceil() as usize;
+                fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
+                fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+            }
         }
 
         match self.mode {
@@ -224,8 +229,11 @@ impl AdaptiveZoom {
                 fov_values = convolve(&fov_min_pad, &gaussian);
             },
             Mode::StaticZoom => {
-                let max_f = fov_values.iter().copied().reduce(f64::min).unwrap();
-                fov_values.iter_mut().for_each(|v| *v = max_f);
+                if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {
+                    fov_values.iter_mut().for_each(|v| *v = max_f);
+                } else {
+                    log::warn!("Unable to find min of fov_values, len: {}", fov_values.len());
+                }
             }
             _ => { }
         }
@@ -290,8 +298,8 @@ impl AdaptiveZoom {
 }
 
 fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {
-    a.windows(window).map(|window| {
-        window.iter().copied().reduce(f64::min).unwrap()
+    a.windows(window).filter_map(|window| {
+        window.iter().copied().reduce(f64::min)
     }).collect()
 }
 

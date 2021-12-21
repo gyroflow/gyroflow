@@ -17,7 +17,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
                 if !lines.0.is_empty() && lines.0.len() == lines.1.len() {
                     matched_points.push((frame, lines));
                 } else {
-                    eprintln!("Invalid point pairs {} {}", lines.0.len(), lines.1.len());
+                    log::warn!("Invalid point pairs {} {}", lines.0.len(), lines.1.len());
                 }
             }
         }
@@ -80,7 +80,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
                         })
                         .reduce_with(find_min)
                 });
-            dbg!(lowest);
+            log::debug!("lowest: {:?}", &lowest);
             if let Some(lowest) = lowest {
                 final_offsets.push((0.0, lowest.0, lowest.1));
             }
@@ -105,7 +105,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
                         .reduce_with(find_min)
                 });
 
-            dbg!(&lowest);
+            log::debug!("lowest: {:?}", &lowest);
             if let Some(lowest) = lowest {
                 let middle_frame = from_frame + (to_frame - from_frame) / 2;
                 let middle_timestamp = (middle_frame as f64 * 1000.0) / fps;

@@ -87,8 +87,8 @@ MenuItem {
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             onCurrentIndexChanged: {
-                theme.set_language(langs[currentIndex][1]);
                 settings.lang = langs[currentIndex][1];
+                theme.set_language(settings.lang);
             }
         }
     }

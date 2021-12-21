@@ -98,7 +98,7 @@ pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -
                 break;
             }
             let type_ = (*config).device_type;
-            println!("codec type {:?} {}", type_, i);
+            ::log::debug!("codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
             if !devices.contains_key(&type_) {
                 if let Ok(dev) = HWDevice::from_type(type_) {
@@ -127,12 +127,12 @@ pub fn find_working_encoder(encoders: &Vec<(&'static str, bool)>) -> (&'static s
                         break;
                     }
                     let type_ = (*config).device_type;
-                    println!("codec type {:?} {}", type_, i);
+                    ::log::debug!("codec type {:?} {}", type_, i);
                     let mut devices = DEVICES.lock();
                     if !devices.contains_key(&type_) {
-                        println!("create {:?}", type_);
+                        ::log::debug!("create {:?}", type_);
                         if let Ok(dev) = HWDevice::from_type(type_) {
-                            println!("created ok {:?}", type_);
+                            ::log::debug!("created ok {:?}", type_);
                             devices.insert(type_, dev);
                         }
                     }
@@ -192,8 +192,8 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
             if !dev.hw_formats.is_empty() {
                 let target_format = {
                     if !dev.sw_formats.contains(&pixel_format) {
-                        eprintln!("Encoder doesn't support the desired pixel format ({:?})\n", pixel_format);
-                        dbg!(&dev.sw_formats);
+                        log::warn!("Encoder doesn't support the desired pixel format ({:?})\n", pixel_format);
+                        log::debug!("dev.sw_formats: {:?}", &dev.sw_formats);
                         let formats = get_transfer_formats_to_gpu(_frame_ctx);
                         if formats.is_empty() {
                             super::append_log(&format!("No frame transfer formats. Desired format: {:?}\n", pixel_format));
@@ -209,7 +209,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                         pixel_format
                     }
                 };
-                dbg!(&target_format);
+                log::debug!("target_format: {:?}", &target_format);
 
                 if target_format != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
                     let hw_format = *dev.hw_formats.first().unwrap(); // Safe because we check !is_empty() above

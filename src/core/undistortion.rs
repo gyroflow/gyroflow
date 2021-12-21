@@ -142,7 +142,12 @@ impl FrameTransform {
                 r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             }
             
-            let i_r: Matrix3<f32> = nalgebra::convert((new_k * r).pseudo_inverse(0.000001).unwrap());
+            let i_r = (new_k * r).pseudo_inverse(0.000001);
+            if let Err(err) = i_r {
+                log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
+            }
+            let i_r = i_r.unwrap_or_default();
+            let i_r: Matrix3<f32> = nalgebra::convert(i_r);
             [
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)], 
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)], 
@@ -250,16 +255,13 @@ impl<T: PixelType> Undistortion<T> {
         assert!(params.fov_scale > 0.0);
         assert!(params.fps > 0.0);
 
-        let frame_middle = 0.0;//if params.frame_readout_time > 0.0 { params.frame_readout_time / (1000.0 / params.fps) } else { 0.5 }; // TODO: +0.5?
-        //dbg!(frame_middle);
-
         let mut vec = Vec::with_capacity(params.frame_count);
         let start_frame = (params.trim_start_frame as i32 - 120).max(0) as usize;
         let end_frame = (params.trim_end_frame as i32 + 120) as usize;
         for i in 0..params.frame_count {
             if current_compute_id.load(Relaxed) != compute_id { return Err(()); }
             if i >= start_frame && i <= end_frame {
-                vec.push(FrameTransform::at_timestamp(params, (i as f64 + frame_middle) * 1000.0 / params.fps, i));
+                vec.push(FrameTransform::at_timestamp(params, (i as f64) * 1000.0 / params.fps, i));
             } else {
                 vec.push(FrameTransform::default());
             }
@@ -270,21 +272,39 @@ impl<T: PixelType> Undistortion<T> {
         let _time = std::time::Instant::now();
 
         let a = std::sync::atomic::AtomicU64::new(0);
-        self.stab_data = Self::calculate_stab_data(params, &a, 0).unwrap();
-
-        println!("Computed in {:.3}ms, len: {}", _time.elapsed().as_micros() as f64 / 1000.0, self.stab_data.len());
+        match Self::calculate_stab_data(params, &a, 0) {
+            Ok(stab_data) => {
+                self.stab_data = stab_data;
+                ::log::info!("Computed in {:.3}ms, len: {}", _time.elapsed().as_micros() as f64 / 1000.0, self.stab_data.len());
+            }
+            Err(err) => {
+                log::error!("Failed to calculate stab data! {:?}", err);
+            }
+        }
     }
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
 
         #[cfg(feature = "use-opencl")]
         {
-            self.cl = opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background).ok();
+            let cl = opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background);
+            match cl {
+                Ok(cl) => self.cl = Some(cl),
+                Err(err) => {
+                    log::error!("OpenCL error: {:?}", err);
+                }
+            }
         }
         
         // TODO: Support other pixel types
         if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-            self.wgpu = Some(wgpu::WgpuWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, self.background).unwrap());
+            let wgpu = wgpu::WgpuWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, self.background);
+            match wgpu {
+                Some(wgpu) => self.wgpu = Some(wgpu),
+                None => {
+                    log::error!("Failed to initialize wgpu");
+                }
+            }
         }
         
         self.size = (size.0, size.1, stride);
@@ -318,7 +338,7 @@ impl<T: PixelType> Undistortion<T> {
         #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
             if let Err(err) = cl.undistort_image(pixels, out_pixels, itm) {
-                eprintln!("OpenCL error: {:?}", err);
+                log::error!("OpenCL error: {:?}", err);
             } else {
                 return true;
             }
