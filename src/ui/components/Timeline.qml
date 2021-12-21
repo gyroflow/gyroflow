@@ -235,7 +235,16 @@ Item {
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
-                    controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame);
+
+                    const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" + 
+                                      "This feature is experimental, the results may not be correct at all.\n" + 
+                                      "Are you sure you want to continue?");
+                    messageBox(Modal.Warning, text, [
+                        { text: qsTr("Yes"), clicked: function() {
+                             controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame);
+                        }},
+                        { text: qsTr("No"), accent: true },
+                    ]);
                 }
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }

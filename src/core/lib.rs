@@ -336,37 +336,43 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn get_features_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+        let mut ret = None;
         if self.params.read().show_detected_features {
-            let mut pixels = Vec::new();
             let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
             for i in 0..xs.len() {
+                if ret.is_none() {
+                    // Only allocate if we actually have any points
+                    ret = Some(Vec::with_capacity(2048));
+                }
                 for xstep in -1..=1i32 {
                     for ystep in -1..=1i32 {
-                        pixels.push((xs[i] as i32 + xstep, ys[i] as i32 + ystep, 1.0));
+                        ret.as_mut().unwrap().push((xs[i] as i32 + xstep, ys[i] as i32 + ystep, 1.0));
                     }
                 }
             }
-            return Some(pixels);
         }
-        None
+        ret
     }
     pub fn get_opticalflow_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+        let mut ret = None;
         if self.params.read().show_optical_flow {
-            let mut pixels = Vec::new();
             for i in 0..3 {
                 let a = (3 - i) as f32 / 3.0;
                 if let Some(lines) = self.pose_estimator.get_of_lines_for_frame(&(frame + i), 1.0, 1) {
                     lines.0.into_iter().zip(lines.1.into_iter()).for_each(|(p1, p2)| {
+                        if ret.is_none() {
+                            // Only allocate if we actually have any points
+                            ret = Some(Vec::with_capacity(2048));
+                        }
                         let line = bresenham::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
                         for point in line {
-                            pixels.push((point.0 as i32, point.1 as i32, a));
+                            ret.as_mut().unwrap().push((point.0 as i32, point.1 as i32, a));
                         }
                     });
                 }
             }
-            return Some(pixels);
         }
-        None
+        ret
     }
 
     pub unsafe fn fill_undistortion_data_padded(&self, frame: usize, out_ptr: *mut f32, out_size: usize) -> bool {
@@ -391,16 +397,17 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool { // TODO: generic
-        let (enabled, ow, oh) = {
+        let (enabled, ow, oh, framebuffer_inverted) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted)
         };
         if enabled && ow == out_width && oh == out_height {
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
                 if let Some(pxs) = self.get_features_pixels(frame) {
-                    for (x, y, _) in pxs {
+                    for (x, mut y, _) in pxs {
+                        if framebuffer_inverted { y = oh as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
                         if pixels.len() > pos + 2 { 
                             pixels[pos + 0] = 0x0c; // R
@@ -410,7 +417,8 @@ impl<T: PixelType> StabilizationManager<T> {
                     }
                 }
                 if let Some(pxs) = self.get_opticalflow_pixels(frame) {
-                    for (x, y, a) in pxs {
+                    for (x, mut y, a) in pxs {
+                        if framebuffer_inverted { y = oh as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
                         if pixels.len() > pos + 2 { 
                             pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
@@ -495,6 +503,7 @@ impl<T: PixelType> StabilizationManager<T> {
             lens:   Arc::new(RwLock::new(self.lens.read().clone())),
             ..Default::default()
         };
+        stab.params.write().framebuffer_inverted = false;
         stab.set_size(size.0, size.1);
         stab.set_output_size(output_size.0, output_size.1);
 

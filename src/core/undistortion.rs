@@ -73,7 +73,7 @@ impl ComputeParams {
             video_rotation: params.video_rotation,
             distortion_coeffs,
             framebuffer_inverted: params.framebuffer_inverted,
-            frame_readout_time: if params.framebuffer_inverted { -params.frame_readout_time } else { params.frame_readout_time },
+            frame_readout_time: params.frame_readout_time,
             trim_start_frame: (params.trim_start * params.frame_count as f64).floor() as usize,
             trim_end_frame: (params.trim_end * params.frame_count as f64).ceil() as usize,
         }
@@ -105,6 +105,9 @@ impl FrameTransform {
 
         // ----------- Rolling shutter correction -----------
         let mut frame_readout_time = params.frame_readout_time;
+        if params.framebuffer_inverted {
+            frame_readout_time *= -1.0;
+        }
         frame_readout_time *= fov;
         frame_readout_time /= 2.0;
         frame_readout_time *= img_dim_ratio;
@@ -207,13 +210,8 @@ impl FrameTransform {
                      * params.gyro.smoothed_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
-            if params.framebuffer_inverted {
-                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
-                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
-            } else {
-                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
-                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
-            }
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             
             new_k * r
         }).collect();
