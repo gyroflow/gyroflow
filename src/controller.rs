@@ -142,7 +142,7 @@ impl Controller {
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (fps, size, duration_ms, frame_count) = {
+        let (_fps, size, duration_ms, frame_count) = {
             let params = self.stabilizer.params.read(); 
             (params.fps, params.size, params.duration_ms, params.frame_count)
         };
