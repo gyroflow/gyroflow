@@ -34,7 +34,7 @@ QQC.ComboBox {
 
     contentItem: Text {
         id: ti;
-        text: root.displayText;
+        text: qsTranslate("Popup", root.displayText);
         color: styleTextColor;
         font: root.font;
         anchors.left: parent.left;

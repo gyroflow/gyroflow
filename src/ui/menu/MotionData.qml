@@ -44,6 +44,14 @@ MenuItem {
     }
     TableList {
         id: info;
+            
+        Component.onCompleted: {
+            const _ = [
+                QT_TRANSLATE_NOOP("TableList", "File name"),
+                QT_TRANSLATE_NOOP("TableList", "Detected format")
+            ];
+        }
+
         model: ({
             "File name": "---",
             "Detected format": "---"
@@ -131,7 +139,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
-            model: hasQuaternions? [qsTr("None"), "Madgwick", "Complementary", "Mahony", "Gyroflow"] :  ["Madgwick", "Complementary", "Mahony", "Gyroflow"];
+            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Madgwick", "Complementary", "Mahony", "Gyroflow"] :  ["Madgwick", "Complementary", "Mahony", "Gyroflow"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");

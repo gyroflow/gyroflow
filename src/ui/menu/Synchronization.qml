@@ -179,7 +179,7 @@ MenuItem {
 
             ComboBox {
                 id: offsetMethod;
-                model: [qsTr("Using essential matrix"), qsTr("Using visual features")];
+                model: [QT_TRANSLATE_NOOP("Popup", "Using essential matrix"), QT_TRANSLATE_NOOP("Popup", "Using visual features")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 onCurrentIndexChanged: controller.offset_method = currentIndex;

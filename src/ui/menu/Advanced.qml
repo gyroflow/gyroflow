@@ -9,9 +9,11 @@ MenuItem {
     opened: false;
 
     Settings {
+        id: settings;
         property alias previewResolution: previewResolution.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
+        property string lang: "en";
     }
 
     Label {
@@ -20,7 +22,7 @@ MenuItem {
 
         ComboBox {
             id: previewResolution;
-            model: [qsTr("Full"), "1080p", "720p", "480p"];
+            model: [QT_TRANSLATE_NOOP("Popup", "Full"), "1080p", "720p", "480p"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             currentIndex: 2;
@@ -56,13 +58,37 @@ MenuItem {
 
         ComboBox {
             id: themeList;
-            model: [qsTr("Light"), qsTr("Dark")];
+            model: [QT_TRANSLATE_NOOP("Popup", "Light"), QT_TRANSLATE_NOOP("Popup", "Dark")];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             currentIndex: 1;
             onCurrentIndexChanged: {
                 const themes = ["light", "dark"];
                 theme.set_theme(themes[currentIndex]);
+            }
+        }
+    }
+    Label {
+        position: Label.Left;
+        text: qsTr("Language");
+
+        ComboBox {
+            id: langList;
+            property var langs: [
+                ["English",         "en"],
+                ["Polish - polski", "pl"]
+            ];
+            Component.onCompleted: {
+                let selectedIndex = 0;
+                let i = 0;
+                model = langs.map((x) => { if (x[1] == settings.lang) { selectedIndex = i; } i++; return x[0]; });
+                currentIndex = selectedIndex;
+            }
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            onCurrentIndexChanged: {
+                theme.set_language(langs[currentIndex][1]);
+                settings.lang = langs[currentIndex][1];
             }
         }
     }

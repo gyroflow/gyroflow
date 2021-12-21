@@ -134,7 +134,7 @@ Rectangle {
                     fadeWhenDisabled: false;
                     property bool successShown: false;
 
-                    model: [qsTr("Export .gyroflow file")];
+                    model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
                     function doRender() {
                         successShown = false;

@@ -12,16 +12,16 @@ MenuItem {
 
     Component.onCompleted: {
         const fields = [
-            QT_TR_NOOP("File name"),
-            QT_TR_NOOP("Detected camera"),
-            QT_TR_NOOP("Dimensions"),
-            QT_TR_NOOP("Duration"),
-            QT_TR_NOOP("Frame rate"),
-            QT_TR_NOOP("Codec"),
-            QT_TR_NOOP("Pixel format"),
-            QT_TR_NOOP("Audio"),
-            QT_TR_NOOP("Rotation"),
-            QT_TR_NOOP("Contains gyro")
+            QT_TRANSLATE_NOOP("TableList", "File name"),
+            QT_TRANSLATE_NOOP("TableList", "Detected camera"),
+            QT_TRANSLATE_NOOP("TableList", "Dimensions"),
+            QT_TRANSLATE_NOOP("TableList", "Duration"),
+            QT_TRANSLATE_NOOP("TableList", "Frame rate"),
+            QT_TRANSLATE_NOOP("TableList", "Codec"),
+            QT_TRANSLATE_NOOP("TableList", "Pixel format"),
+            QT_TRANSLATE_NOOP("TableList", "Audio"),
+            QT_TRANSLATE_NOOP("TableList", "Rotation"),
+            QT_TRANSLATE_NOOP("TableList", "Contains gyro")
         ];
         let model = {};
         for (const x of fields) model[x] = "---";

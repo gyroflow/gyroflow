@@ -34,7 +34,7 @@ QQC.Popup {
 
             contentItem: QQCI.IconLabel {
                 anchors.fill: parent;
-                text: modelData;
+                text: qsTr(modelData);
                 icon.name: popup.icons[index] || "";
                 icon.color: c;
                 icon.height: popup.itemHeight / 2 + 5 * dpiScale;

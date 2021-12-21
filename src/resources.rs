@@ -84,5 +84,7 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/undistort.comp.qsb",
         "src/qt_gpu/compiled/texture.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",
+
+        "resources/translations/pl.qm",
     }
 );

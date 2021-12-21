@@ -2,14 +2,41 @@
 use qmetaobject::*;
 use cpp::*;
 
+cpp! {{
+    #include <QTranslator>
+}}
+
 #[derive(Default, QObject)]
 pub struct Theme { 
     base: qt_base_class!(trait QObject), 
     set_theme: qt_method!(fn(theme: String)),
+    set_language: qt_method!(fn(lang_id: QString)),
+
+    language_changed: qt_signal!(),
 
     pub engine_ptr: Option<*mut QmlEngine>
 }
 impl Theme {
+    pub fn set_language(&self, lang_id: QString) {
+        if let Some(engine) = self.engine_ptr {
+            let engine = unsafe { &mut *(engine) };
+            let engine_ptr = engine.cpp_ptr();
+            cpp!(unsafe [engine_ptr as "QQmlEngine *", lang_id as "QString"] {
+                static QTranslator translator;
+                QCoreApplication::removeTranslator(&translator);
+
+                if (lang_id != "en") {
+                    if (translator.load(":/resources/translations/" + lang_id + ".qm")) {
+                        QCoreApplication::installTranslator(&translator);
+                    }
+                }
+
+                engine_ptr->retranslate();
+            });
+            self.language_changed();
+        }
+    }
+
     pub fn set_theme(&self, theme: String) {
         let engine = unsafe { &mut *(self.engine_ptr.unwrap()) };
 

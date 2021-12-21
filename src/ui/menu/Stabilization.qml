@@ -127,7 +127,7 @@ MenuItem {
         id: croppingMode;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        model: [qsTr("No cropping"), qsTr("Dynamic cropping"), qsTr("Static crop")];
+        model: [QT_TRANSLATE_NOOP("Popup", "No cropping"), QT_TRANSLATE_NOOP("Popup", "Dynamic cropping"), QT_TRANSLATE_NOOP("Popup", "Static crop")];
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             switch (currentIndex) {

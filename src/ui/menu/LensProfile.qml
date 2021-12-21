@@ -39,19 +39,26 @@ MenuItem {
             list.push(fname.replace(/_/g, " "))
         }
         search.model = list;
+
+        const _ = [
+            QT_TRANSLATE_NOOP("TableList", "Camera"),
+            QT_TRANSLATE_NOOP("TableList", "Lens"),
+            QT_TRANSLATE_NOOP("TableList", "Setting"),
+            QT_TRANSLATE_NOOP("TableList", "Dimensions"),
+            QT_TRANSLATE_NOOP("TableList", "Calibrated by")
+        ];
     }
     Connections {
         target: controller;
         function onLens_profile_loaded(obj) {
-            // TODO: translations
             info.model = {
-                "Camera": obj.camera,
-                "Lens": obj.lens,
-                "Setting": obj.camera_setting,
-                "Dimensions": obj.calib_dimension,
+                "Camera":        obj.camera,
+                "Lens":          obj.lens,
+                "Setting":       obj.camera_setting,
+                "Dimensions":    obj.calib_dimension,
                 "Calibrated by": obj.calibrated_by
             };
-            root.calibWidth = obj.calib_width;
+            root.calibWidth  = obj.calib_width;
             root.calibHeight = obj.calib_height;
             const coeffs = obj.coefficients.split(";").map(parseFloat);
             const mtrx = obj.matrix.split(";").map(parseFloat);
@@ -96,9 +103,6 @@ MenuItem {
     LinkButton {
         visible: Object.keys(info.model).length > 0;
         text: qsTr("Adjust parameters");
-        //icon.name: "pencil"
-        //icon.height: 14 * dpiScale;
-        //icon.width: 14 * dpiScale;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: adjust.opened = !adjust.opened;
     }
@@ -112,7 +116,6 @@ MenuItem {
         height: opened? implicitHeight : -10 * dpiScale;
         Ease on opacity { }
         Ease on height { }
-        //clip: true;
 
         component SmallNumberField: NumberField {
             property bool preventChange2: true;
