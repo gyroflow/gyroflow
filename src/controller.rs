@@ -472,7 +472,7 @@ impl Controller {
             arg.push_str("\n\n");
             arg.push_str(&rendering::get_log());
             this.error(QString::from(msg), QString::from(arg), QString::default());
-            this.render_progress(1.0, 0, 0, false);
+            this.render_progress(1.0, 0, 0, true);
         });
 
         let trim_ratio = trim_end - trim_start;
