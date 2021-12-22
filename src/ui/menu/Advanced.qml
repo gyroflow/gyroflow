@@ -75,8 +75,9 @@ MenuItem {
         ComboBox {
             id: langList;
             property var langs: [
-                ["English",         "en"],
-                ["Polish - polski", "pl"]
+                ["English",          "en"],
+                ["German (Deutsch)", "de"],
+                ["Polish (polski)",  "pl"]
             ];
             Component.onCompleted: {
                 let selectedIndex = 0;

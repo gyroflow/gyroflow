@@ -86,5 +86,6 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/texture.vert.qsb",
 
         "resources/translations/pl.qm",
+        "resources/translations/de.qm",
     }
 );
