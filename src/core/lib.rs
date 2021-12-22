@@ -311,6 +311,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
                 lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
+                lib_gyro.org_smoothed_quaternions = params.gyro.org_smoothed_quaternions.clone();
                 smoothing_changed = true;
             }
             
