@@ -272,7 +272,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn recompute_undistortion(&self) {
         let params = undistortion::ComputeParams::from_manager(self);
-        self.undistortion.write().recompute(&params);
+        self.undistortion.write().set_compute_params(params);
     }
 
     pub fn recompute_blocking(&self) {
@@ -324,13 +324,11 @@ impl<T: PixelType> StabilizationManager<T> {
             
             if current_compute_id.load(Relaxed) != compute_id { return; }
 
-            if let Ok(stab_data) = undistortion::Undistortion::<T>::calculate_stab_data(&params, &current_compute_id, compute_id) {
-                undistortion.write().stab_data = stab_data;
+            undistortion.write().set_compute_params(params);
 
-                smoothness_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
-                adaptive_zoom_checksum.store(zoom.get_state_checksum(), SeqCst);
-                cb(compute_id);
-            }
+            smoothness_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
+            adaptive_zoom_checksum.store(zoom.get_state_checksum(), SeqCst);
+            cb(compute_id);
         });
         compute_id
     }
@@ -375,10 +373,9 @@ impl<T: PixelType> StabilizationManager<T> {
         ret
     }
 
-    pub unsafe fn fill_undistortion_data_padded(&self, frame: usize, out_ptr: *mut f32, out_size: usize) -> bool {
+    pub unsafe fn fill_undistortion_data_padded(&self, timestamp_us: i64, out_ptr: *mut f32, out_size: usize) -> bool {
         if self.params.read().stab_enabled {
-            let lock = self.undistortion.read();
-            if let Some(itm) = lock.get_undistortion_data(frame) {
+            if let Some(itm) = self.undistortion.write().get_undistortion_data(timestamp_us) {
                 let params_count = itm.params.len() * 9;
                 if params_count <= out_size {
                     let src_ptr = itm.params.as_ptr() as *const f32;
@@ -396,12 +393,13 @@ impl<T: PixelType> StabilizationManager<T> {
         false
     }
 
-    pub fn process_pixels(&self, frame: usize, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool { // TODO: generic
-        let (enabled, ow, oh, framebuffer_inverted) = {
+    pub fn process_pixels(&self, timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
+        let (enabled, ow, oh, framebuffer_inverted, fps) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps)
         };
         if enabled && ow == out_width && oh == out_height {
+            let frame = timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize; // used only to draw features and OF
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
@@ -430,7 +428,7 @@ impl<T: PixelType> StabilizationManager<T> {
             }
             //////////////////////////// Draw detected features ////////////////////////////
             
-            self.undistortion.write().process_pixels(frame, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels)
+            self.undistortion.write().process_pixels(timestamp_us, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels)
         } else {
             false
         }
@@ -524,6 +522,10 @@ impl<T: PixelType> StabilizationManager<T> {
         *self.gyro.write() = GyroSource::new();
         self.pose_estimator.clear();
     }
+}
+
+pub fn timestamp_to_frame(timestamp_ms: f64, fps: f64) -> i32 {
+    (timestamp_ms * (fps / 1000.0)).round() as i32
 }
 
 pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {

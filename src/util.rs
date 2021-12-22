@@ -1,10 +1,6 @@
 use cpp::*;
 use qmetaobject::*;
 
-pub fn timestamp_to_frame(ts: f64, fps: f64) -> i32 {
-    ((ts * (fps / 1000.0) * 100.0).round() / 100.0).ceil() as i32
-}
-
 pub fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();
     use simd_json::ValueAccess;

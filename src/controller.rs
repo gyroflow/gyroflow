@@ -145,7 +145,7 @@ impl Controller {
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (_fps, size, duration_ms, frame_count) = {
+        let (fps, size, _duration_ms, _frame_count) = {
             let params = self.stabilizer.params.read(); 
             (params.fps, params.size, params.duration_ms, params.frame_count)
         };
@@ -204,9 +204,7 @@ impl Controller {
                 match FfmpegProcessor::from_file(&video_path, true) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                            //let frame0 = util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
-                            let frame = ((timestamp_us as f64 / 1000.0 / duration_ms) * frame_count as f64).round() as i32;
-                            //::log::debug!("frame1: {} ({:.5}), frame2: {} ({:.5})", frame0, (timestamp_us as f64 / 1000.0) * (fps / 1000.0), frame, ((timestamp_us as f64 / 1000.0 / duration_ms) * frame_count as f64));
+                            let frame = core::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
       
                             assert!(_output_frame.is_none());
 
@@ -394,7 +392,7 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
             let out_pixels = RefCell::new(Vec::new());
-            vid.onProcessPixels(Box::new(move |frame, _timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
+            vid.onProcessPixels(Box::new(move |_frame, timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
                 // let _time = std::time::Instant::now();
 
                 // TODO: cache in atomics instead of locking the mutex every time
@@ -407,7 +405,7 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels(frame as usize, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
+                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
                 
                 // ::log::info!("Frame {}, {}x{}, {:.2} MB | OpenCL {:.3}ms", frame, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {

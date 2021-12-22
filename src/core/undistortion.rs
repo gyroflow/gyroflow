@@ -1,4 +1,4 @@
-use std::sync::atomic::Ordering::Relaxed;
+use std::collections::BTreeMap;
 
 use nalgebra::{Matrix3, Vector4};
 use rayon::prelude::*;
@@ -9,7 +9,7 @@ use super::gpu::opencl;
 use super::gpu::wgpu;
 use super::StabilizationManager;
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct ComputeParams {
     pub gyro: GyroSource,
     pub fovs: Vec<f64>,
@@ -227,7 +227,7 @@ impl FrameTransform {
 
 #[derive(Default)]
 pub struct Undistortion<T: PixelType> {
-    pub stab_data: Vec<FrameTransform>,
+    stab_data: BTreeMap<i64, FrameTransform>,
 
     size: (usize, usize, usize), // width, height, stride
     output_size: (usize, usize, usize), // width, height, stride
@@ -238,50 +238,34 @@ pub struct Undistortion<T: PixelType> {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
+    empty_frame_transform: FrameTransform,
+    compute_params: ComputeParams,
+
     _d: std::marker::PhantomData<T>
 }
 
 impl<T: PixelType> Undistortion<T> {
-    pub fn calculate_stab_data(params: &ComputeParams, current_compute_id: &std::sync::atomic::AtomicU64, compute_id: u64) -> Result<Vec<FrameTransform>, ()> {
-        if params.frame_count == 0 || params.width == 0 || params.height == 0 {
-            return Ok(Vec::new());
-        }
-
-        assert!(params.frame_count > 0);
-        assert!(params.width > 0);
-        assert!(params.height > 0);
-        assert!(params.calib_width > 0.0);
-        assert!(params.calib_height > 0.0);
-        assert!(params.fov_scale > 0.0);
-        assert!(params.fps > 0.0);
-
-        let mut vec = Vec::with_capacity(params.frame_count);
-        let start_frame = (params.trim_start_frame as i32 - 120).max(0) as usize;
-        let end_frame = (params.trim_end_frame as i32 + 120) as usize;
-        for i in 0..params.frame_count {
-            if current_compute_id.load(Relaxed) != compute_id { return Err(()); }
-            if i >= start_frame && i <= end_frame {
-                vec.push(FrameTransform::at_timestamp(params, (i as f64) * 1000.0 / params.fps, i));
-            } else {
-                vec.push(FrameTransform::default());
-            }
-        }
-        Ok(vec)
+    pub fn set_compute_params(&mut self, params: ComputeParams) {
+        self.stab_data.clear();
+        self.compute_params = params;
     }
-    pub fn recompute(&mut self, params: &ComputeParams) {
-        let _time = std::time::Instant::now();
 
-        let a = std::sync::atomic::AtomicU64::new(0);
-        match Self::calculate_stab_data(params, &a, 0) {
-            Ok(stab_data) => {
-                self.stab_data = stab_data;
-                ::log::info!("Computed in {:.3}ms, len: {}", _time.elapsed().as_micros() as f64 / 1000.0, self.stab_data.len());
-            }
-            Err(err) => {
-                log::error!("Failed to calculate stab data! {:?}", err);
-            }
+    pub fn get_stab_data_at_timestamp(&mut self, timestamp_us: i64) -> &FrameTransform {
+        use std::collections::btree_map::Entry;
+
+        if let Entry::Vacant(e) = self.stab_data.entry(timestamp_us) {
+            let timestamp_ms = (timestamp_us as f64) / 1000.0;
+            let frame = crate::timestamp_to_frame(timestamp_ms, self.compute_params.fps) as usize; // Only for FOVs
+            e.insert(FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame));
         }
+        if let Some(e) = self.stab_data.get(&timestamp_us) {
+            return e;
+        } else {
+            ::log::error!("Failed to get stab data at timestamp: {}, stab_data.len: {}", timestamp_us, self.stab_data.len());
+        }
+        &self.empty_frame_transform
     }
+
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
 
@@ -322,22 +306,20 @@ impl<T: PixelType> Undistortion<T> {
         }
     }
 
-    pub fn get_undistortion_data(&self, frame: usize) -> Option<&FrameTransform> {
-        if self.stab_data.is_empty() || frame >= self.stab_data.len() { return None; }
-
-        Some(&self.stab_data[frame])
+    pub fn get_undistortion_data(&mut self, timestamp_us: i64) -> Option<FrameTransform> {
+        Some(self.get_stab_data_at_timestamp(timestamp_us).clone())
     }
 
-    pub fn process_pixels(&mut self, frame: usize, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        if self.stab_data.is_empty() || frame >= self.stab_data.len() || self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return false; }
+    pub fn process_pixels(&mut self, timestamp_us: i64, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
+        if self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return false; }
 
-        let itm = &self.stab_data[frame];
+        let itm = self.get_stab_data_at_timestamp(timestamp_us).clone(); // TODO: get rid of this clone
         if itm.params.is_empty() { return false; }
 
         // OpenCL path
         #[cfg(feature = "use-opencl")]
         if let Some(ref mut cl) = self.cl {
-            if let Err(err) = cl.undistort_image(pixels, out_pixels, itm) {
+            if let Err(err) = cl.undistort_image(pixels, out_pixels, &itm) {
                 log::error!("OpenCL error: {:?}", err);
             } else {
                 return true;
@@ -345,7 +327,7 @@ impl<T: PixelType> Undistortion<T> {
         }
 
         if let Some(ref mut wgpu) = self.wgpu {
-            wgpu.undistort_image(pixels, out_pixels, itm);
+            wgpu.undistort_image(pixels, out_pixels, &itm);
             return true;
         }
 

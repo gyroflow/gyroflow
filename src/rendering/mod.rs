@@ -100,23 +100,21 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     //proc.video.codec_options.set("preset", "medium");
 
-    let start_ms = proc.start_ms.unwrap_or_default();
+    let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
 
     if !audio {
         proc.audio_codec = codec::Id::None;
     }
 
-    log::debug!("start_ms: {}, render_duration: {}, render_frame_count: {}", start_ms, render_duration, render_frame_count);
+    log::debug!("start_us: {}, render_duration: {}, render_frame_count: {}", start_us, render_duration, render_frame_count);
 
-    let mut planes = Vec::<Box<dyn FnMut(usize, &mut Video, &mut Video, usize)>>::new();
+    let mut planes = Vec::<Box<dyn FnMut(i64, &mut Video, &mut Video, usize)>>::new();
 
     let progress2 = progress.clone();
+    let mut process_frame = 0;
     proc.on_frame(move |timestamp_us, input_frame, output_frame, converter| {
-        let absolute_frame_id = ((timestamp_us as f64 / 1000.0 / duration_ms) * total_frame_count as f64).round() as usize;
-        let process_frame = ((((timestamp_us as f64 / 1000.0) - start_ms as f64) / render_duration) * render_frame_count as f64).round() as usize + 1;
-        //let absolute_frame_id = crate::util::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize;
-        //let process_frame = crate::util::timestamp_to_frame((timestamp_us as f64 / 1000.0) - start_ms as f64, fps) as usize;
-        log::debug!("process_frame: {}, absolute_frame: {}, timestamp_us: {}", process_frame, absolute_frame_id, timestamp_us);
+        process_frame += 1;
+        log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
 
         let output_frame = output_frame.unwrap();
 
@@ -133,14 +131,14 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
                     };
                     let mut plane = Undistortion::<$t>::default();
                     plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
-                    plane.recompute(&ComputeParams::from_manager(&stab));
-                    $planes.push(Box::new(move |frame_id: usize, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
+                    plane.set_compute_params(ComputeParams::from_manager(&stab));
+                    $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
                         let (w, h, s)    = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
                         let (ow, oh, os) = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
 
-                        plane.process_pixels(frame_id, w, h, s, ow, oh, os, buffer, out_buffer);
+                        plane.process_pixels(timestamp_us, w, h, s, ow, oh, os, buffer, out_buffer);
                     }));
                 })*
             };
@@ -201,7 +199,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
         let mut undistort_frame = |frame: &mut Video, out_frame: &mut Video| {
             for (i, cb) in planes.iter_mut().enumerate() {
-                (*cb)(absolute_frame_id, frame, out_frame, i);
+                (*cb)(timestamp_us, frame, out_frame, i);
             }
             progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count, false));
         };
@@ -216,6 +214,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
                 })?;
             }
         }
+        
         Ok(())
     });
 
