@@ -39,7 +39,6 @@ use ui::theme::Theme;
 // TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: -- Recommended output size (eg. 4:3 to 16:9)
 // TODO: UI: activeFocus indicators
-// TODO: languages
 // TODO: timeline panning
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
@@ -56,6 +55,7 @@ use ui::theme::Theme;
 // TODO: Add cache for the undistortion if the video is not playing
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
+// TODO: save panel sizes, menu opened states and window dimensions
 
 cpp! {{
     #include <QQuickStyle>
@@ -84,6 +84,8 @@ fn entry() {
         .add_filter_ignore_str("wgpu")
         .add_filter_ignore_str("naga")
         .add_filter_ignore_str("akaze")
+        .add_filter_ignore_str("ureq")
+        .add_filter_ignore_str("rustls")
         .build(), simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
 
     qmetaobject::log::init_qt_to_rust();

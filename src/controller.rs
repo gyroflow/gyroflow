@@ -1,6 +1,6 @@
 use gyroflow_core::undistortion;
 use qmetaobject::*;
-use nalgebra::{Vector4};
+use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::AtomicBool;
@@ -97,6 +97,9 @@ pub struct Controller {
     sync_in_progress_changed: qt_signal!(),
 
     export_gyroflow: qt_method!(fn(&self)),
+
+    check_updates: qt_method!(fn(&self)),
+    updates_available: qt_signal!(version: QString, changelog: QString),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
@@ -297,10 +300,8 @@ impl Controller {
                             } else {
                                 stab.set_output_size(video_size.0, video_size.1);
                             }
-                        } else {
-                            if let Err(e) = stab.load_gyro_data(&s) {
-                                err(("An error occured: %1".to_string(), e.to_string()));
-                            }
+                        } else if let Err(e) = stab.load_gyro_data(&s) {
+                            err(("An error occured: %1".to_string(), e.to_string()));
                         }
                         stab.recompute_smoothness();
 
@@ -530,6 +531,30 @@ impl Controller {
     fn set_lens_param(&self, param: QString, value: f64) {
         self.stabilizer.set_lens_param(param.to_string().as_str(), value);
         self.request_recompute();
+    }
+
+    fn check_updates(&self) {
+        let update = util::qt_queued_callback_mut(self, |this, (version, changelog): (String, String)| {
+            this.updates_available(QString::from(version), QString::from(changelog))
+        });
+        core::run_threaded(move || {
+            use simd_json::ValueAccess;
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/AdrianEddy/gyroflow/releases").call().map(|x| x.into_string()) {
+                let mut slice = body.as_bytes().to_vec();
+                let v = simd_json::to_borrowed_value(&mut slice).unwrap();
+                if let Some(obj) = v.as_array().and_then(|x| x.first()).and_then(|x| x.as_object()) {
+                    let name = obj.get("name").and_then(|x| x.as_str());
+                    let body = obj.get("body").and_then(|x| x.as_str());
+
+                    if let Some(name) = name {
+                        ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
+                        if name.trim_start_matches('v') != env!("CARGO_PKG_VERSION") {
+                            update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // Utilities

@@ -100,9 +100,9 @@ pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -
             let type_ = (*config).device_type;
             ::log::debug!("codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
-            if !devices.contains_key(&type_) {
+            if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
                 if let Ok(dev) = HWDevice::from_type(type_) {
-                    devices.insert(type_, dev);
+                    e.insert(dev);
                 }
             }
             if let Some(dev) = devices.get(&type_) {
@@ -115,7 +115,7 @@ pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -
     Ok((ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))
 }
 
-pub fn find_working_encoder(encoders: &Vec<(&'static str, bool)>) -> (&'static str, bool, Option<DeviceType>) {
+pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str, bool, Option<DeviceType>) {
     if encoders.is_empty() { return ("", false, None); } // TODO: should be Result<>
 
     for x in encoders {
@@ -129,11 +129,11 @@ pub fn find_working_encoder(encoders: &Vec<(&'static str, bool)>) -> (&'static s
                     let type_ = (*config).device_type;
                     ::log::debug!("codec type {:?} {}", type_, i);
                     let mut devices = DEVICES.lock();
-                    if !devices.contains_key(&type_) {
+                    if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
                         ::log::debug!("create {:?}", type_);
                         if let Ok(dev) = HWDevice::from_type(type_) {
                             ::log::debug!("created ok {:?}", type_);
-                            devices.insert(type_, dev);
+                            e.insert(dev);
                         }
                     }
                     if let Some(dev) = devices.get_mut(&type_) {
@@ -153,7 +153,7 @@ pub fn find_working_encoder(encoders: &Vec<(&'static str, bool)>) -> (&'static s
         }
     }
     let x = encoders.last().unwrap();
-    return (x.0, x.1, None);
+    (x.0, x.1, None)
 }
 
 pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::AVPixelFormat> {

@@ -48,7 +48,7 @@ pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initia
                         distances.push(dist as u64);
                     }
                 }
-                distances.sort();
+                distances.sort_unstable();
 
                 // Use only 90% of lines, discard the longest ones as they are often wrongly computed point matches
                 for dist in &distances[0..(distances.len() as f64 * 0.9) as usize] {

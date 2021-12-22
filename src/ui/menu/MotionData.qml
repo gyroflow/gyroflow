@@ -46,10 +46,8 @@ MenuItem {
         id: info;
             
         Component.onCompleted: {
-            const _ = [
-                QT_TRANSLATE_NOOP("TableList", "File name"),
-                QT_TRANSLATE_NOOP("TableList", "Detected format")
-            ];
+            QT_TRANSLATE_NOOP("TableList", "File name"),
+            QT_TRANSLATE_NOOP("TableList", "Detected format")
         }
 
         model: ({
@@ -64,7 +62,7 @@ MenuItem {
 
         NumberField {
             id: lpf;
-            unit: "Hz";
+            unit: qsTr("Hz");
             precision: 2;
             value: 0;
             from: 0;

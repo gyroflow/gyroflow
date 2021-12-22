@@ -385,7 +385,7 @@ Item {
 
             width: 90 * dpiScale;
             precision: 4;
-            unit: "ms";
+            unit: qsTr("ms");
             anchors.verticalCenter: parent.verticalCenter;
             property bool preventChange: true;
             onValueChanged: {

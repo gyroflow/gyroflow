@@ -41,6 +41,9 @@ struct Uniforms {
     float bg[4];
 };
 
+// ubufAlignment
+// static inline uint aligned(uint v, uint byteAlign) { return (v + byteAlign - 1) & ~(byteAlign - 1); }
+
 class QtRHIUndistort {
 public:
     bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/) {

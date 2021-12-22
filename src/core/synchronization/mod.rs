@@ -197,7 +197,7 @@ impl PoseEstimator {
 
     pub fn get_of_lines_for_frame(&self, frame: &usize, scale: f64, num_frames: usize) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
         if let Some(l) = self.sync_results.try_read() {
-            if let Some(curr) = l.get(&frame) {
+            if let Some(curr) = l.get(frame) {
                 if let Some(next) = l.get(&(frame + num_frames)) {
                     let mut curr = curr.item.clone();
                     let mut next = next.item.clone();
@@ -350,11 +350,11 @@ impl PoseEstimator {
     }
 
     pub fn find_offsets(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset::find_offsets(&ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
+        find_offset::find_offsets(ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
     }
 
     pub fn find_offsets_visually(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset_visually::find_offsets(&ranges, &self, initial_offset, search_size, params, for_rs)
+        find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs)
     }
 }
 
@@ -457,7 +457,8 @@ impl AutosyncProcess {
             }
             return true;    
         }
-        return false;
+
+        false
     }
     pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);

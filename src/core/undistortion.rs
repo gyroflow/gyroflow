@@ -285,9 +285,12 @@ impl<T: PixelType> Undistortion<T> {
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
 
+        self.size = (size.0, size.1, stride);
+        self.output_size = (output_size.0, output_size.1, output_stride);
+
         #[cfg(feature = "use-opencl")]
         {
-            let cl = opencl::OclWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, T::ocl_names(), self.background);
+            let cl = opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background);
             match cl {
                 Ok(cl) => self.cl = Some(cl),
                 Err(err) => {
@@ -298,7 +301,7 @@ impl<T: PixelType> Undistortion<T> {
         
         // TODO: Support other pixel types
         if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-            let wgpu = wgpu::WgpuWrapper::new(size.0, size.1, stride, T::COUNT * T::SCALAR_BYTES, output_size.0, output_size.1, output_stride, T::COUNT, self.background);
+            let wgpu = wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background);
             match wgpu {
                 Some(wgpu) => self.wgpu = Some(wgpu),
                 None => {
@@ -306,9 +309,6 @@ impl<T: PixelType> Undistortion<T> {
                 }
             }
         }
-        
-        self.size = (size.0, size.1, stride);
-        self.output_size = (output_size.0, output_size.1, output_stride);
     }
 
     pub fn set_background(&mut self, bg: Vector4<f32>) {
@@ -351,7 +351,8 @@ impl<T: PixelType> Undistortion<T> {
 
         // CPU path
         Self::undistort_image_cpu(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background);
-        return true;
+
+        true
     }
 
     // TODO: optimize further with SIMD
@@ -466,7 +467,7 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
     }
 
     // TODO: into_par_iter?
-    distorted.into_iter().enumerate().map(|(index, pi)| {
+    distorted.iter().enumerate().map(|(index, pi)| {
         let pw = ((pi.0 - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
 
         let mut theta_d = (pw.0 * pw.0 + pw.1 * pw.1).sqrt();

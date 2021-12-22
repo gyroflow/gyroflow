@@ -40,13 +40,11 @@ MenuItem {
         }
         search.model = list;
 
-        const _ = [
-            QT_TRANSLATE_NOOP("TableList", "Camera"),
-            QT_TRANSLATE_NOOP("TableList", "Lens"),
-            QT_TRANSLATE_NOOP("TableList", "Setting"),
-            QT_TRANSLATE_NOOP("TableList", "Dimensions"),
-            QT_TRANSLATE_NOOP("TableList", "Calibrated by")
-        ];
+        QT_TRANSLATE_NOOP("TableList", "Camera");
+        QT_TRANSLATE_NOOP("TableList", "Lens");
+        QT_TRANSLATE_NOOP("TableList", "Setting");
+        QT_TRANSLATE_NOOP("TableList", "Dimensions");
+        QT_TRANSLATE_NOOP("TableList", "Calibrated by");
     }
     Connections {
         target: controller;
@@ -89,6 +87,7 @@ MenuItem {
     }
     
     InfoMessageSmall {
+        type: lensRatio != videoRatio? InfoMessage.Error : InfoMessage.Warning;
         show: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight);
         property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(5);
         property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(5);

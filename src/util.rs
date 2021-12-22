@@ -35,10 +35,8 @@ pub fn url_to_path(url: &str) -> &str {
             if let Some(stripped) = url.strip_prefix("file:///") {
                 return stripped;
             }
-        } else {
-            if let Some(stripped) = url.strip_prefix("file://") {
-                return stripped;
-            }
+        } else if let Some(stripped) = url.strip_prefix("file://") {
+            return stripped;
         }
     }
     url

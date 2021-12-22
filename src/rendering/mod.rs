@@ -83,7 +83,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
         Some("prores_ks") => {
             let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
             let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
-            if let Some(profile) = profiles.iter().position(|&x| x == &codec_options) {
+            if let Some(profile) = profiles.iter().position(|&x| x == codec_options) {
                 proc.video.codec_options.set("profile", &format!("{}", profile));
                 proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
             }

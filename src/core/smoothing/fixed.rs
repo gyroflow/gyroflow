@@ -30,7 +30,7 @@ impl SmoothingAlgorithm for Fixed {
                 "from": -180,
                 "to": 180,
                 "value": 0,
-                "unit": "deg"
+                "unit": "°"
             },
             {
                 "name": "pitch",
@@ -39,7 +39,7 @@ impl SmoothingAlgorithm for Fixed {
                 "from": -90,
                 "to": 90,
                 "value": 0,
-                "unit": "deg"
+                "unit": "°"
             },
             {
                 "name": "yaw",
@@ -48,7 +48,7 @@ impl SmoothingAlgorithm for Fixed {
                 "from": -180,
                 "to": 180,
                 "value": 0,
-                "unit": "deg"
+                "unit": "°"
             }
         ])
     }

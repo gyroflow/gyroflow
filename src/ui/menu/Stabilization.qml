@@ -24,6 +24,21 @@ MenuItem {
         return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
 
+    Component.onCompleted: {
+        QT_TRANSLATE_NOOP("Popup", "No smoothing");
+        QT_TRANSLATE_NOOP("Popup", "Plain 3D smoothing");
+        QT_TRANSLATE_NOOP("Popup", "Fixed camera");
+        QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
+
+        QT_TRANSLATE_NOOP("Stabilization", "Smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
+        QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
+        QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
+        QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
+        QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
+        QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
+    }
+
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
@@ -93,14 +108,14 @@ MenuItem {
                             qml += `Label {
                                 width: parent.width;
                                 spacing: 2 * dpiScale;
-                                text: qsTr("${x.description}")
+                                text: qsTranslate("Stabilization", "${x.description}")
                                 ${x.type} {
                                     width: parent.width;
                                     from: ${x.from};
                                     to: ${x.to};
                                     value: root.getSmoothingParam("${x.name}", ${x.value});
                                     defaultValue: ${x.value};
-                                    unit: "${x.unit}";
+                                    unit: qsTranslate("Stabilization", "${x.unit}");
                                     live: false;
                                     precision: ${x.precision} || 2;
                                     onValueChanged: root.setSmoothingParam("${x.name}", value);
@@ -145,7 +160,7 @@ MenuItem {
             value: 4;
             from: 0.1;
             to: 15;
-            unit: "s";
+            unit: qsTr("s");
             width: parent.width;
             onValueChanged: controller.adaptive_zoom = value;
         }
@@ -164,7 +179,7 @@ MenuItem {
                 id: shutter;
                 to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
                 width: parent.width;
-                unit: "ms";
+                unit: qsTr("ms");
                 precision: 2;
                 onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
             }

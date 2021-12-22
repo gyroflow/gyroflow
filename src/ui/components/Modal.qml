@@ -4,6 +4,7 @@ import QtQuick.Controls.impl 2.15 as QQCI
 
 Rectangle {
     id: root;
+    property alias t: t;
     property alias text: t.text;
     property alias buttons: btns.model;
     property bool opened: false;

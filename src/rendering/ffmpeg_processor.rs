@@ -347,7 +347,7 @@ impl<'a> FfmpegProcessor<'a> {
                         Err(e) => {
                             ::log::error!("Encoder error {:?}", e);
                             if !any_encoded {
-                                return Err(e.into());
+                                return Err(e);
                             }
                         }
                     }

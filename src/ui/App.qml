@@ -242,27 +242,14 @@ Rectangle {
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
+        function onUpdates_available(version, changelog) {
+            const body = changelog? "<p align=\"left\">" + changelog + "</p>" : "";
+            const el = messageBox(Modal.Info, qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + body, [ { text: qsTr("Download"), accent: true, clicked: () => Qt.openUrlExternally("https://github.com/AdrianEddy/gyroflow/releases") }, { text: qsTr("Close") }])
+            el.t.textFormat = Text.RichText;
+        }
     }
 
-    function checkUpdate() {
-        const xhr = new XMLHttpRequest()
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                const obj = JSON.parse(xhr.responseText.toString());
-                if (obj && obj.length) {
-                    const latestVersion = obj[0].name.replace("v", "");
-                    console.info('Latest version:', latestVersion, '. Current: ', version);
-                    if (version != latestVersion) {
-                        const body = obj[0].body? "\n\n" + obj[0].body : "";
-                        messageBox(Modal.Info, qsTr("There's a newer version available.") + body, [ { text: qsTr("Download"), clicked: () => Qt.openUrlExternally("https://github.com/AdrianEddy/gyroflow/releases") }, { text: qsTr("Close") }])
-                    }
-                }
-            }
-        }
-        xhr.open("GET", "https://api.github.com/repos/AdrianEddy/gyroflow/releases")
-        xhr.send()
-    }
     Component.onCompleted: {
-        checkUpdate();
+        controller.check_updates();
     }
 }

@@ -127,7 +127,7 @@ impl<'a> VideoTranscoder<'a> {
 
         if let Some(hw_type) = hw_device_type {
             unsafe {
-                if let Err(_) = super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size) {
+                if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size).is_err() {
                     super::append_log("Failed to create encoder HW context.\n");
                 }
             }
@@ -143,7 +143,7 @@ impl<'a> VideoTranscoder<'a> {
     pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>) -> Result<Status, FFmpegError> {
         let mut status = Status::Continue;
         
-        let mut decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
+        let decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
         
         let mut frame = frame::Video::empty();
         let mut sw_frame = &mut self.buffers.sw_frame;
@@ -171,7 +171,7 @@ impl<'a> VideoTranscoder<'a> {
 
                 // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                let result = Self::init_encoder(&mut frame, &mut decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format);
+                let result = Self::init_encoder(&mut frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format);
 
                 // let mut output = String::new();
                 // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -248,7 +248,7 @@ impl<'a> VideoTranscoder<'a> {
 
                     // Process frame
                     if let Some(ref mut cb) = self.on_frame_callback {
-                        cb(timestamp_us, &mut input_frame, self.output_frame.as_mut(), &mut self.converter)?;
+                        cb(timestamp_us, input_frame, self.output_frame.as_mut(), &mut self.converter)?;
                     }
 
                     // Encode output frame

@@ -160,7 +160,7 @@ MenuItem {
         NumberField {
             id: bitrate;
             value: 0;
-            unit: "Mbps";
+            unit: qsTr("Mbps");
             width: parent.width;
         }
     }

@@ -80,7 +80,7 @@ MenuItem {
             width: parent.width;
             height: 25 * dpiScale;
             precision: 1;
-            unit: "s";
+            unit: qsTr("s");
         }
     }
 
@@ -94,7 +94,7 @@ MenuItem {
             height: 25 * dpiScale;
             precision: 1;
             value: 5;
-            unit: "s";
+            unit: qsTr("s");
         }
     }
     Label {
@@ -157,7 +157,7 @@ MenuItem {
                 height: 25 * dpiScale;
                 value: 1.5;
                 precision: 1;
-                unit: "s";
+                unit: qsTr("s");
                 from: 1;
             }
         }
@@ -195,7 +195,7 @@ MenuItem {
 
             NumberField {
                 id: lpf;
-                unit: "Hz";
+                unit: qsTr("Hz");
                 precision: 2;
                 value: 0;
                 from: 0;
