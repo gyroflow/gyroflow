@@ -16,6 +16,7 @@ use crate::util;
 use crate::wrap_simple_method;
 use crate::rendering::FfmpegProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
+use crate::qt_gpu::qrhi_undistort;
 
 #[derive(Default, SimpleListItem)]
 struct OffsetItem {
@@ -59,6 +60,10 @@ pub struct Controller {
     set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
 
+    override_video_fps: qt_method!(fn(&self, fps: f64)),
+    get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
+    get_scaled_fps: qt_method!(fn(&self) -> f64),
+
     recompute_threaded: qt_method!(fn(&self)),
     request_recompute: qt_signal!(),
 
@@ -100,6 +105,8 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
+
+    set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
@@ -145,9 +152,9 @@ impl Controller {
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (fps, size, _duration_ms, _frame_count) = {
+        let (fps, size) = {
             let params = self.stabilizer.params.read(); 
-            (params.fps, params.size, params.duration_ms, params.frame_count)
+            (params.fps, params.size)
         };
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
@@ -204,7 +211,7 @@ impl Controller {
                 match FfmpegProcessor::from_file(&video_path, true) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                            let frame = core::timestamp_to_frame(timestamp_us as f64 / 1000.0, fps);
+                            let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
       
                             assert!(_output_frame.is_none());
 
@@ -377,6 +384,18 @@ impl Controller {
         });
     }
 
+    fn set_zero_copy(&self, player: QJSValue, enabled: bool) {
+        if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
+            let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
+
+            if enabled {
+                qrhi_undistort::init_player(vid.get_mdkplayer(), self.stabilizer.clone());
+            } else {
+                qrhi_undistort::deinit_player(vid.get_mdkplayer());
+            }
+        }
+    }
+
     fn init_player(&self, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -396,10 +415,7 @@ impl Controller {
                 // let _time = std::time::Instant::now();
 
                 // TODO: cache in atomics instead of locking the mutex every time
-                let (ow, oh) = {
-                    let params = stab.params.read();
-                    params.output_size
-                };
+                let (ow, oh) = stab.params.read().output_size;
                 let os = ow * 4; // Assume RGBA8 - 4 bytes per pixel
 
                 let mut out_pixels = out_pixels.borrow_mut();
@@ -414,8 +430,6 @@ impl Controller {
                     (0, 0, 0, std::ptr::null_mut())
                 }
             }));
-
-            // crate::qt_gpu::qrhi_undistort::init_player(vid.get_mdkplayer(), self.stabilizer.clone());
         }
     }
 
@@ -504,7 +518,13 @@ impl Controller {
         // TODO
     }
 
-    wrap_simple_method!(set_output_size,            w: usize, h: usize; recompute);
+    fn set_output_size(&self, w: usize, h: usize) {
+        self.stabilizer.set_output_size(w, h);
+        self.request_recompute();
+        qrhi_undistort::resize_player(self.stabilizer.clone());
+    }
+
+    wrap_simple_method!(override_video_fps,         v: f64; recompute; update_offset_model);
     wrap_simple_method!(set_video_rotation,         v: f64; recompute);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
@@ -522,6 +542,9 @@ impl Controller {
     wrap_simple_method!(set_imu_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
+
+    fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
+    fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
 
     fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
         self.stabilizer.offset_at_timestamp(timestamp_us)

@@ -199,7 +199,7 @@ impl<'a> FfmpegProcessor<'a> {
                 Some(atranscoder) => {
                     packet.rescale_ts(stream.time_base(), atranscoder.decoder.time_base());
                     atranscoder.decoder.send_packet(&packet)?;
-                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base)?;
+                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, self.start_ms)?;
                 }
                 None => {
                     // Direct stream copy
@@ -282,7 +282,7 @@ impl<'a> FfmpegProcessor<'a> {
             for (ost_index, transcoder) in atranscoders.iter_mut() {
                 let ost_time_base = self.ost_time_bases[*ost_index];
                 transcoder.decoder.send_eof()?;
-                transcoder.receive_and_process_decoded_frames(&mut octx, ost_time_base)?;
+                transcoder.receive_and_process_decoded_frames(&mut octx, ost_time_base, self.start_ms)?;
                 transcoder.encoder.send_eof()?;
                 transcoder.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
             }

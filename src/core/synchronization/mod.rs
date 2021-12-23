@@ -150,7 +150,7 @@ impl PoseEstimator {
                 }
             }
         });
-        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
+        self.recalculate_gyro_data(frame_count, duration_ms, false);
     }
 
     pub fn get_points_for_frame(&self, frame: &usize) -> (Vec<f32>, Vec<f32>) {
@@ -230,12 +230,12 @@ impl PoseEstimator {
         // TODO: maybe a better way than using stride as width?
         image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
     }
-    pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
+    pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
-        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
+        self.recalculate_gyro_data(frame_count, duration_ms, false);
     }
 
-    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, _fps: f64, final_pass: bool) {
+    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, final_pass: bool) {
         let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut is_akaze = false;
         for v in self.sync_results.read().values() {
@@ -349,11 +349,11 @@ impl PoseEstimator {
         ranges
     }
 
-    pub fn find_offsets(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         find_offset::find_offsets(ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
     }
 
-    pub fn find_offsets_visually(&self, ranges: &[(usize, usize)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets_visually(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs)
     }
 }
@@ -364,10 +364,10 @@ pub struct AutosyncProcess {
     sync_search_size: f64,
     frame_count: usize,
     duration_ms: f64,
-    fps: f64,
+    org_fps: f64,
     for_rs: bool, // for rolling shutter estimation
     ranges_ms: Vec<(f64, f64)>,
-    frame_ranges: Vec<(usize, usize)>,
+    frame_ranges: Vec<(i32, i32)>,
     estimator: Arc<PoseEstimator>,
     frame_status: Arc<RwLock<HashMap<usize, bool>>>,
     total_read_frames: Arc<AtomicUsize>,
@@ -378,30 +378,35 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
+    pub fn from_manager<T: crate::undistortion::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
-        let fps = params.fps;
+        let org_fps = params.fps;
         let size = params.size;
-        let duration_ms = params.duration_ms;
+        let org_duration_ms = params.duration_ms;
+        let duration_ms = params.get_scaled_duration_ms();
+
+        if let Some(scale) = params.fps_scale {
+            sync_duration_ms *= scale;
+        }
+
         drop(params);
 
         if duration_ms < 10.0 || frame_count < 2 || sync_duration_ms < 10.0 || sync_search_size < 10.0 { return Err(()); }
 
         let ranges_ms: Vec<(f64, f64)> = timestamps_fract.iter().map(|x| {
             let range = (
-                ((x * duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
-                ((x * duration_ms) + (sync_duration_ms / 2.0)).min(duration_ms)
+                ((x * org_duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
+                ((x * org_duration_ms) + (sync_duration_ms / 2.0)).min(org_duration_ms)
             );
             (range.0, range.1)
         }).collect();
 
-        let frame_ranges: Vec<(usize, usize)> = ranges_ms.iter().map(|(from, to)| (stab.frame_at_timestamp(*from, fps), stab.frame_at_timestamp(*to, fps))).collect();
-        log::debug!("frame_ranges: {:?}", &frame_ranges);
+        let frame_ranges: Vec<(i32, i32)> = ranges_ms.iter().map(|(from, to)| (crate::frame_at_timestamp(*from, org_fps), crate::frame_at_timestamp(*to, org_fps))).collect();
         let mut frame_status = HashMap::<usize, bool>::new();
         for x in &frame_ranges {
             for frame in x.0..x.1-1 {
-                frame_status.insert(frame, false);
+                frame_status.insert(frame as usize, false);
             }
         }
         let frame_status = Arc::new(RwLock::new(frame_status));
@@ -427,7 +432,7 @@ impl AutosyncProcess {
         Ok(Self {
             frame_count,
             duration_ms,
-            fps,
+            org_fps,
             for_rs,
             method,
             ranges_ms,
@@ -448,7 +453,7 @@ impl AutosyncProcess {
         self.ranges_ms.clone()
     }
     pub fn is_frame_wanted(&self, frame: i32) -> bool {
-        if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))) {
+        if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)) {
             if frame % self.estimator.every_nth_frame.load(SeqCst) as i32 != 0 {
                 // Don't analyze this frame
                 self.frame_status.write().insert(frame as usize, true);
@@ -473,8 +478,9 @@ impl AutosyncProcess {
         let progress_cb = self.progress_cb.clone();
         let frame_count = self.frame_count;
         let duration_ms = self.duration_ms;
-        let fps = self.fps;
-        if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&(frame as usize))).copied() {
+        //let fps = self.fps;
+        let org_fps = self.org_fps;
+        if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)).copied() {
             crate::THREAD_POOL.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     total_detected_frames.fetch_add(1, SeqCst);
@@ -485,11 +491,11 @@ impl AutosyncProcess {
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame % 7 == 0 {
-                        estimator.process_detected_frames(frame_count as usize, duration_ms, fps);
-                        estimator.recalculate_gyro_data(frame_count, duration_ms, fps, false);
+                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps);
+                        estimator.recalculate_gyro_data(frame_count, duration_ms, false);
                     }
 
-                    let processed_frames = estimator.processed_frames(current_range.0..current_range.1);
+                    let processed_frames = estimator.processed_frames(current_range.0 as usize..current_range.1 as usize);
                     for x in processed_frames { frame_status.write().insert(x, true); }
 
                     if total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
@@ -512,8 +518,8 @@ impl AutosyncProcess {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.fps);
-        self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.fps, true);
+        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps);
+        self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, true);
 
         if let Some(cb) = &self.finished_cb {
             if self.for_rs {

@@ -5,19 +5,37 @@ use std::sync::Arc;
 use crate::core::StabilizationManager;
 use crate::core::undistortion::RGBA8;
 use cpp::*;
+use qmetaobject::QSize;
 
 cpp! {{
     struct RustPtr { void *data; };
     #include "src/qt_gpu/qrhi_undistort.cpp"
+
+    static std::unique_ptr<QtRHIUndistort> rhiUndistortion = std::make_unique<QtRHIUndistort>();
 }}
 
+pub fn resize_player(stab: Arc<StabilizationManager<RGBA8>>) {
+    let player = cpp!(unsafe [] -> *mut MDKPlayer as "MDKPlayer *" {
+        if (!rhiUndistortion->m_releasePool.isEmpty() && rhiUndistortion->m_player) {
+            return rhiUndistortion->m_player;
+        } else {
+            return nullptr;
+        }
+    });
+    if !player.is_null() {
+        unsafe { init_player(&mut *player, stab); }
+    }
+}
 pub fn init_player(mdkplayer: &mut MDKPlayer, stab: Arc<StabilizationManager<RGBA8>>) {
-    cpp!(unsafe [mdkplayer as "MDKPlayer *", stab as "RustPtr"] -> bool as "bool" {
-        if (!mdkplayer) return false;
-        static std::unique_ptr<QtRHIUndistort> rhiUndistortion = std::make_unique<QtRHIUndistort>();
+    cpp!(unsafe [mdkplayer as "MDKPlayer *", stab as "RustPtr"] {
+        if (!mdkplayer) return;
 
-        auto initCb = [mdkplayer](QSize texSize, QSizeF itemSize) -> bool {
-            return rhiUndistortion->init(mdkplayer, texSize, itemSize);
+        auto initCb = [mdkplayer, stab](QSize texSize, QSizeF itemSize) -> bool {
+            QSize outputSize = rust!(Rust_Controller_InitRHI [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> QSize as "QSize" {
+                let osize = stab.params.read().output_size;
+                QSize { width: osize.0 as u32, height: osize.1 as u32 }
+            });
+            return rhiUndistortion->init(mdkplayer, texSize, itemSize, outputSize);
         };
         auto renderCb = [mdkplayer, stab](double timestamp, int32_t frame, bool doRender) -> bool {
             float bg[4];
@@ -43,6 +61,17 @@ pub fn init_player(mdkplayer: &mut MDKPlayer, stab: Arc<StabilizationManager<RGB
             return ok && rhiUndistortion->render(mdkplayer, timestamp, frame, ptr, params_count, bg, doRender, nullptr, 0, nullptr, 0);
         };
         auto cleanupCb = [] { rhiUndistortion->cleanup(); };
+        rhiUndistortion->m_player = mdkplayer;
+        mdkplayer->cleanupGpuCompute();
         mdkplayer->setupGpuCompute(initCb, renderCb, cleanupCb);
+    });
+}
+
+pub fn deinit_player(mdkplayer: &mut MDKPlayer) {
+    cpp!(unsafe [mdkplayer as "MDKPlayer *"] {
+        if (!mdkplayer) return;
+        rhiUndistortion->m_player = nullptr;
+        mdkplayer->cleanupGpuCompute();
+        mdkplayer->setupGpuCompute(nullptr, nullptr, nullptr);
     });
 }

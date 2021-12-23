@@ -56,6 +56,7 @@ use ui::theme::Theme;
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
 // TODO: save panel sizes, menu opened states and window dimensions
+// TODO: audio slightly off sync when using exporting trimmed video
 
 cpp! {{
     #include <QQuickStyle>

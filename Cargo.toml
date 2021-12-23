@@ -27,7 +27,7 @@ winapi = "*"
 simplelog = "*"
 log = "*"
 
-ureq = "2.3"
+ureq = "2.4"
 
 [build-dependencies]
 cpp_build = "*"

@@ -36,6 +36,7 @@ pub struct TimelineGyroChart {
     visibleAreaRight: qt_property!(f64; WRITE setVisibleAreaRight),
     vscale: qt_property!(f64; WRITE setVScale),
 
+    setDurationMs: qt_method!(fn(&mut self, v: f64)),
     setVScaleToVisibleArea: qt_method!(fn(&mut self)),
     setAxisVisible: qt_method!(fn(&mut self, a: usize, v: bool)),
     getAxisVisible: qt_method!(fn(&self, a: usize) -> bool),

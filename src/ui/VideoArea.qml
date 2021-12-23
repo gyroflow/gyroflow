@@ -293,7 +293,7 @@ Item {
                 }
 
                 ComboBox {
-                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "8x", "10x"];
+                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "8x", "10x", "20x"];
                     width: 60 * dpiScale;
                     currentIndex: 3;
                     height: 25 * dpiScale;
@@ -325,11 +325,11 @@ Item {
 
                 onTrimStartChanged: {
                     controller.set_trim_start(trimStart);
-                    vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
+                    vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
                 }
                 onTrimEndChanged: {
                     controller.set_trim_end(trimEnd);
-                    vid.setPlaybackRange(trimStart * durationMs, trimEnd * durationMs);
+                    vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
                 }
 
                 property bool preventChange: false;

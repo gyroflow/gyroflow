@@ -238,8 +238,9 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
 }
 
 pub fn find_best_matching_codec(codec: ffi::AVPixelFormat, supported: &[ffi::AVPixelFormat]) -> ffi::AVPixelFormat {
-    if supported.is_empty() || supported.contains(&codec) { return ffi::AVPixelFormat::AV_PIX_FMT_NONE; }
+    if supported.is_empty() { return ffi::AVPixelFormat::AV_PIX_FMT_NONE; }
 
+    if supported.contains(&codec) { return codec; }
     if codec == ffi::AVPixelFormat::AV_PIX_FMT_P010LE && supported.contains(&ffi::AVPixelFormat::AV_PIX_FMT_YUV420P10LE) { return ffi::AVPixelFormat::AV_PIX_FMT_YUV420P10LE; }
     if codec == ffi::AVPixelFormat::AV_PIX_FMT_NV12   && supported.contains(&ffi::AVPixelFormat::AV_PIX_FMT_YUV420P)     { return ffi::AVPixelFormat::AV_PIX_FMT_YUV420P; }
 

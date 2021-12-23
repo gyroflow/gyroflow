@@ -10,6 +10,7 @@ MenuItem {
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property alias integrationMethod: integrator.currentIndex;
+    property string filename: "";
 
     FileDialog {
         id: fileDialog;
@@ -29,6 +30,7 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
+            root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
             orientation.text = imu_orientation;

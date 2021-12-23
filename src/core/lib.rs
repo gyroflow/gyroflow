@@ -42,6 +42,7 @@ pub struct BasicParams {
     pub fov: f64,
     pub fovs: Vec<f64>,
     pub fps: f64,
+    pub fps_scale: Option<f64>,
     pub frame_count: usize,
     pub duration_ms: f64,
 
@@ -82,9 +83,27 @@ impl Default for BasicParams {
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
     
             fps: 0.0,
+            fps_scale: None,
             frame_count: 0,
             duration_ms: 0.0,
         }
+    }
+}
+
+impl BasicParams {
+    pub fn get_scaled_duration_ms(&self) -> f64 {
+        let mut duration = self.duration_ms;
+        if let Some(scale) = self.fps_scale {
+            duration /= scale;
+        }
+        duration
+    }
+    pub fn get_scaled_fps(&self) -> f64 {
+        let mut fps = self.fps;
+        if let Some(scale) = self.fps_scale {
+            fps *= scale;
+        }
+        fps
     }
 }
 
@@ -144,10 +163,8 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn load_gyro_data(&self, path: &str) -> std::io::Result<()> {
         {
             let params = self.params.read();
-            let mut gyro = self.gyro.write(); 
-            gyro.fps = params.fps;
-            gyro.duration_ms = params.duration_ms;
-            gyro.offsets.clear();
+            let mut gyro = self.gyro.write();
+            gyro.init_from_params(&params);
         }
 
         if path.ends_with(".gyroflow") {
@@ -242,7 +259,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>, gyro: &RwLock<GyroSource>) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.fps)
+            (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
         };
         if window > 0.0 || window < -0.9 {
             let mut quats = Vec::with_capacity(frames);
@@ -266,8 +283,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_smoothness(&self) {
-        let duration_ms = self.params.read().duration_ms;
-        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_ref(), duration_ms);
+        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_ref());
     }
 
     pub fn recompute_undistortion(&self) {
@@ -306,7 +322,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
                 let smoothing = smoothing.write().current().clone();
-                params.gyro.recompute_smoothness(smoothing.as_ref(), params.duration_ms);
+                params.gyro.recompute_smoothness(smoothing.as_ref());
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
@@ -394,13 +410,16 @@ impl<T: PixelType> StabilizationManager<T> {
         false
     }
 
-    pub fn process_pixels(&self, timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        let (enabled, ow, oh, framebuffer_inverted, fps) = {
+    pub fn process_pixels(&self, mut timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
+        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps, params.fps_scale)
         };
         if enabled && ow == out_width && oh == out_height {
-            let frame = timestamp_to_frame(timestamp_us as f64 / 1000.0, fps) as usize; // used only to draw features and OF
+            if let Some(scale) = fps_scale {
+                timestamp_us = (timestamp_us as f64 / scale).round() as i64;
+            }
+            let frame = frame_at_timestamp(timestamp_us as f64 / 1000.0, fps) as usize; // used only to draw features and OF
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
@@ -456,11 +475,8 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_imu_orientation(&self, orientation: String) { self.gyro.write().set_imu_orientation(orientation); }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
-        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
+        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms);
     }
-
-    pub fn timestamp_at_frame(&self, frame: usize, fps: f64) -> f64   { frame as f64 * fps * 1000.0 }
-    pub fn frame_at_timestamp(&self, ts: f64,      fps: f64) -> usize { (ts / 1000.0 * fps).ceil() as usize }
 
     pub fn set_lens_param(&self, param: &str, value: f64) {
         let mut lens = self.lens.write();
@@ -523,11 +539,27 @@ impl<T: PixelType> StabilizationManager<T> {
         *self.gyro.write() = GyroSource::new();
         self.pose_estimator.clear();
     }
+
+    pub fn override_video_fps(&self, fps: f64) {
+        {
+            let mut params = self.params.write();
+            if (fps - params.fps).abs() > 0.001 {
+                params.fps_scale = Some(fps / params.fps);
+            } else {
+                params.fps_scale = None;
+            } 
+            self.gyro.write().init_from_params(&params);
+        }
+
+        self.undistortion.write().set_compute_params(undistortion::ComputeParams::from_manager(self));
+
+        self.smoothness_checksum.store(0, SeqCst);
+        self.adaptive_zoom_checksum.store(0, SeqCst);
+    }
 }
 
-pub fn timestamp_to_frame(timestamp_ms: f64, fps: f64) -> i32 {
-    (timestamp_ms * (fps / 1000.0)).round() as i32
-}
+pub fn timestamp_at_frame(frame: i32, fps: f64) -> f64 { frame as f64 * fps * 1000.0 }
+pub fn frame_at_timestamp(ts: f64,    fps: f64) -> i32 { (ts / 1000.0 * fps).ceil() as i32 }
 
 pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
     THREAD_POOL.spawn(cb);

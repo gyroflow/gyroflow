@@ -14,9 +14,7 @@ pub struct ComputeParams {
     pub gyro: GyroSource,
     pub fovs: Vec<f64>,
 
-    pub duration_ms: f64,
-    pub frame_count: usize, 
-    pub fps: f64,
+    pub frame_count: usize,
     pub fov_scale: f64,
     pub width: usize,
     pub height: usize, 
@@ -56,11 +54,9 @@ impl ComputeParams {
         };
 
         Self {
-            duration_ms: params.duration_ms,
             gyro: mgr.gyro.read().clone(), // TODO: maybe not clone?
 
             frame_count: params.frame_count,
-            fps: params.fps,
             fov_scale: params.fov / (params.size.0 as f64 / calib_width),
             fovs: params.fovs.clone(),
             width: params.size.0,
@@ -146,8 +142,7 @@ impl FrameTransform {
             if let Err(err) = i_r {
                 log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
             }
-            let i_r = i_r.unwrap_or_default();
-            let i_r: Matrix3<f32> = nalgebra::convert(i_r);
+            let i_r: Matrix3<f32> = nalgebra::convert(i_r.unwrap_or_default());
             [
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)], 
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)], 
@@ -238,6 +233,8 @@ pub struct Undistortion<T: PixelType> {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
+    backend_initialized: bool,
+
     empty_frame_transform: FrameTransform,
     compute_params: ComputeParams,
 
@@ -255,7 +252,7 @@ impl<T: PixelType> Undistortion<T> {
 
         if let Entry::Vacant(e) = self.stab_data.entry(timestamp_us) {
             let timestamp_ms = (timestamp_us as f64) / 1000.0;
-            let frame = crate::timestamp_to_frame(timestamp_ms, self.compute_params.fps) as usize; // Only for FOVs
+            let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs
             e.insert(FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame));
         }
         if let Some(e) = self.stab_data.get(&timestamp_us) {
@@ -268,31 +265,10 @@ impl<T: PixelType> Undistortion<T> {
 
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), stride: usize, output_size: (usize, usize), output_stride: usize) {
         self.background = bg;
+        self.backend_initialized = false;
 
         self.size = (size.0, size.1, stride);
         self.output_size = (output_size.0, output_size.1, output_stride);
-
-        #[cfg(feature = "use-opencl")]
-        {
-            let cl = opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background);
-            match cl {
-                Ok(cl) => self.cl = Some(cl),
-                Err(err) => {
-                    log::error!("OpenCL error: {:?}", err);
-                }
-            }
-        }
-        
-        // TODO: Support other pixel types
-        if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-            let wgpu = wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background);
-            match wgpu {
-                Some(wgpu) => self.wgpu = Some(wgpu),
-                None => {
-                    log::error!("Failed to initialize wgpu");
-                }
-            }
-        }
     }
 
     pub fn set_background(&mut self, bg: Vector4<f32>) {
@@ -310,11 +286,40 @@ impl<T: PixelType> Undistortion<T> {
         Some(self.get_stab_data_at_timestamp(timestamp_us).clone())
     }
 
+    pub fn init_backends(&mut self) {
+        if !self.backend_initialized {
+            #[cfg(feature = "use-opencl")]
+            {
+                let cl = opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background);
+                match cl {
+                    Ok(cl) => self.cl = Some(cl),
+                    Err(err) => {
+                        log::error!("OpenCL error: {:?}", err);
+                    }
+                }
+            }
+            
+            // TODO: Support other pixel types
+            if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+                let wgpu = wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background);
+                match wgpu {
+                    Some(wgpu) => self.wgpu = Some(wgpu),
+                    None => {
+                        log::error!("Failed to initialize wgpu");
+                    }
+                }
+            }
+            self.backend_initialized = true;
+        }
+    }
+
     pub fn process_pixels(&mut self, timestamp_us: i64, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
         if self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return false; }
 
         let itm = self.get_stab_data_at_timestamp(timestamp_us).clone(); // TODO: get rid of this clone
         if itm.params.is_empty() { return false; }
+
+        self.init_backends();
 
         // OpenCL path
         #[cfg(feature = "use-opencl")]

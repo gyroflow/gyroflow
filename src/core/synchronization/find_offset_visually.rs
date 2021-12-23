@@ -2,17 +2,18 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ undistortion, undistortion::ComputeParams };
 use super::PoseEstimator;
 
-pub fn find_offsets(ranges: &[(usize, usize)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
 
     let next_frame_no = 2;
-    let fps = params.fps;
+    let fps = params.gyro.fps;
 
     for (from_frame, to_frame) in ranges {
         let mut matched_points = Vec::new();
         for frame in (*from_frame..*to_frame).step_by(next_frame_no) {
+            let frame = frame as usize;
             if let Some(lines) = estimator.get_of_lines_for_frame(&frame, 1.0, next_frame_no) {
                 if !lines.0.is_empty() && lines.0.len() == lines.1.len() {
                     matched_points.push((frame, lines));

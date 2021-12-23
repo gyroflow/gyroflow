@@ -59,6 +59,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
     let trim_ratio = trim_end - trim_start;
     let total_frame_count = params.frame_count;
     let _fps = params.fps;
+    let fps_scale = params.fps_scale;
 
     let duration_ms = params.duration_ms;
 
@@ -112,9 +113,13 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     let progress2 = progress.clone();
     let mut process_frame = 0;
-    proc.on_frame(move |timestamp_us, input_frame, output_frame, converter| {
+    proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
         process_frame += 1;
         log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
+            
+        if let Some(scale) = fps_scale {
+            timestamp_us = (timestamp_us as f64 / scale).round() as i64;
+        }
 
         let output_frame = output_frame.unwrap();
 

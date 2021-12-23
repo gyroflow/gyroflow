@@ -3,11 +3,11 @@ use std::collections::BTreeMap;
 
 use crate::gyro_source::{ GyroSource, TimeIMU };
 
-pub fn find_offsets(ranges: &[(usize, usize)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
-            let mut of_item = estimated_gyro[*from_frame..*to_frame].to_vec();
+            let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();
             let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
                 if x.timestamp_ms >= of_item[0].timestamp_ms - (search_size / 2.0) && x.timestamp_ms <= last_of_timestamp + (search_size / 2.0) {

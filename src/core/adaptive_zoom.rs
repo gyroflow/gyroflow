@@ -56,7 +56,7 @@ impl AdaptiveZoom {
 
             _size: params.size,
             output_dim: params.output_size,
-            fps: params.fps,
+            fps: params.get_scaled_fps(),
             range : (params.trim_start, params.trim_end),
 
             img_scale_ratio: params.size.0 as f64 / params.video_size.0 as f64,

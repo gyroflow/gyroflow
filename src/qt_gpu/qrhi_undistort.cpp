@@ -19,9 +19,10 @@ public:
     QMatrix4x4 textureMatrix();
 
     void setupGpuCompute(std::function<bool(QSize texSize, QSizeF itemSize)> &&initCb, std::function<bool(double, int32_t, bool)> &&renderCb, std::function<void()> &&cleanupCb);
+    void cleanupGpuCompute();
 };
 
-// #define DRAW_TO_RENDERTARGET
+#define DRAW_TO_RENDERTARGET
 
 #ifdef DRAW_TO_RENDERTARGET
     static float quadVertexData[16] = { // Y up, CCW
@@ -46,7 +47,7 @@ struct Uniforms {
 
 class QtRHIUndistort {
 public:
-    bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/) {
+    bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/, QSize outputSize) {
         if (!item) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -56,15 +57,17 @@ public:
             return false;
         }
 
+        m_outputSize = outputSize;
+
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
         // -------- Compute pass init --------
 
-        m_texIn = rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedWithLoadStore | QRhiTexture::UsedAsTransferSource);
-        m_texIn->create();
-        m_releasePool << m_texIn;
+        // m_texIn = rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedWithLoadStore | QRhiTexture::UsedAsTransferSource);
+        // m_texIn->create();
+        // m_releasePool << m_texIn;
 
-        m_texOut = rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedWithLoadStore); // TODO out texture size
+        m_texOut = rhi->newTexture(QRhiTexture::RGBA8, m_outputSize, 1, QRhiTexture::UsedWithLoadStore);
         m_texOut->create();
         m_releasePool << m_texOut;
 
@@ -86,13 +89,8 @@ public:
 
         m_computeBindings = rhi->newShaderResourceBindings();
         m_computeBindings->setBindings({
-#ifdef DRAW_TO_RENDERTARGET
             QRhiShaderResourceBinding::imageLoad(0, QRhiShaderResourceBinding::ComputeStage, item->rhiTexture(), 0),
-            QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage, m_texOut, 0) ,
-#else
-            QRhiShaderResourceBinding::imageLoad(0, QRhiShaderResourceBinding::ComputeStage, m_texIn, 0),
-            QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage, item->rhiTexture(), 0) ,
-#endif
+            QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage, m_texOut, 0),
             QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::ComputeStage, m_computeUniform),
             QRhiShaderResourceBinding::bufferLoad(3, QRhiShaderResourceBinding::ComputeStage, m_computeParams),
             QRhiShaderResourceBinding::bufferLoad(4, QRhiShaderResourceBinding::ComputeStage, m_featuresPixels),
@@ -184,10 +182,9 @@ public:
             m_initialUpdates = nullptr;
         }
 
-#ifndef DRAW_TO_RENDERTARGET
-        QRhiTextureCopyDescription desc;
-        u->copyTexture(m_texIn, item->rhiTexture(), desc);
-#endif
+/*#ifndef DRAW_TO_RENDERTARGET
+        u->copyTexture(m_texIn, item->rhiTexture(), {});
+#endif*/
 
         Uniforms uniforms;
         uniforms.params_count = params_count - 1;
@@ -215,14 +212,19 @@ public:
         u->updateDynamicBuffer(m_drawingUniform, 0, 64, mvp.constData());
 #endif
 
-        // QRhiTextureCopyDescription desc2;
-        // u->copyTexture(item->rhiTexture(), m_texOut, desc2);
-
         cb->beginComputePass(u);
         cb->setComputePipeline(m_computePipeline);
         cb->setShaderResources();
-        cb->dispatch(size.width() / 16, size.height() / 16, 1);
+        cb->dispatch(m_outputSize.width() / 16, m_outputSize.height() / 16, 1);
         cb->endComputePass();
+
+#ifndef DRAW_TO_RENDERTARGET
+        u = rhi->nextResourceUpdateBatch();
+        QRhiTextureCopyDescription desc;
+        desc.setPixelSize(size);
+        u->copyTexture(item->rhiTexture(), m_texOut, desc);
+        cb->resourceUpdate(u);
+#endif
 
 #ifdef DRAW_TO_RENDERTARGET
         QColor clearColor(Qt::black);
@@ -240,7 +242,6 @@ public:
 
     std::vector<float> params_buffer;
 
-private:
     QShader getShader(const QString &name) {
         QFile f(name);
         if (f.open(QIODevice::ReadOnly))
@@ -250,7 +251,7 @@ private:
 
     QList<QRhiResource *> m_releasePool;
 
-    QRhiTexture *m_texIn = nullptr;
+    // QRhiTexture *m_texIn = nullptr;
     QRhiTexture *m_texOut = nullptr;
     QRhiBuffer *m_computeUniform = nullptr;
     QRhiBuffer *m_computeParams = nullptr;
@@ -258,6 +259,10 @@ private:
     QRhiBuffer *m_optflowPixels = nullptr;
     QRhiShaderResourceBindings *m_computeBindings = nullptr;
     QRhiComputePipeline *m_computePipeline = nullptr;
+
+    QSize m_outputSize;
+
+    MDKPlayer *m_player{nullptr};
 
 #ifdef DRAW_TO_RENDERTARGET
     QRhiBuffer *m_vertexBuffer = nullptr;

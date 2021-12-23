@@ -9,6 +9,9 @@ MenuItem {
     icon: "info";
 
     property real videoRotation: 0;
+    property real fps: 0;
+    property real org_fps: 0;
+    property string filename: "";
 
     Component.onCompleted: {
         const fields = [
@@ -51,9 +54,12 @@ MenuItem {
         list.modelChanged();
 
         root.videoRotation = +(md["stream.video[0].rotation"] || 0);
+        root.fps = framerate;
+        root.org_fps = framerate;
         // controller.set_video_rotation(-root.videoRotation);
     }
     function updateEntry(key, value) {
+        if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
     }
 
@@ -93,58 +99,41 @@ MenuItem {
         onClicked: root.selectFileRequest();
     }
 
-    Item {
-        id: editRotationControl;
-        height: parent.height;
-        LinkButton {
-            anchors.verticalCenter: parent.verticalCenter;
-            icon.name: newRotation.visible? "checkmark" : "pencil";
-            icon.height: parent.height * 0.8;
-            icon.width: parent.height * 0.8;
-            height: newRotation.visible? newRotation.height + 5 * dpiScale : undefined;
-            leftPadding: newRotation.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
-            x: (newRotation.visible? newRotation.width + 5 * dpiScale : parent.parent.paintedWidth + 15 * dpiScale);
-            onClicked: {
-                if (newRotation.visible) {
-                    newRotation.accepted();
-                } else {
-                    newRotation.value = root.videoRotation;
-                    newRotation.visible = true;
-                }
-            }
-        } 
-        NumberField {
-            id: newRotation;
-            visible: false;
-            x: 5 * dpiScale;
-            y: (parent.parent.height - height) / 2;
-            from: -360;
-            to: 360;
-            unit: "°";
-            height: parent.parent.height + 8 * dpiScale;
-            topPadding: 0; bottomPadding: 0;
-            width: 50 * dpiScale;
-            font.pixelSize: 12 * dpiScale;
-            onAccepted: {
-                visible = false;
-                root.videoRotation = value;
-                root.updateEntry("Rotation", root.videoRotation + " °");
-                controller.set_video_rotation(root.videoRotation);
-            }
-        }
-    }
-
     TableList {
         id: list;
-        onModelChanged: {
-            Qt.callLater(function() {
-                if (list) {
-                    const rotObj = list.col2.children[list.col2.children.length - 3];
-                    editRotationControl.parent = rotObj;
-                    editRotationControl.enabled = rotObj.text != '---';
+        editableFields: ({
+            "Rotation": {
+                "unit": "°",
+                "from": -360,
+                "to": 360,
+                "value": function() { return root.videoRotation; },
+                "onChange": function(value) {
+                    root.videoRotation = value;
+                    root.updateEntry("Rotation", root.videoRotation + " °");
+                    controller.set_video_rotation(root.videoRotation);
                 }
-            });
-        }
+            },
+            "Frame rate": {
+                "unit": "fps",
+                "precision": 3,
+                "width": 70,
+                "value": function() { return root.fps; },
+                "onChange": function(value) {
+                    root.fps = value;
+                    root.updateEntry("Frame rate", value.toFixed(3) + " fps");
+                    controller.override_video_fps(value);
+
+                    const scale = root.fps / root.org_fps;
+                    console.log(scale);
+                    window.sync.everyNthFrame = Math.max(1, Math.floor(scale));
+
+                    const chart = window.videoArea.timeline.getChart();
+                    chart.setDurationMs(controller.get_scaled_duration_ms());
+                    window.videoArea.durationMs = controller.get_scaled_duration_ms();
+                    Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
+                }
+            }
+        });
     }
 
     DropTarget {

@@ -93,4 +93,11 @@ MenuItem {
             }
         }
     }
+    CheckBox {
+        id: zerocopy;
+        text: qsTr("Experimental zero-copy GPU preview");
+        tooltip: qsTr("Render and undistort the preview video entirely on the GPU.\nThis should provide much better UI performance.");
+        checked: false;
+        onCheckedChanged: controller.set_zero_copy(window.videoArea.vid, checked);
+    }
 }

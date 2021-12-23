@@ -34,7 +34,7 @@ Row {
         onValueChanged: {
             slider.preventChange = true;
             slider.value = value;
-            Qt.callLater(() => slider.preventChange = false);
+            Qt.callLater(() => { if (slider) slider.preventChange = false; });
         }
     }
 }

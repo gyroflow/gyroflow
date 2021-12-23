@@ -150,11 +150,9 @@ impl<'a> VideoTranscoder<'a> {
         let mut hw_frame = frame::Video::empty();
         
         while decoder.receive_frame(&mut frame).is_ok() {
-
             if !self.decode_only && self.encoder.is_none() {
                 let octx = octx.as_deref_mut().ok_or(FFmpegError::NoOutputContext)?;
 
-                log::debug!("hw_device_type: {:?}", self.hw_device_type);
                 if self.gpu_decoding && self.encoder_pixel_format.is_none() {
                     unsafe {
                         let dl_format = *super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr()).first().ok_or(FFmpegError::NoHWTransferFormats)?;
@@ -168,6 +166,7 @@ impl<'a> VideoTranscoder<'a> {
                         }
                     }
                 }
+                log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.hw_device_type, self.encoder_pixel_format);
 
                 // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 

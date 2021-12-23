@@ -6,6 +6,8 @@ use std::path::Path;
 use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
+use crate::BasicParams;
+
 use super::integration::*;
 use super::smoothing::SmoothingAlgorithm;
 use std::io::Result;
@@ -35,8 +37,8 @@ pub struct GyroSource {
 
     pub imu_orientation: Option<String>,
 
-    pub imu_rotation: Option<Rotation3<f64>>,
-    pub imu_lpf: f64,
+    imu_rotation: Option<Rotation3<f64>>,
+    imu_lpf: f64,
 
     pub integration_method: usize,
 
@@ -55,6 +57,11 @@ impl GyroSource {
             integration_method: 1,
             ..Default::default()
         }
+    }
+    pub fn init_from_params(&mut self, params: &BasicParams) {
+        self.fps = params.get_scaled_fps();
+        self.duration_ms = params.get_scaled_duration_ms();
+        self.offsets.clear();
     }
     pub fn parse_telemetry_file(path: &str) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
@@ -122,6 +129,8 @@ impl GyroSource {
         self.offsets.clear();
         self.raw_imu.clear();
         self.org_raw_imu.clear();
+        self.imu_rotation = None;
+        self.imu_lpf = 0.0;
 
         self.imu_orientation = telemetry.imu_orientation.clone();
         self.detected_source = telemetry.detected_source.clone();
@@ -159,8 +168,8 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, duration_ms: f64) {
-        self.smoothed_quaternions = alg.smooth(&self.quaternions, duration_ms);
+    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm) {
+        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
 
         for (sq, q) in self.smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {

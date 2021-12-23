@@ -1,4 +1,4 @@
-use ffmpeg_next::{ codec, format, decoder, encoder, frame, software, Packet, Rational, Error, format::context::Output, channel_layout::ChannelLayout };
+use ffmpeg_next::{ codec, format, decoder, encoder, frame, software, Packet, Rescale, Rational, Error, format::context::Output, channel_layout::ChannelLayout };
 
 pub struct AudioTranscoder {
     pub ost_index: usize,
@@ -52,19 +52,22 @@ impl AudioTranscoder {
         })
     }
 
-    pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational) -> Result<(), Error> {
+    pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational, start_ms: Option<f64>) -> Result<(), Error> {
         let mut frame = frame::Audio::empty();
         let mut out_frame = frame::Audio::empty();
         
         while self.decoder.receive_frame(&mut frame).is_ok() {
-            if self.first_frame_ts.is_none() {
-                self.first_frame_ts = frame.timestamp();
-            }
 
             if let Some(mut ts) = frame.timestamp() {
-                ts -= self.first_frame_ts.unwrap();
+                let timestamp_us = ts.rescale(self.decoder.time_base(), (1, 1000000));
+                let timestamp_ms = timestamp_us as f64 / 1000.0;
 
-                if ts >= 0 {
+                if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
+                    if self.first_frame_ts.is_none() {
+                        self.first_frame_ts = frame.timestamp();
+                    }
+                    ts -= self.first_frame_ts.unwrap();
+
                     frame.set_pts(Some(ts));
                     frame.set_channel_layout(self.resampler.input().channel_layout);
         

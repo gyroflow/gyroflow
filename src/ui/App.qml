@@ -36,6 +36,7 @@ Rectangle {
             rightPanel.parent = mainLayout;
         }
     }
+    property alias vidInfo: vidInfo;
     property alias videoArea: videoArea;
     property alias motionData: motionData;
     property alias lensProfile: lensProfile;
