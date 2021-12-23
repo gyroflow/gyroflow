@@ -42,8 +42,11 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time) {
-            setShutterTimer.pending = frame_readout_time;
-            setShutterTimer.start();
+            // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
+            if (!camera.includes("GoPro")) {
+                setShutterTimer.pending = frame_readout_time;
+                setShutterTimer.start();
+            }
         }
         function onRolling_shutter_estimated(rolling_shutter) {
             shutter.value = Math.abs(rolling_shutter);

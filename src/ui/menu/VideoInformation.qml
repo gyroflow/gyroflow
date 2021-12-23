@@ -124,7 +124,6 @@ MenuItem {
                     controller.override_video_fps(value);
 
                     const scale = root.fps / root.org_fps;
-                    console.log(scale);
                     window.sync.everyNthFrame = Math.max(1, Math.floor(scale));
 
                     const chart = window.videoArea.timeline.getChart();

@@ -92,18 +92,16 @@ impl Default for BasicParams {
 
 impl BasicParams {
     pub fn get_scaled_duration_ms(&self) -> f64 {
-        let mut duration = self.duration_ms;
-        if let Some(scale) = self.fps_scale {
-            duration /= scale;
+        match self.fps_scale {
+            Some(scale) => self.duration_ms / scale,
+            None            => self.duration_ms
         }
-        duration
     }
     pub fn get_scaled_fps(&self) -> f64 {
-        let mut fps = self.fps;
-        if let Some(scale) = self.fps_scale {
-            fps *= scale;
+        match self.fps_scale {
+            Some(scale) => self.fps / scale,
+            None            => self.fps
         }
-        fps
     }
 }
 

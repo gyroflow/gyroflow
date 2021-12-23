@@ -28,82 +28,93 @@
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../../src/ui/menu/Advanced.qml" line="98"/>
+        <source>Experimental zero-copy GPU preview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Advanced.qml" line="99"/>
+        <source>Render and undistort the preview video entirely on the GPU.
+This should provide much better UI performance.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>App</name>
     <message>
-        <location filename="../../src/ui/App.qml" line="50"/>
+        <location filename="../../src/ui/App.qml" line="51"/>
         <source>Choose a video file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="51"/>
+        <location filename="../../src/ui/App.qml" line="52"/>
         <source>Video files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="112"/>
+        <location filename="../../src/ui/App.qml" line="113"/>
         <source>Output path:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="129"/>
+        <location filename="../../src/ui/App.qml" line="130"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="166"/>
+        <location filename="../../src/ui/App.qml" line="167"/>
         <source>Output file already exists, do you want to overwrite it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="167"/>
+        <location filename="../../src/ui/App.qml" line="168"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="168"/>
+        <location filename="../../src/ui/App.qml" line="169"/>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="169"/>
+        <location filename="../../src/ui/App.qml" line="170"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="184"/>
+        <location filename="../../src/ui/App.qml" line="185"/>
         <source>Rendering %1... %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="187"/>
+        <location filename="../../src/ui/App.qml" line="188"/>
         <source>Rendering completed. The file was written to: %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="188"/>
+        <location filename="../../src/ui/App.qml" line="189"/>
         <source>Open rendered file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="189"/>
-        <location filename="../../src/ui/App.qml" line="240"/>
+        <location filename="../../src/ui/App.qml" line="190"/>
+        <location filename="../../src/ui/App.qml" line="241"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="247"/>
+        <location filename="../../src/ui/App.qml" line="248"/>
         <source>There&apos;s a newer version available: %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="247"/>
+        <location filename="../../src/ui/App.qml" line="248"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="247"/>
+        <location filename="../../src/ui/App.qml" line="248"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -263,17 +274,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="18"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="19"/>
         <source>Choose a motion data file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="19"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="20"/>
         <source>Motion data files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="40"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="42"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -341,7 +352,7 @@
 <context>
     <name>Popup</name>
     <message>
-        <location filename="../../src/ui/App.qml" line="136"/>
+        <location filename="../../src/ui/App.qml" line="137"/>
         <source>Export .gyroflow file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -386,17 +397,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="145"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
         <source>No cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="145"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
         <source>Dynamic cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="145"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
         <source>Static crop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -454,42 +465,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="70"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="73"/>
         <source>FOV is greater than 1.0, you may see black borders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="75"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="78"/>
         <source>FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="159"/>
         <source>Smoothing window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="163"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="174"/>
         <source>Rolling shutter correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="177"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
         <source>Frame readout time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>
@@ -615,18 +626,18 @@ Resulting offset is the one where lines were the shortest, meaning the video was
 <context>
     <name>TableList</name>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="50"/>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="15"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="51"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="18"/>
         <source>File name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="51"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="52"/>
         <source>Detected format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="16"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="19"/>
         <source>Detected camera</source>
         <translation type="unfinished"></translation>
     </message>
@@ -647,7 +658,7 @@ Resulting offset is the one where lines were the shortest, meaning the video was
     </message>
     <message>
         <location filename="../../src/ui/menu/LensProfile.qml" line="46"/>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="17"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="20"/>
         <source>Dimensions</source>
         <translation type="unfinished"></translation>
     </message>
@@ -657,37 +668,37 @@ Resulting offset is the one where lines were the shortest, meaning the video was
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="18"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="21"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="19"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="22"/>
         <source>Frame rate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="20"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="23"/>
         <source>Codec</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="21"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
         <source>Pixel format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="22"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="25"/>
         <source>Audio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="23"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
         <source>Rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="27"/>
         <source>Contains gyro</source>
         <translation type="unfinished"></translation>
     </message>
@@ -879,7 +890,7 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="90"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="96"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>
