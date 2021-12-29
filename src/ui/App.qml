@@ -13,6 +13,8 @@ Rectangle {
     color: styleBackground;
     anchors.fill: parent;
 
+    property QtObject controller: main_controller;
+
     property bool isLandscape: width > height;
     onIsLandscapeChanged: {
         videoAreaCol.parent = null;
@@ -214,8 +216,8 @@ Rectangle {
         }
     }
 
-    function messageBox(type, text, buttons) {
-        const el = Qt.createComponent("components/Modal.qml").createObject(window, { text: text, iconType: type });
+    function messageBox(type, text, buttons, parent) {
+        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { text: text, iconType: type });
         el.onClicked.connect((index) => {
             if (buttons[index].clicked)
                 buttons[index].clicked();

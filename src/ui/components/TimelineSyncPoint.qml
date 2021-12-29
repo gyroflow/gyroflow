@@ -4,7 +4,10 @@ Rectangle {
     property QtObject timeline: null;
     property int org_timestamp_us: 0;
     property real position: 0;
-    property real offsetMs: 0;
+    property real value: 0;
+    property string unit: "";
+
+    property bool isCalibPoint: false;
 
     id: root;
 
@@ -16,14 +19,14 @@ Rectangle {
     color: "#dcae24";
     visible: x >= 0 && x <= parent.width;
 
-    signal edit(real timestamp_us, real offset_ms);
+    signal edit(real timestamp_us, real val);
     signal remove(real timestamp_us);
     signal zoomIn(real timestamp_us);
 
     Rectangle {
         height: 12 * dpiScale;
         width: 13 * dpiScale;
-        color: "#dcae24";
+        color: root.color;
         radius: 3 * dpiScale;
         //y: -5 * dpiScale;
         x: -width / 2;
@@ -48,7 +51,7 @@ Rectangle {
             cursorShape: Qt.PointingHandCursor;
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
-                    root.edit(root.org_timestamp_us, root.offsetMs);
+                    root.edit(root.org_timestamp_us, root.value);
                 } else {
                     menu.popup();
                 }
@@ -64,8 +67,9 @@ Rectangle {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
         BasicText {
+            id: t;
             leftPadding: 0;
-            text: root.offsetMs.toFixed(2) + " ms";
+            text: root.value.toFixed(2) + " " + root.unit;
             anchors.horizontalCenter: parent.horizontalCenter;
             y: 16 * dpiScale;
             font.pixelSize: 11 * dpiScale;
@@ -74,19 +78,27 @@ Rectangle {
         Menu {
             id: menu;
             Action {
+                id: editAction;
                 text: qsTr("Edit offset");
                 icon.name: "pencil";
-                onTriggered: root.edit(root.org_timestamp_us, root.offsetMs);
+                onTriggered: root.edit(root.org_timestamp_us, root.value);
             }
             Action {
-                text: qsTr("Delete sync point");
+                text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
                 icon.name: "bin;#f67575";
                 onTriggered: root.remove(root.org_timestamp_us);
             }
             Action {
+                id: zoomAction;
                 text: qsTr("Zoom in");
                 icon.name: "search";
                 onTriggered: root.zoomIn(root.org_timestamp_us);
+            }
+            Component.onCompleted: {
+                if (isCalibPoint) {
+                    menu.removeAction(editAction);
+                    menu.removeAction(zoomAction);
+                }
             }
         }
     }

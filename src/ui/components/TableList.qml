@@ -7,6 +7,7 @@ Row {
     property alias col1: col1;
     property alias col2: col2;
     width: parent.width;
+    property real spacing: 8 * dpiScale;
 
     property var editableFields: ({});
     property var editableKeys: Object.keys(editableFields);
@@ -17,7 +18,7 @@ Row {
     }
     Column {
         id: col1;
-        spacing: 8 * dpiScale;
+        spacing: tl.spacing;
         property var keys: Object.keys(tl.model);
         Repeater {
             model: col1.keys;
@@ -26,7 +27,7 @@ Row {
     }
     Column {
         id: col2;
-        spacing: 8 * dpiScale;
+        spacing: tl.spacing;
         Repeater {
             model: Object.values(tl.model);
             Row {
@@ -66,7 +67,7 @@ Row {
                     visible = false;
                     parent.parent.parent.children[0].visible = true;
                     if (desc.onChange)
-                        desc.onChange(value);
+                        desc.onChange(newValue.allowText? text : value);
                 }
             }
             LinkButton {
@@ -80,7 +81,9 @@ Row {
                     if (newValue.visible) {
                         newValue.accepted();
                     } else {
-                        newValue.value = desc.value();
+                        const val = desc.value();
+                        if (typeof val === "string") newValue.text = val;
+                        else newValue.value = val;
                         newValue.visible = true;
                         parent.parent.parent.children[0].visible = false;
                     }
@@ -91,6 +94,7 @@ Row {
                 if (desc.hasOwnProperty("to"))        newValue.to        = desc.to;
                 if (desc.hasOwnProperty("unit"))      newValue.unit      = desc.unit;
                 if (desc.hasOwnProperty("precision")) newValue.precision = desc.precision;
+                if (desc["type"] == "text")           newValue.allowText = true;
             }
         }
     }

@@ -31,6 +31,8 @@ use ui::theme::Theme;
 // TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
 // TODO: default lens profile
+// TODO: render queue
+// TODO: cli interface
 // TODO: Calibrator
 // TODO: -- auto upload of lens profiles to a central database (with a checkbox)
 // TODO: -- Save camera model with calibration and later load lens profile automatically
@@ -73,6 +75,8 @@ cpp! {{
 }}
 
 fn entry() {
+    let ui_live_reload = false;
+
     #[cfg(target_os = "windows")]
     /*if std::env::args().any(|x| x == "--console")*/ {
         unsafe {
@@ -97,8 +101,11 @@ fn entry() {
 
     // return rendering::test();
 
-    // let icons_path = QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")));
-    let icons_path = QString::from(":/resources/icons/");
+    let icons_path = if ui_live_reload {
+        QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")))
+    } else {
+        QString::from(":/resources/icons/")
+    };
     cpp!(unsafe [icons_path as "QString"] {
         QGuiApplication::setOrganizationName("Gyroflow");
         QGuiApplication::setOrganizationDomain("gyroflow.xyz");
@@ -115,6 +122,9 @@ fn entry() {
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };
 
+    let calib_ctl = RefCell::new(controller::Controller::new());
+    let calib_ctlpinned = unsafe { QObjectPinned::new(&calib_ctl) };
+
     let theme = RefCell::new(Theme::default());
     let themepinned = unsafe { QObjectPinned::new(&theme) };
 
@@ -123,7 +133,8 @@ fn entry() {
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
     engine.set_property("isOpenGl".into(), QVariant::from(false));
-    engine.set_object_property("controller".into(), ctlpinned);
+    engine.set_object_property("main_controller".into(), ctlpinned);
+    engine.set_object_property("calib_controller".into(), calib_ctlpinned);
     engine.set_object_property("theme".into(), themepinned);
     theme.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
     theme.borrow().set_theme("dark".into());
@@ -138,8 +149,7 @@ fn entry() {
     let engine_ptr = engine.cpp_ptr();
 
     // Load main UI
-    let live_reload = false;
-    if !live_reload {
+    if !ui_live_reload {
         engine.load_file("qrc:/src/ui/main_window.qml".into());
     } else {
         engine.load_file(format!("{}/src/ui/main_window.qml", env!("CARGO_MANIFEST_DIR")).into());
@@ -158,6 +168,7 @@ fn entry() {
         return isOpenGl;
     });
     ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
+    calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
 
     rendering::init().unwrap();
 

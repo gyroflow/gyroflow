@@ -2,6 +2,7 @@ pub mod gyro_source;
 pub mod integration;
 pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod lens_profile;
+pub mod lens_calibration;
 pub mod synchronization;
 pub mod undistortion;
 pub mod adaptive_zoom;
@@ -17,7 +18,7 @@ use std::sync::atomic::Ordering::SeqCst;
 use parking_lot::RwLock;
 pub use undistortion::PixelType;
 
-use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
+use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, lens_calibration::LensCalibrator };
 
 use simd_json::ValueAccess;
 use nalgebra::{ Quaternion, Vector3, Vector4 };
@@ -52,6 +53,7 @@ pub struct BasicParams {
     pub video_rotation: f64,
 
     pub framebuffer_inverted: bool,
+    pub is_calibrator: bool,
     
     pub stab_enabled: bool,
     pub show_detected_features: bool,
@@ -76,6 +78,7 @@ impl Default for BasicParams {
             video_rotation: 0.0,
             
             framebuffer_inverted: false,
+            is_calibrator: false,
 
             trim_start: 0.0,
             trim_end: 1.0,
@@ -113,6 +116,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub undistortion: Arc<RwLock<Undistortion<T>>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
+    pub lens_calibrator: Arc<RwLock<Option<LensCalibrator>>>,
 
     pub current_compute_id: Arc<AtomicU64>,
     pub smoothness_checksum: Arc<AtomicU64>,
@@ -136,7 +140,9 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             smoothness_checksum: Arc::new(AtomicU64::new(0)),
             adaptive_zoom_checksum: Arc::new(AtomicU64::new(0)),
             
-            pose_estimator: Arc::new(synchronization::PoseEstimator::default())
+            pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
+
+            lens_calibrator: Arc::new(RwLock::new(None))
         }
     }
 }
@@ -174,24 +180,27 @@ impl<T: PixelType> StabilizationManager<T> {
             let to_f64_array = |x: &simd_json::borrowed::Value| -> Option<Vec<f64>> { Some(x.as_array()?.iter().filter_map(|x| x.as_f64()).collect()) };
 
             try_block!({
-                let smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3], Vector3::new(x[4], x[5], x[6])))))
-                    .collect();
+                //let smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
+                //    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3], Vector3::new(x[4], x[5], x[6])))))
+                //    .collect();
         
                 let quaternions = v["frame_orientation"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3-1], Vector3::new(x[4-1], x[5-1], x[6-1])))))
+                    .map(|x| ((x[1] * 1000000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3-1], Vector3::new(x[4-1], x[5-1], x[6-1])))))
                     .collect();
         
                 let raw_imu = v["raw_imu"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| TimeIMU { timestamp_ms: 0.0/*TODO*/, gyro: Some([x[0], x[1], x[2]]), accl: Some([x[3], x[4], x[6]]), magn: None }) // TODO IMU orientation
+                    .map(|x| TimeIMU { timestamp_ms: 0.0/*TODO*/, gyro: Some([x[0], x[1], x[2]]), accl: Some([x[3], x[4], x[6]]), magn: None })
                     .collect();
-                {
-                    let mut gyro = self.gyro.write(); 
-                    gyro.smoothed_quaternions = smoothed_quaternions;
-                    gyro.quaternions = quaternions;
-                    gyro.raw_imu = raw_imu;
-                    self.smoothing.write().update_quats_checksum(&gyro.quaternions);
-                }
+
+                let md = crate::gyro_source::FileMetadata {
+                    imu_orientation: None, // TODO IMU orientation
+                    detected_source: Some("Gyroflow file".to_string()),
+                    quaternions: Some(quaternions),
+                    raw_imu: Some(raw_imu),
+                    frame_readout_time: None
+                };
+                self.gyro.write().load_from_telemetry(&md);
+                self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
             });
         } else {
             let md = GyroSource::parse_telemetry_file(path)?;
@@ -377,7 +386,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             // Only allocate if we actually have any points
                             ret = Some(Vec::with_capacity(2048));
                         }
-                        let line = bresenham::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
+                        let line = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
                         for point in line {
                             ret.as_mut().unwrap().push((point.0 as i32, point.1 as i32, a));
                         }
@@ -409,9 +418,9 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn process_pixels(&self, mut timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale) = {
+        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps, params.fps_scale)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps, params.fps_scale, params.is_calibrator)
         };
         if enabled && ow == out_width && oh == out_height {
             if let Some(scale) = fps_scale {
@@ -423,7 +432,7 @@ impl<T: PixelType> StabilizationManager<T> {
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
                 if let Some(pxs) = self.get_features_pixels(frame) {
                     for (x, mut y, _) in pxs {
-                        if framebuffer_inverted { y = oh as i32 - y; }
+                        if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
                         if pixels.len() > pos + 2 { 
                             pixels[pos + 0] = 0x0c; // R
@@ -434,12 +443,24 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
                 if let Some(pxs) = self.get_opticalflow_pixels(frame) {
                     for (x, mut y, a) in pxs {
-                        if framebuffer_inverted { y = oh as i32 - y; }
+                        if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
                         if pixels.len() > pos + 2 { 
                             pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
                             pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
                             pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
+                        }
+                    }
+                }
+                if is_calibrator {
+                    let lock = self.lens_calibrator.read();
+                    if let Some(ref cal) = *lock {
+                        let points = cal.all_matches.read();
+                        match points.get(&(frame as i32)) {
+                            Some(entry) => {
+                                cal.draw_chessboard_corners(width as u32, height as u32, stride, pixels, (cal.columns, cal.rows), &entry.points, true);
+                            },
+                            _ => { }
                         }
                     }
                 }

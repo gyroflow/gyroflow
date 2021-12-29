@@ -17,6 +17,12 @@ Item {
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
 
+    property int outWidth: window.exportSettings.outWidth;
+    property int outHeight: window.exportSettings.outHeight;
+    
+    property alias dropRect: dropRect;
+    property bool isCalibrator: false;
+
     property Menu.VideoInformation vidInfo: null;
 
     function toLocalFile(u) {
@@ -33,10 +39,12 @@ Item {
         //vid.url = url;
         vid.errorShown = false;
         controller.load_video(url, vid);
-        const pathParts = toLocalFile(url).split(".");
-        pathParts.pop();
-        window.outputFile = pathParts.join(".") + "_stabilized.mp4";
-        window.exportSettings.updateCodecParams();
+        if (!isCalibrator) {
+            const pathParts = toLocalFile(url).split(".");
+            pathParts.pop();
+            window.outputFile = pathParts.join(".") + "_stabilized.mp4";
+            window.exportSettings.updateCodecParams();
+        }
 
         const filename = url.toString().split("/").pop();
         dropText.loadingFile = filename;
@@ -52,6 +60,7 @@ Item {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
             }
+            controller.recompute_calib_undistortion();
         }
         function onChart_data_changed() {
             chartUpdateTimer.start();
@@ -69,8 +78,8 @@ Item {
         width: parent.width;
         height: parent.height - tlcol.height;
         Item {
-            property real orgW: window.exportSettings.outWidth || vid.videoWidth;
-            property real orgH: window.exportSettings.outHeight || vid.videoHeight;
+            property real orgW: root.outWidth || vid.videoWidth;
+            property real orgH: root.outHeight || vid.videoHeight;
             property real ratio: orgW / Math.max(1, orgH);
             property real w: parent.width - 20 * dpiScale;
             property real h: parent.height - 20 * dpiScale;
@@ -133,7 +142,7 @@ Item {
 
                 InfoMessage {
                     type: InfoMessage.Warning;
-                    visible: !controller.lens_loaded;
+                    visible: !controller.lens_loaded && !isCalibrator;
                     text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
                 }
             }

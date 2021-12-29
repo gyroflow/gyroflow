@@ -12,6 +12,7 @@ MenuItem {
     property real fps: 0;
     property real org_fps: 0;
     property string filename: "";
+    property bool isCalibrator: false;
 
     Component.onCompleted: {
         const fields = [
@@ -101,11 +102,12 @@ MenuItem {
 
     TableList {
         id: list;
-        editableFields: ({
+        spacing: 6 * dpiScale;
+        editableFields: isCalibrator? ({}) : ({
             "Rotation": {
                 "unit": "°",
                 "from": -360,
-                "to": 360,
+                "to": 360, 
                 "value": function() { return root.videoRotation; },
                 "onChange": function(value) {
                     root.videoRotation = value;

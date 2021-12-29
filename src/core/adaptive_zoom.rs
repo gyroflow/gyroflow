@@ -131,6 +131,7 @@ impl AdaptiveZoom {
         let num_int_points = 20;
         // let (original_width, original_height) = self.calib_dimension;
         let (fcorr, idx) = self.find_fcorr(center, polygon, output_dim);
+        if idx < 1 { return None; }
         let n_p = polygon.len();
         let relevant_p = [
             polygon[(idx - 1) % n_p], 
@@ -242,6 +243,7 @@ impl AdaptiveZoom {
     }
 
     fn bounding_polygon(&self, quat: &nalgebra::UnitQuaternion<f64>, num_points: usize, _output_dim: (usize, usize)) -> Vec<Point2D> {
+        if num_points < 1 { return Vec::new(); }
         let (w, h) = (self.calib_dimension.0, self.calib_dimension.1);
 
         let mut r = self.image_rotation * *quat.to_rotation_matrix().matrix();

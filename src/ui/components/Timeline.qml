@@ -20,6 +20,7 @@ Item {
     onVisibleAreaLeftChanged: Qt.callLater(redrawChart);
     onVisibleAreaRightChanged: Qt.callLater(redrawChart);
     property alias pressed: ma.pressed;
+    property alias inner: inner;
 
     property real value: 0;
 
@@ -71,6 +72,7 @@ Item {
     }
 
     Item {
+        id: inner;
         x: 33 * dpiScale;
         y: 15 * dpiScale;
         width: parent.width - x - 33 * dpiScale;
@@ -215,6 +217,17 @@ Item {
                 controller.update_chart(chart);
             }
             Action {
+                id: addCalibAction;
+                icon.name: "plus";
+                text: qsTr("Add calibration point");
+                onTriggered: {
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    controller.add_calibration_point(pos * root.durationMs * 1000);
+                }
+            }
+            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; visible: isCalibrator; }
+            Action {
+                id: syncHereAction;
                 icon.name: "spinner";
                 text: qsTr("Auto sync here");
                 onTriggered: {
@@ -223,6 +236,7 @@ Item {
                 }
             }
             Action {
+                id: addSyncAction;
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
@@ -231,6 +245,7 @@ Item {
                 }
             }
             Action {
+                id: estimateRSAction;
                 icon.name: "readout_time";
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
@@ -316,13 +331,15 @@ Item {
                 timeline: root;
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
-                offsetMs: offset_ms;
-                onEdit: (ts_us, offs) => {
+                value: offset_ms;
+                unit: qsTr("ms");
+                isCalibPoint: false;
+                onEdit: (ts_us, val) => {
                     root.editingSyncPoint = true;
                     syncPointSlider.timestamp_us = ts_us;
-                    syncPointSlider.from  = offs - Math.max(15, Math.abs(offs));
-                    syncPointSlider.to    = offs + Math.max(15, Math.abs(offs));
-                    syncPointSlider.value = offs;
+                    syncPointSlider.from  = val - Math.max(15, Math.abs(val));
+                    syncPointSlider.to    = val + Math.max(15, Math.abs(val));
+                    syncPointSlider.value = val;
                 }
                 onRemove: (ts_us) => {
                     root.editingSyncPoint = false;
@@ -334,6 +351,27 @@ Item {
                     root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
                     root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
                     chart.setVScaleToVisibleArea();
+                }
+            }
+        }
+        Repeater {
+            visible: isCalibrator;
+            model: isCalibrator? controller.calib_model : [];
+
+            TimelineSyncPoint {
+                timeline: root;
+                color: "#17b3f0"
+                org_timestamp_us: timestamp_us;
+                position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
+                value: sharpness;
+                unit: qsTr("px");
+                isCalibPoint: true;
+                onEdit: (ts_us, val) => {
+                    vid.setTimestamp(ts_us / 1000);
+                }
+                onRemove: (ts_us) => {
+                    root.editingSyncPoint = false;
+                    controller.remove_calibration_point(ts_us);
                 }
             }
         }

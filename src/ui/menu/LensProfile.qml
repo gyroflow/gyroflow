@@ -79,11 +79,25 @@ MenuItem {
             controller.load_lens_profile(lensProfilesList[index]);
         }
     }
-    Button {
-        text: qsTr("Open file");
-        icon.name: "file-empty"
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: fileDialog.open();
+        spacing: 10 * dpiScale;
+        Button {
+            text: qsTr("Open file");
+            icon.name: "file-empty"
+            onClicked: fileDialog.open();
+        }
+        Button {
+            text: qsTr("Create new");
+            icon.name: "plus";
+            icon.width: 15 * dpiScale;
+            icon.height: 15 * dpiScale;
+            onClicked: {
+                calib_controller.init_calibrator();
+                const wnd = Qt.createComponent("../Calibrator.qml").createObject(window)
+                wnd.show()
+            }
+        }
     }
     
     InfoMessageSmall {

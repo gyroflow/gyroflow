@@ -52,9 +52,6 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
-    // decoders: h264 h264_qsv h264_cuvid / encoders: libx264 h264_amf h264_nvenc h264_qsv
-    // decoders: hevc hevc_qsv hevc_cuvid / encoders: libx265 hevc_amf hevc_nvenc hevc_qsv
-    
     let params = stab.params.read();
     let trim_ratio = trim_end - trim_start;
     let total_frame_count = params.frame_count;

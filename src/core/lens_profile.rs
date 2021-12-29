@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use simd_json::ValueAccess;
 use walkdir::WalkDir;
 
+use crate::lens_calibration::LensCalibrator;
+
 #[derive(Default, Clone)]
 pub struct LensProfile {
     pub camera: String,
@@ -23,6 +25,11 @@ impl LensProfile {
 
         self.load_from_json_value(&v)?; // TODO unwrap
         Some(())
+    }
+    pub fn set_from_calibrator(&mut self, cal: &LensCalibrator) {
+        self.calib_dimension   = (cal.width as f64, cal.height as f64);
+        self.camera_matrix     = cal.k.transpose().iter().copied().collect();
+        self.distortion_coeffs = cal.d.iter().copied().collect();
     }
 
     pub fn load_from_json_value(&mut self, v: &simd_json::borrowed::Value) -> Option<()> {

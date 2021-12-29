@@ -3,13 +3,14 @@ use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{ AtomicBool, AtomicUsize };
 use std::sync::atomic::Ordering::SeqCst;
 
 use qml_video_rs::video_item::MDKVideoItem;
 
 use crate::core;
 use crate::core::StabilizationManager;
+use crate::core::lens_calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
 use crate::rendering;
 use crate::util;
@@ -22,6 +23,12 @@ use crate::qt_gpu::qrhi_undistort;
 struct OffsetItem {
     pub timestamp_us: i64,
     pub offset_ms: f64,
+}
+
+#[derive(Default, SimpleListItem)]
+struct CalibrationItem {
+    pub timestamp_us: i64,
+    pub sharpness: f64,
 }
 
 #[derive(Default, QObject)]
@@ -39,6 +46,8 @@ pub struct Controller {
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
     estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
+
+    start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
     lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
@@ -64,6 +73,7 @@ pub struct Controller {
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
 
+    recompute_calib_undistortion: qt_method!(fn(&self)),
     recompute_threaded: qt_method!(fn(&self)),
     request_recompute: qt_signal!(),
 
@@ -101,6 +111,15 @@ pub struct Controller {
     sync_in_progress: qt_property!(bool; NOTIFY sync_in_progress_changed),
     sync_in_progress_changed: qt_signal!(),
 
+    calib_in_progress: qt_property!(bool; NOTIFY calib_in_progress_changed),
+    calib_in_progress_changed: qt_signal!(),
+    calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize),
+
+    calib_model: qt_property!(RefCell<SimpleListModel<CalibrationItem>>; NOTIFY calib_model_updated),
+    calib_model_updated: qt_signal!(),
+
+    init_calibrator: qt_method!(fn(&mut self)),
+
     export_gyroflow: qt_method!(fn(&self)),
 
     check_updates: qt_method!(fn(&self)),
@@ -111,6 +130,7 @@ pub struct Controller {
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
     open_file_externally: qt_method!(fn(&self, path: QString)),
+    get_username: qt_method!(fn(&self) -> QString),
 
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
@@ -473,6 +493,9 @@ impl Controller {
         }));
         self.compute_progress(id, 0.0);
     }
+    fn recompute_calib_undistortion(&self) {
+        self.stabilizer.recompute_threaded(|_|());
+    }
 
     fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         rendering::clear_log();
@@ -516,6 +539,7 @@ impl Controller {
 
     fn export_gyroflow(&self) {
         // TODO
+        self.error(QString::from("Not implemented"), QString::default(), QString::default());
     }
 
     fn set_output_size(&self, w: usize, h: usize) {
@@ -578,8 +602,139 @@ impl Controller {
         });
     }
 
+    fn init_calibrator(&self) {
+        self.stabilizer.params.write().is_calibrator = true;
+        *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
+        self.stabilizer.set_smoothing_param("time_constant", 2.0);
+    }
+
+    fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64) {
+        rendering::clear_log();
+
+        self.calib_in_progress = true;
+        self.calib_in_progress_changed();
+        self.calib_progress(0.0, 0.0, 0, 0, 0);
+
+        let stab = self.stabilizer.clone();
+
+        let cal = stab.lens_calibrator.clone();
+        {
+            let mut lock = cal.write();
+            let cal = lock.as_mut().unwrap();
+            cal.image_points.write().clear();
+            cal.max_images = max_points;
+            cal.iterations = iterations;
+            cal.max_sharpness = max_sharpness;
+        }
+
+        let (fps, frame_count, trim_start_ms, trim_end_ms) = {
+            let params = stab.params.read();
+            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms)
+        };
+
+        let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
+            this.calib_in_progress = ready < total;
+            this.calib_in_progress_changed();
+            this.calib_progress(ready as f64 / total as f64, rms, ready, total, good);
+            if rms > 0.0 {
+                this.update_calib_model();
+            }
+        });
+        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+            arg.push_str("\n\n");
+            arg.push_str(&rendering::get_log());
+
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+
+            this.calib_in_progress = false;
+            this.calib_in_progress_changed();
+        });
+
+        let ranges = vec![(trim_start_ms, trim_end_ms)];
+
+        self.cancel_flag.store(false, SeqCst);
+        let cancel_flag = self.cancel_flag.clone();
+
+        let total = frame_count / every_nth_frame;
+        let total_read = Arc::new(AtomicUsize::new(0));
+        let processed = Arc::new(AtomicUsize::new(0));
+        
+        let video_path = self.video_path.clone();
+        core::run_threaded(move || {
+            match FfmpegProcessor::from_file(&video_path, true) {
+                Ok(mut proc) => {
+                    proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                        let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
+
+                        assert!(_output_frame.is_none());
+
+                        if (frame % every_nth_frame as i32) == 0 {
+                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, input_frame.width(), input_frame.height()) {
+                                Ok(mut small_frame) => {
+                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+
+                                    total_read.fetch_add(1, SeqCst);
+                                    let mut lock = cal.write();
+                                    let cal = lock.as_mut().unwrap();
+                                    cal.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
+                                },
+                                Err(e) => {
+                                    err(("An error occured: %1".to_string(), e.to_string()))
+                                }
+                            }
+                        }
+                        Ok(())
+                    });
+                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                        err(("An error occured: %1".to_string(), e.to_string()));
+                    }
+                }
+                Err(error) => {
+                    err(("An error occured: %1".to_string(), error.to_string()));
+                }
+            }
+            while processed.load(SeqCst) < total_read.load(SeqCst) {
+                std::thread::sleep(std::time::Duration::from_millis(100));
+            }
+            // Don't lock the UI trying to draw chessboards while we calibrate
+            stab.params.write().is_calibrator = false;
+            
+            let mut lock = cal.write();
+            let cal = lock.as_mut().unwrap();
+            if let Err(e) = cal.calibrate() {
+                err(("An error occured: %1".to_string(), format!("{:?}", e)));
+            } else {
+                stab.lens.write().set_from_calibrator(cal);
+                dbg!(cal.rms);
+                dbg!(cal.k);
+                dbg!(cal.d);
+                dbg!(cal.used_points.keys());
+            }
+
+            progress((total, total, 0, cal.rms));
+
+            stab.params.write().is_calibrator = true;
+        });
+    }
+
+    fn update_calib_model(&mut self) {
+        let cal = self.stabilizer.lens_calibrator.clone();
+
+        let used_points = cal.read().as_ref().map(|x| x.used_points.clone()).unwrap_or_default();
+
+        self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
+            timestamp_us: v.timestamp_us, 
+            sharpness: v.avg_sharpness
+        }).collect());
+
+        util::qt_queued_callback(self, |this, _| {
+            this.calib_model_updated();
+        })(());
+    }
+
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
+    fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
 }

@@ -28,6 +28,7 @@ simplelog = "*"
 log = "*"
 
 ureq = "2.4"
+whoami = "*"
 
 [build-dependencies]
 cpp_build = "*"

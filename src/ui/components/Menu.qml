@@ -28,9 +28,9 @@ QQC.Menu {
         topPadding: 5 * dpiScale;
         bottomPadding: 5 * dpiScale;
         spacing: 8 * dpiScale;
-        icon.width: menu.itemHeight / 2 + 1 * dpiScale;
-        icon.height: menu.itemHeight / 2 + 1 * dpiScale;
-        font: menu.font;
+        icon.width: menu? (menu.itemHeight / 2 + 1 * dpiScale) : 0;
+        icon.height: menu? (menu.itemHeight / 2 + 1 * dpiScale) : 0;
+        font: menu? menu.font : undefined;
 
         Component.onCompleted: {
             if (icon.name && icon.name.indexOf(";") > 0) {
@@ -39,7 +39,7 @@ QQC.Menu {
                 icon.name = parts[0];
             }
             Qt.callLater(function() {
-                if (dlg && dlg.implicitContentWidth > menu.maxItemWidth) menu.maxItemWidth = dlg.implicitContentWidth;
+                if (menu && dlg && dlg.implicitContentWidth > menu.maxItemWidth) menu.maxItemWidth = dlg.implicitContentWidth;
             });
         }
 
