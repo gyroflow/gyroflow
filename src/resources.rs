@@ -6,6 +6,7 @@ qrc!(pub rsrc,
         "src/ui/App.qml",
         "src/ui/VideoArea.qml",
         "src/ui/Calibrator.qml",
+        "src/ui/CalibrationTarget.qml",
 
         "src/ui/menu/Advanced.qml",
         "src/ui/menu/Export.qml",
