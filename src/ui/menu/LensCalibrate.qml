@@ -47,7 +47,7 @@ MenuItem {
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
-            controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value);
+            controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1);
         }
     }
 
@@ -155,12 +155,12 @@ MenuItem {
         Label {
             position: Label.Left;
             text: qsTr("FOV");
-            Slider {
+            SliderWithField {
                 from: 0.1;
                 to: 3;
                 value: 1.0;
                 width: parent.width;
-                onValueChanged: { controller.fov = value; controller.recompute_calib_undistortion(); }
+                onValueChanged: { controller.fov = value; }
             }
         }
         Label {
@@ -208,7 +208,6 @@ MenuItem {
             text: qsTr("Rolling shutter correction");
             cb.onCheckedChanged: {
                 controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
-                controller.recompute_calib_undistortion();
             }
 
             Label {
@@ -219,7 +218,7 @@ MenuItem {
                     width: parent.width;
                     unit: qsTr("ms");
                     precision: 2;
-                    onValueChanged: { controller.frame_readout_time = bottomToTop.checked? -value : value; controller.recompute_calib_undistortion(); }
+                    onValueChanged: { controller.frame_readout_time = bottomToTop.checked? -value : value; }
                 }
                 CheckBox {
                     id: bottomToTop;
@@ -230,7 +229,7 @@ MenuItem {
                     contentItem.visible: false;
                     scale: 0.7;
                     tooltip: qsTr("Bottom to top")
-                    onCheckedChanged: { controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value; controller.recompute_calib_undistortion(); }
+                    onCheckedChanged: { controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value; }
                 }
             }
         }

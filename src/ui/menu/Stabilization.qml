@@ -76,7 +76,7 @@ MenuItem {
     Label {
         position: Label.Left;
         text: qsTr("FOV");
-        Slider {
+        SliderWithField {
             id: fov;
             from: 0.1;
             to: 3;
@@ -158,7 +158,7 @@ MenuItem {
     Label {
         text: qsTr("Smoothing window");
         visible: croppingMode.currentIndex == 1;
-        Slider {
+        SliderWithField {
             id: adaptiveZoom;
             value: 4;
             from: 0.1;

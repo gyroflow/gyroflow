@@ -60,7 +60,6 @@ Item {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
             }
-            controller.recompute_calib_undistortion();
         }
         function onChart_data_changed() {
             chartUpdateTimer.start();

@@ -47,7 +47,7 @@ pub struct Controller {
     estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
 
-    start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64)),
+    start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
     lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
@@ -73,7 +73,6 @@ pub struct Controller {
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
 
-    recompute_calib_undistortion: qt_method!(fn(&self)),
     recompute_threaded: qt_method!(fn(&self)),
     request_recompute: qt_signal!(),
 
@@ -117,6 +116,9 @@ pub struct Controller {
 
     calib_model: qt_property!(RefCell<SimpleListModel<CalibrationItem>>; NOTIFY calib_model_updated),
     calib_model_updated: qt_signal!(),
+
+    add_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
+    remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -493,9 +495,6 @@ impl Controller {
         }));
         self.compute_progress(id, 0.0);
     }
-    fn recompute_calib_undistortion(&self) {
-        self.stabilizer.recompute_threaded(|_|());
-    }
 
     fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         rendering::clear_log();
@@ -608,7 +607,7 @@ impl Controller {
         self.stabilizer.set_smoothing_param("time_constant", 2.0);
     }
 
-    fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64) {
+    fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64) {
         rendering::clear_log();
 
         self.calib_in_progress = true;
@@ -618,18 +617,22 @@ impl Controller {
         let stab = self.stabilizer.clone();
 
         let cal = stab.lens_calibrator.clone();
-        {
+        if max_points > 0 {
             let mut lock = cal.write();
             let cal = lock.as_mut().unwrap();
-            cal.image_points.write().clear();
+            let saved: std::collections::BTreeMap<i32, core::lens_calibration::Detected> = {
+                let lock = cal.image_points.read();
+                cal.forced_frames.iter().filter_map(|f| Some((*f, lock.get(f)?.clone()))).collect()
+            };
+            *cal.image_points.write() = saved;
             cal.max_images = max_points;
             cal.iterations = iterations;
             cal.max_sharpness = max_sharpness;
         }
 
-        let (fps, frame_count, trim_start_ms, trim_end_ms) = {
+        let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
             let params = stab.params.read();
-            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms)
+            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
         };
 
         let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
@@ -650,12 +653,17 @@ impl Controller {
             this.calib_in_progress_changed();
         });
 
-        let ranges = vec![(trim_start_ms, trim_end_ms)];
+        let is_forced = custom_timestamp_ms > -0.5;
+        let ranges = if is_forced {
+            vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
+        } else {
+            vec![(trim_start_ms, trim_end_ms)]
+        };
 
         self.cancel_flag.store(false, SeqCst);
         let cancel_flag = self.cancel_flag.clone();
 
-        let total = frame_count / every_nth_frame;
+        let total = ((frame_count as f64 * trim_ratio) / every_nth_frame as f64) as usize;
         let total_read = Arc::new(AtomicUsize::new(0));
         let processed = Arc::new(AtomicUsize::new(0));
         
@@ -666,7 +674,9 @@ impl Controller {
                     proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                         let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
-                        assert!(_output_frame.is_none());
+                        if is_forced && total_read.load(SeqCst) > 0 {
+                            return Ok(());
+                        }
 
                         if (frame % every_nth_frame as i32) == 0 {
                             match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, input_frame.width(), input_frame.height()) {
@@ -676,6 +686,9 @@ impl Controller {
                                     total_read.fetch_add(1, SeqCst);
                                     let mut lock = cal.write();
                                     let cal = lock.as_mut().unwrap();
+                                    if is_forced {
+                                        cal.forced_frames.insert(frame);
+                                    }
                                     cal.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
                                 },
                                 Err(e) => {
@@ -701,14 +714,11 @@ impl Controller {
             
             let mut lock = cal.write();
             let cal = lock.as_mut().unwrap();
-            if let Err(e) = cal.calibrate() {
+            if let Err(e) = cal.calibrate(is_forced) {
                 err(("An error occured: %1".to_string(), format!("{:?}", e)));
             } else {
                 stab.lens.write().set_from_calibrator(cal);
-                dbg!(cal.rms);
-                dbg!(cal.k);
-                dbg!(cal.d);
-                dbg!(cal.used_points.keys());
+                ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
             }
 
             progress((total, total, 0, cal.rms));
@@ -730,6 +740,41 @@ impl Controller {
         util::qt_queued_callback(self, |this, _| {
             this.calib_model_updated();
         })(());
+    }
+    
+    fn add_calibration_point(&mut self, timestamp_us: i64) {
+        dbg!(timestamp_us);
+        
+        self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0);
+
+    }
+    fn remove_calibration_point(&mut self, timestamp_us: i64) {
+        let cal = self.stabilizer.lens_calibrator.clone();
+        let mut rms = 0.0;
+        {
+            let mut lock = cal.write();
+            let cal = lock.as_mut().unwrap();
+            let mut frame_to_remove = None;
+            for x in &cal.used_points {
+                if x.1.timestamp_us == timestamp_us {
+                    frame_to_remove = Some(*x.0);
+                    break;
+                }
+            }
+            if let Some(f) = frame_to_remove {
+                cal.forced_frames.remove(&f);
+                cal.used_points.remove(&f);
+            }
+            if let Ok(_) = cal.calibrate(true) {
+                rms = cal.rms;
+                self.stabilizer.lens.write().set_from_calibrator(cal);
+                ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+            }
+        }
+        self.update_calib_model();
+        if rms > 0.0 {
+            self.calib_progress(1.0, rms, 1, 1, 1);
+        }
     }
 
     // Utilities

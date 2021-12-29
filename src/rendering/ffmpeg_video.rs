@@ -192,11 +192,6 @@ impl<'a> VideoTranscoder<'a> {
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
 
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
-                    if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
-                        status = Status::Finish;
-                        break;
-                    }
-
                     if self.first_frame_ts.is_none() {
                         self.first_frame_ts = frame.timestamp();
                     }
@@ -307,6 +302,10 @@ impl<'a> VideoTranscoder<'a> {
                             final_sw_frame.set_color_transfer_characteristic(frame_color_transfer_characteristic);
                             encoder.send_frame(final_sw_frame)?;
                         }                     
+                    }
+                    if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
+                        status = Status::Finish;
+                        break;
                     }
                 }
             }

@@ -11,7 +11,7 @@ use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
 use std::sync::Arc;
 use nalgebra::{ Matrix3, Vector4 };
 use opencv::core::TermCriteria_Type;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
@@ -22,8 +22,10 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 #[derive(Clone, Default, Debug)]
 pub struct Detected {
     pub points: Vec<(f32, f32)>,
+    pub frame: i32,
     pub timestamp_us: i64,
     pub avg_sharpness: f64,
+    pub is_forced: bool
 }
 #[derive(Default)]
 pub struct LensCalibrator {
@@ -42,6 +44,8 @@ pub struct LensCalibrator {
 
     pub k: Matrix3<f64>,
     pub d: Vector4<f64>,
+
+    pub forced_frames: HashSet<i32>,
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
     pub image_points: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
@@ -92,6 +96,7 @@ impl LensCalibrator {
         let pixels = pixels.to_vec();
         let img_points = self.image_points.clone();
         let all_matches = self.all_matches.clone();
+        let is_forced = self.forced_frames.contains(&frame);
 
         if let Some(detected) = all_matches.read().get(&frame) {
             if detected.avg_sharpness < max_sharpness {
@@ -124,10 +129,10 @@ impl LensCalibrator {
                                 points.push((pt.x, pt.y));
                             }
                             log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
-                            if avg_sharpness < max_sharpness { 
-                                img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, avg_sharpness });
+                            if avg_sharpness < max_sharpness || is_forced { 
+                                img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, frame, avg_sharpness, is_forced });
                             }
-                            all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness });
+                            all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness, frame, is_forced });
                             return Ok(());
                         }
                     }
@@ -139,40 +144,47 @@ impl LensCalibrator {
         Ok(())
     }
 
-    pub fn calibrate(&mut self) -> Result<(), opencv::Error> {
-        let center_camera = true;
+    pub fn calibrate(&mut self, only_used: bool) -> Result<(), opencv::Error> {
+        let calib_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 1e-6)?;
 
-        let calib_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 1e-6).unwrap();
-
-        let found_frames: Vec<i32> = self.image_points.read().keys().copied().collect();
+        let found_frames: Vec<i32> = if only_used {
+            self.used_points.keys().copied().collect()
+        } else {
+            self.image_points.read().keys().copied().collect()
+        };
         
         let find_min = |a: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
 
         let image_points = self.image_points.read().clone();
         let size = Size::new(self.width as i32, self.height as i32);
         let objp = self.objp.clone();
-        let max_images = self.max_images;
+        let max_images = if only_used { found_frames.len() } else { self.max_images };
+        let forced_frames = self.forced_frames.clone();
 
         let mut iterations = self.iterations;
-        if found_frames.len() <= max_images {
+        if found_frames.len() <= max_images || max_images == 0 || only_used {
             iterations = 1;
         }
-        let result = (0..self.iterations).into_par_iter().map(|_| {
-            let candidate_frames: Vec<i32> = (&found_frames)
+        let result = (0..iterations).into_par_iter().map(|_| {
+            let candidate_frames: HashSet<i32> = (&found_frames)
                 .choose_multiple(&mut rand::thread_rng(), max_images)
                 .copied()
+                .chain(forced_frames.iter().copied())
                 .collect();
+  
+            println!("forced_frames: {:?}", &forced_frames);
+            println!("candidates: {:?}", &candidate_frames);
 
+            let imgpoints = Vector::<Vector<Point2f>>::from_iter(
+                candidate_frames.iter().filter_map(|k| Some(Vector::from_iter(
+                    image_points.get(k)?.points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
+                ))
+            ));
             let objpoints = Vector::<Vector<Point3d>>::from_iter(
-                (0..candidate_frames.len()).into_iter().map(|_| Vector::<Point3d>::from_iter(
+                (0..imgpoints.len()).into_iter().map(|_| Vector::<Point3d>::from_iter(
                     objp.iter().map(|(x, y)| Point3d::new(*x, *y, 0.0))
                 ))
             );
-            let imgpoints = Vector::<Vector<Point2f>>::from_iter(
-                candidate_frames.iter().map(|k| Vector::from_iter(
-                    image_points[k].points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
-                )
-            ));
         
             let mut k  = Mat::default(); let mut d  = Mat::default();
             let mut rv = Mat::default(); let mut tv = Mat::default();
@@ -180,14 +192,14 @@ impl LensCalibrator {
             if let Ok(rms) = opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
                 if let Ok(k) = cv_to_mat3(k) {
                     if let Ok(d) = cv_to_vec4(d) {
-                        return (rms, k, d, candidate_frames);
+                        return (rms, k, d, candidate_frames.into_iter().collect::<Vec<_>>());
                     }
-                }                
+                }
             }
-            (99999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), Vec::new())
+            (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), Vec::new())
         }).reduce_with(find_min);
 
-        if let Some((rms, mut k, d, used_frames)) = result {
+        if let Some((rms, k, d, used_frames)) = result {
             // TODO add this to undistortion
             //if center_camera {
             //    k[(0, 2)] = self.width as f64 / 2.0;
@@ -197,7 +209,7 @@ impl LensCalibrator {
             self.k = k;
             self.d = d;
             self.rms = rms;
-            self.used_points = used_frames.into_iter().map(|f| (f, image_points[&f].clone())).collect();
+            self.used_points = used_frames.into_iter().filter_map(|f| Some((f, image_points.get(&f)?.clone()))).collect();
 
             Ok(())
         } else {

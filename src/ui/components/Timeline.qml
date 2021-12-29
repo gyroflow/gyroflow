@@ -175,6 +175,7 @@ Item {
 
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                    timelineContextMenu.pressedX = mouse.x;
                     timelineContextMenu.popup()
                 } else {
                     mouse.accepted = false;
@@ -182,6 +183,7 @@ Item {
             }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
+                    timelineContextMenu.pressedX = mouse.x;
                     timelineContextMenu.popup();
                 }
             }
@@ -210,6 +212,7 @@ Item {
 
         Menu {
             id: timelineContextMenu;
+            property real pressedX: x;
 
             font.pixelSize: 11.5 * dpiScale;
             function setDisplayMode(i) {
@@ -221,17 +224,17 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add calibration point");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                     controller.add_calibration_point(pos * root.durationMs * 1000);
                 }
             }
-            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; visible: isCalibrator; }
+            QQC.MenuSeparator { id: msep; verticalPadding: 5 * dpiScale; }
             Action {
                 id: syncHereAction;
                 icon.name: "spinner";
                 text: qsTr("Auto sync here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                     controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
                 }
             }
@@ -240,7 +243,7 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                     controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
                 }
             }
@@ -249,7 +252,7 @@ Item {
                 icon.name: "readout_time";
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.x / ma.width));
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
 
                     const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" + 
                                       "This feature is experimental, the results may not be correct at all.\n" + 
@@ -270,6 +273,12 @@ Item {
                 Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
                 Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
                 Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
+            }
+            Component.onCompleted: {
+                if (!isCalibrator) {
+                    timelineContextMenu.removeAction(addCalibAction);
+                    timelineContextMenu.removeItem(msep);
+                }
             }
         }
 
