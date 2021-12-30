@@ -14,6 +14,8 @@ Window {
     property real tileSize: Math.min(root.height / (rows + 2), root.width / (columns + 2));
 
     title: qsTr("Calibration target") + ` (${columns} x ${rows})`;
+    
+    Component.onCompleted: ui_tools.set_icon(calibrator_window);
 
     Column {
         anchors.centerIn: parent;

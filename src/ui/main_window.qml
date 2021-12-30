@@ -25,6 +25,8 @@ Window {
         return null;
     }
 
+    Component.onCompleted: ui_tools.set_icon(main_window);
+
     property bool closeConfirmationModal: false;
     onClosing: (close) => {
         let app = getApp();

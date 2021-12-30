@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use simd_json::ValueAccess;
 use walkdir::WalkDir;
 
-use crate::lens_calibration::LensCalibrator;
+use crate::calibration::LensCalibrator;
 
 #[derive(Default, Clone)]
 pub struct LensProfile {
@@ -23,7 +23,7 @@ impl LensProfile {
         let mut data = std::fs::read(path).ok()?;
         let v = simd_json::to_borrowed_value(&mut data).ok()?;
 
-        self.load_from_json_value(&v)?; // TODO unwrap
+        self.load_from_json_value(&v)?;
         Some(())
     }
     pub fn set_from_calibrator(&mut self, cal: &LensCalibrator) {
@@ -46,10 +46,10 @@ impl LensProfile {
         self.distortion_coeffs = params["distortion_coeffs"].as_array()?.iter().filter_map(|x| x.as_f64()).collect();
             
         self.camera_matrix = params["camera_matrix"].as_array()?.iter()
-                .filter_map(|x| x.as_array())
-                .flat_map(|x| x.iter())
-                .filter_map(|x| x.as_f64())
-                .collect();
+            .filter_map(|x| x.as_array())
+            .flat_map(|x| x.iter())
+            .filter_map(|x| x.as_f64())
+            .collect();
         
         Some(())
     }

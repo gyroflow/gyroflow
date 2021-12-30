@@ -15,9 +15,12 @@ use std::collections::{BTreeMap, HashSet};
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
+pub mod drawing;
+pub mod lens_profile;
+
 /// The basic idea here is to find chessboard every 10 frames and save all points to a map. 
 /// Then we pick a random 10 frames from that map and calculate the calibration.
-/// Repeat that step 1000 times, with new random set of frames each time and return the set which resulted in the lowest RMS
+/// Repeat that 1000 times, with new random set of frames each time and return the set which resulted in the lowest RMS
 
 #[derive(Clone, Default, Debug)]
 pub struct Detected {
@@ -49,7 +52,7 @@ pub struct LensCalibrator {
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
     pub image_points: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
-    pub used_points: BTreeMap<i32, Detected>
+    pub used_points: BTreeMap<i32, Detected> // frame, Detected
 }
 
 impl LensCalibrator {
@@ -167,14 +170,10 @@ impl LensCalibrator {
         }
         let result = (0..iterations).into_par_iter().map(|_| {
             let candidate_frames: HashSet<i32> = (&found_frames)
-                .choose_multiple(&mut rand::thread_rng(), max_images)
-                .copied()
+                .choose_multiple(&mut rand::thread_rng(), max_images).copied()
                 .chain(forced_frames.iter().copied())
                 .collect();
   
-            println!("forced_frames: {:?}", &forced_frames);
-            println!("candidates: {:?}", &candidate_frames);
-
             let imgpoints = Vector::<Vector<Point2f>>::from_iter(
                 candidate_frames.iter().filter_map(|k| Some(Vector::from_iter(
                     image_points.get(k)?.points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
@@ -214,75 +213,6 @@ impl LensCalibrator {
             Ok(())
         } else {
             Err(opencv::Error::new(0, "Unable to calibrate camera".to_string()))
-        }
-    }
-
-    pub fn draw_chessboard_corners(&self, w: u32, _h: u32, s: usize, pixels: &mut [u8], pattern_size: (usize, usize), corners: &[(f32, f32)], found: bool) {
-        let r = 4.0;
-        let ratio = w as f32 / self.width as f32;
-        if !found {
-            let color = (0, 0, 255);
-
-            for x in corners {
-                let pt = ((x.0 * ratio).round(), (x.1 * ratio).round());
-                line(s, pixels, (pt.0 - r, pt.1 - r), (pt.0 + r, pt.1 + r), color);
-                line(s, pixels, (pt.0 - r, pt.1 + r), (pt.0 + r, pt.1 - r), color);
-                circle(s, pixels, pt, r + 1.0, color);
-            }
-        } else {
-            let line_colors = [
-                (0, 0, 255),
-                (0, 128, 255),
-                (0, 200, 200),
-                (0, 255, 0),
-                (200, 200, 0),
-                (255, 0, 0),
-                (255, 0, 255)
-            ];
-
-            let mut prev_pt = (0.0, 0.0);
-            let mut i = 0;
-            for y in 0..pattern_size.1 {
-                let color = line_colors[y % line_colors.len()];
-
-                for _x in 0..pattern_size.0 {
-                    let pt = corners[i];
-                    let pt = ((pt.0 * ratio).round(), (pt.1 * ratio).round());
-
-                    if i != 0 {
-                        line(s, pixels, prev_pt, pt, color);
-                    }
-
-                    line(s, pixels, (pt.0 - r, pt.1 - r), (pt.0 + r, pt.1 + r), color);
-                    line(s, pixels, (pt.0 - r, pt.1 + r), (pt.0 + r, pt.1 - r), color);
-                    circle(s, pixels, pt, r + 1.0, color);
-                    prev_pt = pt;
-                    i += 1;
-                }
-            }
-        }
-    }
-}
-
-fn line(s: usize, pixels: &mut [u8], p1: (f32, f32), p2: (f32, f32), color: (u8, u8, u8)) {
-    let line = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
-    for point in line {
-        let pos = (point.1 * s as isize + point.0 * 4) as usize;
-        if pixels.len() > pos + 2 { 
-            pixels[pos + 0] = color.0; // R
-            pixels[pos + 1] = color.1; // G
-            pixels[pos + 2] = color.2; // B
-        }
-    }
-}
-fn circle(s: usize, pixels: &mut [u8], center: (f32, f32), radius: f32, color: (u8, u8, u8)) {
-    let line = line_drawing::BresenhamCircle::new(center.0 as isize, center.1 as isize, radius as isize); 
-    for point in line {
-        let pos = (point.1 * s as isize + point.0 * 4) as usize;
-        if pixels.len() > pos + 2 { 
-            pixels[pos + 0] = color.0; // R
-            pixels[pos + 1] = color.1; // G
-            pixels[pos + 2] = color.2; // B
         }
     }
 }

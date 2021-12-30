@@ -8,11 +8,11 @@ MenuItem {
     text: qsTr("Lens profile");
     icon: "lens";
 
-    property real calibWidth: 0;
-    property real calibHeight: 0;
+    property int calibWidth: 0;
+    property int calibHeight: 0;
 
-    property real videoWidth: 0;
-    property real videoHeight: 0;
+    property int videoWidth: 0;
+    property int videoHeight: 0;
 
     FileDialog {
         id: fileDialog;
@@ -93,8 +93,8 @@ MenuItem {
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
             onClicked: {
-                calib_controller.init_calibrator();
-                const wnd = Qt.createComponent("../Calibrator.qml").createObject(window)
+                ui_tools.init_calibrator();
+                const wnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
                 wnd.show()
             }
         }

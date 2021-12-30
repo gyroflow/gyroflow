@@ -64,7 +64,7 @@ MenuItem {
             currentIndex: 1;
             onCurrentIndexChanged: {
                 const themes = ["light", "dark"];
-                theme.set_theme(themes[currentIndex]);
+                ui_tools.set_theme(themes[currentIndex]);
             }
         }
     }
@@ -90,7 +90,7 @@ MenuItem {
             width: parent.width;
             onCurrentIndexChanged: {
                 settings.lang = langs[currentIndex][1];
-                theme.set_language(settings.lang);
+                ui_tools.set_language(settings.lang);
             }
         }
     }

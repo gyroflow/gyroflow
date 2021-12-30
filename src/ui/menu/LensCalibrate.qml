@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import QtQuick.Dialogs
 import Qt.labs.settings 1.0
 
 import "../components/"
@@ -10,6 +11,18 @@ MenuItem {
     innerItem.enabled: calibrator_window.videoArea.vid.loaded && !controller.calib_in_progress;
     loader: controller.calib_in_progress;
 
+    property alias rms: rms.value;
+    property var calibrationInfo: ({});
+
+    property int videoWidth: 0;
+    property int videoHeight: 0;
+    onVideoWidthChanged: {
+        Qt.callLater(function() {
+            calib.calibrationInfo.output_size = videoWidth + "x" + videoHeight;
+            list.updateEntry("Default output size", calib.calibrationInfo.output_size);
+        });
+    }
+
     Settings {
         id: settings;
         property alias calib_maxPoints: maxPoints.value;
@@ -18,9 +31,17 @@ MenuItem {
         property alias calib_maxSharpness: maxSharpness.value;
     }
 
-    property alias rms: rms.value;
+    FileDialog {
+        id: fileDialog;
+        fileMode: FileDialog.SaveFile;
+        defaultSuffix: "json";
 
-    property var calibrationInfo: ({});
+        title: qsTr("Export lens profile");
+        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
+        onAccepted: {
+            controller.export_lens_profile(fileDialog.selectedFile, calib.calibrationInfo, uploadProfile.checked);
+        }
+    }
 
     Item {
         width: parent.width;
@@ -120,13 +141,20 @@ MenuItem {
                 "type": "text",
                 "width": 120,
                 "value": function() { return calib.calibrationInfo.output_size || ""; },
-                "onChange": function(value) { calib.calibrationInfo.output_size = value; list.updateEntry("Default output size", value);  }
-            },
-            "Identifier": {
-                "type": "text",
-                "width": 120,
-                "value": function() { return calib.calibrationInfo.identifier || ""; },
-                "onChange": function(value) { calib.calibrationInfo.identifier = value; list.updateEntry("Identifier", value);  }
+                "onChange": function(value) {
+                    if (/^[0-9]{1,5}x[0-9]{1,5}$/.test(value)) {
+                        calib.calibrationInfo.output_size = value;
+                        list.updateEntry("Default output size", value);
+                        
+                        const parts = value.split('x');
+                        const ow = parts[0], oh = parts[1];
+                        calibrator_window.videoArea.outWidth = ow;
+                        calibrator_window.videoArea.outHeight = oh;
+                        controller.set_output_size(ow, oh);
+                    } else {
+                        window.messageBox(Modal.Error, qsTr("Invalid format"), [ { "text": qsTr("Ok") } ], calibrator_window.contentItem);
+                    }
+                }
             },
             "Calibrated by": {
                 "type": "text",
@@ -136,15 +164,41 @@ MenuItem {
             }
         });
     }
+    CheckBoxWithContent {
+        id: shutterCb;
+        text: qsTr("Rolling shutter correction");
+        cb.onCheckedChanged: controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+
+        Label {
+            text: qsTr("Frame readout time");
+            SliderWithField {
+                id: shutter;
+                to: 1000 / Math.max(1, calibrator_window.videoArea.vid.frameRate);
+                width: parent.width;
+                unit: qsTr("ms");
+                precision: 2;
+                onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
+            }
+            CheckBox {
+                id: bottomToTop;
+                anchors.right: parent.right;
+                anchors.top: parent.top;
+                anchors.topMargin: -30 * dpiScale;
+                anchors.rightMargin: -10 * dpiScale;
+                contentItem.visible: false;
+                scale: 0.7;
+                tooltip: qsTr("Bottom to top")
+                onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+            }
+        }
+    }
     Item { width: 1; height: 1; }
     Button {
         text: qsTr("Export lens profile");
         accent: true;
         icon.name: "save"
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: {
-            // TODO
-        }
+        onClicked: fileDialog.open();
     }
     CheckBox {
         id: uploadProfile;
@@ -160,7 +214,7 @@ MenuItem {
                 to: 3;
                 value: 1.0;
                 width: parent.width;
-                onValueChanged: { controller.fov = value; }
+                onValueChanged: controller.fov = value;
             }
         }
         Label {
@@ -184,7 +238,7 @@ MenuItem {
                 width: parent.width;
                 height: 25 * dpiScale;
                 precision: 2;
-                value: 3;
+                value: 5;
                 from: 1;
                 unit: qsTr("px");
 
@@ -203,33 +257,24 @@ MenuItem {
                 from: 1;
             }
         }
-        CheckBoxWithContent {
-            id: shutterCb;
-            text: qsTr("Rolling shutter correction");
-            cb.onCheckedChanged: {
-                controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
-            }
+        Label {
+            position: Label.Left;
+            text: qsTr("Preview resolution");
 
-            Label {
-                text: qsTr("Frame readout time");
-                SliderWithField {
-                    id: shutter;
-                    to: 1000 / Math.max(1, calibrator_window.videoArea.vid.frameRate);
-                    width: parent.width;
-                    unit: qsTr("ms");
-                    precision: 2;
-                    onValueChanged: { controller.frame_readout_time = bottomToTop.checked? -value : value; }
-                }
-                CheckBox {
-                    id: bottomToTop;
-                    anchors.right: parent.right;
-                    anchors.top: parent.top;
-                    anchors.topMargin: -30 * dpiScale;
-                    anchors.rightMargin: -10 * dpiScale;
-                    contentItem.visible: false;
-                    scale: 0.7;
-                    tooltip: qsTr("Bottom to top")
-                    onCheckedChanged: { controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value; }
+            ComboBox {
+                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "1080p", "720p", "480p"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 2;
+                onCurrentIndexChanged: {
+                    let target_height = -1; // Full
+                    switch (currentIndex) {
+                        case 1: target_height = 1080; break;
+                        case 2: target_height = 720; break;
+                        case 3: target_height = 480; break;
+                    }
+
+                    controller.set_preview_resolution(target_height, calibrator_window.videoArea.vid);
                 }
             }
         }

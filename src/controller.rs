@@ -10,7 +10,7 @@ use qml_video_rs::video_item::MDKVideoItem;
 
 use crate::core;
 use crate::core::StabilizationManager;
-use crate::core::lens_calibration::LensCalibrator;
+use crate::core::calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
 use crate::rendering;
 use crate::util;
@@ -29,6 +29,7 @@ struct OffsetItem {
 struct CalibrationItem {
     pub timestamp_us: i64,
     pub sharpness: f64,
+    pub is_forced: bool,
 }
 
 #[derive(Default, QObject)]
@@ -39,6 +40,7 @@ pub struct Controller {
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
+    export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
     offset_method: qt_property!(u32),
@@ -601,7 +603,7 @@ impl Controller {
         });
     }
 
-    fn init_calibrator(&self) {
+    pub fn init_calibrator(&self) {
         self.stabilizer.params.write().is_calibrator = true;
         *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
         self.stabilizer.set_smoothing_param("time_constant", 2.0);
@@ -620,7 +622,7 @@ impl Controller {
         if max_points > 0 {
             let mut lock = cal.write();
             let cal = lock.as_mut().unwrap();
-            let saved: std::collections::BTreeMap<i32, core::lens_calibration::Detected> = {
+            let saved: std::collections::BTreeMap<i32, core::calibration::Detected> = {
                 let lock = cal.image_points.read();
                 cal.forced_frames.iter().filter_map(|f| Some((*f, lock.get(f)?.clone()))).collect()
             };
@@ -734,7 +736,8 @@ impl Controller {
 
         self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
             timestamp_us: v.timestamp_us, 
-            sharpness: v.avg_sharpness
+            sharpness: v.avg_sharpness,
+            is_forced: v.is_forced
         }).collect());
 
         util::qt_queued_callback(self, |this, _| {
@@ -774,6 +777,18 @@ impl Controller {
         self.update_calib_model();
         if rms > 0.0 {
             self.calib_progress(1.0, rms, 1, 1, 1);
+        }
+    }
+    fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
+        let path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
+
+        if upload {
+            core::run_threaded(move || {
+                let val = format!("Testing: {}", path);
+                if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&val).map(|x| x.into_string()) {
+                    ::log::debug!("Lens profile uploaded: {}", body.as_str());
+                }
+            });
         }
     }
 

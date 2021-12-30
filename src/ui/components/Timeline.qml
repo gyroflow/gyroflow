@@ -369,7 +369,7 @@ Item {
 
             TimelineSyncPoint {
                 timeline: root;
-                color: "#17b3f0"
+                color: is_forced? "#11d144" : "#17b3f0"
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: sharpness;

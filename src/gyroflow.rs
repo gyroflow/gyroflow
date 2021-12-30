@@ -10,12 +10,12 @@ pub mod util;
 pub mod controller;
 pub mod rendering;
 pub mod resources;
-pub mod ui { pub mod theme; pub mod components { pub mod TimelineGyroChart; } }
+pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; } }
 pub mod qt_gpu { pub mod qrhi_undistort; }
 
 use crate::core::{lens_profile::LensProfile};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
-use ui::theme::Theme;
+use ui::ui_tools::UITools;
 
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
@@ -78,11 +78,7 @@ fn entry() {
     let ui_live_reload = false;
 
     #[cfg(target_os = "windows")]
-    /*if std::env::args().any(|x| x == "--console")*/ {
-        unsafe {
-            winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS);
-        }
-    }
+    unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
 
     simplelog::TermLogger::init(simplelog::LevelFilter::Debug, simplelog::ConfigBuilder::new()
         .add_filter_ignore_str("mp4parse")
@@ -98,8 +94,6 @@ fn entry() {
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
-
-    // return rendering::test();
 
     let icons_path = if ui_live_reload {
         QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")))
@@ -122,11 +116,8 @@ fn entry() {
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };
 
-    let calib_ctl = RefCell::new(controller::Controller::new());
-    let calib_ctlpinned = unsafe { QObjectPinned::new(&calib_ctl) };
-
-    let theme = RefCell::new(Theme::default());
-    let themepinned = unsafe { QObjectPinned::new(&theme) };
+    let ui_tools = RefCell::new(UITools::default());
+    let ui_tools_pinned = unsafe { QObjectPinned::new(&ui_tools) };
 
     let mut engine = QmlEngine::new();
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
@@ -134,10 +125,9 @@ fn entry() {
     engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
     engine.set_property("isOpenGl".into(), QVariant::from(false));
     engine.set_object_property("main_controller".into(), ctlpinned);
-    engine.set_object_property("calib_controller".into(), calib_ctlpinned);
-    engine.set_object_property("theme".into(), themepinned);
-    theme.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
-    theme.borrow().set_theme("dark".into());
+    engine.set_object_property("ui_tools".into(), ui_tools_pinned);
+    ui_tools.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
+    ui_tools.borrow().set_theme("dark".into());
 
     // Get camera profiles list
     let lens_profiles: QVariantList = LensProfile::get_profiles_list().unwrap_or_default().into_iter().map(QString::from).collect();
@@ -157,18 +147,15 @@ fn entry() {
         cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *", ui_path as "QString"] { init_live_reload(engine_ptr, ui_path); });
     }
 
-    let is_opengl = cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *"] -> bool as "bool" {
-        auto wnd = qobject_cast<QQuickWindow *>(engine_ptr->rootObjects().first());
-        bool isOpenGl = wnd->rendererInterface()->graphicsApi() == QSGRendererInterface::OpenGLRhi;
-        engine_ptr->rootContext()->setContextProperty("isOpenGl", QVariant::fromValue(isOpenGl));
-        wnd->setIcon(QIcon(":/resources/icon.png"));
+    let is_opengl = cpp!(unsafe [] -> bool as "bool" {
+        bool isOpenGl = QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi;
         #ifdef Q_OS_ANDROID
             QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
         #endif
         return isOpenGl;
     });
+    engine.set_property("isOpenGl".into(), QVariant::from(is_opengl));
     ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
-    calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
 
     rendering::init().unwrap();
 

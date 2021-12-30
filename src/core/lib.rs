@@ -2,7 +2,7 @@ pub mod gyro_source;
 pub mod integration;
 pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod lens_profile;
-pub mod lens_calibration;
+pub mod calibration;
 pub mod synchronization;
 pub mod undistortion;
 pub mod adaptive_zoom;
@@ -18,7 +18,7 @@ use std::sync::atomic::Ordering::SeqCst;
 use parking_lot::RwLock;
 pub use undistortion::PixelType;
 
-use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, lens_calibration::LensCalibrator };
+use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, calibration::LensCalibrator };
 
 use simd_json::ValueAccess;
 use nalgebra::{ Quaternion, Vector3, Vector4 };
@@ -458,7 +458,8 @@ impl<T: PixelType> StabilizationManager<T> {
                         let points = cal.all_matches.read();
                         match points.get(&(frame as i32)) {
                             Some(entry) => {
-                                cal.draw_chessboard_corners(width as u32, height as u32, stride, pixels, (cal.columns, cal.rows), &entry.points, true);
+                                let (w, h, s) = (width as u32, height as u32, stride);
+                                calibration::drawing::draw_chessboard_corners(cal.width, w, h, s, pixels, (cal.columns, cal.rows), &entry.points, true);
                             },
                             _ => { }
                         }

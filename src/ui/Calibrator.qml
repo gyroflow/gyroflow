@@ -18,16 +18,21 @@ Window {
     property QtObject controller: calib_controller;
 
     property alias videoArea: videoArea;
+    property alias lensCalib: lensCalib;
     
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
 
     title: qsTr("Lens calibrator");
 
+    Component.onCompleted: {
+        ui_tools.set_icon(calibrator_window);
+    }
+    
     Connections {
         target: controller;
         function onError(text, arg, callback) {
-            window.getApp().messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ], calibrator_window);
+            window.messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ], calibrator_window.contentItem);
         }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
@@ -85,7 +90,7 @@ Window {
                     Button {
                         text: qsTr("Open calibration target");
                         icon.name: "chessboard"
-                        onClicked: Qt.createComponent("CalibrationTarget.qml").createObject(window).showMaximized();
+                        onClicked: Qt.createComponent("CalibrationTarget.qml").createObject(calibrator_window).showMaximized();
                     }
                     LinkButton {
                         anchors.horizontalCenter: parent.horizontalCenter;

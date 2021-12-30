@@ -39,11 +39,17 @@ MenuItem {
         const w = md["stream.video[0].codec.width"];
         const h = md["stream.video[0].codec.height"];
 
-        window.exportSettings.orgWidth  = w || 0;
-        window.exportSettings.orgHeight = h || 0;
-        window.lensProfile.videoWidth   = w || 0;
-        window.lensProfile.videoHeight  = h || 0;
-        window.exportSettings.outBitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
+        if (window) {
+            window.exportSettings.orgWidth  = w || 0;
+            window.exportSettings.orgHeight = h || 0;
+            window.lensProfile.videoWidth   = w || 0;
+            window.lensProfile.videoHeight  = h || 0;
+            window.exportSettings.outBitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
+        }
+        if (calibrator_window) {
+            calibrator_window.lensCalib.videoWidth   = w || 0;
+            calibrator_window.lensCalib.videoHeight  = h || 0;
+        }
 
         list.model["Dimensions"]   = w && h? w + "x" + h : "---";
         list.model["Duration"]     = getDuration(md) || "---";

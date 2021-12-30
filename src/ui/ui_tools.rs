@@ -1,22 +1,28 @@
 
 use qmetaobject::*;
 use cpp::*;
+use std::cell::RefCell;
+use crate::controller::Controller;
 
 cpp! {{
     #include <QTranslator>
 }}
 
 #[derive(Default, QObject)]
-pub struct Theme { 
+pub struct UITools { 
     base: qt_base_class!(trait QObject), 
-    set_theme: qt_method!(fn(theme: String)),
-    set_language: qt_method!(fn(lang_id: QString)),
+    set_theme: qt_method!(fn(&self, theme: String)),
+    set_language: qt_method!(fn(&self, lang_id: QString)),
+    init_calibrator: qt_method!(fn(&mut self)),
+    set_icon: qt_method!(fn(&self, wnd: QJSValue)),
 
     language_changed: qt_signal!(),
 
+    calibrator_ctl: Option<RefCell<Controller>>,
+
     pub engine_ptr: Option<*mut QmlEngine>
 }
-impl Theme {
+impl UITools {
     pub fn set_language(&self, lang_id: QString) {
         if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
@@ -38,7 +44,7 @@ impl Theme {
     }
 
     pub fn set_theme(&self, theme: String) {
-        if let Some(engine) = self.engine_ptr{
+        if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
         
             cpp!(unsafe [] { auto f = QGuiApplication::font(); f.setFamily("Arial"); QGuiApplication::setFont(f); });
@@ -76,6 +82,32 @@ impl Theme {
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10000000").into());
                 },
                 _ => { }
+            }
+        }
+    }
+
+    pub fn set_icon(&self, wnd: QJSValue) {
+        cpp!(unsafe [wnd as "QJSValue"] {
+            auto obj = qobject_cast<QQuickWindow *>(wnd.toQObject());
+            obj->setIcon(QIcon(":/resources/icon.png"));
+        });
+    }
+
+    pub fn init_calibrator(&mut self) {
+        if self.calibrator_ctl.is_none() {
+            self.calibrator_ctl = Some(RefCell::new(Controller::new()));
+
+            let calib_ctl = self.calibrator_ctl.as_ref().unwrap();
+            calib_ctl.borrow().init_calibrator();
+            let calib_ctlpinned = unsafe { QObjectPinned::new(&calib_ctl) };
+    
+            if let Some(engine) = self.engine_ptr {
+                let engine = unsafe { &mut *(engine) };
+                engine.set_object_property("calib_controller".into(), calib_ctlpinned);
+
+                calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = cpp!(unsafe [] -> bool as "bool" {
+                    return QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi;
+                });
             }
         }
     }

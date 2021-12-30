@@ -17,8 +17,8 @@ Item {
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
 
-    property int outWidth: window.exportSettings.outWidth;
-    property int outHeight: window.exportSettings.outHeight;
+    property int outWidth: window? window.exportSettings.outWidth : 0;
+    property int outHeight: window? window.exportSettings.outHeight : 0;
     
     property alias dropRect: dropRect;
     property bool isCalibrator: false;
@@ -149,7 +149,7 @@ Item {
             Rectangle {
                 visible: isOpenGl;
                 x: 0; y: 0; width: 1; height: 1;
-                parent: window;
+                parent: window || calibrator_window.contentItem;
                 color: "#01000000";
             }
         }
