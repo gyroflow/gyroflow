@@ -3,6 +3,7 @@ use qmetaobject::*;
 use cpp::*;
 use std::cell::RefCell;
 use crate::controller::Controller;
+use crate::util;
 
 cpp! {{
     #include <QTranslator>
@@ -105,9 +106,7 @@ impl UITools {
                 let engine = unsafe { &mut *(engine) };
                 engine.set_object_property("calib_controller".into(), calib_ctlpinned);
 
-                calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = cpp!(unsafe [] -> bool as "bool" {
-                    return QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi;
-                });
+                calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = util::is_opengl();
             }
         }
     }

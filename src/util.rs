@@ -1,5 +1,6 @@
 use cpp::*;
 use qmetaobject::*;
+use std::collections::HashMap;
 
 pub fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();
@@ -23,6 +24,21 @@ pub fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
         }
     }
     ret
+}
+pub fn qjsonobject_to_hashmap(o: &QJsonObject) -> HashMap<String, String> {
+    let mut ret = HashMap::new();
+    let keys = o.keys();
+    for k in keys {
+        let val: QString = o.value(&k).into();
+        ret.insert(k, val.to_string());
+    }
+    ret
+}
+
+pub fn is_opengl() -> bool {
+    cpp!(unsafe [] -> bool as "bool" {
+        return QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi;
+    })
 }
 
 pub fn url_to_path(url: &str) -> &str {

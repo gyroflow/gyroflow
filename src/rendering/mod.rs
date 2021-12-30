@@ -269,7 +269,7 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
     }
 }
 
-pub fn append_log(msg: &str) { ::log::warn!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
+pub fn append_log(msg: &str) { ::log::debug!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
 pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
 pub fn clear_log() { FFMPEG_LOG.write().clear() }
 

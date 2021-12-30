@@ -31,6 +31,10 @@ pub struct WgpuWrapper  {
     bind_group: wgpu::BindGroup,
     compute_pipeline: wgpu::ComputePipeline,
 
+    in_size: u64,
+    out_size: u64,
+    params_size: u64,
+
     globals: Globals
 }
 
@@ -85,6 +89,7 @@ impl WgpuWrapper  {
             width: width as u32,
             height: height as u32,
             stride: stride as u32,
+
             output_width: output_width as u32,
             output_height: output_height as u32,
             output_stride: output_stride as u32,
@@ -104,6 +109,9 @@ impl WgpuWrapper  {
             params2_buffer,
             bind_group,
             compute_pipeline,
+            in_size,
+            out_size,
+            params_size,
             globals
         })
     }
@@ -113,7 +121,13 @@ impl WgpuWrapper  {
     }
 
     pub fn undistort_image(&mut self, pixels: &mut [u8], output_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) {
-        self.queue.write_buffer(&self.params_buffer, 0, bytemuck::cast_slice(&itm.params));
+        let flattened_params = bytemuck::cast_slice(&itm.params);
+
+        if self.in_size != pixels.len() as u64              { log::error!("Buffer size mismatch! {} vs {}", self.in_size, pixels.len()); return; }
+        if self.out_size != output_pixels.len() as u64      { log::error!("Buffer size mismatch! {} vs {}", self.out_size, output_pixels.len()); return; }
+        if self.params_size < flattened_params.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.params_size, flattened_params.len()); return; }
+
+        self.queue.write_buffer(&self.params_buffer, 0, flattened_params);
         self.queue.write_buffer(&self.in_pixels, 0, bytemuck::cast_slice(pixels));
 
         self.globals.num_params = itm.params.len() as u32;
@@ -146,7 +160,7 @@ impl WgpuWrapper  {
             self.staging_buffer.unmap();
         } else {
             // TODO change to Result
-            panic!("failed to run compute on gpu!")
+            log::error!("failed to run compute on wgpu!")
         }
     }
 }

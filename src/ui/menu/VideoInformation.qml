@@ -46,7 +46,7 @@ MenuItem {
             window.lensProfile.videoHeight  = h || 0;
             window.exportSettings.outBitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
         }
-        if (calibrator_window) {
+        if (typeof calibrator_window !== "undefined") {
             calibrator_window.lensCalib.videoWidth   = w || 0;
             calibrator_window.lensCalib.videoHeight  = h || 0;
         }

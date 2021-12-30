@@ -23,10 +23,12 @@ crossbeam-channel = "*"
 parking_lot = "*"
 bincode = "*"
 serde = "*"
+serde_json = "*"
 crc32fast = "*"
 byteorder = "*"
 line_drawing = "*"
 rand = "0.8"
+chrono = "*"
 
 dyn-clone = "*"
 

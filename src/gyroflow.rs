@@ -147,13 +147,13 @@ fn entry() {
         cpp!(unsafe [engine_ptr as "QQmlApplicationEngine *", ui_path as "QString"] { init_live_reload(engine_ptr, ui_path); });
     }
 
-    let is_opengl = cpp!(unsafe [] -> bool as "bool" {
-        bool isOpenGl = QQuickWindow::graphicsApi() == QSGRendererInterface::OpenGLRhi;
+    cpp!(unsafe [] {
         #ifdef Q_OS_ANDROID
             QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
         #endif
-        return isOpenGl;
     });
+
+    let is_opengl = util::is_opengl();
     engine.set_property("isOpenGl".into(), QVariant::from(is_opengl));
     ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
 

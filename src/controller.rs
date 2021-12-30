@@ -779,16 +779,29 @@ impl Controller {
             self.calib_progress(1.0, rms, 1, 1, 1);
         }
     }
+
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
         let path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
+        let info_json = info.to_json().to_string();
+ 
+        let mut profile = core::calibration::lens_profile::LensProfile::from_json(&info_json).unwrap();
+        if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+            profile.set_from_calibrator(cal);
+        }
 
-        if upload {
-            core::run_threaded(move || {
-                let val = format!("Testing: {}", path);
-                if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&val).map(|x| x.into_string()) {
-                    ::log::debug!("Lens profile uploaded: {}", body.as_str());
-                }
-            });
+        if let Err(e) = profile.save_to_file(&path) {
+            self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default());
+        }
+
+        if let Ok(json) = profile.get_json() {
+            ::log::debug!("Lens profile json: {}", json);
+            if upload {
+                core::run_threaded(move || {
+                    if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
+                        ::log::debug!("Lens profile uploaded: {}", body.as_str());
+                    }
+                });
+            }
         }
     }
 

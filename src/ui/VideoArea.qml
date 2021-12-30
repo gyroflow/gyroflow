@@ -149,7 +149,7 @@ Item {
             Rectangle {
                 visible: isOpenGl;
                 x: 0; y: 0; width: 1; height: 1;
-                parent: window || calibrator_window.contentItem;
+                parent: isCalibrator? calibrator_window.contentItem : window;
                 color: "#01000000";
             }
         }

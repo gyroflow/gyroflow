@@ -15,7 +15,7 @@ Window {
 
     title: qsTr("Calibration target") + ` (${columns} x ${rows})`;
     
-    Component.onCompleted: ui_tools.set_icon(calibrator_window);
+    Component.onCompleted: ui_tools.set_icon(root);
 
     Column {
         anchors.centerIn: parent;

@@ -87,9 +87,13 @@ impl OclWrapper {
         Ok(())
     }
     pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) -> ocl::Result<()> {
-        self.src.write(pixels as &[u8]).enq()?;
-
         let flattened_params = unsafe { std::slice::from_raw_parts(itm.params.as_ptr() as *const f32, itm.params.len() * 9 ) };
+
+        if self.src.len() != pixels.len()                 { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
+        if self.dst.len() != out_pixels.len()             { log::error!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
+        if self.params_buf.len() < flattened_params.len() { log::error!("Buffer size mismatch! {} vs {}", self.params_buf.len(), flattened_params.len()); return Ok(()); }
+
+        self.src.write(pixels as &[u8]).enq()?;
 
         self.params_buf.write(flattened_params).enq()?;
 

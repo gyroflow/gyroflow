@@ -95,9 +95,7 @@ Window {
                     LinkButton {
                         anchors.horizontalCenter: parent.horizontalCenter;
                         text: qsTr("How to calibrate lens?");
-                        onClicked: {
-                            // TODO
-                        }
+                        onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/guide/calibration/") 
                     }
                 }
             }
