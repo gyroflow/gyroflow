@@ -72,6 +72,7 @@ MenuItem {
                 if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
                 if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
                 if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
+                if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
             }
             calib.updateTable();
         }
@@ -295,7 +296,7 @@ MenuItem {
                 width: parent.width;
                 height: 25 * dpiScale;
                 precision: 2;
-                value: 5;
+                value: 8;
                 from: 1;
                 unit: qsTr("px");
 

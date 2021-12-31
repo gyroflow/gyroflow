@@ -95,7 +95,7 @@ impl UITools {
     }
 
     pub fn init_calibrator(&mut self) {
-        if self.calibrator_ctl.is_none() {
+        //if self.calibrator_ctl.is_none() {
             self.calibrator_ctl = Some(RefCell::new(Controller::new()));
 
             let calib_ctl = self.calibrator_ctl.as_ref().unwrap();
@@ -108,6 +108,6 @@ impl UITools {
 
                 calib_ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = util::is_opengl();
             }
-        }
+        //}
     }
 }

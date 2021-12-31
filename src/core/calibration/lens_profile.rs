@@ -29,6 +29,8 @@ pub struct LensProfile {
     input_horizontal_stretch: f64,
     num_images: usize,
 
+    fps: f64,
+
     use_opencv_fisheye: bool,
     fisheye_params: CameraParams,
 
@@ -69,7 +71,7 @@ impl LensProfile {
     }
 
     pub fn get_name(&self) -> String {
-        format!("{}_{}_{}_{}_{}x{}", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.calib_dimension.w, self.calib_dimension.h)
+        format!("{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.calib_dimension.w, self.calib_dimension.h, self.fps)
     }
 
     pub fn save_to_file(&mut self, path: &str) -> std::io::Result<String> {

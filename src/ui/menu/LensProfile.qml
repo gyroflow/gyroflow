@@ -92,10 +92,16 @@ MenuItem {
             icon.name: "plus";
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
+            property var calibratorWnd: null;
             onClicked: {
-                ui_tools.init_calibrator();
-                const wnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
-                wnd.show()
+                if (!calibratorWnd) {
+                    ui_tools.init_calibrator();
+                    calibratorWnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
+                    calibratorWnd.show();
+                    calibratorWnd.closing.connect(function(e) {
+                        calibratorWnd = null;
+                    })
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
 // Things to do before first public preview:
+// - Load lens profile based on identifier
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
@@ -33,13 +34,7 @@ use ui::ui_tools::UITools;
 // TODO: default lens profile
 // TODO: render queue
 // TODO: cli interface
-// TODO: Calibrator
-// TODO: -- auto upload of lens profiles to a central database (with a checkbox)
-// TODO: -- Save camera model with calibration and later load lens profile automatically
-// TODO: -- Save frame readout time
-// TODO: -- Save lens parameters (gopro: linear, wide, narrow, also hypersmooth on/off), sony: lens model and zoom position
-// TODO: -- Allow for multiple zoom values, could be interpolated later (Sony)
-// TODO: -- Recommended output size (eg. 4:3 to 16:9)
+// TODO: Calibrator: Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
 // TODO: timeline panning
 // TODO: add lens distortion back after stabilization
