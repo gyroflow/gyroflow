@@ -1,5 +1,4 @@
-use serde::Serialize;
-use serde::Deserialize;
+use serde::{ Serialize, Deserialize };
 use super::LensCalibrator;
 
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
@@ -36,6 +35,8 @@ pub struct LensProfile {
     use_opencv_standard: bool,
     calib_params: CameraParams,
 
+    identifier: String,
+    
     calibrator_version: String,
     date: String,
 }

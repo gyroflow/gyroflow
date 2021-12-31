@@ -32,6 +32,16 @@ impl LensProfile {
         self.distortion_coeffs = cal.d.iter().copied().collect();
     }
 
+    pub fn get_camera_matrix(&self) -> Vec<f64> {
+        if self.camera_matrix.len() != 9 { return Vec::new(); }
+        // Center the camera
+        let mut k = self.camera_matrix.clone();
+        // TODO: uncomment this
+        // k[2] = self.calib_dimension.0 / 2.0;
+        // k[5] = self.calib_dimension.1 / 2.0;
+        k
+    }
+
     pub fn load_from_json_value(&mut self, v: &simd_json::borrowed::Value) -> Option<()> {
         self.camera         = if v.contains_key("camera_brand")   { format!("{} {}", v["camera_brand"].as_str()?, v["camera_model"].as_str()?) } else { String::new() };
         self.lens           = if v.contains_key("lens_model")     { v["lens_model"]    .as_str()?.to_string() } else { String::new() };
@@ -78,7 +88,7 @@ impl LensProfile {
         ret.insert("calib_width"    .into(), format!("{}", self.calib_dimension.0));
         ret.insert("calib_height"   .into(), format!("{}", self.calib_dimension.1));
         ret.insert("coefficients"   .into(), self.distortion_coeffs.iter().map(f64::to_string).collect::<Vec<String>>().join(";"));
-        ret.insert("matrix"         .into(), self.camera_matrix.iter().map(f64::to_string).collect::<Vec<String>>().join(";"));
+        ret.insert("matrix"         .into(), self.get_camera_matrix().iter().map(f64::to_string).collect::<Vec<String>>().join(";"));
         ret
     }
 }

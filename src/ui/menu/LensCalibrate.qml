@@ -18,9 +18,68 @@ MenuItem {
     property int videoHeight: 0;
     onVideoWidthChanged: {
         Qt.callLater(function() {
-            calib.calibrationInfo.output_size = videoWidth + "x" + videoHeight;
-            list.updateEntry("Default output size", calib.calibrationInfo.output_size);
+            calib.calibrationInfo.output_dimension = { "w": videoWidth, "h": videoHeight };
+            list.updateEntry("Default output size", videoWidth + "x" + videoHeight);
         });
+    }
+    function resetMetadata() {
+        calib.calibrationInfo = {
+            "calibrated_by": controller.get_username(),
+            "output_dimension": { "w": videoWidth, "h": videoHeight }
+        };
+    }
+    function updateTable() {
+        const fields = {
+            "camera_brand":     QT_TRANSLATE_NOOP("TableList", "Camera brand"),
+            "camera_model":     QT_TRANSLATE_NOOP("TableList", "Camera model"),
+            "lens_model":       QT_TRANSLATE_NOOP("TableList", "Lens model"),
+            "camera_setting":   QT_TRANSLATE_NOOP("TableList", "Camera setting"),
+            "note":             QT_TRANSLATE_NOOP("TableList", "Additional info"),
+            "output_dimension": QT_TRANSLATE_NOOP("TableList", "Default output size"),
+            "identifier":       QT_TRANSLATE_NOOP("TableList", "Identifier"),
+            "calibrated_by":    QT_TRANSLATE_NOOP("TableList", "Calibrated by")
+        };
+        let model = {};
+        for (const x in fields) {
+            let v = calib.calibrationInfo[x];
+            if (v && x == "output_dimension") {
+                v = v.w + "x" + v.h;
+            }
+            model[fields[x]] = v || "---";
+        }
+        list.model = model;
+    }
+    Component.onCompleted: {
+        calib.resetMetadata();
+        calib.updateTable();
+    }
+    Connections {
+        target: controller;
+        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+            // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
+            if (!camera.includes("GoPro")) {
+                shutter.value = Math.abs(frame_readout_time);
+                shutterCb.checked = Math.abs(frame_readout_time) > 0;
+                bottomToTop.checked = frame_readout_time < 0;
+            }
+
+            calib.resetMetadata();
+            const camera_id = JSON.parse(camera_id_json);
+            if (camera_id) {
+                if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
+                if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }
+                if (camera_id.lens_model) { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_model : camera_id.lens_model; }
+                if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
+                if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
+                if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
+            }
+            calib.updateTable();
+        }
+        function onRolling_shutter_estimated(rolling_shutter) {
+            shutter.value = Math.abs(rolling_shutter);
+            shutterCb.checked = Math.abs(rolling_shutter) > 0;
+            bottomToTop.checked = rolling_shutter < 0;
+        }
     }
 
     Settings {
@@ -84,24 +143,6 @@ MenuItem {
             from: 1;
         }
     }
-    Component.onCompleted: {
-        const fields = [
-            QT_TRANSLATE_NOOP("TableList", "Camera brand"),
-            QT_TRANSLATE_NOOP("TableList", "Camera model"),
-            QT_TRANSLATE_NOOP("TableList", "Lens model"),
-            QT_TRANSLATE_NOOP("TableList", "Camera setting"),
-            QT_TRANSLATE_NOOP("TableList", "Additional info"),
-            QT_TRANSLATE_NOOP("TableList", "Default output size"),
-            QT_TRANSLATE_NOOP("TableList", "Identifier"),
-            QT_TRANSLATE_NOOP("TableList", "Calibrated by")
-        ];
-        let model = {};
-        for (const x of fields) model[x] = "---";
-        list.model = model;
-
-        calib.calibrationInfo.calibrated_by = controller.get_username();
-        list.updateEntry("Calibrated by", calib.calibrationInfo.calibrated_by);
-    }
 
     TableList {
         id: list;
@@ -134,20 +175,21 @@ MenuItem {
             "Additional info": {
                 "type": "text",
                 "width": 120,
-                "value": function() { return calib.calibrationInfo.additional_info || ""; },
-                "onChange": function(value) { calib.calibrationInfo.additional_info = value; list.updateEntry("Additional info", value);  }
+                "value": function() { return calib.calibrationInfo.note || ""; },
+                "onChange": function(value) { calib.calibrationInfo.note = value; list.updateEntry("Additional info", value);  }
             },
             "Default output size": {
                 "type": "text",
                 "width": 120,
-                "value": function() { return calib.calibrationInfo.output_size || ""; },
+                "value": function() { return calib.calibrationInfo.output_dimension? (calib.calibrationInfo.output_dimension.w + "x" + calib.calibrationInfo.output_dimension.h) : ""; },
                 "onChange": function(value) {
                     if (/^[0-9]{1,5}x[0-9]{1,5}$/.test(value)) {
-                        calib.calibrationInfo.output_size = value;
                         list.updateEntry("Default output size", value);
                         
                         const parts = value.split('x');
-                        const ow = parts[0], oh = parts[1];
+                        const ow = +parts[0], oh = +parts[1];
+
+                        calib.calibrationInfo.output_dimension = { "w": ow, "h": oh };
                         calibrator_window.videoArea.outWidth = ow;
                         calibrator_window.videoArea.outHeight = oh;
                         controller.set_output_size(ow, oh);
@@ -167,7 +209,11 @@ MenuItem {
     CheckBoxWithContent {
         id: shutterCb;
         text: qsTr("Rolling shutter correction");
-        cb.onCheckedChanged: controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+        cb.onCheckedChanged: {
+            const v = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+            controller.frame_readout_time = v;
+            calib.calibrationInfo.frame_readout_time = v;
+        }
 
         Label {
             text: qsTr("Frame readout time");
@@ -177,7 +223,11 @@ MenuItem {
                 width: parent.width;
                 unit: qsTr("ms");
                 precision: 2;
-                onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
+                onValueChanged: {
+                    const v = bottomToTop.checked? -value : value;
+                    controller.frame_readout_time = v;
+                    calib.calibrationInfo.frame_readout_time = v;
+                }
             }
             CheckBox {
                 id: bottomToTop;
@@ -188,7 +238,11 @@ MenuItem {
                 contentItem.visible: false;
                 scale: 0.7;
                 tooltip: qsTr("Bottom to top")
-                onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+                onCheckedChanged: {
+                    const v = bottomToTop.checked? -shutter.value : shutter.value;
+                    controller.frame_readout_time = v;
+                    calib.calibrationInfo.frame_readout_time = v;
+                }
             }
         }
     }

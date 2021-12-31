@@ -2,10 +2,12 @@ pub mod gyro_source;
 pub mod integration;
 pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod lens_profile;
+pub mod lens_profile_database;
 pub mod calibration;
 pub mod synchronization;
 pub mod undistortion;
 pub mod adaptive_zoom;
+pub mod camera_identifier;
 
 pub mod smoothing;
 pub mod filtering;
@@ -15,6 +17,7 @@ pub mod gpu;
 use std::sync::{ Arc, atomic::Ordering::Relaxed };
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
+use camera_identifier::CameraIdentifier;
 use parking_lot::RwLock;
 pub use undistortion::PixelType;
 
@@ -122,6 +125,8 @@ pub struct StabilizationManager<T: PixelType> {
     pub smoothness_checksum: Arc<AtomicU64>,
     pub adaptive_zoom_checksum: Arc<AtomicU64>,
 
+    pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
+
     pub params: Arc<RwLock<BasicParams>>
 }
 
@@ -142,7 +147,9 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
-            lens_calibrator: Arc::new(RwLock::new(None))
+            lens_calibrator: Arc::new(RwLock::new(None)),
+
+            camera_id: Arc::new(RwLock::new(None)),
         }
     }
 }
@@ -197,16 +204,25 @@ impl<T: PixelType> StabilizationManager<T> {
                     detected_source: Some("Gyroflow file".to_string()),
                     quaternions: Some(quaternions),
                     raw_imu: Some(raw_imu),
-                    frame_readout_time: None
+                    frame_readout_time: None,
+                    camera_identifier: None,
                 };
                 self.gyro.write().load_from_telemetry(&md);
                 self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
             });
         } else {
-            let md = GyroSource::parse_telemetry_file(path)?;
+            let (fps, size) = {
+                let params = self.params.read();
+                (params.fps, params.video_size)
+            };
+
+            let md = GyroSource::parse_telemetry_file(path, size, fps)?;
             self.gyro.write().load_from_telemetry(&md);
             self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
             self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+            if let Some(id) = md.camera_identifier {
+                *self.camera_id.write() = Some(id);
+            }
         }
         Ok(())
     }
@@ -216,7 +232,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn camera_matrix_or_default(&self) -> Vec<f64> {
-        let matrix = self.lens.read().camera_matrix.clone();
+        let matrix = self.lens.read().get_camera_matrix();
         if matrix.len() == 9 {
             matrix
         } else {

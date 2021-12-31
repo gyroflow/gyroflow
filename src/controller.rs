@@ -51,7 +51,7 @@ pub struct Controller {
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
     lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
@@ -310,14 +310,14 @@ impl Controller {
                 this.error(QString::from(msg), QString::from(arg), QString::default());
             });
 
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64)| {
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64, QString)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
                 
                 this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6);    
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -345,11 +345,12 @@ impl Controller {
                             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
                             chart.setDurationMs(duration_ms);
                         }
-                        
-                        (detected, orientation, has_gyro, has_quats, stab.params.read().frame_readout_time)
+                        let camera_id = stab.camera_id.read();
+
+                        (detected, orientation, has_gyro, has_quats, stab.params.read().frame_readout_time, camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default())
                     };
 
-                    finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3, detected.4));
+                    finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3, detected.4, QString::from(detected.5)));
                 });
             }
         }
@@ -784,24 +785,27 @@ impl Controller {
         let path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
         let info_json = info.to_json().to_string();
  
-        let mut profile = core::calibration::lens_profile::LensProfile::from_json(&info_json).unwrap();
-        if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
-            profile.set_from_calibrator(cal);
-        }
-
-        if let Err(e) = profile.save_to_file(&path) {
-            self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default());
-        }
-
-        if let Ok(json) = profile.get_json() {
-            ::log::debug!("Lens profile json: {}", json);
-            if upload {
-                core::run_threaded(move || {
-                    if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
-                        ::log::debug!("Lens profile uploaded: {}", body.as_str());
+        match core::calibration::lens_profile::LensProfile::from_json(&info_json) {
+            Ok(mut profile) => {
+                if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+                    profile.set_from_calibrator(cal);
+                }
+        
+                match profile.save_to_file(&path) {
+                    Ok(json) => {
+                        ::log::debug!("Lens profile json: {}", json);
+                        if upload {
+                            core::run_threaded(move || {
+                                if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
+                                    ::log::debug!("Lens profile uploaded: {}", body.as_str());
+                                }
+                            });
+                        }
                     }
-                });
-            }
+                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
+                }
+            },
+            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
         }
     }
 

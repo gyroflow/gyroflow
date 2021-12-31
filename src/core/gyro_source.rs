@@ -7,6 +7,7 @@ use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
 use crate::BasicParams;
+use crate::camera_identifier::CameraIdentifier;
 
 use super::integration::*;
 use super::smoothing::SmoothingAlgorithm;
@@ -22,7 +23,8 @@ pub struct FileMetadata {
     pub raw_imu:  Option<Vec<TimeIMU>>,
     pub quaternions:  Option<TimeQuat>,
     pub detected_source: Option<String>,
-    pub frame_readout_time: Option<f64>
+    pub frame_readout_time: Option<f64>,
+    pub camera_identifier: Option<CameraIdentifier>
 }
 
 #[derive(Default, Clone)]
@@ -63,13 +65,15 @@ impl GyroSource {
         self.duration_ms = params.get_scaled_duration_ms();
         self.offsets.clear();
     }
-    pub fn parse_telemetry_file(path: &str) -> Result<FileMetadata> {
+    pub fn parse_telemetry_file(path: &str, size: (usize, usize), fps: f64) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
     
         let filename = Path::new(&path).file_name().unwrap().to_str().unwrap();
     
         let input = Input::from_stream(&mut stream, filesize, filename)?;
+
+        let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
     
         let mut detected_source = input.camera_type();
         if let Some(m) = input.camera_model() { detected_source.push(' '); detected_source.push_str(m); }
@@ -114,7 +118,8 @@ impl GyroSource {
             detected_source: Some(detected_source),
             quaternions,
             raw_imu,
-            frame_readout_time: telemetry_parser::util::frame_readout_time(&input)
+            frame_readout_time: telemetry_parser::util::frame_readout_time(&input),
+            camera_identifier
         })
     }
 

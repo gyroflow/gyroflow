@@ -1,16 +1,15 @@
-use opencv::core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, CV_8UC1 };
-use opencv::prelude::MatTraitConst;
-use opencv::calib3d::CALIB_CB_ADAPTIVE_THRESH;
-use opencv::calib3d::CALIB_CB_NORMALIZE_IMAGE;
-use opencv::calib3d::CALIB_CB_FAST_CHECK;
-use opencv::calib3d::Fisheye_CALIB_RECOMPUTE_EXTRINSIC;
-use opencv::calib3d::Fisheye_CALIB_FIX_SKEW;
+#[cfg(feature = "use-opencv")]
+use opencv::{
+    core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 }, 
+    prelude::MatTraitConst, 
+    calib3d::{ CALIB_CB_ADAPTIVE_THRESH, CALIB_CB_NORMALIZE_IMAGE, CALIB_CB_FAST_CHECK, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
+};
+
 use rand::seq::SliceRandom;
 use std::ffi::c_void;
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
 use std::sync::Arc;
 use nalgebra::{ Matrix3, Vector4 };
-use opencv::core::TermCriteria_Type;
 use std::collections::{BTreeMap, HashSet};
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
@@ -87,9 +86,8 @@ impl LensCalibrator {
         self.used_points.clear();
     }
 
-    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F) -> Result<(), opencv::Error>
+    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
     where F: Fn((usize, usize, usize, f64)) + Send + Sync + Clone + 'static {
-        let subpix_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 0.001)?;
 
         self.width = width as usize;
         self.height = height as usize;
@@ -106,11 +104,13 @@ impl LensCalibrator {
                 img_points.write().insert(frame, detected.clone());
             }
             progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0));
-            return Ok(());
+            return;
         }
 
         crate::run_threaded(move || {
             let _ = (|| -> Result<(), opencv::Error> {
+                let subpix_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 0.001)?;
+
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     return Ok(());
                 }
@@ -144,7 +144,6 @@ impl LensCalibrator {
             })();
             progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0));
         });
-        Ok(())
     }
 
     pub fn calibrate(&mut self, only_used: bool) -> Result<(), opencv::Error> {
@@ -199,12 +198,6 @@ impl LensCalibrator {
         }).reduce_with(find_min);
 
         if let Some((rms, k, d, used_frames)) = result {
-            // TODO add this to undistortion
-            //if center_camera {
-            //    k[(0, 2)] = self.width as f64 / 2.0;
-            //    k[(1, 2)] = self.height as f64 / 2.0;
-            //}
-
             self.k = k;
             self.d = d;
             self.rms = rms;
@@ -217,6 +210,7 @@ impl LensCalibrator {
     }
 }
 
+#[cfg(feature = "use-opencv")]
 fn cv_to_mat3(r1: Mat) -> Result<Matrix3<f64>, opencv::Error> {
     if r1.typ() != opencv::core::CV_64FC1 {
         return Err(opencv::Error::new(0, "Invalid matrix type".into()));
@@ -228,6 +222,7 @@ fn cv_to_mat3(r1: Mat) -> Result<Matrix3<f64>, opencv::Error> {
     ))
 }
 
+#[cfg(feature = "use-opencv")]
 fn cv_to_vec4(v: Mat) -> Result<Vector4<f64>, opencv::Error> {
     if v.typ() != opencv::core::CV_64FC1 {
         return Err(opencv::Error::new(0, "Invalid matrix type".into()));
