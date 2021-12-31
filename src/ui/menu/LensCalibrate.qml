@@ -252,7 +252,10 @@ MenuItem {
         accent: true;
         icon.name: "save"
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: fileDialog.open();
+        onClicked: {
+            fileDialog.currentFile = controller.export_lens_profile_filename(calib.calibrationInfo);
+            fileDialog.open();
+        }
     }
     CheckBox {
         id: uploadProfile;

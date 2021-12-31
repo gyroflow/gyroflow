@@ -5,8 +5,8 @@ use opencv::{
     calib3d::{ CALIB_CB_ADAPTIVE_THRESH, CALIB_CB_NORMALIZE_IMAGE, CALIB_CB_FAST_CHECK, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
-use rand::seq::SliceRandom;
-use std::ffi::c_void;
+use rand::prelude::IteratorRandom;
+use std::{ffi::c_void, collections::BTreeSet};
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
 use std::sync::Arc;
 use nalgebra::{ Matrix3, Vector4 };
@@ -149,7 +149,7 @@ impl LensCalibrator {
     pub fn calibrate(&mut self, only_used: bool) -> Result<(), opencv::Error> {
         let calib_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 1e-6)?;
 
-        let found_frames: Vec<i32> = if only_used {
+        let found_frames: BTreeSet<i32> = if only_used {
             self.used_points.keys().copied().collect()
         } else {
             self.image_points.read().keys().copied().collect()
@@ -160,7 +160,7 @@ impl LensCalibrator {
         let image_points = self.image_points.read().clone();
         let size = Size::new(self.width as i32, self.height as i32);
         let objp = self.objp.clone();
-        let max_images = if only_used { found_frames.len() } else { self.max_images };
+        let max_images = self.max_images;
         let forced_frames = self.forced_frames.clone();
 
         let mut iterations = self.iterations;
@@ -168,13 +168,42 @@ impl LensCalibrator {
             iterations = 1;
         }
         let result = (0..iterations).into_par_iter().map(|_| {
-            let candidate_frames: HashSet<i32> = (&found_frames)
-                .choose_multiple(&mut rand::thread_rng(), max_images).copied()
-                .chain(forced_frames.iter().copied())
-                .collect();
+            let candidate_frames: BTreeSet<i32> = if iterations > 1 {
+                // Dive the entire range to `max_images` even slices
+                // Then pick a random frame from each slice
+                let mut choosen = BTreeSet::new();
+                if let Some(max) = found_frames.iter().max() {
+                    if let Some(min) = found_frames.iter().min() {
+                        let step = ((*max - *min) as f64 / max_images as f64).floor() as i32;
+                        let mut val = *min;
+                        for _ in 0..max_images {
+                            let range = found_frames.range(val..val + step);
+                            if let Some(el) = range.choose(&mut rand::thread_rng()) {
+                                choosen.insert(*el);
+                            }
+                            val += step;
+                        }
+                    }
+                }
+                choosen
+            } else if only_used {
+                // Calculate only using used frames
+                found_frames.clone()
+            } else {
+                // Pick `max_images` random frames from the entire range
+                found_frames.iter().copied()
+                    .choose_multiple(&mut rand::thread_rng(), max_images).into_iter()
+                    .collect()
+            };
+
+            let final_frames: Vec<i32> = candidate_frames.iter().chain(forced_frames.iter()).filter_map(|k| Some(image_points.get(k)?.frame)).collect();
+
+            if final_frames.len() == 1 {
+                return (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), final_frames);
+            }
   
             let imgpoints = Vector::<Vector<Point2f>>::from_iter(
-                candidate_frames.iter().filter_map(|k| Some(Vector::from_iter(
+                final_frames.iter().filter_map(|k| Some(Vector::from_iter(
                     image_points.get(k)?.points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
                 ))
             ));
@@ -190,7 +219,7 @@ impl LensCalibrator {
             if let Ok(rms) = opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
                 if let Ok(k) = cv_to_mat3(k) {
                     if let Ok(d) = cv_to_vec4(d) {
-                        return (rms, k, d, candidate_frames.into_iter().collect::<Vec<_>>());
+                        return (rms, k, d, final_frames);
                     }
                 }
             }

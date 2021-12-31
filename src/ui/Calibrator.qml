@@ -28,11 +28,15 @@ Window {
     Component.onCompleted: {
         ui_tools.set_icon(calibrator_window);
     }
+
+    function messageBox(type, text, buttons, parent) {
+        window.messageBox(type, text, buttons, parent || calibrator_window.contentItem);
+    }
     
     Connections {
         target: controller;
         function onError(text, arg, callback) {
-            window.messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ], calibrator_window.contentItem);
+            messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);

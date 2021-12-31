@@ -41,6 +41,7 @@ pub struct Controller {
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: QString)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
+    export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
     offset_method: qt_property!(u32),
@@ -619,6 +620,18 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
 
+        let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
+            let params = stab.params.read();
+            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
+        };
+
+        let is_forced = custom_timestamp_ms > -0.5;
+        let ranges = if is_forced {
+            vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
+        } else {
+            vec![(trim_start_ms, trim_end_ms)]
+        };
+
         let cal = stab.lens_calibrator.clone();
         if max_points > 0 {
             let mut lock = cal.write();
@@ -632,11 +645,6 @@ impl Controller {
             cal.iterations = iterations;
             cal.max_sharpness = max_sharpness;
         }
-
-        let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
-            let params = stab.params.read();
-            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
-        };
 
         let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
             this.calib_in_progress = ready < total;
@@ -655,13 +663,6 @@ impl Controller {
             this.calib_in_progress = false;
             this.calib_in_progress_changed();
         });
-
-        let is_forced = custom_timestamp_ms > -0.5;
-        let ranges = if is_forced {
-            vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
-        } else {
-            vec![(trim_start_ms, trim_end_ms)]
-        };
 
         self.cancel_flag.store(false, SeqCst);
         let cancel_flag = self.cancel_flag.clone();
@@ -779,6 +780,18 @@ impl Controller {
         if rms > 0.0 {
             self.calib_progress(1.0, rms, 1, 1, 1);
         }
+    }
+
+    fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
+        let info_json = info.to_json().to_string();
+ 
+        if let Ok(mut profile) = core::calibration::lens_profile::LensProfile::from_json(&info_json) {
+            if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+                profile.set_from_calibrator(cal);
+            }
+            return QString::from(format!("{}.json", profile.get_name()));
+        }
+        QString::default()
     }
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {

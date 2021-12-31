@@ -43,11 +43,13 @@ impl CameraIdentifier {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(map) = tag_map.get(&GroupId::Default) {
                                 if let Some(v) = map.get_t(TagId::Unknown(0x45495341/*EISA*/)) as Option<&String> {
-                                    id.additional = if v == "Y" || v == "N" {
-                                        format!("EIS-{}", v)
-                                    } else {
-                                        v.clone()
-                                    };
+                                    if v != "N/A" {
+                                        id.additional = if v == "Y" || v == "N" {
+                                            format!("EIS-{}", v)
+                                        } else {
+                                            v.clone()
+                                        };
+                                    }
                                 }
                                 if let Some(v) = map.get_t(TagId::Unknown(0x45495345/*EISE*/)) as Option<&String> {
                                     if id.additional.is_empty() {
@@ -128,7 +130,6 @@ impl CameraIdentifier {
         if self.brand.is_empty() && self.model.is_empty() { return String::new(); }
 
         let mut id = format!("{}-{}-{}-{}-{}x{}@{}-{}", self.brand, self.model, self.lens_model, self.lens_info, self.video_width, self.video_height, self.fps, self.additional);
-        id = id.replace("N/A", "");
         id = id.replace(" ", "");
         id = id.replace("--", "-");
         let x: &[_] =  &['-', ' '];

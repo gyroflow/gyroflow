@@ -63,8 +63,13 @@ impl LensProfile {
     pub fn get_json(&mut self) -> Result<String, serde_json::error::Error> {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = chrono::Local::today().naive_local().to_string();
+        self.name = self.get_name();
 
         Ok(serde_json::to_string_pretty(&self)?)
+    }
+
+    pub fn get_name(&self) -> String {
+        format!("{}_{}_{}_{}_{}x{}", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.calib_dimension.w, self.calib_dimension.h)
     }
 
     pub fn save_to_file(&mut self, path: &str) -> std::io::Result<String> {
@@ -75,4 +80,3 @@ impl LensProfile {
         Ok(json)
     }
 }
-
