@@ -1,0 +1,50 @@
+{
+    "name": "RUNCAM SplitHD MJ 1440P 4by3",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "RUNCAM",
+    "camera_model": "SplitHD",
+    "lens_model": "MJ",
+    "camera_setting": "1440P 4by3",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-09-10",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "orig_dimension": {
+        "w": 1920,
+        "h": 1440
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 11,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 0.520704853021607,
+        "camera_matrix": [
+            [
+                811.4276327081599,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                812.7240938126519,
+                720.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.13618386870646057,
+            0.05913100041909645,
+            -0.11630674103849185,
+            0.05196818426103514
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}
