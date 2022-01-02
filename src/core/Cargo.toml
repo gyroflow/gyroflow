@@ -29,6 +29,8 @@ byteorder = "*"
 line_drawing = "*"
 rand = "0.8"
 chrono = "*"
+itertools = "*"
+num = "*"
 
 dyn-clone = "*"
 

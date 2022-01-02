@@ -320,38 +320,48 @@ impl Controller {
                 this.chart_data_changed();
                 this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
             });
+            let load_lens = util::qt_queued_callback_mut(self, move |this, path: QString| {
+                this.load_lens_profile(path);
+            });
             
             if duration_ms > 0.0 && fps > 0.0 {
                 core::run_threaded(move || {
-                    let detected = {
-                        if is_main_video {
-                            if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
-                                err(("An error occured: %1".to_string(), e.to_string()));
-                            } else {
-                                stab.set_output_size(video_size.0, video_size.1);
-                            }
-                        } else if let Err(e) = stab.load_gyro_data(&s) {
+                    if is_main_video {
+                        if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
+                        } else {
+                            stab.set_output_size(video_size.0, video_size.1);
                         }
-                        stab.recompute_smoothness();
+                    } else if let Err(e) = stab.load_gyro_data(&s) {
+                        err(("An error occured: %1".to_string(), e.to_string()));
+                    }
+                    stab.recompute_smoothness();
 
-                        let gyro = stab.gyro.read();
-                        let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                        let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
-                        let has_gyro = !gyro.quaternions.is_empty();
-                        let has_quats = !gyro.org_quaternions.is_empty();
-                        drop(gyro);
+                    let gyro = stab.gyro.read();
+                    let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
+                    let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
+                    let has_gyro = !gyro.quaternions.is_empty();
+                    let has_quats = !gyro.org_quaternions.is_empty();
+                    drop(gyro);
 
-                        if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
-                            let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
-                            chart.setDurationMs(duration_ms);
+                    if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
+                        let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
+                        chart.setDurationMs(duration_ms);
+                    }
+                    let camera_id = stab.camera_id.read();
+
+                    let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
+                    if !id_str.is_empty() {
+                        let db = stab.lens_profile_db.read();
+                        if let Some(lens) = db.get_by_id(&id_str) {
+                            load_lens(QString::from(lens.filename.clone()));
                         }
-                        let camera_id = stab.camera_id.read();
+                    }
 
-                        (detected, orientation, has_gyro, has_quats, stab.params.read().frame_readout_time, camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default())
-                    };
+                    let frame_readout_time = stab.params.read().frame_readout_time;
+                    let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
 
-                    finished((is_main_video, filename, QString::from(detected.0.trim()), QString::from(detected.1), detected.2, detected.3, detected.4, QString::from(detected.5)));
+                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_quats, frame_readout_time, QString::from(camera_id)));
                 });
             }
         }
@@ -783,9 +793,9 @@ impl Controller {
     }
 
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
-        let info_json = info.to_json().to_string();
+        let mut info_json = info.to_json().to_string();
  
-        if let Ok(mut profile) = core::calibration::lens_profile::LensProfile::from_json(&info_json) {
+        if let Ok(mut profile) = core::calibration::lens_profile::LensProfile::from_json(&mut info_json) {
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                 profile.set_from_calibrator(cal);
             }
@@ -796,9 +806,9 @@ impl Controller {
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
         let path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
-        let info_json = info.to_json().to_string();
+        let mut info_json = info.to_json().to_string();
  
-        match core::calibration::lens_profile::LensProfile::from_json(&info_json) {
+        match core::calibration::lens_profile::LensProfile::from_json(&mut info_json) {
             Ok(mut profile) => {
                 if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                     profile.set_from_calibrator(cal);

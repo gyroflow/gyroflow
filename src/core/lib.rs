@@ -21,6 +21,8 @@ use camera_identifier::CameraIdentifier;
 use parking_lot::RwLock;
 pub use undistortion::PixelType;
 
+use crate::lens_profile_database::LensProfileDatabase;
+
 use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, calibration::LensCalibrator };
 
 use simd_json::ValueAccess;
@@ -126,6 +128,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub adaptive_zoom_checksum: Arc<AtomicU64>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
+    pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
 
     pub params: Arc<RwLock<BasicParams>>
 }
@@ -146,6 +149,8 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             adaptive_zoom_checksum: Arc::new(AtomicU64::new(0)),
             
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
+
+            lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
 
             lens_calibrator: Arc::new(RwLock::new(None)),
 
