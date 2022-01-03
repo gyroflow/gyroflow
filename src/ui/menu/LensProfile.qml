@@ -14,6 +14,8 @@ MenuItem {
     property int videoWidth: 0;
     property int videoHeight: 0;
 
+    property var lensProfilesList: [];
+
     FileDialog {
         id: fileDialog;
         property var extensions: ["json"];
@@ -26,46 +28,61 @@ MenuItem {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
-        controller.load_lens_profile(url.toString());
+        controller.load_lens_profile_url(url);
     }
 
     Component.onCompleted: {
+        lensProfilesList = controller.get_profiles();
+
         let list = [];
         for (const x of lensProfilesList) {
-            let fname = x.split("/").pop().replace(".json", "");
-            fname = fname.replace("4_3", "4:3").replace("4by3", "4:3").replace("16_9", "16:9").replace("16by9", "16:9");
-            fname = fname.replace("2_7K", "2.7k").replace("4K", "4k").replace("5K", "5k");
-
-            list.push(fname.replace(/_/g, " "))
+            list.push(x[0])
         }
         search.model = list;
 
         QT_TRANSLATE_NOOP("TableList", "Camera");
         QT_TRANSLATE_NOOP("TableList", "Lens");
         QT_TRANSLATE_NOOP("TableList", "Setting");
+        QT_TRANSLATE_NOOP("TableList", "Additional info");
         QT_TRANSLATE_NOOP("TableList", "Dimensions");
         QT_TRANSLATE_NOOP("TableList", "Calibrated by");
     }
     Connections {
         target: controller;
-        function onLens_profile_loaded(obj) {
-            info.model = {
-                "Camera":        obj.camera,
-                "Lens":          obj.lens,
-                "Setting":       obj.camera_setting,
-                "Dimensions":    obj.calib_dimension,
-                "Calibrated by": obj.calibrated_by
-            };
-            root.calibWidth  = obj.calib_width;
-            root.calibHeight = obj.calib_height;
-            const coeffs = obj.coefficients.split(";").map(parseFloat);
-            const mtrx = obj.matrix.split(";").map(parseFloat);
-            k1.setInitialValue(coeffs[0]);
-            k2.setInitialValue(coeffs[1]);
-            k3.setInitialValue(coeffs[2]);
-            k4.setInitialValue(coeffs[3]);
-            fx.setInitialValue(mtrx[0]);
-            fy.setInitialValue(mtrx[4]);
+        function onLens_profile_loaded(json_str) {
+            if (json_str) {
+                const obj = JSON.parse(json_str);
+                if (obj) {
+                    info.model = {
+                        "Camera":          obj.camera_brand + " " + obj.camera_model,
+                        "Lens":            obj.lens_model,
+                        "Setting":         obj.camera_setting,
+                        "Additional info": obj.note,
+                        "Dimensions":      obj.calib_dimension.w + "x" + obj.calib_dimension.h,
+                        "Calibrated by":   obj.calibrated_by
+                    };
+
+                    if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
+                        window.exportSettings.setOutputSize(obj.output_dimension.w, obj.output_dimension.h);
+                    }
+                    if (obj.frame_readout_time && Math.abs(obj.frame_readout_time) > 0) {
+                        window.stab.setFrameReadoutTime(obj.frame_readout_time);
+                    }
+
+                    root.calibWidth  = obj.calib_dimension.w;
+                    root.calibHeight = obj.calib_dimension.h;
+                    const coeffs = obj.fisheye_params.distortion_coeffs;
+                    const mtrx = obj.fisheye_params.camera_matrix;
+                    k1.setInitialValue(coeffs[0]);
+                    k2.setInitialValue(coeffs[1]);
+                    k3.setInitialValue(coeffs[2]);
+                    k4.setInitialValue(coeffs[3]);
+                    fx.setInitialValue(mtrx[0][0]);
+                    fy.setInitialValue(mtrx[1][1]);
+                    cx.setInitialValue(mtrx[0][2]);
+                    cy.setInitialValue(mtrx[1][2]);
+                }
+            }
         }
     }
 
@@ -74,9 +91,10 @@ MenuItem {
         placeholderText: qsTr("Search...");
         height: 25 * dpiScale;
         width: parent.width;
+        popup.width: width * 1.5;
         topPadding: 5 * dpiScale;
         onSelected: (text, index) => {
-            controller.load_lens_profile(lensProfilesList[index]);
+            controller.load_lens_profile(lensProfilesList[index][1]);
         }
     }
     Row {
@@ -161,6 +179,16 @@ MenuItem {
                 width: parent.width;
                 SmallNumberField { id: fx; param: "fx"; }
                 SmallNumberField { id: fy; param: "fy"; }
+            }
+        }
+        Label {
+            text: qsTr("Focal center");
+
+            Row {
+                spacing: 4 * dpiScale;
+                width: parent.width;
+                SmallNumberField { id: cx; param: "cx"; }
+                SmallNumberField { id: cy; param: "cy"; }
             }
         }
         Label {

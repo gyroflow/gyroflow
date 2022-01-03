@@ -5,6 +5,7 @@ import QtQuick.Controls.impl 2.15 as QQCI
 TextField {
     id: root;
     property var model: [];
+    property alias popup: popup;
 
     signal selected(var text, int index);
 

@@ -11,6 +11,9 @@ pub struct OclWrapper {
 
 impl OclWrapper {
     pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
+        
+        if height < 4 || output_height < 4 || stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
+        
         let platform = Platform::default();
         let device = Device::first(platform)?;
         ::log::info!("OpenCL Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);

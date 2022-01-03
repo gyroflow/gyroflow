@@ -64,15 +64,17 @@ MenuItem {
             }
 
             calib.resetMetadata();
-            const camera_id = JSON.parse(camera_id_json);
-            if (camera_id) {
-                if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
-                if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }
-                if (camera_id.lens_model) { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_model : camera_id.lens_model; }
-                if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
-                if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
-                if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
-                if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
+            if (camera_id_json) {
+                const camera_id = JSON.parse(camera_id_json);
+                if (camera_id) {
+                    if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
+                    if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }
+                    if (camera_id.lens_model) { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_model : camera_id.lens_model; }
+                    if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
+                    if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
+                    if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
+                    if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
+                }
             }
             calib.updateTable();
         }

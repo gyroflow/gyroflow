@@ -1,4 +1,9 @@
 {
+    "camera_brand": "Canon",
+    "camera_model": "M6 MarkII",
+    "lens_model": "7Artisans 7.5mm",
+    "calibrated_by": "Elvin Chen",
+    "camera_setting": "",
     "name": "Camera name",
     "note": "",
     "calibrator_version": "0.1.1-alpha",

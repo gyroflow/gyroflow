@@ -1,5 +1,6 @@
 #![recursion_limit="4096"]
 #![windows_subsystem = "windows"]
+#![allow(non_snake_case)]
 
 use cpp::*;
 use qmetaobject::*;
@@ -13,12 +14,10 @@ pub mod resources;
 pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; } }
 pub mod qt_gpu { pub mod qrhi_undistort; }
 
-use crate::core::{lens_profile::LensProfile};
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
 // Things to do before first public preview:
-// - Load lens profile based on identifier
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 // - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
@@ -27,7 +26,6 @@ use ui::ui_tools::UITools;
 // TODO: more smoothing algorithms
 
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
-// TODO: base all frames on timestamps, build a mapping frame->timestamp
 // TODO: wgpu convert to using textures
 // TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
@@ -39,6 +37,7 @@ use ui::ui_tools::UITools;
 // TODO: timeline panning
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
+// TODO: show error when loading invalid lens profile
 // TODO: Setup CI for packaging for Linux
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
@@ -123,10 +122,6 @@ fn entry() {
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
     ui_tools.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
     ui_tools.borrow().set_theme("dark".into());
-
-    // Get camera profiles list
-    let lens_profiles: QVariantList = LensProfile::get_profiles_list().unwrap_or_default().into_iter().map(QString::from).collect();
-    engine.set_property("lensProfilesList".into(), QVariant::from(lens_profiles));
 
     // Get smoothing algorithms
     engine.set_property("smoothingAlgorithms".into(), QVariant::from(ctl.borrow().get_smoothing_algs()));

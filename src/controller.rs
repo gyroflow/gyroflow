@@ -39,7 +39,8 @@ pub struct Controller {
     init_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue)),
-    load_lens_profile: qt_method!(fn(&mut self, path: QString)),
+    load_lens_profile: qt_method!(fn(&mut self, path: String)),
+    load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
@@ -53,7 +54,7 @@ pub struct Controller {
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
-    lens_profile_loaded: qt_signal!(lens_info: QJsonObject),
+    lens_profile_loaded: qt_signal!(lens_json: QString),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
@@ -66,6 +67,8 @@ pub struct Controller {
     offset_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
+
+    get_profiles: qt_method!(fn(&self) -> QVariantList),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -161,7 +164,7 @@ impl Controller {
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
         self.chart_data_changed();
-        self.video_path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
+        self.video_path = util::url_to_path(url.clone());
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -292,7 +295,7 @@ impl Controller {
     }
 
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue) {
-        let s = util::url_to_path(&QString::from(url).to_string()).to_string();
+        let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
 
@@ -321,7 +324,7 @@ impl Controller {
                 this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
             });
             let load_lens = util::qt_queued_callback_mut(self, move |this, path: QString| {
-                this.load_lens_profile(path);
+                this.load_lens_profile(path.to_string());
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -366,14 +369,17 @@ impl Controller {
             }
         }
     }
-    fn load_lens_profile(&mut self, path: QString) {
-        let info = {
-            self.stabilizer.load_lens_profile(&util::url_to_path(&path.to_string()).to_string()); // TODO errors
-            QJsonObject::from(self.stabilizer.lens.read().get_info())
+    fn load_lens_profile_url(&mut self, url: QUrl) {
+        self.load_lens_profile(util::url_to_path(url))
+    }
+    fn load_lens_profile(&mut self, path: String) {
+        let json = {
+            self.stabilizer.load_lens_profile(&path); // TODO errors
+            self.stabilizer.lens.write().get_json().unwrap_or_default()
         };
         self.lens_loaded = true;
         self.lens_changed();
-        self.lens_profile_loaded(info);
+        self.lens_profile_loaded(QString::from(json));
         self.request_recompute();
     }
     
@@ -795,7 +801,7 @@ impl Controller {
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
         let mut info_json = info.to_json().to_string();
  
-        if let Ok(mut profile) = core::calibration::lens_profile::LensProfile::from_json(&mut info_json) {
+        if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&mut info_json) {
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                 profile.set_from_calibrator(cal);
             }
@@ -805,10 +811,10 @@ impl Controller {
     }
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
-        let path = util::url_to_path(&QString::from(url.clone()).to_string()).to_string();
+        let path = util::url_to_path(url);
         let mut info_json = info.to_json().to_string();
  
-        match core::calibration::lens_profile::LensProfile::from_json(&mut info_json) {
+        match core::lens_profile::LensProfile::from_json(&mut info_json) {
             Ok(mut profile) => {
                 if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                     profile.set_from_calibrator(cal);
@@ -830,6 +836,12 @@ impl Controller {
             },
             Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
         }
+    }
+
+    fn get_profiles(&self) -> QVariantList {
+        let mut db = self.stabilizer.lens_profile_db.write();
+        db.load_all();
+        db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect()
     }
 
     // Utilities

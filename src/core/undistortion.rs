@@ -32,37 +32,29 @@ pub struct ComputeParams {
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
-        let camera_matrix = Matrix3::from_row_slice(&mgr.camera_matrix_or_default());
-
         let params = mgr.params.read();
         let lens = mgr.lens.read();
 
-        let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 {
-            [
-                lens.distortion_coeffs[0], 
-                lens.distortion_coeffs[1], 
-                lens.distortion_coeffs[2], 
-                lens.distortion_coeffs[3]
-            ]
+        let camera_matrix = lens.get_camera_matrix(params.size);
+        let distortion_coeffs = lens.get_distortion_coeffs();
+        let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
+
+        let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
+            (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
         } else {
-            [0.0, 0.0, 0.0, 0.0]
-        };
-        let (calib_width, calib_height) = if lens.calib_dimension.0 > 0.0 && lens.calib_dimension.1 > 0.0 {
-            lens.calib_dimension
-        } else {
-            (params.size.0 as f64, params.size.1 as f64)
+            (params.size.0.max(1) as f64, params.size.1.max(1) as f64)
         };
 
         Self {
             gyro: mgr.gyro.read().clone(), // TODO: maybe not clone?
 
             frame_count: params.frame_count,
-            fov_scale: params.fov / (params.size.0 as f64 / calib_width),
+            fov_scale: params.fov / (params.size.0.max(1) as f64 / calib_width),
             fovs: params.fovs.clone(),
-            width: params.size.0,
-            height: params.size.1,
-            output_width: params.output_size.0,
-            output_height: params.output_size.1,
+            width: params.size.0.max(1),
+            height: params.size.1.max(1),
+            output_width: params.output_size.0.max(1),
+            output_height: params.output_size.1.max(1),
             calib_width,
             calib_height,
             camera_matrix,
@@ -91,14 +83,14 @@ impl FrameTransform {
         let out_dim = (params.output_width as f64, params.output_height as f64);
         let focal_center = (params.calib_width / 2.0, params.calib_height / 2.0);
 
-        let fov = if params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale };
+        let fov = if params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale }.max(0.001);
 
         let mut new_k = k;
         new_k[(0, 0)] = new_k[(0, 0)] * 1.0 / fov;
         new_k[(1, 1)] = new_k[(1, 1)] * 1.0 / fov;
         new_k[(0, 2)] = (params.calib_width  / 2.0 - focal_center.0) * img_dim_ratio / fov + out_dim.0 / 2.0;
         new_k[(1, 2)] = (params.calib_height / 2.0 - focal_center.1) * img_dim_ratio / fov + out_dim.1 / 2.0;
-
+        
         // ----------- Rolling shutter correction -----------
         let mut frame_readout_time = params.frame_readout_time;
         if params.framebuffer_inverted {
@@ -314,7 +306,7 @@ impl<T: PixelType> Undistortion<T> {
     }
 
     pub fn process_pixels(&mut self, timestamp_us: i64, width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        if self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height { return false; }
+        if self.size.0 != width || self.size.1 != height || self.output_size.0 != output_width || self.output_size.1 != output_height || height < 4 || output_height < 4 { return false; }
 
         let itm = self.get_stab_data_at_timestamp(timestamp_us).clone(); // TODO: get rid of this clone
         if itm.params.is_empty() { return false; }

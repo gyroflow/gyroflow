@@ -1,5 +1,9 @@
 {
-    "name": "Camera name",
+    "camera_brand": "Insta360",
+    "camera_model": "SMO4K",
+    "lens_model": "Wide",
+    "camera_setting": "",
+    "name": "",
     "note": "",
     "calibrator_version": "0.1.1-alpha",
     "date": "2021-01-10",

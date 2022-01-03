@@ -41,18 +41,11 @@ pub fn is_opengl() -> bool {
     })
 }
 
-pub fn url_to_path(url: &str) -> &str {
-    if url.starts_with("file://") {
-        if cfg!(target_os = "windows") {
-            if let Some(stripped) = url.strip_prefix("file:///") {
-                return stripped;
-            }
-        } else if let Some(stripped) = url.strip_prefix("file://") {
-            return stripped;
-        }
-    }
-    url
-    
+pub fn url_to_path(url: QUrl) -> String {
+    let path = cpp!(unsafe [url as "QUrl"] -> QString as "QString" {
+        return url.toLocalFile();
+    });
+    path.to_string()    
 }
 
 pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {

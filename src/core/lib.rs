@@ -236,20 +236,6 @@ impl<T: PixelType> StabilizationManager<T> {
         self.lens.write().load_from_file(path); // TODO Result
     }
 
-    pub fn camera_matrix_or_default(&self) -> Vec<f64> {
-        let matrix = self.lens.read().get_camera_matrix();
-        if matrix.len() == 9 {
-            matrix
-        } else {
-            let params = self.params.read();
-            vec![
-                params.size.0 as f64, 0.0, params.size.0 as f64 / 2.0,
-                0.0, params.size.0 as f64, params.size.1 as f64 / 2.0,
-                0.0, 0.0, 1.0
-            ]
-        }
-    }
-
     fn init_size(&self) {
         let (w, h, ow, oh, bg) = {
             let params = self.params.read();
@@ -521,14 +507,20 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_lens_param(&self, param: &str, value: f64) {
         let mut lens = self.lens.write();
-        if lens.distortion_coeffs.len() >= 4 && lens.camera_matrix.len() >= 9 {
-            match param{
-                "fx" => lens.camera_matrix[0] = value,
-                "fy" => lens.camera_matrix[4] = value,
-                "k1" => lens.distortion_coeffs[0] = value,
-                "k2" => lens.distortion_coeffs[1] = value,
-                "k3" => lens.distortion_coeffs[2] = value,
-                "k4" => lens.distortion_coeffs[3] = value,
+        if lens.fisheye_params.distortion_coeffs.len() >= 4 && 
+           lens.fisheye_params.camera_matrix.len() == 3 && 
+           lens.fisheye_params.camera_matrix[0].len() == 3 && 
+           lens.fisheye_params.camera_matrix[1].len() == 3 && 
+           lens.fisheye_params.camera_matrix[2].len() == 3 {
+            match param {
+                "fx" => lens.fisheye_params.camera_matrix[0][0] = value,
+                "fy" => lens.fisheye_params.camera_matrix[1][1] = value,
+                "cx" => lens.fisheye_params.camera_matrix[0][2] = value,
+                "cy" => lens.fisheye_params.camera_matrix[1][2] = value,
+                "k1" => lens.fisheye_params.distortion_coeffs[0] = value,
+                "k2" => lens.fisheye_params.distortion_coeffs[1] = value,
+                "k3" => lens.fisheye_params.distortion_coeffs[2] = value,
+                "k4" => lens.fisheye_params.distortion_coeffs[3] = value,
                 _ => { }
             }
         }

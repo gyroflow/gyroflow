@@ -413,14 +413,14 @@ impl AutosyncProcess {
 
         let estimator = stab.pose_estimator.clone();
          
-        let mut img_ratio = stab.lens.read().calib_dimension.0 / size.0 as f64;
+        let mut img_ratio = stab.lens.read().calib_dimension.w as f64 / size.0 as f64;
         if img_ratio < 0.1 || !img_ratio.is_finite() {
             img_ratio = 1.0;
         }
-        let mtrx = stab.camera_matrix_or_default();
+        let mtrx = stab.lens.read().get_camera_matrix(size);
         estimator.set_lens_params(
-            Vector2::new(mtrx[0] / img_ratio, mtrx[4] / img_ratio),
-            Vector2::new(mtrx[2] / img_ratio, mtrx[5] / img_ratio)
+            Vector2::new(mtrx[(0, 0)] / img_ratio, mtrx[(1, 1)] / img_ratio),
+            Vector2::new(mtrx[(0, 2)] / img_ratio, mtrx[(1, 2)] / img_ratio)
         );
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
         

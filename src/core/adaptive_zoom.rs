@@ -44,14 +44,14 @@ impl AdaptiveZoom {
         let params = mgr.params.read();
 
         let image_rotation = nalgebra::Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
-        let calib_dimension = if lens.calib_dimension.0 > 0.0 { lens.calib_dimension } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
-        let distortion_coeffs = if lens.distortion_coeffs.len() >= 4 { lens.distortion_coeffs.clone() } else { vec![0.0, 0.0, 0.0, 0.0] };
+        let calib_dimension = if lens.calib_dimension.w > 0 { (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64) } else { (params.video_size.0 as f64, params.video_size.1 as f64) };
+        let distortion_coeffs = lens.get_distortion_coeffs().as_slice().to_vec();
         
         Self {
             calib_dimension,
             image_rotation, 
             image_rotation_angle: params.video_rotation,
-            camera_matrix: nalgebra::Matrix3::from_row_slice(&mgr.camera_matrix_or_default()),
+            camera_matrix: lens.get_camera_matrix(params.size),
             distortion_coeffs,
 
             _size: params.size,

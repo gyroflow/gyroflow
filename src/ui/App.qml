@@ -45,6 +45,7 @@ Rectangle {
     property alias exportSettings: exportSettings;
     property alias outputFile: outputFile.text;
     property alias sync: sync;
+    property alias stab: stab;
 
     FileDialog {
         id: fileDialog;
@@ -71,7 +72,7 @@ Rectangle {
                 height: children[0].height + 35 * dpiScale;
                 Image {
                     source: "qrc:/resources/logo" + (style === "dark"? "_white" : "_black") + ".svg"
-                    sourceSize.width: parent.width * 0.9;
+                    sourceSize.width: Math.min(300 * dpiScale, parent.width * 0.9);
                     anchors.centerIn: parent;
                 }
                 Hr { anchors.bottom: parent.bottom; }

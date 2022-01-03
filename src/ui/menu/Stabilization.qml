@@ -16,6 +16,12 @@ MenuItem {
         property alias adaptiveZoom: adaptiveZoom.value;
     }
 
+    function setFrameReadoutTime(v) {
+        shutter.value = Math.abs(v);
+        shutterCb.checked = Math.abs(v) > 0;
+        bottomToTop.checked = v < 0;
+    }
+
     function setSmoothingParam(name, value) {
         settings.setValue("smoothing-" + smoothingMethod.currentIndex + "-" + name, value);
         controller.set_smoothing_param(name, value);
@@ -44,26 +50,11 @@ MenuItem {
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             if (!camera.includes("GoPro")) {
-                setShutterTimer.pending = frame_readout_time;
-                setShutterTimer.start();
+                root.setFrameReadoutTime(frame_readout_time);
             }
         }
         function onRolling_shutter_estimated(rolling_shutter) {
-            shutter.value = Math.abs(rolling_shutter);
-            shutterCb.checked = Math.abs(rolling_shutter) > 0;
-            bottomToTop.checked = rolling_shutter < 0;
-        }
-    }
-    Timer {
-        id: setShutterTimer;
-        property real pending: 0;
-        interval: 2000;
-        repeat: false;
-        running: false;
-        onTriggered: {
-            shutter.value = Math.abs(pending);
-            shutterCb.checked = Math.abs(pending) > 0;
-            bottomToTop.checked = pending < 0;
+            root.setFrameReadoutTime(rolling_shutter);
         }
     }
 

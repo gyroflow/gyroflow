@@ -29,7 +29,7 @@ QQC.Popup {
         QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
         delegate: QQC.ItemDelegate {
             id: dlg;
-            width: parent.width;
+            width: parent? parent.width : 0;
             implicitHeight: popup.itemHeight;
 
             contentItem: QQCI.IconLabel {

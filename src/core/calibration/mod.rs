@@ -15,7 +15,6 @@ use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
 pub mod drawing;
-pub mod lens_profile;
 
 /// The basic idea here is to find chessboard every 10 frames and save all points to a map. 
 /// Then we pick a random 10 frames from that map and calculate the calibration.

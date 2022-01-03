@@ -56,6 +56,12 @@ MenuItem {
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
 
+    function setOutputSize(w, h) {
+        orgWidth = w;
+        orgHeight = h;
+
+        controller.set_output_size(outWidth, outHeight);
+    }
     function updateOutputSize(isWidth) {
         if (lockAspectRatio.checked && ratioHeight > 0) {
             const ratio = ratioWidth / ratioHeight;

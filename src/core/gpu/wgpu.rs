@@ -38,10 +38,11 @@ pub struct WgpuWrapper  {
     globals: Globals
 }
 
-// TODO: check in write_buffer if we're not writing more than buffer size
 impl WgpuWrapper  {
     pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, bg: nalgebra::Vector4<f32>) -> Option<Self> {
         let params_count = 9 * (height + 1);
+
+        if height < 4 || output_height < 4 || stride < 1 { return None; }
 
         let in_size = (stride * height) as wgpu::BufferAddress;
         let out_size = (output_stride * output_height) as wgpu::BufferAddress;
