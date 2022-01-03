@@ -127,10 +127,11 @@ impl CameraIdentifier {
     }
 
     fn get_identifier(&self) -> String {
-        if self.brand.is_empty() && self.model.is_empty() { return String::new(); }
+        if self.brand.is_empty() || self.model.is_empty() || self.lens_info.is_empty() { return String::new(); }
 
         let mut id = format!("{}-{}-{}-{}-{}x{}@{}-{}", self.brand, self.model, self.lens_model, self.lens_info, self.video_width, self.video_height, self.fps, self.additional);
         id = id.replace(" ", "");
+        id = id.replace("--", "-");
         id = id.replace("--", "-");
         let x: &[_] =  &['-', ' '];
         id.trim_matches(x).to_lowercase()
