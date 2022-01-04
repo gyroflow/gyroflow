@@ -28,9 +28,9 @@
 
 ![Downloads](https://img.shields.io/github/downloads/AdrianEddy/gyroflow/total) ![Contributors](https://img.shields.io/github/contributors/AdrianEddy/gyroflow?color=dark-green) ![Issues](https://img.shields.io/github/issues/AdrianEddy/gyroflow) ![License](https://img.shields.io/github/license/AdrianEddy/gyroflow) 
 
-## Table Of Contents
+## Table of contents
 
-* [About the Project](#about-the-project)
+* [About the project](#about-the-project)
 * [Features](#features)
 * [Supported gyro sources](#supported-gyro-sources)
 * [Roadmap](#roadmap)
@@ -40,7 +40,7 @@
 * [Authors](#authors)
 * [Acknowledgements](#acknowledgements)
 
-## About the Project
+## About the project
 Gyroflow is a program to stabilize video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this program uses them to stabilize the captured footage very accurately.
 
 ![Screenshot](resources/screenshot.png)
@@ -51,7 +51,7 @@ Gyroflow is a program to stabilize video by using motion data from gyroscope (IM
 - Fully multi-threaded
 - Rolling shutter correction
 - Supports already stabilized GoPro videos (captured with Hypersmooth enabled) (Hero 8 and up)
-- Direct YUV rendering, up to 16 bit with no data loss whatsoever (no conversion to RGB)
+- Supports and renders 10-bit videos (and higher, up to 16-bit 4:4:4, direct YUV rendering with no data loss (no conversion to RGB))
 - Visual chart with gyro data (supports gyro, accel, magnetometer and quaternions)
 - Visual display of smoothed quaternions
 - Real time offset adjustments
