@@ -18,11 +18,11 @@
     •
     <a href="https://docs.gyroflow.xyz">Documentation</a>
     •
-    <a href="https://discord.gg/WfxZZXjpke">Discord group</a>
+    <a href="https://discord.gg/WfxZZXjpke">Discord</a>
     •
-    <a href="https://github.com/AdrianEddy/gyroflow/issues">Report Bug</a>
+    <a href="https://github.com/AdrianEddy/gyroflow/issues">Report bug</a>
     •
-    <a href="https://github.com/AdrianEddy/gyroflow/issues">Request Feature</a>
+    <a href="https://github.com/AdrianEddy/gyroflow/issues">Request feature</a>
   </p>
 </p>
 
@@ -40,7 +40,7 @@
 * [Authors](#authors)
 * [Acknowledgements](#acknowledgements)
 
-## About The Project
+## About the Project
 Gyroflow is a program to stabilize video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this program uses them to stabilize the captured footage very accurately.
 
 ![Screenshot](resources/screenshot.png)
@@ -105,6 +105,7 @@ Help us translate Gyroflow to your language! We use *crowdin* to manage translat
 ## Development
 ### Used languages and technologies
 Gyroflow is written in [Rust](https://www.rust-lang.org/), with UI written in [QML](https://doc.qt.io/qt-6/qmlfirststeps.html). It uses *Qt*, *ffmpeg*, *OpenCV* and *mdk-sdk* external dependencies for the main program, but the core library is written in pure Rust without any external dependencies.
+
 GPU stuff supports *DirectX*, *OpenGL*, *Metal* and *Vulkan* thanks to *Qt RHI* and *wgpu*.
 For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU implementation as a fallback.
 
