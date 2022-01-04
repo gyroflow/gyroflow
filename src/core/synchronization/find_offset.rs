@@ -1,10 +1,12 @@
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use std::collections::BTreeMap;
+use crate::undistortion::ComputeParams;
 
-use crate::gyro_source::{ GyroSource, TimeIMU };
+use crate::gyro_source::TimeIMU;
 
-pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
+    let gyro = &params.gyro;
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
             let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();

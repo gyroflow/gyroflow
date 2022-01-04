@@ -17,7 +17,7 @@ use self::opencv::ItemOpenCV;
 use self::akaze::ItemAkaze;
 
 use super::StabilizationManager;
-use super::gyro_source::{ GyroSource, TimeIMU };
+use super::gyro_source::TimeIMU;
 
 #[cfg(feature = "use-opencv")]
 mod opencv;
@@ -349,8 +349,8 @@ impl PoseEstimator {
         ranges
     }
 
-    pub fn find_offsets(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, gyro: &GyroSource) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset::find_offsets(ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, gyro)
+    pub fn find_offsets(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset::find_offsets(ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, params)
     }
 
     pub fn find_offsets_visually(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
@@ -526,7 +526,7 @@ impl AutosyncProcess {
                 cb(self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true));
             } else {
                 let offsets = match method {
-                    0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read().gyro),
+                    0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                     1 => self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
                     _ => { panic!("Unsupported offset method: {}", method); }
                 };

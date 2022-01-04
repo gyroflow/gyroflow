@@ -20,6 +20,8 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_of
                 } else {
                     log::warn!("Invalid point pairs {} {}", lines.0.len(), lines.1.len());
                 }
+            } else {
+                log::warn!("No detected features for frame {}", frame);
             }
         }
 

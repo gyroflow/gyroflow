@@ -107,7 +107,7 @@ impl BasicParams {
     }
     pub fn get_scaled_fps(&self) -> f64 {
         match self.fps_scale {
-            Some(scale) => self.fps / scale,
+            Some(scale) => self.fps * scale,
             None            => self.fps
         }
     }
@@ -427,7 +427,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn process_pixels(&self, mut timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
         let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.fps, params.fps_scale, params.is_calibrator)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator)
         };
         if enabled && ow == out_width && oh == out_height {
             if let Some(scale) = fps_scale {
