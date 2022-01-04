@@ -1,4 +1,3 @@
-<br/>
 <p align="center">
   <h1 align="center">
     <a href="https://github.com/AdrianEddy/gyroflow#gh-light-mode-only">
@@ -14,13 +13,15 @@
     <br/>
     <br/>
     <a href="https://gyroflow.xyz">Homepage</a>
-    .
+    •
     <a href="https://github.com/AdrianEddy/gyroflow/releases">Download</a>
-    .
+    •
+    <a href="https://docs.gyroflow.xyz">Documentation</a>
+    •
     <a href="https://discord.gg/WfxZZXjpke">Discord group</a>
-    .
+    •
     <a href="https://github.com/AdrianEddy/gyroflow/issues">Report Bug</a>
-    .
+    •
     <a href="https://github.com/AdrianEddy/gyroflow/issues">Request Feature</a>
   </p>
 </p>
@@ -152,7 +153,7 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy
 
 ## Authors
 
-* [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing and advanced rendering features*
+* [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing, rolling shutter correction and advanced rendering features*
 * [Elvin Chen](https://github.com/ElvinC/) - *Author of the first version in Python, laid the groundwork to make all this possible*
 * [Aphobius](https://github.com/Aphobius/) - *Author of velocity dampened smoothing algorithm*
 
