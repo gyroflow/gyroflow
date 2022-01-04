@@ -1,0 +1,1 @@
+forfiles /s /m *.ts /c "cmd /c D:\Programy\Qt\6.2.2\msvc2019_64\bin\lrelease @path"
