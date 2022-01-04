@@ -34,7 +34,7 @@ cargo apk build --release
 mkdir "$PSScriptRoot\target\android-build" -ErrorAction SilentlyContinue
 mkdir "$PSScriptRoot\target\android-build\libs" -ErrorAction SilentlyContinue
 Copy-Item -Path "$PSScriptRoot\target\release\apk\lib\*" -Destination "$PSScriptRoot\target\android-build\libs\" -Recurse -Force
-Copy-Item -Path "$PSScriptRoot\android\src" -Destination "$PSScriptRoot\target\android-build\" -Recurse -Force
+Copy-Item -Path "$PSScriptRoot\_deployment\android\src" -Destination "$PSScriptRoot\target\android-build\" -Recurse -Force
 Copy-Item -Path "$PSScriptRoot\target\aarch64-linux-android\release\libffmpeg.so" -Destination "$PSScriptRoot\target\android-build\libs\arm64-v8a\" -Force
 Move-Item -Path "$PSScriptRoot\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$PSScriptRoot\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
@@ -43,7 +43,7 @@ Copy-Item -Path "$QT_LIBS\libQt6Svg_arm64-v8a.so"     -Destination "$PSScriptRoo
 Copy-Item -Path "$QT_LIBS\..\plugins\iconengines\libplugins_iconengines_qsvgicon_arm64-v8a.so" -Destination "$PSScriptRoot\target\android-build\libs\arm64-v8a\libplugins_iconengines_qsvgicon_arm64-v8a.so" -ErrorAction SilentlyContinue
 Copy-Item -Path "$QT_LIBS\..\plugins\imageformats\libplugins_imageformats_qsvg_arm64-v8a.so" -Destination "$PSScriptRoot\target\android-build\libs\arm64-v8a\libplugins_imageformats_qsvg_arm64-v8a.so" -ErrorAction SilentlyContinue
 
-androiddeployqt --input "$PSScriptRoot\android\android-deploy.json" `
+androiddeployqt --input "$PSScriptRoot\_deployment\android\android-deploy.json" `
                 --output "$PSScriptRoot\target\android-build" `
                 --deployment bundled `
                 --android-platform android-30 `

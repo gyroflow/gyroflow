@@ -28,7 +28,6 @@ use ui::ui_tools::UITools;
 // TODO: wgpu convert to using textures
 // TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
-// TODO: default lens profile
 // TODO: render queue
 // TODO: cli interface
 // TODO: Calibrator: Allow for multiple zoom values, could be interpolated later (Sony)
