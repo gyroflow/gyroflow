@@ -150,7 +150,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ## License
 
-Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE.md) for more information.
+Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE) for more information.
 
 ## Authors
 

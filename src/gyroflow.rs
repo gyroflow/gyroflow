@@ -1,6 +1,5 @@
 #![recursion_limit="4096"]
 #![windows_subsystem = "windows"]
-#![allow(non_snake_case)]
 
 use cpp::*;
 use qmetaobject::*;
@@ -74,14 +73,20 @@ fn entry() {
     #[cfg(target_os = "windows")]
     unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
 
-    simplelog::TermLogger::init(simplelog::LevelFilter::Debug, simplelog::ConfigBuilder::new()
+    let log_config = simplelog::ConfigBuilder::new()
         .add_filter_ignore_str("mp4parse")
         .add_filter_ignore_str("wgpu")
         .add_filter_ignore_str("naga")
         .add_filter_ignore_str("akaze")
         .add_filter_ignore_str("ureq")
         .add_filter_ignore_str("rustls")
-        .build(), simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
+        .build();
+
+    #[cfg(target_os = "android")]
+    simplelog::WriteLogger::init(simplelog::LevelFilter::Debug, log_config, util::AndroidLog::default()).unwrap();
+
+    #[cfg(not(target_os = "android"))]
+    simplelog::TermLogger::init(simplelog::LevelFilter::Debug, log_config, simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
 
     qmetaobject::log::init_qt_to_rust();
 
@@ -106,6 +111,10 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
+
+    if cfg!(target_os = "android") {
+        cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
+    }
 
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };

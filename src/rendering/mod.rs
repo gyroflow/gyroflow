@@ -240,13 +240,21 @@ lazy_static::lazy_static! {
     pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
 }
 
+#[cfg(not(target_os = "macos"))]
+type VaList = ffi::va_list;
+#[cfg(target_os = "macos")]
+type VaList = *mut ffi::__va_list_tag;
+
 #[allow(improper_ctypes_definitions)]
-unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: ffi::va_list) {
+unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: VaList) {
     if level <= ffi::av_log_get_level() {
         let mut line = vec![0u8; 2048];
         let mut prefix: i32 = *LAST_PREFIX.read();
         
         ffi::av_log_default_callback(avcl, level, fmt, vl);
+        #[cfg(target_os = "android")]
+        let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut u8, line.len() as i32, &mut prefix);
+        #[cfg(not(target_os = "android"))]
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
         if written > 0 { 
             line.resize(written as usize, 0u8);

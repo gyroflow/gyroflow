@@ -133,3 +133,20 @@ pub fn android_log(v: String) {
         }
     }
 }
+
+#[cfg(target_os = "android")]
+#[derive(Default)]
+pub struct AndroidLog { buf: String }
+#[cfg(target_os = "android")]
+impl std::io::Write for AndroidLog {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        if let Ok(s) = String::from_utf8(buf.to_vec()) {
+            self.buf.push_str(&s);
+        };
+        if self.buf.contains('\n') {
+            self.flush()?;
+        }
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> { android_log(self.buf.clone()); self.buf.clear(); Ok(()) }
+}

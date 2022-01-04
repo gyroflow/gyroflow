@@ -14,8 +14,8 @@ simd-json = "*"
 bytemuck = "*"
 nalgebra = "0.29"
 
-qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
-qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }
+qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
@@ -35,7 +35,7 @@ cpp_build = "*"
 winres = "*"
 
 [[bin]]
-name = "Gyroflow"
+name = "gyroflow"
 path = "src/gyroflow.rs"
 
 # -------------------------- Android stuff --------------------------
@@ -49,7 +49,7 @@ path = "src/gyroflow.rs"
 build_targets = [ "aarch64-linux-android" ]
 
 [package.metadata.android.sdk]
-min_sdk_version = 21
+min_sdk_version = 23
 target_sdk_version = 29
 
 [[package.metadata.android.uses_permission]]

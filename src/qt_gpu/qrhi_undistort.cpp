@@ -21,6 +21,10 @@ public:
     void setupGpuCompute(std::function<bool(QSize texSize, QSizeF itemSize)> &&initCb, std::function<bool(double, int32_t, bool)> &&renderCb, std::function<void()> &&cleanupCb);
     void cleanupGpuCompute();
 };
+class MDKPlayerWrapper {
+public:
+    MDKPlayer *mdkplayer;
+};
 
 #define DRAW_TO_RENDERTARGET
 
@@ -167,7 +171,7 @@ public:
         m_releasePool.clear();
     }
 
-    bool render(MDKPlayer *item, double timestamp, int frame_no, const float *params_padded, int params_count, float bg[4], bool doRender, float *features_pixels, int fpx_count, float *optflow_pixels, int of_count) {
+    bool render(MDKPlayer *item, double /*timestamp*/, int /*frame_no*/, const float *params_padded, int params_count, float bg[4], bool /*doRender*/, float *features_pixels, int fpx_count, float *optflow_pixels, int of_count) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -262,7 +266,7 @@ public:
 
     QSize m_outputSize;
 
-    MDKPlayer *m_player{nullptr};
+    MDKPlayerWrapper *m_player{nullptr};
 
 #ifdef DRAW_TO_RENDERTARGET
     QRhiBuffer *m_vertexBuffer = nullptr;

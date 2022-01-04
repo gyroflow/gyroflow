@@ -280,19 +280,20 @@ impl<T: PixelType> Undistortion<T> {
 
     pub fn init_backends(&mut self) {
         if !self.backend_initialized {
+            let mut _opencl_initialized = false;
             #[cfg(feature = "use-opencl")]
             {
                 let cl = opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background);
                 match cl {
-                    Ok(cl) => self.cl = Some(cl),
+                    Ok(cl) => { self.cl = Some(cl); _opencl_initialized = true; },
                     Err(err) => {
                         log::error!("OpenCL error: {:?}", err);
                     }
                 }
             }
-            
+
             // TODO: Support other pixel types
-            if self.cl.is_none() && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+            if !_opencl_initialized && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
                 let wgpu = wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background);
                 match wgpu {
                     Some(wgpu) => self.wgpu = Some(wgpu),

@@ -30,27 +30,32 @@ fn main() {
     private_include("QtQuick");
     private_include("QtQml");
 
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
+    match target_os.as_str() {
+        "android" => {
+            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-lite/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            config.flag("-std=c++17");
+        },
+        "macos" => {
+            
+        },
+        "windows" => {
+            let mut res = winres::WindowsResource::new();
+            res.set_icon("resources/app_icon.ico");
+            res.set("FileVersion", env!("CARGO_PKG_VERSION"));
+            res.set("ProductVersion", env!("CARGO_PKG_VERSION"));
+            res.set("ProductName", "Gyroflow");
+            res.set("FileDescription", &format!("Gyroflow v{}", env!("CARGO_PKG_VERSION")));
+            res.compile().unwrap();
+        }
+        tos => panic!("unknown target os {:?}!", tos)
+    }
+
     config
         .include(&qt_include_path)
         .flag_if_supported("-std=c++17")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("/Zc:__cplusplus")
         .build("src/gyroflow.rs");
-
-    let target_os = std::env::var("CARGO_CFG_TARGET_OS");
-    match target_os.as_ref().map(|x| &**x) {
-        Ok("android") => {
-            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-lite/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
-        },
-        Ok("macos") => {
-            
-        },
-        Ok("windows") => {
-            let mut res = winres::WindowsResource::new();
-            res.set_icon("resources/app_icon.ico");
-            res.compile().unwrap();
-        }
-        tos => panic!("unknown target os {:?}!", tos)
-    }
 
 }
