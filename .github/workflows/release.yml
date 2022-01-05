@@ -88,6 +88,7 @@ jobs:
       # Download ffmpeg
       - name: Download ffmpeg
         run: |
+          mkdir ${{ github.workspace }}/ext
           cd ${{ github.workspace }}/ext/
           curl -L https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-default.tar.xz/download -o ffmpeg.tar.xz
           7z x ffmpeg.tar.xz
