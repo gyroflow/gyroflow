@@ -18,7 +18,6 @@ use ui::ui_tools::UITools;
 
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
-// - Setup CI for packaging for Windows
 // - Setup CI for packaging for Mac
 // - Port Aphobius 2.0
 

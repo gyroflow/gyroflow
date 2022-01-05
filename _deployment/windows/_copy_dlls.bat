@@ -3,7 +3,7 @@ if "%1"=="" ( set "PROJECT_DIR=D:\programowanie\projekty\Rust\gyroflow" ) else (
 if "%2"=="" ( set "QT_DIR=D:\Programy\Qt\6.2.2\msvc2019_64" ) else ( set "QT_DIR=%2" )
 if "%3"=="" ( set "OPENCV_DIR=%PROJECT_DIR%\ext\opencv-4.5.4\bin" ) else ( set "OPENCV_DIR=%3" )
 if "%4"=="" ( set "CARGO_TARGET=%PROJECT_DIR%\target\release" ) else ( set "CARGO_TARGET=%4" )
-set FFMPEG_DIR=%PROJECT_DIR%\ext\ffmpeg-4.4-windows-desktop-clang-default\bin\x64
+if "%FFMPEG_DIR%"=="" ( set FFMPEG_DIR=%PROJECT_DIR%\ext\ffmpeg-4.4-windows-desktop-clang-default )
 
 set TARGET=%PROJECT_DIR%\_deployment\_binaries\win64
 set CMD=xcopy /Y
@@ -66,13 +66,13 @@ set CMD=xcopy /Y
 %CMD% "%QT_DIR%\qml\QtQuick\Window\quickwindowplugin.dll"                                       "%TARGET%\QtQuick\Window\"
 
 :: Copy ffmpeg
-%CMD% "%FFMPEG_DIR%\avcodec-58.dll"    "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\avfilter-7.dll"    "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\avformat-58.dll"   "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\avutil-56.dll"     "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\swresample-3.dll"  "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\swscale-5.dll"     "%TARGET%\"
-%CMD% "%FFMPEG_DIR%\postproc-55.dll"   "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\avcodec-58.dll"    "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\avfilter-7.dll"    "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\avformat-58.dll"   "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\avutil-56.dll"     "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\swresample-3.dll"  "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\swscale-5.dll"     "%TARGET%\"
+%CMD% "%FFMPEG_DIR%\bin\x64\postproc-55.dll"   "%TARGET%\"
 
 :: Copy OpenCV
 %CMD% "%OPENCV_DIR%\opencv_calib*.dll"      "%TARGET%\"
