@@ -41,7 +41,7 @@
 * [Acknowledgements](#acknowledgements)
 
 ## About the project
-Gyroflow is a program to stabilize video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this program uses them to stabilize the captured footage very accurately.
+Gyroflow is a application that can stabilize your video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilize the captured footage precisely by using them.
 
 ![Screenshot](resources/screenshot.png)
 
@@ -71,13 +71,19 @@ Gyroflow is a program to stabilize video by using motion data from gyroscope (IM
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be easily used to create OpenFX and Adobe plugins (on the TODO list)
 
 ## Supported gyro sources
-- [x] Sony (RX0 II, a7s III, RX100 VII, ZV1, a7c, a7r IV, a6600, a9 II, a1, FX3, ZV-E10, FX6)
-- [x] GoPro (All models with gyro metadata, starting with HERO 5)
-- [x] Insta360 (OneR, SMO 4k, GO2)
 - [x] Betaflight blackbox (CSV and binary)
-- [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR)
-- [x] WitMotion (WT901SDCL binary and *.txt)
+- [x] GoPro (HERO 5 and later)
+- [x] Insta360 (OneR, SMO 4k, GO2)
 - [x] Mobile apps: `Sensor Logger`, `G-Field Recorder`, `Gyro`
+- [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR)
+- [x] Sony (a1, a6600, a7c, a7r IV, a7s III, a9 II, FX3, FX6，RX0 II, RX100 VII, ZV1, ZV-E10)
+- [x] WitMotion (WT901SDCL binary and *.txt)
+
+### Info for cameras not on the list
+
+- For cameras which do have built-in gyro, please contact us to make us support you camera
+- For cameras don't have built-in gyro, please consider using betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
+
 
 ## Roadmap
 
@@ -95,9 +101,9 @@ Contributions are what make the open source community such an amazing place to l
 ### Translations
 Currently gyroflow is available in:
 * **English** (base language)
-* **Polish** (by AdrianEddy)
+* **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
 * **German** (by Grommi)
-* **Chinese Simplified** (by DusKing1)
+* **Chinese Simplified** (by [DusKing1](https://gthub.com/DusKing1))
 
 Help us translate Gyroflow to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow
 
