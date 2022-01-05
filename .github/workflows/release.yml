@@ -19,8 +19,6 @@ jobs:
           #{ os: windows-latest, target: aarch64-pc-windows-msvc,    cross: false, name: windows-arm64, ext: '.exe' }
       ]
     runs-on: ${{ matrix.targets.os }}
-    env:
-      VCPKG_ROOT: '${{ github.workspace }}/vcpkg'
     steps:
       - uses: actions/checkout@v2
       - name: Install Rust
@@ -44,6 +42,7 @@ jobs:
       - uses: lukka/get-cmake@latest
       - uses: lukka/run-vcpkg@v10
         with:
+          vcpkgDirectory: '${{ runner.workspace }}/b/vcpkg'
           vcpkgGitCommitId: a720cf5eba9c8b69201db3f84166b4681f9ff0d5
       
       # Download and install OpenCV
