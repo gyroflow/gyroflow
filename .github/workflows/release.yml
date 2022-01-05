@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     strategy:
-      fail-fast: true # TODO change to false
+      fail-fast: false # TODO change to false
       matrix:
         targets: [
           #{ os: ubuntu-latest,  target: x86_64-unknown-linux-musl,  cross: false, name: linux64,       ext: '' },
@@ -42,7 +42,9 @@ jobs:
           echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx11.1 --show-sdk-platform-version)" >> $GITHUB_ENV
 
       - uses: lukka/get-cmake@latest
-      - uses: lukka/run-vcpkg@v10 
+      - uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: a720cf5eba9c8b69201db3f84166b4681f9ff0d5
       
       # Download and install OpenCV
       - name: Install opencv
