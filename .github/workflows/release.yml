@@ -9,14 +9,12 @@ jobs:
       fail-fast: false # TODO change to false
       matrix:
         targets: [
-          #{ os: ubuntu-latest,  target: x86_64-unknown-linux-musl,  cross: false, name: linux64,       ext: '' },
-          #{ os: ubuntu-latest,  target: i686-unknown-linux-musl,    cross: true,  name: linux32,       ext: '' },
-          #{ os: ubuntu-latest,  target: aarch64-unknown-linux-musl, cross: true,  name: linux-arm64,   ext: '' },
-          #{ os: macos-latest,   target: x86_64-apple-darwin,        cross: false, name: mac64,         ext: '' },
-          #{ os: macos-latest,   target: aarch64-apple-darwin,       cross: true,  name: mac-arm64,     ext: '' },
-          { os: windows-latest, target: x86_64-pc-windows-msvc,     cross: false, name: windows64,     ext: '.exe' },
-          #{ os: windows-latest, target: i686-pc-windows-msvc,       cross: false, name: windows32,     ext: '.exe' },
-          #{ os: windows-latest, target: aarch64-pc-windows-msvc,    cross: false, name: windows-arm64, ext: '.exe' }
+          #{ os: ubuntu-latest,  target: x86_64-unknown-linux-musl,  cross: false, name: linux64,       ext: "", vcpkg: "x64-linux-release" },
+          #{ os: ubuntu-latest,  target: aarch64-unknown-linux-musl, cross: true,  name: linux-arm64,   ext: "", vcpkg: "arm64-linux" },
+          #{ os: macos-latest,   target: x86_64-apple-darwin,        cross: false, name: mac64,         ext: "", vcpkg: "x64-osx-release" },
+          #{ os: macos-latest,   target: aarch64-apple-darwin,       cross: true,  name: mac-arm64,     ext: "", vcpkg: "arm64-osx" },
+          { os: windows-latest, target: x86_64-pc-windows-msvc,     cross: false, name: windows64,     ext: ".exe", vcpkg: "x64-windows-release" },
+          #{ os: windows-latest, target: aarch64-pc-windows-msvc,    cross: false, name: windows-arm64, ext: ".exe", vcpkg: "arm64-windows" }
       ]
     runs-on: ${{ matrix.targets.os }}
     steps:
@@ -49,9 +47,9 @@ jobs:
       - name: Install OpenCV and curl
         run: |
           cd ${{ github.workspace }}
-          vcpkg install opencv4[core]:x64-windows-release
-          vcpkg install curl[core]:x64-windows-release
-          vcpkg install opencl:x64-windows-release
+          vcpkg install opencv4[core]:${{ matrix.targets.vcpkg }}
+          vcpkg install curl[core]:${{ matrix.targets.vcpkg }}
+          vcpkg install opencl:${{ matrix.targets.vcpkg }}
 
       # Download and install Qt
       - name: Cache Qt
@@ -66,6 +64,18 @@ jobs:
           version: 6.2.2
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+      - run: |
+          cd ${{ github.workspace }}../Qt/6.2.2/msvc2019_64
+          dir
+        continue-on-error: true
+      - run: |
+          cd ${{ env.Qt6_DIR }}
+          dir
+        continue-on-error: true
+      - run: |
+          cd $Qt6_DIR
+          dir
+        continue-on-error: true
       # Install LLVM
       - name: Cache LLVM and Clang
         id: cache-llvm
@@ -103,8 +113,8 @@ jobs:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/bin/
           FFMPEG_DIR: ${{ github.workspace }}/ext/ffmpeg-4.4-windows-desktop-clang-default
           OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
-          OPENCV_LINK_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/lib
-          OPENCV_INCLUDE_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/include
+          OPENCV_LINK_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/lib
+          OPENCV_INCLUDE_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/include
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.targets.cross }}
@@ -119,15 +129,15 @@ jobs:
       - run: |
           cd ${{ github.workspace }}/
           dir
-          cd ${{ github.workspace }}/target/release
+          cd ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
           dir
-          cd %Qt6_DIR%
+          cd ${{ github.workspace }}../Qt/6.2.2/msvc2019_64/bin/
           dir
-          cd ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin
+          cd ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin
           dir
       - name: Copy dist
         run: |
-          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} %Qt6_DIR% ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} ${{ github.workspace }}../Qt/6.2.2/msvc2019_64 ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a Gyroflow-${{ matrix.targets.name }}.7z *
 
