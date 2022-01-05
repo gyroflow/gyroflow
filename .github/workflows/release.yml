@@ -46,7 +46,7 @@ jobs:
           vcpkgGitCommitId: a720cf5eba9c8b69201db3f84166b4681f9ff0d5
       
       # Download and install OpenCV
-      - name: Install opencv
+      - name: Install OpenCV and curl
         run: |
           cd ${{ github.workspace }}
           vcpkg install opencv4[core]:x64-windows-release
@@ -73,11 +73,13 @@ jobs:
           path: |
             C:/Program Files/LLVM
             ./llvm
-          key: llvm-13.0
+            ${{ runner.temp }}/llvm
+          key: llvm-11.0
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1.5.0
         with:
-          version: "13.0"
+          version: "11.0"
+          directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
@@ -115,7 +117,7 @@ jobs:
 
       - name: Copy dist
         run: |
-          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat "${{ github.workspace }}" "%QT6_PATH%"
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat "${{ github.workspace }}" "%QT6_PATH%" "${{ github.workspace }}/vcpkg/installed/x64-windows-release/bin"
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a Gyroflow-${{ matrix.targets.name }}.7z *
 

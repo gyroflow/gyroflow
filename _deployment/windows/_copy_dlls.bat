@@ -1,8 +1,8 @@
 @echo off
 if "%1"=="" ( set "PROJECT_DIR=D:\programowanie\projekty\Rust\gyroflow" ) else ( set "PROJECT_DIR=%1" )
 if "%2"=="" ( set "QT_DIR=D:\Programy\Qt\6.2.2\msvc2019_64" ) else ( set "QT_DIR=%2" )
+if "%3"=="" ( set "OPENCV_DIR=%PROJECT_DIR%\ext\opencv-4.5.4\bin" ) else ( set "OPENCV_DIR=%3" )
 set FFMPEG_DIR=%PROJECT_DIR%\ext\ffmpeg-4.4-windows-desktop-clang-default\bin\x64
-set OPENCV_DIR=%PROJECT_DIR%\ext\opencv-4.5.4
 
 set TARGET=%PROJECT_DIR%\_deployment\_binaries\win64
 set CMD=xcopy /Y
@@ -74,12 +74,13 @@ set CMD=xcopy /Y
 %CMD% %FFMPEG_DIR%\postproc-55.dll   %TARGET%\
 
 :: Copy OpenCV
-%CMD% %OPENCV_DIR%\bin\opencv_calib3d454.dll     %TARGET%\
-%CMD% %OPENCV_DIR%\bin\opencv_core454.dll        %TARGET%\
-%CMD% %OPENCV_DIR%\bin\opencv_features2d454.dll  %TARGET%\
-%CMD% %OPENCV_DIR%\bin\opencv_flann454.dll       %TARGET%\
-%CMD% %OPENCV_DIR%\bin\opencv_imgproc454.dll     %TARGET%\
-%CMD% %OPENCV_DIR%\bin\opencv_video454.dll       %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_calib*.dll      %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_cor*.dll        %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_features*.dll   %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_flan*.dll       %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_imgpro*.dll     %TARGET%\
+%CMD% %OPENCV_DIR%\opencv_vide*.dll       %TARGET%\
+del %TARGET%\opencv_*videoio*
 
 :: Copy Gyroflow
 %CMD% %PROJECT_DIR%\target\release\mdk.dll                        %TARGET%\
