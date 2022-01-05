@@ -90,11 +90,6 @@ jobs:
           7z x ffmpeg.tar.xz
           7z x ffmpeg.tar
 
-      - run: |
-          cd ${{ github.workspace }}/
-          tree
-          cd ${{ runner.workspace }}/b/vcpkg/installed
-          tree
       - name: Build Gyroflow
         env:
           CARGO_TARGET_DIR: ./target
@@ -114,17 +109,6 @@ jobs:
         continue-on-error: true
         run: strip target/${{ matrix.targets.target }}/release/gyroflow 2>/dev/null || true
 
-      - run: |
-          cd ${{ github.workspace }}/
-          dir
-          cd ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
-          dir
-          cd ${{ env.Qt6_DIR }}
-          cd bin
-          dir
-          cd ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin
-          dir
-        continue-on-error: true
       - name: Copy dist
         run: |
           ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/release

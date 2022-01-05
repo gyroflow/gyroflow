@@ -13,7 +13,8 @@ path = "lib.rs"
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", features = ["field_access"] }
 
-simd-json = "*"
+simd-json = { version = "*", features = ["allow-non-simd"] }
+mimalloc = { version = "*", default-features = false }
 nalgebra = "0.29"
 rayon = "*"
 biquad = "*"

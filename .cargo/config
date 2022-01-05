@@ -1,5 +1,6 @@
-[target.x86_64-pc-windows-msvc]
-rustflags = ["-C", "target-cpu=native"]
+#[target.x86_64-pc-windows-msvc]
+#rustflags = ["-C", "target-cpu=native"]
 
 [target.x86_64-apple-darwin]
-rustflags = ["-C", "target-cpu=native", "-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@loader_path"]
+#rustflags = ["-C", "target-cpu=native", "-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@loader_path"]
+rustflags = ["-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@loader_path"]

@@ -30,6 +30,9 @@ use nalgebra::{ Quaternion, Vector3, Vector4 };
 use gyro_source::{ GyroSource, Quat64, TimeIMU };
 use telemetry_parser::try_block;
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 lazy_static::lazy_static! {
     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
 }

@@ -81,6 +81,7 @@ set CMD=xcopy /Y
 %CMD% "%OPENCV_DIR%\opencv_flan*.dll"       "%TARGET%\"
 %CMD% "%OPENCV_DIR%\opencv_imgpro*.dll"     "%TARGET%\"
 %CMD% "%OPENCV_DIR%\opencv_vide*.dll"       "%TARGET%\"
+%CMD% "%OPENCV_DIR%\zlib*.dll"              "%TARGET%\"
 del "%TARGET%\opencv_*videoio*"
 
 :: Copy Gyroflow
