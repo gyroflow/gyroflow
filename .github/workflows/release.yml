@@ -66,6 +66,17 @@ jobs:
           version: 6.2.2
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+      # Install LLVM
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1.5.0
+        if: matrix.config.os == 'windows-latest'
+        with:
+          version: "13.0"
+          directory: ${{ runner.temp }}/llvm
+      - name: Set LIBCLANG_PATH
+        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+        if: matrix.config.os == 'windows-latest'
+
       # Download ffmpeg
       - name: Download ffmpeg
         run: |
@@ -74,9 +85,17 @@ jobs:
           7z x ffmpeg.tar.xz
           7z x ffmpeg-4.4-windows-desktop-clang-default.tar
 
+      - run: |
+          cd ${{ github.workspace }}/
+          tree
       - name: Build Gyroflow
         env:
           CARGO_TARGET_DIR: ./target
+          FFMPEG_DIR: ${{ github.workspace }}/ext/ffmpeg-4.4-windows-desktop-clang-default
+          OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
+          OPENCV_LINK_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/lib
+          OPENCV_INCLUDE_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/include
+          #LIBCLANG_PATH: ${{ github.workspace }}/ext/llvm-13-win64/bin
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.targets.cross }}
