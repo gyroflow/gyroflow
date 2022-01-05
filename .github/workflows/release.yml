@@ -120,6 +120,7 @@ jobs:
           cd ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
           dir
           cd ${{ env.Qt6_DIR }}
+          cd bin
           dir
           cd ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin
           dir
