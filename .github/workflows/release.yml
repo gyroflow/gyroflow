@@ -64,18 +64,6 @@ jobs:
           version: 6.2.2
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
-      - run: |
-          cd ${{ github.workspace }}../Qt/6.2.2/msvc2019_64
-          dir
-        continue-on-error: true
-      - run: |
-          cd ${{ env.Qt6_DIR }}
-          dir
-        continue-on-error: true
-      - run: |
-          cd $Qt6_DIR
-          dir
-        continue-on-error: true
       # Install LLVM
       - name: Cache LLVM and Clang
         id: cache-llvm
@@ -131,13 +119,14 @@ jobs:
           dir
           cd ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
           dir
-          cd ${{ github.workspace }}../Qt/6.2.2/msvc2019_64/bin/
+          cd ${{ env.Qt6_DIR }}
           dir
           cd ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin
           dir
+        continue-on-error: true
       - name: Copy dist
         run: |
-          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} ${{ github.workspace }}../Qt/6.2.2/msvc2019_64 ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a Gyroflow-${{ matrix.targets.name }}.7z *
 
