@@ -119,13 +119,15 @@ jobs:
       - run: |
           cd ${{ github.workspace }}/
           dir
-          cd {{ env.Qt6_DIR }}
+          cd ${{ github.workspace }}/target/release
+          dir
+          cd %Qt6_DIR%
           dir
           cd ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin
           dir
       - name: Copy dist
         run: |
-          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} {{ env.Qt6_DIR }} ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat ${{ github.workspace }} %Qt6_DIR% ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a Gyroflow-${{ matrix.targets.name }}.7z *
 
