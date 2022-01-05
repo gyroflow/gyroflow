@@ -59,8 +59,7 @@ impl Default for Smoothing {
 
 impl Smoothing {
     pub fn set_current(&mut self, id: usize) {
-        assert!(id < self.algs.len());
-        self.current_id = id;
+        self.current_id = id.min(self.algs.len() - 1);
     }
 
     pub fn current(&mut self) -> &mut Box<dyn SmoothingAlgorithm> {
