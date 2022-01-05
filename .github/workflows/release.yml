@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true # TODO change to false
+      matrix:
+        targets: [
+          #{ os: ubuntu-latest,  target: x86_64-unknown-linux-musl,  cross: false, name: linux64,       ext: '' },
+          #{ os: ubuntu-latest,  target: i686-unknown-linux-musl,    cross: true,  name: linux32,       ext: '' },
+          #{ os: ubuntu-latest,  target: aarch64-unknown-linux-musl, cross: true,  name: linux-arm64,   ext: '' },
+          #{ os: macos-latest,   target: x86_64-apple-darwin,        cross: false, name: mac64,         ext: '' },
+          #{ os: macos-latest,   target: aarch64-apple-darwin,       cross: true,  name: mac-arm64,     ext: '' },
+          { os: windows-latest, target: x86_64-pc-windows-msvc,     cross: false, name: windows64,     ext: '.exe' },
+          #{ os: windows-latest, target: i686-pc-windows-msvc,       cross: false, name: windows32,     ext: '.exe' },
+          #{ os: windows-latest, target: aarch64-pc-windows-msvc,    cross: false, name: windows-arm64, ext: '.exe' }
+      ]
+    runs-on: ${{ matrix.targets.os }}
+    env:
+      VCPKG_ROOT: '${{ github.workspace }}/vcpkg'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: ${{ matrix.targets.target }}
+      - uses: Swatinem/rust-cache@v1
+
+      - name: Add rust target
+        run: rustup target add ${{ matrix.targets.target }}
+
+      - name: Setup target ${{ matrix.targets.target }}
+        if: ${{ matrix.targets.target == 'aarch64-apple-darwin' }}
+        run: |
+          echo "SDKROOT=$(xcrun -sdk macosx11.1 --show-sdk-path)" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx11.1 --show-sdk-platform-version)" >> $GITHUB_ENV
+
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@v10 
+      
+      # Download and install OpenCV
+      - name: Install opencv
+        run: |
+          cd ${{ github.workspace }}
+          vcpkg install opencv4[core]:x64-windows-release
+          vcpkg install curl[core]:x64-windows-release
+
+      # Download and install Qt
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: QtCache-${{ runner.os }}-6.2.2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: 6.2.2
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      # Download ffmpeg
+      - name: Download ffmpeg
+        run: |
+          cd ${{ github.workspace }}/ext/
+          curl -L https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-default.tar.xz/download -o ffmpeg.tar.xz
+          7z x ffmpeg.tar.xz
+          7z x ffmpeg-4.4-windows-desktop-clang-default.tar
+
+      - name: Build Gyroflow
+        env:
+          CARGO_TARGET_DIR: ./target
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.targets.cross }}
+          command: build
+          args: --target ${{ matrix.targets.target }} --release
+
+      - name: Strip
+        if: ${{ matrix.targets.os != 'windows-latest' }}
+        continue-on-error: true
+        run: strip target/${{ matrix.targets.target }}/release/gyroflow 2>/dev/null || true
+
+      - name: Copy dist
+        run: |
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat "${{ github.workspace }}" "%QT6_PATH%"
+          cd ${{ github.workspace }}/_deployment/_binaries/win64/
+          7z a Gyroflow-${{ matrix.targets.name }}.7z *
+
+      - name: Save Binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: gyroflow
+          path: _deployment/_binaries/win64/*.7z
+
+  github_release:
+    name: Create GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: gyroflow
+   
+      - run: ls -l
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+         files: ./*
+

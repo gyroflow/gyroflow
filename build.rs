@@ -33,13 +33,14 @@ fn main() {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
     match target_os.as_str() {
         "android" => {
-            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-lite/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-default/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
             config.flag("-std=c++17");
         },
         "macos" => {
             
         },
         "windows" => {
+            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-windows-desktop-clang-default/lib/x64", std::env::var("CARGO_MANIFEST_DIR").unwrap());
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
             res.set("FileVersion", env!("CARGO_PKG_VERSION"));
