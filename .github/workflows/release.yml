@@ -67,12 +67,20 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       # Install LLVM
+      - name: Cache LLVM and Clang
+        id: cache-llvm
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:/Program Files/LLVM
+            ./llvm
+          key: llvm-13.0
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1.5.0
         if: matrix.config.os == 'windows-latest'
         with:
           version: "13.0"
-          directory: ${{ runner.temp }}/llvm
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         if: matrix.config.os == 'windows-latest'
@@ -95,7 +103,6 @@ jobs:
           OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
           OPENCV_LINK_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/lib
           OPENCV_INCLUDE_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/include
-          #LIBCLANG_PATH: ${{ github.workspace }}/ext/llvm-13-win64/bin
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.targets.cross }}
