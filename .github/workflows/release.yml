@@ -70,10 +70,7 @@ jobs:
         id: cache-llvm
         uses: actions/cache@v2
         with:
-          path: |
-            C:/Program Files/LLVM
-            ./llvm
-            ${{ runner.temp }}/llvm
+          path: ${{ runner.temp }}/llvm
           key: llvm-11.0
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v1.5.0
@@ -97,13 +94,16 @@ jobs:
       - run: |
           cd ${{ github.workspace }}/
           tree
+          cd ${{ runner.workspace }}/b/vcpkg
+          tree
       - name: Build Gyroflow
         env:
           CARGO_TARGET_DIR: ./target
+          LIBCLANG_PATH2: ${{ env.LLVM_PATH }}/bin/
           FFMPEG_DIR: ${{ github.workspace }}/ext/ffmpeg-4.4-windows-desktop-clang-default
           OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
-          OPENCV_LINK_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/lib
-          OPENCV_INCLUDE_PATHS: ${{ github.workspace }}/vcpkg/installed/x64-windows-release/include
+          OPENCV_LINK_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/lib
+          OPENCV_INCLUDE_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/include
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.targets.cross }}
@@ -117,7 +117,7 @@ jobs:
 
       - name: Copy dist
         run: |
-          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat "${{ github.workspace }}" "%QT6_PATH%" "${{ github.workspace }}/vcpkg/installed/x64-windows-release/bin"
+          ${{ github.workspace }}/_deployment/windows/_copy_dlls.bat "${{ github.workspace }}" "%QT6_PATH%" "${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/bin"
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a Gyroflow-${{ matrix.targets.name }}.7z *
 
