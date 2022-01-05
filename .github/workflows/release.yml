@@ -51,6 +51,7 @@ jobs:
           cd ${{ github.workspace }}
           vcpkg install opencv4[core]:x64-windows-release
           vcpkg install curl[core]:x64-windows-release
+          vcpkg install opencl:x64-windows-release
 
       # Download and install Qt
       - name: Cache Qt
@@ -78,9 +79,9 @@ jobs:
           version: "11.0"
           directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
-      - name: Set LIBCLANG_PATH
-        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+      #- name: Set LIBCLANG_PATH
+      #  run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+      #  if: ${{ matrix.targets.os == 'windows-latest' }}
 
       # Download ffmpeg
       - name: Download ffmpeg
@@ -94,12 +95,12 @@ jobs:
       - run: |
           cd ${{ github.workspace }}/
           tree
-          cd ${{ runner.workspace }}/b/vcpkg
+          cd ${{ runner.workspace }}/b/vcpkg/installed
           tree
       - name: Build Gyroflow
         env:
           CARGO_TARGET_DIR: ./target
-          LIBCLANG_PATH2: ${{ env.LLVM_PATH }}/bin/
+          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/bin/
           FFMPEG_DIR: ${{ github.workspace }}/ext/ffmpeg-4.4-windows-desktop-clang-default
           OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
           OPENCV_LINK_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/x64-windows-release/lib
