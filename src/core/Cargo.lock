@@ -234,9 +234,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitreader"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9178181a7d44239c6c8eaafa8688558a2ab5fa04b8855381f2681e9591fb941b"
+checksum = "bd5bf8a17cdc06d475689f9e9226f4b5bf5610e93cf5c3010a518fe6fb0d97f5"
 dependencies = [
  "cfg-if 1.0.0",
 ]

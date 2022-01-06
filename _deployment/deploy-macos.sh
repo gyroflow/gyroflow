@@ -4,17 +4,17 @@ PROJECT_DIR="/Users/admin/gyroflow"
 
 CARGO_TARGET="$PROJECT_DIR/target/release"
 QT_DIR="$PROJECT_DIR/ext/6.2.2/macos"
-OPENCV_DIR="$PROJECT_DIR/ext/vcpkg/installed"
-FFMPEG_DIR="$PROJECT_DIR/ext/ffmpeg-4.4-macOS-default"
 
 #cargo build --release --target=x86_64-apple-darwin
 #cargo build --release --target=aarch64-apple-darwin
 #@lipo target/{x86_64,aarch64}-apple-darwin/release/$(TARGET) -create -output $(APP_BINARY)
 
 if [ "$1" == "deploy" ]; then
+    rm -rf "$PROJECT_DIR/_deployment/_binaries/mac64"
     mkdir -p "$PROJECT_DIR/_deployment/_binaries/mac64"
     CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/MacOS"
     cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac64/"
+    strip  "$PROJECT_DIR/target/release/gyroflow"
     cp -f  "$PROJECT_DIR/target/release/gyroflow"         "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/MacOS/"
     cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Frameworks/mdk.framework"
     cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Resources/"
