@@ -16,15 +16,26 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=CoreAudio");
     }
 
-    let mut public_include = |name| { config.include(format!("{}/{}", qt_include_path, name)); };
+    let mut public_include = |name| {
+        if cfg!(target_os = "macos") {
+            config.include(format!("{}/{}.framework/Headers/", qt_library_path, name));
+        }
+        config.include(format!("{}/{}", qt_include_path, name));
+    };
     public_include("QtCore");
     public_include("QtGui");
     public_include("QtQuick");
     public_include("QtQml");
     public_include("QtQuickControls2");
 
-    let mut private_include = |name| { config.include(format!("{}/{}/{}",    qt_include_path, name, qt_version))
-                                             .include(format!("{}/{}/{}/{}", qt_include_path, name, qt_version, name)); };
+    let mut private_include = |name| {
+        if cfg!(target_os = "macos") {
+            config.include(format!("{}/{}.framework/Headers/{}",       qt_library_path, name, qt_version));
+            config.include(format!("{}/{}.framework/Headers/{}/{}",    qt_library_path, name, qt_version, name));
+        }
+        config.include(format!("{}/{}/{}",    qt_include_path, name, qt_version))
+              .include(format!("{}/{}/{}/{}", qt_include_path, name, qt_version, name));
+    };
     private_include("QtCore");
     private_include("QtGui");
     private_include("QtQuick");

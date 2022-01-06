@@ -47,9 +47,9 @@ jobs:
       - name: Install OpenCV and curl
         run: |
           cd ${{ github.workspace }}
-          vcpkg install opencv4[core]:${{ matrix.targets.vcpkg }}
-          vcpkg install curl[core]:${{ matrix.targets.vcpkg }}
-          vcpkg install opencl:${{ matrix.targets.vcpkg }}
+          vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg }}"
+          vcpkg install "curl[core]:${{ matrix.targets.vcpkg }}"
+          vcpkg install "opencl:${{ matrix.targets.vcpkg }}"
 
       # Download and install Qt
       - name: Cache Qt

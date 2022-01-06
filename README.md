@@ -95,7 +95,7 @@ Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributors are **greatly appreciated**.
-* If you have suggestions for adding or removing features, feel free to [open an issue](https://github.com/AdrianEddy/gyroflow/issues/new) to discuss it, or directly create a pull request.
+* If you have suggestions for adding or removing features, feel free to [open an issue](https://github.com/AdrianEddy/gyroflow/issues/new) to discuss it.
 * If you want to implement a feature, you can fork this project, implement your code and open a pull request.
 
 ### Translations
@@ -146,12 +146,17 @@ The project also supports UI live reload, it's a super quick way of working with
 ### Building on MacOS
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install Xcode command line tools: `xcode-select --install`
-3. Install Qt, OpenCV and 7z: `brew install qt opencv p7zip`
-4. Download ffmepg from avbuild: https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-4.4-macOS-lite.tar.xz/download and extract to `ext` directory
-5. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
-6. Update paths in `__env-macos.sh`
-7. Setup the environment in terminal: `./__env-macos.sh` - I do this in VS Code built-in terminal
-8. Compile and run: `cargo run --release`
+3. Create `ext` directory: `mkdir ext ; cd ext`
+4. Install 7z: `brew install p7zip`
+5. Install vcpkg: `git clone https://github.com/Microsoft/vcpkg.git ; ./vcpkg/bootstrap-vcpkg.sh`
+6. Install Qt: `pip3 install -U pip ; pip3 install aqtinstall ; aqt install-qt mac desktop 6.2.2`
+7. Install OpenCV: `./vcpkg/vcpkg install "opencv[core]:x64-osx-release"`
+8. Download ffmpeg from avbuild: `curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-4.4-macOS-default.tar.xz/download -o ffmpeg.tar.xz ; 7z x ffmpeg.tar.xz ; 7z x ffmpeg.tar`
+9. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+10. Update PROJECT_DIR in `__env-macos.sh`
+11. Setup the environment in terminal: `source __env-macos.sh` - I do this in VS Code built-in terminal
+12. Compile and run: `cargo run --release`
+13. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
 
 ## License
