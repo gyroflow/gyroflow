@@ -18,8 +18,8 @@ impl SmoothingAlgorithm for Plain {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
-    fn get_parameters_json(&self) -> simd_json::owned::Value {
-        simd_json::json!([
+    fn get_parameters_json(&self) -> serde_json::Value {
+        serde_json::json!([
             {
                 "name": "time_constant",
                 "description": "Smoothness",

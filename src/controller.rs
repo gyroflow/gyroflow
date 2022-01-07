@@ -69,6 +69,8 @@ pub struct Controller {
     offsets_updated: qt_signal!(),
 
     get_profiles: qt_method!(fn(&self) -> QVariantList),
+    fetch_profiles_from_github: qt_method!(fn(&self)),
+    lens_profiles_updated: qt_signal!(),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -488,7 +490,7 @@ impl Controller {
     }
 
     fn set_smoothing_method(&mut self, index: usize) -> QJsonArray {
-        let params = util::simd_json_to_qt(&self.stabilizer.set_smoothing_method(index));
+        let params = util::serde_json_to_qt(&self.stabilizer.set_smoothing_method(index));
         self.request_recompute();
         self.chart_data_changed();
         params
@@ -602,18 +604,17 @@ impl Controller {
             this.updates_available(QString::from(version), QString::from(changelog))
         });
         core::run_threaded(move || {
-            use simd_json::ValueAccess;
             if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/AdrianEddy/gyroflow/releases").call().map(|x| x.into_string()) {
-                let mut slice = body.as_bytes().to_vec();
-                let v = simd_json::to_borrowed_value(&mut slice).unwrap();
-                if let Some(obj) = v.as_array().and_then(|x| x.first()).and_then(|x| x.as_object()) {
-                    let name = obj.get("name").and_then(|x| x.as_str());
-                    let body = obj.get("body").and_then(|x| x.as_str());
+                if let Ok(v) = serde_json::from_str(&body) as serde_json::Result<serde_json::Value> {
+                    if let Some(obj) = v.as_array().and_then(|x| x.first()).and_then(|x| x.as_object()) {
+                        let name = obj.get("name").and_then(|x| x.as_str());
+                        let body = obj.get("body").and_then(|x| x.as_str());
 
-                    if let Some(name) = name {
-                        ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
-                        if name.trim_start_matches('v') != env!("CARGO_PKG_VERSION") {
-                            update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                        if let Some(name) = name {
+                            ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
+                            if name.trim_start_matches('v') != env!("CARGO_PKG_VERSION") {
+                                update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                            }
                         }
                     }
                 }
@@ -842,6 +843,50 @@ impl Controller {
         let mut db = self.stabilizer.lens_profile_db.write();
         db.load_all();
         db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect()
+    }
+
+    fn fetch_profiles_from_github(&self) {
+        use crate::core::lens_profile_database::LensProfileDatabase;
+
+        
+        let update = util::qt_queued_callback_mut(self, |this, _| {
+            this.lens_profiles_updated();
+        });
+
+        core::run_threaded(move || {
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/AdrianEddy/gyroflow/git/trees/master?recursive=1").call().map(|x| x.into_string()) {
+                (|| -> Option<()> {
+                    let v: serde_json::Value = serde_json::from_str(&body).ok()?;
+                    for obj in v.get("tree")?.as_array()? {
+                        let obj = obj.as_object()?;
+                        let path = obj.get("path")?.as_str()?;
+                        if path.contains("/camera_presets/") && path.contains(".json") {
+                            let local_path_str = format!("{}{}", LensProfileDatabase::get_path(), path.replace("resources/camera_presets/", ""));
+                            let local_path = std::path::Path::new(&local_path_str);
+                            if !local_path.exists() {
+                                ::log::info!("Downloading lens profile {:?}", local_path.file_name()?);
+
+                                let url = obj.get("url")?.as_str()?.to_string();
+                                let _ = std::fs::create_dir_all(local_path.parent()?);
+                                let update = update.clone();
+                                core::run_threaded(move || {
+                                    let local_path = std::path::Path::new(&local_path_str);
+                                    let content = ureq::get(&url)
+                                        .set("Accept", "application/vnd.github.v3.raw")
+                                        .call().map(|x| x.into_string());
+                                    if let Ok(Ok(content)) = content {
+                                        if let Ok(_) = std::fs::write(local_path, content.into_bytes()) {
+                                            update(());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    Some(())
+                }());
+            }
+        });
     }
 
     // Utilities

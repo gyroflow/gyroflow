@@ -259,9 +259,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitreader"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9178181a7d44239c6c8eaafa8688558a2ab5fa04b8855381f2681e9591fb941b"
+checksum = "bd5bf8a17cdc06d475689f9e9226f4b5bf5610e93cf5c3010a518fe6fb0d97f5"
 dependencies = [
  "cfg-if 1.0.0",
 ]
@@ -893,15 +893,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "float-cmp"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98de4bbd547a563b716d8dfa9aad1cb19bfab00f4fa09a6a4ed21dbcf44ce9c4"
-dependencies = [
- "num-traits 0.2.14",
-]
-
-[[package]]
 name = "float-ord"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1061,7 +1052,7 @@ dependencies = [
  "qmetaobject",
  "qml-video-rs",
  "qttypes",
- "simd-json",
+ "serde_json",
  "simplelog",
  "ureq",
  "whoami",
@@ -1108,21 +1099,10 @@ dependencies = [
  "sample-consensus",
  "serde",
  "serde_json",
- "simd-json",
  "space",
  "telemetry-parser",
  "walkdir",
  "wgpu",
-]
-
-[[package]]
-name = "halfbrown"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ed39577259d319b81a15176a32673271be2786cb463889703c58c90fe83c825"
-dependencies = [
- "hashbrown",
- "serde",
 ]
 
 [[package]]
@@ -2076,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#095d5608ca63c755d0dd14cf9ecbc35f0034c5dc"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#b79887ef409cc47f07c878d15cc431408a742b44"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2471,25 +2451,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simd-json"
-version = "0.4.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8db546b694ee6a410ec93748bcb445051b7a74d4992f8ab4a23d94f289449bd7"
-dependencies = [
- "halfbrown",
- "serde",
- "serde_json",
- "simdutf8",
- "value-trait",
-]
-
-[[package]]
-name = "simdutf8"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c970da16e7c682fa90a261cf0724dee241c9f7831635ecc4e988ae8f3b505559"
-
-[[package]]
 name = "simplelog"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2751,18 +2712,6 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding",
-]
-
-[[package]]
-name = "value-trait"
-version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0393efdd7d82f856a927b0fcafa80bca45911f5c89ef6b9d80197bebc284f72e"
-dependencies = [
- "float-cmp",
- "halfbrown",
- "itoa 0.4.8",
- "ryu",
 ]
 
 [[package]]

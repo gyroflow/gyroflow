@@ -3,6 +3,9 @@ _dev/
 _binaries/
 cache/
 target/
-ext/
+ext/*/*
+ext/*.xz
+ext/*.7z
+ext/*.tar
 .vscode/
 *.code-workspace

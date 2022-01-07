@@ -14,35 +14,57 @@ use parking_lot::RwLock;
 
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
-    if use_gpu {
-        match codec {
-            "x264" => vec![
-                ("h264_nvenc",        true),
-                ("h264_amf",          true),
-                ("h264_mf",           true),
-                ("h264_videotoolbox", true),
-                ("h264_vaapi",        true),
-                ("h264_qsv",          true),
-                ("libx264",           false),
-            ],
-            "x265" => vec![
-                ("hevc_nvenc",        true),
-                ("hevc_amf",          true),
-                ("hevc_mf",           true),
-                ("hevc_videotoolbox", true),
-                ("hevc_vaapi",        true),
-                ("hevc_qsv",          true),
-                ("libx265",           false),
-            ],
-            "ProRes" => vec![("prores_ks", false)],
-            _        => vec![]
+    if cfg!(target_os = "macos") || cfg!(target_os = "ios") {
+        if use_gpu {
+            match codec {
+                "x264" => vec![
+                    ("h264_videotoolbox", true),
+                    ("h264_videotoolbox", false),
+                ],
+                "x265" => vec![
+                    ("hevc_videotoolbox", true),
+                    ("hevc_videotoolbox", false),
+                ],
+                "ProRes" => vec![("prores_ks", false)],
+                _        => vec![]
+            }
+        } else {
+            match codec {
+                "x264"   => vec![("h264_videotoolbox", false)],
+                "x265"   => vec![("hevc_videotoolbox", false)],
+                "ProRes" => vec![("prores_ks", false)],
+                _        => vec![]
+            }
         }
     } else {
-        match codec {
-            "x264"   => vec![("libx264", false)],
-            "x265"   => vec![("libx265", false)],
-            "ProRes" => vec![("prores_ks", false)],
-            _        => vec![]
+        if use_gpu {
+            match codec {
+                "x264" => vec![
+                    ("h264_nvenc",        true),
+                    ("h264_amf",          true),
+                    ("h264_mf",           true),
+                    ("h264_vaapi",        true),
+                    ("h264_qsv",          true),
+                    ("libx264",           false),
+                ],
+                "x265" => vec![
+                    ("hevc_nvenc",        true),
+                    ("hevc_amf",          true),
+                    ("hevc_mf",           true),
+                    ("hevc_vaapi",        true),
+                    ("hevc_qsv",          true),
+                    ("libx265",           false),
+                ],
+                "ProRes" => vec![("prores_ks", false)],
+                _        => vec![]
+            }
+        } else {
+            match codec {
+                "x264"   => vec![("libx264", false)],
+                "x265"   => vec![("libx265", false)],
+                "ProRes" => vec![("prores_ks", false)],
+                _        => vec![]
+            }
         }
     }
 }
@@ -240,9 +262,9 @@ lazy_static::lazy_static! {
     pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
 type VaList = ffi::va_list;
-#[cfg(target_os = "macos")]
+#[cfg(all(target_os = "macos", target_arch = "x86_64"))]
 type VaList = *mut ffi::__va_list_tag;
 
 #[allow(improper_ctypes_definitions)]

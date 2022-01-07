@@ -10,7 +10,7 @@ gyroflow-core = { path = "src/core/", features = ["use-opencl", "use-opencv"], d
 
 cstr = "*"
 cpp = "*"
-simd-json = { version = "*", features = ["allow-non-simd"] }
+serde_json = "*"
 bytemuck = "*"
 nalgebra = "0.29"
 

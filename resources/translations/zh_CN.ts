@@ -146,7 +146,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="39"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>确定</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="50"/>
@@ -306,17 +306,17 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="102"/>
       <source>Lens profiles</source>
-      <translation type="unfinished">Lens profiles</translation>
+      <translation>镜头配置文件</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="200"/>
       <source>Invalid format</source>
-      <translation type="unfinished">Invalid format</translation>
+      <translation>无效格式</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="200"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>确定</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="265"/>
@@ -351,7 +351,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="322"/>
       <source>Preview resolution</source>
-      <translation type="unfinished">Preview resolution</translation>
+      <translation>预览分辨率</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="214"/>
@@ -429,7 +429,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="185"/>
       <source>Focal center</source>
-      <translation type="unfinished">Focal center</translation>
+      <translation>聚焦中心</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="195"/>

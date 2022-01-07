@@ -12,7 +12,7 @@ use std::collections::hash_map::DefaultHasher;
 pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
     
-    fn get_parameters_json(&self) -> simd_json::owned::Value;
+    fn get_parameters_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
 
     fn get_checksum(&self) -> u64;
@@ -26,7 +26,7 @@ pub struct None { }
 impl SmoothingAlgorithm for None {
     fn get_name(&self) -> String { "No smoothing".to_owned() }
 
-    fn get_parameters_json(&self) -> simd_json::owned::Value { simd_json::json!([]) }
+    fn get_parameters_json(&self) -> serde_json::Value { serde_json::json!([]) }
     fn set_parameter(&mut self, _name: &str, _val: f64) { }
 
     fn get_checksum(&self) -> u64 { 0 }

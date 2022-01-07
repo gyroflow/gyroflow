@@ -25,7 +25,6 @@ use crate::lens_profile_database::LensProfileDatabase;
 
 use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, calibration::LensCalibrator };
 
-use simd_json::ValueAccess;
 use nalgebra::{ Quaternion, Vector3, Vector4 };
 use gyro_source::{ GyroSource, Quat64, TimeIMU };
 use telemetry_parser::try_block;
@@ -187,12 +186,12 @@ impl<T: PixelType> StabilizationManager<T> {
         }
 
         if path.ends_with(".gyroflow") {
-            let mut data = std::fs::read(path)?;
-            let v = simd_json::to_borrowed_value(&mut data)?;
+            let data = std::fs::read_to_string(path)?;
+            let v: serde_json::Value = serde_json::from_str(&data)?;
     
             self.lens.write().load_from_json_value(&v["calibration_data"]);
 
-            let to_f64_array = |x: &simd_json::borrowed::Value| -> Option<Vec<f64>> { Some(x.as_array()?.iter().filter_map(|x| x.as_f64()).collect()) };
+            let to_f64_array = |x: &serde_json::Value| -> Option<Vec<f64>> { Some(x.as_array()?.iter().filter_map(|x| x.as_f64()).collect()) };
 
             try_block!({
                 //let smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
@@ -534,7 +533,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.undistortion.write().set_background(bg);
     }
 
-    pub fn set_smoothing_method(&self, index: usize) -> simd_json::owned::Value {
+    pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);
         smooth.current().get_parameters_json()

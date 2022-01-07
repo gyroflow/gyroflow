@@ -31,7 +31,7 @@ MenuItem {
         controller.load_lens_profile_url(url);
     }
 
-    Component.onCompleted: {
+    function updateProfilesModel() {
         lensProfilesList = controller.get_profiles();
 
         let list = [];
@@ -39,6 +39,10 @@ MenuItem {
             list.push(x[0])
         }
         search.model = list;
+    }
+    Component.onCompleted: {
+        controller.fetch_profiles_from_github();
+        updateProfilesModel();
 
         QT_TRANSLATE_NOOP("TableList", "Camera");
         QT_TRANSLATE_NOOP("TableList", "Lens");
@@ -47,8 +51,16 @@ MenuItem {
         QT_TRANSLATE_NOOP("TableList", "Dimensions");
         QT_TRANSLATE_NOOP("TableList", "Calibrated by");
     }
+    Timer {
+        id: profilesUpdateTimer;
+        interval: 1000;
+        onTriggered: updateProfilesModel();
+    }
     Connections {
         target: controller;
+        function onLens_profiles_updated() {
+            profilesUpdateTimer.start();
+        }
         function onLens_profile_loaded(json_str) {
             if (json_str) {
                 const obj = JSON.parse(json_str);

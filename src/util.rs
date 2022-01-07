@@ -2,20 +2,17 @@ use cpp::*;
 use qmetaobject::*;
 use std::collections::HashMap;
 
-pub fn simd_json_to_qt(v: &simd_json::owned::Value) -> QJsonArray {
+pub fn serde_json_to_qt(v: &serde_json::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();
-    use simd_json::ValueAccess;
     if let Some(arr) = v.as_array() {
         for param in arr {
             if let Some(obj) = param.as_object() {
                 let mut map = QJsonObject::default();
                 for (k, v) in obj {
                     match v {
-                        simd_json::OwnedValue::Static(simd_json::StaticNode::F64(v)) => { map.insert(k, QJsonValue::from(*v)); },
-                        simd_json::OwnedValue::Static(simd_json::StaticNode::I64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
-                        simd_json::OwnedValue::Static(simd_json::StaticNode::U64(v)) => { map.insert(k, QJsonValue::from(*v as f64)); },
-                        simd_json::OwnedValue::Static(simd_json::StaticNode::Bool(v)) => { map.insert(k, QJsonValue::from(*v)); },
-                        simd_json::OwnedValue::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
+                        serde_json::Value::Number(v) => { map.insert(k, QJsonValue::from(v.as_f64().unwrap())); },
+                        serde_json::Value::Bool(v) => { map.insert(k, QJsonValue::from(*v)); },
+                        serde_json::Value::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
                         _ => { ::log::warn!("Unimplemented"); }
                     };
                 }

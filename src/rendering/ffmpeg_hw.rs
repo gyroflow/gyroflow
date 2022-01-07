@@ -124,6 +124,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                 unsafe {
                     let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
                     if config.is_null() {
+                        println!("config is null {}", x.0);
                         break;
                     }
                     let type_ = (*config).device_type;
@@ -150,6 +151,8 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                     }
                 }
             }
+        } else {
+            println!("codec not found {}", x.0);
         }
     }
     let x = encoders.last().unwrap();

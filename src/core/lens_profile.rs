@@ -48,13 +48,14 @@ pub struct LensProfile {
 }
 
 impl LensProfile {
-    pub fn from_json(json: &mut str) -> Result<Self, simd_json::Error> {
-        simd_json::from_str(json)
+    pub fn from_json(json: &mut str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
     }
 
-    pub fn load_from_file(&mut self, path: &str) -> Result<(), simd_json::Error> {
-        let mut data = std::fs::read_to_string(path)?;
-        *self = simd_json::from_str(&mut data)?;
+    pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
+        if let Ok(mut data) = std::fs::read_to_string(path) {
+            *self = serde_json::from_str(&mut data)?;
+        }
         Ok(())
     }
 
@@ -167,7 +168,7 @@ impl LensProfile {
         nalgebra::Vector4::from_row_slice(&self.fisheye_params.distortion_coeffs)
     }
 
-    pub fn load_from_json_value(&mut self, v: &simd_json::borrowed::Value) -> Option<()> {
+    pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
         *self = <Self as Deserialize>::deserialize(v).ok()?;
         Some(())
     }

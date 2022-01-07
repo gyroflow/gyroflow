@@ -9,10 +9,19 @@ pub struct LensProfileDatabase {
 }
 
 impl LensProfileDatabase {
+    pub fn get_path() -> &'static str {
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        let path = "../Resources/camera_presets/";
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+        let path = "./resources/camera_presets/";
+
+        path
+    }
+
     pub fn load_all(&mut self) {
         let _time = std::time::Instant::now();
 
-        WalkDir::new("./resources/camera_presets/").into_iter().for_each(|e| {
+        WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
                 if f_name.ends_with(".json") && !f_name.contains("/Legacy/") {
