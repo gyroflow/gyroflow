@@ -158,7 +158,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gyroflow
-          path: _deployment/_binaries/*.{zip,dmg}
+          path: _deployment/_binaries/*.*
 
   github_release:
     name: Create GitHub release

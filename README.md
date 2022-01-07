@@ -28,18 +28,6 @@
 
 ![Downloads](https://img.shields.io/github/downloads/AdrianEddy/gyroflow/total) ![Contributors](https://img.shields.io/github/contributors/AdrianEddy/gyroflow?color=dark-green) ![Issues](https://img.shields.io/github/issues/AdrianEddy/gyroflow) ![License](https://img.shields.io/github/license/AdrianEddy/gyroflow) 
 
-## Table of contents
-
-* [About the project](#about-the-project)
-* [Features](#features)
-* [Supported gyro sources](#supported-gyro-sources)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
-* [Development](#development)
-* [License](#license)
-* [Authors](#authors)
-* [Acknowledgements](#acknowledgements)
-
 ## About the project
 Gyroflow is a application that can stabilize your video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilize the captured footage precisely by using them.
 
@@ -71,23 +59,22 @@ Gyroflow is a application that can stabilize your video by using motion data fro
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be easily used to create OpenFX and Adobe plugins (on the TODO list)
 
 ## Supported gyro sources
-- [x] Betaflight blackbox (CSV and binary)
 - [x] GoPro (HERO 5 and later)
+- [x] Sony (a1, a6600, a7c, a7r IV, a7s III, a9 II, FX3, FX6，RX0 II, RX100 VII, ZV1, ZV-E10)
 - [x] Insta360 (OneR, SMO 4k, GO2)
+- [x] Betaflight blackbox (CSV and binary)
 - [x] Mobile apps: `Sensor Logger`, `G-Field Recorder`, `Gyro`
 - [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR)
-- [x] Sony (a1, a6600, a7c, a7r IV, a7s III, a9 II, FX3, FX6，RX0 II, RX100 VII, ZV1, ZV-E10)
 - [x] WitMotion (WT901SDCL binary and *.txt)
 
 ### Info for cameras not on the list
 
 - For cameras which do have built-in gyro, please contact us to make us support you camera
-- For cameras don't have built-in gyro, please consider using betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
-
+- For cameras which don't have built-in gyro, please consider using betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
 
 ## Roadmap
 
-See the [open issues](https://github.com/AdrianEddy/gyroflow/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/AdrianEddy/gyroflow/issues) for a list of proposed features and known issues.
 
 ### Video editor plugins 
 Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
@@ -106,7 +93,6 @@ Currently gyroflow is available in:
 * **Chinese Simplified** (by [DusKing1](https://github.com/DusKing1))
 
 Help us translate Gyroflow to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow
-
 
 ## Development
 ### Used languages and technologies
@@ -153,7 +139,6 @@ The project also supports UI live reload, it's a super quick way of working with
 7. Compile and run: `cargo run --release`
 8. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
-
 ## License
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE) for more information.
@@ -162,7 +147,10 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy
 
 * [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing, rolling shutter correction and advanced rendering features*
 * [Elvin Chen](https://github.com/ElvinC/) - *Author of the first version in Python, laid the groundwork to make all this possible*
+
+### Notable contributors
 * [Aphobius](https://github.com/Aphobius/) - *Author of velocity dampened smoothing algorithm*
+* [Marc Roeschlin](https://github.com/marcroe/) - *Author of adaptive zoom algorithm*
 
 ## Acknowledgements
 
