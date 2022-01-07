@@ -18,7 +18,7 @@ impl LensProfileDatabase {
 
         let candidates = [
             std::fs::canonicalize(&path).unwrap_or_default(),
-            std::fs::canonicalize(std::env::current_exe().unwrap_or_default().join(&path)).unwrap_or_default()
+            std::fs::canonicalize(std::env::current_exe().unwrap_or_default().parent().map(|x| x.join(&path)).unwrap_or_default()).unwrap_or_default()
         ];
         for x in candidates {
             if x.exists() {
@@ -32,7 +32,7 @@ impl LensProfileDatabase {
     pub fn load_all(&mut self) {
         log::info!("Current dir: {:?}", std::env::current_dir());
         log::info!("Current exe: {:?}", std::env::current_exe());
-        log::info!("Test path: {:?}", std::env::current_exe().unwrap_or_default().join("../Resources/camera_presets/"));
+        log::info!("Test path: {:?}", std::env::current_exe().unwrap_or_default().parent().map(|x| x.join("../Resources/camera_presets/")).unwrap_or_default());
         log::info!("Lens profiles directory: {:?}", Self::get_path());
 
         let _time = std::time::Instant::now();
