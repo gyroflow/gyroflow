@@ -6,7 +6,7 @@
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-macOS-default}"
 
-rm -rf "$PROJECT_DIR/_deployment/_binaries/mac64"
+rm -rf "$PROJECT_DIR/_deployment/_binaries/mac"
 
 if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     pushd $PROJECT_DIR
@@ -43,14 +43,14 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
 fi
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    mkdir -p "$PROJECT_DIR/_deployment/_binaries/mac64"
-    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/MacOS"
-    cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac64/"
+    mkdir -p "$PROJECT_DIR/_deployment/_binaries/mac"
+    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS"
+    cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac/"
     strip  "$PROJECT_DIR/target/release/gyroflow"
-    cp -f  "$PROJECT_DIR/target/release/gyroflow"         "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/MacOS/"
-    cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Frameworks/mdk.framework"
-    cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Frameworks/mdk.framework"
-    cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Resources/"
+    cp -f  "$PROJECT_DIR/target/release/gyroflow"         "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/"
+    cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework"
+    cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework"
+    cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/"
 fi
 
 cp -af "$QT_DIR/lib/QtCore.framework"                     "$CARGO_TARGET/../Frameworks/"
@@ -73,7 +73,7 @@ cp -af "$QT_DIR/lib/QtSvg.framework"                      "$CARGO_TARGET/../Fram
 cp -af "$QT_DIR/lib/QtWidgets.framework"                  "$CARGO_TARGET/../Frameworks/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Resources/qml"
+    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/qml"
 fi
 
 mkdir -p "$CARGO_TARGET/Qt/labs/settings/"
@@ -88,7 +88,7 @@ mkdir -p "$CARGO_TARGET/QtQuick/Templates/"
 mkdir -p "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/+Material/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/Resources/qml"
+    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/qml"
 fi
 cp -f $QT_DIR/qml/Qt/labs/settings/qmldir                                                         "$CARGO_TARGET/Qt/labs/settings/"
 cp -f $QT_DIR/qml/Qt/labs/settings/libqmlsettingsplugin.dylib                                     "$CARGO_TARGET/Qt/labs/settings/"
@@ -130,7 +130,7 @@ cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/+Material/*.qml                 
 cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib               "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac64/Gyroflow.app/Contents/PlugIns"
+    CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns"
 fi
 mkdir -p "$CARGO_TARGET/iconengines/"
 mkdir -p "$CARGO_TARGET/imageformats/"
@@ -140,6 +140,6 @@ cp -f $QT_DIR/plugins/imageformats/libqsvg.dylib                                
 cp -f $QT_DIR/plugins/platforms/libqcocoa.dylib                                                   "$CARGO_TARGET/platforms/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac64/Applications"
-    hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac64.dmg" -volname "Gyroflow v0.4.0" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac64/" -ov -format UDZO -imagekey zlib-level=9
+    ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
+    hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v0.4.0" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 fi

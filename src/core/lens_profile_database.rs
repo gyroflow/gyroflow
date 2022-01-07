@@ -19,11 +19,14 @@ impl LensProfileDatabase {
     }
 
     pub fn load_all(&mut self) {
-        let _time = std::time::Instant::now();
+        log::info!("Lens profiles directory: {}", Self::get_path());
 
+        let _time = std::time::Instant::now();
+        
         WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
+                println!("{}", f_name);
                 if f_name.ends_with(".json") && !f_name.contains("/Legacy/") {
                     let mut data = std::fs::read_to_string(&f_name).unwrap();
                     match LensProfile::from_json(&mut data) {

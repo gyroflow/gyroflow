@@ -55,8 +55,9 @@ Gyroflow is a application that can stabilize your video by using motion data fro
 - Supports variable frame rate videos, all calculations are done on timestamps
 - x264, x265, ProRes and PNG outputs, with x264 and x265 fully GPU accelerated
 - Automatic lens calibration process
-- Fully zero-copy GPU rendering is possible, implemented and almost working (:D)
+- Fully zero-copy GPU rendering is possible, implemented and almost working (😀)
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be easily used to create OpenFX and Adobe plugins (on the TODO list)
+- Automatic updates of lens profile database
 
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
