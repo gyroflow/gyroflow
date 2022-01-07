@@ -205,13 +205,9 @@ impl<'a> VideoTranscoder<'a> {
 
                     let timestamp = Some(ts);
 
-                    #[cfg(target_os = "linux")]
-                    let vaapi = frame.format() == format::Pixel::VAAPI;
-                    #[cfg(not(target_os = "linux"))]
-                    let vaapi = false;
+                    let raw_format: ffi::AVPixelFormat = frame.format().into();
 
-                    let mut input_frame = if vaapi || 
-                       frame.format() == format::Pixel::CUDA || 
+                    let mut input_frame = if frame.format() == format::Pixel::CUDA || 
                        frame.format() == format::Pixel::DXVA2_VLD || 
                        frame.format() == format::Pixel::VDPAU || 
                        frame.format() == format::Pixel::D3D11 || 
@@ -219,9 +215,10 @@ impl<'a> VideoTranscoder<'a> {
                        frame.format() == format::Pixel::VIDEOTOOLBOX || 
                        frame.format() == format::Pixel::MEDIACODEC || 
                        frame.format() == format::Pixel::OPENCL || 
-                       frame.format() == format::Pixel::VULKAN || 
-                       frame.format() == format::Pixel::QSV || 
-                       frame.format() == format::Pixel::MMAL {
+                       frame.format() == format::Pixel::QSV ||
+                       frame.format() == format::Pixel::MMAL || 
+                       raw_format == ffi::AVPixelFormat::AV_PIX_FMT_VAAPI ||
+                       raw_format == ffi::AVPixelFormat::AV_PIX_FMT_VAAPI_VLD {
                         unsafe {
                             // retrieve data from GPU to CPU
                             let err = ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0);

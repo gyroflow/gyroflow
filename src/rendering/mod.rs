@@ -45,6 +45,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                     ("h264_mf",           true),
                     ("h264_vaapi",        true),
                     ("h264_qsv",          true),
+                    ("h264_v4l2m2m",      true),
                     ("libx264",           false),
                 ],
                 "x265" => vec![
@@ -53,6 +54,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                     ("hevc_mf",           true),
                     ("hevc_vaapi",        true),
                     ("hevc_qsv",          true),
+                    ("hevc_v4l2m2m",      true),
                     ("libx265",           false),
                 ],
                 "ProRes" => vec![("prores_ks", false)],
@@ -262,9 +264,9 @@ lazy_static::lazy_static! {
     pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
 }
 
-#[cfg(not(all(target_os = "macos", target_arch = "x86_64")))]
+#[cfg(not(any(target_os = "linux", all(target_os = "macos", target_arch = "x86_64"))))]
 type VaList = ffi::va_list;
-#[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+#[cfg(any(target_os = "linux", all(target_os = "macos", target_arch = "x86_64")))]
 type VaList = *mut ffi::__va_list_tag;
 
 #[allow(improper_ctypes_definitions)]

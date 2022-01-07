@@ -26,10 +26,13 @@ impl LensProfileDatabase {
             }
         }
 
-        path
+        std::fs::canonicalize(&path).unwrap_or_default()
     }
 
     pub fn load_all(&mut self) {
+        log::info!("Current dir: {:?}", std::env::current_dir());
+        log::info!("Current exe: {:?}", std::env::current_exe());
+        log::info!("Test path: {:?}", std::env::current_exe().unwrap_or_default().join("../Resources/camera_presets/"));
         log::info!("Lens profiles directory: {:?}", Self::get_path());
 
         let _time = std::time::Instant::now();

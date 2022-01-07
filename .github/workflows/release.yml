@@ -95,9 +95,6 @@ jobs:
           version: "13.0"
           directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
-      #- name: Set LIBCLANG_PATH
-      #  run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-      #  if: ${{ matrix.targets.os == 'windows-latest' }}
 
       # Download ffmpeg
       - name: Download ffmpeg
@@ -107,6 +104,7 @@ jobs:
           curl -L ${{ matrix.targets.ffmpeg_url }} -o ffmpeg.tar.xz
           7z x ffmpeg.tar.xz
           7z x ffmpeg.tar
+          rm -f ffmpeg.tar*
 
       - name: Install remaining dependencies
         if: ${{ matrix.targets.os == 'macos-latest' }}
@@ -173,4 +171,3 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
          files: ./*
-
