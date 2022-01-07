@@ -1188,9 +1188,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.7.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc633605454125dec4b66843673f01c7df2b89479b32e0ed634e43a91cff62a5"
+checksum = "282a6247722caba404c065016bbfa522806e51714c34f5dfc3e4a3a46fcb4223"
 dependencies = [
  "autocfg",
  "hashbrown",
@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#b79887ef409cc47f07c878d15cc431408a742b44"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#b1e6ce61b6921af7a100341bd19173302abce425"
 dependencies = [
  "cpp",
  "cpp_build",
