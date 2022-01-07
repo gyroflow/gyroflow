@@ -2,6 +2,7 @@ use walkdir::WalkDir;
 use std::collections::HashMap;
 use crate::LensProfile;
 use itertools::Itertools;
+use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct LensProfileDatabase {
@@ -9,24 +10,33 @@ pub struct LensProfileDatabase {
 }
 
 impl LensProfileDatabase {
-    pub fn get_path() -> &'static str {
+    pub fn get_path() -> PathBuf {
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        let path = "../Resources/camera_presets/";
+        let path = PathBuf::from("../Resources/camera_presets/");
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-        let path = "./resources/camera_presets/";
+        let path = PathBuf::from("./resources/camera_presets/");
+
+        let candidates = [
+            std::fs::canonicalize(&path).unwrap_or_default(),
+            std::fs::canonicalize(std::env::current_exe().unwrap_or_default().join(&path)).unwrap_or_default()
+        ];
+        for x in candidates {
+            if x.exists() {
+                return x;
+            }
+        }
 
         path
     }
 
     pub fn load_all(&mut self) {
-        log::info!("Lens profiles directory: {}", Self::get_path());
+        log::info!("Lens profiles directory: {:?}", Self::get_path());
 
         let _time = std::time::Instant::now();
         
         WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                println!("{}", f_name);
                 if f_name.ends_with(".json") && !f_name.contains("/Legacy/") {
                     let mut data = std::fs::read_to_string(&f_name).unwrap();
                     match LensProfile::from_json(&mut data) {

@@ -861,8 +861,7 @@ impl Controller {
                         let obj = obj.as_object()?;
                         let path = obj.get("path")?.as_str()?;
                         if path.contains("/camera_presets/") && path.contains(".json") {
-                            let local_path_str = format!("{}{}", LensProfileDatabase::get_path(), path.replace("resources/camera_presets/", ""));
-                            let local_path = std::path::Path::new(&local_path_str);
+                            let local_path = LensProfileDatabase::get_path().join(path.replace("resources/camera_presets/", ""));
                             if !local_path.exists() {
                                 ::log::info!("Downloading lens profile {:?}", local_path.file_name()?);
 
@@ -870,13 +869,12 @@ impl Controller {
                                 let _ = std::fs::create_dir_all(local_path.parent()?);
                                 let update = update.clone();
                                 core::run_threaded(move || {
-                                    let local_path = std::path::Path::new(&local_path_str);
                                     let content = ureq::get(&url)
                                         .set("Accept", "application/vnd.github.v3.raw")
                                         .call().map(|x| x.into_string());
                                     if let Ok(Ok(content)) = content {
                                         if let Ok(_) = std::fs::write(local_path, content.into_bytes()) {
-                                            update(());
+                                           update(());
                                         }
                                     }
                                 });

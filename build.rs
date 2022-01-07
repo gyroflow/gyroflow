@@ -57,6 +57,9 @@ fn main() {
         "macos" => {
             
         },
+        "linux" => {
+            
+        },
         "windows" => {
             println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-windows-desktop-clang-default/lib/x64", std::env::var("CARGO_MANIFEST_DIR").unwrap());
             let mut res = winres::WindowsResource::new();

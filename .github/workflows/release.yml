@@ -52,10 +52,6 @@ jobs:
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
 
-      - name: Setup target ${{ matrix.targets.target2 }}
-        if: ${{ matrix.targets.target2 == 'aarch64-apple-darwin' }}
-        run: echo "SDKROOT=$(xcrun -sdk macosx11.1 --show-sdk-path)" >> $GITHUB_ENV
-
       - uses: lukka/get-cmake@latest
       - uses: lukka/run-vcpkg@v10
         with:
