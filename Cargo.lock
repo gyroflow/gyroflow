@@ -547,12 +547,12 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ed27e177f16d65f0f0c22a213e17c696ace5dd64b14258b52f9417ccb52db4"
+checksum = "e54ea8bc3fb1ee042f5aace6e3c6e025d3874866da222930f70ce62aceba0bfa"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-utils 0.8.5",
+ "crossbeam-utils 0.8.6",
 ]
 
 [[package]]
@@ -573,8 +573,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6455c0ca19f0d2fbf751b908d5c55c1f5cbc65e03c4225427254b46890bdde1e"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-epoch 0.9.5",
- "crossbeam-utils 0.8.5",
+ "crossbeam-epoch 0.9.6",
+ "crossbeam-utils 0.8.6",
 ]
 
 [[package]]
@@ -594,12 +594,12 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.5"
+version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ec02e091aa634e2c3ada4a392989e7c3116673ef0ac5b72232439094d73b7fd"
+checksum = "97242a70df9b89a65d0b6df3c4bf5b9ce03c5b7309019777fbde37e7537f8762"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-utils 0.8.5",
+ "crossbeam-utils 0.8.6",
  "lazy_static",
  "memoffset 0.6.5",
  "scopeguard",
@@ -629,9 +629,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d82cfc11ce7f2c3faef78d8a684447b40d503d9681acebed6cb728d45940c4db"
+checksum = "cfcae03edb34f947e64acdb1c33ec169824e20657e9ecb61cef6c8c74dcb8120"
 dependencies = [
  "cfg-if 1.0.0",
  "lazy_static",
@@ -1074,7 +1074,7 @@ dependencies = [
  "byteorder",
  "chrono",
  "crc32fast",
- "crossbeam-channel 0.5.1",
+ "crossbeam-channel 0.5.2",
  "cv-core",
  "cv-pinhole",
  "dyn-clone",
@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#b1e6ce61b6921af7a100341bd19173302abce425"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#9d95bafe2cfc0484f20d296711c6609ad97906e5"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2217,9 +2217,9 @@ version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d78120e2c850279833f1dd3582f730c4ab53ed95aeaaaa862a2a5c71b1656d8e"
 dependencies = [
- "crossbeam-channel 0.5.1",
+ "crossbeam-channel 0.5.2",
  "crossbeam-deque 0.8.1",
- "crossbeam-utils 0.8.5",
+ "crossbeam-utils 0.8.6",
  "lazy_static",
  "num_cpus",
 ]

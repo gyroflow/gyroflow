@@ -33,6 +33,7 @@ MenuItem {
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Plain 3D smoothing");
+        QT_TRANSLATE_NOOP("Popup", "Velocity dampened smoothing"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
         QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
@@ -43,6 +44,9 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
+        QT_TRANSLATE_NOOP("Stabilization", "Pitch velocity dampening");
+        QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
+        QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
     }
 
     Connections {
