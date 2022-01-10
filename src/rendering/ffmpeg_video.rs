@@ -155,10 +155,13 @@ impl<'a> VideoTranscoder<'a> {
 
                 if self.gpu_decoding && self.encoder_pixel_format.is_none() {
                     unsafe {
-                        let dl_format = *super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr()).first().ok_or(FFmpegError::NoHWTransferFormats)?;
+                        let formats = super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr());
+                        log::debug!("Hardware transfer formats from GPU: {:?}", formats);
+                        let dl_format = *formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                         let codec = octx.stream(0).unwrap().codec().as_mut_ptr();
                         if !(*codec).codec.is_null() {
                             let sw_formats = super::ffmpeg_hw::pix_formats_to_vec((*(*codec).codec).pix_fmts);
+                            log::debug!("Codec formats: {:?}", sw_formats);
                             let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &sw_formats);
                             if picked != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
                                 self.encoder_pixel_format = Some(format::Pixel::from(picked));

@@ -57,6 +57,7 @@ pub struct Controller {
     lens_profile_loaded: qt_signal!(lens_json: QString),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
+    get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
@@ -502,6 +503,9 @@ impl Controller {
     }
     pub fn get_smoothing_algs(&self) -> QVariantList {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
+    }
+    fn get_smoothing_status(&self) -> QJsonArray {
+        util::serde_json_to_qt(&self.stabilizer.get_smoothing_status())
     }
 
     fn set_sync_method(&mut self, v: u32) {

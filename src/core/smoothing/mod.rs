@@ -1,6 +1,7 @@
 pub mod plain;
 pub mod horizon;
 pub mod fixed;
+pub mod velocity_dampened;
 
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
@@ -13,11 +14,12 @@ pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
     
     fn get_parameters_json(&self) -> serde_json::Value;
+    fn get_status_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
 
     fn get_checksum(&self) -> u64;
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat;
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat;
 }
 clone_trait_object!(SmoothingAlgorithm);
 
@@ -27,11 +29,12 @@ impl SmoothingAlgorithm for None {
     fn get_name(&self) -> String { "No smoothing".to_owned() }
 
     fn get_parameters_json(&self) -> serde_json::Value { serde_json::json!([]) }
+    fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
     fn set_parameter(&mut self, _name: &str, _val: f64) { }
 
     fn get_checksum(&self) -> u64 { 0 }
 
-    fn smooth(&self, quats: &TimeQuat, _duration: f64) -> TimeQuat { quats.clone() }
+    fn smooth(&mut self, quats: &TimeQuat, _duration: f64, _params: &crate::BasicParams) -> TimeQuat { quats.clone() }
 }
 
 pub struct Smoothing {
@@ -48,6 +51,7 @@ impl Default for Smoothing {
             algs: vec![
                 Box::new(None { }),
                 Box::new(self::plain::Plain::default()),
+                Box::new(self::velocity_dampened::VelocityDampened::default()),
                 Box::new(self::horizon::HorizonLock::default()),
                 Box::new(self::fixed::Fixed::default())
             ],

@@ -6,18 +6,26 @@ pub fn serde_json_to_qt(v: &serde_json::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();
     if let Some(arr) = v.as_array() {
         for param in arr {
-            if let Some(obj) = param.as_object() {
-                let mut map = QJsonObject::default();
-                for (k, v) in obj {
-                    match v {
-                        serde_json::Value::Number(v) => { map.insert(k, QJsonValue::from(v.as_f64().unwrap())); },
-                        serde_json::Value::Bool(v) => { map.insert(k, QJsonValue::from(*v)); },
-                        serde_json::Value::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
-                        _ => { ::log::warn!("Unimplemented"); }
-                    };
-                }
-                ret.push(QJsonValue::from(map));
-            }
+            match param {
+                serde_json::Value::Number(v) => { ret.push(QJsonValue::from(v.as_f64().unwrap())); },
+                serde_json::Value::Bool(v) => { ret.push(QJsonValue::from(*v)); },
+                serde_json::Value::String(v) => { ret.push(QJsonValue::from(QString::from(v.clone()))); },
+                serde_json::Value::Array(v) => { ret.push(QJsonValue::from(serde_json_to_qt(&serde_json::Value::Array(v.to_vec())))); },
+                serde_json::Value::Object(obj) => {
+                    let mut map = QJsonObject::default();
+                    for (k, v) in obj {
+                        match v {
+                            serde_json::Value::Number(v) => { map.insert(k, QJsonValue::from(v.as_f64().unwrap())); },
+                            serde_json::Value::Bool(v) => { map.insert(k, QJsonValue::from(*v)); },
+                            serde_json::Value::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
+                            serde_json::Value::Array(v) => { map.insert(k, QJsonValue::from(serde_json_to_qt(&serde_json::Value::Array(v.to_vec())))); },
+                            _ => { ::log::warn!("Unimplemented"); }
+                        };
+                    }
+                    ret.push(QJsonValue::from(map));
+                },
+                _ => { ::log::warn!("Unimplemented"); }
+            };
         }
     }
     ret

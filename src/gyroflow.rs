@@ -18,7 +18,6 @@ use ui::ui_tools::UITools;
 
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
-// - Port Aphobius 2.0
 
 // TODO: more smoothing algorithms
 

@@ -52,6 +52,7 @@ impl SmoothingAlgorithm for Fixed {
             }
         ])
     }
+    fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -61,9 +62,9 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat {
-
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
+        
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();

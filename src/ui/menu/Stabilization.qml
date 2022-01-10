@@ -30,6 +30,45 @@ MenuItem {
         return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
 
+    Connections {
+        target: controller;
+        function onCompute_progress(id, progress) {
+            if (progress >= 1) {
+                const status = controller.get_smoothing_status();
+                // Clear current params
+                for (let i = smoothingStatus.children.length; i > 0; --i) {
+                    smoothingStatus.children[i - 1].destroy();
+                }
+
+                if (status.length > 0) {
+                    let qml = "import QtQuick 2.15; import '../components/'; Column { width: parent.width; ";
+                    for (const x of status) {
+                        // TODO: figure out a better way than constructing a string
+                        switch (x.type) {
+                            case 'Label':
+                                let text = qsTranslate("Stabilization", x.description);
+                                if (x.description_args) {
+                                    for (const arg of x.description_args) {
+                                        text = text.arg(arg);
+                                    }
+                                }
+                                qml += `BasicText {
+                                    width: parent.width;
+                                    wrapMode: Text.WordWrap;
+                                    text: "${text}"
+                                }`;
+                            break;
+                            case 'QML': qml += x.custom_qml; break;
+                        }
+                    }
+                    qml += "}";
+
+                    Qt.createQmlObject(qml, smoothingStatus);
+                }
+            }
+        }
+    }
+    
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Plain 3D smoothing");
@@ -47,6 +86,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Pitch velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
+        QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
     }
 
     Connections {
@@ -114,7 +154,7 @@ MenuItem {
                                     value: root.getSmoothingParam("${x.name}", ${x.value});
                                     defaultValue: ${x.value};
                                     unit: qsTranslate("Stabilization", "${x.unit}");
-                                    live: false;
+                                    //live: false;
                                     precision: ${x.precision} || 2;
                                     onValueChanged: root.setSmoothingParam("${x.name}", value);
                                 }
@@ -131,6 +171,12 @@ MenuItem {
     }
     Column {
         id: smoothingOptions;
+        x: 5 * dpiScale;
+        width: parent.width - x;
+        visible: children.length > 0;
+    }
+    Column {
+        id: smoothingStatus;
         x: 5 * dpiScale;
         width: parent.width - x;
         visible: children.length > 0;

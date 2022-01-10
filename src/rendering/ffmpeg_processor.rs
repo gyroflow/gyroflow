@@ -85,7 +85,7 @@ impl From<ffmpeg_next::Error> for FFmpegError {
 impl<'a> FfmpegProcessor<'a> {
     pub fn from_file(path: &str, mut gpu_decoding: bool) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
-        log::set_level(log::Level::Info);
+        crate::rendering::init();
 
         let mut input_context = format::input(&path)?;
 

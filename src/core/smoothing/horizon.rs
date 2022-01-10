@@ -133,6 +133,7 @@ impl SmoothingAlgorithm for HorizonLock {
             },
         ])
     }
+    fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -143,7 +144,7 @@ impl SmoothingAlgorithm for HorizonLock {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);

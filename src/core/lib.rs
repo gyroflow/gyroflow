@@ -299,7 +299,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_smoothness(&self) {
-        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_ref());
+        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_mut(), &self.params.read());
     }
 
     pub fn recompute_undistortion(&self) {
@@ -337,13 +337,14 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
-                let smoothing = smoothing.write().current().clone();
-                params.gyro.recompute_smoothness(smoothing.as_ref());
+                let mut smoothing = smoothing.write().current().clone();
+                params.gyro.recompute_smoothness(smoothing.as_mut(), &basic_params.read());
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
                 lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
                 lib_gyro.org_smoothed_quaternions = params.gyro.org_smoothed_quaternions.clone();
+                lib_gyro.smoothing_status = smoothing.get_status_json();
                 smoothing_changed = true;
             }
             
@@ -485,8 +486,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
 
-    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; }
-    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; }
+    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.smoothness_checksum.store(0, SeqCst); }
+    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.smoothness_checksum.store(0, SeqCst); }
 
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
@@ -540,6 +541,10 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_smoothing_param(&self, name: &str, val: f64) {
         self.smoothing.write().current().as_mut().set_parameter(name, val);
+    }
+    pub fn get_smoothing_status(&self) -> serde_json::Value {
+        self.gyro.read().smoothing_status.clone()
+        //self.smoothing.write().current().get_status_json()
     }
     pub fn get_smoothing_algs(&self) -> Vec<String> {
         self.smoothing.read().get_names()

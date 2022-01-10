@@ -253,6 +253,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
 pub fn init() -> Result<(), Error> {
 	unsafe {
+        ffi::av_log_set_level(ffi::AV_LOG_INFO);
         ffi::av_log_set_callback(Some(ffmpeg_log));
     }
 
@@ -289,12 +290,16 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
         if let Ok(mut line) = String::from_utf8(line) {
             match level {
                 ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
+                    log::error!("{}", line);
                     line = format!("<font color=\"#d82626\">{}</font>", line);
                 },
                 ffi::AV_LOG_WARNING => {
+                    log::warn!("{}", line);
                     line = format!("<font color=\"#f6a10c\">{}</font>", line);
                 },
-                _ => { }
+                _ => {
+                    log::debug!("{}", line);
+                }
             }
             FFMPEG_LOG.write().push_str(&line);
         }

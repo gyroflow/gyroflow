@@ -49,7 +49,7 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: ["mp4", "mov", "mxf", "mkv", "webm"];
+        property var extensions: ["mp4", "mov", "mxf", "mkv", "webm", "insv"];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];
@@ -255,5 +255,9 @@ Rectangle {
 
     Component.onCompleted: {
         controller.check_updates();
+
+        if (!isLandscape) {
+            isLandscapeChanged();
+        }
     }
 }

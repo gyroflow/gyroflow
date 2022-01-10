@@ -49,6 +49,8 @@ pub struct GyroSource {
 
     pub smoothed_quaternions: TimeQuat,
     pub org_smoothed_quaternions: TimeQuat,
+
+    pub smoothing_status: serde_json::Value,
     
     pub offsets: BTreeMap<i64, f64>, // microseconds timestamp, offset in milliseconds
 }
@@ -173,8 +175,8 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm) {
-        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms);
+    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, params: &BasicParams) {
+        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
 
         for (sq, q) in self.smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {
