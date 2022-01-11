@@ -2,6 +2,7 @@ pub mod plain;
 pub mod horizon;
 pub mod fixed;
 pub mod velocity_dampened;
+pub mod velocity_dampened2;
 
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
@@ -52,6 +53,7 @@ impl Default for Smoothing {
                 Box::new(None { }),
                 Box::new(self::plain::Plain::default()),
                 Box::new(self::velocity_dampened::VelocityDampened::default()),
+                Box::new(self::velocity_dampened2::VelocityDampened2::default()),
                 Box::new(self::horizon::HorizonLock::default()),
                 Box::new(self::fixed::Fixed::default())
             ],

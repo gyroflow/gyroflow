@@ -4,10 +4,20 @@ use crate::gyro_source::TimeQuat;
 
 
 #[derive(Clone)]
-pub struct HorizonLock { pub time_constant: f64,  pub roll: f64, pub pitch: f64, pub yaw: f64 }
+pub struct HorizonLock {
+    pub time_constant: f64,
+    pub roll: f64,
+    pub pitch: f64,
+    pub yaw: f64
+}
 
 impl Default for HorizonLock {
-    fn default() -> Self { Self { time_constant: 0.2, roll: 0.0, pitch: 0.0, yaw: 0.0 } }
+    fn default() -> Self { Self {
+        time_constant: 0.25,
+        roll: 0.0,
+        pitch: 0.0,
+        yaw: 0.0
+    } }
 }
 
 // Alternative implementation adapted from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles for the "standard" order
@@ -101,7 +111,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "type": "SliderWithField",
                 "from": 0.01,
                 "to": 10.0,
-                "value": 0.25,
+                "value": self.time_constant,
                 "unit": "s"
             },
             {
@@ -110,7 +120,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
-                "value": 0,
+                "value": self.roll,
                 "unit": "°"
             },
             {
@@ -119,7 +129,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "type": "SliderWithField",
                 "from": -90,
                 "to": 90,
-                "value": 0,
+                "value": self.pitch,
                 "unit": "°"
             },
             {
@@ -128,7 +138,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
-                "value": 0,
+                "value": self.yaw,
                 "unit": "°"
             },
         ])

@@ -4,10 +4,18 @@ use crate::gyro_source::TimeQuat;
 
 
 #[derive(Clone)]
-pub struct Fixed { pub roll: f64, pub pitch: f64, pub yaw: f64}
+pub struct Fixed {
+    pub roll: f64,
+    pub pitch: f64,
+    pub yaw: f64
+}
 
 impl Default for Fixed {
-    fn default() -> Self { Self { roll: 0.0, pitch: 0.0, yaw: 0.0 } }
+    fn default() -> Self { Self {
+        roll: 0.0,
+        pitch: 0.0,
+        yaw: 0.0
+    } }
 }
 
 impl SmoothingAlgorithm for Fixed {
@@ -29,7 +37,7 @@ impl SmoothingAlgorithm for Fixed {
                 "type": "Slider",
                 "from": -180,
                 "to": 180,
-                "value": 0,
+                "value": self.roll,
                 "unit": "°"
             },
             {
@@ -38,7 +46,7 @@ impl SmoothingAlgorithm for Fixed {
                 "type": "Slider",
                 "from": -90,
                 "to": 90,
-                "value": 0,
+                "value": self.pitch,
                 "unit": "°"
             },
             {
@@ -47,7 +55,7 @@ impl SmoothingAlgorithm for Fixed {
                 "type": "Slider",
                 "from": -180,
                 "to": 180,
-                "value": 0,
+                "value": self.yaw,
                 "unit": "°"
             }
         ])
@@ -64,7 +72,7 @@ impl SmoothingAlgorithm for Fixed {
 
     fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
-        
+
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();

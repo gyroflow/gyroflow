@@ -15,7 +15,13 @@ pub struct VelocityDampened {
 }
 
 impl Default for VelocityDampened {
-    fn default() -> Self { Self { time_constant: 0.4, pitch_vel_damp: 2.0, yaw_vel_damp: 2.0, roll_vel_damp: 2.0, label_arguments: ["0.0".into(), "0.0".into(), "0.0".into()] } }
+    fn default() -> Self { Self {
+        time_constant: 0.4,
+        pitch_vel_damp: 2.0,
+        yaw_vel_damp: 2.0,
+        roll_vel_damp: 2.0,
+        label_arguments: ["<b>0.0°</b>".into(), "<b>0.0°</b>".into(), "<b>0.0°</b>".into()]
+    } }
 }
 
 impl SmoothingAlgorithm for VelocityDampened {
@@ -47,7 +53,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "type": "SliderWithField",
                 "from": 0.0,
                 "to": 100.0,
-                "value": 2.0,
+                "value": self.pitch_vel_damp,
                 "unit": "",
                 "precision": 1
             },
@@ -57,7 +63,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "type": "SliderWithField",
                 "from": 0.0,
                 "to": 100.0,
-                "value": 2.0,
+                "value": self.yaw_vel_damp,
                 "unit": "",
                 "precision": 1
             },
@@ -67,7 +73,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "type": "SliderWithField",
                 "from": 0.0,
                 "to": 100.0,
-                "value": 2.0,
+                "value": self.roll_vel_damp,
                 "unit": "",
                 "precision": 1
             }
@@ -77,8 +83,8 @@ impl SmoothingAlgorithm for VelocityDampened {
         serde_json::json!([
             {
                 "name": "label",
-                "description": "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).",
-                "description_args": self.label_arguments,
+                "text": "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).",
+                "text_args": self.label_arguments,
                 "type": "Label"
             }
         ])
@@ -127,16 +133,15 @@ impl SmoothingAlgorithm for VelocityDampened {
         }
 
         // Calculate velocity
-        let dt = 1.0 / sample_rate;
         let mut prev_quat = *low_smooth.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in low_smooth.iter().skip(1) {
             let dist = prev_quat.inverse() * quat;
             let euler = dist.euler_angles();
 
             velocity.insert(*timestamp, Vector3::new(
-                euler.0.abs() / dt, // Roll
-                euler.1.abs() / dt, // Pitch
-                euler.2.abs() / dt  // Yaw
+                euler.0.abs() * sample_rate, // Roll
+                euler.1.abs() * sample_rate, // Pitch
+                euler.2.abs() * sample_rate  // Yaw
             ));
             prev_quat = *quat;
         }
@@ -204,11 +209,9 @@ impl SmoothingAlgorithm for VelocityDampened {
         }
         
         const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
-        self.label_arguments[0] = format!("{:.2}", max_pitch * RAD2DEG);
-        self.label_arguments[1] = format!("{:.2}", max_yaw * RAD2DEG);
-        self.label_arguments[2] = format!("{:.2}", max_roll * RAD2DEG);
-        //log::info!("Max pitch rotation: {:.2} Max yaw rotation: {:.2} Max roll rotation: {:.2}", max_pitch * RAD2DEG, max_yaw * RAD2DEG, max_roll * RAD2DEG);
-        //log::info!("Modify dampening settings until you get the desired values (recommended around 6 on all axes)");
+        self.label_arguments[0] = format!("<b>{:.2}°</b>", max_pitch * RAD2DEG);
+        self.label_arguments[1] = format!("<b>{:.2}°</b>", max_yaw * RAD2DEG);
+        self.label_arguments[2] = format!("<b>{:.2}°</b>", max_roll * RAD2DEG);
 
         vel_corr_smooth
     }

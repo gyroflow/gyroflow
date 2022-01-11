@@ -3,7 +3,7 @@ use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::error;
 
-use ffmpeg_next::{ ffi, codec, encoder, format, frame, log, media, Dictionary, Rational, Stream, rescale, rescale::Rescale };
+use ffmpeg_next::{ ffi, codec, encoder, format, frame, media, Dictionary, Rational, Stream, rescale, rescale::Rescale };
 
 use super::*;
 use super::ffmpeg_video::*;
@@ -85,7 +85,7 @@ impl From<ffmpeg_next::Error> for FFmpegError {
 impl<'a> FfmpegProcessor<'a> {
     pub fn from_file(path: &str, mut gpu_decoding: bool) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
-        crate::rendering::init();
+        let _ = crate::rendering::init();
 
         let mut input_context = format::input(&path)?;
 

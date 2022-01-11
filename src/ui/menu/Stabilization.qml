@@ -46,15 +46,16 @@ MenuItem {
                         // TODO: figure out a better way than constructing a string
                         switch (x.type) {
                             case 'Label':
-                                let text = qsTranslate("Stabilization", x.description);
-                                if (x.description_args) {
-                                    for (const arg of x.description_args) {
+                                let text = qsTranslate("Stabilization", x.text).replace(/\n/g, "<br>");
+                                if (x.text_args) {
+                                    for (const arg of x.text_args) {
                                         text = text.arg(arg);
                                     }
                                 }
                                 qml += `BasicText {
                                     width: parent.width;
                                     wrapMode: Text.WordWrap;
+                                    textFormat: Text.StyledText;
                                     text: "${text}"
                                 }`;
                             break;
@@ -73,6 +74,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Plain 3D smoothing");
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened smoothing"),
+        QT_TRANSLATE_NOOP("Popup", "Velocity dampened smoothing 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
         QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
@@ -87,6 +89,8 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
+        QT_TRANSLATE_NOOP("Stabilization", "Smoothness at high velocity");
+        QT_TRANSLATE_NOOP("Stabilization", "Velocity factor");
     }
 
     Connections {

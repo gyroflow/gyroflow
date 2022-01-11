@@ -6,7 +6,7 @@ use crate::gyro_source::TimeQuat;
 pub struct Plain { pub time_constant: f64 }
 
 impl Default for Plain {
-    fn default() -> Self { Self { time_constant: 0.2 } }
+    fn default() -> Self { Self { time_constant: 0.25 } }
 }
 
 impl SmoothingAlgorithm for Plain {
@@ -26,7 +26,7 @@ impl SmoothingAlgorithm for Plain {
                 "type": "SliderWithField",
                 "from": 0.01,
                 "to": 1.0,
-                "value": 0.25,
+                "value": self.time_constant,
                 "unit": "s"
             }
         ])
