@@ -1,7 +1,10 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15 as QQC
-import QtQuick.Controls.impl 2.15 as QQCI
-import QtQuick.Controls.Material 2.15 as QQCM
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+import QtQuick
+import QtQuick.Controls as QQC
+import QtQuick.Controls.impl as QQCI
+import QtQuick.Controls.Material as QQCM
 
 Item {
     id: root;

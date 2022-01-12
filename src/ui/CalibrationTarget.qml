@@ -1,5 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Window 2.10
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+import QtQuick
+import QtQuick.Window
 
 Window {
     id: root;

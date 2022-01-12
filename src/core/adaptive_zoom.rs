@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Marc Roeschlin
+
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 

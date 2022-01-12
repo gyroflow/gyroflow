@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+/// The basic idea here is to find chessboard every 10 frames and save all points to a map. 
+/// Then we pick a random 10 frames from that map and calculate the calibration.
+/// Repeat that 1000 times, with new random set of frames each time and return the set which resulted in the lowest RMS
+
 #[cfg(feature = "use-opencv")]
 use opencv::{
     core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 }, 
@@ -15,10 +22,6 @@ use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
 pub mod drawing;
-
-/// The basic idea here is to find chessboard every 10 frames and save all points to a map. 
-/// Then we pick a random 10 frames from that map and calculate the calibration.
-/// Repeat that 1000 times, with new random set of frames each time and return the set which resulted in the lowest RMS
 
 #[derive(Clone, Default, Debug)]
 pub struct Detected {

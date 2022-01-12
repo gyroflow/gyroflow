@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
 enum {
     INTER_BITS = 5,
     INTER_TAB_SIZE = 1 << INTER_BITS
@@ -11,8 +14,8 @@ __constant float coeffs[64] = {
     0.250000f, 0.750000f, 0.218750f, 0.781250f, 0.187500f, 0.812500f, 0.156250f, 0.843750f, 0.125000f, 0.875000f, 0.093750f, 0.906250f,
     0.062500f, 0.937500f, 0.031250f, 0.968750f
 };
-/*
-float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
+
+/*float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
     // To relative coordinates
     float x = (point.x - c.x) / f.x;
     float y = (point.y - c.y) / f.y;
@@ -39,6 +42,9 @@ float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
     return (float2)(xDistort, yDistort);
 }*/
 
+// Adapted from OpenCV: initUndistortRectifyMap + remap 
+// https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
+// https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
 __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, ushort width, ushort height, ushort stride, ushort output_width, ushort output_height, ushort output_stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
     int x = get_global_id(0);
     int y = get_global_id(1);

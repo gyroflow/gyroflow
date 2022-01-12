@@ -1,0 +1,61 @@
+{
+  "name": "DJI_Action 2_F2.8_4K 4by3 _C4k_4by3_4096x3072-29.97fps",
+  "note": "Ultra_wide",
+  "calibrated_by": "Nicecrash",
+  "camera_brand": "DJI",
+  "camera_model": "Action 2",
+  "lens_model": "F2.8",
+  "camera_setting": "4K 4by3 ",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 7,
+  "fps": 29.97,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8549814158578167,
+    "camera_matrix": [
+      [
+        1155.757071140233,
+        0.0,
+        2043.6502716048913
+      ],
+      [
+        0.0,
+        1156.8266766032118,
+        1524.6893387052862
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.43525523658086357,
+      -0.20358760551826383,
+      0.27781021573469816,
+      -0.15462821096937165
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": []
+  },
+  "identifier": "",
+  "calibrator_version": "0.4.0",
+  "date": "2022-01-11"
+}

@@ -1,5 +1,8 @@
-import QtQuick 2.15
-import Qt.labs.settings 1.0
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+import QtQuick
+import Qt.labs.settings
 
 import "../components/"
 
@@ -41,7 +44,7 @@ MenuItem {
                 }
 
                 if (status.length > 0) {
-                    let qml = "import QtQuick 2.15; import '../components/'; Column { width: parent.width; ";
+                    let qml = "import QtQuick; import '../components/'; Column { width: parent.width; ";
                     for (const x of status) {
                         // TODO: figure out a better way than constructing a string
                         switch (x.type) {
@@ -141,7 +144,7 @@ MenuItem {
 
             const opt_json = controller.set_smoothing_method(currentIndex);
             if (opt_json.length > 0) {
-                let qml = "import QtQuick 2.15; import '../components/'; Column { width: parent.width; ";
+                let qml = "import QtQuick; import '../components/'; Column { width: parent.width; ";
                 for (const x of opt_json) {
                     // TODO: figure out a better way than constructing a string
                     switch (x.type) {

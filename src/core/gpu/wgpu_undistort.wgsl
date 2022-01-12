@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 struct PixelsData {
     data: [[stride(4)]] array<u32>;
@@ -51,7 +53,9 @@ fn put_pixel(pos: u32, px: vec4<f32>) {
     );
 }
 
-
+// Adapted from OpenCV: initUndistortRectifyMap + remap 
+// https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
+// https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
 [[stage(compute), workgroup_size(8, 8)]]
 fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
     let width = params.width;

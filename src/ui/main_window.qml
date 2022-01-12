@@ -1,7 +1,10 @@
-import QtQuick 2.15
-import QtQuick.Window 2.10
-import QtQuick.Controls.Material 2.12
-import Qt.labs.settings 1.0
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls.Material
+import Qt.labs.settings
 
 import "components/"
 
@@ -12,7 +15,7 @@ Window {
     visible: true;
     color: styleBackground;
 
-    title: "Gyroflow v" + version + " preview";
+    title: "Gyroflow v" + version + " RC0";
     
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;

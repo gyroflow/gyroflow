@@ -1,4 +1,5 @@
-
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use qml_video_rs::video_player::MDKPlayerWrapper;
 use std::sync::Arc;

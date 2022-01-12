@@ -141,5 +141,5 @@ cp -f $QT_DIR/plugins/platforms/libqcocoa.dylib                                 
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
-    hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v0.4.0" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
+    hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v1.0.0 RC0" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 fi

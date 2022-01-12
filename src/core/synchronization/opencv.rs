@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
 use nalgebra::{Vector2, Rotation3};
 use std::ffi::c_void;
 use opencv::core::{Mat, Size, Point2f, TermCriteria, CV_8UC1};

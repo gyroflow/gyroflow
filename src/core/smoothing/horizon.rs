@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Elvin Chen
+
 use super::*;
 use nalgebra::*;
 use crate::gyro_source::TimeQuat;
-
 
 #[derive(Clone)]
 pub struct HorizonLock {

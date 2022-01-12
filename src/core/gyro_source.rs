@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
 use nalgebra::*;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;

@@ -1,4 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+// Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/calibinit.cpp#L2078
 pub fn draw_chessboard_corners(org_width: usize, w: u32, _h: u32, s: usize, pixels: &mut [u8], pattern_size: (usize, usize), corners: &[(f32, f32)], found: bool) {
     const LINE_COLORS: &[(u8, u8, u8)] = &[
         (0, 0, 255),

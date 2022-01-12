@@ -830,7 +830,7 @@ impl Controller {
                         ::log::debug!("Lens profile json: {}", json);
                         if upload {
                             core::run_threaded(move || {
-                                if let Ok(Ok(body)) = ureq::post("https://eddy.cx/gyroflow/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
+                                if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
                                     ::log::debug!("Lens profile uploaded: {}", body.as_str());
                                 }
                             });

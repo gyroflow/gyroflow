@@ -1,3 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+// 1. Calculate velocity for each quaternion
+// 2. Smooth the velocities
+// 3. Get max velocity and convert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
+// 4. Perform plain 3D smoothing with varying alpha, where each alpha is between `Smoothness` and `Smoothness at high velocity`, according to velocity ratio
+// 5. This way, low velocities are smoothed using `Smoothness`, but high velocities are smoothed using `Smoothness at high velocity`
+
 use std::collections::BTreeMap;
 
 use super::*;
@@ -11,12 +20,6 @@ pub struct VelocityDampened2 {
     pub velocity_factor: f64,
     pub label_arguments: [String; 3],
 }
-
-// 1. Calculate velocity for each quaternion
-// 2. Smooth the velocities
-// 3. Get max velocity and convert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
-// 4. Perform plain 3D smoothing with varying alpha, where each alpha is between `Smoothness` and `Smoothness at high velocity`, according to velocity ratio
-// 5. This way, low velocities are smoothed using `Smoothness`, but high velocities are smoothed using `Smoothness at high velocity`
 
 impl Default for VelocityDampened2 {
     fn default() -> Self { Self {

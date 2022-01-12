@@ -1,0 +1,148 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
+use nalgebra::Matrix3;
+use super::ComputeParams;
+use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+
+#[derive(Default, Clone)]
+pub struct FrameTransform {
+    pub params: Vec<[f32; 9]>,
+}
+
+impl FrameTransform {
+    fn get_frame_readout_time(params: &ComputeParams, fov: f64, can_invert: bool) -> f64 {
+        let img_dim_ratio = params.width as f64 / params.calib_width;
+    
+        let mut frame_readout_time = params.frame_readout_time;
+        if can_invert && params.framebuffer_inverted {
+            frame_readout_time *= -1.0;
+        }
+        frame_readout_time *= fov;
+        frame_readout_time /= 2.0;
+        frame_readout_time *= img_dim_ratio;
+        frame_readout_time
+    }
+    fn get_new_k(params: &ComputeParams, fov: f64) -> Matrix3<f64> {
+        let img_dim_ratio = params.width as f64 / params.calib_width;
+        
+        let out_dim = (params.output_width as f64, params.output_height as f64);
+        let focal_center = (params.calib_width / 2.0, params.calib_height / 2.0);
+
+        let mut new_k = params.camera_matrix;
+        new_k[(0, 0)] = new_k[(0, 0)] * 1.0 / fov;
+        new_k[(1, 1)] = new_k[(1, 1)] * 1.0 / fov;
+        new_k[(0, 2)] = (params.calib_width  / 2.0 - focal_center.0) * img_dim_ratio / fov + out_dim.0 / 2.0;
+        new_k[(1, 2)] = (params.calib_height / 2.0 - focal_center.1) * img_dim_ratio / fov + out_dim.1 / 2.0;
+        new_k
+    }
+
+    pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
+        let img_dim_ratio = params.width as f64 / params.calib_width;
+    
+        let fov = if params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale }.max(0.001);
+    
+        let scaled_k = params.camera_matrix * img_dim_ratio;
+        let new_k = Self::get_new_k(params, fov);
+        
+        // ----------- Rolling shutter correction -----------
+        let frame_readout_time = Self::get_frame_readout_time(params, fov, true);
+
+        let row_readout_time = frame_readout_time / params.height as f64;
+        let start_ts = timestamp_ms - (frame_readout_time / 2.0);
+        // ----------- Rolling shutter correction -----------
+
+        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+
+        let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+
+        // Only compute 1 matrix if not using rolling shutter correction
+        let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
+
+        let mut transform_params = (0..rows).into_par_iter().map(|y| {
+            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
+                start_ts + row_readout_time * y as f64
+            } else {
+                timestamp_ms
+            };
+            let quat = quat1
+                     * params.gyro.org_quat_at_timestamp(quat_time)
+                     * params.gyro.smoothed_quat_at_timestamp(quat_time);
+
+            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
+            if params.framebuffer_inverted {
+                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+            } else {
+                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            }
+            
+            let i_r = (new_k * r).pseudo_inverse(0.000001);
+            if let Err(err) = i_r {
+                log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
+            }
+            let i_r: Matrix3<f32> = nalgebra::convert(i_r.unwrap_or_default());
+            [
+                i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)], 
+                i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)], 
+                i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
+            ]
+        }).collect::<Vec<[f32; 9]>>();
+
+        // Prepend lens params at the beginning
+        transform_params.insert(0, [
+            scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32, // 1, 2 - f
+            scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32, // 3, 4 - c
+    
+            params.distortion_coeffs[0] as f32, // 5
+            params.distortion_coeffs[1] as f32, // 6
+            params.distortion_coeffs[2] as f32, // 7
+            params.distortion_coeffs[3] as f32, // 8
+            0.0 // pad to 9 values
+        ]);
+
+        Self { params: transform_params }
+    }
+
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+        let img_dim_ratio = params.width as f64 / params.calib_width;
+    
+        let fov = params.fov_scale;
+        let scaled_k = params.camera_matrix * img_dim_ratio;
+        let new_k = Self::get_new_k(params, fov);
+
+        // ----------- Rolling shutter correction -----------
+        let frame_readout_time = Self::get_frame_readout_time(params, fov, false);
+
+        let row_readout_time = frame_readout_time / params.height as f64;
+        let start_ts = timestamp_ms - (frame_readout_time / 2.0);
+        // ----------- Rolling shutter correction -----------
+
+        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+
+        let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+
+        // Only compute 1 matrix if not using rolling shutter correction
+        let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
+
+        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(_, y)| {
+            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
+                start_ts + row_readout_time * y as f64
+            } else {
+                timestamp_ms
+            };
+            let quat = quat1
+                     * params.gyro.org_quat_at_timestamp(quat_time)
+                     * params.gyro.smoothed_quat_at_timestamp(quat_time);
+
+            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+            
+            new_k * r
+        }).collect();
+
+        (scaled_k, params.distortion_coeffs, new_k, rotations)
+    }
+}
