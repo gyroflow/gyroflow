@@ -2,9 +2,6 @@
 
 sudo apt install p7zip-full python3-pip clang libclang-dev bison pkg-config gperf curl git libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers intel-opencl-icd ocl-icd-opencl-dev opencl-headers
 
-# OpenCV dependencies
-sudo apt install libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev
-
 if [ "$1" != "CI" ]; then
     # Install vcpkg
     git clone --depth 1 https://github.com/Microsoft/vcpkg.git
@@ -14,6 +11,9 @@ if [ "$1" != "CI" ]; then
     pip3 install -U pip
     pip3 install aqtinstall
     python3 -m aqt install-qt linux desktop 6.2.2
+
+    # OpenCV dependencies
+    sudo apt install libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev
 
     # Install OpenCV
     ./vcpkg/vcpkg install "opencv[core]:x64-linux-release"

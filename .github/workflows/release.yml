@@ -60,6 +60,8 @@ jobs:
           override: true
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
+        with:
+          key: gf
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -107,6 +109,9 @@ jobs:
           version: "13.0"
           directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+      - name: Set LIBCLANG_PATH
+        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+        if: ${{ matrix.targets.os == 'windows-latest' }}
 
       # Download ffmpeg
       - name: Download ffmpeg
@@ -137,7 +142,6 @@ jobs:
         if: ${{ matrix.targets.os != 'macos-latest' }}
         env:
           CARGO_TARGET_DIR: ./target
-          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/bin/
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
           OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
           OPENCV_LINK_PATHS: ${{ runner.workspace }}/b/vcpkg/installed/${{ matrix.targets.vcpkg }}/lib
