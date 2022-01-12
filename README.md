@@ -125,7 +125,7 @@ For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU imple
 `Visual Studio Code` with `rust-analyzer` extension.
 
 For working with QML I recommend to use Qt Creator and load all QML files there, as it has auto-complete and syntax highlighting.
-The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `main.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
+The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `gyroflow.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/

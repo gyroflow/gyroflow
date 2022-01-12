@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+
 fn main() {
     let qt_include_path = std::env::var("DEP_QT_INCLUDE_PATH").unwrap();
     let qt_library_path = std::env::var("DEP_QT_LIBRARY_PATH").unwrap();
