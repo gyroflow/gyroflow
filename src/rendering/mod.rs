@@ -41,6 +41,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             match codec {
                 "x264" => vec![
                     ("h264_nvenc",        true),
+                    ("nvenc",             true),
+                    ("nvenc_h264",        true),
                     ("h264_amf",          true),
                     ("h264_mf",           true),
                     ("h264_vaapi",        true),

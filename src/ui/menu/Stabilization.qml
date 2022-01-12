@@ -89,6 +89,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
+        QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify velocity factor until you get the desired values (recommended less than 20).");
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness at high velocity");
         QT_TRANSLATE_NOOP("Stabilization", "Velocity factor");
     }

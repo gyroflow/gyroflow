@@ -19,8 +19,9 @@ use ui::ui_tools::UITools;
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
+// TODO: space should always play
+// TODO: dragging numbers on the numberfield left and right
 // TODO: more smoothing algorithms
-
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // TODO: wgpu convert to using textures
 // TODO: exporting and loading .gyroflow

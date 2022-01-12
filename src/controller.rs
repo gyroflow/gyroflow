@@ -791,7 +791,7 @@ impl Controller {
                 cal.forced_frames.remove(&f);
                 cal.used_points.remove(&f);
             }
-            if let Ok(_) = cal.calibrate(true) {
+            if cal.calibrate(true).is_ok() {
                 rms = cal.rms;
                 self.stabilizer.lens.write().set_from_calibrator(cal);
                 ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
@@ -877,7 +877,7 @@ impl Controller {
                                         .set("Accept", "application/vnd.github.v3.raw")
                                         .call().map(|x| x.into_string());
                                     if let Ok(Ok(content)) = content {
-                                        if let Ok(_) = std::fs::write(local_path, content.into_bytes()) {
+                                        if std::fs::write(local_path, content.into_bytes()).is_ok() {
                                            update(());
                                         }
                                     }

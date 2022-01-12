@@ -90,7 +90,7 @@ impl LensProfileDatabase {
             .replace("2.7K", "")
             .replace("4K", "")
             .replace("5K", "")
-            .replace("_", " ")
+            .replace('_', " ")
     }
 
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {

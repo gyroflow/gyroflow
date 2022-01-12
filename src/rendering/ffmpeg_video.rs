@@ -117,7 +117,9 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_color_range(decoder.color_range());
         encoder.set_colorspace(decoder.color_space());
         unsafe {
-            (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
+            if encoder.codec().map(|x| x.name().to_string()).unwrap_or_default() != "hevc_videotoolbox" {
+                (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
+            }
             (*encoder.as_mut_ptr()).color_primaries = (*decoder.as_ptr()).color_primaries;
         }
 
@@ -156,7 +158,7 @@ impl<'a> VideoTranscoder<'a> {
                 if self.gpu_decoding && self.encoder_pixel_format.is_none() {
                     unsafe {
                         let formats = super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr());
-                        log::debug!("Hardware transfer formats from GPU: {:?}", formats);
+                        log::debug!("Hardware transfer formats from GPU: {:?}, frame.is_empty: {}", formats, frame.is_empty());
                         let dl_format = *formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                         let codec = octx.stream(0).unwrap().codec().as_mut_ptr();
                         if !(*codec).codec.is_null() {

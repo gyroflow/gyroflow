@@ -210,8 +210,12 @@ impl AdaptiveZoom {
                 let l = (quaternions.len() - 1) as f64;
                 let first_ind = (l * self.range.0).floor() as usize;
                 let last_ind  = (l * self.range.1).ceil() as usize;
-                fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
-                fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+                if fov_values.len() > first_ind {
+                    fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
+                }
+                if fov_values.len() > last_ind {
+                    fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+                }
             }
         }
 

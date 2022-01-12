@@ -174,7 +174,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 rot.1 * (alpha * vel_vector[1]).min(1.0),
                 rot.2 * (alpha * vel_vector[2]).min(1.0),
             );
-            prev_quat = prev_quat * vel_quat;
+            prev_quat *= vel_quat;
             (*timestamp, prev_quat)
         }).collect();
 

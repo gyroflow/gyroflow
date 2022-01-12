@@ -53,8 +53,8 @@ impl LensProfile {
     }
 
     pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
-        if let Ok(mut data) = std::fs::read_to_string(path) {
-            *self = serde_json::from_str(&mut data)?;
+        if let Ok(data) = std::fs::read_to_string(path) {
+            *self = serde_json::from_str(&data)?;
         }
         Ok(())
     }
@@ -82,7 +82,7 @@ impl LensProfile {
     }
 
     pub fn get_name(&self) -> String {
-        format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.get_size_str(), self.get_aspect_ratio().replace(":", "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
+        format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.get_size_str(), self.get_aspect_ratio().replace(':', "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
     }
 
     pub fn get_aspect_ratio(&self) -> String {
@@ -91,7 +91,7 @@ impl LensProfile {
         }
 
         let ratios = [
-            (1.0/1.0, "1:1"), 
+            (1.0, "1:1"), 
             (3.0/2.0, "3:2"), (2.0/3.0, "2:3"), 
             (4.0/3.0, "4:3"), (3.0/4.0, "3:4"), 
             (16.0/9.0, "16:9"), (9.0/16.0, "9:16")

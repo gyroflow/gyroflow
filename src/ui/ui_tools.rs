@@ -100,7 +100,7 @@ impl UITools {
 
             let calib_ctl = self.calibrator_ctl.as_ref().unwrap();
             calib_ctl.borrow().init_calibrator();
-            let calib_ctlpinned = unsafe { QObjectPinned::new(&calib_ctl) };
+            let calib_ctlpinned = unsafe { QObjectPinned::new(calib_ctl) };
     
             if let Some(engine) = self.engine_ptr {
                 let engine = unsafe { &mut *(engine) };

@@ -14,7 +14,7 @@ pub struct VelocityDampened2 {
 
 // 1. Calculate velocity for each quaternion
 // 2. Smooth the velocities
-// 3. Get max velocity and covert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
+// 3. Get max velocity and convert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
 // 4. Perform plain 3D smoothing with varying alpha, where each alpha is between `Smoothness` and `Smoothness at high velocity`, according to velocity ratio
 // 5. This way, low velocities are smoothed using `Smoothness`, but high velocities are smoothed using `Smoothness at high velocity`
 
@@ -55,7 +55,6 @@ impl SmoothingAlgorithm for VelocityDampened2 {
                 "type": "SliderWithField",
                 "from": 0.001,
                 "to": 0.1,
-                "precision": 3,
                 "value": self.time_constant2,
                 "unit": "s"
             },

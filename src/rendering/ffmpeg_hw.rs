@@ -91,14 +91,15 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<ffi:
 }
 
 pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -> Result<(ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), Error> {
-    for i in 0..100 {
+    for i in 0..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i);
             if config.is_null() {
-                break;
+                ::log::debug!("config null for {}", i);
+                continue;
             }
             let type_ = (*config).device_type;
-            ::log::debug!("codec type {:?} {}", type_, i);
+            ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
             if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
                 if let Ok(dev) = HWDevice::from_type(type_) {
@@ -128,7 +129,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                         break;
                     }
                     let type_ = (*config).device_type;
-                    ::log::debug!("codec type {:?} {}", type_, i);
+                    ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
                     let mut devices = DEVICES.lock();
                     if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
                         ::log::debug!("create {:?}", type_);

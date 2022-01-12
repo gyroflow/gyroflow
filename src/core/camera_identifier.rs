@@ -24,11 +24,11 @@ impl CameraIdentifier {
     pub fn from_telemetry_parser(input: &Input, video_width: usize, video_height: usize, fps: f64) -> Result<Self> {
         let fps = (fps * 1000.0).round() as usize;
         let brand = input.camera_type();
-        let model = input.camera_model().map(|x| x.clone()).unwrap_or_default();
+        let model = input.camera_model().cloned().unwrap_or_default();
 
         let mut id = Self {
             brand: brand.clone(),
-            model: model.clone(),
+            model,
             video_width,
             video_height,
             fps,
@@ -73,7 +73,7 @@ impl CameraIdentifier {
             },
             "Sony" => {
                 if let Some(ref samples) = input.samples {
-                    for info in samples {
+                    if let Some(info) = samples.iter().next() {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::LensZoomNative) as Option<&f32>) {
                                 id.lens_info = format!("{:.2}mm", v);
@@ -86,7 +86,6 @@ impl CameraIdentifier {
                                 }
                             }
                         }
-                        break;
                     }
                 }
             },
@@ -130,7 +129,7 @@ impl CameraIdentifier {
         if self.brand.is_empty() || self.model.is_empty() || self.lens_info.is_empty() { return String::new(); }
 
         let mut id = format!("{}-{}-{}-{}-{}x{}@{}-{}", self.brand, self.model, self.lens_model, self.lens_info, self.video_width, self.video_height, self.fps, self.additional);
-        id = id.replace(" ", "");
+        id = id.replace(' ', "");
         id = id.replace("--", "-");
         id = id.replace("--", "-");
         let x: &[_] =  &['-', ' '];

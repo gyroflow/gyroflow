@@ -391,47 +391,47 @@ This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="91"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="103"/>
         <source>Search...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="104"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="116"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="109"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="121"/>
         <source>Create new</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="132"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="144"/>
         <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="133"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="145"/>
         <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="142"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="154"/>
         <source>Adjust parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="187"/>
         <source>Pixel focal length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="185"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="197"/>
         <source>Focal center</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="195"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="207"/>
         <source>Distortion coefficients</source>
         <translation type="unfinished"></translation>
     </message>
@@ -556,37 +556,47 @@ This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="34"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="74"/>
         <source>No smoothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="35"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="75"/>
         <source>Plain 3D smoothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="36"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="76"/>
+        <source>Velocity dampened smoothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="77"/>
+        <source>Velocity dampened smoothing 2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="78"/>
         <source>Fixed camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="37"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="79"/>
         <source>Lock horizon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="139"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
         <source>No cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="139"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
         <source>Dynamic cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="139"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
         <source>Static crop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -609,77 +619,116 @@ This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="39"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="81"/>
         <source>Smoothness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="40"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="82"/>
         <source>Yaw angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="41"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="83"/>
         <source>Pitch angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="42"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="84"/>
         <source>Roll angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="43"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="85"/>
         <source>Yaw angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="44"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="86"/>
         <source>Pitch angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="45"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="87"/>
         <source>Roll angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="64"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="88"/>
+        <source>Pitch velocity dampening</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="89"/>
+        <source>Yaw velocity dampening</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="90"/>
+        <source>Roll velocity dampening</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="91"/>
+        <source>Max rotation:
+Pitch: %1, Yaw: %2, Roll: %3.
+Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="92"/>
+        <source>Max rotation:
+Pitch: %1, Yaw: %2, Roll: %3.
+Modify velocity factor until you get the desired values (recommended less than 20).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="93"/>
+        <source>Smoothness at high velocity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="94"/>
+        <source>Velocity factor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="113"/>
         <source>FOV is greater than 1.0, you may see black borders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="69"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="118"/>
         <source>FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="150"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="205"/>
         <source>Smoothing window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="212"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
         <source>Rolling shutter correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
         <source>Frame readout time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="176"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="243"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>
@@ -821,22 +870,22 @@ Resulting offset is the one where lines were the shortest, meaning the video was
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="43"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="47"/>
         <source>Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="44"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
         <source>Lens</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="45"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
         <source>Setting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="47"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="51"/>
         <location filename="../../src/ui/menu/VideoInformation.qml" line="21"/>
         <source>Dimensions</source>
         <translation type="unfinished"></translation>
@@ -863,7 +912,7 @@ Resulting offset is the one where lines were the shortest, meaning the video was
     </message>
     <message>
         <location filename="../../src/ui/menu/LensCalibrate.qml" line="37"/>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="46"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
         <source>Additional info</source>
         <translation type="unfinished"></translation>
     </message>
@@ -879,7 +928,7 @@ Resulting offset is the one where lines were the shortest, meaning the video was
     </message>
     <message>
         <location filename="../../src/ui/menu/LensCalibrate.qml" line="40"/>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
         <source>Calibrated by</source>
         <translation type="unfinished"></translation>
     </message>

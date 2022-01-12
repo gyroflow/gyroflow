@@ -191,7 +191,7 @@ impl FrameTransform {
         // Only compute 1 matrix if not using rolling shutter correction
         let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
 
-        let rotations: Vec<Matrix3<f64>> = points_iter.into_iter().map(|&(_, y)| {
+        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(_, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {

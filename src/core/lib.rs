@@ -466,12 +466,9 @@ impl<T: PixelType> StabilizationManager<T> {
                     let lock = self.lens_calibrator.read();
                     if let Some(ref cal) = *lock {
                         let points = cal.all_matches.read();
-                        match points.get(&(frame as i32)) {
-                            Some(entry) => {
-                                let (w, h, s) = (width as u32, height as u32, stride);
-                                calibration::drawing::draw_chessboard_corners(cal.width, w, h, s, pixels, (cal.columns, cal.rows), &entry.points, true);
-                            },
-                            _ => { }
+                        if let Some(entry) = points.get(&(frame as i32)) {
+                            let (w, h, s) = (width as u32, height as u32, stride);
+                            calibration::drawing::draw_chessboard_corners(cal.width, w, h, s, pixels, (cal.columns, cal.rows), &entry.points, true);
                         }
                     }
                 }
