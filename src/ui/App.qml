@@ -52,7 +52,10 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: ["mp4", "mov", "mxf", "mkv", "webm", "insv"];
+        property var extensions: [
+            "mp4", "mov", "mxf", "mkv", "webm", "insv", 
+            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV"
+        ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];

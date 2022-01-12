@@ -149,6 +149,14 @@ The project also supports UI live reload, it's a super quick way of working with
 7. Compile and run: `cargo run --release`
 8. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
+### Building on Linux
+1. Get latest stable Rust language from: https://rustup.rs/
+2. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+3. Install dependencies: `cd gyroflow/ext && ./install-deps-linux.sh` (Debian based apt)
+4. Update PROJECT_DIR in `__env-linux.sh`
+5. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
+6. Compile and run: `cargo run --release`
+
 ## License
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE) for more information.

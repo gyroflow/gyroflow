@@ -4,7 +4,7 @@ if [ "$1" != "CI" ]; then
     brew install p7zip
 
     # Install vcpkg
-    git clone https://github.com/Microsoft/vcpkg.git
+    git clone --depth 1 https://github.com/Microsoft/vcpkg.git
     ./vcpkg/bootstrap-vcpkg.sh
 
     # Install Qt

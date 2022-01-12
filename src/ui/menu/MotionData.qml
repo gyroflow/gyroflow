@@ -17,7 +17,10 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: ["csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "360", "gyroflow", "insv"];
+        property var extensions: [
+            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "gyroflow", "insv", "360", 
+            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "GYROFLOW", "INSV"
+        ];
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];

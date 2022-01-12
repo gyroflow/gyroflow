@@ -54,7 +54,7 @@ fn main() {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
     match target_os.as_str() {
         "android" => {
-            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-android-default/lib/arm64-v8a", std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());
             config.flag("-std=c++17");
         },
         "macos" => {
@@ -62,13 +62,14 @@ fn main() {
         },
         "linux" => {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
+            println!("cargo:rustc-link-search={}/lib/amd64", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-lib=static=z");
             // assumes that OpenCV has been downloaded using vcpgk and libraries are in static form (default triplets of vcpgk for linux provide static libs)
             std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib=static={}", lib.trim()));
         },
         "windows" => {
-            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4-windows-desktop-clang-default/lib/x64", std::env::var("CARGO_MANIFEST_DIR").unwrap());
-            println!("cargo:rustc-link-search={}/ext/ffmpeg-4.4.1-full_build-shared/lib", std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib/x64", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
             res.set("FileVersion", env!("CARGO_PKG_VERSION"));
