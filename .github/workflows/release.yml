@@ -91,6 +91,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: 6.2.2
+          dir: ${{ github.workspace }}/ext/
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       # Install LLVM

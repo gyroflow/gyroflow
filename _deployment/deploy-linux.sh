@@ -28,6 +28,7 @@ if [ "$1" == "build-docker" ]; then
         export PROJECT_DIR=$PROJECT_DIR
         ./_deployment/deploy-linux.sh
     "
+    sudo chown -R $USER:$USER $PROJECT_DIR
     exit;
 fi
 
