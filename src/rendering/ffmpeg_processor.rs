@@ -179,7 +179,7 @@ impl<'a> FfmpegProcessor<'a> {
                     // Direct stream copy
                     let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
                     ost.set_parameters(stream.parameters());
-                    // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format. 
+                    // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format.
                     unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = 0; }
                 } else {
                     // Transcode audio

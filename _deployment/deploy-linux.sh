@@ -7,7 +7,7 @@
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
 
 if [ "$1" == "build-docker" ]; then
-    sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -it debian:10 bash -c "
+    sudo docker run -v $PROJECT_DIR:$PROJECT_DIR debian:10 bash -c "
         apt update
         echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
         apt install -y sudo dialog apt-utils

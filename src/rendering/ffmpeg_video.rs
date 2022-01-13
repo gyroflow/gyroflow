@@ -108,7 +108,9 @@ impl<'a> VideoTranscoder<'a> {
     fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(0).unwrap();
-        let mut encoder = ost.codec().encoder().video()?;
+        let ost_codec = ost.codec();
+        let codec_name = ost_codec.codec().map(|x| x.name().to_string()).unwrap_or_default();
+        let mut encoder = ost_codec.encoder().video()?;
         let pixel_format = format.unwrap_or_else(|| decoder.format());
         encoder.set_width(size.0);
         encoder.set_height(size.1);
@@ -136,10 +138,15 @@ impl<'a> VideoTranscoder<'a> {
                 }
             }
         }
-
+    
         encoder.open_with(codec_options)?;
         encoder = ost.codec().encoder().video()?;
         ost.set_parameters(encoder);
+        
+        if codec_name.contains("hevc") || codec_name.contains("x265") {
+            let hvc1_tag: u32 = (b'h' as u32) | ((b'v' as u32) << 8) | ((b'c' as u32) << 16) | ((b'1' as u32) << 24);
+            unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = hvc1_tag; }
+        }
         
         Ok(ost.codec().encoder().video()?)
     }

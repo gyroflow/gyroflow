@@ -69,7 +69,7 @@ lazy_static::lazy_static! {
 pub fn supported_gpu_backends() -> Vec<String> {
     let mut ret = Vec::new();
     let mut hw_type = ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE;
-    for _ in 0..100 { // Better 100 than infinity
+    for _ in 0..20 { // Better 20 than infinity
         unsafe {
             hw_type = ffi::av_hwdevice_iterate_types(hw_type);
             if hw_type == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
