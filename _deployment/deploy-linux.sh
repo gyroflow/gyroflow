@@ -6,9 +6,9 @@
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-default}"
 
-rm -rf "$PROJECT_DIR/_deployment/_binaries/linux/*"
+rm -rf "$PROJECT_DIR/_deployment/_binaries/linux64"
 
-TARGET="$PROJECT_DIR/_deployment/_binaries/linux"
+TARGET="$PROJECT_DIR/_deployment/_binaries/linux64"
 mkdir -p $TARGET
 mkdir -p $TARGET/resources/camera_presets
 mkdir -p $TARGET/lib
@@ -42,6 +42,7 @@ cp -f "$QT_DIR/lib/libQt6WaylandClient.so.6"           "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libQt6WaylandEglClientHwIntegration.so.6" "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libQt6EglFSDeviceIntegration.so.6"  "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libQt6EglFsKmsSupport.so.6"         "$TARGET/lib/"
+cp -f "$QT_DIR/lib/libQt6WlShellIntegration.so.6"      "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libicudata.so.56"                   "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libicuuc.so.56"                     "$TARGET/lib/"
 cp -f "$QT_DIR/lib/libicui18n.so.56"                   "$TARGET/lib/"
@@ -119,8 +120,7 @@ cp -f $QT_DIR/plugins/wayland-graphics-integration-client/*.so                  
 cp -f $QT_DIR/plugins/wayland-shell-integration/*.so                                             "$TARGET/plugins/wayland-shell-integration/"
 cp -f $QT_DIR/plugins/xcbglintegrations/*.so                                                     "$TARGET/plugins/xcbglintegrations/"
 
-cp -f "$CARGO_TARGET/libmdk.so"                        "$TARGET/libmdk.so.0"
-cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/"
+cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
 #cp -f "$CARGO_TARGET/libffmpeg.so.5"                  "$TARGET/"
 
 cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.58"         "$TARGET/lib/"
@@ -135,6 +135,6 @@ strip "$TARGET/gyroflow"
 
 cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/resources/"
 
-pushd $TARGET/
-tar -czf "$TARGET/../Gyroflow-linux64.tar.gz" *
+pushd $TARGET/..
+tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64
 popd
