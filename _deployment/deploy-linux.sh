@@ -26,6 +26,7 @@ if [ "$1" == "build-docker" ]; then
         cd $PROJECT_DIR
         cargo build --release
         export PROJECT_DIR=$PROJECT_DIR
+        export QT_DIR=$QT_DIR
         ./_deployment/deploy-linux.sh
     "
     sudo chown -R $USER:$USER $PROJECT_DIR
