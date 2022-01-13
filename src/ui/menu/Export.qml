@@ -92,8 +92,11 @@ MenuItem {
         onCurrentIndexChanged: {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
+            if (format.name == "x264" && !window.vidInfo.pixelFormat.includes("8 bit")) {
+                gpu.enabled2 = false;
+            }
             audio.enabled2 = format.audio;
-            if (!gpu.enabled2) gpu.checked = false;
+            gpu.checked = gpu.enabled2;
             if (!audio.enabled2) audio.checked = false;
 
             updateExtension(format.extension);

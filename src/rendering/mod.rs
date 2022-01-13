@@ -76,7 +76,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     }
 }
 
-pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video_path: String, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
+pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, codec: &str, codec_options: &str, output_path: &str, trim_start: f64, trim_end: f64, 
+                               output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
@@ -94,10 +95,10 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
 
     drop(params);
 
-    let mut proc = FfmpegProcessor::from_file(&video_path, true)?;
+    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
-    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&codec, use_gpu));
+    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, use_gpu));
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
     proc.video.hw_device_type = encoder.2;
@@ -126,6 +127,7 @@ pub fn render<T: PixelType, F>(stab: StabilizationManager<T>, progress: F, video
     }
 
     //proc.video.codec_options.set("preset", "medium");
+    proc.video.codec_options.set("allow_sw", "1");
 
     let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
 

@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     strategy:
-      fail-fast: false # TODO change to true
+      fail-fast: false
       matrix:
         targets: [
           {
@@ -46,8 +46,7 @@ jobs:
             #ffmpeg_name: "ffmpeg-4.4-windows-desktop-clang-default"
             ffmpeg_url: "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z",
             ffmpeg_name: "ffmpeg-4.4.1-full_build-shared"
-          },
-          #{ os: windows-latest, target: aarch64-pc-windows-msvc,    cross: false, name: windows-arm64, ext: ".exe", vcpkg: "arm64-windows" }
+          }
       ]
     runs-on: ${{ matrix.targets.os }}
     steps:
@@ -69,11 +68,12 @@ jobs:
       - uses: lukka/get-cmake@latest
       - uses: lukka/run-vcpkg@v10
         with:
-          vcpkgDirectory: '${{ runner.workspace }}/b/vcpkg'
+          vcpkgDirectory: '${{ runner.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: b25cb779e5783531cc66562e224079b376055939
       
       # Download and install OpenCV
       - name: Install OpenCV and curl
+        if: ${{ matrix.targets.os != 'ubuntu-latest' }}
         run: |
           cd ${{ github.workspace }}
           vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg }}"
@@ -86,7 +86,7 @@ jobs:
         id: cache-qt
         uses: actions/cache@v1
         with:
-          path: ../Qt
+          path: ext/Qt
           key: QtCache-${{ runner.os }}-6.2.2
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -133,13 +133,16 @@ jobs:
 
       - name: Install dependencies Linux
         if: ${{ matrix.targets.os == 'ubuntu-latest' }}
+        env:
+          PROJECT_DIR: ${{ github.workspace }}
+          QT_DIR: ${{ env.Qt6_DIR }}
         run: |
-          cd ${{ github.workspace }}/ext
-          chmod +x install-deps-linux.sh
-          ./install-deps-linux.sh CI
+          chmod +x ${{ github.workspace }}/ext/install-deps-linux.sh
+          chmod +x ${{ github.workspace }}/_deployment/deploy-linux.sh
+          ${{ github.workspace }}/_deployment/deploy-linux.sh build-docker
 
       - name: Build Gyroflow
-        if: ${{ matrix.targets.os != 'macos-latest' }}
+        if: ${{ matrix.targets.os == 'windows-latest' }}
         env:
           CARGO_TARGET_DIR: ./target
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
@@ -162,18 +165,6 @@ jobs:
         run: |
           chmod +x ${{ github.workspace }}/_deployment/deploy-macos.sh
           ${{ github.workspace }}/_deployment/deploy-macos.sh deploy-universal
-
-      - name: Deploy Linux
-        if: ${{ matrix.targets.os == 'ubuntu-latest' }}
-        env:
-          PROJECT_DIR: ${{ github.workspace }}
-          CARGO_TARGET: ${{ github.workspace }}/target/${{ matrix.targets.target }}/release
-          QT_DIR: ${{ env.Qt6_DIR }}
-          OPENCV_DIR: ${{ runner.workspace }}/b/vcpkg/installed/
-          FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
-        run: |
-          chmod +x ${{ github.workspace }}/_deployment/deploy-linux.sh
-          ${{ github.workspace }}/_deployment/deploy-linux.sh
 
       - name: Copy dist Windows
         if: ${{ matrix.targets.os == 'windows-latest' }}

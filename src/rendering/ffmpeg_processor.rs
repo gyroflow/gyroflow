@@ -44,9 +44,11 @@ pub enum FFmpegError {
     EncoderConverterEmpty,
     ConverterEmpty,
     FrameEmpty,
+    NoGPUDecodingDevice,
     NoHWTransferFormats,
     FromHWTransferError(i32),
     ToHWTransferError(i32),
+    CannotCreateGPUDecoding,
     NoFramesContext,
     ToHWBufferError(i32),
     UnknownPixelFormat(format::Pixel),
@@ -68,6 +70,8 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::ToHWTransferError(i)    => write!(f, "Error transferring frame to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
             FFmpegError::ToHWBufferError(i)      => write!(f, "Error getting HW transfer buffer to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
             FFmpegError::NoFramesContext             => write!(f, "Empty hw frames context"),
+            FFmpegError::CannotCreateGPUDecoding     => write!(f, "Unable to create HW devices context"),
+            FFmpegError::NoGPUDecodingDevice         => write!(f, "Unable to create any HW decoding context"),
             FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
             FFmpegError::InternalError(e)      => write!(f, "ffmpeg error: {:?}", e),
         }
@@ -86,7 +90,7 @@ impl From<ffmpeg_next::Error> for FFmpegError {
 }
 
 impl<'a> FfmpegProcessor<'a> {
-    pub fn from_file(path: &str, mut gpu_decoding: bool) -> Result<Self, FFmpegError> {
+    pub fn from_file(path: &str, mut gpu_decoding: bool, gpu_decoder_index: usize) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
         let _ = crate::rendering::init();
 
@@ -110,11 +114,9 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut hw_backend = String::new();
         if gpu_decoding {
-            // --------------------------- GPU ---------------------------
-            let hw = ffmpeg_hw::init_device_for_decoding(decoder, &mut stream)?;
-            hw_backend = hw.1;
-            super::append_log(&format!("Selected HW backend {:?} with format {:?}\n", hw.0, hw.2));
-            // --------------------------- GPU ---------------------------
+            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut stream)?;
+            super::append_log(&format!("Selected HW backend {:?} ({}) with format {:?}\n", hw.1, hw.2, hw.3));
+            hw_backend = hw.2;
         }
         gpu_decoding = !hw_backend.is_empty();
 

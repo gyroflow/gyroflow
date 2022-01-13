@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use ffmpeg_next::{ ffi, encoder, Stream, Error };
+use ffmpeg_next::{ ffi, encoder, Stream };
 
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::ffi::CStr;
 use parking_lot::Mutex;
 
@@ -20,7 +21,7 @@ pub struct HWDevice {
     pub max_size: (i32, i32)
 }
 impl HWDevice {
-    pub fn from_type(type_: DeviceType) -> Result<Self, ()> {
+    pub fn from_type(type_: DeviceType) -> Result<Self, super::FFmpegError> {
         unsafe {
             let mut device_ref = std::ptr::null_mut();
             let err = ffi::av_hwdevice_ctx_create(&mut device_ref, type_, std::ptr::null(), std::ptr::null_mut(), 0);
@@ -35,7 +36,7 @@ impl HWDevice {
                 })
             } else {
                 super::append_log(&format!("Failed to create specified HW device: {:?}\n", type_));
-                Err(())
+                Err(super::FFmpegError::CannotCreateGPUDecoding)
             }
         }
     }
@@ -61,7 +62,8 @@ unsafe impl Sync for HWDevice { }
 unsafe impl Send for HWDevice { }
 
 lazy_static::lazy_static! {
-    static ref DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
+    static ref ENC_DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
+    static ref DEC_DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
 }
 
 pub fn supported_gpu_backends() -> Vec<String> {
@@ -93,18 +95,18 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<ffi:
     ret
 }
 
-pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -> Result<(ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), Error> {
-    for i in 0..20 {
+pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, stream: &mut Stream) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
+    for i in index..20 {
         unsafe {
-            let config = ffi::avcodec_get_hw_config(codec, i);
+            let config = ffi::avcodec_get_hw_config(codec, i as i32);
             if config.is_null() {
                 ::log::debug!("config null for {}", i);
                 continue;
             }
             let type_ = (*config).device_type;
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
-            let mut devices = DEVICES.lock();
-            if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
+            let mut devices = DEC_DEVICES.lock();
+            if let Entry::Vacant(e) = devices.entry(type_) {
                 if let Ok(dev) = HWDevice::from_type(type_) {
                     e.insert(dev);
                 }
@@ -112,11 +114,11 @@ pub fn init_device_for_decoding(codec: *mut ffi::AVCodec, stream: &mut Stream) -
             if let Some(dev) = devices.get(&type_) {
                 let mut decoder_ctx = stream.codec().decoder();
                 (*decoder_ctx.as_mut_ptr()).hw_device_ctx = dev.add_ref();
-                return Ok((type_, dev.name(), Some((*config).pix_fmt)));
+                return Ok((i, type_, dev.name(), Some((*config).pix_fmt)));
             }
         }
     }
-    Ok((ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))
+    Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))
 }
 
 pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str, bool, Option<DeviceType>) {
@@ -124,17 +126,17 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
 
     for x in encoders {
         if let Some(mut enc) = encoder::find_by_name(x.0) {
-            for i in 0..100 {
+            for i in 0..20 {
                 unsafe {
                     let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
                     if config.is_null() {
                         println!("config is null {}", x.0);
-                        break;
+                        continue;
                     }
                     let type_ = (*config).device_type;
                     ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
-                    let mut devices = DEVICES.lock();
-                    if let std::collections::hash_map::Entry::Vacant(e) = devices.entry(type_) {
+                    let mut devices = ENC_DEVICES.lock();
+                    if let Entry::Vacant(e) = devices.entry(type_) {
                         ::log::debug!("create {:?}", type_);
                         if let Ok(dev) = HWDevice::from_type(type_) {
                             ::log::debug!("created ok {:?}", type_);
@@ -187,7 +189,7 @@ pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::
 }
 
 pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32)) -> Result<(), ()> {
-    let devices = DEVICES.lock();
+    let devices = ENC_DEVICES.lock();
     if let Some(dev) = devices.get(&type_) {
         unsafe {                
             let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
@@ -240,6 +242,8 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                 }
             }
         }
+    } else {
+        log::warn!("ENC_DEVICES didn't have {:?}", type_);
     }
     Ok(())
 }

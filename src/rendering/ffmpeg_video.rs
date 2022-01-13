@@ -113,6 +113,7 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_width(size.0);
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(decoder.aspect_ratio());
+        log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, decoder.color_range());
         encoder.set_format(pixel_format);
         encoder.set_frame_rate(decoder.frame_rate());
         encoder.set_time_base(decoder.frame_rate().unwrap().invert());
@@ -120,9 +121,7 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_color_range(decoder.color_range());
         encoder.set_colorspace(decoder.color_space());
         unsafe {
-            if encoder.codec().map(|x| x.name().to_string()).unwrap_or_default() != "hevc_videotoolbox" {
-                (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
-            }
+            (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
             (*encoder.as_mut_ptr()).color_primaries = (*decoder.as_ptr()).color_primaries;
         }
 
@@ -160,6 +159,7 @@ impl<'a> VideoTranscoder<'a> {
 
                 if self.gpu_decoding && self.encoder_pixel_format.is_none() {
                     unsafe {
+                        log::debug!("Get transfer formats from GPU, frame.is_null: {}, hw_ctx.is_null: {}, format: {:?}", frame.as_ptr().is_null(), frame.as_ptr().is_null() || (*frame.as_ptr()).hw_frames_ctx.is_null(), frame.format());
                         let formats = super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr());
                         log::debug!("Hardware transfer formats from GPU: {:?}, frame.is_empty: {}", formats, frame.is_empty());
                         let dl_format = *formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;

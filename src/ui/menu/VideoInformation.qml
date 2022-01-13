@@ -16,6 +16,7 @@ MenuItem {
     property real org_fps: 0;
     property string filename: "";
     property bool isCalibrator: false;
+    property string pixelFormat: "";
 
     Component.onCompleted: {
         const fields = [
@@ -54,11 +55,13 @@ MenuItem {
             calibrator_window.lensCalib.videoHeight  = h || 0;
         }
 
+        root.pixelFormat = getPixelFormat(md) || "---";
+
         list.model["Dimensions"]   = w && h? w + "x" + h : "---";
         list.model["Duration"]     = getDuration(md) || "---";
         list.model["Frame rate"]   = framerate? framerate.toFixed(3) + " fps" : "---";
         list.model["Codec"]        = getCodec(md) || "---";
-        list.model["Pixel format"] = getPixelFormat(md) || "---";
+        list.model["Pixel format"] = root.pixelFormat;
         list.model["Rotation"]     = (md["stream.video[0].rotation"] || 0) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
         list.modelChanged();

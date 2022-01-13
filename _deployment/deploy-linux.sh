@@ -3,8 +3,33 @@
 : "${PROJECT_DIR:=/home/eddy/gyroflow}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.2/gcc_64}"
-: "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-default}"
+: "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
+
+if [ "$1" == "build-docker" ]; then
+    sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -it debian:10 bash -c "
+        apt update
+        echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+        apt install -y sudo dialog apt-utils
+        export RUNLEVEL=1
+        export VCPKG_ROOT=$VCPKG_ROOT
+        cd $PROJECT_DIR/ext
+        ./install-deps-linux.sh docker
+        curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+        source \$HOME/.cargo/env
+        export FFMPEG_DIR=$FFMPEG_DIR
+        export OPENCV_LINK_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/lib
+        export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
+
+        export PATH=\"$QT_DIR/bin:\$PATH\"
+        export OPENCV_LINK_LIBS=\"opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann\"
+        cd $PROJECT_DIR
+        cargo build --release
+        export PROJECT_DIR=$PROJECT_DIR
+        ./_deployment/deploy-linux.sh
+    "
+    exit;
+fi
 
 rm -rf "$PROJECT_DIR/_deployment/_binaries/linux64"
 

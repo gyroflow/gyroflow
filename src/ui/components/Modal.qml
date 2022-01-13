@@ -80,16 +80,25 @@ Rectangle {
             }
 
             Item { height: 10 * dpiScale; width: 1; }
-            BasicText {
-                id: t;
-                x: 15 * dpiScale;
-                width: parent.width - 2*x;
-                horizontalAlignment: Text.AlignHCenter;
-                wrapMode: Text.WordWrap;
-                font.pixelSize: 14 * dpiScale;
+            Flickable {
+                width: parent.width;
+                height: Math.min(contentHeight, root.height - icon.height - btnsRow.height - 150 * dpiScale);
+                contentWidth: width;
+                contentHeight: t.height;
+                clip: true;
+                QQC.ScrollBar.vertical: QQC.ScrollBar { }
+                BasicText {
+                    id: t;
+                    x: 15 * dpiScale;
+                    width: parent.width - 2*x;
+                    horizontalAlignment: Text.AlignHCenter;
+                    wrapMode: Text.WordWrap;
+                    font.pixelSize: 14 * dpiScale;
+                }
             }
             Item { height: 25 * dpiScale; width: 1; }
             Row {
+                id: btnsRow;
                 anchors.horizontalCenter: parent.horizontalCenter;
                 spacing: 10 * dpiScale;
                 Repeater {

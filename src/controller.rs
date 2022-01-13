@@ -242,7 +242,7 @@ impl Controller {
             let video_path = self.video_path.clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
-                match FfmpegProcessor::from_file(&video_path, true) {
+                match FfmpegProcessor::from_file(&video_path, true, 0) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
@@ -528,7 +528,10 @@ impl Controller {
     fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
         rendering::clear_log();
 
-        let progress = util::qt_queued_callback(self, |this, params: (f64, usize, usize, bool)| {
+        let rendered_frames = Arc::new(AtomicUsize::new(0));
+        let rendered_frames2 = rendered_frames.clone();
+        let progress = util::qt_queued_callback(self, move |this, params: (f64, usize, usize, bool)| {
+            rendered_frames2.store(params.1, SeqCst);
             this.render_progress(params.0, params.1, params.2, params.3);
         });
 
@@ -549,10 +552,32 @@ impl Controller {
         let cancel_flag = self.cancel_flag.clone();
 
         let stab = self.stabilizer.clone();
+        let rendered_frames2 = rendered_frames.clone();
         core::run_threaded(move || {
-            let stab = stab.get_render_stabilizator((output_width, output_height));
-            if let Err(e) = rendering::render(stab, progress, video_path, codec, codec_options, output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, cancel_flag) {
-                err(("An error occured: %1".to_string(), e.to_string()))
+            let stab = Arc::new(stab.get_render_stabilizator((output_width, output_height)));
+
+            let mut i = 0;
+            loop {
+                let result = rendering::render(stab.clone(), progress.clone(), &video_path, &codec, &codec_options, &output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, i, cancel_flag.clone());
+                if let Err(e) = result {
+                    if rendered_frames2.load(SeqCst) == 0 {
+                        if i >= 0 && i < 4 {
+                            // Try 4 times with different GPU decoders
+                            i += 1;
+                            continue;
+                        }
+                        if i >= 0 && i < 5 {
+                            // Try without GPU decoder
+                            i = -1;
+                            continue;
+                        }
+                    }
+                    err(("An error occured: %1".to_string(), e.to_string()));
+                    break;
+                } else {
+                    // Render ok
+                    break;
+                }
             }
         });
     }
@@ -697,7 +722,7 @@ impl Controller {
         
         let video_path = self.video_path.clone();
         core::run_threaded(move || {
-            match FfmpegProcessor::from_file(&video_path, true) {
+            match FfmpegProcessor::from_file(&video_path, true, 0) {
                 Ok(mut proc) => {
                     proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                         let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
