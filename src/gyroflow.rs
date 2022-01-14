@@ -22,6 +22,7 @@ use ui::ui_tools::UITools;
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
+// TODO: chart looks wrong for VFR videos, when changed fps first and loaded gyro second
 // TODO: space should always play
 // TODO: dragging numbers on the numberfield left and right
 // TODO: more smoothing algorithms

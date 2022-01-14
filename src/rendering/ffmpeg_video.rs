@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, software, Dictionary, Packet, Rational, Error, rescale::Rescale };
+use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, software, util, Dictionary, Packet, Rational, Error, rescale::Rescale };
 
 use super::ffmpeg_processor::Status;
 use super::ffmpeg_processor::FFmpegError;
@@ -109,21 +109,28 @@ impl<'a> VideoTranscoder<'a> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(0).unwrap();
         let ost_codec = ost.codec();
-        let codec_name = ost_codec.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let mut encoder = ost_codec.encoder().video()?;
-        let pixel_format = format.unwrap_or_else(|| decoder.format());
+        let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
+        let mut pixel_format = format.unwrap_or_else(|| decoder.format());
+        let mut color_range = decoder.color_range();
+        if codec_name == "hevc_videotoolbox" && pixel_format == format::Pixel::YUVJ420P {
+            pixel_format = format::Pixel::YUV420P;
+            color_range = util::color::Range::JPEG;
+        }
         encoder.set_width(size.0);
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(decoder.aspect_ratio());
-        log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, decoder.color_range());
+        log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
         encoder.set_format(pixel_format);
         encoder.set_frame_rate(decoder.frame_rate());
         encoder.set_time_base(decoder.frame_rate().unwrap().invert());
         encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
-        encoder.set_color_range(decoder.color_range());
+        encoder.set_color_range(color_range);
         encoder.set_colorspace(decoder.color_space());
         unsafe {
-            (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
+            if codec_name != "hevc_videotoolbox" {
+                (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
+            }
             (*encoder.as_mut_ptr()).color_primaries = (*decoder.as_ptr()).color_primaries;
         }
 
