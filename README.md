@@ -102,6 +102,12 @@ Currently *Gyroflow* is available in:
 
 Help us translate *Gyroflow* to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow
 
+#### I want to contribute but I don't know Rust or QML
+* The Rust book is a great way to get started with Rust: https://doc.rust-lang.org/book/
+* Once you get the basics, this is a great resource too: https://cheats.rs/
+* For the UI stuff, there's a nice QML book by The Qt Company: https://www.qt.io/product/qt6/qml-book
+
+
 ## Development
 ### Used languages and technologies
 *Gyroflow* is written in [Rust](https://www.rust-lang.org/), with UI written in [QML](https://doc.qt.io/qt-6/qmlfirststeps.html). It uses *Qt*, *ffmpeg*, *OpenCV* and *mdk-sdk* external dependencies for the main program, but the core library is written in pure Rust without any external dependencies.
