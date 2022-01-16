@@ -1,8 +1,8 @@
 $Env:Path += ";D:\Programy\Qt\6.2.2\msvc2019_64\bin"
 
 
-$Env:Path += ";$PSScriptRoot\ext\ffmpeg-4.4-windows-desktop-clang-default\bin\x64"
-$Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-4.4-windows-desktop-clang-default"
+$Env:Path += ";$PSScriptRoot\ext\ffmpeg-4.4-windows-desktop-clang-gpl-lite\bin"
+$Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-4.4-windows-desktop-clang-gpl-lite"
 
 $Env:OPENCV_LINK_LIBS = "opencv_core454,opencv_calib3d454,opencv_features2d454,opencv_imgproc454,opencv_video454,opencv_flann454,opencv_imgcodecs454"
 $Env:OPENCV_LINK_PATHS = "$PSScriptRoot\ext\opencv-4.5.4\lib"

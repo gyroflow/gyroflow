@@ -113,7 +113,8 @@ impl<'a> VideoTranscoder<'a> {
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let mut pixel_format = format.unwrap_or_else(|| decoder.format());
         let mut color_range = decoder.color_range();
-        if codec_name == "hevc_videotoolbox" && pixel_format == format::Pixel::YUVJ420P {
+        if /*codec_name == "hevc_videotoolbox" && */pixel_format == format::Pixel::YUVJ420P {
+            log::debug!("Overriding YUVJ420P ({:?}) with YUV420P and JPEG range", color_range);
             pixel_format = format::Pixel::YUV420P;
             color_range = util::color::Range::JPEG;
         }

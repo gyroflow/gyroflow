@@ -2,7 +2,7 @@
 
 export PROJECT_DIR="/home/eddy/gyroflow"
 
-export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-default
+export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-gpl-lite
 export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/x64-linux-release/lib
 export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/x64-linux-release/include/
 
