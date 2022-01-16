@@ -1036,7 +1036,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.0.0"
+version = "1.0.0-rc0"
 dependencies = [
  "bytemuck",
  "cpp",
@@ -1062,7 +1062,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.0.0"
+version = "1.0.0-rc0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -1074,7 +1074,7 @@ dependencies = [
  "byteorder",
  "chrono",
  "crc32fast",
- "crossbeam-channel 0.5.2",
+ "crossbeam-channel 0.4.4",
  "cv-core",
  "cv-pinhole",
  "dyn-clone",
@@ -1088,7 +1088,7 @@ dependencies = [
  "log",
  "mimalloc",
  "nalgebra",
- "num 0.4.0",
+ "num",
  "ocl",
  "opencv",
  "parking_lot",
@@ -1624,20 +1624,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43db66d1170d347f9a065114077f7dccb00c1b9478c89384490a3425279a4606"
-dependencies = [
- "num-bigint 0.4.3",
- "num-complex 0.4.0",
- "num-integer",
- "num-iter",
- "num-rational 0.4.0",
- "num-traits 0.2.14",
-]
-
-[[package]]
 name = "num-bigint"
 version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1827,7 +1813,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4072920739958adeec5abedec51af70febc58f7fff0601aaa0827c1f3c8fefd"
 dependencies = [
- "num 0.1.42",
+ "num",
 ]
 
 [[package]]

@@ -22,6 +22,7 @@ use ui::ui_tools::UITools;
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
+// TODO: rendering cancel button
 // TODO: chart looks wrong for VFR videos, when changed fps first and loaded gyro second
 // TODO: space should always play
 // TODO: dragging numbers on the numberfield left and right
@@ -126,7 +127,7 @@ fn entry() {
     let mut engine = QmlEngine::new();
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
-    engine.set_property("version".into(), QString::from(env!("CARGO_PKG_VERSION")).into());
+    engine.set_property("version".into(), QString::from(util::get_version()).into());
     engine.set_property("isOpenGl".into(), QVariant::from(false));
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
