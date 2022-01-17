@@ -13,11 +13,14 @@ Item {
     property alias text: t.text;
     property alias t: t;
     property bool cancelable: true;
+    property bool canceled: false;
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
         if (!active) {
             progress = -1;
             t.text = "";
+        } else {
+            canceled = false;
         }
     }
 
@@ -30,8 +33,8 @@ Item {
     }
 
     anchors.fill: parent;
-    QQC.ProgressBar { id: pb; anchors.centerIn: parent; value: parent.progress; visible: parent.progress != -1; }
-    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.progress == -1; }
+    QQC.ProgressBar { id: pb; anchors.centerIn: parent; value: parent.progress; visible: parent.progress != -1 && !root.canceled; }
+    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.progress == -1 || root.canceled; }
     
     BasicText {
         id: t;
@@ -51,6 +54,6 @@ Item {
         text: qsTr("Cancel");
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.top: t.bottom;
-        onClicked: root.cancel();
+        onClicked: { root.canceled = true; root.cancel(); }
     }
 }

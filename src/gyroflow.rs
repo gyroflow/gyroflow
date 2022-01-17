@@ -22,13 +22,9 @@ use ui::ui_tools::UITools;
 // Things to do before first public preview:
 // - Fix ffmpeg GPU acceleration detection and test with different graphic cards
 
-// TODO: rendering cancel button
-// TODO: chart looks wrong for VFR videos, when changed fps first and loaded gyro second
-// TODO: space should always play
-// TODO: dragging numbers on the numberfield left and right
-// TODO: more smoothing algorithms
-// TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // TODO: wgpu convert to using textures
+// TODO: dragging numbers on the numberfield left and right
+// TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
 // TODO: render queue
@@ -39,7 +35,6 @@ use ui::ui_tools::UITools;
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
 // TODO: show error when loading invalid lens profile
-// TODO: Setup CI for packaging for Linux
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)

@@ -31,6 +31,15 @@ QQC.ComboBox {
         border.width: style === "light"? (1 * dpiScale) : 0;
         border.color: "#cccccc";
     }
+    Keys.onPressed: (e) => {
+        if (e.key == Qt.Key_Space) {
+            root.focus = false;
+            window.videoArea.timeline.focus = true;
+            const vid = window.videoArea.vid;
+            if (vid.playing) vid.pause(); else vid.play();
+            e.accepted = true;
+        }
+    }
 
     scale: root.pressed? 0.98 : 1.0;
     Ease on scale {  }

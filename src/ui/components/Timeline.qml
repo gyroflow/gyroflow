@@ -189,6 +189,7 @@ Item {
                     timelineContextMenu.pressedX = mouse.x;
                     timelineContextMenu.popup();
                 }
+                root.focus = true;
             }
             onDoubleClicked: (mouse) => {
                 root.visibleAreaLeft  = 0.0;

@@ -92,7 +92,7 @@ MenuItem {
         onCurrentIndexChanged: {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
-            if (format.name == "x264" && !window.vidInfo.pixelFormat.includes("8 bit")) {
+            if (format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit")) {
                 gpu.enabled2 = false;
             }
             audio.enabled2 = format.audio;

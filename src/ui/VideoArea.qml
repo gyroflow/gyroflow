@@ -155,6 +155,10 @@ Item {
                 parent: isCalibrator? calibrator_window.contentItem : window;
                 color: "#01000000";
             }
+            MouseArea {
+                anchors.fill: parent;
+                onClicked: timeline.focus = true;
+            }
         }
         Rectangle {
             id: dropRect;

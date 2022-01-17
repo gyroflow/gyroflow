@@ -160,7 +160,7 @@ impl std::io::Write for AndroidLog {
 }
 
 pub fn get_version() -> String {
-    let mut ver = env!("CARGO_PKG_VERSION");
+    let ver = env!("CARGO_PKG_VERSION");
     if let Some(gh_run) = option_env!("GITHUB_RUN_NUMBER") {
         format!("{}-c{}", ver, gh_run)
     } else if let Ok(time) = std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH) {

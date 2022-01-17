@@ -169,7 +169,7 @@ Rectangle {
                         }
 
                         outputFile.text = output;
-                        clicked(null);
+                        clicked();
                     }
                     onClicked: {
                         if (controller.file_exists(outputFile.text)) {

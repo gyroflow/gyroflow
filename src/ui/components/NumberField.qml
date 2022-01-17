@@ -30,6 +30,15 @@ TextField {
         else if (e.modifiers & Qt.ShiftModifier) value += 1;
         else value += 0.01;
     }
+    Keys.onPressed: (e) => {
+        if (e.key == Qt.Key_Space) {
+            root.focus = false;
+            window.videoArea.timeline.focus = true;
+            const vid = window.videoArea.vid;
+            if (vid.playing) vid.pause(); else vid.play();
+            e.accepted = true;
+        }
+    }
 
     onValueChanged: {
         if (preventChange || allowText) return;

@@ -93,6 +93,9 @@ impl SmoothingAlgorithm for VelocityDampened2 {
     fn smooth(&mut self, quats: &TimeQuat, duration: f64, params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
+        let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
+        let end_ts = (params.trim_end * params.get_scaled_duration_ms() * 1000.0) as i64;
+
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
         let mut alpha = 1.0;
@@ -130,12 +133,14 @@ impl SmoothingAlgorithm for VelocityDampened2 {
             *vec = prev_velocity * (1.0 - high_alpha) + *vec * high_alpha;
             prev_velocity = *vec;
         }
-        for (_timestamp, vec) in velocity.iter_mut().rev().skip(1) {
+        for (timestamp, vec) in velocity.iter_mut().rev().skip(1) {
             *vec = prev_velocity * (1.0 - high_alpha) + *vec * high_alpha;
             prev_velocity = *vec;
 
-            let max = vec[0].max(vec[1]).max(vec[2]);
-            if max > max_velocity { max_velocity = max; }
+            if timestamp >= &start_ts && timestamp <= &end_ts {
+                let max = vec[0].max(vec[1]).max(vec[2]);
+                if max > max_velocity { max_velocity = max; }
+            }
         }
 
         if self.velocity_factor > 0.0 {
@@ -169,8 +174,6 @@ impl SmoothingAlgorithm for VelocityDampened2 {
         let mut max_pitch = 0.0;
         let mut max_yaw = 0.0;
         let mut max_roll = 0.0;
-        let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
-        let end_ts = (params.trim_end * params.get_scaled_duration_ms() * 1000.0) as i64;
 
         for (timestamp, quat) in vel_corr_smooth.iter() {
             if timestamp >= &start_ts && timestamp <= &end_ts {

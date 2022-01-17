@@ -41,6 +41,11 @@ MenuItem {
             info.updateEntry("Detected format", camera || "---");
             orientation.text = imu_orientation;
             integrator.hasQuaternions = contains_quats;
+
+            const chart = window.videoArea.timeline.getChart();
+            chart.setDurationMs(controller.get_scaled_duration_ms());
+            window.videoArea.durationMs = controller.get_scaled_duration_ms();
+            Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
         }
     }
 
