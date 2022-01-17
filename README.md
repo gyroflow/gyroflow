@@ -120,7 +120,7 @@ For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU imple
 ### Code structure
 1. Entire GUI is in the `src/ui` diretory
 2. `src/controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
-3. `src/core` directory contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*, and *OpenCV* is optional
+3. `src/core` contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*, and *OpenCV* is optional
 4. `src/rendering` contains all FFmpeg related code for rendering final video and processing for synchronization
 5. `src/core/gpu` contains GPU implementations of the undistortion
 6. `src/qt_gpu` contains zero-copy GPU undistortion path, using Qt RHI and GLSL compute shader, but this method is experimental and buggy for now

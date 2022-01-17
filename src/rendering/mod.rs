@@ -297,16 +297,12 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
         if let Ok(mut line) = String::from_utf8(line) {
             match level {
                 ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
-                    log::error!("{}", line);
                     line = format!("<font color=\"#d82626\">{}</font>", line);
                 },
                 ffi::AV_LOG_WARNING => {
-                    log::warn!("{}", line);
                     line = format!("<font color=\"#f6a10c\">{}</font>", line);
                 },
-                _ => {
-                    log::debug!("{}", line);
-                }
+                _ => { }
             }
             FFMPEG_LOG.write().push_str(&line);
         }

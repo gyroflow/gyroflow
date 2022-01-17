@@ -33,15 +33,6 @@ pub fn serde_json_to_qt(v: &serde_json::Value) -> QJsonArray {
     }
     ret
 }
-pub fn qjsonobject_to_hashmap(o: &QJsonObject) -> HashMap<String, String> {
-    let mut ret = HashMap::new();
-    let keys = o.keys();
-    for k in keys {
-        let val: QString = o.value(&k).into();
-        ret.insert(k, val.to_string());
-    }
-    ret
-}
 
 pub fn is_opengl() -> bool {
     cpp!(unsafe [] -> bool as "bool" {

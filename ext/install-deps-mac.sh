@@ -20,7 +20,7 @@ fi
 # Download and extract ffmpeg 
 curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-4.4-macOS-lite.tar.xz/download -o ffmpeg.tar.xz
 7z x ffmpeg.tar.xz
-7z x ffmpeg.tar
+tar -xf ffmpeg.tar
 mkdir -p ffmpeg-x86_64/lib
 mkdir -p ffmpeg-arm64/lib
 cd ffmpeg-4.4-macOS-lite
