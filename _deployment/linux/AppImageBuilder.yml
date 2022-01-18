@@ -36,6 +36,10 @@ AppDir:
     - libvdpau-dev:amd64
     - libvdpau1:amd64
     - mesa-va-drivers:amd64
+    - mesa-utils:amd64
+    - libgl1-mesa-glx:amd64
+    - libgles2-mesa-dev:amd64
+    - libglfw3:amd64
     - ocl-icd-opencl-dev:amd64
     - libpulse-dev:amd64
     - libasound2:amd64
@@ -45,8 +49,6 @@ AppDir:
     - libc++-dev:amd64
     - libcanberra-gtk0:amd64
     - libcanberra-gtk3-module:amd64
-    - libgles2-mesa-dev:amd64
-    - libglfw3:amd64
     - locales
     - tzdata
     - xkb-data
