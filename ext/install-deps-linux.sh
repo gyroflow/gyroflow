@@ -26,6 +26,8 @@ if [ "$1" != "CI" ] || [ "$1" == "docker" ]; then
 fi
 if [ "$1" == "docker" ]; then
     # Install AppImage builder
+    sudo apt-get install -y debian-keyring debian-archive-keyring
+    sudo apt-key update
     sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
     sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
 
