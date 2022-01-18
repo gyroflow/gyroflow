@@ -18,6 +18,7 @@ if [ "$1" == "build-docker" ]; then
         curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
         source \$HOME/.cargo/env
         export FFMPEG_DIR=$FFMPEG_DIR
+        export GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER
         export OPENCV_LINK_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/lib
         export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
 

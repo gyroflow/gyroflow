@@ -17,7 +17,6 @@ AppDir:
     - sourceline: deb http://security.debian.org/debian-security buster/updates main
     - sourceline: deb http://deb.debian.org/debian/ buster-updates main
     include:
-    - adwaita-icon-theme
     - fonts-dejavu-core
     - fonts-liberation2
     - gvfs:amd64
@@ -32,7 +31,18 @@ AppDir:
     - libpulse0:amd64
     - libsystemd0:amd64
     - libtinfo6:amd64
+    - libva-dev:amd64
+    - libvdpau-dev:amd64
+    - libvdpau1:amd64
+    - mesa-va-drivers:amd64
+    - ocl-icd-opencl-dev:amd64
+    - libpulse:amd64
+    - libasound:amd64
+    - libxkbcommon:amd64
+    - libc++-dev:amd64
     - libcanberra-gtk-module:amd64
+    - libgles2-mesa-dev:amd64
+    - libglfw3:amd64
     - locales
     - tzdata
     - xkb-data
