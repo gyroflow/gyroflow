@@ -17,6 +17,7 @@ AppDir:
     - sourceline: deb http://security.debian.org/debian-security buster/updates main
     - sourceline: deb http://deb.debian.org/debian/ buster-updates main
     include:
+    - adwaita-icon-theme
     - fonts-dejavu-core
     - fonts-liberation2
     - gvfs:amd64

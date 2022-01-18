@@ -34,7 +34,7 @@ jobs:
             ffmpeg_name: "ffmpeg-4.4-macOS-gpl-lite"
           },
           {
-            os: windows-latest,
+            os: windows-2022,
             target: x86_64-pc-windows-msvc,
             target2: x86_64-pc-windows-msvc,
             cross: false,
@@ -94,14 +94,14 @@ jobs:
 
       # Install LLVM
       - name: Cache LLVM and Clang
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         id: cache-llvm
         uses: actions/cache@v2
         with:
           path: ${{ runner.temp }}/llvm
           key: llvm-13.0
       - name: Install LLVM and Clang
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         uses: KyleMayes/install-llvm-action@v1.5.0
         with:
           version: "13.0"
@@ -109,11 +109,11 @@ jobs:
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
 
       # Download ffmpeg
       - name: Download ffmpeg
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         run: |
           cd ${{ github.workspace }}/ext/
           curl -L ${{ matrix.targets.ffmpeg_url }} -o ffmpeg.tar.xz
@@ -138,7 +138,7 @@ jobs:
           ${{ github.workspace }}/_deployment/deploy-linux.sh build-docker
 
       - name: Build Gyroflow
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         env:
           CARGO_TARGET_DIR: ./target
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
@@ -163,7 +163,7 @@ jobs:
           ${{ github.workspace }}/_deployment/deploy-macos.sh deploy-universal
 
       - name: Copy dist Windows
-        if: ${{ matrix.targets.os == 'windows-latest' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         env:
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
         run: |

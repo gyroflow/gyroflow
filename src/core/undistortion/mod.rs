@@ -88,12 +88,13 @@ impl<T: PixelType> Undistortion<T> {
             let mut _opencl_initialized = false;
             #[cfg(feature = "use-opencl")]
             {
-                let cl = opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background);
+                let cl = std::panic::catch_unwind(|| {
+                    opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background)
+                });
                 match cl {
-                    Ok(cl) => { self.cl = Some(cl); _opencl_initialized = true; },
-                    Err(err) => {
-                        log::error!("OpenCL error: {:?}", err);
-                    }
+                    Ok(Ok(cl)) => { self.cl = Some(cl); _opencl_initialized = true; },
+                    Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
+                    Err(e) => { log::error!("OpenCL error: {:?}", e); }
                 }
             }
 
