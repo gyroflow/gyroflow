@@ -33,6 +33,8 @@ if [ "$1" == "docker" ]; then
     cd /opt/; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract
     sudo mv /opt/squashfs-root /opt/appimagetool.AppDir
     sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+
+    sudo pip3 install appimage-builder
 fi
 
 # Download and extract ffmpeg

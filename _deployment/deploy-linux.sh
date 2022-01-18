@@ -24,6 +24,8 @@ if [ "$1" == "build-docker" ]; then
         export PATH=\"$QT_DIR/bin:\$PATH\"
         export OPENCV_LINK_LIBS=\"opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann\"
         cd $PROJECT_DIR
+        echo \$FFMPEG_DIR
+        ls -l \$FFMPEG_DIR
         cargo build --release
         export PROJECT_DIR=$PROJECT_DIR
         export QT_DIR=$QT_DIR
