@@ -30,7 +30,7 @@ if [ "$1" == "docker" ]; then
     sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
 
     # workaround AppImage issues with Docker
-    cd /opt/; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract
+    pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
     sudo mv /opt/squashfs-root /opt/appimagetool.AppDir
     sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
