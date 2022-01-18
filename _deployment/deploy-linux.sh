@@ -7,7 +7,7 @@
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
 
 if [ "$1" == "build-docker" ]; then
-    sudo docker run -v $PROJECT_DIR:$PROJECT_DIR debian:10 bash -c "
+    sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -v $HOME/.cargo:/root/.cargo debian:10 bash -c "
         apt update
         echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
         apt install -y sudo dialog apt-utils
@@ -32,7 +32,9 @@ if [ "$1" == "build-docker" ]; then
         export QT_DIR=$QT_DIR
         ./_deployment/deploy-linux.sh
     "
+    stat $HOME/.cargo
     stat $PROJECT_DIR/Cargo.toml
+    sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $HOME/.cargo
     sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $PROJECT_DIR
     exit;
 fi
