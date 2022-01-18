@@ -237,8 +237,8 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(())
     }
 
-    pub fn load_lens_profile(&self, path: &str) {
-        self.lens.write().load_from_file(path); // TODO Result
+    pub fn load_lens_profile(&self, path: &str) -> Result<(), serde_json::Error> {
+        self.lens.write().load_from_file(path)
     }
 
     fn init_size(&self) {
@@ -500,9 +500,18 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_offset         (&self, timestamp_us: i64, offset_ms: f64) { self.gyro.write().set_offset(timestamp_us, offset_ms); }
     pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64          { self.gyro.read() .offset_at_timestamp(timestamp_us as f64 / 1000.0) }
 
-    pub fn set_imu_lpf(&self, lpf: f64) { self.gyro.write().set_lowpass_filter(lpf); }
-    pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) { self.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg); }
-    pub fn set_imu_orientation(&self, orientation: String) { self.gyro.write().set_imu_orientation(orientation); }
+    pub fn set_imu_lpf(&self, lpf: f64) {
+        self.gyro.write().set_lowpass_filter(lpf);
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+    }
+    pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
+        self.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+    }
+    pub fn set_imu_orientation(&self, orientation: String) {
+        self.gyro.write().set_imu_orientation(orientation);
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+    }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
         self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms);

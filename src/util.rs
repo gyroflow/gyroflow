@@ -3,7 +3,6 @@
 
 use cpp::*;
 use qmetaobject::*;
-use std::collections::HashMap;
 
 pub fn serde_json_to_qt(v: &serde_json::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();

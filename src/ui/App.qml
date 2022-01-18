@@ -262,6 +262,8 @@ Rectangle {
     Component.onCompleted: {
         controller.check_updates();
 
+        QT_TRANSLATE_NOOP("App", "An error occured: %1");
+
         if (!isLandscape) {
             isLandscapeChanged();
         }

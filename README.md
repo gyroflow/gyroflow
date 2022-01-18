@@ -104,7 +104,7 @@ Help us translate *Gyroflow* to your language! We use *crowdin* to manage transl
 
 #### I want to contribute but I don't know Rust or QML
 * The Rust book is a great way to get started with Rust: https://doc.rust-lang.org/book/
-* Once you get the basics, this is a great resource too: https://cheats.rs/
+* Additional useful resources for Rust: https://quickref.me/rust and https://cheats.rs/
 * For the UI stuff, there's a nice QML book by The Qt Company: https://www.qt.io/product/qt6/qml-book
 
 

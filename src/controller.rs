@@ -380,7 +380,9 @@ impl Controller {
     }
     fn load_lens_profile(&mut self, path: String) {
         let json = {
-            self.stabilizer.load_lens_profile(&path); // TODO errors
+            if let Err(e) = self.stabilizer.load_lens_profile(&path) {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            }
             self.stabilizer.lens.write().get_json().unwrap_or_default()
         };
         self.lens_loaded = true;

@@ -56,9 +56,13 @@ impl LensProfile {
     }
 
     pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
-        if let Ok(data) = std::fs::read_to_string(path) {
-            *self = serde_json::from_str(&data)?;
+        let data = std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?;
+        *self = serde_json::from_str(&data)?;
+
+        if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
+            return Err(serde_json::Error::io(std::io::ErrorKind::InvalidData.into()));
         }
+        
         Ok(())
     }
 
