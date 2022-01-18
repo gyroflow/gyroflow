@@ -99,10 +99,15 @@ impl<T: PixelType> Undistortion<T> {
 
             // TODO: Support other pixel types
             if !_opencl_initialized && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-                let wgpu = wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background);
+                let wgpu = std::panic::catch_unwind(|| {
+                    wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background)
+                });
                 match wgpu {
-                    Some(wgpu) => self.wgpu = Some(wgpu),
-                    None => {
+                    Ok(Some(wgpu)) => self.wgpu = Some(wgpu),
+                    Err(e) => {
+                        log::error!("Failed to initialize wgpu {:?}", e);
+                    },
+                    _ => {
                         log::error!("Failed to initialize wgpu");
                     }
                 }

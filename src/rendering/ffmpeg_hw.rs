@@ -104,6 +104,9 @@ pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, stream: 
                 continue;
             }
             let type_ = (*config).device_type;
+            if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
+                return Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None));
+            }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEC_DEVICES.lock();
             if let Entry::Vacant(e) = devices.entry(type_) {

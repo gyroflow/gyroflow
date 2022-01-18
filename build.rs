@@ -81,6 +81,10 @@ fn main() {
         tos => panic!("unknown target os {:?}!", tos)
     }
 
+    if let Ok(time) = std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH) {
+        println!("cargo:rustc-env=BUILD_TIME={}", time.as_secs() - 1642516578);
+    }
+
     config
         .include(&qt_include_path)
         .flag_if_supported("-std=c++17")

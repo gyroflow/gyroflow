@@ -1,0 +1,135 @@
+version: 1
+AppDir:
+  path: !ENV ${APP_DIR}
+  app_info:
+    id: xyz.gyroflow
+    name: Gyroflow
+    icon: gyroflow
+    version: !ENV ${APP_VERSION}
+    exec: gyroflow
+    exec_args: $@
+  apt:
+    arch:
+    - amd64
+    allow_unauthenticated: true
+    sources:
+    - sourceline: deb http://deb.debian.org/debian/ buster main
+    - sourceline: deb http://security.debian.org/debian-security buster/updates main
+    - sourceline: deb http://deb.debian.org/debian/ buster-updates main
+    include:
+    - adwaita-icon-theme
+    - fonts-dejavu-core
+    - fonts-liberation2
+    - gvfs:amd64
+    - libcom-err2:amd64
+    - libgcrypt20:amd64
+    - libgtk-3-common
+    - libkeyutils1:amd64
+    - liblzma5:amd64
+    - libmount1:amd64
+    - libnss-mdns:amd64
+    - libpcre3:amd64
+    - libpulse0:amd64
+    - libsystemd0:amd64
+    - libtinfo6:amd64
+    - libcanberra-gtk-module:amd64
+    - locales
+    - tzdata
+    - xkb-data
+  files:
+    include:
+    - /lib/x86_64-linux-gnu/libEGL_mesa.so.0
+    - /lib/x86_64-linux-gnu/libFLAC.so.8
+    - /lib/x86_64-linux-gnu/libGLX.so.0
+    - /lib/x86_64-linux-gnu/libGLdispatch.so.0
+    - /lib/x86_64-linux-gnu/libICE.so.6
+    - /lib/x86_64-linux-gnu/libLLVM-7.so.1
+    - /lib/x86_64-linux-gnu/libOpenCL.so.1
+    - /lib/x86_64-linux-gnu/libSM.so.6
+    - /lib/x86_64-linux-gnu/libX11.so.6
+    - /lib/x86_64-linux-gnu/libXau.so.6
+    - /lib/x86_64-linux-gnu/libXcomposite.so.1
+    - /lib/x86_64-linux-gnu/libXcursor.so.1
+    - /lib/x86_64-linux-gnu/libXdamage.so.1
+    - /lib/x86_64-linux-gnu/libXdmcp.so.6
+    - /lib/x86_64-linux-gnu/libXext.so.6
+    - /lib/x86_64-linux-gnu/libXfixes.so.3
+    - /lib/x86_64-linux-gnu/libXi.so.6
+    - /lib/x86_64-linux-gnu/libXinerama.so.1
+    - /lib/x86_64-linux-gnu/libXrandr.so.2
+    - /lib/x86_64-linux-gnu/libXrender.so.1
+    - /lib/x86_64-linux-gnu/libXtst.so.6
+    - /lib/x86_64-linux-gnu/libasound.so.2
+    - /lib/x86_64-linux-gnu/libasyncns.so.0
+    - /lib/x86_64-linux-gnu/libatk-1.0.so.0
+    - /lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+    - /lib/x86_64-linux-gnu/libatspi.so.0
+    - /lib/x86_64-linux-gnu/libbsd.so.0
+    - /lib/x86_64-linux-gnu/libc++.so.1
+    - /lib/x86_64-linux-gnu/libc++abi.so.1
+    - /lib/x86_64-linux-gnu/libcairo-gobject.so.2
+    - /lib/x86_64-linux-gnu/libcairo.so.2
+    - /lib/x86_64-linux-gnu/libdatrie.so.1
+    - /lib/x86_64-linux-gnu/libedit.so.2
+    - /lib/x86_64-linux-gnu/libelf.so.1
+    - /lib/x86_64-linux-gnu/libepoxy.so.0
+    - /lib/x86_64-linux-gnu/libffi.so.6
+    - /lib/x86_64-linux-gnu/libfontconfig.so.1
+    - /lib/x86_64-linux-gnu/libfreetype.so.6
+    - /lib/x86_64-linux-gnu/libfribidi.so.0
+    - /lib/x86_64-linux-gnu/libgbm.so.1
+    - /lib/x86_64-linux-gnu/libgdk-3.so.0
+    - /lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+    - /lib/x86_64-linux-gnu/libgio-2.0.so.0
+    - /lib/x86_64-linux-gnu/libglapi.so.0
+    - /lib/x86_64-linux-gnu/libglib-2.0.so.0
+    - /lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+    - /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+    - /lib/x86_64-linux-gnu/libgraphite2.so.3
+    - /lib/x86_64-linux-gnu/libgssapi_krb5.so.2
+    - /lib/x86_64-linux-gnu/libgthread-2.0.so.0
+    - /lib/x86_64-linux-gnu/libgtk-3.so.0
+    - /lib/x86_64-linux-gnu/libharfbuzz.so.0
+    - /lib/x86_64-linux-gnu/libk5crypto.so.3
+    - /lib/x86_64-linux-gnu/libkrb5.so.3
+    - /lib/x86_64-linux-gnu/libkrb5support.so.0
+    - /lib/x86_64-linux-gnu/liblz4.so.1
+    - /lib/x86_64-linux-gnu/libogg.so.0
+    - /lib/x86_64-linux-gnu/libpango-1.0.so.0
+    - /lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+    - /lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+    - /lib/x86_64-linux-gnu/libpixman-1.so.0
+    - /lib/x86_64-linux-gnu/libpng16.so.16
+    - /lib/x86_64-linux-gnu/libpulse.so.0
+    - /lib/x86_64-linux-gnu/libsensors.so.5
+    - /lib/x86_64-linux-gnu/libsndfile.so.1
+    - /lib/x86_64-linux-gnu/libstdc++.so.6
+    - /lib/x86_64-linux-gnu/libthai.so.0
+    - /lib/x86_64-linux-gnu/libva-drm.so.2
+    - /lib/x86_64-linux-gnu/libva-x11.so.2
+    - /lib/x86_64-linux-gnu/libva.so.2
+    - /lib/x86_64-linux-gnu/libvdpau.so.1
+    - /lib/x86_64-linux-gnu/libvorbis.so.0
+    - /lib/x86_64-linux-gnu/libvorbisenc.so.2
+    - /lib/x86_64-linux-gnu/libvulkan.so.1
+    - /lib/x86_64-linux-gnu/libwayland-client.so.0
+    - /lib/x86_64-linux-gnu/libwayland-cursor.so.0
+    - /lib/x86_64-linux-gnu/libwayland-egl.so.1
+    - /lib/x86_64-linux-gnu/libwayland-server.so.0
+    - /lib/x86_64-linux-gnu/libxcb-dri2.so.0
+    - /lib/x86_64-linux-gnu/libxcb-dri3.so.0
+    - /lib/x86_64-linux-gnu/libxcb-present.so.0
+    - /lib/x86_64-linux-gnu/libxcb-sync.so.1
+    - /lib/x86_64-linux-gnu/libxkbcommon.so.0
+    - /lib/x86_64-linux-gnu/libxshmfence.so.1
+    - /usr/lib/locale/locale-archive
+    - /usr/share/icons/default/index.theme
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+AppImage:
+  arch: x86_64
+  update-information: guess

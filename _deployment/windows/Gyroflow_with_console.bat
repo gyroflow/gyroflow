@@ -1,4 +1,4 @@
 @echo off
-set RUST_BACKTRACE=1
+set RUST_BACKTRACE=full
 Gyroflow.exe
 pause

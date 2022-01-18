@@ -78,9 +78,11 @@ impl Default for FrameBuffers {
 #[derive(Default)]
 pub struct VideoTranscoder<'a> {
     pub input_index: usize,
-    pub output_index: usize,
+    pub output_index: Option<usize>,
     pub decoder: Option<decoder::Video>,
     pub encoder: Option<encoder::video::Video>,
+    pub frame_rate: Option<Rational>,
+    pub time_base: Option<Rational>,
 
     pub codec_options: Dictionary<'a>,
 
@@ -105,7 +107,7 @@ pub struct VideoTranscoder<'a> {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>) -> Result<encoder::video::Video, FFmpegError> {
+    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(0).unwrap();
         let ost_codec = ost.codec();
@@ -113,7 +115,7 @@ impl<'a> VideoTranscoder<'a> {
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let mut pixel_format = format.unwrap_or_else(|| decoder.format());
         let mut color_range = decoder.color_range();
-        if /*codec_name == "hevc_videotoolbox" && */pixel_format == format::Pixel::YUVJ420P {
+        if pixel_format == format::Pixel::YUVJ420P {
             log::debug!("Overriding YUVJ420P ({:?}) with YUV420P and JPEG range", color_range);
             pixel_format = format::Pixel::YUV420P;
             color_range = util::color::Range::JPEG;
@@ -127,8 +129,8 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_aspect_ratio(decoder.aspect_ratio());
         log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
         encoder.set_format(pixel_format);
-        encoder.set_frame_rate(decoder.frame_rate());
-        encoder.set_time_base(decoder.frame_rate().unwrap().invert());
+        encoder.set_frame_rate(frame_rate);
+        encoder.set_time_base(time_base);
         encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
         encoder.set_color_range(color_range);
         encoder.set_colorspace(decoder.color_space());
@@ -197,7 +199,7 @@ impl<'a> VideoTranscoder<'a> {
 
                 // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                let result = Self::init_encoder(&mut frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format);
+                let result = Self::init_encoder(&mut frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap());
 
                 // let mut output = String::new();
                 // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -214,8 +216,10 @@ impl<'a> VideoTranscoder<'a> {
                 }
             }
 
+            let time_base = self.time_base.unwrap();
+
             if let Some(mut ts) = frame.timestamp() {
-                let timestamp_us = ts.rescale(decoder.time_base(), (1, 1000000));
+                let timestamp_us = ts;
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
 
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
@@ -230,7 +234,7 @@ impl<'a> VideoTranscoder<'a> {
                     let frame_color_space = frame.color_space();
                     let frame_color_transfer_characteristic = frame.color_transfer_characteristic();
 
-                    let timestamp = Some(ts);
+                    let timestamp = Some(ts.rescale((1, 1000000), time_base));
 
                     let raw_format: ffi::AVPixelFormat = frame.format().into();
 
@@ -291,6 +295,7 @@ impl<'a> VideoTranscoder<'a> {
                             let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
 
                             let output_frame = self.output_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
+                            output_frame.set_pts(timestamp);
                             hw_frame.set_width(output_frame.width());
                             hw_frame.set_height(output_frame.height());
 
@@ -336,7 +341,7 @@ impl<'a> VideoTranscoder<'a> {
         }
 
         if !self.decode_only && self.encoder.is_some() {
-            let ost_time_base = ost_time_bases[self.output_index];
+            let ost_time_base = ost_time_bases[self.output_index.unwrap_or_default()];
             let octx = octx.unwrap();
             self.receive_and_process_encoded_packets(octx, ost_time_base)?;
         }
@@ -346,10 +351,10 @@ impl<'a> VideoTranscoder<'a> {
 
     pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_base: Rational) -> Result<(), FFmpegError> {
         if !self.decode_only {
-            let time_base = self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
+            let time_base = self.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
             let mut encoded = Packet::empty();
             while self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.receive_packet(&mut encoded).is_ok() {
-                encoded.set_stream(self.output_index);
+                encoded.set_stream(self.output_index.unwrap_or_default());
                 encoded.rescale_ts(time_base, ost_time_base);
                 if octx.format().name().contains("image") {
                     encoded.write(octx)?;

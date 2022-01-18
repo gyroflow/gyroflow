@@ -24,6 +24,16 @@ if [ "$1" != "CI" ] || [ "$1" == "docker" ]; then
     # Install OpenCV
     $VCPKG_ROOT/vcpkg install "opencv[core]:x64-linux-release"
 fi
+if [ "$1" == "docker" ]; then
+    # Install AppImage builder
+    sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse
+    sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /opt/appimagetool
+    
+    # workaround AppImage issues with Docker
+    cd /opt/; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract
+    sudo mv /opt/squashfs-root /opt/appimagetool.AppDir
+    sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+fi
 
 # Download and extract ffmpeg
 curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-4.4-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz

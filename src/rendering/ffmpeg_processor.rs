@@ -164,15 +164,22 @@ impl<'a> FfmpegProcessor<'a> {
                 stream_mapping[i] = -1;
                 continue;
             }
+            // Limit to first video stream
+            if medium == media::Type::Video && self.video.output_index.is_some() {
+                stream_mapping[i] = -1;
+                continue;
+            }
             stream_mapping[i] = output_index as isize;
             ist_time_bases[i] = stream.time_base();
-            if medium == media::Type::Video { // TODO limit to first video stream
+            if medium == media::Type::Video {
                 self.video.input_index = i;
-                self.video.output_index = output_index;
+                self.video.output_index = Some(output_index);
 
                 octx.add_stream(encoder::find_by_name(self.video_codec.as_ref().ok_or(Error::EncoderNotFound)?))?;
 
                 self.video.decoder = Some(stream.codec().decoder().video()?);
+                self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
+                self.video.time_base = Some(stream.rate().invert());
 
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
                 if stream.codec().id() == self.audio_codec {
@@ -235,7 +242,7 @@ impl<'a> FfmpegProcessor<'a> {
             if ist_index == self.video.input_index {
                 {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
-                    packet.rescale_ts(stream.time_base(), decoder.time_base());
+                    packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
                     if let Err(err) = decoder.send_packet(&packet) {
                         if !any_encoded {
                             return Err(err.into());
@@ -277,7 +284,7 @@ impl<'a> FfmpegProcessor<'a> {
     
         // Flush encoders and decoders.
         {
-            let ost_time_base = self.ost_time_bases[self.video.output_index];
+            let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
@@ -323,6 +330,8 @@ impl<'a> FfmpegProcessor<'a> {
                 // unsafe { ffi::av_opt_set((*codec.as_mut_ptr()).priv_data, c_name.as_ptr(), c_val.as_ptr(), 1); } 
 
                 self.video.decoder = Some(codec.video()?);
+                self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
+                self.video.time_base = Some(stream.rate().invert());
                 break;
             }
         }
@@ -334,7 +343,7 @@ impl<'a> FfmpegProcessor<'a> {
 
                 if ist_index == self.video.input_index {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
-                    packet.rescale_ts(stream.time_base(), decoder.time_base());
+                    packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
 
                     if let Err(err) = decoder.send_packet(&packet) {
                         ::log::error!("Decoder error {:?}", err);

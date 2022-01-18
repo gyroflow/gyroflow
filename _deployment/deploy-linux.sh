@@ -150,6 +150,12 @@ cp -f $QT_DIR/plugins/xcbglintegrations/*.so                                    
 cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
 #cp -f "$CARGO_TARGET/libffmpeg.so.5"                  "$TARGET/"
 
+cp -f "$FFMPEG_DIR/lib/libavcodec.so.58"               "$TARGET/lib/"
+cp -f "$FFMPEG_DIR/lib/libavfilter.so.7"               "$TARGET/lib/"
+cp -f "$FFMPEG_DIR/lib/libavformat.so.58"              "$TARGET/lib/"
+cp -f "$FFMPEG_DIR/lib/libavutil.so.56"                "$TARGET/lib/"
+cp -f "$FFMPEG_DIR/lib/libswresample.so.3"             "$TARGET/lib/"
+cp -f "$FFMPEG_DIR/lib/libswscale.so.5"                "$TARGET/lib/"
 cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.58"         "$TARGET/lib/"
 cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.7"         "$TARGET/lib/"
 cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.58"        "$TARGET/lib/"
@@ -164,4 +170,20 @@ cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/resources/"
 
 pushd $TARGET/..
 tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64
+
+# ---- Build AppImage ----
+APP_PKG=$TARGET/../linux64
+export APP_DIR=$TARGET/AppDir
+export APP_VERSION=1.0.0-rc0
+
+rm -rf $APP_DIR
+mkdir -p $APP_DIR/usr/share/icons
+cp -f $PROJECT_DIR/_deployment/linux/gyroflow.png $APP_DIR/usr/share/icons/
+cp -f $PROJECT_DIR/_deployment/linux/gyroflow.svg $APP_DIR/usr/share/icons/
+
+cp -rf $APP_PKG/* $APP_DIR/
+appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
+chmod +x Gyroflow-${APP_VERSION}-x86_64.AppImage
+# ---- Build AppImage ----
+
 popd

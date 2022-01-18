@@ -35,7 +35,6 @@ use ui::ui_tools::UITools;
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
 // TODO: show error when loading invalid lens profile
-// TODO: Linux: Create AppImage
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)
