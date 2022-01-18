@@ -31,16 +31,20 @@ AppDir:
     - libpulse0:amd64
     - libsystemd0:amd64
     - libtinfo6:amd64
+    - libva2:amd64
     - libva-dev:amd64
     - libvdpau-dev:amd64
     - libvdpau1:amd64
     - mesa-va-drivers:amd64
     - ocl-icd-opencl-dev:amd64
-    - libpulse:amd64
-    - libasound:amd64
-    - libxkbcommon:amd64
+    - libpulse-dev:amd64
+    - libasound2:amd64
+    - libasound-dev:amd64
+    - libxkbcommon0:amd64
+    - libxkbcommon-dev:amd64
     - libc++-dev:amd64
-    - libcanberra-gtk-module:amd64
+    - libcanberra-gtk0:amd64
+    - libcanberra-gtk3-module:amd64
     - libgles2-mesa-dev:amd64
     - libglfw3:amd64
     - locales

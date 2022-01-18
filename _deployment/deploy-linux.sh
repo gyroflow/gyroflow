@@ -32,7 +32,8 @@ if [ "$1" == "build-docker" ]; then
         export QT_DIR=$QT_DIR
         ./_deployment/deploy-linux.sh
     "
-    sudo chown -R $USER:$USER $PROJECT_DIR
+    stat $PROJECT_DIR/Cargo.toml
+    sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $PROJECT_DIR
     exit;
 fi
 
@@ -187,5 +188,8 @@ cp -rf $TARGET/* $APP_DIR/
 appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
 chmod +x Gyroflow-${APP_VERSION}-x86_64.AppImage
 # ---- Build AppImage ----
+
+rm -rf $APP_DIR
+rm -rf $TARGET
 
 popd
