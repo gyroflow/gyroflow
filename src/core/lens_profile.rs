@@ -35,6 +35,8 @@ pub struct LensProfile {
 
     pub fps: f64,
 
+    pub official: bool,
+
     pub use_opencv_fisheye: bool,
     pub fisheye_params: CameraParams,
 

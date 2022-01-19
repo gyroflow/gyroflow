@@ -8,6 +8,7 @@
     "camera_setting": "1080p-60fps",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-13",
+    "official": true,
     "calib_dimension": {
         "w": 1920,
         "h": 1080

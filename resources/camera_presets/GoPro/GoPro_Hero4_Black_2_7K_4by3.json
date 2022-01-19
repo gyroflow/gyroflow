@@ -8,6 +8,7 @@
     "camera_setting": "2.7K 4by3",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-09",
+    "official": true,
     "calib_dimension": {
         "w": 2704,
         "h": 2028

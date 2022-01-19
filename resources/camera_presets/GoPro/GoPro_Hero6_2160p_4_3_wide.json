@@ -8,6 +8,7 @@
     "camera_setting": "2160p 4/3 wide",
     "calibrator_version": "0.3.0-beta/dev",
     "date": "2021-08-08",
+    "official": true,
     "calib_dimension": {
         "w": 3840,
         "h": 2160

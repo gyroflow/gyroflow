@@ -8,6 +8,7 @@
     "camera_setting": "5k 16x9 Linear",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-10-04",
+    "official": true,
     "calib_dimension": {
         "w": 5120,
         "h": 2880

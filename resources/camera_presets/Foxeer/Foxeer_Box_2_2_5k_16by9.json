@@ -8,6 +8,7 @@
     "camera_setting": "2.5k 16by9",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-02-09",
+    "official": true,
     "calib_dimension": {
         "w": 2560,
         "h": 1440

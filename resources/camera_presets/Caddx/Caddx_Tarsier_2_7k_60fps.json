@@ -8,6 +8,7 @@
     "camera_setting": "2.7k 60fps",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-02-14",
+    "official": true,
     "calib_dimension": {
         "w": 2704,
         "h": 1520

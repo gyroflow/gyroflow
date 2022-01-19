@@ -8,6 +8,7 @@
     "camera_setting": "1080p/60Hz",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-02-28",
+    "official": true,
     "calib_dimension": {
         "w": 1920,
         "h": 1080

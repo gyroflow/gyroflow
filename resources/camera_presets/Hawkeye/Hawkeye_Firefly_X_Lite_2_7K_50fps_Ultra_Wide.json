@@ -8,6 +8,7 @@
     "camera_setting": "2.7K 50fps Ultra Wide",
     "calibrator_version": "0.3.0-beta/dev",
     "date": "2021-08-18",
+    "official": true,
     "calib_dimension": {
         "w": 2704,
         "h": 1520

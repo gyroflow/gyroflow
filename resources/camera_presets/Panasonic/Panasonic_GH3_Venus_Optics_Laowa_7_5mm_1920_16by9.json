@@ -8,6 +8,7 @@
     "camera_setting": "1920 16by9",
     "calibrator_version": "0.2.0-aarrggh-prerelease-plz-dont-share",
     "date": "2021-02-07",
+    "official": true,
     "calib_dimension": {
         "w": 1920,
         "h": 1080

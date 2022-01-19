@@ -8,6 +8,7 @@
     "camera_setting": "1280x720",
     "calibrator_version": "0.2.0-alpha",
     "date": "2021-02-01",
+    "official": true,
     "calib_dimension": {
         "w": 1280,
         "h": 720

@@ -8,6 +8,7 @@
     "camera_setting": "1520p/60",
     "calibrator_version": "0.3.0-beta/dev",
     "date": "2021-08-06",
+    "official": true,
     "calib_dimension": {
         "w": 2704,
         "h": 1520

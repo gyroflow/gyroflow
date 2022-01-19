@@ -8,6 +8,7 @@
     "camera_setting": "1600BY1200",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-08-12",
+    "official": true,
     "calib_dimension": {
         "w": 1600,
         "h": 1200

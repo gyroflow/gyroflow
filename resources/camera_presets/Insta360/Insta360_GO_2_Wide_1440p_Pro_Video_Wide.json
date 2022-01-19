@@ -8,6 +8,7 @@
     "camera_setting": "1440p Pro Video Wide",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-08-10",
+    "official": true,
     "calib_dimension": {
         "w": 2880,
         "h": 2880

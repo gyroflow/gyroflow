@@ -8,6 +8,7 @@
     "camera_setting": "Open Gate 4x3",
     "calibrator_version": "0.2.2-alpha",
     "date": "2021-05-09",
+    "official": true,
     "calib_dimension": {
         "w": 4096,
         "h": 3072

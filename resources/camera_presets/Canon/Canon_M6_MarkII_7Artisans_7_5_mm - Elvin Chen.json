@@ -8,6 +8,7 @@
     "note": "",
     "calibrator_version": "0.1.1-alpha",
     "date": "2021-01-24",
+    "official": true,
     "calib_dimension": {
         "w": 1920,
         "h": 1080

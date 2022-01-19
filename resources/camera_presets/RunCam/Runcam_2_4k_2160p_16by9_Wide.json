@@ -8,6 +8,7 @@
     "camera_setting": "2160\u0440 16by9 Wide",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-03-09",
+    "official": true,
     "calib_dimension": {
         "w": 3840,
         "h": 2160

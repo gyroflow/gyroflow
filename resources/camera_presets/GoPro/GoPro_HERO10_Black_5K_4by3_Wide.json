@@ -8,6 +8,7 @@
     "camera_setting": "5K 4:3 Wide",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-16",
+    "official": true,
     "calib_dimension": {
         "w": 5120,
         "h": 3840

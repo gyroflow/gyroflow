@@ -76,6 +76,7 @@ MenuItem {
                         "Dimensions":      obj.calib_dimension.w + "x" + obj.calib_dimension.h,
                         "Calibrated by":   obj.calibrated_by
                     };
+                    officialInfo.show = !obj.official;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         window.exportSettings.setOutputSize(obj.output_dimension.w, obj.output_dimension.h);
@@ -139,6 +140,13 @@ MenuItem {
         }
     }
     
+    InfoMessageSmall {
+        id: officialInfo;
+        type: InfoMessage.Warning;
+        show: false;
+        text: qsTr("This lens profile is unofficial, we can't guarantee it's correctness. Use at your own risk."); 
+    }
+
     InfoMessageSmall {
         type: lensRatio != videoRatio? InfoMessage.Error : InfoMessage.Warning;
         show: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight);

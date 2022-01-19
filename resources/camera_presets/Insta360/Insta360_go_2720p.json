@@ -8,6 +8,7 @@
     "camera_setting": "2720p",
     "calibrator_version": "0.2.1-alpha",
     "date": "2021-03-07",
+    "official": true,
     "calib_dimension": {
         "w": 2720,
         "h": 2720

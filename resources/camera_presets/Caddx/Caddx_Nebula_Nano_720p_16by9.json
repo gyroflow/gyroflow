@@ -8,6 +8,7 @@
     "camera_setting": "720p 16by9",
     "calibrator_version": "0.2.0-alpha",
     "date": "2021-02-06",
+    "official": true,
     "calib_dimension": {
         "w": 1280,
         "h": 720

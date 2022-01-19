@@ -8,6 +8,7 @@
     "camera_setting": "4k 4x3 Linear",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-10-03",
+    "official": true,
     "calib_dimension": {
         "w": 4000,
         "h": 3000

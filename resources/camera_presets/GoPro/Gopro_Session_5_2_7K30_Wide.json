@@ -8,6 +8,7 @@
     "camera_setting": "2.7K30 Wide",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-03",
+    "official": true,
     "calib_dimension": {
         "w": 2704,
         "h": 1520

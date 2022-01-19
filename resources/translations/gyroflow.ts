@@ -51,83 +51,83 @@ This should provide much better UI performance.</source>
 <context>
     <name>App</name>
     <message>
-        <location filename="../../src/ui/App.qml" line="60"/>
+        <location filename="../../src/ui/App.qml" line="62"/>
         <source>Choose a video file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="61"/>
+        <location filename="../../src/ui/App.qml" line="63"/>
         <source>Video files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="122"/>
+        <location filename="../../src/ui/App.qml" line="126"/>
         <source>Output path:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="139"/>
+        <location filename="../../src/ui/App.qml" line="143"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="176"/>
+        <location filename="../../src/ui/App.qml" line="180"/>
         <source>Output file already exists, do you want to overwrite it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="177"/>
+        <location filename="../../src/ui/App.qml" line="181"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="178"/>
+        <location filename="../../src/ui/App.qml" line="182"/>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="179"/>
+        <location filename="../../src/ui/App.qml" line="183"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="194"/>
+        <location filename="../../src/ui/App.qml" line="198"/>
         <source>Rendering %1... %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="197"/>
+        <location filename="../../src/ui/App.qml" line="201"/>
         <source>Rendering completed. The file was written to: %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="198"/>
+        <location filename="../../src/ui/App.qml" line="202"/>
         <source>Open rendered file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="199"/>
-        <location filename="../../src/ui/App.qml" line="250"/>
+        <location filename="../../src/ui/App.qml" line="203"/>
+        <location filename="../../src/ui/App.qml" line="255"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="257"/>
+        <location filename="../../src/ui/App.qml" line="262"/>
         <source>There&apos;s a newer version available: %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="257"/>
+        <location filename="../../src/ui/App.qml" line="262"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="257"/>
+        <location filename="../../src/ui/App.qml" line="262"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/App.qml" line="265"/>
+        <location filename="../../src/ui/App.qml" line="270"/>
         <source>An error occured: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -396,47 +396,52 @@ This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="106"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
         <source>Search...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="119"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="120"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="124"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="125"/>
         <source>Create new</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/LensProfile.qml" line="147"/>
+        <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="155"/>
         <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="148"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="156"/>
         <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="157"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="165"/>
         <source>Adjust parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="190"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="198"/>
         <source>Pixel focal length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="208"/>
         <source>Focal center</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensProfile.qml" line="210"/>
+        <location filename="../../src/ui/menu/LensProfile.qml" line="218"/>
         <source>Distortion coefficients</source>
         <translation type="unfinished"></translation>
     </message>
@@ -535,7 +540,7 @@ This should provide much better UI performance.</source>
 <context>
     <name>Popup</name>
     <message>
-        <location filename="../../src/ui/App.qml" line="146"/>
+        <location filename="../../src/ui/App.qml" line="150"/>
         <source>Export .gyroflow file</source>
         <translation type="unfinished"></translation>
     </message>

@@ -8,6 +8,7 @@
     "camera_setting": "2.5K 50fps 16by9 Wide",
     "calibrator_version": "0.3.0-beta/dev",
     "date": "2021-08-18",
+    "official": true,
     "calib_dimension": {
         "w": 2560,
         "h": 1440

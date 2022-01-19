@@ -8,6 +8,7 @@
     "camera_setting": "2688x2688",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-22",
+    "official": true,
     "calib_dimension": {
         "w": 2688,
         "h": 2688

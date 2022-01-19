@@ -8,6 +8,7 @@
     "camera_setting": "2880x2880_ProMode_unprocessed",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-09-12",
+    "official": true,
     "calib_dimension": {
         "w": 2880,
         "h": 2880
