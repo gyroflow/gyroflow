@@ -20,25 +20,27 @@ Rectangle {
 
     property bool isLandscape: width > height;
     onIsLandscapeChanged: {
-        videoAreaCol.parent = null;
-        if (!isLandscape) {
+        if (isLandscape) {
+            // Landscape layout
+            leftPanel.y = 0;
+            rightPanel.x = Qt.binding(() => leftPanel.width + videoAreaCol.width);
+            rightPanel.y = 0;
+            videoAreaCol.x = Qt.binding(() => leftPanel.width);
+            videoAreaCol.width = Qt.binding(() => mainLayout.width - leftPanel.width - rightPanel.width);
+            videoAreaCol.height = Qt.binding(() => mainLayout.height);
+            leftPanel.fixedWidth = 0;
+            rightPanel.fixedWidth = 0;
+        } else {
+            // Portrait layout
+            videoAreaCol.y = 0;
             videoAreaCol.x = 0;
             videoAreaCol.width = Qt.binding(() => window.width);
             videoAreaCol.height = Qt.binding(() => window.height * 0.5);
             leftPanel.fixedWidth = Qt.binding(() => window.width * 0.4);
             rightPanel.fixedWidth = Qt.binding(() => window.width * 0.6);
-            mainLayout.y = Qt.binding(() => videoAreaCol.height);
-
-            videoAreaCol.parent = window;
-        } else {
-            videoAreaCol.parent = mainLayout;
-            videoAreaCol.width = Qt.binding(() => mainLayout.width - leftPanel.width - rightPanel.width);
-            videoAreaCol.height = Qt.binding(() => mainLayout.height);
-            leftPanel.fixedWidth = 0;
-            rightPanel.fixedWidth = 0;
-            mainLayout.y = 0;
-            rightPanel.parent = null;
-            rightPanel.parent = mainLayout;
+            leftPanel.y = Qt.binding(() => videoAreaCol.height);
+            rightPanel.x = Qt.binding(() => leftPanel.width);
+            rightPanel.y = Qt.binding(() => videoAreaCol.height);
         }
     }
     property alias vidInfo: vidInfo;
@@ -62,7 +64,7 @@ Rectangle {
         onAccepted: videoArea.loadFile(fileDialog.selectedFile);
     }
 
-    Row {
+    Item {
         id: mainLayout;
         width: parent.width;
         height: parent.height - y;
@@ -98,6 +100,8 @@ Rectangle {
 
         Column {
             id: videoAreaCol;
+            y: 0;
+            x: leftPanel.width;
             width: parent? parent.width - leftPanel.width - rightPanel.width : 0;
             height: parent? parent.height : 0;
             VideoArea {
@@ -207,6 +211,7 @@ Rectangle {
 
         SidePanel {
             id: rightPanel;
+            x: leftPanel.width + videoAreaCol.width;
             direction: SidePanel.HandleLeft;
             Menu.Synchronization {
                 id: sync;

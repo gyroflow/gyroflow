@@ -80,6 +80,16 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - For cameras which do have built-in gyro, please contact us and we will implement support for that camera
 - For cameras which don't have built-in gyro, please consider using Betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
 
+## Minimum system requirements:
+- Windows 10 64-bit (1809 or later)
+- macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
+- Linux: 
+    - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
+    - `.AppImage` should work everywhere
+    - Make sure you have latest graphics drivers installed
+    - Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev opencl-icd`
+- Android 10+
+
 ## Roadmap
 
 See the [open issues](https://github.com/AdrianEddy/gyroflow/issues) for a list of proposed features and known issues.
