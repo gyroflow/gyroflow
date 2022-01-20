@@ -82,6 +82,7 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
         let f = vec2<f32>(undistortion_params.data[0], undistortion_params.data[1]);
         let c = vec2<f32>(undistortion_params.data[2], undistortion_params.data[3]);
         let k = vec4<f32>(undistortion_params.data[4], undistortion_params.data[5], undistortion_params.data[6], undistortion_params.data[7]);
+        let r_limit = undistortion_params.data[8];
 
         let params_idx: u32 = min((global_id.y + 1u), (params_count - 1u)) * 9u;
 
@@ -95,9 +96,13 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
             let pos = x_y_ / w_;
         
             let r = length(pos);
-
             let theta = atan(r);
         
+            if (r_limit > 0.0 && r > r_limit) {
+                put_pixel(dst_index, bg);
+                return;
+            }
+            
             let theta2 = theta*theta;
             let theta4 = theta2*theta2;
             let theta6 = theta4*theta2;

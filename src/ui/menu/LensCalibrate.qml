@@ -59,12 +59,9 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
-            // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
-            if (!camera.includes("GoPro")) {
-                shutter.value = Math.abs(frame_readout_time);
-                shutterCb.checked = Math.abs(frame_readout_time) > 0;
-                bottomToTop.checked = frame_readout_time < 0;
-            }
+            shutter.value = Math.abs(frame_readout_time);
+            shutterCb.checked = Math.abs(frame_readout_time) > 0;
+            bottomToTop.checked = frame_readout_time < 0;
 
             calib.resetMetadata();
             if (camera_id_json) {
@@ -339,6 +336,22 @@ MenuItem {
 
                     controller.set_preview_resolution(target_height, calibrator_window.videoArea.vid);
                 }
+            }
+        }
+        CheckBoxWithContent {
+            id: rLimitCb;
+            text: qsTr("Radial distortion limit");
+            cb.onCheckedChanged: {
+                controller.set_lens_param("r_limit", checked? rLimit.value : 0);
+            }
+
+            SliderWithField {
+                id: rLimit;
+                width: parent.width;
+                precision: 2;
+                from: 0;
+                to: 10;
+                onValueChanged: controller.set_lens_param("r_limit", rLimitCb.checked? value : 0);
             }
         }
     }

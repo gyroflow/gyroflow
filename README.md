@@ -87,7 +87,11 @@ Gyroflow is an application that can stabilize your video by using motion data fr
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
     - `.AppImage` should work everywhere
     - Make sure you have latest graphics drivers installed
-    - Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev opencl-icd`
+    - Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev vdpau-va-driver libvulkan1`
+    - GPU specific packages: 
+        - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd`
+        - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
+        - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 - Android 10+
 
 ## Roadmap
@@ -128,7 +132,7 @@ GPU stuff supports *DirectX*, *OpenGL*, *Metal* and *Vulkan* thanks to *Qt RHI* 
 For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU implementation as a fallback.
 
 ### Code structure
-1. Entire GUI is in the `src/ui` diretory
+1. Entire GUI is in the `src/ui` directory
 2. `src/controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
 3. `src/core` contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*, and *OpenCV* is optional
 4. `src/rendering` contains all FFmpeg related code for rendering final video and processing for synchronization

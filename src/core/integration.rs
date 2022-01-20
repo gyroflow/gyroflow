@@ -169,7 +169,6 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let init_pos = UnitQuaternion::from_euler_angles(0.0, std::f64::consts::FRAC_PI_2, 0.0);
 
         let mut f = ComplementaryFilter::default();
-        f.do_adaptive_gain = true;
         let init_pos_q = init_pos.quaternion();
         f.set_orientation(init_pos_q.scalar(), init_pos_q.vector()[0], init_pos_q.vector()[1], init_pos_q.vector()[2]);
         

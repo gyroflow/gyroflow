@@ -49,6 +49,8 @@ pub struct LensCalibrator {
     pub k: Matrix3<f64>,
     pub d: Vector4<f64>,
 
+    pub r_limit: f64,
+
     pub forced_frames: HashSet<i32>,
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected

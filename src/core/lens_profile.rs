@@ -10,7 +10,7 @@ pub struct Dimensions { pub w: usize, pub h: usize }
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
 #[serde(default)]
 #[allow(non_snake_case)]
-pub struct CameraParams { pub RMS_error: f64, pub camera_matrix: Vec<[f64; 3]>, pub distortion_coeffs: Vec<f64> }
+pub struct CameraParams { pub RMS_error: f64, pub camera_matrix: Vec<[f64; 3]>, pub distortion_coeffs: Vec<f64>, pub radial_distortion_limit: Option<f64> }
 
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
 #[serde(default)]
@@ -48,6 +48,8 @@ pub struct LensProfile {
     pub calibrator_version: String,
     pub date: String,
 
+    pub matching_settings: Vec<serde_json::Value>,
+
     #[serde(skip)]
     pub filename: String,
 }
@@ -78,7 +80,8 @@ impl LensProfile {
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
             camera_matrix: cal.k.row_iter().map(|x| [x[0], x[1], x[2]]).collect(),
-            distortion_coeffs: cal.d.as_slice().to_vec()
+            distortion_coeffs: cal.d.as_slice().to_vec(),
+            radial_distortion_limit: if cal.r_limit > 0.0 { Some(cal.r_limit) } else { None }
         };
     }
 
@@ -91,7 +94,8 @@ impl LensProfile {
     }
 
     pub fn get_name(&self) -> String {
-        format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, self.camera_setting, self.get_size_str(), self.get_aspect_ratio().replace(':', "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
+        let setting = if self.camera_setting.is_empty() { &self.note } else { &self.camera_setting };
+        format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, setting, self.get_size_str(), self.get_aspect_ratio().replace(':', "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
     }
 
     pub fn get_aspect_ratio(&self) -> String {
@@ -180,5 +184,49 @@ impl LensProfile {
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
         *self = <Self as Deserialize>::deserialize(v).ok()?;
         Some(())
+    }
+
+    pub fn get_all_matching_profiles(&self) -> Vec<LensProfile> {
+        let mut ret = Vec::with_capacity(self.matching_settings.len() + 1);
+        ret.push(self.clone());
+        for x in &self.matching_settings {
+            let mut cpy = self.clone();
+            if let Some(x) = x.as_object() {
+                if x.contains_key("width") && x.contains_key("height") {
+                    let (new_w, new_h) = (x["width"].as_u64().unwrap_or_default(), x["height"].as_u64().unwrap_or_default());
+                    if new_w > 0 && new_h > 0 {
+                        let ratio = new_w as f64 / cpy.calib_dimension.w as f64;
+                        let scale = |val: &mut usize| { *val = (*val as f64 * ratio).round() as usize; };
+                        scale(&mut cpy.calib_dimension.w);
+                        scale(&mut cpy.calib_dimension.h);
+                        scale(&mut cpy.orig_dimension.w);
+                        scale(&mut cpy.orig_dimension.h);
+                        if cpy.fisheye_params.camera_matrix.len() > 1 {
+                            cpy.fisheye_params.camera_matrix[0][0] *= ratio;
+                            cpy.fisheye_params.camera_matrix[0][2] *= ratio;
+                            cpy.fisheye_params.camera_matrix[1][1] *= ratio;
+                            cpy.fisheye_params.camera_matrix[1][2] *= ratio;
+                        }
+                        if let Some(ref mut odim) = cpy.output_dimension {
+                            scale(&mut odim.w);
+                            scale(&mut odim.h);
+                        }
+                    }
+                }
+                if x.contains_key("frame_readout_time") {
+                    cpy.frame_readout_time = x["frame_readout_time"].as_f64();
+                }
+                if x.contains_key("fps") {
+                    if let Some(fps) = x["fps"].as_f64() {
+                        cpy.fps = fps;
+                    }
+                }
+                if x.contains_key("identifier") {
+                    cpy.identifier = x["identifier"].as_str().unwrap_or_default().to_string();
+                }
+                ret.push(cpy);
+            }
+        }
+        ret
     }
 }

@@ -26,7 +26,8 @@ impl<T: PixelType> Undistortion<T> {
 
         let f = &undistortion_params[0][0..2];
         let c = &undistortion_params[0][2..4];
-        let k = &undistortion_params[0][4..];
+        let k = &undistortion_params[0][4..8];
+        let r_limit = undistortion_params[0][8];
 
         out_pixels.par_chunks_mut(output_stride).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(T::COUNT * T::SCALAR_BYTES).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
@@ -46,10 +47,10 @@ impl<T: PixelType> Undistortion<T> {
                         let r = (posx*posx + posy*posy).sqrt();
                         let theta = r.atan();
 
-                        /*if r > 1.0 { // TODO add this maybe in lens profile?
+                        if r_limit > 0.0 && r > r_limit {
                             *pix_out = bg_t;
                             return;
-                        }*/
+                        }
                 
                         let theta2 = theta*theta;
                         let theta4 = theta2*theta2;

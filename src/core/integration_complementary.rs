@@ -38,11 +38,11 @@ pub struct ComplementaryFilter {
 impl Default for ComplementaryFilter {
     fn default() -> Self {
         Self {
-            gain_acc: 0.01,
+            gain_acc: 1.0,
             gain_mag: 0.01,
             bias_alpha: 0.01,
             do_bias_estimation: true,
-            do_adaptive_gain: false,
+            do_adaptive_gain: true,
             initialized: false,
             steady_state: false,
             q: (1.0, 0.0, 0.0, 0.0),

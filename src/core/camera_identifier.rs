@@ -60,6 +60,7 @@ impl CameraIdentifier {
                                 }
                                 if let Some(v) = map.get_t(TagId::Unknown(0x56464f56/*VFOV*/)) as Option<&String> {
                                     match v.as_str() {
+                                        "X" => id.lens_info = "Max".into(),
                                         "W" => id.lens_info = "Wide".into(),
                                         "S" => id.lens_info = "Super".into(),
                                         "L" => id.lens_info = "Linear".into(),
@@ -91,7 +92,7 @@ impl CameraIdentifier {
                     }
                 }
             },
-            "Insta360" => {        
+            "Insta360" => {
                 if let Some(ref samples) = input.samples {
                     for info in samples {
                         if let Some(ref tag_map) = info.tag_map {

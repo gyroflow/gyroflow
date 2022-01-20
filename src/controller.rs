@@ -363,7 +363,7 @@ impl Controller {
                     if !id_str.is_empty() {
                         let db = stab.lens_profile_db.read();
                         if let Some(lens) = db.get_by_id(&id_str) {
-                            load_lens(QString::from(lens.filename.clone()));
+                            load_lens(QString::from(id_str.clone()));
                         }
                     }
 
@@ -802,7 +802,6 @@ impl Controller {
         dbg!(timestamp_us);
         
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0);
-
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
         let cal = self.stabilizer.lens_calibrator.clone();
@@ -882,7 +881,6 @@ impl Controller {
     fn fetch_profiles_from_github(&self) {
         use crate::core::lens_profile_database::LensProfileDatabase;
 
-        
         let update = util::qt_queued_callback_mut(self, |this, _| {
             this.lens_profiles_updated();
         });

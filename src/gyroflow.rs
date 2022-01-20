@@ -45,6 +45,7 @@ use ui::ui_tools::UITools;
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: Add cache for the undistortion if the video is not playing
+// TODO: display rectangle of an area that would be cropped at FOV = 1.0
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
 // TODO: save panel sizes, menu opened states and window dimensions

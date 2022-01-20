@@ -17,6 +17,8 @@ pub mod filtering;
 
 pub mod gpu;
 
+pub mod util;
+
 use std::sync::{ Arc, atomic::Ordering::Relaxed };
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
@@ -238,7 +240,13 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn load_lens_profile(&self, path: &str) -> Result<(), serde_json::Error> {
-        self.lens.write().load_from_file(path)
+        let db = self.lens_profile_db.read();
+        if let Some(lens) = db.get_by_id(path) {
+            *self.lens.write() = lens.clone();
+            Ok(())
+        } else {
+            self.lens.write().load_from_file(path)
+        }
     }
 
     fn init_size(&self) {
@@ -533,6 +541,12 @@ impl<T: PixelType> StabilizationManager<T> {
                 "k2" => lens.fisheye_params.distortion_coeffs[1] = value,
                 "k3" => lens.fisheye_params.distortion_coeffs[2] = value,
                 "k4" => lens.fisheye_params.distortion_coeffs[3] = value,
+                "r_limit" => {
+                    if let Some(ref mut calib) = *self.lens_calibrator.write() {
+                        calib.r_limit = value;
+                    }
+                    lens.fisheye_params.radial_distortion_limit = if value > 0.0 { Some(value) } else { None };
+                }
                 _ => { }
             }
         }

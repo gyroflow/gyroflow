@@ -99,7 +99,7 @@ impl FrameTransform {
             params.distortion_coeffs[1] as f32, // 6
             params.distortion_coeffs[2] as f32, // 7
             params.distortion_coeffs[3] as f32, // 8
-            0.0 // pad to 9 values
+            params.radial_distortion_limit as f32
         ]);
 
         Self { params: transform_params }

@@ -45,12 +45,18 @@ impl LensProfileDatabase {
                     match LensProfile::from_json(&mut data) {
                         Ok(mut v) => {
                             v.filename = f_name.clone();
-                            let key = if !v.identifier.is_empty() { 
-                                v.identifier.clone()
-                            } else {
-                                f_name
-                            };
-                            self.map.insert(key, v);
+                            for profile in v.get_all_matching_profiles() {
+                                let key = if !profile.identifier.is_empty() { 
+                                    profile.identifier.clone()
+                                } else {
+                                    f_name.clone()
+                                };
+                                if self.map.contains_key(&key) {
+                                    log::warn!("Lens profile already present: {}, filename: {}", key, f_name);
+                                } else {
+                                    self.map.insert(key, profile);
+                                }
+                            }
                         },
                         Err(e) => {
                             log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
@@ -65,11 +71,12 @@ impl LensProfileDatabase {
 
     pub fn get_all_names(&self) -> Vec<(String, String)> {
         let mut ret = Vec::with_capacity(self.map.len());
-        for v in self.map.values() {
+        for (k, v) in &self.map {
             if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 let strs = vec![&v.camera_brand, &v.camera_model, &v.lens_model, &v.camera_setting, &v.note].into_iter().filter(|x| !x.is_empty()).join(" ");
 
-                ret.push((format!("{} {} {} {}x{}", self.cleanup_name(strs), v.get_size_str(), v.get_aspect_ratio(), v.calib_dimension.w, v.calib_dimension.h), v.filename.clone()));
+                let fps = if v.fps > 0.0 { format!(" {:.2}fps", v.fps) } else { String::new() };
+                ret.push((format!("{} {} {} {}x{}{}", self.cleanup_name(strs), v.get_size_str(), v.get_aspect_ratio(), v.calib_dimension.w, v.calib_dimension.h, fps), k.clone()));
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
             }
