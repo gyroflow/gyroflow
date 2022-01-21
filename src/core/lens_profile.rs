@@ -48,7 +48,7 @@ pub struct LensProfile {
     pub calibrator_version: String,
     pub date: String,
 
-    pub matching_settings: Vec<serde_json::Value>,
+    pub compatible_settings: Vec<serde_json::Value>,
 
     #[serde(skip)]
     pub filename: String,
@@ -158,9 +158,8 @@ impl LensProfile {
                 self.fisheye_params.camera_matrix[1].into(), 
                 self.fisheye_params.camera_matrix[2].into()
             ]);
-            // TODO: uncomment this
-            // mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
-            // mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
+            mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
+            mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
             
             mat
         } else {
@@ -187,9 +186,9 @@ impl LensProfile {
     }
 
     pub fn get_all_matching_profiles(&self) -> Vec<LensProfile> {
-        let mut ret = Vec::with_capacity(self.matching_settings.len() + 1);
+        let mut ret = Vec::with_capacity(self.compatible_settings.len() + 1);
         ret.push(self.clone());
-        for x in &self.matching_settings {
+        for x in &self.compatible_settings {
             let mut cpy = self.clone();
             if let Some(x) = x.as_object() {
                 if x.contains_key("width") && x.contains_key("height") {

@@ -19,9 +19,10 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// Things to do before first public preview:
-// - Fix ffmpeg GPU acceleration detection and test with different graphic cards
-
+// TODO: Batch processing when loaded multiple files
+// TODO: Display maximum cropping value
+// TODO: Display current cropping value
+// TODO: use quaternions for finding offset, not gyro samples
 // TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
@@ -34,7 +35,8 @@ use ui::ui_tools::UITools;
 // TODO: timeline panning
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
-// TODO: show error when loading invalid lens profile
+// TODO: video speed 
+// TODO: export framerate
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)
@@ -48,6 +50,8 @@ use ui::ui_tools::UITools;
 // TODO: display rectangle of an area that would be cropped at FOV = 1.0
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
+// TODO: support GoPro's superview lens correction
+// TODO: Figure out Sony lens distortion parameters
 // TODO: save panel sizes, menu opened states and window dimensions
 // TODO: audio slightly off sync when using exporting trimmed video
 

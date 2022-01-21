@@ -260,6 +260,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
             self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
+            
+            self.adaptive_zoom_checksum.store(0, SeqCst);
         }
     }
 
@@ -281,6 +283,7 @@ impl<T: PixelType> StabilizationManager<T> {
             params.video_output_size = (width, height);
         }
         self.init_size();
+        self.recompute_undistortion();
     }
 
     pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>, gyro: &RwLock<GyroSource>) -> Vec<f64> {

@@ -15,20 +15,39 @@ MenuItem {
     loader: controller.calib_in_progress;
 
     property alias rms: rms.value;
+    property alias autoCalibBtn: autoCalibBtn;
+    property alias uploadProfile: uploadProfile;
     property var calibrationInfo: ({});
 
     property int videoWidth: 0;
     property int videoHeight: 0;
     onVideoWidthChanged: {
-        Qt.callLater(function() {
-            calib.calibrationInfo.output_dimension = { "w": videoWidth, "h": videoHeight };
-            list.updateEntry("Default output size", videoWidth + "x" + videoHeight);
-        });
+        sizeTimer.start();
+    }
+    Timer {
+        id: sizeTimer;
+        interval: 1;
+        onTriggered: {
+            let w = videoWidth;
+            let h = videoHeight;
+            let videoRatio = w / h;
+            if (Math.round(videoRatio * 100) == 133) { // 4:3
+                // Default to 16:9 output
+                h = Math.round(w / (16 / 9));
+                if ((h % 2) != 0) h++;
+            }
+
+            calib.calibrationInfo.output_dimension = { "w": w, "h": h };
+            list.updateEntry("Default output size", w + "x" + h);
+            calibrator_window.videoArea.outWidth = w;
+            calibrator_window.videoArea.outHeight = h;
+            controller.set_output_size(w, h);
+        }
     }
     function resetMetadata() {
         calib.calibrationInfo = {
-            "calibrated_by": controller.get_username(),
-            "output_dimension": { "w": videoWidth, "h": videoHeight }
+            "calibrated_by": calib.calibrationInfo.calibrated_by || controller.get_username(),
+            "output_dimension": { "w": 0, "h": 0 }
         };
     }
     function updateTable() {
@@ -77,6 +96,7 @@ MenuItem {
                 }
             }
             calib.updateTable();
+            sizeTimer.start();
         }
         function onRolling_shutter_estimated(rolling_shutter) {
             shutter.value = Math.abs(rolling_shutter);
@@ -126,6 +146,7 @@ MenuItem {
         ToolTip { visible: rmsMa.containsMouse; text: qsTr("For a good lens calibration, this value should be less than 5, ideally less than 1.") }
     }
     Button {
+        id: autoCalibBtn;
         text: qsTr("Auto calibrate");
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;

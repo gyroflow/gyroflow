@@ -70,7 +70,7 @@ Row {
                     visible = false;
                     parent.parent.parent.children[0].visible = true;
                     if (desc.onChange)
-                        desc.onChange(newValue.allowText? text : value);
+                        desc.onChange(newValue.allowText? text.trim() : value);
                 }
             }
             LinkButton {

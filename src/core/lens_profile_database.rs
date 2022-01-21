@@ -103,6 +103,9 @@ impl LensProfileDatabase {
             .replace('_', " ")
     }
 
+    pub fn contains_id(&self, id: &str) -> bool {
+        self.map.contains_key(id)
+    }
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)
     }

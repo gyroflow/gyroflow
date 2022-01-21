@@ -82,7 +82,7 @@ fn main() {
     }
 
     if let Ok(time) = std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH) {
-        println!("cargo:rustc-env=BUILD_TIME={}", time.as_secs() - 1642516578);
+        println!("cargo:rustc-env=BUILD_TIME={}", (time.as_secs() - 1642516578) / 600); // New version every 10 minutes
     }
 
     config

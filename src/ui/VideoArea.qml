@@ -205,7 +205,13 @@ Item {
                 const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
                 drag.accepted = fileDialog.extensions.indexOf(ext) > -1;
             }
-            onDropped: (drop) => root.loadFile(drop.urls[0])
+            onDropped: (drop) => {
+                if (isCalibrator) {
+                    calibrator_window.loadFile(drop.urls[0]);
+                } else {
+                    root.loadFile(drop.urls[0])
+                }
+            }
         }
         LoaderOverlay {
             id: videoLoader;

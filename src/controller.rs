@@ -40,6 +40,7 @@ pub struct Controller {
     base: qt_base_class!(trait QObject),  
  
     init_player: qt_method!(fn(&self, player: QJSValue)),
+    reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: String)),
@@ -329,8 +330,8 @@ impl Controller {
                 this.chart_data_changed();
                 this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
             });
-            let load_lens = util::qt_queued_callback_mut(self, move |this, path: QString| {
-                this.load_lens_profile(path.to_string());
+            let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
+                this.load_lens_profile(path);
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -362,8 +363,8 @@ impl Controller {
                     let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
                     if !id_str.is_empty() {
                         let db = stab.lens_profile_db.read();
-                        if let Some(lens) = db.get_by_id(&id_str) {
-                            load_lens(QString::from(id_str.clone()));
+                        if db.contains_id(&id_str) {
+                            load_lens(id_str.clone());
                         }
                     }
 
@@ -446,6 +447,16 @@ impl Controller {
         }
     }
 
+    fn reset_player(&self, player: QJSValue) {
+        if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
+            let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
+            vid.onResize(Box::new(|_, _| { }));
+            vid.onProcessPixels(Box::new(|_, _, _, _, _, _| -> (u32, u32, u32, *mut u8) {
+                (0, 0, 0, std::ptr::null_mut())
+            }));
+            qrhi_undistort::deinit_player(vid.get_mdkplayer());
+        }
+    }
     fn init_player(&self, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()

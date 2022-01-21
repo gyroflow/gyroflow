@@ -46,6 +46,24 @@ Window {
         }
     }
 
+    function batchProcess() {
+        batch.queue = [...fileDialog.selectedFiles];
+        batch.start();
+    }
+    function loadFile(file) {
+        lensCalib.rms = 0;
+        controller.reset_player(videoArea.vid);
+        Qt.callLater(() => {
+            ui_tools.init_calibrator();
+            Qt.callLater(() => {
+                controller.init_player(videoArea.vid);
+                Qt.callLater(() => {
+                    videoArea.loadFile(file);
+                });
+            });
+        });
+    }
+    
     FileDialog {
         id: fileDialog;
         property var extensions: [
@@ -55,8 +73,79 @@ Window {
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];
-        onAccepted: videoArea.loadFile(fileDialog.selectedFile);
+
+        onAccepted: {
+            if (fileDialog.selectedFiles.length > 1) {
+                messageBox(Modal.NoIcon, qsTr("You selected multiple files. Do you want to process them automatically and export lens profiles?"), [
+                    { text: qsTr("Yes"), accent: true, clicked: batchProcess },
+                    { text: qsTr("No") }
+                ]);
+            } else {
+                loadFile(fileDialog.selectedFile);
+            }
+        }
+        fileMode: FileDialog.OpenFiles;
     }
+
+    // --------- Batch processing ---------
+    Item {
+        id: batch;
+        property var queue: [];
+        property bool active: false;
+        property url currentFile;
+        function runIn(ms, cb) {
+            batchTimer.cb = cb;
+            batchTimer.interval = ms;
+            batchTimer.start();
+        }
+        function start() {
+            if (queue.length) {
+                active = true;
+                batch.currentFile = batch.queue.shift();
+                fileDialog.loadFile(batch.currentFile);
+            } else {
+                active = false;
+            }
+        }
+        Connections {
+            target: controller;
+            function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+                if (!batch.active) return;
+                batch.runIn(2000, function() {
+                    lensCalib.autoCalibBtn.clicked();
+                })
+            }
+            function onCalib_progress(progress, rms, ready, total, good) {
+                if (!batch.active) return;
+                if (ready > 0 && rms > 0) {
+                    batch.runIn(2000, function() {
+                        console.log('rms', rms);
+                        if (rms < 2) {
+                            const pathParts = batch.currentFile.toString().split(".");
+                            pathParts.pop();
+                            const outputFilename = pathParts.join(".") + ".json";
+
+                            let output = outputFilename;
+                            let i = 1;
+                            while (controller.file_exists(output)) {
+                                output = outputFilename.replace(/(_\d+)?\.json/, "_" + i++ + ".json");
+                                if (i > 2000) break;
+                            }
+
+                            controller.export_lens_profile(output, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
+                        }
+                        batch.runIn(1000, function() { batch.start(); });
+                    });
+                }
+            }
+        }
+        Timer {
+            id: batchTimer;
+            property var cb;
+            onTriggered: cb();
+        }
+    }
+    // --------- Batch processing ---------
 
     Row {
         id: mainLayout;
