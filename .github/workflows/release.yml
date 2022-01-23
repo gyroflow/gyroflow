@@ -149,7 +149,7 @@ jobs:
         with:
           use-cross: ${{ matrix.targets.cross }}
           command: build
-          args: --target ${{ matrix.targets.target }} --release
+          args: --target ${{ matrix.targets.target }} --profile deploy
 
       - name: Build and deploy Mac
         if: ${{ matrix.targets.os == 'macos-latest' }}
@@ -167,7 +167,7 @@ jobs:
         env:
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
         run: |
-          ${{ github.workspace }}/_deployment/deploy-windows.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/release 
+          ${{ github.workspace }}/_deployment/deploy-windows.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy 
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a ../Gyroflow-${{ matrix.targets.name }}.zip *
 

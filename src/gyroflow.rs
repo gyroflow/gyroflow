@@ -37,6 +37,8 @@ use ui::ui_tools::UITools;
 // TODO: hyperlapse mode
 // TODO: video speed 
 // TODO: export framerate
+// TODO: fix scaling when lens profile dimensions don't match and also when output size is different
+// TODO: fix rolling shutter - it needs to use source row instead of destination row
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)

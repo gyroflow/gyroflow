@@ -38,6 +38,11 @@ winres = "*"
 name = "gyroflow"
 path = "src/gyroflow.rs"
 
+[profile.deploy]
+inherits = "release"
+lto = true
+codegen-units = 1
+
 # -------------------------- Android stuff --------------------------
 
 # [lib]

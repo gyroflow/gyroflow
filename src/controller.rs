@@ -284,6 +284,7 @@ impl Controller {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
 
             chart.setSyncResults(&*self.stabilizer.pose_estimator.estimated_gyro.read());
+            // chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
 
             chart.setFromGyroSource(&self.stabilizer.gyro.read());
         }

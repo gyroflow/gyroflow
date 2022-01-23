@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : "${PROJECT_DIR:=/Users/admin/gyroflow}"
-: "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
+: "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.2/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-macOS-gpl-lite}"
@@ -22,8 +22,8 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
     export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx-release/lib
     export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx-release/include/
-    cargo build --target x86_64-apple-darwin --release
-    strip $PROJECT_DIR/target/x86_64-apple-darwin/release/gyroflow
+    cargo build --target x86_64-apple-darwin --profile deploy
+    strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
 
     export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64
@@ -31,10 +31,10 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/arm64-osx/include/
     export MACOSX_DEPLOYMENT_TARGET="11.0"
     rustup target add aarch64-apple-darwin
-    cargo build --target aarch64-apple-darwin --release
-    strip $PROJECT_DIR/target/aarch64-apple-darwin/release/gyroflow
+    cargo build --target aarch64-apple-darwin --profile deploy
+    strip $PROJECT_DIR/target/aarch64-apple-darwin/deploy/gyroflow
 
-    lipo $PROJECT_DIR/target/{x86_64,aarch64}-apple-darwin/release/gyroflow -create -output $PROJECT_DIR/target/release/gyroflow
+    lipo $PROJECT_DIR/target/{x86_64,aarch64}-apple-darwin/deploy/gyroflow -create -output $PROJECT_DIR/target/deploy/gyroflow
 
     popd
     if [ "$1" == "build-universal" ]; then
@@ -46,8 +46,8 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     mkdir -p "$PROJECT_DIR/_deployment/_binaries/mac"
     CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS"
     cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac/"
-    strip  "$PROJECT_DIR/target/release/gyroflow"
-    cp -f  "$PROJECT_DIR/target/release/gyroflow"         "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/"
+    strip  "$PROJECT_DIR/target/deploy/gyroflow"
+    cp -f  "$PROJECT_DIR/target/deploy/gyroflow"          "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/"
     cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework"
     cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework"
     cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/"

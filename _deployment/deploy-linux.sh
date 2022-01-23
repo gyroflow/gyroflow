@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : "${PROJECT_DIR:=/home/eddy/gyroflow}"
-: "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
+: "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.2/gcc_64}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-gpl-lite}"
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
@@ -27,7 +27,7 @@ if [ "$1" == "build-docker" ]; then
         cd $PROJECT_DIR
         echo \$FFMPEG_DIR
         ls -l \$FFMPEG_DIR
-        cargo build --release
+        cargo build --profile deploy
         export PROJECT_DIR=$PROJECT_DIR
         export QT_DIR=$QT_DIR
         ./_deployment/deploy-linux.sh

@@ -62,3 +62,8 @@ ocl = { version = "*", optional = true }
 default = ["use-opencl", "use-opencv"]
 use-opencl = ["ocl"]
 use-opencv = ["opencv"]
+
+[profile.deploy]
+inherits = "release"
+lto = true
+codegen-units = 1

@@ -181,6 +181,21 @@ impl TimelineGyroChart {
         }
     }
 
+    pub fn setSyncResultsQuats(&mut self, data: &TimeQuat) {
+        if self.viewMode == 3 {
+            self.sync_results = Vec::with_capacity(data.len());
+
+            for (ts, q) in data {
+                let q = q.quaternion().as_vector();
+                self.sync_results.push(ChartData {
+                    timestamp_us: *ts,
+                    values: [q[0], q[1], q[2], q[3]]
+                });
+            }
+            self.update_data();
+        }
+    }
+
     pub fn setFromGyroSource(&mut self, gyro: &GyroSource) {
         self.gyro = Vec::with_capacity(gyro.raw_imu.len());
         self.accl = Vec::with_capacity(gyro.raw_imu.len());
@@ -240,6 +255,7 @@ impl TimelineGyroChart {
             3 => {
                 let qmax = Self::normalize_height(&mut self.quats, None);
                 Self::normalize_height(&mut self.smoothed_quats, qmax);
+                // Self::normalize_height(&mut self.sync_results, qmax);
             },
             _ => { }
         }
@@ -282,6 +298,12 @@ impl TimelineGyroChart {
                 self.series[1].data = Self::get_serie_vector(&self.quats, 1);
                 self.series[2].data = Self::get_serie_vector(&self.quats, 2);
                 self.series[3].data = Self::get_serie_vector(&self.quats, 3);
+
+                // + Sync quaternions
+                // self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
+                // self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
+                // self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
+                // self.series[7].data = Self::get_serie_vector(&self.sync_results, 3);
 
                 // + Smoothed quaternions
                 self.series[4].data = Self::get_serie_vector(&self.smoothed_quats, 0);
