@@ -314,4 +314,15 @@ impl GyroSource {
             }
         }
     }
+
+    pub fn clone_quaternions(&self) -> Self {
+        Self {
+            duration_ms:          self.duration_ms,
+            fps:                  self.fps,
+            quaternions:          self.quaternions.clone(),
+            smoothed_quaternions: self.smoothed_quaternions.clone(),            
+            offsets:              self.offsets.clone(),
+            ..Default::default()
+        }
+    }
 }

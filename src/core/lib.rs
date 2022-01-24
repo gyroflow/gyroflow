@@ -624,7 +624,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 }
 
-pub fn timestamp_at_frame(frame: i32, fps: f64) -> f64 { frame as f64 * fps * 1000.0 }
+pub fn timestamp_at_frame(frame: i32, fps: f64) -> f64 { frame as f64 * 1000.0 / fps }
 pub fn frame_at_timestamp(timestamp_ms: f64, fps: f64) -> i32 { (timestamp_ms * (fps / 1000.0)).round() as i32 }
 
 pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {

@@ -84,7 +84,30 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
         let k = vec4<f32>(undistortion_params.data[4], undistortion_params.data[5], undistortion_params.data[6], undistortion_params.data[7]);
         let r_limit = undistortion_params.data[8];
 
-        let params_idx: u32 = min((global_id.y + 1u), (params_count - 1u)) * 9u;
+        ///////////////////////////////////////////////////////////////////
+        // Calculate source `y` for rolling shutter
+        var sy = global_id.y;
+        if (params_count > 2u) {
+            let x_y_ = vec2<f32>(y * undistortion_params.data[9u + 1u] + undistortion_params.data[9u + 2u] + (x * undistortion_params.data[9u + 0u]),
+                                 y * undistortion_params.data[9u + 4u] + undistortion_params.data[9u + 5u] + (x * undistortion_params.data[9u + 3u]));
+            let w_ = y * undistortion_params.data[9u + 7u] + undistortion_params.data[9u + 8u] + (x * undistortion_params.data[9u + 6u]);
+            if (w_ > 0.0) {
+                let pos = x_y_ / w_;            
+                let r = length(pos);
+                let theta = atan(r);                
+                let theta2 = theta*theta; let theta4 = theta2*theta2; let theta6 = theta4*theta2; let theta8 = theta4*theta4;
+                let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));            
+                var scale: f32 = 1.0;
+                if (r != 0.0) {
+                    scale = theta_d / r;
+                }
+                let uv = f * pos * scale + c;
+                sy = u32(min(height_u, max(0, i32(floor(0.5 + uv.y * f32(INTER_TAB_SIZE))) >> INTER_BITS)));
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+
+        let params_idx: u32 = min((sy + 1u), (params_count - 1u)) * 9u;
 
         let x_y_ = vec2<f32>(y * undistortion_params.data[params_idx + 1u] + undistortion_params.data[params_idx + 2u] + (x * undistortion_params.data[params_idx + 0u]),
                              y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));

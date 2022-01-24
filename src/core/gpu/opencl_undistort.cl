@@ -57,7 +57,28 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     float r_limit = undistortion_params[8];
 
     if (x < output_width && y < output_height) {
-        __global const float *params = &undistortion_params[min((y + 1), params_count - 1) * 9];
+        ///////////////////////////////////////////////////////////////////
+        // Calculate source `y` for rolling shutter
+        int sy = y;
+        if (params_count > 2) {
+            __global const float *params = &undistortion_params[9]; // Use first matrix
+            float _x = y * params[1] + params[2] + (x * params[0]);
+            float _y = y * params[4] + params[5] + (x * params[3]);
+            float _w = y * params[7] + params[8] + (x * params[6]);
+            if (_w > 0) {
+                float2 pos = (float2)(_x, _y) / _w;
+                float r = length(pos);
+                float theta = atan(r);
+                float theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;
+                float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
+                float scale = r == 0? 1.0 : theta_d / r;
+                float2 uv = f * pos * scale + c;
+                sy = min((int)height, max(0, convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE) >> INTER_BITS));
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+
+        __global const float *params = &undistortion_params[min((sy + 1), params_count - 1) * 9];
 
         float _x = y * params[1] + params[2] + (x * params[0]);
         float _y = y * params[4] + params[5] + (x * params[3]);

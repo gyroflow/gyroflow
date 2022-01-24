@@ -19,10 +19,13 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO: Batch processing when loaded multiple files
+// TODO: fix scaling when lens profile dimensions don't match and also when output size is different
 // TODO: Display maximum cropping value
 // TODO: Display current cropping value
 // TODO: use quaternions for finding offset, not gyro samples
+// TODO: fix loader that sometimes stays on after load
+
+// TODO: Batch processing when loaded multiple files
 // TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
@@ -37,8 +40,6 @@ use ui::ui_tools::UITools;
 // TODO: hyperlapse mode
 // TODO: video speed 
 // TODO: export framerate
-// TODO: fix scaling when lens profile dimensions don't match and also when output size is different
-// TODO: fix rolling shutter - it needs to use source row instead of destination row
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)

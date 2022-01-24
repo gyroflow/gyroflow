@@ -33,13 +33,35 @@ impl<T: PixelType> Undistortion<T> {
             row_bytes.chunks_mut(T::COUNT * T::SCALAR_BYTES).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
                 if y < output_height && x < output_width {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());
-                    let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
+                    ///////////////////////////////////////////////////////////////////
+                    // Calculate source `y` for rolling shutter
+                    let mut sy = y;
+                    if undistortion_params.len() > 2 {
+                        let undistortion_params = undistortion_params[1]; // Use first matrix
+                        let _x = y as f32 * undistortion_params[1] + undistortion_params[2] + (x as f32 * undistortion_params[0]);
+                        let _y = y as f32 * undistortion_params[4] + undistortion_params[5] + (x as f32 * undistortion_params[3]);
+                        let _w = y as f32 * undistortion_params[7] + undistortion_params[8] + (x as f32 * undistortion_params[6]);
+                        if _w > 0.0 {
+                            let posx = _x / _w;
+                            let posy = _y / _w;
+                            let r = (posx*posx + posy*posy).sqrt();
+                            let theta = r.atan();
+                            let theta2 = theta*theta; let theta4 = theta2*theta2; let theta6 = theta4*theta2; let theta8 = theta4*theta4;
+                            let theta_d = theta * (1.0 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
+                            let scale =  if r == 0.0 { 1.0 } else { theta_d / r };
+                            let v = f[1] * posy * scale + c[1];
+                            sy = (((0.5 + v * INTER_TAB_SIZE as f32).floor() as i32) >> INTER_BITS).min(height as i32).max(0) as usize;
+                        }
+                    }
+                    ///////////////////////////////////////////////////////////////////
 
-                    let undistortion_params = undistortion_params[(y + 1).min(undistortion_params.len() - 1)];
+                    let undistortion_params = undistortion_params[(sy + 1).min(undistortion_params.len() - 1)];
                     let _x = y as f32 * undistortion_params[1] + undistortion_params[2] + (x as f32 * undistortion_params[0]);
                     let _y = y as f32 * undistortion_params[4] + undistortion_params[5] + (x as f32 * undistortion_params[3]);
                     let _w = y as f32 * undistortion_params[7] + undistortion_params[8] + (x as f32 * undistortion_params[6]);
                 
+                    let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
+
                     if _w > 0.0 {
                         let posx = _x / _w;
                         let posy = _y / _w;
