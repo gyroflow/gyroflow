@@ -11,42 +11,45 @@ pub struct FrameTransform {
 }
 
 impl FrameTransform {
-    fn get_frame_readout_time(params: &ComputeParams, fov: f64, can_invert: bool) -> f64 {
-        let img_dim_ratio = params.width as f64 / params.calib_width;
-    
+    fn get_frame_readout_time(params: &ComputeParams, can_invert: bool) -> f64 {
         let mut frame_readout_time = params.frame_readout_time;
         if can_invert && params.framebuffer_inverted {
             frame_readout_time *= -1.0;
         }
-        frame_readout_time *= fov;
         frame_readout_time /= 2.0;
-        frame_readout_time *= img_dim_ratio;
         frame_readout_time
     }
     fn get_new_k(params: &ComputeParams, fov: f64) -> Matrix3<f64> {
-        let img_dim_ratio = params.width as f64 / params.calib_width;
+        let img_dim_ratio = Self::get_ratio(params);
         
         let out_dim = (params.output_width as f64, params.output_height as f64);
-        let focal_center = (params.calib_width / 2.0, params.calib_height / 2.0);
+        //let focal_center = (params.video_width as f64 / 2.0, params.video_height as f64 / 2.0);
 
         let mut new_k = params.camera_matrix;
-        new_k[(0, 0)] = new_k[(0, 0)] * 1.0 / fov;
-        new_k[(1, 1)] = new_k[(1, 1)] * 1.0 / fov;
-        new_k[(0, 2)] = (params.calib_width  / 2.0 - focal_center.0) * img_dim_ratio / fov + out_dim.0 / 2.0;
-        new_k[(1, 2)] = (params.calib_height / 2.0 - focal_center.1) * img_dim_ratio / fov + out_dim.1 / 2.0;
+        new_k[(0, 0)] = new_k[(0, 0)] * img_dim_ratio / fov;
+        new_k[(1, 1)] = new_k[(1, 1)] * img_dim_ratio / fov;
+        new_k[(0, 2)] = /*(params.video_width  as f64 / 2.0 - focal_center.0) * img_dim_ratio / fov + */out_dim.0 / 2.0;
+        new_k[(1, 2)] = /*(params.video_height as f64 / 2.0 - focal_center.1) * img_dim_ratio / fov + */out_dim.1 / 2.0;
         new_k
+    }
+    fn get_ratio(params: &ComputeParams) -> f64 {
+        params.width as f64 / params.video_width.max(1) as f64
+    }
+    fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool) -> f64 {
+        let mut fov = if use_fovs && params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale }.max(0.001);
+        fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
+        fov
     }
 
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
-        let img_dim_ratio = params.width as f64 / params.calib_width;
-    
-        let fov = if params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale }.max(0.001);
+        let img_dim_ratio = Self::get_ratio(params);
+        let fov = Self::get_fov(params, frame, true);
     
         let scaled_k = params.camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, fov);
         
         // ----------- Rolling shutter correction -----------
-        let frame_readout_time = Self::get_frame_readout_time(params, fov, true);
+        let frame_readout_time = Self::get_frame_readout_time(params, true);
 
         let row_readout_time = frame_readout_time / params.height as f64;
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
@@ -106,14 +109,14 @@ impl FrameTransform {
     }
 
     pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
-        let img_dim_ratio = params.width as f64 / params.calib_width;
-    
-        let fov = params.fov_scale;
+        let img_dim_ratio = Self::get_ratio(params);
+        let fov = Self::get_fov(params, 0, false);
+
         let scaled_k = params.camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, fov);
 
         // ----------- Rolling shutter correction -----------
-        let frame_readout_time = Self::get_frame_readout_time(params, fov, false);
+        let frame_readout_time = Self::get_frame_readout_time(params, false);
 
         let row_readout_time = frame_readout_time / params.height as f64;
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);

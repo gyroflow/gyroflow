@@ -286,21 +286,18 @@ impl<T: PixelType> StabilizationManager<T> {
         self.recompute_undistortion();
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>, gyro: &RwLock<GyroSource>) -> Vec<f64> {
+    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
         };
         if window > 0.0 || window < -0.9 {
-            let mut quats = Vec::with_capacity(frames);
-            {
-                let g = gyro.read();
-                for i in 0..frames {
-                    quats.push(g.smoothed_quat_at_timestamp(i as f64 * 1000.0 / fps));
-                }
+            let mut timestamps = Vec::with_capacity(frames);
+            for i in 0..frames {
+                timestamps.push(i as f64 * 1000.0 / fps);
             }
 
-            let fovs = zoom.compute(&quats);
+            let fovs = zoom.compute(&timestamps);
             fovs.iter().map(|v| v.0).collect()
         } else {
             Vec::new()
@@ -308,7 +305,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn recompute_adaptive_zoom(&self) {
         let mut zoom = AdaptiveZoom::from_manager(self);
-        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.gyro);
+        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
         self.params.write().fovs = fovs;
     }
 
@@ -365,8 +362,7 @@ impl<T: PixelType> StabilizationManager<T> {
             if current_compute_id.load(Relaxed) != compute_id { return; }
 
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
-                let lock = RwLock::new(params.gyro.clone());
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params, &lock);
+                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params);
                 basic_params.write().fovs = params.fovs.clone();
             }
             
