@@ -36,6 +36,7 @@ Item {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
+        window.stab.fovSlider.value = 1.0;
         vid.loaded = false;
         videoLoader.active = true;
         vidInfo.loader = true;

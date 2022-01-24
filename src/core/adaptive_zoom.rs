@@ -28,6 +28,7 @@ enum Mode {
 #[derive(Clone)]
 pub struct AdaptiveZoom {
     compute_params: ComputeParams,
+    input_dim: (f64, f64), 
     output_dim: (f64, f64), 
     fps: f64, 
     mode: Mode, 
@@ -40,12 +41,21 @@ impl AdaptiveZoom {
         compute_params.fov_scale = 1.0;
         compute_params.fovs.clear();
         
+        // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
+        // Then we can use real `output_dim` to fit the fov
+        compute_params.width = compute_params.video_width;
+        compute_params.height = compute_params.video_height;
+        compute_params.output_width = compute_params.video_width;
+        compute_params.output_height = compute_params.video_height;
+
         let params = mgr.params.read();
 
-        let output_dim = (params.output_size.0 as f64, params.output_size.1 as f64);
+        let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
+        let output_dim = (compute_params.video_output_width as f64, compute_params.video_output_height as f64);
 
         Self {
             compute_params,
+            input_dim,
             output_dim,
             fps: params.get_scaled_fps(),
             range : (params.trim_start, params.trim_end),
@@ -62,14 +72,14 @@ impl AdaptiveZoom {
 
     pub fn get_state_checksum(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
-        hasher.write_usize(self.compute_params.video_width);
-        hasher.write_usize(self.compute_params.video_height);
         if self.compute_params.distortion_coeffs.len() >= 4 {
             hasher.write_u64(self.compute_params.distortion_coeffs[0].to_bits());
             hasher.write_u64(self.compute_params.distortion_coeffs[1].to_bits());
             hasher.write_u64(self.compute_params.distortion_coeffs[2].to_bits());
             hasher.write_u64(self.compute_params.distortion_coeffs[3].to_bits());
         }
+        hasher.write_u64(self.input_dim.0.to_bits());
+        hasher.write_u64(self.input_dim.1.to_bits());
         hasher.write_u64(self.output_dim.0.to_bits());
         hasher.write_u64(self.output_dim.1.to_bits());
         hasher.write_u64(self.compute_params.video_rotation.to_bits());
@@ -173,7 +183,7 @@ impl AdaptiveZoom {
         // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
-        let crop_center_positions: Vec<Point2D> = timestamps.into_iter().map(|_| Point2D(self.compute_params.width as f64 / 2.0, self.compute_params.height as f64 / 2.0)).collect();
+        let crop_center_positions: Vec<Point2D> = timestamps.into_iter().map(|_| Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0)).collect();
 
         // if smoothing_center > 0 {
         //     let mut smoothing_num_frames = (smoothing_center * fps).floor() as usize;
@@ -236,7 +246,7 @@ impl AdaptiveZoom {
 
     fn bounding_polygon(&self, timestamp_ms: f64, num_points: usize) -> Vec<Point2D> {
         if num_points < 1 { return Vec::new(); }
-        let (w, h) = (self.compute_params.width as f64, self.compute_params.height as f64);
+        let (w, h) = (self.input_dim.0, self.input_dim.1);
 
         let pts = num_points - 1;
         let dim_ratio = ((w / pts as f64), (h / pts as f64));

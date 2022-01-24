@@ -276,14 +276,16 @@ impl<T: PixelType> StabilizationManager<T> {
         self.init_size();
     }
     pub fn set_output_size(&self, width: usize, height: usize) {
-        {
-            let mut params = self.params.write();
-            let ratio = params.size.0 as f64 / params.video_size.0 as f64;
-            params.output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
-            params.video_output_size = (width, height);
+        if width > 0 && height > 0 {
+            {
+                let mut params = self.params.write();
+                let ratio = params.size.0 as f64 / params.video_size.0 as f64;
+                params.output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
+                params.video_output_size = (width, height);
+            }
+            self.init_size();
+            self.recompute_undistortion();
         }
-        self.init_size();
-        self.recompute_undistortion();
     }
 
     pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>) -> Vec<f64> {

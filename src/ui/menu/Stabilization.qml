@@ -12,6 +12,8 @@ MenuItem {
     icon: "gyroflow";
     innerItem.enabled: window.videoArea.vid.loaded;
 
+    property alias fovSlider: fov;
+
     Settings {
         id: settings;
         property alias smoothingMethod: smoothingMethod.currentIndex;

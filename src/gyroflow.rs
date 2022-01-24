@@ -19,12 +19,10 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO: fix scaling when output size is different
 // TODO: Display maximum cropping value
 // TODO: Display current cropping value
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: fix loader that sometimes stays on after load
-// TODO: reset FOV when loading a new video
 
 // TODO: Batch processing when loaded multiple files
 // TODO: wgpu convert to using textures
