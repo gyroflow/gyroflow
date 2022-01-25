@@ -55,7 +55,9 @@ fn main() {
     match target_os.as_str() {
         "android" => {
             println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
             config.flag("-std=c++17");
+            config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
         },
         "macos" => {
             
@@ -63,6 +65,7 @@ fn main() {
         "linux" => {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
             println!("cargo:rustc-link-search={}/lib/amd64", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-lib=static=z");
             // assumes that OpenCV has been downloaded using vcpgk and libraries are in static form (default triplets of vcpgk for linux provide static libs)
             std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib=static={}", lib.trim()));
