@@ -32,6 +32,7 @@ pub struct Undistortion<T: PixelType> {
 
     backend_initialized: bool,
 
+    pub current_fov: f64,
     empty_frame_transform: FrameTransform,
     compute_params: ComputeParams,
 
@@ -123,6 +124,8 @@ impl<T: PixelType> Undistortion<T> {
 
         let itm = self.get_stab_data_at_timestamp(timestamp_us).clone(); // TODO: get rid of this clone
         if itm.params.is_empty() { return false; }
+
+        self.current_fov = itm.fov;
 
         self.init_backends();
 

@@ -16,6 +16,7 @@ MenuItem {
         property alias previewResolution: previewResolution.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
+        property alias safeAreaGuide: safeAreaGuide.checked;
         property string lang: "en";
     }
 
@@ -96,6 +97,13 @@ MenuItem {
                 ui_tools.set_language(settings.lang);
             }
         }
+    }
+    CheckBox {
+        id: safeAreaGuide;
+        text: qsTr("Safe area guide");
+        tooltip: qsTr("When FOV > 1, show an rectangle simulating FOV = 1 over the preview video.\nNote that this is only a visual indicator, it doesn't affect rendering.");
+        checked: false;
+        onCheckedChanged: window.videoArea.safeArea = checked;
     }
     CheckBox {
         id: zerocopy;

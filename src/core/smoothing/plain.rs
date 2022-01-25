@@ -13,7 +13,7 @@ impl Default for Plain {
 }
 
 impl SmoothingAlgorithm for Plain {
-    fn get_name(&self) -> String { "Plain 3D smoothing".to_owned() }
+    fn get_name(&self) -> String { "Plain 3D".to_owned() }
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {

@@ -26,6 +26,8 @@ Item {
     property alias dropRect: dropRect;
     property bool isCalibrator: false;
 
+    property bool safeArea: false;
+
     property Menu.VideoInformation vidInfo: null;
 
     function toLocalFile(u) {
@@ -107,6 +109,14 @@ Item {
                         timeline.preventChange = false;
                     }
                 }
+                onCurrentFrameChanged: {
+                    const fov = controller.get_current_fov();
+                    currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
+                    if (window.stab.fovSlider.value > 1) {
+                        safeAreaRect.width = safeAreaRect.parent.width / window.stab.fovSlider.value;
+                        safeAreaRect.height = safeAreaRect.parent.height / window.stab.fovSlider.value;
+                    }
+                }
                 onMetadataLoaded: (md) => {
                     controller.load_telemetry(vid.url, true, vid, timeline.getChart());
                     vidInfo.loadFromVideoMetadata(md);
@@ -121,8 +131,10 @@ Item {
                 onMetadataChanged: {
                     if (vid.frameCount > 0) {
                         // Trigger seek to buffer the video frames
-                        vid.currentFrame++;
-                        vid.currentFrame--;
+                        Qt.callLater(() => {
+                            vid.currentFrame++;
+                            Qt.callLater(() => vid.currentFrame--);
+                        })
                     } else if (!errorShown) {
                         messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
                         errorShown = true;
@@ -141,6 +153,23 @@ Item {
                     radius: 5 * dpiScale;
                     anchors.fill: parent;
                     anchors.margins: -border.width;
+                }
+                Item {
+                    anchors.fill: parent;
+                    layer.enabled: true;
+                    opacity: root.safeArea && window.stab.fovSlider.value > 1? 1 : 0;
+                    Ease on opacity { }
+                    visible: opacity > 0;
+                    Item {
+                        id: safeAreaRect;
+                        width: parent.width;
+                        height: parent.height;
+                        anchors.centerIn: parent;
+                    }
+                    Rectangle { x: -1; width: parent.width + 2; height: safeAreaRect.y; color: "#80000000"; } // Top
+                    Rectangle { x: -1; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Left
+                    Rectangle { x: -1; y: safeAreaRect.y + safeAreaRect.height; width: parent.width + 2; height: parent.height - y; color: "#80000000"; } // Bottom
+                    Rectangle { x: safeAreaRect.x + safeAreaRect.width; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Right
                 }
 
                 InfoMessage {
@@ -244,25 +273,30 @@ Item {
             width: parent.width;
             height: 40 * dpiScale;
 
-            Row {
+            Column {
                 enabled: vid.loaded;
                 anchors.verticalCenter: parent.verticalCenter;
                 anchors.left: parent.left;
                 anchors.leftMargin: 10 * dpiScale;
-                height: parent.height;
-                BasicText {
-                    text: timeline.timeAtPosition((vid.currentFrame + 1) / Math.max(1, vid.frameCount));
-                    leftPadding: 0;
-                    font.pixelSize: 14 * dpiScale;
-                    verticalAlignment: Text.AlignVCenter;
-                    height: parent.height;
+                spacing: 3 * dpiScale;
+                Row {
+                    BasicText {
+                        text: timeline.timeAtPosition((vid.currentFrame + 1) / Math.max(1, vid.frameCount));
+                        leftPadding: 0;
+                        font.pixelSize: 14 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                    }
+                    BasicText {
+                        text: `(${vid.currentFrame+1}/${vid.frameCount})`;
+                        leftPadding: 5 * dpiScale;
+                        font.pixelSize: 11 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                    }
                 }
                 BasicText {
-                    text: `(${vid.currentFrame+1}/${vid.frameCount})`;
-                    leftPadding: 5 * dpiScale;
+                    id: currentFovText;
                     font.pixelSize: 11 * dpiScale;
-                    verticalAlignment: Text.AlignVCenter;
-                    height: parent.height;
+                    leftPadding: 0;
                 }
             }
 

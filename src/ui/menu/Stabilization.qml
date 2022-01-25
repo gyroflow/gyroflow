@@ -13,6 +13,7 @@ MenuItem {
     innerItem.enabled: window.videoArea.vid.loaded;
 
     property alias fovSlider: fov;
+    property alias maxValues: maxValues;
 
     Settings {
         id: settings;
@@ -39,6 +40,12 @@ MenuItem {
         target: controller;
         function onCompute_progress(id, progress) {
             if (progress >= 1) {
+                const min_fov = controller.get_min_fov();
+                const max_angles = controller.get_smoothing_max_angles();
+                maxValues.maxPitch = max_angles[0];
+                maxValues.maxYaw   = max_angles[1];
+                maxValues.maxRoll  = max_angles[2];
+                maxValues.maxZoom  = min_fov > 0.0001? (100 / min_fov) : min_fov;
                 const status = controller.get_smoothing_status();
                 // Clear current params
                 for (let i = smoothingStatus.children.length; i > 0; --i) {
@@ -77,9 +84,9 @@ MenuItem {
     
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
-        QT_TRANSLATE_NOOP("Popup", "Plain 3D smoothing");
-        QT_TRANSLATE_NOOP("Popup", "Velocity dampened smoothing"),
-        QT_TRANSLATE_NOOP("Popup", "Velocity dampened smoothing 2"),
+        QT_TRANSLATE_NOOP("Popup", "Plain 3D");
+        QT_TRANSLATE_NOOP("Popup", "Velocity dampened"),
+        // QT_TRANSLATE_NOOP("Popup", "Velocity dampened 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
         QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
@@ -90,13 +97,17 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
-        QT_TRANSLATE_NOOP("Stabilization", "Pitch velocity dampening");
-        QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
-        QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
+        // QT_TRANSLATE_NOOP("Stabilization", "Pitch velocity dampening");
+        // QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
+        // QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify velocity factor until you get the desired values (recommended less than 20).");
+        QT_TRANSLATE_NOOP("Stabilization", "Modify dampening settings until you get the desired values (recommended around 6 on all axes).");
+        QT_TRANSLATE_NOOP("Stabilization", "Modify velocity factor until you get the desired values (recommended less than 20).");
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness at high velocity");
         QT_TRANSLATE_NOOP("Stabilization", "Velocity factor");
+        QT_TRANSLATE_NOOP("Stabilization", "Smoothness multiplier");
+        QT_TRANSLATE_NOOP("Stabilization", "Responsiveness");
     }
 
     Connections {
@@ -133,7 +144,7 @@ MenuItem {
         model: smoothingAlgorithms;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        currentIndex: 1;
+        currentIndex: 2;
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             // Clear current params
@@ -187,6 +198,31 @@ MenuItem {
         x: 5 * dpiScale;
         width: parent.width - x;
         visible: children.length > 0;
+    }
+    
+    InfoMessageSmall {
+        id: maxValues;
+        property real maxPitch: 0;
+        property real maxYaw: 0;
+        property real maxRoll: 0;
+        property real maxZoom: 0;
+        show: true;
+        //color: styleBackground;
+        color: "transparent";
+        border.width: 0 * dpiScale;
+        border.color: styleVideoBorderColor;
+        //t.x: 10 * dpiScale;
+        t.x: 0;
+        //height: t.height + 20 * dpiScale;
+        height: t.height + 5 * dpiScale;
+        t.color: styleTextColor;
+        t.horizontalAlignment: Text.AlignLeft;
+        text: qsTr("Max rotation: Pitch: %1, Yaw: %2, Roll: %3")
+                .arg("<b>" + maxPitch.toFixed(1) + "°</b>")
+                .arg("<b>" + maxYaw  .toFixed(1) + "°</b>")
+                .arg("<b>" + maxRoll .toFixed(1) + "°</b>")
+              + "<br>"
+              + qsTr("Max zoom: %1").arg("<b>" + maxZoom.toFixed(1) + "%</b>"); 
     }
 
     ComboBox {

@@ -54,6 +54,7 @@ pub struct BasicParams {
     pub adaptive_zoom_window: f64,
     pub fov: f64,
     pub fovs: Vec<f64>,
+    pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
     pub frame_count: usize,
@@ -75,6 +76,7 @@ impl Default for BasicParams {
     fn default() -> Self {
         Self {
             fov: 1.0,
+            min_fov: 1.0,
             fovs: vec![],
             stab_enabled: true,
             show_detected_features: true,
@@ -118,6 +120,16 @@ impl BasicParams {
             None            => self.fps
         }
     }
+
+    pub fn set_fovs(&mut self, fovs: Vec<f64>) {
+        if let Some(min_fov) = fovs.iter().copied().reduce(f64::min) {
+            self.min_fov = min_fov;
+        }
+        if fovs.is_empty() {
+            self.min_fov = 1.0;
+        }
+        self.fovs = fovs;
+    }
 }
 
 pub struct StabilizationManager<T: PixelType> {
@@ -133,6 +145,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub current_compute_id: Arc<AtomicU64>,
     pub smoothness_checksum: Arc<AtomicU64>,
     pub adaptive_zoom_checksum: Arc<AtomicU64>,
+    pub current_fov_10000: Arc<AtomicU64>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
@@ -154,6 +167,8 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             current_compute_id: Arc::new(AtomicU64::new(0)),
             smoothness_checksum: Arc::new(AtomicU64::new(0)),
             adaptive_zoom_checksum: Arc::new(AtomicU64::new(0)),
+
+            current_fov_10000: Arc::new(AtomicU64::new(0)),
             
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
@@ -308,7 +323,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_adaptive_zoom(&self) {
         let mut zoom = AdaptiveZoom::from_manager(self);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
-        self.params.write().fovs = fovs;
+        self.params.write().set_fovs(fovs);
     }
 
     pub fn recompute_smoothness(&self) {
@@ -356,6 +371,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
                 lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
+                lib_gyro.max_angles = params.gyro.max_angles;
                 lib_gyro.org_smoothed_quaternions = params.gyro.org_smoothed_quaternions.clone();
                 lib_gyro.smoothing_status = smoothing.get_status_json();
                 smoothing_changed = true;
@@ -365,7 +381,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params);
-                basic_params.write().fovs = params.fovs.clone();
+                basic_params.write().set_fovs(params.fovs.clone());
             }
             
             if current_compute_id.load(Relaxed) != compute_id { return; }
@@ -486,8 +502,10 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
             }
             //////////////////////////// Draw detected features ////////////////////////////
-            
-            self.undistortion.write().process_pixels(timestamp_us, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels)
+            let mut undist = self.undistortion.write();
+            let ret = undist.process_pixels(timestamp_us, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels);
+            self.current_fov_10000.store((undist.current_fov * 10000.0) as u64, SeqCst);
+            ret
         } else {
             false
         }
@@ -504,6 +522,9 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
+
+    pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
+    pub fn get_min_fov               (&self) -> f64 { self.params.read().min_fov }
 
     pub fn remove_offset      (&self, timestamp_us: i64)                 { self.gyro.write().remove_offset(timestamp_us); }
     pub fn set_offset         (&self, timestamp_us: i64, offset_ms: f64) { self.gyro.write().set_offset(timestamp_us, offset_ms); }
@@ -561,14 +582,23 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);
+        
+        self.smoothness_checksum.store(0, SeqCst);
+        self.adaptive_zoom_checksum.store(0, SeqCst);
+
         smooth.current().get_parameters_json()
     }
     pub fn set_smoothing_param(&self, name: &str, val: f64) {
+        self.smoothness_checksum.store(0, SeqCst);
+        self.adaptive_zoom_checksum.store(0, SeqCst);
+
         self.smoothing.write().current().as_mut().set_parameter(name, val);
+    }
+    pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
+        self.gyro.read().max_angles
     }
     pub fn get_smoothing_status(&self) -> serde_json::Value {
         self.gyro.read().smoothing_status.clone()
-        //self.smoothing.write().current().get_status_json()
     }
     pub fn get_smoothing_algs(&self) -> Vec<String> {
         self.smoothing.read().get_names()

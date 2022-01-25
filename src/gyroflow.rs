@@ -19,10 +19,7 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO: Display maximum cropping value
-// TODO: Display current cropping value
 // TODO: use quaternions for finding offset, not gyro samples
-// TODO: fix loader that sometimes stays on after load
 
 // TODO: Batch processing when loaded multiple files
 // TODO: wgpu convert to using textures
@@ -49,7 +46,6 @@ use ui::ui_tools::UITools;
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: Add cache for the undistortion if the video is not playing
-// TODO: display rectangle of an area that would be cropped at FOV = 1.0
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
 // TODO: support GoPro's superview lens correction

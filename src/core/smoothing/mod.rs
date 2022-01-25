@@ -4,8 +4,8 @@
 pub mod plain;
 pub mod horizon;
 pub mod fixed;
+// pub mod velocity_dampened_v1;
 pub mod velocity_dampened;
-pub mod velocity_dampened2;
 
 use super::gyro_source::TimeQuat;
 pub use std::collections::HashMap;
@@ -55,8 +55,8 @@ impl Default for Smoothing {
             algs: vec![
                 Box::new(None { }),
                 Box::new(self::plain::Plain::default()),
+                // Box::new(self::velocity_dampened_v1::VelocityDampened::default()),
                 Box::new(self::velocity_dampened::VelocityDampened::default()),
-                Box::new(self::velocity_dampened2::VelocityDampened2::default()),
                 Box::new(self::horizon::HorizonLock::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
@@ -98,5 +98,28 @@ impl Smoothing {
 
     pub fn get_names(&self) -> Vec<String> {
         self.algs.iter().map(|x| x.get_name()).collect()
+    }
+
+    pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &crate::BasicParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
+        let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
+        let end_ts   = (params.trim_end   * params.get_scaled_duration_ms() * 1000.0) as i64;
+        let identity_quat = crate::Quat64::identity();
+
+        let mut max_pitch = 0.0;
+        let mut max_yaw = 0.0;
+        let mut max_roll = 0.0;
+        
+        for (timestamp, quat) in smoothed_quats.iter() {
+            if timestamp >= &start_ts && timestamp <= &end_ts {
+                let dist = quat.inverse() * quats.get(timestamp).unwrap_or(&identity_quat);
+                let euler_dist = dist.euler_angles();
+                if euler_dist.2.abs() > max_roll  { max_roll  = euler_dist.2.abs(); }
+                if euler_dist.0.abs() > max_pitch { max_pitch = euler_dist.0.abs(); }
+                if euler_dist.1.abs() > max_yaw   { max_yaw   = euler_dist.1.abs(); }
+            }
+        }
+        
+        const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
+        (max_pitch * RAD2DEG, max_yaw * RAD2DEG, max_roll * RAD2DEG)
     }
 }

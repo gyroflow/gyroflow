@@ -61,6 +61,7 @@ pub struct Controller {
     lens_profile_loaded: qt_signal!(lens_json: QString),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
+    get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
     get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
@@ -132,6 +133,9 @@ pub struct Controller {
 
     add_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
     remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
+
+    get_current_fov: qt_method!(fn(&self) -> f64),
+    get_min_fov: qt_method!(fn(&self) -> f64),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -524,6 +528,10 @@ impl Controller {
     fn get_smoothing_status(&self) -> QJsonArray {
         util::serde_json_to_qt(&self.stabilizer.get_smoothing_status())
     }
+    fn get_smoothing_max_angles(&self) -> QJsonArray {
+        let max_angles = self.stabilizer.get_smoothing_max_angles();
+        util::serde_json_to_qt(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
+    }
 
     fn set_sync_method(&mut self, v: u32) {
         self.sync_method = v;
@@ -636,6 +644,8 @@ impl Controller {
 
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
+    fn get_current_fov       (&self) -> f64 { self.stabilizer.get_current_fov() }
+    fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
 
     fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
         self.stabilizer.offset_at_timestamp(timestamp_us)

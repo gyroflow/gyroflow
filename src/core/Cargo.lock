@@ -1109,9 +1109,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.113"
+version = "0.2.114"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eef78b64d87775463c549fbd80e19249ef436ea3bf1de2a1eb7e717ec7fab1e9"
+checksum = "b0005d08a8f7b65fb8073cb697aa0b12b631ed251ce73d862ce50eeb52ce3b50"
 
 [[package]]
 name = "libloading"
@@ -1284,9 +1284,9 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22c5cfe6dbc4ae14962316265a931fbb89b892c5ed6a4a61d7fe4e9f58c0bf94"
+checksum = "33f2a8d82486d74d708bec00bba92749cb3f685551e8220b625af4bcc70a9d15"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -2456,9 +2456,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.12.3"
+version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62fa524903bf336b51a399f0d586f3c30af94101149588678ef147c30be89e53"
+checksum = "93b1a9400e8d7f32dd4dd909bb9a391015d70633d639775ddd3f14d1104bc970"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",

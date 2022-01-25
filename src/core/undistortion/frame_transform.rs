@@ -8,6 +8,7 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 #[derive(Default, Clone)]
 pub struct FrameTransform {
     pub params: Vec<[f32; 9]>,
+    pub fov: f64,
 }
 
 impl FrameTransform {
@@ -105,7 +106,10 @@ impl FrameTransform {
             params.radial_distortion_limit as f32
         ]);
 
-        Self { params: transform_params }
+        Self {
+            params: transform_params,
+            fov,
+        }
     }
 
     pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
