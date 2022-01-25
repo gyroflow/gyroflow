@@ -60,7 +60,9 @@ fn main() {
             config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
         },
         "macos" => {
-            
+            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-lib=static=x264");
+            println!("cargo:rustc-link-lib=static=x265");
         },
         "linux" => {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
