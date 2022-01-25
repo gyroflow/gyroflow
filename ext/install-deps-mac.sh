@@ -31,6 +31,8 @@ lipo lib/libavfilter.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavfilter.a
 lipo lib/libavutil.a     -thin x86_64 -output ../ffmpeg-x86_64/lib/libavutil.a
 lipo lib/libswresample.a -thin x86_64 -output ../ffmpeg-x86_64/lib/libswresample.a
 lipo lib/libswscale.a    -thin x86_64 -output ../ffmpeg-x86_64/lib/libswscale.a
+lipo lib/libx264.a       -thin x86_64 -output ../ffmpeg-x86_64/lib/libx264.a
+lipo lib/libx265.a       -thin x86_64 -output ../ffmpeg-x86_64/lib/libx265.a
 
 lipo lib/libavcodec.a    -thin arm64 -output ../ffmpeg-arm64/lib/libavcodec.a
 lipo lib/libavformat.a   -thin arm64 -output ../ffmpeg-arm64/lib/libavformat.a
@@ -39,6 +41,8 @@ lipo lib/libavfilter.a   -thin arm64 -output ../ffmpeg-arm64/lib/libavfilter.a
 lipo lib/libavutil.a     -thin arm64 -output ../ffmpeg-arm64/lib/libavutil.a
 lipo lib/libswresample.a -thin arm64 -output ../ffmpeg-arm64/lib/libswresample.a
 lipo lib/libswscale.a    -thin arm64 -output ../ffmpeg-arm64/lib/libswscale.a
+lipo lib/libx264.a       -thin arm64 -output ../ffmpeg-arm64/lib/libx264.a
+lipo lib/libx265.a       -thin arm64 -output ../ffmpeg-arm64/lib/libx265.a
 cp -R include ../ffmpeg-x86_64/include
 cp -R include ../ffmpeg-arm64/include
 cd ..

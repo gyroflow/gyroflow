@@ -80,6 +80,7 @@ impl AutosyncProcess {
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
         
         let mut comp_params = ComputeParams::from_manager(stab);
+        comp_params.gyro.raw_imu = stab.gyro.read().raw_imu.clone();
         if !for_rs {
             comp_params.gyro.offsets.clear();
         }
