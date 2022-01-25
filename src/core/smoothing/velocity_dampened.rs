@@ -104,13 +104,16 @@ impl SmoothingAlgorithm for VelocityDampened {
         // Calculate velocity
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
+            // let euler = (prev_quat.inverse() * quat).scaled_axis().abs();
+            // let dist = euler[0].max(euler[1]).max(euler[2]);
+
             let dist = (prev_quat.inverse() * quat).angle();
-            velocity.insert(*timestamp, dist / sample_rate);
+            velocity.insert(*timestamp, dist.abs());
             prev_quat = *quat;
         }
 
         // Smooth velocity
-        let mut max_velocity = 0.0001;
+        let mut max_velocity = 0.0000001;
         let mut prev_velocity = *velocity.iter().next().unwrap().1; // First velocity
         for (_timestamp, vel) in velocity.iter_mut().skip(1) {
             *vel = prev_velocity * (1.0 - high_alpha) + *vel * high_alpha;

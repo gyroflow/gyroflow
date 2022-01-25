@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{Vector2, Rotation3};
+use nalgebra::{ Rotation3, Matrix3, Vector4 };
 use std::ops::Range;
 use std::sync::atomic::Ordering::SeqCst;
 use std::vec::Vec;
-use parking_lot::{RwLock};
+use parking_lot::RwLock;
 use std::sync::Arc;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
@@ -47,7 +47,7 @@ unsafe impl Sync for FrameResult {}
 #[derive(Default)]
 pub struct PoseEstimator {
     pub sync_results: Arc<RwLock<BTreeMap<usize, FrameResult>>>,
-    pub lens_params: Arc<RwLock<(Vector2<f64>, Vector2<f64>)>>,
+    pub lens_params: Arc<RwLock<(Matrix3<f64>, Vector4<f64>)>>,
     pub estimated_gyro: Arc<RwLock<Vec<TimeIMU>>>,
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
     pub lpf: std::sync::atomic::AtomicU32,
@@ -55,8 +55,8 @@ pub struct PoseEstimator {
 }
 
 impl PoseEstimator {
-    pub fn set_lens_params(&self, focal: Vector2<f64>, principal: Vector2<f64>) {
-        *self.lens_params.write() = (focal, principal);
+    pub fn set_lens_params(&self, camera_matrix: Matrix3<f64>, coefficients: Vector4<f64>) {
+        *self.lens_params.write() = (camera_matrix, coefficients);
     }
     pub fn clear(&self) {
         self.sync_results.write().clear();
@@ -131,15 +131,15 @@ impl PoseEstimator {
                     let curr = curr.item.clone();
                     if let Some(next) = l.get(&(frame + every_nth_frame)) {
                         let next = next.item.clone();
-                        let (focal, principal) = *self.lens_params.read();
+                        let (camera_matrix, coeffs) = *self.lens_params.read();
 
                         // Unlock the mutex for estimate_pose
                         drop(l);
 
                         let r = match (curr, next) {
                             #[cfg(feature = "use-opencv")]
-                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, focal, principal) }
-                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, focal, principal) }
+                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, camera_matrix, coeffs) }
+                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, camera_matrix, coeffs) }
                             _ => None
                         };
 

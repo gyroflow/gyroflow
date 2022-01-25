@@ -3,9 +3,9 @@
 
 use akaze::Akaze;
 use arrsac::Arrsac;
-use bitarray::{BitArray, Hamming};
+use bitarray::{ BitArray, Hamming };
 //use image::EncodableLayout;
-use nalgebra::{Point2, Vector2, Rotation3};
+use nalgebra::{ Rotation3, Matrix3, Vector4 };
 use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
@@ -64,18 +64,24 @@ impl ItemAkaze {
         self.features.0[i].point
     }
 
-    pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {        
+    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>) -> Option<Rotation3<f64>> {        
         let a1 = &self.features;
         let a2 = &next.features;
 
-        let intrinsics = cv_pinhole::CameraIntrinsics {
-            focals: focal,
-            principal_point: Point2::from(principal),
-            skew: 0.0,
-        };
+        let pts1 = a1.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
+        let pts2 = a2.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
+        let pts1 = crate::undistortion::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
+        let pts2 = crate::undistortion::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
 
+        let intrinsics = cv_pinhole::CameraIntrinsics::identity();
         let matches: Vec<Match> = Self::match_descriptors(&a1.1, &a2.1).into_iter()
-            .map(|(i1, i2)| FeatureMatch(intrinsics.calibrate(a1.0[i1]), intrinsics.calibrate(a2.0[i2])))
+            .map(|(i1, i2)| {
+                let mut p1 = a1.0[i1];
+                let mut p2 = a2.0[i2];
+                p1.point = (pts1[i1].0 as f32, pts1[i1].1 as f32);
+                p2.point = (pts2[i2].0 as f32, pts2[i2].1 as f32);
+                FeatureMatch(intrinsics.calibrate(p1), intrinsics.calibrate(p2))
+            })
             .collect();
 
         // Try different thresholds for best results

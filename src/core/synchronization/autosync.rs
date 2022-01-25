@@ -6,7 +6,6 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
 use parking_lot::RwLock;
-use nalgebra::Vector2;
 use std::collections::HashMap;
 
 use crate::StabilizationManager;
@@ -74,8 +73,8 @@ impl AutosyncProcess {
         }
         let mtrx = stab.lens.read().get_camera_matrix(size);
         estimator.set_lens_params(
-            Vector2::new(mtrx[(0, 0)] / img_ratio, mtrx[(1, 1)] / img_ratio),
-            Vector2::new(mtrx[(0, 2)] / img_ratio, mtrx[(1, 2)] / img_ratio)
+            mtrx / img_ratio,
+            stab.lens.read().get_distortion_coeffs()
         );
         estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
         

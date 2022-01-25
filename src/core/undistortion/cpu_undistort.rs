@@ -128,17 +128,17 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Matrix3::identity(), Some(rotations))
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations))
 }
 
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Matrix3<f64>, rot_per_point: Option<Vec<Matrix3<f64>>>) -> Vec<(f64, f64)> {
+pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>) -> Vec<(f64, f64)> {
     let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
     let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
     let k = distortion_coeffs;
     
     let mut rr = rotation;
-    if !p.is_empty() { // PP
+    if let Some(p) = p { // PP
         rr = p * rr;
     }
 

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{Vector2, Rotation3};
+use nalgebra::{ Rotation3, Matrix3, Vector4 };
 use std::ffi::c_void;
-use opencv::core::{Mat, Size, Point2f, TermCriteria, CV_8UC1};
+use opencv::core::{ Mat, Size, Point2f, TermCriteria, CV_8UC1 };
 use opencv::prelude::MatTraitConst;
 
 // use opencv::prelude::{PlatformInfoTraitConst, DeviceTraitConst, UMatTraitConst};
@@ -56,35 +56,51 @@ impl ItemOpenCV {
         }
     }
     
-    pub fn estimate_pose(&mut self, next: &mut Self, focal: Vector2<f64>, principal: Vector2<f64>) -> Option<Rotation3<f64>> {
+    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
+            let pts11 = pts1.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
+            let pts22 = pts2.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
+            let pts11 = crate::undistortion::undistort_points(&pts11, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
+            let pts22 = crate::undistortion::undistort_points(&pts22, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
+
+            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+
             let a1_pts = Mat::from_slice(&pts1)?;
             let a2_pts = Mat::from_slice(&pts2)?;
             
-            let scaled_k = Mat::from_slice_2d(&[
-                [focal.x, 0.0, principal.x],
-                [0.0, focal.y, principal.y],
-                [0.0, 0.0, 1.0]
+            // let scaled_k = Mat::from_slice_2d(&[
+            //     [focal.x, 0.0, principal.x],
+            //     [0.0, focal.y, principal.y],
+            //     [0.0, 0.0, 1.0]
+            // ])?;
+            let identity = Mat::from_slice_2d(&[
+                [1.0f64, 0.0f64, 0.0f64],
+                [0.0f64, 1.0f64, 0.0f64],
+                [0.0f64, 0.0f64, 1.0f64]
             ])?;
 
             // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default())?;
-            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, opencv::calib3d::RANSAC, 0.999, 0.1, 1000, &mut Mat::default())?;
+            let mut mask = Mat::default();
+            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.99, 5e-4, 1000, &mut mask)?;
         
             let mut r1 = Mat::default();
-            let mut r2 = Mat::default();
+            // let mut r2 = Mat::default();
             let mut t = Mat::default();
-            opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
+            
+            opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
+            // opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
             
             let r1 = cv_to_rot2(r1)?;
-            let r2 = cv_to_rot2(r2)?;
-        
-            Ok(if r1.angle() < r2.angle() {
-                r1
-            } else {
-                r2
-            })
+            Ok(r1)
+            // let r2 = cv_to_rot2(r2)?;
+            // Ok(if r1.angle() < r2.angle() {
+            //     r1
+            // } else {
+            //     r2
+            // })
         }();
 
         match result {
