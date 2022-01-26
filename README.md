@@ -26,6 +26,8 @@
     <a href="https://github.com/AdrianEddy/gyroflow/">
       <img src="https://img.shields.io/github/contributors/AdrianEddy/gyroflow?color=dark-green" alt="Contributors">
     </a>
+    <a title="Crowdin" target="_blank" href="https://crowdin.com/project/gyroflow"><img src="https://badges.crowdin.net/gyroflow/localized.svg">
+    </a>
     <a href="https://github.com/AdrianEddy/gyroflow/issues/">
       <img src="https://img.shields.io/github/issues/AdrianEddy/gyroflow" alt="Issues">
     </a>
