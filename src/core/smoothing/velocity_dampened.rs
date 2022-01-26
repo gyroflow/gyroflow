@@ -14,12 +14,16 @@ use crate::gyro_source::TimeQuat;
 
 #[derive(Clone)]
 pub struct VelocityDampened {
-    pub smoothness: f64
+    pub time_constant: f64,
+    pub time_constant2: f64,
+    pub velocity_factor: f64,
 }
 
 impl Default for VelocityDampened {
     fn default() -> Self { Self {
-        smoothness: 0.2
+        time_constant: 0.6,
+        time_constant2: 0.1,
+        velocity_factor: 0.9
     } }
 }
 
@@ -28,21 +32,40 @@ impl SmoothingAlgorithm for VelocityDampened {
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
-            "smoothness" => self.smoothness = val,
+            "time_constant"   => self.time_constant   = val,
+            "time_constant2"  => self.time_constant2  = val,
+            "velocity_factor" => self.velocity_factor = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {
-                "name": "smoothness",
+                "name": "time_constant",
                 "description": "Smoothness",
                 "type": "SliderWithField",
-                "from": 0.001,
+                "from": 0.01,
                 "to": 1.0,
-                "value": self.smoothness,
-                "unit": "s",
-                "precision": 3
+                "value": self.time_constant,
+                "unit": "s"
+            },
+            {
+                "name": "time_constant2",
+                "description": "Smoothness at high velocity",
+                "type": "SliderWithField",
+                "from": 0.001,
+                "to": 0.1,
+                "value": self.time_constant2,
+                "unit": "s"
+            },
+            {
+                "name": "velocity_factor",
+                "description": "Velocity factor",
+                "type": "SliderWithField",
+                "from": 0.01,
+                "to": 10.0,
+                "value": self.velocity_factor,
+                "unit": ""
             }
         ])
     }
@@ -52,7 +75,9 @@ impl SmoothingAlgorithm for VelocityDampened {
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        hasher.write_u64(self.smoothness.to_bits());
+        hasher.write_u64(self.time_constant.to_bits());
+        hasher.write_u64(self.time_constant2.to_bits());
+        hasher.write_u64(self.velocity_factor.to_bits());
         hasher.finish()
     }
 
@@ -64,8 +89,12 @@ impl SmoothingAlgorithm for VelocityDampened {
 
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
-        let alpha = 1.0 - (-(1.0 / sample_rate) / 1.0).exp();
-        let high_alpha = 1.0 - (-(1.0 / sample_rate) / 0.1).exp();
+        let mut alpha = 1.0;
+        let mut high_alpha = 1.0;
+        if self.time_constant > 0.0 {
+            alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
+            high_alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant2).exp();
+        }
 
         let mut velocity = BTreeMap::<i64, f64>::new();
 
@@ -76,7 +105,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
             let dist = (prev_quat.inverse() * quat).angle();
-            velocity.insert(*timestamp, dist);
+            velocity.insert(*timestamp, dist / sample_rate);
             prev_quat = *quat;
         }
 
@@ -96,8 +125,8 @@ impl SmoothingAlgorithm for VelocityDampened {
             }
         }
 
-        if self.smoothness > 0.0 {
-            max_velocity *= self.smoothness;
+        if self.velocity_factor > 0.0 {
+            max_velocity *= self.velocity_factor;
         }
 
         let ratios: BTreeMap<i64, f64> = velocity.iter().map(|(k, vel)| {
@@ -109,7 +138,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         let smoothed1: TimeQuat = quats.iter().map(|(ts, x)| {
             let ratio = ratios[ts];
             let val = alpha * (1.0 - ratio) + high_alpha * ratio;
-            q = q.slerp(x, val.min(1.0));
+            q = q.slerp(x, val);
             (*ts, q)
         }).collect();
 
@@ -118,7 +147,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         smoothed1.iter().rev().map(|(ts, x)| {
             let ratio = ratios[ts];
             let val = alpha * (1.0 - ratio) + high_alpha * ratio;
-            q = q.slerp(x, val.min(1.0));
+            q = q.slerp(x, val);
             (*ts, q)
         }).collect()
     }
