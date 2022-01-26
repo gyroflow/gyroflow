@@ -259,8 +259,6 @@ impl LensProfile {
         params.distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
 
         let zoom = crate::AdaptiveZoom::from_compute_params(params);
-        let fov = zoom.compute(&[0.0]).first().map(|x| x.0).unwrap_or(1.0);
-        dbg!(&fov);
-        fov
+        zoom.compute(&[0.0]).first().map(|x| x.0).unwrap_or(1.0)
     }
 }

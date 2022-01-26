@@ -122,7 +122,8 @@ impl BasicParams {
     }
 
     pub fn set_fovs(&mut self, fovs: Vec<f64>, mut lens_fov_adjustment: f64) {
-        if let Some(min_fov) = fovs.iter().copied().reduce(f64::min) {
+        if let Some(mut min_fov) = fovs.iter().copied().reduce(f64::min) {
+            min_fov *= self.video_size.0 as f64 / self.video_output_size.0.max(1) as f64;
             if lens_fov_adjustment <= 0.0001 { lens_fov_adjustment = 1.0 };
             self.min_fov = min_fov / lens_fov_adjustment;
         }

@@ -121,7 +121,14 @@ MenuItem {
         title: qsTr("Export lens profile");
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         onAccepted: {
-            controller.export_lens_profile(fileDialog.selectedFile, calib.calibrationInfo, uploadProfile.checked);
+            if (uploadProfile.checked) {
+                messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
+                    { text: qsTr("Yes"), accent: true, clicked: () => controller.export_lens_profile(fileDialog.selectedFile, calib.calibrationInfo, true) },
+                    { text: qsTr("No"),                clicked: () => controller.export_lens_profile(fileDialog.selectedFile, calib.calibrationInfo, false) }
+                ]);
+            } else {
+                controller.export_lens_profile(fileDialog.selectedFile, calib.calibrationInfo, uploadProfile.checked);
+            }
         }
     }
 
