@@ -128,6 +128,8 @@ impl SmoothingAlgorithm for VelocityDampened {
             }
         }
 
+        log::debug!("Max velocity: {}", max_velocity);
+
         if self.velocity_factor > 0.0 {
             max_velocity *= self.velocity_factor;
         }

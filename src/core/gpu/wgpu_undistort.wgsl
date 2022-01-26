@@ -88,9 +88,10 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
         // Calculate source `y` for rolling shutter
         var sy = global_id.y;
         if (params_count > 2u) {
-            let x_y_ = vec2<f32>(y * undistortion_params.data[9u + 1u] + undistortion_params.data[9u + 2u] + (x * undistortion_params.data[9u + 0u]),
-                                 y * undistortion_params.data[9u + 4u] + undistortion_params.data[9u + 5u] + (x * undistortion_params.data[9u + 3u]));
-            let w_ = y * undistortion_params.data[9u + 7u] + undistortion_params.data[9u + 8u] + (x * undistortion_params.data[9u + 6u]);
+            let params_idx: u32 = (params_count / 2u) * 9u; // Use middle matrix
+            let x_y_ = vec2<f32>(y * undistortion_params.data[params_idx + 1u] + undistortion_params.data[params_idx + 2u] + (x * undistortion_params.data[params_idx + 0u]),
+                                 y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));
+            let w_ = y * undistortion_params.data[params_idx + 7u] + undistortion_params.data[params_idx + 8u] + (x * undistortion_params.data[params_idx + 6u]);
             if (w_ > 0.0) {
                 let pos = x_y_ / w_;            
                 let r = length(pos);

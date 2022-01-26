@@ -37,7 +37,7 @@ impl<T: PixelType> Undistortion<T> {
                     // Calculate source `y` for rolling shutter
                     let mut sy = y;
                     if undistortion_params.len() > 2 {
-                        let undistortion_params = undistortion_params[1]; // Use first matrix
+                        let undistortion_params = undistortion_params[undistortion_params.len() / 2]; // Use middle matrix
                         let _x = y as f32 * undistortion_params[1] + undistortion_params[2] + (x as f32 * undistortion_params[0]);
                         let _y = y as f32 * undistortion_params[4] + undistortion_params[5] + (x as f32 * undistortion_params[3]);
                         let _w = y as f32 * undistortion_params[7] + undistortion_params[8] + (x as f32 * undistortion_params[6]);

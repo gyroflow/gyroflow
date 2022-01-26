@@ -157,7 +157,7 @@ Item {
                 Item {
                     anchors.fill: parent;
                     layer.enabled: true;
-                    opacity: root.safeArea && window.stab.fovSlider.value > 1? 1 : 0;
+                    opacity: root.safeArea && window.stab.fovSlider.value > 1 && stabEnabledBtn.checked? 1 : 0;
                     Ease on opacity { }
                     visible: opacity > 0;
                     Item {
@@ -336,6 +336,7 @@ Item {
                 }
 
                 SmallLinkButton {
+                    id: stabEnabledBtn;
                     icon.name: "gyroflow";
                     onCheckedChanged: controller.stab_enabled = checked;
                     tooltip: qsTr("Toggle stabilization");

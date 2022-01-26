@@ -49,7 +49,7 @@ void main() {
     // Calculate source `y` for rolling shutter
     int sy = texPos.y;
     if (uniforms.params_count > 2) {
-        int idx = 2; // Use first matrix
+        int idx = 2 + int(uniforms.params_count / 2) * 3; // Use middle matrix
         float _x = (float(texPos.y) * ssbo.params[idx + 0].y) + ssbo.params[idx + 0].z + (float(texPos.x) * ssbo.params[idx + 0].x);
         float _y = (float(texPos.y) * ssbo.params[idx + 1].y) + ssbo.params[idx + 1].z + (float(texPos.x) * ssbo.params[idx + 1].x);
         float _w = (float(texPos.y) * ssbo.params[idx + 2].y) + ssbo.params[idx + 2].z + (float(texPos.x) * ssbo.params[idx + 2].x);

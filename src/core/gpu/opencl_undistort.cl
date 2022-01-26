@@ -61,7 +61,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         // Calculate source `y` for rolling shutter
         int sy = y;
         if (params_count > 2) {
-            __global const float *params = &undistortion_params[9]; // Use first matrix
+            __global const float *params = &undistortion_params[(params_count / 2) * 9]; // Use middle matrix
             float _x = y * params[1] + params[2] + (x * params[0]);
             float _y = y * params[4] + params[5] + (x * params[3]);
             float _w = y * params[7] + params[8] + (x * params[6]);

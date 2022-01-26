@@ -148,7 +148,7 @@ impl PoseEstimator {
                             if let Some(x) = l.get_mut(frame) {
                                 x.rotation = Some(rot);
                                 x.quat = Some(Quat64::from(rot));
-                                let rotvec = rot.scaled_axis() * fps;
+                                let rotvec = rot.scaled_axis() * (fps / every_nth_frame as f64);
                                 x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                             } else {
                                 log::warn!("Failed to get frame {}", frame);
