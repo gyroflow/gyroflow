@@ -13,6 +13,7 @@ pub struct ComputeParams {
 
     pub frame_count: usize,
     pub fov_scale: f64,
+    pub lens_fov_adjustment: f64,
     pub width: usize,
     pub height: usize,
     pub output_width: usize,
@@ -26,16 +27,18 @@ pub struct ComputeParams {
     pub distortion_coeffs: [f64; 4],
     pub radial_distortion_limit: f64,
     pub frame_readout_time: f64,
-    pub trim_start_frame: usize,
-    pub trim_end_frame: usize,
+    pub trim_start: f64,
+    pub trim_end: f64,
+    pub scaled_fps: f64,
+    pub adaptive_zoom_window: f64,
     pub framebuffer_inverted: bool,
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
         let params = mgr.params.read();
-        let lens = mgr.lens.read();
 
-        let mut camera_matrix = lens.get_camera_matrix(params.size);
+        let mut camera_matrix = mgr.lens.write().get_camera_matrix(params.size);
+        let lens = mgr.lens.read();
         let distortion_coeffs = lens.get_distortion_coeffs();
         let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
@@ -48,8 +51,8 @@ impl ComputeParams {
         
         let lens_ratio = params.video_size.0 as f64 / calib_width;
         camera_matrix[(0, 0)] *= lens_ratio;
-        camera_matrix[(0, 2)] *= lens_ratio;
         camera_matrix[(1, 1)] *= lens_ratio;
+        camera_matrix[(0, 2)] *= lens_ratio;
         camera_matrix[(1, 2)] *= lens_ratio;
 
         Self {
@@ -57,6 +60,7 @@ impl ComputeParams {
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
+            lens_fov_adjustment: lens.optimal_fov.unwrap_or(1.0),
             fovs: params.fovs.clone(),
             width: params.size.0.max(1),
             height: params.size.1.max(1),
@@ -72,8 +76,10 @@ impl ComputeParams {
             radial_distortion_limit,
             framebuffer_inverted: params.framebuffer_inverted,
             frame_readout_time: params.frame_readout_time,
-            trim_start_frame: (params.trim_start * params.frame_count as f64).floor() as usize,
-            trim_end_frame: (params.trim_end * params.frame_count as f64).ceil() as usize,
+            trim_start: params.trim_start,
+            trim_end: params.trim_end,
+            scaled_fps: params.get_scaled_fps(),
+            adaptive_zoom_window: params.adaptive_zoom_window
         }
     }
 }

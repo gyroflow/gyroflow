@@ -79,10 +79,13 @@ MenuItem {
         ComboBox {
             id: langList;
             property var langs: [
-                ["English",          "en"],
-                ["German (Deutsch)", "de"],
-                ["Polish (polski)",  "pl"],
-                ["Chinese - Simplified (简体中文)", "zh_CN"]
+                ["English",           "en"],
+                ["Danish (dansk)",    "da"],
+                ["German (Deutsch)",  "de"],
+                ["Norwegian (norsk)", "no"],
+                ["Polish (polski)",   "pl"],
+                ["Chinese - Simplified (简体中文)", "zh_CN"],
+                ["Chinese - Traditional (繁体中文)", "zh_TW"]
             ];
             Component.onCompleted: {
                 let selectedIndex = 0;

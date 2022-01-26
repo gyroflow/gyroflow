@@ -52,16 +52,19 @@ pub struct LensProfile {
 
     #[serde(skip)]
     pub filename: String,
+
+    #[serde(skip)]
+    pub optimal_fov: Option<f64>,
 }
 
 impl LensProfile {
-    pub fn from_json(json: &mut str) -> Result<Self, serde_json::Error> {
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
     }
 
     pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
         let data = std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?;
-        *self = serde_json::from_str(&data)?;
+        *self = Self::from_json(&data)?;
 
         if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
             return Err(serde_json::Error::io(std::io::ErrorKind::InvalidData.into()));
@@ -151,7 +154,7 @@ impl LensProfile {
         Ok(json)
     }
 
-    pub fn get_camera_matrix(&self, video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
+    fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mut mat = nalgebra::Matrix3::from_rows(&[
                 self.fisheye_params.camera_matrix[0].into(), 
@@ -160,6 +163,18 @@ impl LensProfile {
             ]);
             mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
             mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
+            Some(mat)
+        } else {
+            None
+        }
+    }
+    pub fn get_camera_matrix(&mut self, video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
+        if self.fisheye_params.camera_matrix.len() == 3 {
+            let mat = self.get_camera_matrix_internal().unwrap();
+
+            if self.optimal_fov.is_none() {
+                self.optimal_fov = Some(self.calculate_optimal_fov(video_size));
+            }
             
             mat
         } else {
@@ -227,5 +242,25 @@ impl LensProfile {
             }
         }
         ret
+    }
+
+    pub fn calculate_optimal_fov(&self, output_size: (usize, usize)) -> f64 {
+        if output_size.0 <= 0 || output_size.1 <= 0 { return 1.0; }
+        let mut params = crate::undistortion::ComputeParams::default();
+        params.frame_count = 1;
+        params.fov_scale = 1.0;
+        params.adaptive_zoom_window = -1.0;
+        params.width              = self.calib_dimension.w;  params.height              = self.calib_dimension.h;
+        params.output_width       = output_size.0;           params.output_height       = output_size.1;
+        params.video_output_width = params.output_width;     params.video_output_height = params.output_height;
+        params.video_width        = params.width;            params.video_height        = params.height;
+        params.camera_matrix = self.get_camera_matrix_internal().unwrap_or_else(|| nalgebra::Matrix3::identity());
+        let distortion_coeffs = self.get_distortion_coeffs();
+        params.distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
+
+        let zoom = crate::AdaptiveZoom::from_compute_params(params);
+        let fov = zoom.compute(&[0.0]).first().map(|x| x.0).unwrap_or(1.0);
+        dbg!(&fov);
+        fov
     }
 }

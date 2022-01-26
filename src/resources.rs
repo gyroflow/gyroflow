@@ -94,7 +94,10 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/texture.vert.qsb",
 
         "resources/translations/pl.qm",
+        "resources/translations/da.qm",
         "resources/translations/de.qm",
+        "resources/translations/no.qm",
         "resources/translations/zh_CN.qm",
+        "resources/translations/zh_TW.qm",
     }
 );

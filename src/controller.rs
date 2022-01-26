@@ -254,12 +254,12 @@ impl Controller {
       
                             assert!(_output_frame.is_none());
 
-                            if sync.is_frame_wanted(frame) {
+                            if sync.is_frame_wanted(frame, timestamp_us) {
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                     Ok(mut small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
             
-                                        sync.feed_frame(frame, width, height, stride, pixels, cancel_flag.clone());
+                                        sync.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone());
                                     },
                                     Err(e) => {
                                         err(("An error occured: %1".to_string(), e.to_string()))
@@ -288,7 +288,7 @@ impl Controller {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
 
             chart.setSyncResults(&*self.stabilizer.pose_estimator.estimated_gyro.read());
-            // chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
+            chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
 
             chart.setFromGyroSource(&self.stabilizer.gyro.read());
         }
@@ -681,6 +681,7 @@ impl Controller {
     pub fn init_calibrator(&self) {
         self.stabilizer.params.write().is_calibrator = true;
         *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
+        self.stabilizer.set_smoothing_method(1); // Plain 3D
         self.stabilizer.set_smoothing_param("time_constant", 2.0);
     }
 

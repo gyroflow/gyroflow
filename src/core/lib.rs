@@ -19,7 +19,7 @@ pub mod gpu;
 
 pub mod util;
 
-use std::sync::{ Arc, atomic::Ordering::Relaxed };
+use std::sync::Arc;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use camera_identifier::CameraIdentifier;
@@ -121,9 +121,10 @@ impl BasicParams {
         }
     }
 
-    pub fn set_fovs(&mut self, fovs: Vec<f64>) {
+    pub fn set_fovs(&mut self, fovs: Vec<f64>, mut lens_fov_adjustment: f64) {
         if let Some(min_fov) = fovs.iter().copied().reduce(f64::min) {
-            self.min_fov = min_fov;
+            if lens_fov_adjustment <= 0.0001 { lens_fov_adjustment = 1.0 };
+            self.min_fov = min_fov / lens_fov_adjustment;
         }
         if fovs.is_empty() {
             self.min_fov = 1.0;
@@ -321,9 +322,11 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
     pub fn recompute_adaptive_zoom(&self) {
-        let mut zoom = AdaptiveZoom::from_manager(self);
+        let params = undistortion::ComputeParams::from_manager(self);
+        let lens_fov_adjustment = params.lens_fov_adjustment;
+        let mut zoom = AdaptiveZoom::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
-        self.params.write().set_fovs(fovs);
+        self.params.write().set_fovs(fovs, lens_fov_adjustment);
     }
 
     pub fn recompute_smoothness(&self) {
@@ -349,7 +352,6 @@ impl<T: PixelType> StabilizationManager<T> {
         let smoothing = self.smoothing.clone();
         let basic_params = self.params.clone();
         let gyro = self.gyro.clone();
-        let mut zoom = AdaptiveZoom::from_manager(self);
 
         let compute_id = fastrand::u64(..);
         self.current_compute_id.store(compute_id, SeqCst);
@@ -361,7 +363,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let undistortion = self.undistortion.clone();
         THREAD_POOL.spawn(move || {
             // std::thread::sleep(std::time::Duration::from_millis(20));
-            if current_compute_id.load(Relaxed) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return; }
 
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
@@ -377,14 +379,15 @@ impl<T: PixelType> StabilizationManager<T> {
                 smoothing_changed = true;
             }
             
-            if current_compute_id.load(Relaxed) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return; }
 
+            let mut zoom = AdaptiveZoom::from_compute_params(params.clone());
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params);
-                basic_params.write().set_fovs(params.fovs.clone());
+                basic_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
             }
             
-            if current_compute_id.load(Relaxed) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return; }
 
             undistortion.write().set_compute_params(params);
 
@@ -544,7 +547,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
-        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms);
+        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
     }
 
     pub fn set_lens_param(&self, param: &str, value: f64) {

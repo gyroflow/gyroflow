@@ -55,6 +55,7 @@ pub struct TimelineGyroChart {
     quats: Vec<ChartData>,
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
+    sync_quats: Vec<ChartData>,
 
     gyro_max: Option<f64>,
     duration_ms: f64,
@@ -183,15 +184,16 @@ impl TimelineGyroChart {
 
     pub fn setSyncResultsQuats(&mut self, data: &TimeQuat) {
         if self.viewMode == 3 {
-            self.sync_results = Vec::with_capacity(data.len());
+            self.sync_quats = Vec::with_capacity(data.len());
 
             for (ts, q) in data {
                 let q = q.quaternion().as_vector();
-                self.sync_results.push(ChartData {
+                self.sync_quats.push(ChartData {
                     timestamp_us: *ts,
                     values: [q[0], q[1], q[2], q[3]]
                 });
             }
+            Self::normalize_height(&mut self.sync_quats, None);
             self.update_data();
         }
     }
@@ -255,7 +257,6 @@ impl TimelineGyroChart {
             3 => {
                 let qmax = Self::normalize_height(&mut self.quats, None);
                 Self::normalize_height(&mut self.smoothed_quats, qmax);
-                // Self::normalize_height(&mut self.sync_results, qmax);
             },
             _ => { }
         }
@@ -300,10 +301,10 @@ impl TimelineGyroChart {
                 self.series[3].data = Self::get_serie_vector(&self.quats, 3);
 
                 // + Sync quaternions
-                // self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
-                // self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
-                // self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
-                // self.series[7].data = Self::get_serie_vector(&self.sync_results, 3);
+                // self.series[4].data = Self::get_serie_vector(&self.sync_quats, 0);
+                // self.series[5].data = Self::get_serie_vector(&self.sync_quats, 1);
+                // self.series[6].data = Self::get_serie_vector(&self.sync_quats, 2);
+                // self.series[7].data = Self::get_serie_vector(&self.sync_quats, 3);
 
                 // + Smoothed quaternions
                 self.series[4].data = Self::get_serie_vector(&self.smoothed_quats, 0);

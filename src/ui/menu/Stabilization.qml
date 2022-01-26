@@ -86,10 +86,14 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened"),
+        QT_TRANSLATE_NOOP("Popup", "Velocity dampened per axis"),
         // QT_TRANSLATE_NOOP("Popup", "Velocity dampened 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
         QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
+        QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Roll smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");

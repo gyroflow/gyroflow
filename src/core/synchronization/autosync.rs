@@ -71,7 +71,7 @@ impl AutosyncProcess {
         if img_ratio < 0.1 || !img_ratio.is_finite() {
             img_ratio = 1.0;
         }
-        let mtrx = stab.lens.read().get_camera_matrix(size);
+        let mtrx = stab.lens.write().get_camera_matrix(size);
         estimator.set_lens_params(
             mtrx / img_ratio,
             stab.lens.read().get_distortion_coeffs()
@@ -107,12 +107,12 @@ impl AutosyncProcess {
     pub fn get_ranges(&self) -> Vec<(f64, f64)> {
         self.ranges_ms.clone()
     }
-    pub fn is_frame_wanted(&self, frame: i32) -> bool {
+    pub fn is_frame_wanted(&self, frame: i32, timestamp_us: i64) -> bool {
         if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)) {
             if frame % self.estimator.every_nth_frame.load(SeqCst) as i32 != 0 {
                 // Don't analyze this frame
                 self.frame_status.write().insert(frame as usize, true);
-                self.estimator.insert_empty_result(frame as usize, self.method);
+                self.estimator.insert_empty_result(frame as usize, timestamp_us, self.method);
                 return false;
             }
             return true;    
@@ -120,7 +120,7 @@ impl AutosyncProcess {
 
         false
     }
-    pub fn feed_frame(&self, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
+    pub fn feed_frame(&self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);
@@ -142,12 +142,12 @@ impl AutosyncProcess {
                     return;
                 }
                 if let Some(img) = img {
-                    estimator.detect_features(frame as usize, method, img);
+                    estimator.detect_features(frame as usize, timestamp_us, method, img);
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame % 7 == 0 {
                         estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps);
-                        estimator.recalculate_gyro_data(frame_count, duration_ms, false);
+                        estimator.recalculate_gyro_data(frame_count, duration_ms, org_fps, false);
                     }
 
                     let processed_frames = estimator.processed_frames(current_range.0 as usize..current_range.1 as usize);
@@ -174,7 +174,7 @@ impl AutosyncProcess {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
         self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps);
-        self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, true);
+        self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.org_fps, true);
 
         if let Some(cb) = &self.finished_cb {
             if self.for_rs {

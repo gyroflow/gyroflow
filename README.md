@@ -113,8 +113,11 @@ Contributions are what make the open source community such an amazing place to l
 Currently *Gyroflow* is available in:
 * **English** (base language)
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
-* **German** (by [Grommi](https://github.com/Gro2mi))
+* **German** (by [Grommi](https://github.com/Gro2mi) and [Nicecrash](https://github.com/B-nutze-RR))
+* **Danish** (by [ElvinC](https://github.com/ElvinC))
+* **Norwegian** (by [MiniGod](https://github.com/MiniGod))
 * **Chinese Simplified** (by [DusKing1](https://github.com/DusKing1))
+* **Chinese Traditional** (by [DusKing1](https://github.com/DusKing1))
 
 Help us translate *Gyroflow* to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow
 

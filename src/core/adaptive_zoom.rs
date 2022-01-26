@@ -5,7 +5,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
 use enterpolation::{ Curve, Merge, bspline::BSpline };
-use crate::{ StabilizationManager, undistortion::{ self, ComputeParams } };
+use crate::undistortion::{ self, ComputeParams };
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f64, f64);
@@ -36,8 +36,7 @@ pub struct AdaptiveZoom {
 }
 
 impl AdaptiveZoom {
-    pub fn from_manager<T: crate::PixelType>(mgr: &StabilizationManager<T>) -> Self {
-        let mut compute_params = ComputeParams::from_manager(mgr);
+    pub fn from_compute_params(mut compute_params: ComputeParams) -> Self {
         compute_params.fov_scale = 1.0;
         compute_params.fovs.clear();
         
@@ -48,25 +47,23 @@ impl AdaptiveZoom {
         compute_params.output_width = compute_params.video_width;
         compute_params.output_height = compute_params.video_height;
 
-        let params = mgr.params.read();
-
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
         let output_dim = (compute_params.video_output_width as f64, compute_params.video_output_height as f64);
 
         Self {
-            compute_params,
             input_dim,
             output_dim,
-            fps: params.get_scaled_fps(),
-            range : (params.trim_start, params.trim_end),
+            fps: compute_params.scaled_fps,
+            range: (compute_params.trim_start, compute_params.trim_end),
 
-            mode: if params.adaptive_zoom_window < -0.9 {
+            mode: if compute_params.adaptive_zoom_window < -0.9 {
                 Mode::StaticZoom
-            } else if params.adaptive_zoom_window > 0.0001 {
-                Mode::DynamicZoom(params.adaptive_zoom_window)
+            } else if compute_params.adaptive_zoom_window > 0.0001 {
+                Mode::DynamicZoom(compute_params.adaptive_zoom_window)
             } else {
                 Mode::Disabled
-            }
+            },
+            compute_params
         }
     }
 

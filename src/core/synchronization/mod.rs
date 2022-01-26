@@ -37,6 +37,7 @@ enum EstimatorItem {
 pub type GrayImage = image::GrayImage;
 pub struct FrameResult {
     item: EstimatorItem,
+    pub timestamp_us: i64,
     pub rotation: Option<Rotation3<f64>>,
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>
@@ -66,7 +67,7 @@ impl PoseEstimator {
         let _ = opencv::init();
     }
 
-    pub fn insert_empty_result(&self, frame: usize, method: u32) {
+    pub fn insert_empty_result(&self, frame: usize, timestamp_us: i64, method: u32) {
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::default()),
             #[cfg(feature = "use-opencv")]
@@ -77,13 +78,14 @@ impl PoseEstimator {
             let mut l = self.sync_results.write();
             l.entry(frame).or_insert(FrameResult {
                 item,
+                timestamp_us,
                 rotation: None,
                 quat: None,
                 euler: None
             });
         }
     }
-    pub fn detect_features(&self, frame: usize, method: u32, img: image::GrayImage) {
+    pub fn detect_features(&self, frame: usize, timestamp_us: i64, method: u32, img: image::GrayImage) {
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
             #[cfg(feature = "use-opencv")]
@@ -94,6 +96,7 @@ impl PoseEstimator {
             let mut l = self.sync_results.write();
             l.entry(frame).or_insert(FrameResult {
                 item,
+                timestamp_us,
                 rotation: None,
                 quat: None,
                 euler: None
@@ -158,7 +161,7 @@ impl PoseEstimator {
                 }
             }
         });
-        self.recalculate_gyro_data(frame_count, duration_ms, false);
+        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
     }
 
     pub fn get_points_for_frame(&self, frame: &usize) -> (Vec<f32>, Vec<f32>) {
@@ -238,12 +241,12 @@ impl PoseEstimator {
         // TODO: maybe a better way than using stride as width?
         image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
     }
-    pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64) {
+    pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
-        self.recalculate_gyro_data(frame_count, duration_ms, false);
+        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
     }
 
-    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, final_pass: bool) {
+    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, fps: f64, final_pass: bool) {
         let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut is_akaze = false;
         for v in self.sync_results.read().values() {
@@ -253,35 +256,31 @@ impl PoseEstimator {
             }
         }
 
-        let timestamp_at_frame = |frame: f64| -> f64 {
-            (frame as f64 / frame_count as f64) * duration_ms
-        };
-
         let lpf = self.lpf.load(SeqCst) as f64 / 100.0;
         
         let mut vec = Vec::new();
         let mut quats = TimeQuat::new();
-        if !self.sync_results.read().is_empty() {
-            vec.resize(frame_count, TimeIMU::default());
-            for frame in 0..frame_count {
-                // Analyzed motion in reality happened during the transition from this frame to the next frame
-                // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
-                // TODO: figure out if rolling shutter time can be used to make better calculation here
-                // TODO: figure out why AKAZE and OpenCV have slight difference
-                let next_frame = frame + every_nth_frame;
-                if is_akaze {
-                    let halfway = (next_frame as f64 - frame as f64) / 2.0;
-                    vec[frame].timestamp_ms = timestamp_at_frame(frame as f64 + halfway);
-                } else {
-                    let halfway = (next_frame as f64 - frame as f64) / 2.5;
-                    vec[frame].timestamp_ms = timestamp_at_frame(frame as f64 + halfway);
-                }
-            }
-        }
-
         let mut update_eulers = BTreeMap::<usize, Option<(f64, f64, f64)>>::new();
         {
             let sync_results = self.sync_results.read();
+            if !sync_results.is_empty() {
+                vec.resize(frame_count, TimeIMU::default());
+                for frame in 0..frame_count {
+                    // Analyzed motion in reality happened during the transition from this frame to the next frame
+                    // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
+                    // TODO: figure out if rolling shutter time can be used to make better calculation here
+                    // TODO: figure out why AKAZE and OpenCV have slight difference
+                    let next_frame = frame + every_nth_frame;
+                    let ts = sync_results.get(&frame).map(|x| x.timestamp_us as f64 / 1000.0).unwrap_or_else(|| crate::timestamp_at_frame(frame as i32, fps));
+                    let next_ts = sync_results.get(&next_frame).map(|x| x.timestamp_us as f64 / 1000.0).unwrap_or_else(|| crate::timestamp_at_frame(next_frame as i32, fps));
+                    if is_akaze {
+                        vec[frame].timestamp_ms = ts + (next_ts - ts) / 2.0;
+                    } else {
+                        vec[frame].timestamp_ms = ts + (next_ts - ts) / 2.5;
+                    }
+                }
+            }
+
             for (k, v) in sync_results.iter() {
                 let mut eul = v.euler;
 
