@@ -17,61 +17,57 @@ use parking_lot::RwLock;
 
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
-    if cfg!(target_os = "macos") || cfg!(target_os = "ios") {
-        if use_gpu {
-            match codec {
-                "x264" => vec![
-                    ("h264_videotoolbox", true),
-                    ("h264_videotoolbox", false),
-                ],
-                "x265" => vec![
-                    ("hevc_videotoolbox", true),
-                    ("hevc_videotoolbox", false),
-                ],
-                "ProRes" => vec![("prores_ks", false)],
-                _        => vec![]
-            }
-        } else {
-            match codec {
-                "x264"   => vec![("h264_videotoolbox", false)],
-                "x265"   => vec![("hevc_videotoolbox", false)],
-                "ProRes" => vec![("prores_ks", false)],
-                _        => vec![]
-            }
+    if use_gpu {
+        match codec {
+            "x264" => vec![
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                ("h264_videotoolbox", true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("h264_nvenc",        true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("nvenc",             true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("nvenc_h264",        true),
+                #[cfg(target_os = "windows")]
+                ("h264_amf",          true),
+                #[cfg(target_os = "windows")]
+                ("h264_mf",           true),
+                #[cfg(target_os = "linux")]
+                ("h264_vaapi",        true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("h264_qsv",          true),
+                #[cfg(target_os = "linux")]
+                ("h264_v4l2m2m",      true),
+                ("libx264",           false),
+            ],
+            "x265" => vec![
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                ("hevc_videotoolbox", true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("hevc_nvenc",        true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("nvenc_hevc",        true),
+                #[cfg(target_os = "windows")]
+                ("hevc_amf",          true),
+                #[cfg(target_os = "windows")]
+                ("hevc_mf",           true),
+                #[cfg(target_os = "linux")]
+                ("hevc_vaapi",        true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("hevc_qsv",          true),
+                #[cfg(target_os = "linux")]
+                ("hevc_v4l2m2m",      true),
+                ("libx265",           false),
+            ],
+            "ProRes" => vec![("prores_ks", false)],
+            _        => vec![]
         }
     } else {
-        if use_gpu {
-            match codec {
-                "x264" => vec![
-                    ("h264_nvenc",        true),
-                    ("nvenc",             true),
-                    ("nvenc_h264",        true),
-                    ("h264_amf",          true),
-                    ("h264_mf",           true),
-                    ("h264_vaapi",        true),
-                    ("h264_qsv",          true),
-                    ("h264_v4l2m2m",      true),
-                    ("libx264",           false),
-                ],
-                "x265" => vec![
-                    ("hevc_nvenc",        true),
-                    ("hevc_amf",          true),
-                    ("hevc_mf",           true),
-                    ("hevc_vaapi",        true),
-                    ("hevc_qsv",          true),
-                    ("hevc_v4l2m2m",      true),
-                    ("libx265",           false),
-                ],
-                "ProRes" => vec![("prores_ks", false)],
-                _        => vec![]
-            }
-        } else {
-            match codec {
-                "x264"   => vec![("libx264", false)],
-                "x265"   => vec![("libx265", false)],
-                "ProRes" => vec![("prores_ks", false)],
-                _        => vec![]
-            }
+        match codec {
+            "x264"   => vec![("libx264", false)],
+            "x265"   => vec![("libx265", false)],
+            "ProRes" => vec![("prores_ks", false)],
+            _        => vec![]
         }
     }
 }

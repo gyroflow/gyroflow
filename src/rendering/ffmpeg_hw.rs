@@ -130,6 +130,8 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
     for x in encoders {
         if let Some(mut enc) = encoder::find_by_name(x.0) {
             for i in 0..20 {
+                if !x.1 { return (x.0, x.1, None); } // If not HW encoder
+                
                 unsafe {
                     let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
                     if config.is_null() {
