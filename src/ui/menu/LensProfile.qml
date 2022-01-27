@@ -81,8 +81,8 @@ MenuItem {
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         window.exportSettings.setOutputSize(obj.output_dimension.w, obj.output_dimension.h);
                     }
-                    if (obj.frame_readout_time && Math.abs(obj.frame_readout_time) > 0) {
-                        window.stab.setFrameReadoutTime(obj.frame_readout_time);
+                    if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
+                        Qt.callLater(() => window.stab.setFrameReadoutTime(obj.frame_readout_time));
                     }
 
                     root.calibWidth  = obj.calib_dimension.w;

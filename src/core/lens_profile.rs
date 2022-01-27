@@ -210,7 +210,10 @@ impl LensProfile {
                     let (new_w, new_h) = (x["width"].as_u64().unwrap_or_default(), x["height"].as_u64().unwrap_or_default());
                     if new_w > 0 && new_h > 0 {
                         let ratio = new_w as f64 / cpy.calib_dimension.w as f64;
-                        let scale = |val: &mut usize| { *val = (*val as f64 * ratio).round() as usize; };
+                        let scale = |val: &mut usize| {
+                            *val = (*val as f64 * ratio).round() as usize;
+                            if *val % 2 != 0 { *val -= 1; }
+                        };
                         scale(&mut cpy.calib_dimension.w);
                         scale(&mut cpy.calib_dimension.h);
                         scale(&mut cpy.orig_dimension.w);

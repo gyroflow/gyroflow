@@ -20,6 +20,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
 // TODO: use quaternions for finding offset, not gyro samples
+// TODO: fix loader that stays on after load sometimes
 
 // TODO: Batch processing when loaded multiple files
 // TODO: wgpu convert to using textures
@@ -48,6 +49,7 @@ use ui::ui_tools::UITools;
 // TODO: Add cache for the undistortion if the video is not playing
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
+// TODO: preview resolution calculation is wrong when setting the output size to 1280x720 and the source size is 4k
 // TODO: support GoPro's superview lens correction
 // TODO: Figure out Sony lens distortion parameters
 // TODO: save panel sizes, menu opened states and window dimensions

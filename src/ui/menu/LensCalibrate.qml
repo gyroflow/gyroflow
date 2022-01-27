@@ -34,7 +34,7 @@ MenuItem {
             if (Math.round(videoRatio * 100) == 133) { // 4:3
                 // Default to 16:9 output
                 h = Math.round(w / (16 / 9));
-                if ((h % 2) != 0) h++;
+                if ((h % 2) != 0) h--;
             }
 
             calib.calibrationInfo.output_dimension = { "w": w, "h": h };
@@ -170,7 +170,7 @@ MenuItem {
             id: maxPoints;
             width: parent.width;
             height: 25 * dpiScale;
-            value: 10;
+            value: 15;
             from: 1;
         }
     }
@@ -341,7 +341,7 @@ MenuItem {
                 id: iterations;
                 width: parent.width;
                 height: 25 * dpiScale;
-                value: 1000;
+                value: 500;
                 from: 1;
             }
         }
