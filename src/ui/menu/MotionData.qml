@@ -40,6 +40,9 @@ MenuItem {
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
             orientation.text = imu_orientation;
+
+            // Twice to trigger change signal
+            integrator.hasQuaternions = !contains_quats;
             integrator.hasQuaternions = contains_quats;
 
             const chart = window.videoArea.timeline.getChart();
@@ -154,12 +157,11 @@ MenuItem {
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
-            onCurrentIndexChanged: {
+            function setMethod() {
                 controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
             }
-            onHasQuaternionsChanged: {
-                controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
-            }
+            onCurrentIndexChanged: Qt.callLater(integrator.setMethod);
+            onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);
         }
     }
     DropTarget {
