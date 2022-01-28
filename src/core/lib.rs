@@ -19,7 +19,7 @@ pub mod gpu;
 
 pub mod util;
 
-use std::sync::Arc;
+use std::{sync::Arc, collections::BTreeMap};
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use camera_identifier::CameraIdentifier;
@@ -205,6 +205,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
+            gyro.file_path = path.to_string();
         }
 
         if path.ends_with(".gyroflow") {
@@ -653,6 +654,109 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.smoothness_checksum.store(0, SeqCst);
         self.adaptive_zoom_checksum.store(0, SeqCst);
+    }
+
+    pub fn export_gyroflow(&self, video_path: &str, filepath: impl AsRef<std::path::Path>, thin: bool) -> std::io::Result<()> {
+        use std::io::{ BufWriter, Write };
+
+        let gyro = self.gyro.read();
+        let params = self.params.read();
+
+        let quats: BTreeMap<i64, gyro_source::Quat64Serde> = gyro.org_quaternions.iter().map(|(&k, &v)| (k, v.into())).collect();
+        // let smooth_quats: std::collections::BTreeMap<i64, gyro_source::Quat64Serde> = gyro.org_smoothed_quaternions.iter().map(|(&k, &v)| (k, v.into())).collect();
+
+        let (smoothing_name, smoothing_params) = {
+            let mut smoothing_lock = self.smoothing.write();
+            let smoothing = smoothing_lock.current();
+            (smoothing.get_name(), smoothing.get_parameters_json())
+        };
+
+        let empty_vec = Vec::new(); let empty_vec2 = Vec::new();
+        
+        let obj = serde_json::json!({
+            "title": "Gyroflow data file",
+            "version": 2,
+            "app_version": env!("CARGO_PKG_VERSION").to_string(),
+            "videofile": video_path,
+            "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
+            "date": chrono::Local::today().naive_local().to_string(),
+    
+            "video_info": {
+                "width":       params.video_size.0,
+                "height":      params.video_size.1,
+                "fps":         params.fps,
+                "vfr_fps":     params.get_scaled_fps(),
+                "rotation":    params.video_rotation,
+                "duration_ms": params.duration_ms,
+                "num_frames":  params.frame_count
+            },
+            "stabilization": {
+                "fov":                  params.fov,
+                "method":               smoothing_name,
+                "smoothing_params":     smoothing_params,
+                "frame_readout_time":   params.frame_readout_time,
+                "adaptive_zoom_window": params.adaptive_zoom_window,
+                "adaptive_zoom_fovs":   if !thin { &params.fovs } else { &empty_vec }
+            },
+            "gyro_source": {
+                "filepath":           gyro.file_path,
+                "lpf":                gyro.imu_lpf,
+                "rotation":           gyro.imu_rotation_angles,
+                "imu_orientation":    gyro.imu_orientation,
+                "integration_method": gyro.integration_method,
+                "raw_imu":            if !thin { &gyro.org_raw_imu } else { &empty_vec2 },
+                "quaternions":        if !thin { quats } else { BTreeMap::new() },
+                // "smoothed_quaternions": smooth_quats
+            },
+            /*"output": { // TODO
+                "filepath":     "",
+                "codec":        "",
+                "width":        0,
+                "height":       0,
+                "bitrate":      0.0f32,
+                "use_gpu":      true,
+                "export_audio": true
+            },*/
+            /*"autosync": { // TODO
+                // TODO: input settings?
+                "camera_matrix": {}, // frame, Matrix3
+                "euler_angles": {} // frame, rotation vector
+            },*/
+            "offsets": gyro.offsets, // timestamp, offset value
+
+            "trim_start": params.trim_start,
+            "trim_end":   params.trim_end,
+
+            // "frame_orientation": {}, // timestamp, original frame quaternion
+            // "stab_transform":    {} // timestamp, final quaternion
+        });
+        
+        let file = std::fs::File::create(filepath)?;
+        let mut writer = BufWriter::new(file);
+        serde_json::to_writer(&mut writer, &obj)?;
+        writer.flush()?;
+
+        Ok(())
+    }
+    pub fn import_gyroflow(&self, path: &str) -> std::io::Result<serde_json::Value> {
+        let data = std::fs::read(path)?;
+        let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
+        if let serde_json::Value::Object(ref mut obj) = obj {
+            if let Some(lens) = obj.get("calibration_data") {
+                self.lens.write().load_from_json_value(&lens);
+            }
+            obj.remove("frame_orientation");
+            obj.remove("stab_transform");
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+                obj.remove("raw_imu");
+                obj.remove("quaternions");
+                obj.remove("smoothed_quaternions");
+            }
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
+                obj.remove("adaptive_zoom_fovs");
+            }
+        }
+        Ok(obj)
     }
 }
 

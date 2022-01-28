@@ -21,14 +21,15 @@ use ui::ui_tools::UITools;
 
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: fix loader that stays on after load sometimes
+// TODO: loading .gyroflow
 
 // TODO: Batch processing when loaded multiple files
+// TODO: when adding a sync point, enter its edit mode immediately
+// TODO: delete all sync points button
 // TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
-// TODO: exporting and loading .gyroflow
 // TODO: smoothing presets
-// TODO: render queue
 // TODO: cli interface
 // TODO: Calibrator: Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
@@ -37,18 +38,21 @@ use ui::ui_tools::UITools;
 // TODO: hyperlapse mode
 // TODO: video speed 
 // TODO: export framerate
+// TODO: export pixel format conversion (ComboBox in the UI)
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: drop mutliple files at once (video, lens profile, gyro data)
 // TODO: add elapsed and remaining times when rendering
-// TODO: add vertical labels and scale to gyro chart
-// TODO: When rendering, it should be possible to "minimize" the status and continue to work. 
+// TODO: add vertical labels and scale lines to gyro chart
+// TODO: render queue
+// TODO: When rendering, it should be possible to "minimize" the status and let it render in render queue
 // TODO: keyframes for stabilization params
 // TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
 // TODO: mask for optical flow
 // TODO: Add cache for the undistortion if the video is not playing
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
+// TODO: exporting .gyroflow: include output settings and allow user to choose thin or full file
 // TODO: preview resolution calculation is wrong when setting the output size to 1280x720 and the source size is 4k
 // TODO: support GoPro's superview lens correction
 // TODO: Figure out Sony lens distortion parameters

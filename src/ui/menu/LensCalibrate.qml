@@ -21,6 +21,7 @@ MenuItem {
 
     property int videoWidth: 0;
     property int videoHeight: 0;
+    property real fps: 0;
     onVideoWidthChanged: {
         sizeTimer.start();
     }
@@ -38,6 +39,7 @@ MenuItem {
             }
 
             calib.calibrationInfo.output_dimension = { "w": w, "h": h };
+            calib.calibrationInfo.fps = fps;
             list.updateEntry("Default output size", w + "x" + h);
             calibrator_window.videoArea.outWidth = w;
             calibrator_window.videoArea.outHeight = h;

@@ -10,8 +10,8 @@ import "components/"
 
 Window {
     id: main_window;
-    width: 1450;
-    height: 800;
+    width: Math.min(Screen.width, 1650 * dpiScale);
+    height: Math.min(Screen.height, 950 * dpiScale);
     visible: true;
     color: styleBackground;
 

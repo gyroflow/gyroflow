@@ -38,6 +38,12 @@ Item {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
+        const isGyroflow = url.toString().endsWith(".gyroflow");
+        if (isGyroflow) {
+            const thin_object = controller.import_gyroflow(url);
+            console.log(JSON.stringify(thin_object)); // TODO
+            return;
+        }
         window.stab.fovSlider.value = 1.0;
         vid.loaded = false;
         videoLoader.active = true;
@@ -45,11 +51,23 @@ Item {
         //vid.url = url;
         vid.errorShown = false;
         controller.load_video(url, vid);
+        const pathParts = toLocalFile(url).split(".");
+        pathParts.pop();
         if (!isCalibrator) {
-            const pathParts = toLocalFile(url).split(".");
-            pathParts.pop();
             window.outputFile = pathParts.join(".") + "_stabilized.mp4";
             window.exportSettings.updateCodecParams();
+        }
+        if (!isGyroflow) {
+            const gfFile = pathParts.join(".") + ".gyroflow";
+            if (controller.file_exists(gfFile)) {
+                const gfFilename = gfFile.replace(/\\/g, "/").split("/").pop();
+                messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [
+                    { text: qsTr("Yes"), clicked: function() {
+                        Qt.callLater(() => loadFile(gfFile));
+                    } },
+                    { text: qsTr("No"), accent: true },
+                ]);
+            }
         }
 
         const filename = url.toString().split("/").pop();

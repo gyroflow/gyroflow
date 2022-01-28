@@ -55,8 +55,8 @@ Rectangle {
     FileDialog {
         id: fileDialog;
         property var extensions: [
-            "mp4", "mov", "mxf", "mkv", "webm", "insv", 
-            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV"
+            "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow",
+            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV", "GYROFLOW"
         ];
 
         title: qsTr("Choose a video file")
@@ -144,10 +144,15 @@ Rectangle {
                     icon.name: "video";
                     enabled: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     opacity: enabled? 1.0 : 0.6;
+                    popup.width: width * 2;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
 
-                    model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
+                    Component.onCompleted: {
+                        QT_TRANSLATE_NOOP("Popup", "Add to render queue");
+                    }
+
+                    model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file"), ];
 
                     function doRender() {
                         controller.render(
@@ -187,7 +192,7 @@ Rectangle {
                         }
                     }
                     popup.onClicked: (index) => {
-                        controller.export_gyroflow();
+                        controller.export_gyroflow(index == 1);
                     }
                     
                     Connections {
@@ -254,6 +259,9 @@ Rectangle {
         function onError(text, arg, callback) {
             messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
+        function onMessage(text, arg, callback) {
+            messageBox(Modal.Info, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+        }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
@@ -268,6 +276,7 @@ Rectangle {
         controller.check_updates();
 
         QT_TRANSLATE_NOOP("App", "An error occured: %1");
+        QT_TRANSLATE_NOOP("App", "Gyroflow file exported to %1.");
 
         if (!isLandscape) {
             isLandscapeChanged();

@@ -139,7 +139,8 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    export_gyroflow: qt_method!(fn(&self)),
+    import_gyroflow: qt_method!(fn(&self, url: String) -> QJsonObject),
+    export_gyroflow: qt_method!(fn(&self, thin: bool)),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -151,6 +152,7 @@ pub struct Controller {
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
 
+    message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
     video_path: String,
@@ -512,7 +514,7 @@ impl Controller {
     }
 
     fn set_smoothing_method(&mut self, index: usize) -> QJsonArray {
-        let params = util::serde_json_to_qt(&self.stabilizer.set_smoothing_method(index));
+        let params = util::serde_json_to_qt_array(&self.stabilizer.set_smoothing_method(index));
         self.request_recompute();
         self.chart_data_changed();
         params
@@ -526,11 +528,11 @@ impl Controller {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
     }
     fn get_smoothing_status(&self) -> QJsonArray {
-        util::serde_json_to_qt(&self.stabilizer.get_smoothing_status())
+        util::serde_json_to_qt_array(&self.stabilizer.get_smoothing_status())
     }
     fn get_smoothing_max_angles(&self) -> QJsonArray {
         let max_angles = self.stabilizer.get_smoothing_max_angles();
-        util::serde_json_to_qt(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
+        util::serde_json_to_qt_array(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
     }
 
     fn set_sync_method(&mut self, v: u32) {
@@ -612,9 +614,29 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow(&self) {
-        // TODO
-        self.error(QString::from("Not implemented"), QString::default(), QString::default());
+    fn export_gyroflow(&self, thin: bool) {
+        let video_path = std::path::Path::new(&self.video_path);
+        let gf_path = video_path.with_extension("gyroflow");
+        match self.stabilizer.export_gyroflow(&self.video_path, &gf_path, thin) {
+            Ok(_) => {
+                self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path.to_string_lossy())), QString::default());
+            },
+            Err(e) => {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            }
+        }
+    }
+
+    fn import_gyroflow(&self, path: String) -> QJsonObject {
+        match self.stabilizer.import_gyroflow(&path) {
+            Ok(thin_obj) => {
+                util::serde_json_to_qt_object(&thin_obj)
+            },
+            Err(e) => {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                QJsonObject::default()
+            }
+        }
     }
 
     fn set_output_size(&self, w: usize, h: usize) {
