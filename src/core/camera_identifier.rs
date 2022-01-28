@@ -115,7 +115,7 @@ impl CameraIdentifier {
                                         }
                                     }
                                     if let Some(flowstate) = v.get("is_flowstate_online").and_then(|v| v.as_bool()) {
-                                        id.additional = format!("EIS-{}", if flowstate { "Y" } else { "N" });
+                                        id.additional = if flowstate { "EIS" } else { "NO-EIS" }.into();
                                     }
                                 }
                                 break;

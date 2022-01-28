@@ -4,7 +4,6 @@
 use walkdir::WalkDir;
 use std::collections::HashMap;
 use crate::LensProfile;
-use itertools::Itertools;
 use std::path::PathBuf;
 
 #[derive(Default)]
@@ -73,34 +72,15 @@ impl LensProfileDatabase {
         let mut ret = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
             if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
-                let strs = vec![&v.camera_brand, &v.camera_model, &v.lens_model, &v.camera_setting, &v.note].into_iter().filter(|x| !x.is_empty()).join(" ");
-
-                let fps = if v.fps > 0.0 { format!(" {:.2}fps", v.fps) } else { String::new() };
-                ret.push((format!("{} {} {} {}x{}{}", self.cleanup_name(strs), v.get_size_str(), v.get_aspect_ratio(), v.calib_dimension.w, v.calib_dimension.h, fps), k.clone()));
+                if !v.is_copy {
+                    ret.push((v.get_display_name(), k.clone()));
+                }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
             }
         }
         ret.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
         ret
-    }
-    pub fn cleanup_name(&self, name: String) -> String {
-        name.replace(".json", "")
-            .replace("4_3", "")
-            .replace("4:3", "")
-            .replace("4by3", "")
-            .replace("16:9", "")
-            .replace("169", "")
-            .replace("16_9", "")
-            .replace("16*9", "")
-            .replace("16/9", "")
-            .replace("16by9", "")
-            .replace("2_7K", "")
-            .replace("2,7K", "")
-            .replace("2.7K", "")
-            .replace("4K", "")
-            .replace("5K", "")
-            .replace('_', " ")
     }
 
     pub fn contains_id(&self, id: &str) -> bool {

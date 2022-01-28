@@ -29,24 +29,24 @@
       <translation>Sprache</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="103"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="106"/>
       <source>Safe area guide</source>
       <translation>Sicherere-Zone</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="104"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="107"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Wenn FOV &gt; 1 ein Rechteck anzeigt, das FOV = 1 über dem Vorschauvideo simuliert.
 Beachte, dass dies nur ein visueller Indikator ist, der das Rendern&apos;t NICHT beeinflusst.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="111"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="114"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>Experimentelle GPU zero-copy Vorschau</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="112"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="115"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>Rendern und entzerren des Vorschau-Videos auf der GPU.
@@ -310,28 +310,28 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
       <translation>Kalibrierung</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="134"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="141"/>
       <source>Reprojection error</source>
       <translation>Rückprojektionsfehler</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="146"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="153"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>Für eine erfolgreiche Kalibrierung der Linse, sollte dieser Wert unter 5 liegen - besser noch unter 1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="150"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="157"/>
       <source>Auto calibrate</source>
       <translation>Automatische Kalibrierung</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="160"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="167"/>
       <source>Max calibration points</source>
       <translation>Max. Kalibrierungs-Punkte</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="121"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="275"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
       <source>Export lens profile</source>
       <translation>Exportiere Linsen Profil</translation>
     </message>
@@ -341,72 +341,89 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
       <translation>Linsen Profile</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="221"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="125"/>
+      <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
+Do you want to submit your profile?</source>
+      <translation>Mit dem Hochladen des Profils, erklärst du dich damit einverstanden, es unter GPLv3 zu veröffentlichen und automatisch mit Gyroflow an andere Nutzer zu verteilen.
+Soll das Profil hoch geladen werden?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="126"/>
+      <source>Yes</source>
+      <translation>Ja</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="127"/>
+      <source>No</source>
+      <translation>Nein</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="228"/>
       <source>Invalid format</source>
       <translation>Ungültiges Format</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="221"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="228"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="286"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="293"/>
       <source>Upload lens profile to the database</source>
       <translation>Linsen-Profil in die Datenbank hoch laden</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="292"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="299"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="303"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="310"/>
       <source>Analyze every n-th frame</source>
       <translation>Jedes n-te Bild analysieren</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="315"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="322"/>
       <source>Sharpness limit</source>
       <translation>Bildschärfen Limit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="324"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="331"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="331"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="338"/>
       <source>Iterations</source>
       <translation>Wiederholungen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="343"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="350"/>
       <source>Preview resolution</source>
       <translation>Auflösung Vorschau</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="364"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="371"/>
       <source>Radial distortion limit</source>
       <translation>Radiales Verzerrung-Limit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="235"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="242"/>
       <source>Rolling shutter correction</source>
       <translation>Rolling-Shutter Korrektur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="243"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="250"/>
       <source>Frame readout time</source>
       <translation>Bildauslesedauer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="248"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="255"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="264"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="271"/>
       <source>Bottom to top</source>
       <translation>Von unten nach oben</translation>
     </message>
@@ -579,7 +596,7 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="29"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="346"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="353"/>
       <source>Full</source>
       <translation>Komplett</translation>
     </message>
@@ -611,37 +628,42 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="88"/>
       <source>Velocity dampened</source>
-      <translation>Beschleunigung dämpfen</translation>
+      <translation>Geschwindigkeitsgedämpft</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="90"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="89"/>
+      <source>Velocity dampened per axis</source>
+      <translation type="unfinished">Velocity dampened per axis</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="91"/>
       <source>Fixed camera</source>
       <translation>Fixierte Kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="91"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="92"/>
       <source>Lock horizon</source>
-      <translation>Horizontal-Sperre</translation>
+      <translation>Horizont-Sperre</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="236"/>
       <source>No cropping</source>
-      <translation>Kein zuschneiden</translation>
+      <translation>Ohne zuschneiden</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="236"/>
       <source>Dynamic cropping</source>
       <translation>Dynamisch zuschneiden</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="236"/>
       <source>Static crop</source>
       <translation>Statisch zuschneiden</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
       <source>Using essential matrix</source>
-      <translation>Essentielle Matrix verwenden</translation>
+      <translation>Essenzielle Matrix verwenden</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
@@ -657,42 +679,57 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
       <translation>Stabilisierung</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="93"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="94"/>
+      <source>Pitch smoothness</source>
+      <translation>Nick/Pitch Glättung</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="95"/>
+      <source>Yaw smoothness</source>
+      <translation>Gier/Yaw Glättung</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="96"/>
+      <source>Roll smoothness</source>
+      <translation>Roll Glättung</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="97"/>
       <source>Smoothness</source>
       <translation>Glättung</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="94"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="98"/>
       <source>Yaw angle correction</source>
-      <translation>Gier-Winkel Korrektur</translation>
+      <translation>Gier/Yaw-Winkel Korrektur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="95"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="99"/>
       <source>Pitch angle correction</source>
-      <translation>Nick-Winkel Korrektur</translation>
+      <translation>Pitch/Nick-Winkel Korrektur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="96"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="100"/>
       <source>Roll angle correction</source>
       <translation>Roll-Winkel Korrektur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="97"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="101"/>
       <source>Yaw angle</source>
-      <translation>Gier-Winkel</translation>
+      <translation>Yaw/Gier-Winkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="98"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="102"/>
       <source>Pitch angle</source>
-      <translation>Nick-Winkel</translation>
+      <translation>Pitch/Nick-Winkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="99"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="103"/>
       <source>Roll angle</source>
       <translation>Roll-Winkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="103"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="107"/>
       <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
@@ -701,7 +738,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
 Passe die Dämpfungs-Einstellungen an, bis dir die Werte zu sagen (empfohlen: etwa 6 für alle Achsen).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="104"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="108"/>
       <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify velocity factor until you get the desired values (recommended less than 20).</source>
@@ -710,82 +747,82 @@ Pitch: %1, Yaw: %2, Roll: %3.
 Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: 20 oder weniger).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="105"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="109"/>
       <source>Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
       <translation>Passe die Dämpfungs-Einstellungen an, bis dir die Werte zu sagen (empfohlen: etwa 6 für alle Achsen).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="106"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="110"/>
       <source>Modify velocity factor until you get the desired values (recommended less than 20).</source>
       <translation>Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: weniger als 20).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="107"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="111"/>
       <source>Smoothness at high velocity</source>
-      <translation>Glättung bei hoher Beschleunigung</translation>
+      <translation>Glättung bei hohem Beschleunigungs-Grad</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="108"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="112"/>
       <source>Velocity factor</source>
       <translation>Beschleunigungs-Grad</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="113"/>
       <source>Smoothness multiplier</source>
       <translation>Glättung-Multiplikator</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="110"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="114"/>
       <source>Responsiveness</source>
       <translation>Reaktions-Freudigkeit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="126"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="130"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
-      <translation>FOV ist größer als 1.0, schwarzer Rand könnte sichtbar werden</translation>
+      <translation>FOV ist größer als 1.0, ein schwarzer Rand könnte sichtbar werden</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="131"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="135"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Max. Rotation: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
       <source>Max zoom: %1</source>
       <translation>Max. Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="243"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="247"/>
       <source>Smoothing window</source>
-      <translation>Glättungsfenster</translation>
+      <translation>Glättungs-Zeitfenster</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="250"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="254"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="258"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="262"/>
       <source>Rolling shutter correction</source>
       <translation>Rolling-Shutter Korrektur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="264"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="268"/>
       <source>Frame readout time</source>
       <translation>Bildauslesezeit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="269"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="285"/>
       <source>Bottom to top</source>
       <translation>Von unten nach oben</translation>
     </message>
@@ -795,7 +832,7 @@ Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: 20 od
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="11"/>
       <source>Synchronization</source>
-      <translation>Synchronisierung</translation>
+      <translation>Synchronisation</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="36"/>
@@ -857,7 +894,7 @@ Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: 20 od
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="143"/>
       <source>Analyze every n-th frame</source>
-      <translation>Jedes n-tes Bild analysieren</translation>
+      <translation>Jedes n-te Bild analysieren</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="155"/>
@@ -867,7 +904,7 @@ Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: 20 od
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>Optical flow method</source>
-      <translation>Optischer Fluss Methode</translation>
+      <translation>Visuelle Fluss-Richtung</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
@@ -878,17 +915,17 @@ Passe den Geschwindigkeits-Grad an, bis dir die Werte zu sagen (empfohlen: 20 od
       <location filename="../../src/ui/menu/Synchronization.qml" line="190"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
-      <translation>Berechnung der Kamera Transformationsmatrixdurch optischen Fluss um die Rotationswinkel der Kamera zu bekommen.
-Danach werden diese Winkel an die Gyroskopwinkel gefittet.</translation>
+      <translation>Berechnung der Kamera-TransformationsMatrix mithilfe der visuellen Fluss-Richtung, um die Rotationswinkel der Kamera zu bestimmen.
+Anschließend werden diese an die Gyroskopwerte angepasst.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
-      <translation>Punkte des optischen Flusses entzerren, in dem Gyro und Versatzkandidaten benutzt werden.
-Danach wird die Länge der optischen Fluss Linien berechnet.
-Der gewählte Versatz ist derjenige, bei dem die Linien am kürzesten sind, was bedeutet, dass das Video sich am wenigsten visuell bewegt.</translation>
+      <translation>Entzerrung der visuellen Fluss-Indikatoren mithilfe von Gyroskop und Versatz-Daten.
+Anschließend wird die Länge der visuellen Fluss-Bahnen errechnet.
+Der gewählte Versatz ist der, bei dem die Linien am kürzesten sind und bedeutet, dass das Video sich am wenigsten visuell bewegt.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="196"/>
@@ -903,12 +940,12 @@ Der gewählte Versatz ist derjenige, bei dem die Linien am kürzesten sind, was 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
       <source>Show detected features</source>
-      <translation>Erkannte Merkmale anzeigen</translation>
+      <translation>Erkannte Marker anzeigen</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
       <source>Show optical flow</source>
-      <translation>Optischen Fluss anzeigen</translation>
+      <translation>Visuelle Fluss-Richtung anzeigen</translation>
     </message>
   </context>
   <context>
@@ -1212,22 +1249,22 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
       <translation>Endpunkt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="341"/>
+      <location filename="../../src/ui/VideoArea.qml" line="342"/>
       <source>Toggle stabilization</source>
       <translation>Stabilisierung ein/ausschalten</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="347"/>
+      <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Mute</source>
       <translation>Lautlos</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="347"/>
+      <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Unmute</source>
       <translation>Laut</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="363"/>
+      <location filename="../../src/ui/VideoArea.qml" line="364"/>
       <source>Playback speed</source>
       <translation>Wiedergabe-Geschwindigkeit</translation>
     </message>

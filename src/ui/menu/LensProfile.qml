@@ -107,7 +107,7 @@ MenuItem {
         placeholderText: qsTr("Search...");
         height: 25 * dpiScale;
         width: parent.width;
-        popup.width: width * 1.5;
+        popup.width: width * 1.7;
         topPadding: 5 * dpiScale;
         onSelected: (text, index) => {
             controller.load_lens_profile(lensProfilesList[index][1]);

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+use std::collections::HashSet;
+use itertools::Itertools;
+
 use serde::{ Serialize, Deserialize };
 use super::LensCalibrator;
 
@@ -55,6 +58,9 @@ pub struct LensProfile {
 
     #[serde(skip)]
     pub optimal_fov: Option<f64>,
+
+    #[serde(skip)]
+    pub is_copy: bool
 }
 
 impl LensProfile {
@@ -241,10 +247,70 @@ impl LensProfile {
                 if x.contains_key("identifier") {
                     cpy.identifier = x["identifier"].as_str().unwrap_or_default().to_string();
                 }
+                cpy.is_copy = true;
                 ret.push(cpy);
             }
         }
         ret
+    }
+
+    pub fn get_display_name(&self) -> String {
+        let mut all_sizes = HashSet::new();
+        let mut all_fps = HashSet::new();
+        all_sizes.insert(self.calib_dimension.w * 10000 + self.calib_dimension.h);
+        if self.fps > 0.0 { all_fps.insert((self.fps * 10000.0) as usize); }
+        for x in &self.compatible_settings {
+            if let Some(x) = x.as_object() {
+                match (x.get("width").and_then(|v| v.as_u64()), x.get("height").and_then(|v| v.as_u64())) {
+                    (Some(w), Some(h)) => { all_sizes.insert(w as usize * 10000 + h as usize); }
+                    _ => { }
+                }
+                match x.get("fps").and_then(|v| v.as_f64()) {
+                    Some(fps) => { all_fps.insert((fps * 10000.0).round() as usize); }
+                    _ => { }
+                }
+            }
+        }
+            
+        let include_size = all_sizes.len() <= 1;
+        let include_fps = all_fps.len() <= 1 || (all_fps.len() == 2 && all_fps.into_iter().next().unwrap() >= 200_0000);
+
+        let mut final_name = vec![&self.camera_brand, &self.camera_model].into_iter().filter(|x| !x.is_empty()).join(" ");
+        if include_size {
+            final_name.push(' ');
+            final_name.push_str(&self.get_size_str());
+        }
+        final_name.push(' ');
+        final_name.push_str(&self.get_aspect_ratio());
+
+        final_name.push(' ');
+        final_name.push_str(&Self::cleanup_name(vec![&self.lens_model, &self.camera_setting, &self.note].into_iter().filter(|x| !x.is_empty()).join(" ")));
+
+        if include_size {
+            final_name.push_str(&format!(" {}x{}", self.calib_dimension.w, self.calib_dimension.h));
+        }
+        if include_fps && self.fps > 0.0 {
+            final_name.push_str(&format!(" {:.2}fps", self.fps));
+        }
+        final_name
+    }
+    pub fn cleanup_name(name: String) -> String {
+        name.replace(".json", "")
+            .replace("4_3", "")
+            .replace("4:3", "")
+            .replace("4by3", "")
+            .replace("16:9", "")
+            .replace("169", "")
+            .replace("16_9", "")
+            .replace("16*9", "")
+            .replace("16/9", "")
+            .replace("16by9", "")
+            .replace("2_7K", "")
+            .replace("2,7K", "")
+            .replace("2.7K", "")
+            .replace("4K", "")
+            .replace("5K", "")
+            .replace('_', " ")
     }
 
     pub fn calculate_optimal_fov(&self, output_size: (usize, usize)) -> f64 {

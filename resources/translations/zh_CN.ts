@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="zh_CN">
+<TS version="2.1" sourcelanguage="en_US" language="zh-CN">
   <context>
     <name>Advanced</name>
     <message>
@@ -254,7 +254,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="158"/>
       <source>This resolution is not supported by the selected codec.</source>
-      <translation>选择的编码编码器不支持此分辨率。</translation>
+      <translation>选择的编码解码器不支持此分辨率。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="159"/>
@@ -744,7 +744,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
 Modify velocity factor until you get the desired values (recommended less than 20).</source>
       <translation>最大旋转：
 Pitch: %1, Yaw: %2, Roll: %3.
-修改阻尼设置直到您获得期望的值 (建议低于 20)。</translation>
+修改速度因子直到您获得期望的值 (建议低于 20)。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="109"/>
@@ -862,7 +862,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="73"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
-      <translation>此文件使用同步的移动数据，并不需要额外的同步点，强行植入可能会使输出结果变得更糟。</translation>
+      <translation>此文件使用同步的运动数据，并不需要额外的同步点，强行植入可能会使输出结果变得更糟。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="79"/>
@@ -1090,7 +1090,7 @@ on a part of your video with significant camera motion (ideally horizontal).
 This feature is experimental, the results may not be correct at all.
 Are you sure you want to continue?</source>
       <translation>您的视频需要已经正确同步，您应该在视频中相机有
-显著运动 (最好是水平方向) 的一部分中使用此函数。
+显著运动 (最好是水平方向) 的一部分中使用此功能。
 
 此功能是实验性的，结果可能根本不正确。
 您确定要继续吗？</translation>
