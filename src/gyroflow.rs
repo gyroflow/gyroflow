@@ -55,6 +55,7 @@ use ui::ui_tools::UITools;
 // TODO: Figure out Sony lens distortion parameters
 // TODO: save panel sizes, menu opened states and window dimensions
 // TODO: audio slightly off sync when using exporting trimmed video
+// TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
 
 cpp! {{
     #include <QQuickStyle>

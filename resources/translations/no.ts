@@ -123,7 +123,7 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
       <location filename="../../src/ui/App.qml" line="260"/>
       <location filename="../../src/ui/App.qml" line="263"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="270"/>
@@ -169,7 +169,7 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="42"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="74"/>
@@ -328,7 +328,7 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="155"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
-      <translation>For en god linse kalibrering bør denne verdien være mindre enn 5 og ideelt sett mindre enn 1.</translation>
+      <translation>For en god linse-kalibrering bør denne verdien være mindre enn 5 og ideelt sett mindre enn 1.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="159"/>
@@ -1134,7 +1134,7 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="283"/>
       <source>Delete all sync points</source>
-      <translation type="unfinished">Delete all sync points</translation>
+      <translation>Slett alle synkroniseringspunktene</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="289"/>

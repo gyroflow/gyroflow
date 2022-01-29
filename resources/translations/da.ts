@@ -31,26 +31,26 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="106"/>
       <source>Safe area guide</source>
-      <translation type="unfinished">Safe area guide</translation>
+      <translation>Indikator af sikker område</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="107"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
-      <translation type="unfinished">When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
-Note that this is only a visual indicator, it doesn&apos;t affect rendering.</translation>
+      <translation>Når FOV &gt; 1, viser et rektangel FOV = 1 i forhåndsvisningen.
+Bemærk, at dette kun er en visuel indikator og påvirker ikke resultatet.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="114"/>
       <source>Experimental zero-copy GPU preview</source>
-      <translation type="unfinished">Experimental zero-copy GPU preview</translation>
+      <translation>Eksperimentel nul-kopi GPU forhåndsvisning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="115"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
-      <translation type="unfinished">Render and undistort the preview video entirely on the GPU.
-This should provide much better UI performance.</translation>
+      <translation>Behandling og udjævning af forhåndsvisning udelukkende på GPU.
+Dette burde give en hurtigere brugergrænseflade.</translation>
     </message>
   </context>
   <context>
@@ -71,7 +71,7 @@ This should provide much better UI performance.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="63"/>
       <source>Video files</source>
-      <translation>Video Filer</translation>
+      <translation>Videofiler</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="126"/>
@@ -290,7 +290,7 @@ This should provide much better UI performance.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="192"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
-      <translation>Brugen af GPU hardware til indkodning resulterer typisk i lavere kvalitet sammenlignet med software, men er væsentligt hurtigere.</translation>
+      <translation>Brugen af GPU til indkodning resulterer typisk i lavere kvalitet sammenlignet med software, men er væsentligt hurtigere.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="193"/>
@@ -305,12 +305,12 @@ This should provide much better UI performance.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="196"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
-      <translation type="unfinished">GPU acceleration is not available for the pixel format of this video.</translation>
+      <translation>GPU acceleration er ikke tilgængelig med dette videoformat.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="200"/>
       <source>Export audio</source>
-      <translation>Eksporter lyd</translation>
+      <translation>Eksportér lyd</translation>
     </message>
   </context>
   <context>
@@ -560,7 +560,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="142"/>
       <source>Pitch is camera angle up/down when using FPV blackbox data</source>
-      <translation>Pitch er kamera vinkel op/ned når du bruger FPV blackbox data</translation>
+      <translation>Pitch er vinkel op/ned når du bruger FPV blackbox data</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="146"/>
@@ -580,7 +580,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
       <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
-      <translation>Store bogstaver er positiv, små bogstaver er negativ. fx. zYX</translation>
+      <translation>Stort bogstav er positiv, småt bogstav er negativ. F.eks. zYX</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="184"/>
@@ -888,7 +888,7 @@ Pitch: %1, så: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="79"/>
       <source>Rough gyro offset</source>
-      <translation>Omtrentlig tidsforskydning af gyro</translation>
+      <translation>Omtrentlig tidsforskydning af gyroskopdata</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="86"/>
@@ -905,7 +905,7 @@ Pitch: %1, så: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="105"/>
       <source>Max sync points</source>
-      <translation>Maks synkroniseringspunkter</translation>
+      <translation>Maks antal synkroniseringspunkter</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
@@ -925,7 +925,7 @@ Pitch: %1, så: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>Optical flow method</source>
-      <translation>Optical flow metode</translation>
+      <translation>Optisk flow metode</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
@@ -944,7 +944,7 @@ Prøv derefter at matche disse vinkler med gyroskopvinkler.</translation>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
-      <translation>Uforvrængning af punkter fra optical flow ved hjælp af gyro og kandidatforskydning.
+      <translation>Forvrængningskorrektion af punkter fra optisk flow ved hjælp af gyro og kandidatforskydning.
 Beregn derefter længderne af de optiske flowlinjer.
 Resulterende offset er den, hvor linjer var korteste, hvilket betyder at videoen bevægede sig mindst visuelt.</translation>
     </message>
@@ -966,7 +966,7 @@ Resulterende offset er den, hvor linjer var korteste, hvilket betyder at videoen
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
       <source>Show optical flow</source>
-      <translation>Vis optical flow</translation>
+      <translation>Vis optisk flow</translation>
     </message>
   </context>
   <context>

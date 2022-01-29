@@ -346,7 +346,8 @@ impl Controller {
             });
             let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
                 if this.lens_loaded {
-                    this.lens_profile_loaded(QString::from(this.stabilizer.lens.read().get_json().unwrap_or_default()));
+                    let json = this.stabilizer.lens.read().get_json().unwrap_or_default();
+                    this.lens_profile_loaded(QString::from(json));
                 }
             });
             
@@ -401,7 +402,7 @@ impl Controller {
             if let Err(e) = self.stabilizer.load_lens_profile(&path) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
-            self.stabilizer.lens.write().get_json().unwrap_or_default()
+            self.stabilizer.lens.read().get_json().unwrap_or_default()
         };
         self.lens_loaded = true;
         self.lens_changed();
@@ -642,7 +643,8 @@ impl Controller {
             Ok(thin_obj) => {
                 self.lens_loaded = true;
                 self.lens_changed();
-                self.lens_profile_loaded(QString::from(self.stabilizer.lens.read().get_json().unwrap_or_default()));
+                let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
+                self.lens_profile_loaded(QString::from(lens_json));
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
