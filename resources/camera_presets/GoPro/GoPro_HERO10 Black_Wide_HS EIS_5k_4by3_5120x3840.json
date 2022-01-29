@@ -1,0 +1,68 @@
+{
+  "name": "GoPro_HERO10 Black_Wide_HS EIS_5k_4by3_5120x3840-29.97fps",
+  "note": "HS EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO10 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 3840
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 3840
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2880
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 30,
+  "fps": 29.97,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5715710733819015,
+    "camera_matrix": [
+      [
+        2452.658272703092,
+        0.0,
+        2555.8365905217943
+      ],
+      [
+        0.0,
+        2452.9535819133475,
+        1896.6088817605187
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03371147413739165,
+      0.07269223468266804,
+      -0.0847102053380722,
+      0.034677814917692056
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero10black-wide-5120x3840@29970-hseis",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-01-21",
+  "compatible_settings": [
+    { "width": 5120, "height": 3840, "identifier": "gopro-hero10black-wide-5120x3840@23976-hseis", "fps": 23.976 },
+    { "width": 5120, "height": 3840, "identifier": "gopro-hero10black-wide-5120x3840@25000-hseis", "fps": 25.0 }
+  ]
+}
