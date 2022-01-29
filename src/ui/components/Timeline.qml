@@ -357,9 +357,8 @@ Item {
 
             TimelineSyncPoint {
                 timeline: root;
-                gyr_timestamp_us: gyro_timestamp_us;
                 org_timestamp_us: timestamp_us;
-                position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
+                position: (timestamp_us + offset_ms * 1000) / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: offset_ms;
                 unit: qsTr("ms");
                 isCalibPoint: false;

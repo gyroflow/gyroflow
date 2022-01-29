@@ -24,7 +24,6 @@ use crate::qt_gpu::qrhi_undistort;
 
 #[derive(Default, SimpleListItem)]
 struct OffsetItem {
-    pub gyro_timestamp_us: i64,
     pub timestamp_us: i64,
     pub offset_ms: f64,
 }
@@ -303,8 +302,7 @@ impl Controller {
 
     fn update_offset_model(&mut self) {
         self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
-            gyro_timestamp_us: *k,
-            timestamp_us: *k + (*v * 1000.0) as i64,
+            timestamp_us: *k,
             offset_ms: *v
         }).collect());
 
