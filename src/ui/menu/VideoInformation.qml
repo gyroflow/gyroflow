@@ -139,7 +139,6 @@ MenuItem {
                 "width": 70,
                 "value": function() { return root.fps; },
                 "onChange": function(value) {
-                    console.log('fr on change', value);
                     root.fps = value;
                     root.updateEntry("Frame rate", value.toFixed(3) + " fps");
                     controller.override_video_fps(value);
