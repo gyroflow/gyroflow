@@ -15,11 +15,13 @@ MenuItem {
     property alias integrationMethod: integrator.currentIndex;
     property string filename: "";
 
+    property var pendingOffsets: ({});
+
     FileDialog {
         id: fileDialog;
         property var extensions: [
-            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "gyroflow", "insv", "360", 
-            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "GYROFLOW", "INSV"
+            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "360", 
+            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "INSV"
         ];
 
         title: qsTr("Choose a motion data file")
@@ -27,10 +29,36 @@ MenuItem {
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url) {
+        root.pendingOffsets = { };
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
         controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+    }
+
+    function loadGyroflow(obj) {
+        const gyro = obj.gyro_source || { };
+        if (gyro) {
+            if (gyro.filepath && (gyro.filepath != obj.videofile) && controller.file_exists(gyro.filepath)) {
+                loadFile(controller.path_to_url(gyro.filepath));
+                root.pendingOffsets = obj.offsets; // because loading gyro data will clear offsets
+            }
+            if (gyro.rotation && gyro.rotation.length == 3) {
+                p.value = gyro.rotation[0];
+                r.value = gyro.rotation[1];
+                y.value = gyro.rotation[2];
+                rot.checked = Math.abs(p.value) > 0 || Math.abs(r.value) > 0 || Math.abs(y.value) > 0;
+            }
+            if (gyro.imu_orientation) orientation.text = gyro.imu_orientation;
+            if (gyro.hasOwnProperty("integration_method")) {
+                const index = +gyro.integration_method;
+                integrator.currentIndex = integrator.hasQuaternions? index : index - 1;
+            }
+            if (+gyro.lpf > 0) {
+                lpf.value = +gyro.lpf;
+                lpfcb.checked = lpf.value > 0;
+            }
+        }
     }
 
     Connections {
@@ -40,12 +68,20 @@ MenuItem {
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
             orientation.text = imu_orientation;
+
+            // Twice to trigger change signal
+            integrator.hasQuaternions = !contains_quats;
             integrator.hasQuaternions = contains_quats;
 
             const chart = window.videoArea.timeline.getChart();
             chart.setDurationMs(controller.get_scaled_duration_ms());
             window.videoArea.durationMs = controller.get_scaled_duration_ms();
             Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
+            if (root.pendingOffsets) { 
+                for (const ts in root.pendingOffsets) {
+                    controller.set_offset(ts, root.pendingOffsets[ts]);
+                }
+            }
         }
     }
 
@@ -154,12 +190,11 @@ MenuItem {
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
-            onCurrentIndexChanged: {
+            function setMethod() {
                 controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
             }
-            onHasQuaternionsChanged: {
-                controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
-            }
+            onCurrentIndexChanged: Qt.callLater(integrator.setMethod);
+            onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);
         }
     }
     DropTarget {

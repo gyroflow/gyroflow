@@ -87,6 +87,7 @@ qrc!(pub rsrc,
         "resources/icons/svg/confirmed.svg",
         "resources/icons/svg/error.svg",
         "resources/icons/svg/warning.svg",
+        "resources/icons/svg/question.svg",
         "resources/icons/svg/readout_time.svg",
 
         "src/qt_gpu/compiled/undistort.comp.qsb",

@@ -27,16 +27,51 @@ Item {
     property bool isCalibrator: false;
 
     property bool safeArea: false;
+    property url pendingGyroflow;
+    property url loadedFileUrl;
 
     property Menu.VideoInformation vidInfo: null;
 
-    function toLocalFile(u) {
-        const s = u.toString();
-        return s.substring(s.charAt(9) === ':'? 8 : 7);
-    }
     function loadFile(url) {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
+        }
+        const isGyroflow = url.toString().endsWith(".gyroflow");
+        
+        if (!isGyroflow) {
+            root.loadedFileUrl = url;
+        } else {
+            root.pendingGyroflow = "";
+            const obj = controller.import_gyroflow(url);
+
+            if (obj && +obj.version > 0) {
+                const videofile = obj.videofile;
+                if (!vidInfo.filename) {
+                    // If video not loaded, try to load the associated file
+                    root.pendingGyroflow = url;
+                    loadFile(controller.path_to_url(videofile));
+                    return;
+                }
+                window.motionData.loadGyroflow(obj);
+                window.stab.loadGyroflow(obj);
+
+                const info = obj.video_info || { };
+                if (info) {
+                    if (Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
+                        vidInfo.updateEntryWithTrigger("Frame rate", +info.vfr_fps);
+                    }
+                    if (Math.abs(+info.rotation) > 0) {
+                        vidInfo.updateEntryWithTrigger("Rotation", +info.rotation);
+                    }
+                }
+
+                for (const ts in obj.offsets) {
+                    controller.set_offset(ts, obj.offsets[ts]);
+                }
+                timeline.trimStart = obj.trim_start;
+                timeline.trimEnd   = obj.trim_end;
+            }
+            return;
         }
         window.stab.fovSlider.value = 1.0;
         vid.loaded = false;
@@ -45,16 +80,31 @@ Item {
         //vid.url = url;
         vid.errorShown = false;
         controller.load_video(url, vid);
+        const pathParts = url.toString().split(".");
+        pathParts.pop();
         if (!isCalibrator) {
-            const pathParts = toLocalFile(url).split(".");
-            pathParts.pop();
-            window.outputFile = pathParts.join(".") + "_stabilized.mp4";
+            window.outputFile = controller.url_to_path(pathParts.join(".") + "_stabilized.mp4");
             window.exportSettings.updateCodecParams();
+        }
+        if (!isGyroflow && !root.pendingGyroflow.toString()) {
+            const gfUrl = pathParts.join(".") + ".gyroflow";
+            const gfFile = controller.url_to_path(gfUrl);
+            if (controller.file_exists(gfFile)) {
+                const gfFilename = gfFile.replace(/\\/g, "/").split("/").pop();
+                messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [
+                    { text: qsTr("Yes"), clicked: function() {
+                        Qt.callLater(() => loadFile(gfUrl));
+                    } },
+                    { text: qsTr("No"), accent: true },
+                ]);
+            }
         }
 
         const filename = url.toString().split("/").pop();
         dropText.loadingFile = filename;
-        vidInfo.updateEntry("File name", filename);
+        if (!isGyroflow) {
+            vidInfo.updateEntry("File name", filename);
+        }
         vidInfo.updateEntry("Detected camera", "---");
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
@@ -65,6 +115,9 @@ Item {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
+            }
+            if (root.pendingGyroflow.toString()) {
+                loadFile(root.pendingGyroflow);
             }
         }
         function onChart_data_changed() {
@@ -118,13 +171,14 @@ Item {
                     }
                 }
                 onMetadataLoaded: (md) => {
-                    controller.load_telemetry(vid.url, true, vid, timeline.getChart());
-                    vidInfo.loadFromVideoMetadata(md);
                     loaded = frameCount > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
                     timeline.trimStart = 0.0;
                     timeline.trimEnd = 1.0;
+
+                    controller.load_telemetry(vid.url, true, vid, timeline.getChart());
+                    vidInfo.loadFromVideoMetadata(md);
                     // for (var i in md) console.info(i, md[i]);
                 }
                 property bool errorShown: false;

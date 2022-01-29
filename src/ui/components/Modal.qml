@@ -19,7 +19,7 @@ Rectangle {
         }
     }
 
-    enum IconType { NoIcon, Info, Warning, Error, Success }
+    enum IconType { NoIcon, Info, Warning, Error, Success, Question }
 
     property int iconType: Modal.Warning;
 
@@ -32,10 +32,11 @@ Rectangle {
     onVisibleChanged: {
         if (visible && iconType != Modal.NoIcon) {
             switch (iconType) {
-                case Modal.Info:    icon.name = "info";      icon.color = styleAccentColor; break;
-                case Modal.Warning: icon.name = "warning";   icon.color = "#f6a10c"; break;
-                case Modal.Error:   icon.name = "error";     icon.color = "#d82626"; break;
-                case Modal.Success: icon.name = "confirmed"; icon.color = "#3cc42f"; break;
+                case Modal.Info:     icon.name = "info";      icon.color = styleAccentColor; break;
+                case Modal.Warning:  icon.name = "warning";   icon.color = "#f6a10c"; break;
+                case Modal.Error:    icon.name = "error";     icon.color = "#d82626"; break;
+                case Modal.Success:  icon.name = "confirmed"; icon.color = "#3cc42f"; break;
+                case Modal.Question: icon.name = "question";  icon.color = styleAccentColor; break;
             }
             icon.visible = true;
             ease.enabled = false;

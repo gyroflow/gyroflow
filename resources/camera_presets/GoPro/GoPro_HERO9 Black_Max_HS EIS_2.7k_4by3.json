@@ -1,0 +1,73 @@
+{
+  "name": "GoPro_HERO9 Black_Max_HS EIS_2.7k_4by3_2704x2028-29.97fps",
+  "note": "HS EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO9 Black",
+  "lens_model": "Max",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1522
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 30,
+  "fps": 29.97,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.833078672666101,
+    "camera_matrix": [
+      [
+        1133.3879837884385,
+        0.0,
+        1515.1954713824898
+      ],
+      [
+        0.0,
+        1136.1409746732968,
+        1014.8335200596508
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1641196011714308,
+      -0.1588582329140537,
+      0.07251348809496178,
+      -0.013014502028194161
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero9black-max-2704x2028@29970-hseis",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-01-21",
+  "compatible_settings": [
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero9black-max-1920x1440@23976-hseis", "fps": 23.976 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero9black-max-1920x1440@25000-hseis", "fps": 25.0 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero9black-max-1920x1440@29970-hseis", "fps": 29.97 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero9black-max-1920x1440@50000-hseis", "fps": 50.0 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero9black-max-1920x1440@59940-hseis", "fps": 59.94 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero9black-max-2704x2028@23976-hseis", "fps": 23.976 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero9black-max-2704x2028@25000-hseis", "fps": 25.0 }
+  ]
+}

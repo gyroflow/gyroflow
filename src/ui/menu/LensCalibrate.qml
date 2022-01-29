@@ -21,6 +21,7 @@ MenuItem {
 
     property int videoWidth: 0;
     property int videoHeight: 0;
+    property real fps: 0;
     onVideoWidthChanged: {
         sizeTimer.start();
     }
@@ -34,10 +35,11 @@ MenuItem {
             if (Math.round(videoRatio * 100) == 133) { // 4:3
                 // Default to 16:9 output
                 h = Math.round(w / (16 / 9));
-                if ((h % 2) != 0) h++;
+                if ((h % 2) != 0) h--;
             }
 
             calib.calibrationInfo.output_dimension = { "w": w, "h": h };
+            calib.calibrationInfo.fps = fps;
             list.updateEntry("Default output size", w + "x" + h);
             calibrator_window.videoArea.outWidth = w;
             calibrator_window.videoArea.outHeight = h;
@@ -170,7 +172,7 @@ MenuItem {
             id: maxPoints;
             width: parent.width;
             height: 25 * dpiScale;
-            value: 10;
+            value: 15;
             from: 1;
         }
     }
@@ -341,7 +343,7 @@ MenuItem {
                 id: iterations;
                 width: parent.width;
                 height: 25 * dpiScale;
-                value: 1000;
+                value: 500;
                 from: 1;
             }
         }

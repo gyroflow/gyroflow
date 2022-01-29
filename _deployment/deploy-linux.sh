@@ -43,7 +43,7 @@ rm -rf "$PROJECT_DIR/_deployment/_binaries/linux64"
 
 TARGET="$PROJECT_DIR/_deployment/_binaries/linux64"
 mkdir -p $TARGET
-mkdir -p $TARGET/resources/camera_presets
+mkdir -p $TARGET/camera_presets
 mkdir -p $TARGET/lib
 mkdir -p $TARGET/plugins
 mkdir -p $TARGET/qml
@@ -172,7 +172,7 @@ cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.5"          "$TARGET/lib/"
 cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
 strip "$TARGET/gyroflow"
 
-cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/resources/"
+cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/"
 
 pushd $TARGET/..
 tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64

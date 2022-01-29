@@ -1,0 +1,75 @@
+{
+  "name": "GoPro_HERO10 Black_Max_HS EIS_2.7k_16by9_2704x1520-59.94fps",
+  "note": "HS EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO10 Black",
+  "lens_model": "Max",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 30,
+  "fps": 59.94,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4009784126654193,
+    "camera_matrix": [
+      [
+        1126.6344672128375,
+        0.0,
+        1357.6684326233758
+      ],
+      [
+        0.0,
+        1126.2248943893312,
+        734.8157954074113
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16976713498837992,
+      -0.24939994722954265,
+      0.2734383924438232,
+      -0.1179839614920888
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero10black-max-2704x1520@59940-hseis",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-01-21",
+  "compatible_settings": [
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-max-1920x1080@23976-hseis", "fps": 23.976 },
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-max-1920x1080@25000-hseis", "fps": 25.0 },
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-max-1920x1080@29970-hseis", "fps": 29.97 },
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-max-1920x1080@50000-hseis", "fps": 50.0 },
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-max-1920x1080@59940-hseis", "fps": 59.94 },
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-max-2704x1520@23976-hseis", "fps": 23.976 },
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-max-2704x1520@25000-hseis", "fps": 25.0 },
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-max-2704x1520@29970-hseis", "fps": 29.97 },
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-max-2704x1520@50000-hseis", "fps": 50.0 }
+  ]
+}

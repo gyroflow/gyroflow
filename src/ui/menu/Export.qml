@@ -80,6 +80,7 @@ MenuItem {
         }
         controller.set_output_size(outWidth, outHeight);
     }
+    function vidInfoLoaded() { codec.updateGpuStatus(); }
 
     ComboBox {
         id: codec;
@@ -89,16 +90,21 @@ MenuItem {
         function updateExtension(ext) {
             window.outputFile = window.outputFile.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext);
         }
-        onCurrentIndexChanged: {
+        function updateGpuStatus() {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
-            if (format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit")) {
+            if ((format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit"))
+             || (window.vidInfo.pixelFormat.includes("422"))) {
                 gpu.enabled2 = false;
             }
-            audio.enabled2 = format.audio;
             gpu.checked = gpu.enabled2;
+        }
+        onCurrentIndexChanged: {
+            const format = exportFormats[currentIndex];
+            audio.enabled2 = format.audio;
             if (!audio.enabled2) audio.checked = false;
 
+            updateGpuStatus();
             updateExtension(format.extension);
         }
     }
@@ -183,9 +189,11 @@ MenuItem {
         checked: true;
         property bool enabled2: true;
         enabled: enabled2;
-        tooltip: qsTr("GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.") + "\n" + 
-                 qsTr("They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.") + "\n" + 
-                 qsTr("Uncheck this option for maximum possible quality.");
+        tooltip: enabled2? qsTr("GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.") + "\n" + 
+                           qsTr("They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.") + "\n" + 
+                           qsTr("Uncheck this option for maximum possible quality.")
+                         :
+                           qsTr("GPU acceleration is not available for the pixel format of this video.");
     }
     CheckBox {
         id: audio;

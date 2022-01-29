@@ -53,6 +53,7 @@ MenuItem {
         if (typeof calibrator_window !== "undefined") {
             calibrator_window.lensCalib.videoWidth   = w || 0;
             calibrator_window.lensCalib.videoHeight  = h || 0;
+            calibrator_window.lensCalib.fps = framerate || 0;
         }
 
         root.pixelFormat = getPixelFormat(md) || "---";
@@ -70,10 +71,15 @@ MenuItem {
         root.fps = framerate;
         root.org_fps = framerate;
         // controller.set_video_rotation(-root.videoRotation);
+
+        Qt.callLater(() => window.exportSettings.vidInfoLoaded());
     }
     function updateEntry(key, value) {
         if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
+    }
+    function updateEntryWithTrigger(key, value) {
+        list.updateEntryWithTrigger(key, value);
     }
 
     function getDuration(md) {

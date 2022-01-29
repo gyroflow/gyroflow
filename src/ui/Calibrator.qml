@@ -13,8 +13,8 @@ import "menu/" as Menu
 
 Window {
     id: calibrator_window;
-    width: 1000;
-    height: 700;
+    width: Math.min(Screen.width, 1000 * dpiScale);
+    height: Math.min(Screen.height, 700 * dpiScale);
     visible: true;
     color: styleBackground;
 
@@ -102,7 +102,7 @@ Window {
             if (queue.length) {
                 active = true;
                 batch.currentFile = batch.queue.shift();
-                fileDialog.loadFile(batch.currentFile);
+                calibrator_window.loadFile(batch.currentFile);
             } else {
                 active = false;
             }

@@ -279,6 +279,11 @@ Item {
                     ]);
                 }
             }
+            Action {
+                icon.name: "bin;#f67575";
+                text: qsTr("Delete all sync points");
+                onTriggered: controller.clear_offsets();
+            }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Menu {
                 font.pixelSize: 11.5 * dpiScale;

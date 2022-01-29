@@ -85,7 +85,7 @@ MenuItem {
                 ["Norwegian (norsk)", "no"],
                 ["Polish (polski)",   "pl"],
                 ["Chinese - Simplified (简体中文)", "zh_CN"],
-                ["Chinese - Traditional (繁体中文)", "zh_TW"]
+                ["Chinese - Traditional (繁體中文)", "zh_TW"]
             ];
             Component.onCompleted: {
                 let selectedIndex = 0;

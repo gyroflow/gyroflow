@@ -20,6 +20,22 @@ pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 
+pub struct Quat64Serde(pub Quat64);
+impl From<Quat64> for Quat64Serde {
+    fn from(v: Quat64) -> Self { Self(v) }
+}
+use serde::ser::SerializeSeq;
+impl serde::Serialize for Quat64Serde {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where S: serde::Serializer {
+        let mut seq = serializer.serialize_seq(Some(4))?;
+        for e in self.0.as_vector() {
+            seq.serialize_element(e)?;
+        }
+        seq.end()
+    }
+}
+
 #[derive(Default)]
 pub struct FileMetadata {
     pub imu_orientation: Option<String>,
@@ -42,8 +58,9 @@ pub struct GyroSource {
 
     pub imu_orientation: Option<String>,
 
-    imu_rotation: Option<Rotation3<f64>>,
-    imu_lpf: f64,
+    pub imu_rotation_angles: Option<[f64; 3]>,
+    pub imu_rotation: Option<Rotation3<f64>>,
+    pub imu_lpf: f64,
 
     pub integration_method: usize,
 
@@ -58,6 +75,10 @@ pub struct GyroSource {
     pub smoothing_status: serde_json::Value,
     
     pub offsets: BTreeMap<i64, f64>, // microseconds timestamp, offset in milliseconds
+
+    pub file_path: String,
+
+    pub prevent_next_load: bool
 }
 
 impl GyroSource {
@@ -204,6 +225,7 @@ impl GyroSource {
         self.apply_transforms();
     }
     pub fn set_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
+        self.imu_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
             self.imu_rotation = Some(Rotation3::from_euler_angles(

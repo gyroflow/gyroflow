@@ -45,7 +45,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "description": "Smoothness",
                 "type": "SliderWithField",
                 "from": 0.01,
-                "to": 1.0,
+                "to": 2.0,
                 "value": self.time_constant,
                 "unit": "s"
             },
@@ -54,7 +54,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "description": "Smoothness at high velocity",
                 "type": "SliderWithField",
                 "from": 0.001,
-                "to": 0.1,
+                "to": 0.3,
                 "value": self.time_constant2,
                 "unit": "s"
             },
@@ -63,7 +63,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "description": "Velocity factor",
                 "type": "SliderWithField",
                 "from": 0.01,
-                "to": 10.0,
+                "to": 5.0,
                 "value": self.velocity_factor,
                 "unit": ""
             }

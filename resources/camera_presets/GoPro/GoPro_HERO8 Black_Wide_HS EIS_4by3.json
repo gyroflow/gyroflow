@@ -1,0 +1,80 @@
+{
+  "name": "GoPro_HERO8 Black_Wide_HS EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "HS EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO8 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 30,
+  "fps": 29.97,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3475414487702517,
+    "camera_matrix": [
+      [
+        1915.5970967628687,
+        0.0,
+        2014.9509068981495
+      ],
+      [
+        0.0,
+        1914.4091757151855,
+        1503.131458998161
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.028618581040689317,
+      0.08086632154235482,
+      -0.08464587805688917,
+      0.03196178324048459
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero8black-wide-4000x3000@29970-hseis",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-01-21",
+  "compatible_settings": [
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@23976-hseis", "fps": 23.976 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@25000-hseis", "fps": 25.0 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@29970-hseis", "fps": 29.97 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@50000-hseis", "fps": 50.0 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@59940-hseis", "fps": 59.94 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@100000-hseis", "fps": 100.0 },
+    { "width": 1920, "height": 1440, "identifier": "gopro-hero8black-wide-1920x1440@119880-hseis", "fps": 119.88 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero8black-wide-2704x2028@23976-hseis", "fps": 23.976 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero8black-wide-2704x2028@25000-hseis", "fps": 25.0 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero8black-wide-2704x2028@29970-hseis", "fps": 29.97 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero8black-wide-2704x2028@50000-hseis", "fps": 50.0 },
+    { "width": 2704, "height": 2028, "identifier": "gopro-hero8black-wide-2704x2028@59940-hseis", "fps": 59.94 },
+    { "width": 4000, "height": 3000, "identifier": "gopro-hero8black-wide-4000x3000@23976-hseis", "fps": 23.976 },
+    { "width": 4000, "height": 3000, "identifier": "gopro-hero8black-wide-4000x3000@25000-hseis", "fps": 25.0 }
+  ]
+}

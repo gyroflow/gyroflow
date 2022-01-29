@@ -58,6 +58,9 @@ impl CameraIdentifier {
                                         id.additional = format!("EIS-{}", v);
                                     }
                                 }
+                                if id.additional == "EIS-N" {
+                                    id.additional = "NO-EIS".into();
+                                }
                                 if let Some(v) = map.get_t(TagId::Unknown(0x56464f56/*VFOV*/)) as Option<&String> {
                                     match v.as_str() {
                                         "X" => id.lens_info = "Max".into(),
@@ -67,6 +70,11 @@ impl CameraIdentifier {
                                         "N" => id.lens_info = "Narrow".into(),
                                         _ => id.lens_info = v.into()
                                     };
+                                }
+                                if let Some(v) = map.get_t(TagId::Unknown(0x50524a54/*PRJT*/)) as Option<&String> {
+                                    if v.as_str() == "GPMW" {
+                                        id.lens_info = "Max Wide".into();
+                                    }
                                 }
                                 break;
                             }
@@ -107,7 +115,7 @@ impl CameraIdentifier {
                                         }
                                     }
                                     if let Some(flowstate) = v.get("is_flowstate_online").and_then(|v| v.as_bool()) {
-                                        id.additional = format!("EIS-{}", if flowstate { "Y" } else { "N" });
+                                        id.additional = if flowstate { "EIS" } else { "NO-EIS" }.into();
                                     }
                                 }
                                 break;

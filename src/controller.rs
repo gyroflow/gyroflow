@@ -71,6 +71,7 @@ pub struct Controller {
 
     set_offset: qt_method!(fn(&self, timestamp_us: i64, offset_ms: f64)),
     remove_offset: qt_method!(fn(&self, timestamp_us: i64)),
+    clear_offsets: qt_method!(fn(&self)),
     offset_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
@@ -140,7 +141,8 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    export_gyroflow: qt_method!(fn(&self)),
+    import_gyroflow: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
+    export_gyroflow: qt_method!(fn(&self, thin: bool)),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -152,6 +154,10 @@ pub struct Controller {
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
 
+    url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
+    path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
+
+    message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
     video_path: String,
@@ -335,10 +341,16 @@ impl Controller {
                 this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);
             });
             let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
                 this.load_lens_profile(path);
+            });
+            let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
+                if this.lens_loaded {
+                    let json = this.stabilizer.lens.read().get_json().unwrap_or_default();
+                    this.lens_profile_loaded(QString::from(json));
+                }
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -374,6 +386,7 @@ impl Controller {
                             load_lens(id_str.clone());
                         }
                     }
+                    reload_lens(());
 
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
@@ -391,7 +404,7 @@ impl Controller {
             if let Err(e) = self.stabilizer.load_lens_profile(&path) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
-            self.stabilizer.lens.write().get_json().unwrap_or_default()
+            self.stabilizer.lens.read().get_json().unwrap_or_default()
         };
         self.lens_loaded = true;
         self.lens_changed();
@@ -514,7 +527,7 @@ impl Controller {
     }
 
     fn set_smoothing_method(&mut self, index: usize) -> QJsonArray {
-        let params = util::serde_json_to_qt(&self.stabilizer.set_smoothing_method(index));
+        let params = util::serde_json_to_qt_array(&self.stabilizer.set_smoothing_method(index));
         self.request_recompute();
         self.chart_data_changed();
         params
@@ -528,11 +541,11 @@ impl Controller {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
     }
     fn get_smoothing_status(&self) -> QJsonArray {
-        util::serde_json_to_qt(&self.stabilizer.get_smoothing_status())
+        util::serde_json_to_qt_array(&self.stabilizer.get_smoothing_status())
     }
     fn get_smoothing_max_angles(&self) -> QJsonArray {
         let max_angles = self.stabilizer.get_smoothing_max_angles();
-        util::serde_json_to_qt(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
+        util::serde_json_to_qt_array(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
     }
 
     fn set_sync_method(&mut self, v: u32) {
@@ -614,9 +627,33 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow(&self) {
-        // TODO
-        self.error(QString::from("Not implemented"), QString::default(), QString::default());
+    fn export_gyroflow(&self, thin: bool) {
+        let video_path = std::path::Path::new(&self.video_path);
+        let gf_path = video_path.with_extension("gyroflow");
+        match self.stabilizer.export_gyroflow(&self.video_path, &gf_path, thin) {
+            Ok(_) => {
+                self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path.to_string_lossy())), QString::default());
+            },
+            Err(e) => {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            }
+        }
+    }
+
+    fn import_gyroflow(&mut self, url: QUrl) -> QJsonObject {
+        match self.stabilizer.import_gyroflow(&util::url_to_path(url)) {
+            Ok(thin_obj) => {
+                self.lens_loaded = true;
+                self.lens_changed();
+                let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
+                self.lens_profile_loaded(QString::from(lens_json));
+                util::serde_json_to_qt_object(&thin_obj)
+            },
+            Err(e) => {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                QJsonObject::default()
+            }
+        }
     }
 
     fn set_output_size(&self, w: usize, h: usize) {
@@ -637,6 +674,7 @@ impl Controller {
     wrap_simple_method!(set_trim_end,           v: f64; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
+    wrap_simple_method!(clear_offsets,; recompute; update_offset_model);
     wrap_simple_method!(remove_offset, timestamp_us: i64; recompute; update_offset_model);
 
     wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
@@ -949,4 +987,6 @@ impl Controller {
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
+    fn url_to_path(&self, url: QUrl) -> QString { QString::from(util::url_to_path(url)) }
+    fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
 }
