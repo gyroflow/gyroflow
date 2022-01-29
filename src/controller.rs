@@ -219,7 +219,7 @@ impl Controller {
                 let mut gyro = this.stabilizer.gyro.write();
                 for x in offsets {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                    gyro.set_offset((x.0 * 1000.0) as i64, x.1);
+                    gyro.set_offset(((x.0 - x.1) * 1000.0) as i64, x.1);
                 }
             }
             this.update_offset_model();
@@ -302,7 +302,7 @@ impl Controller {
 
     fn update_offset_model(&mut self) {
         self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
-            timestamp_us: *k, 
+            timestamp_us: *k,
             offset_ms: *v
         }).collect());
 

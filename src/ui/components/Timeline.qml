@@ -247,16 +247,17 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    const ts_us = pos * root.durationMs * 1000;
-                    const val = controller.offset_at_timestamp(pos * root.durationMs * 1000);
-                    controller.set_offset(ts_us, val);
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
+                    const offset = controller.offset_at_timestamp(pos);
+                    const final_pos = pos - offset * 1000;
+                    const final_offset = controller.offset_at_timestamp(final_pos)
+                    controller.set_offset(final_pos, final_offset);
                     Qt.callLater(() => {
                         root.editingSyncPoint = true;
-                        syncPointSlider.timestamp_us = ts_us;
-                        syncPointSlider.from  = val - Math.max(15, Math.abs(val));
-                        syncPointSlider.to    = val + Math.max(15, Math.abs(val));
-                        syncPointSlider.value = val;
+                        syncPointSlider.timestamp_us = final_pos;
+                        syncPointSlider.from  = final_offset - Math.max(15, Math.abs(final_offset));
+                        syncPointSlider.to    = final_offset + Math.max(15, Math.abs(final_offset));
+                        syncPointSlider.value = final_offset;
                     });
                 }
             }
@@ -357,7 +358,7 @@ Item {
             TimelineSyncPoint {
                 timeline: root;
                 org_timestamp_us: timestamp_us;
-                position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
+                position: (timestamp_us + offset_ms * 1000) / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: offset_ms;
                 unit: qsTr("ms");
                 isCalibPoint: false;
