@@ -5,6 +5,7 @@ import QtQuick
 
 Rectangle {
     property QtObject timeline: null;
+    property int vid_timestamp_us: 0;
     property int org_timestamp_us: 0;
     property real position: 0;
     property real value: 0;
@@ -54,7 +55,7 @@ Rectangle {
             cursorShape: Qt.PointingHandCursor;
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
-                    root.edit(root.org_timestamp_us, root.value);
+                    root.edit(root.vid_timestamp_us, root.value);
                 } else {
                     menu.popup();
                 }
@@ -84,12 +85,12 @@ Rectangle {
                 id: editAction;
                 text: qsTr("Edit offset");
                 icon.name: "pencil";
-                onTriggered: root.edit(root.org_timestamp_us, root.value);
+                onTriggered: root.edit(root.vid_timestamp_us, root.value);
             }
             Action {
                 text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
                 icon.name: "bin;#f67575";
-                onTriggered: root.remove(root.org_timestamp_us);
+                onTriggered: root.remove(root.vid_timestamp_us);
             }
             Action {
                 id: zoomAction;

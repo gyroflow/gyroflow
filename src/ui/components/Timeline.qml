@@ -238,8 +238,10 @@ Item {
                 icon.name: "spinner";
                 text: qsTr("Auto sync here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
+                    const offset = controller.offset_at_timestamp(pos);
+                    const final_pos = pos - offset * 1000;
+                    controller.start_autosync(final_pos / root.durationMs / 1000, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
                 }
             }
             Action {
@@ -247,8 +249,10 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
+                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
+                    const offset = controller.offset_at_timestamp(pos);
+                    const final_pos = pos - offset * 1000;
+                    controller.set_offset(final_pos, controller.offset_at_timestamp(final_pos));
                 }
             }
             Action {
@@ -342,6 +346,7 @@ Item {
 
             TimelineSyncPoint {
                 timeline: root;
+                vid_timestamp_us: video_timestamp_us;
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: offset_ms;
