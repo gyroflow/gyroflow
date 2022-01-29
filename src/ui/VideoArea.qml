@@ -58,11 +58,9 @@ Item {
                 const info = obj.video_info || { };
                 if (info) {
                     if (Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
-                        console.log("update frame rate", +info.vfr_fps);
                         vidInfo.updateEntryWithTrigger("Frame rate", +info.vfr_fps);
                     }
                     if (Math.abs(+info.rotation) > 0) {
-                        console.log("update Rotation", +info.rotation);
                         vidInfo.updateEntryWithTrigger("Rotation", +info.rotation);
                     }
                 }
