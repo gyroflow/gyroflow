@@ -24,7 +24,7 @@ use crate::qt_gpu::qrhi_undistort;
 
 #[derive(Default, SimpleListItem)]
 struct OffsetItem {
-    pub video_timestamp_us: i64,
+    pub gyro_timestamp_us: i64,
     pub timestamp_us: i64,
     pub offset_ms: f64,
 }
@@ -214,7 +214,7 @@ impl Controller {
                 let mut gyro = this.stabilizer.gyro.write();
                 for x in offsets {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                    gyro.set_offset((x.0 * 1000.0) as i64, x.1);
+                    gyro.set_offset(((x.0 - x.1) * 1000.0) as i64, x.1);
                 }
             }
             this.update_offset_model();
@@ -297,7 +297,7 @@ impl Controller {
 
     fn update_offset_model(&mut self) {
         self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
-            video_timestamp_us: *k,
+            gyro_timestamp_us: *k,
             timestamp_us: *k + (*v * 1000.0) as i64,
             offset_ms: *v
         }).collect());
