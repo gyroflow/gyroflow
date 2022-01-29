@@ -66,7 +66,7 @@ Rectangle {
                     mouse.accepted = false;
                 }
             }
-            onDoubleClicked: root.zoomIn(root.position); 
+            onDoubleClicked: root.zoomIn(root.org_timestamp_us + root.value * 1000.0); 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
         BasicText {
@@ -95,7 +95,7 @@ Rectangle {
                 id: zoomAction;
                 text: qsTr("Zoom in");
                 icon.name: "search";
-                onTriggered: root.zoomIn(root.position);
+                onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
             }
             Component.onCompleted: {
                 if (isCalibPoint) {
