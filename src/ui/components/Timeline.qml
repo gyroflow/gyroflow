@@ -251,7 +251,7 @@ Item {
                     const offset = controller.offset_at_timestamp(pos);
                     const final_pos = pos - offset * 1000;
                     const final_offset = controller.offset_at_timestamp(final_pos)
-                    //controller.set_offset(final_pos, final_offset);
+                    controller.set_offset(final_pos, final_offset);
                     Qt.callLater(() => {
                         root.editingSyncPoint = true;
                         syncPointSlider.timestamp_us = final_pos;
