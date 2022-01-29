@@ -71,9 +71,9 @@ impl ItemOpenCV {
             let a1_pts = Mat::from_slice(&pts1)?;
             let a2_pts = Mat::from_slice(&pts2)?;
             
-            // let scaled_k = Mat::from_slice_2d(&[
-            //     [focal.x, 0.0, principal.x],
-            //     [0.0, focal.y, principal.y],
+            // let cam_matrix = Mat::from_slice_2d(&[
+            //     [camera_matrix[(0, 0)], 0.0, camera_matrix[(0, 2)]],
+            //     [0.0, camera_matrix[(1, 1)], camera_matrix[(1, 0)]],
             //     [0.0, 0.0, 1.0]
             // ])?;
             let identity = Mat::from_slice_2d(&[
@@ -82,19 +82,22 @@ impl ItemOpenCV {
                 [0.0f64, 0.0f64, 1.0f64]
             ])?;
 
-            // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &scaled_k, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default())?;
+            // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &cam_matrix, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default())?;
             let mut mask = Mat::default();
-            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.99, 5e-4, 1000, &mut mask)?;
+            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 1000, &mut mask)?;
         
             let mut r1 = Mat::default();
             // let mut r2 = Mat::default();
             let mut t = Mat::default();
             
-            opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
-            // opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
+            let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
+            if inliers < 50 {
+                return Err(opencv::Error::new(0, "Model not found".into()));
+            }
             
-            let r1 = cv_to_rot2(r1)?;
-            Ok(r1)
+            cv_to_rot2(r1)
+            // opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
+            // let r1 = cv_to_rot2(r1)?;
             // let r2 = cv_to_rot2(r2)?;
             // Ok(if r1.angle() < r2.angle() {
             //     r1

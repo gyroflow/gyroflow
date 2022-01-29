@@ -365,7 +365,24 @@ impl PoseEstimator {
     }
 
     pub fn find_offsets(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset::find_offsets(ranges, &self.estimated_gyro.read().clone(), initial_offset, search_size, params)
+        let gyro = self.estimated_gyro.read().clone();
+        let ret = find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params);
+        if initial_offset.abs() > 1.0 {
+            // Try also negative rough offset
+            let offs2 = find_offset::find_offsets(ranges, &gyro, -initial_offset, search_size, params);
+            if offs2.len() > ret.len() {
+                return offs2;
+            } else if offs2.len() == ret.len() {
+                let sum1: f64 = ret.iter().map(|(_, _, cost)| *cost).sum();
+                let sum2: f64 = offs2.iter().map(|(_, _, cost)| *cost).sum();
+                if sum1 < sum2 {
+                    return ret;
+                } else {
+                    return offs2;
+                }
+            }
+        }
+        ret
     }
 
     pub fn find_offsets_visually(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>

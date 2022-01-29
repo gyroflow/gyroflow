@@ -888,7 +888,7 @@ Modifiser velocity faktoren til du får ønsket resultat (anbefales under 20).</
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="79"/>
       <source>Rough gyro offset</source>
-      <translation>Røff gyro forskyvning</translation>
+      <translation>Ca gyro offset</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="86"/>

@@ -116,7 +116,7 @@ Currently *Gyroflow* is available in:
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
 * **German** (by [Grommi](https://github.com/Gro2mi) and [Nicecrash](https://github.com/B-nutze-RR))
 * **Danish** (by [ElvinC](https://github.com/ElvinC))
-* **Norwegian** (by [MiniGod](https://github.com/MiniGod))
+* **Norwegian** (by [MiniGod](https://github.com/MiniGod) and [alexagv](https://github.com/alexagv))
 * **Chinese Simplified** (by [DusKing1](https://github.com/DusKing1))
 * **Chinese Traditional** (by [DusKing1](https://github.com/DusKing1))
 

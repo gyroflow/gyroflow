@@ -239,7 +239,7 @@ Item {
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
+                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
                 }
             }
             Action {

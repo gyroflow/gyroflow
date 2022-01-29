@@ -3,6 +3,7 @@
 
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use std::collections::BTreeMap;
+use crate::filtering::Lowpass;
 use crate::undistortion::ComputeParams;
 
 use crate::gyro_source::TimeIMU;
@@ -15,7 +16,8 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
             let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();
             let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
             let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                if x.timestamp_ms >= of_item[0].timestamp_ms - (search_size / 2.0) && x.timestamp_ms <= last_of_timestamp + (search_size / 2.0) {
+                let ts = x.timestamp_ms + initial_offset;
+                if ts >= of_item[0].timestamp_ms - search_size && ts <= last_of_timestamp + search_size {
                     Some(x.clone())
                 } else {
                     None
@@ -29,19 +31,19 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
             }
 
             let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
-            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(20.0, gyro.fps, &mut of_item);
-            let _ = crate::filtering::Lowpass::filter_gyro_forward_backward(20.0, sample_rate, &mut gyro_item);
+            let _ = Lowpass::filter_gyro_forward_backward(20.0, gyro.fps, &mut of_item);
+            let _ = Lowpass::filter_gyro_forward_backward(20.0, sample_rate, &mut gyro_item);
 
             let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 
             let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
             // First search every 1 ms
-            let steps = search_size as usize;
+            let steps = search_size as usize * 2;
             let lowest = (0..steps)
                 .into_par_iter()
                 .map(|i| {
-                    let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
+                    let offs = initial_offset - search_size + (i as f64);
                     (offs, calculate_cost(offs, &of_item, &gyro_bintree))
                 })
                 .reduce_with(find_min)
@@ -53,7 +55,7 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
                     (0..steps)
                         .into_par_iter()
                         .map(|i| {
-                            let offs = lowest.0 + (-(search_size / 2.0) + (i as f64 * step));
+                            let offs = lowest.0 + (-search_size + (i as f64 * step));
                             (offs, calculate_cost(offs, &of_item, &gyro_bintree))
                         })
                         .reduce_with(find_min)
@@ -64,8 +66,10 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
                 let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
 
                 // Only accept offsets that are within 90% of search size range
-                if lowest.0.abs() < (search_size / 2.0) * 0.9 {
+                if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
                     offsets.push((middle_timestamp, lowest.0, lowest.1));
+                } else {
+                    log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
                 }
             }
         }

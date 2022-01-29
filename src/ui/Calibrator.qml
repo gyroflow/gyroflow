@@ -110,6 +110,7 @@ Window {
         Connections {
             target: controller;
             function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+                calibrator_window.anyFileLoaded = true;
                 if (!batch.active) return;
                 batch.runIn(2000, function() {
                     lensCalib.autoCalibBtn.clicked();
@@ -211,6 +212,19 @@ Window {
             if (!videoArea.videoLoader.active) {
                 Qt.callLater(controller.recompute_threaded);
             }
+        }
+    }
+
+    property bool anyFileLoaded: false;
+    property bool closeConfirmationModal: false;
+    onClosing: (close) => {
+        if (anyFileLoaded && !closeConfirmationModal) {
+            messageBox(Modal.NoIcon, qsTr("Are you sure you want to close the calibrator?"), [
+                { text: qsTr("Yes"), accent: true, clicked: () => calibrator_window.close() },
+                { text: qsTr("No"), clicked: () => calibrator_window.closeConfirmationModal = false },
+            ]);
+            close.accepted = false;
+            closeConfirmationModal = true;
         }
     }
 }

@@ -219,7 +219,11 @@ impl Controller {
                 let mut gyro = this.stabilizer.gyro.write();
                 for x in offsets {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                    gyro.set_offset(((x.0 - x.1) * 1000.0) as i64, x.1);
+                    let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                    // Remove existing offsets within 100ms range
+                    let remove_keys = gyro.offsets.range(new_ts-100000..new_ts+100000).map(|(k, _)| *k).collect::<Vec<i64>>();
+                    remove_keys.into_iter().for_each(|k| { gyro.offsets.remove(&k); });
+                    gyro.set_offset(new_ts, x.1);
                 }
             }
             this.update_offset_model();
