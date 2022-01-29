@@ -43,6 +43,11 @@ pub fn is_opengl() -> bool {
     })
 }
 
+pub fn path_to_url(path: QString) -> QUrl {
+    cpp!(unsafe [path as "QString"] -> QUrl as "QUrl" {
+        return QUrl::fromLocalFile(path);
+    })
+}
 pub fn url_to_path(url: QUrl) -> String {
     let path = cpp!(unsafe [url as "QUrl"] -> QString as "QString" {
         return url.toLocalFile();

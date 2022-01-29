@@ -78,6 +78,9 @@ MenuItem {
         if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
     }
+    function updateEntryWithTrigger(key, value) {
+        list.updateEntryWithTrigger(key, value);
+    }
 
     function getDuration(md) {
         const s = +md["stream.video[0].duration"] / 1000;
@@ -136,6 +139,7 @@ MenuItem {
                 "width": 70,
                 "value": function() { return root.fps; },
                 "onChange": function(value) {
+                    console.log('fr on change', value);
                     root.fps = value;
                     root.updateEntry("Frame rate", value.toFixed(3) + " fps");
                     controller.override_video_fps(value);

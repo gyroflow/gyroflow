@@ -248,7 +248,16 @@ Item {
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.set_offset(pos * root.durationMs * 1000, controller.offset_at_timestamp(pos * root.durationMs * 1000));
+                    const ts_us = pos * root.durationMs * 1000;
+                    const val = controller.offset_at_timestamp(pos * root.durationMs * 1000);
+                    controller.set_offset(ts_us, val);
+                    Qt.callLater(() => {
+                        root.editingSyncPoint = true;
+                        syncPointSlider.timestamp_us = ts_us;
+                        syncPointSlider.from  = val - Math.max(15, Math.abs(val));
+                        syncPointSlider.to    = val + Math.max(15, Math.abs(val));
+                        syncPointSlider.value = val;
+                    });
                 }
             }
             Action {
@@ -268,6 +277,11 @@ Item {
                         { text: qsTr("No"), accent: true },
                     ]);
                 }
+            }
+            Action {
+                icon.name: "bin;#f67575";
+                text: qsTr("Delete all sync points");
+                onTriggered: controller.clear_offsets();
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Menu {

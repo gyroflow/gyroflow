@@ -19,6 +19,14 @@ Row {
         model[key] = value;
         modelChanged();
     }
+    function updateEntryWithTrigger(key, value) {
+        updateEntry(key, value);
+
+        const desc = tl.editableFields[key];
+        if (desc && desc.onChange) {
+            desc.onChange(value);
+        }
+    }
     Column {
         id: col1;
         spacing: tl.spacing;

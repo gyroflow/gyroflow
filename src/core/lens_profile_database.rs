@@ -19,16 +19,24 @@ impl LensProfileDatabase {
         let path = PathBuf::from("./resources/camera_presets/");
 
         let candidates = [
-            std::fs::canonicalize(&path).unwrap_or_default(),
-            std::fs::canonicalize(std::env::current_exe().unwrap_or_default().parent().map(|x| x.join(&path)).unwrap_or_default()).unwrap_or_default()
+            path,
+            PathBuf::from("./camera_presets/"),
+            PathBuf::from("./lens_profiles/")
         ];
-        for x in candidates {
-            if x.exists() {
-                return x;
+        for path in &candidates {
+            if let Ok(path) = std::fs::canonicalize(&path) {
+                if path.exists() {
+                    return path;
+                }
+            }
+            if let Ok(path) = std::fs::canonicalize(std::env::current_exe().unwrap_or_default().parent().map(|x| x.join(&path)).unwrap_or_default()) {
+                if path.exists() {
+                    return path;
+                }
             }
         }
 
-        std::fs::canonicalize(&path).unwrap_or_default()
+        std::fs::canonicalize(&candidates[0]).unwrap_or_default()
     }
 
     pub fn load_all(&mut self) {
@@ -65,7 +73,7 @@ impl LensProfileDatabase {
             }
         });
         
-        ::log::info!("Loaded lens profiles in {:.3}ms", _time.elapsed().as_micros() as f64 / 1000.0);
+        ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
     }
 
     pub fn get_all_names(&self) -> Vec<(String, String)> {

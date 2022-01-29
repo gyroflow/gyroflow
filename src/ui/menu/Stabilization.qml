@@ -22,6 +22,46 @@ MenuItem {
         property alias adaptiveZoom: adaptiveZoom.value;
     }
 
+    function loadGyroflow(obj) {
+        const stab = obj.stabilization || { };
+        if (stab) {
+            fov.value = +stab.fov;
+            const methodIndex = smoothingAlgorithms.indexOf(stab.method);
+            if (methodIndex > -1) {
+                smoothingMethod.currentIndex = methodIndex;
+            }
+            if (stab.smoothing_params) {
+                Qt.callLater(function() {
+                    for (const x of stab.smoothing_params) {
+                        if (smoothingOptions.children.length > 0) {
+                            for (const y in smoothingOptions.children[0].children) {
+                                const el = smoothingOptions.children[0].children[y];
+                                if (el && el.inner && el.inner.children.length > 0) {
+                                    const slider = el.inner.children[0];
+                                    if (slider.objectName == "param-" + x.name) {
+                                        console.log("Setting param", x.name, x.value);
+                                        slider.value = x.value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            setFrameReadoutTime(+stab.frame_readout_time);
+
+            const az = +stab.adaptive_zoom_window;
+            if (az < -0.9) {
+                croppingMode.currentIndex = 2; // Static crop
+            } else if (az > 0) {
+                croppingMode.currentIndex = 1; // Dynamic cropping
+                adaptiveZoom.value = az;
+            } else {
+                croppingMode.currentIndex = 0; // No cropping
+            }        
+        }
+    }
+
     function setFrameReadoutTime(v) {
         shutter.value = Math.abs(v);
         shutterCb.checked = Math.abs(v) > 0;
@@ -175,6 +215,7 @@ MenuItem {
                                     to: ${x.to};
                                     value: root.getSmoothingParam("${x.name}", ${x.value});
                                     defaultValue: ${x.value};
+                                    objectName: "param-${x.name}";
                                     unit: qsTranslate("Stabilization", "${x.unit}");
                                     //live: false;
                                     precision: ${x.precision} || 2;

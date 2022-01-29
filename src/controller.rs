@@ -70,6 +70,7 @@ pub struct Controller {
 
     set_offset: qt_method!(fn(&self, timestamp_us: i64, offset_ms: f64)),
     remove_offset: qt_method!(fn(&self, timestamp_us: i64)),
+    clear_offsets: qt_method!(fn(&self)),
     offset_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
@@ -139,7 +140,7 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    import_gyroflow: qt_method!(fn(&self, url: String) -> QJsonObject),
+    import_gyroflow: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
     export_gyroflow: qt_method!(fn(&self, thin: bool)),
 
     check_updates: qt_method!(fn(&self)),
@@ -151,6 +152,9 @@ pub struct Controller {
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
+
+    url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
+    path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
 
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
@@ -335,10 +339,15 @@ impl Controller {
                 this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);    
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);
             });
             let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
                 this.load_lens_profile(path);
+            });
+            let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
+                if this.lens_loaded {
+                    this.lens_profile_loaded(QString::from(this.stabilizer.lens.read().get_json().unwrap_or_default()));
+                }
             });
             
             if duration_ms > 0.0 && fps > 0.0 {
@@ -374,6 +383,7 @@ impl Controller {
                             load_lens(id_str.clone());
                         }
                     }
+                    reload_lens(());
 
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
@@ -627,9 +637,12 @@ impl Controller {
         }
     }
 
-    fn import_gyroflow(&self, path: String) -> QJsonObject {
-        match self.stabilizer.import_gyroflow(&path) {
+    fn import_gyroflow(&mut self, url: QUrl) -> QJsonObject {
+        match self.stabilizer.import_gyroflow(&util::url_to_path(url)) {
             Ok(thin_obj) => {
+                self.lens_loaded = true;
+                self.lens_changed();
+                self.lens_profile_loaded(QString::from(self.stabilizer.lens.read().get_json().unwrap_or_default()));
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
@@ -657,6 +670,7 @@ impl Controller {
     wrap_simple_method!(set_trim_end,           v: f64; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
+    wrap_simple_method!(clear_offsets,; recompute; update_offset_model);
     wrap_simple_method!(remove_offset, timestamp_us: i64; recompute; update_offset_model);
 
     wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
@@ -969,4 +983,6 @@ impl Controller {
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
+    fn url_to_path(&self, url: QUrl) -> QString { QString::from(util::url_to_path(url)) }
+    fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
 }

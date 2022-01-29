@@ -77,6 +77,8 @@ pub struct GyroSource {
     pub offsets: BTreeMap<i64, f64>, // microseconds timestamp, offset in milliseconds
 
     pub file_path: String,
+
+    pub prevent_next_load: bool
 }
 
 impl GyroSource {

@@ -15,6 +15,8 @@ MenuItem {
     property alias integrationMethod: integrator.currentIndex;
     property string filename: "";
 
+    property var pendingOffsets: ({});
+
     FileDialog {
         id: fileDialog;
         property var extensions: [
@@ -27,10 +29,36 @@ MenuItem {
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url) {
+        root.pendingOffsets = { };
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
         controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+    }
+
+    function loadGyroflow(obj) {
+        const gyro = obj.gyro_source || { };
+        if (gyro) {
+            if (gyro.filepath && (gyro.filepath != obj.videofile) && controller.file_exists(gyro.filepath)) {
+                loadFile(controller.path_to_url(gyro.filepath));
+                root.pendingOffsets = obj.offsets; // because loading gyro data will clear offsets
+            }
+            if (gyro.rotation && gyro.rotation.length == 3) {
+                p.value = gyro.rotation[0];
+                r.value = gyro.rotation[1];
+                y.value = gyro.rotation[2];
+                rot.checked = Math.abs(p.value) > 0 || Math.abs(r.value) > 0 || Math.abs(y.value) > 0;
+            }
+            if (gyro.imu_orientation) orientation.text = gyro.imu_orientation;
+            if (gyro.hasOwnProperty("integration_method")) {
+                const index = +gyro.integration_method;
+                integrator.currentIndex = integrator.hasQuaternions? index : index - 1;
+            }
+            if (+gyro.lpf > 0) {
+                lpf.value = +gyro.lpf;
+                lpfcb.checked = lpf.value > 0;
+            }
+        }
     }
 
     Connections {
@@ -49,6 +77,11 @@ MenuItem {
             chart.setDurationMs(controller.get_scaled_duration_ms());
             window.videoArea.durationMs = controller.get_scaled_duration_ms();
             Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
+            if (root.pendingOffsets) { 
+                for (const ts in root.pendingOffsets) {
+                    controller.set_offset(ts, root.pendingOffsets[ts]);
+                }
+            }
         }
     }
 

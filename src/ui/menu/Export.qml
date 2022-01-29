@@ -193,7 +193,7 @@ MenuItem {
                            qsTr("They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.") + "\n" + 
                            qsTr("Uncheck this option for maximum possible quality.")
                          :
-                           qsTr("GPU acceleration is not avilable for the pixel format of this video.");
+                           qsTr("GPU acceleration is not available for the pixel format of this video.");
     }
     CheckBox {
         id: audio;

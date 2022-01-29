@@ -21,11 +21,8 @@ use ui::ui_tools::UITools;
 
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: fix loader that stays on after load sometimes
-// TODO: loading .gyroflow
 
 // TODO: Batch processing when loaded multiple files
-// TODO: when adding a sync point, enter its edit mode immediately
-// TODO: delete all sync points button
 // TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
