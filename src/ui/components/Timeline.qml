@@ -250,7 +250,15 @@ Item {
                     const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
                     const offset = controller.offset_at_timestamp(pos);
                     const final_pos = pos - offset * 1000;
-                    controller.set_offset(final_pos, controller.offset_at_timestamp(final_pos));
+                    const final_offset = controller.offset_at_timestamp(final_pos)
+                    controller.set_offset(final_pos, final_offset);
+                    Qt.callLater(() => {
+                        root.editingSyncPoint = true;
+                        syncPointSlider.timestamp_us = pos;
+                        syncPointSlider.from  = final_offset - Math.max(15, Math.abs(final_offset));
+                        syncPointSlider.to    = final_offset + Math.max(15, Math.abs(final_offset));
+                        syncPointSlider.value = final_offset;
+                    });
                 }
             }
             Action {
