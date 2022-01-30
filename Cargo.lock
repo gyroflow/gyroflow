@@ -2055,7 +2055,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject"
 version = "0.2.5"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#090f6e180a3cecb204125bda46c48c99c7ce452a"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2069,7 +2069,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject_impl"
 version = "0.2.5"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#090f6e180a3cecb204125bda46c48c99c7ce452a"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2092,7 +2092,7 @@ dependencies = [
 [[package]]
 name = "qttypes"
 version = "0.2.6"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#090f6e180a3cecb204125bda46c48c99c7ce452a"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
 dependencies = [
  "cpp",
  "cpp_build",

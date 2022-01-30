@@ -188,38 +188,45 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="80"/>
+      <location filename="../../src/ui/Calibrator.qml" line="223"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="81"/>
+      <location filename="../../src/ui/Calibrator.qml" line="224"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="187"/>
+      <location filename="../../src/ui/Calibrator.qml" line="188"/>
       <source>or</source>
       <translation>或</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="190"/>
+      <location filename="../../src/ui/Calibrator.qml" line="191"/>
       <source>Open calibration target</source>
       <translation>打開校準目標</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="196"/>
+      <location filename="../../src/ui/Calibrator.qml" line="197"/>
       <source>How to calibrate lens?</source>
       <translation>如何校準鏡頭？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="209"/>
+      <location filename="../../src/ui/Calibrator.qml" line="210"/>
       <source>Analyzing %1... %2</source>
       <translation>分析中 %1… %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="209"/>
+      <location filename="../../src/ui/Calibrator.qml" line="210"/>
       <source>%1 good frames</source>
       <translation>%1 個良好幀</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Calibrator.qml" line="222"/>
+      <source>Are you sure you want to close the calibrator?</source>
+      <translation>您確定要關閉校準器嗎？?</translation>
     </message>
   </context>
   <context>
@@ -1099,12 +1106,12 @@ Resulting offset is the one where lines were the shortest, meaning the video was
       <translation>在此處添加手動同步點</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="266"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="267"/>
       <source>Estimate rolling shutter here</source>
       <translation>在此估算滾動快門</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="270"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="271"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1117,12 +1124,12 @@ Are you sure you want to continue?</source>
 您確定要繼續嗎？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="274"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="275"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="277"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="278"/>
       <source>No</source>
       <translation>否</translation>
     </message>
@@ -1132,54 +1139,54 @@ Are you sure you want to continue?</source>
       <translation>添加校準點</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="283"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Delete all sync points</source>
       <translation>刪除全部同步點</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="289"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <source>Chart display mode</source>
       <translation>圖表顯示模式</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="290"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="291"/>
       <source>Gyroscope</source>
       <translation>陀螺儀</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="291"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="292"/>
       <source>Accelerometer</source>
       <translation>加速度計</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="292"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="293"/>
       <source>Magnetometer</source>
       <translation>磁力計</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="293"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Quaternions</source>
       <translation>四元數</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="394"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="395"/>
       <source>px</source>
       <translation>像素 (px)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="362"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="446"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="447"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="454"/>
       <source>ms</source>
       <translation>毫秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="473"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="474"/>
       <source>Save</source>
       <translation>保存</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="491"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="492"/>
       <source>Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom</source>
       <translation>Ctrl + 滾輪 水平縮放，Alt + 滾輪 垂直縮放，雙擊重置縮放。</translation>
     </message>
@@ -1210,102 +1217,102 @@ Are you sure you want to continue?</source>
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="96"/>
+      <location filename="../../src/ui/VideoArea.qml" line="94"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>有與此影片相關聯的 %1 檔案，您想要加載它嗎？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="97"/>
+      <location filename="../../src/ui/VideoArea.qml" line="95"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="100"/>
+      <location filename="../../src/ui/VideoArea.qml" line="98"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="169"/>
+      <location filename="../../src/ui/VideoArea.qml" line="167"/>
       <source>Zoom: %1</source>
       <translation>縮放: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="195"/>
+      <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>加載所選檔案失敗，它可能不支援或無效。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="195"/>
+      <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <source>Ok</source>
       <translation>確定</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="234"/>
+      <location filename="../../src/ui/VideoArea.qml" line="232"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>鏡頭檔案并未加載，結果看起來可能會不正塙。請爲您的攝像機加載鏡頭檔案。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
       <source>Loading %1...</source>
       <translation>加載中 %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
       <source>Drop video file here</source>
       <translation>將影片檔案拖曳至此處</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="316"/>
+      <location filename="../../src/ui/VideoArea.qml" line="314"/>
       <source>Analyzing %1... %2</source>
       <translation>分析中 %1… %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="363"/>
+      <location filename="../../src/ui/VideoArea.qml" line="361"/>
       <source>Trim start</source>
       <translation>修剪開始</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="364"/>
+      <location filename="../../src/ui/VideoArea.qml" line="362"/>
       <source>Previous frame</source>
       <translation>前一個影格</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="367"/>
+      <location filename="../../src/ui/VideoArea.qml" line="365"/>
       <source>Pause</source>
       <translation>暫停</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="367"/>
+      <location filename="../../src/ui/VideoArea.qml" line="365"/>
       <source>Play</source>
       <translation>播放</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="370"/>
+      <location filename="../../src/ui/VideoArea.qml" line="368"/>
       <source>Next frame</source>
       <translation>下一個影格</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="371"/>
+      <location filename="../../src/ui/VideoArea.qml" line="369"/>
       <source>Trim end</source>
       <translation>修剪結尾</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="398"/>
+      <location filename="../../src/ui/VideoArea.qml" line="396"/>
       <source>Toggle stabilization</source>
       <translation>切換穩定</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="402"/>
       <source>Mute</source>
       <translation>靜音</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="402"/>
       <source>Unmute</source>
       <translation>取消靜音</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="420"/>
+      <location filename="../../src/ui/VideoArea.qml" line="418"/>
       <source>Playback speed</source>
       <translation>播放速度</translation>
     </message>

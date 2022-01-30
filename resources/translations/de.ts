@@ -187,38 +187,45 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="80"/>
+      <location filename="../../src/ui/Calibrator.qml" line="223"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="81"/>
+      <location filename="../../src/ui/Calibrator.qml" line="224"/>
       <source>No</source>
       <translation>Nein</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="187"/>
+      <location filename="../../src/ui/Calibrator.qml" line="188"/>
       <source>or</source>
       <translation>oder</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="190"/>
+      <location filename="../../src/ui/Calibrator.qml" line="191"/>
       <source>Open calibration target</source>
       <translation>Öffne Kalibrierungs-Muster</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="196"/>
+      <location filename="../../src/ui/Calibrator.qml" line="197"/>
       <source>How to calibrate lens?</source>
       <translation>Wie wird eine Linse/Objektiv kalibriert?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="209"/>
+      <location filename="../../src/ui/Calibrator.qml" line="210"/>
       <source>Analyzing %1... %2</source>
       <translation>Analysiere %1... %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="209"/>
+      <location filename="../../src/ui/Calibrator.qml" line="210"/>
       <source>%1 good frames</source>
       <translation>%1 gute Einzelbilder</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Calibrator.qml" line="222"/>
+      <source>Are you sure you want to close the calibrator?</source>
+      <translation type="unfinished">Are you sure you want to close the calibrator?</translation>
     </message>
   </context>
   <context>
@@ -1098,12 +1105,12 @@ Der gewählte Versatz ist der, bei dem die Linien am kürzesten sind und bedeute
       <translation>Manuellen Syncpunkt hier setzen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="266"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="267"/>
       <source>Estimate rolling shutter here</source>
       <translation>Rolling-Shutter hier analysieren</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="270"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="271"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1116,12 +1123,12 @@ Diese Funktion ist experimentell und kann das Ergebnis verfälschen.
 Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="274"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="275"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="277"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="278"/>
       <source>No</source>
       <translation>Nein</translation>
     </message>
@@ -1131,54 +1138,54 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
       <translation>Marker für Kalibrierung setzen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="283"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Delete all sync points</source>
       <translation type="unfinished">Delete all sync points</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="289"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <source>Chart display mode</source>
       <translation>Diagrammanzeige-Modus</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="290"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="291"/>
       <source>Gyroscope</source>
       <translation>Gyroskop</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="291"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="292"/>
       <source>Accelerometer</source>
       <translation>Beschleunigungssensor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="292"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="293"/>
       <source>Magnetometer</source>
       <translation>Magnetometer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="293"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Quaternions</source>
       <translation>Quaternionen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="394"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="395"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="362"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="446"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="447"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="454"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="473"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="474"/>
       <source>Save</source>
       <translation>Speichern</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="491"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="492"/>
       <source>Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom</source>
       <translation>Strg + Scrollen um in der Höhe zu zoomen, Alt + Scrollen um in der Breite zu zoomen, Doppelklick um den Zoom zurückzusetzen</translation>
     </message>
@@ -1209,102 +1216,102 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="96"/>
+      <location filename="../../src/ui/VideoArea.qml" line="94"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>Es gibt eine %1 Datei, die zu diesem Video passt. Soll diese Datei geladen werden?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="97"/>
+      <location filename="../../src/ui/VideoArea.qml" line="95"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="100"/>
+      <location filename="../../src/ui/VideoArea.qml" line="98"/>
       <source>No</source>
       <translation>No</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="169"/>
+      <location filename="../../src/ui/VideoArea.qml" line="167"/>
       <source>Zoom: %1</source>
       <translation>Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="195"/>
+      <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Die ausgewählte Datei konnte nicht geladen werden. Sie wird nicht unterstützt, ist ungültig oder ist nicht lesbar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="195"/>
+      <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="234"/>
+      <location filename="../../src/ui/VideoArea.qml" line="232"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Kein Linsen-Profil geladen - Ergebnis kann nicht korrekt dargestellt werden. Bitte lade das passende Linsen-Profil für die Kamera.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
       <source>Loading %1...</source>
       <translation>Lade %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
       <source>Drop video file here</source>
       <translation>Videodatei hier ablegen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="316"/>
+      <location filename="../../src/ui/VideoArea.qml" line="314"/>
       <source>Analyzing %1... %2</source>
       <translation>Analysiere %1... %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="363"/>
+      <location filename="../../src/ui/VideoArea.qml" line="361"/>
       <source>Trim start</source>
       <translation>Startpunkt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="364"/>
+      <location filename="../../src/ui/VideoArea.qml" line="362"/>
       <source>Previous frame</source>
       <translation>Vorheriges Bild</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="367"/>
+      <location filename="../../src/ui/VideoArea.qml" line="365"/>
       <source>Pause</source>
       <translation>Pause</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="367"/>
+      <location filename="../../src/ui/VideoArea.qml" line="365"/>
       <source>Play</source>
       <translation>Wiedergabe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="370"/>
+      <location filename="../../src/ui/VideoArea.qml" line="368"/>
       <source>Next frame</source>
       <translation>Nächstes Bild</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="371"/>
+      <location filename="../../src/ui/VideoArea.qml" line="369"/>
       <source>Trim end</source>
       <translation>Endpunkt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="398"/>
+      <location filename="../../src/ui/VideoArea.qml" line="396"/>
       <source>Toggle stabilization</source>
       <translation>Stabilisierung ein/ausschalten</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="402"/>
       <source>Mute</source>
       <translation>Lautlos</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="402"/>
       <source>Unmute</source>
       <translation>Laut</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="420"/>
+      <location filename="../../src/ui/VideoArea.qml" line="418"/>
       <source>Playback speed</source>
       <translation>Wiedergabe-Geschwindigkeit</translation>
     </message>

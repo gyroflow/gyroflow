@@ -1,12 +1,7 @@
-# Install nightly: rustup default nightly
 # cargo install --git https://github.com/zer0def/android-ndk-rs.git cargo-apk
 # rustup target add aarch64-linux-android
-# update Cargo.toml to remove default opencl feature and remove [[bin]] and uncomment [lib]
+# update Cargo.toml to comment [[bin]] and uncomment [lib] section
 
-# Add  .clang_arg("-I$LIBCLANG_PATH/../lib/clang/13.0.0/include")
-#      .clang_arg("--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/sysroot")
-#      .clang_arg("--target=aarch64-linux-android")
-# to ffmpeg-sys-next-4.4.0-next.2\build.rs
 # Change if cfg!(target_env = "msvc") to std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc" in opencv-0.61.3\build.rs
 
 $PROJECT_DIR="$PSScriptRoot\.."
@@ -23,6 +18,10 @@ $Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-13-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"
 $Env:OPENCV_LINK_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
 $Env:OPENCV_INCLUDE_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\jni\include"
+
+$CLANG_LIB = $Env:LIBCLANG_PATH.replace('\', '/').replace('/bin', '/lib');
+$NDK_REPLACED = $Env:ANDROID_NDK_HOME.replace('\', '/');
+$Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/13.0.0/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
 
 Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"    -Destination "$QT_LIBS\libQt6Core.so"    -ErrorAction SilentlyContinue
 Copy-Item -Path "$QT_LIBS\libQt6Gui_arm64-v8a.so"     -Destination "$QT_LIBS\libQt6Gui.so"     -ErrorAction SilentlyContinue
@@ -54,6 +53,6 @@ androiddeployqt --input "$PROJECT_DIR\_deployment\android\android-deploy.json" `
 
 adb install "$PROJECT_DIR\target\android-build\build\outputs\apk\debug\android-build-debug.apk"
 
-#--Alternative
-#--cargo install cargo-ndk
-#--cargo ndk -t arm64-v8a --platform 26 -o ./jniLibs build --release
+# Alternative
+# cargo install cargo-ndk
+# cargo ndk -t arm64-v8a --platform 26 -o ./jniLibs build --release
