@@ -95,7 +95,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
         - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd libnvcuvid1 libnvidia-encode1`
         - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
         - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
-- Android 10+
+- Android 6+
 
 ## Roadmap
 
