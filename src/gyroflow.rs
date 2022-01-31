@@ -19,9 +19,13 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO: use quaternions for finding offset, not gyro samples
 // TODO: fix loader that stays on after load sometimes
+// TODO: fix integration method not correctly set sometimes for gopro quaterions on load
+// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
 
+// TODO: use quaternions for finding offset, not gyro samples
+// TODO: add horizon lock checkbox to all smoothing algos
+// TODO: support horizon lock using GRAV for CORI
 // TODO: Batch processing when loaded multiple files
 // TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
@@ -56,6 +60,7 @@ use ui::ui_tools::UITools;
 // TODO: save panel sizes, menu opened states and window dimensions
 // TODO: audio slightly off sync when using exporting trimmed video
 // TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
+// TODO: optical only stabilization
 
 cpp! {{
     #include <QQuickStyle>

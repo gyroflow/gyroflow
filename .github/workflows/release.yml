@@ -84,11 +84,11 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ext/Qt
-          key: QtCache-${{ runner.os }}-6.2.3
+          key: QtCache-${{ runner.os }}-6.2.2
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: 6.2.3
+          version: 6.2.2
           dir: ${{ github.workspace }}/ext/
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
