@@ -81,12 +81,14 @@ impl SmoothingAlgorithm for Fixed {
         let z_axis = nalgebra::Vector3::<f64>::z_axis();
         
         let rot_x = Rotation3::from_axis_angle(&x_axis, self.pitch * DEG2RAD);
-        let rot_y = Rotation3::from_axis_angle(&y_axis, self.yaw * DEG2RAD);
-        let rot_z = Rotation3::from_axis_angle(&z_axis, self.roll * DEG2RAD);
+        let rot_y = Rotation3::from_axis_angle(&y_axis, (self.roll + 90.0) * DEG2RAD);
+        let rot_z = Rotation3::from_axis_angle(&z_axis, self.yaw * DEG2RAD);
+
+        let correction = Rotation3::from_axis_angle(&z_axis, 90.0 * DEG2RAD) * Rotation3::from_axis_angle(&y_axis, 90.0 * DEG2RAD);
 
         // Z rotation corresponds to body-centric roll, so placed last
         // using x as second rotation corresponds gives the usual pan/tilt combination
-        let combined_rot = rot_y * rot_x * rot_z;
+        let combined_rot = rot_z * rot_x * rot_y * correction;
         let fixed_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
         
         //let fixed_quat = UnitQuaternion::from_euler_angles(self.yaw * DEG2RAD,self.roll * DEG2RAD,self.pitch * DEG2RAD);

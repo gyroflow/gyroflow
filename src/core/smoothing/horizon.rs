@@ -63,33 +63,38 @@ fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
 }
 */
 
-// "correct" euler angle order
 fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
+
     let x_axis = nalgebra::Vector3::<f64>::x_axis();
     let y_axis = nalgebra::Vector3::<f64>::y_axis();
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
     
     let rot_x = Rotation3::from_axis_angle(&x_axis, x);
-    let rot_y = Rotation3::from_axis_angle(&y_axis, y);
+    let rot_y = Rotation3::from_axis_angle(&y_axis, y + std::f64::consts::FRAC_PI_2);
     let rot_z = Rotation3::from_axis_angle(&z_axis, z);
 
-    // Z rotation corresponds to body-centric roll, so placed last
-    // using x as second rotation corresponds gives the usual pan/tilt combination
-    let combined_rotation = rot_y * rot_x * rot_z;
-    UnitQuaternion::from_rotation_matrix(&combined_rotation)
+    let correction = Rotation3::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2);
+
+    let combined_rot = rot_z * rot_x * rot_y * correction;
+    UnitQuaternion::from_rotation_matrix(&combined_rot)
 }
 
 fn lock_horizon_angle(q: UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference
+    let axis = nalgebra::Vector3::<f64>::y_axis();
+
+    // let x_axis = nalgebra::Vector3::<f64>::x_axis();
+    let y_axis = nalgebra::Vector3::<f64>::y_axis();
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
-    
+
+    let corrected_transform = q.to_rotation_matrix() * Rotation3::from_axis_angle(&y_axis, -std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&z_axis, -std::f64::consts::FRAC_PI_2);
     // since this coincides with roll axis, the roll is neglected when transformed back
-    let z_transformed = q.transform_vector(&z_axis);
+    let axis_transformed = corrected_transform * axis;
 
-    let pitch = (-z_transformed.y).asin();
-    let yaw = z_transformed.x.simd_atan2(z_transformed.z);
-
-    from_euler_yxz(pitch, yaw,roll_correction)
+    let pitch = (axis_transformed.z).asin();
+    let yaw = axis_transformed.y.simd_atan2(axis_transformed.x) - std::f64::consts::FRAC_PI_2;
+    
+    from_euler_yxz(pitch, roll_correction, yaw)
 }
 
 
@@ -124,13 +129,13 @@ impl SmoothingAlgorithm for HorizonLock {
                 "to": 180,
                 "value": self.roll,
                 "unit": "°"
-            },
+            } /* , 
             {
-                "name": "pitch",
+                "name": "pitch", // shouldn't be needed with adequite orientation filtering
                 "description": "Pitch angle correction (todo)",
                 "type": "SliderWithField",
-                "from": -90,
-                "to": 90,
+                "from": -180,
+                "to": 180,
                 "value": self.pitch,
                 "unit": "°"
             },
@@ -142,7 +147,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "to": 180,
                 "value": self.yaw,
                 "unit": "°"
-            },
+            },*/
         ])
     }
     fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
@@ -151,8 +156,8 @@ impl SmoothingAlgorithm for HorizonLock {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hasher.write_u64(self.time_constant.to_bits());
         hasher.write_u64(self.roll.to_bits());
-        hasher.write_u64(self.pitch.to_bits());
-        hasher.write_u64(self.yaw.to_bits());
+        //hasher.write_u64(self.pitch.to_bits());
+        //hasher.write_u64(self.yaw.to_bits());
         hasher.finish()
     }
 
@@ -177,10 +182,16 @@ impl SmoothingAlgorithm for HorizonLock {
 
         // Reverse pass, while leveling horizon
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        smoothed1.iter().rev().map(|x| {
-            q = lock_horizon_angle(q.slerp(x.1, alpha), self.roll * DEG2RAD);
+        let smoothed2: TimeQuat = smoothed1.iter().rev().map(|x| {
+            q = q.slerp(x.1, alpha);
             (*x.0, q)
+        }).collect();
+
+        smoothed2.iter().map(|x| {
+            (*x.0, lock_horizon_angle(*x.1, self.roll * DEG2RAD))
         }).collect()
+
+        // level horizon
         // No need to reverse the BTreeMap, because it's sorted by definition
     }
 }
