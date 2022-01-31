@@ -226,7 +226,7 @@ Dette burde give en hurtigere brugergrænseflade.</translation>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="222"/>
       <source>Are you sure you want to close the calibrator?</source>
-      <translation type="unfinished">Are you sure you want to close the calibrator?</translation>
+      <translation>Sikker på, at du vil lukke kalibratoren?</translation>
     </message>
   </context>
   <context>

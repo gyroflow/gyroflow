@@ -656,12 +656,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="128"/>
       <source>Velocity dampened</source>
-      <translation>速度已減緩</translation>
+      <translation>速度阻尼</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="129"/>
       <source>Velocity dampened per axis</source>
-      <translation>單軸速度阻尼平滑</translation>
+      <translation>單軸速度阻尼</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="131"/>

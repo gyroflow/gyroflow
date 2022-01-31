@@ -631,7 +631,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
       <source>Light</source>
-      <translation>Lett</translation>
+      <translation>Lys</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
