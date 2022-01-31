@@ -2,7 +2,7 @@
 
 : "${PROJECT_DIR:=/home/eddy/gyroflow}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
-: "${QT_DIR:=$PROJECT_DIR/ext/6.2.2/gcc_64}"
+: "${QT_DIR:=$PROJECT_DIR/ext/6.2.3/gcc_64}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-gpl-lite}"
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
 

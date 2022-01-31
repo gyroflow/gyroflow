@@ -6,13 +6,13 @@
 
 $PROJECT_DIR="$PSScriptRoot\.."
 
-$QT_LIBS = "D:\Programy\Qt\6.2.2\android_arm64_v8a\lib"
-$Env:Path += ";D:\Programy\Qt\6.2.2\android_arm64_v8a\bin"
-$Env:Path += ";D:\Programy\Qt\6.2.2\mingw_64\bin\"
+$QT_LIBS = "D:\Programy\Qt\6.2.3\android_arm64_v8a\lib"
+$Env:Path += ";D:\Programy\Qt\6.2.3\android_arm64_v8a\bin"
+$Env:Path += ";D:\Programy\Qt\6.2.3\mingw_64\bin\"
 $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk-bundle"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
-$Env:QMAKE = "D:\Programy\Qt\6.2.2\android_arm64_v8a\bin\qmake.bat"
+$Env:QMAKE = "D:\Programy\Qt\6.2.3\android_arm64_v8a\bin\qmake.bat"
 $Env:FFMPEG_DIR = "$PROJECT_DIR\ext\ffmpeg-4.4-android-gpl-lite"
 $Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-13-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"

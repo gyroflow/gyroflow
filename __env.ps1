@@ -1,4 +1,4 @@
-$Env:Path += ";D:\Programy\Qt\6.2.2\msvc2019_64\bin"
+$Env:Path += ";D:\Programy\Qt\6.2.3\msvc2019_64\bin"
 
 
 $Env:Path += ";$PSScriptRoot\ext\ffmpeg-4.4-windows-desktop-clang-gpl-lite\bin"

@@ -19,6 +19,7 @@
     "input_horizontal_stretch": 1,
     "num_images": 45,
     "use_opencv_fisheye": true,
+    "official": true,
     "fisheye_params": {
         "RMS_error": 0.7417197975827522,
         "camera_matrix": [

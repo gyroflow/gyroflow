@@ -155,7 +155,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Install Qt 6.2.2 or higher: https://www.qt.io/download-qt-installer or [aqtinstall](https://github.com/miurahr/aqtinstall)
+2. Install Qt 6.2.3 or higher: https://www.qt.io/download-qt-installer or [aqtinstall](https://github.com/miurahr/aqtinstall)
 3. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
 4. Download `FFmpeg`, `OpenCV` and `llvm` and put them in `ext` directory according to paths in `__env.ps1`: 
 5. - https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z
