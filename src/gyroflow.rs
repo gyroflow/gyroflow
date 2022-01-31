@@ -22,6 +22,7 @@ use ui::ui_tools::UITools;
 // TODO: fix loader that stays on after load sometimes
 // TODO: fix integration method not correctly set sometimes for gopro quaterions on load
 // TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
+// TODO: Changing the trim recalculates smoothness, but doesn't update the quaternions chart.
 
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: add horizon lock checkbox to all smoothing algos

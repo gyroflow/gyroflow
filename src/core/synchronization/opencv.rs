@@ -91,7 +91,7 @@ impl ItemOpenCV {
             let mut t = Mat::default();
             
             let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
-            if inliers < 50 {
+            if inliers < 20 {
                 return Err(opencv::Error::new(0, "Model not found".into()));
             }
             
