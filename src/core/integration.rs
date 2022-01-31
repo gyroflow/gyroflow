@@ -21,10 +21,10 @@ impl GyroIntegrator for MadgwickIntegrator {
         if imu_data.is_empty() { return BTreeMap::new(); }
 
         let mut quats = BTreeMap::new();
-        let init_pos = UnitQuaternion::from_euler_angles(0.0, std::f64::consts::FRAC_PI_2, 0.0);
+        let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
     
-        let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.01, init_pos);
+        let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.02, init_pos);
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
@@ -64,7 +64,7 @@ impl GyroIntegrator for MahonyIntegrator {
         if imu_data.is_empty() { return BTreeMap::new(); }
 
         let mut quats = BTreeMap::new();
-        let init_pos = UnitQuaternion::from_euler_angles(0.0, std::f64::consts::FRAC_PI_2, 0.0);
+        let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
     
         let mut ahrs = Mahony::new_with_quat(sample_time_s, 0.5, 0.0, init_pos);
@@ -108,7 +108,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
         let mut quats = BTreeMap::new();
         // let gyro_sample_rate = imu_data.len() as f64 / (duration_ms / 1000.0);
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
-        let mut orientation = UnitQuaternion::from_euler_angles(0.0, std::f64::consts::FRAC_PI_2, 0.0);
+        let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
 
         // let start_time_s = imu_data[0].timestamp / 1000.0;
 

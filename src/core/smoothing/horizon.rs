@@ -150,7 +150,16 @@ impl SmoothingAlgorithm for HorizonLock {
             },*/
         ])
     }
-    fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
+    fn get_status_json(&self) -> serde_json::Value {
+        serde_json::json!([
+            {
+                "name": "label",
+                "text": "Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.",
+                "text_args": [],
+                "type": "Label"
+            }
+        ])
+    }
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -172,8 +181,6 @@ impl SmoothingAlgorithm for HorizonLock {
         }
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
-        // TODO: This correction should be applied to the raw orientations as well. Alternatively the transform needs to be cancelled out
-        //let correction_quat = from_euler_yxz(self.pitch * DEG2RAD, self.yaw * DEG2RAD, self.roll * DEG2RAD);
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
             q = q.slerp(x.1, alpha);
