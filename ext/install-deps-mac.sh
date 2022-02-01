@@ -10,7 +10,7 @@ if [ "$1" != "CI" ]; then
     # Install Qt
     pip3 install -U pip
     pip3 install aqtinstall
-    python3 -m aqt install-qt mac desktop 6.2.2
+    python3 -m aqt install-qt mac desktop 6.2.3
 
     # Install OpenCV
     ./vcpkg/vcpkg install "opencv[core]:x64-osx-release"

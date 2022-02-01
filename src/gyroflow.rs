@@ -23,6 +23,7 @@ use ui::ui_tools::UITools;
 // TODO: fix integration method not correctly set sometimes for gopro quaterions on load
 // TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
 // TODO: Changing the trim recalculates smoothness, but doesn't update the quaternions chart.
+// TODO: allow changing settings in calibrator before loading video
 
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: add horizon lock checkbox to all smoothing algos
@@ -62,6 +63,7 @@ use ui::ui_tools::UITools;
 // TODO: audio slightly off sync when using exporting trimmed video
 // TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
 // TODO: optical only stabilization
+// TODO: undo framework
 
 cpp! {{
     #include <QQuickStyle>
@@ -122,9 +124,9 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
 
-    if cfg!(target_os = "android") {
-        cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
-    }
+    // if cfg!(target_os = "android") {
+    //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
+    // }
 
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };

@@ -2,7 +2,7 @@
 
 : "${PROJECT_DIR:=/Users/admin/gyroflow}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
-: "${QT_DIR:=$PROJECT_DIR/ext/6.2.2/macos}"
+: "${QT_DIR:=$PROJECT_DIR/ext/6.2.3/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-macOS-gpl-lite}"
 
@@ -11,7 +11,7 @@ rm -rf "$PROJECT_DIR/_deployment/_binaries/mac"
 if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     pushd $PROJECT_DIR
 
-    export PATH="$PROJECT_DIR/ext/6.2.2/macos/bin:$PATH"
+    export PATH="$PROJECT_DIR/ext/6.2.3/macos/bin:$PATH"
     export OPENCV_LINK_LIBS="opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann"
 
     #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
