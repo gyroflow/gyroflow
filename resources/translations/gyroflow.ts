@@ -671,17 +671,17 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
         <source>No cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
         <source>Dynamic cropping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
         <source>Static crop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -740,110 +740,115 @@ Do you want to submit your profile?</source>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="141"/>
-        <source>Yaw angle</source>
+        <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
-        <source>Pitch angle</source>
+        <source>Yaw angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
-        <source>Roll angle</source>
+        <source>Pitch angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="147"/>
-        <source>Max rotation:
-Pitch: %1, Yaw: %2, Roll: %3.
-Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="144"/>
+        <source>Roll angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
         <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
-Modify velocity factor until you get the desired values (recommended less than 20).</source>
+Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
-        <source>Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
+        <source>Max rotation:
+Pitch: %1, Yaw: %2, Roll: %3.
+Modify velocity factor until you get the desired values (recommended less than 20).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="150"/>
-        <source>Modify velocity factor until you get the desired values (recommended less than 20).</source>
+        <source>Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="151"/>
-        <source>Smoothness at high velocity</source>
+        <source>Modify velocity factor until you get the desired values (recommended less than 20).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="152"/>
-        <source>Velocity factor</source>
+        <source>Smoothness at high velocity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="153"/>
-        <source>Smoothness multiplier</source>
+        <source>Velocity factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Stabilization.qml" line="154"/>
+        <source>Smoothness multiplier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
         <source>Responsiveness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
         <source>FOV is greater than 1.0, you may see black borders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="175"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="176"/>
         <source>FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
         <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
         <source>Max zoom: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="288"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="289"/>
         <source>Smoothing window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="295"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="296"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="303"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="304"/>
         <source>Rolling shutter correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="309"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="310"/>
         <source>Frame readout time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="314"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="315"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="326"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>

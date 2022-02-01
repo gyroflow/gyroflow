@@ -1,0 +1,65 @@
+{
+  "name": "Sony_A7S3_Tamron 28-200@100mm__4k_16by9_3840x2160-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "Sony",
+  "camera_model": "A7S3",
+  "lens_model": "Tamron 28-200@100mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.7,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 19,
+  "fps": 59.94006,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4327689947557701,
+    "camera_matrix": [
+      [
+        10836.63066490851,
+        0.0,
+        1907.1627277713148
+      ],
+      [
+        0.0,
+        10976.294435272524,
+        1090.733502877884
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.4072090571660691,
+      -7.741936135823981,
+      372.17590301996484,
+      -4812.750983790704
+    ],
+    "radial_distortion_limit": 0.23
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-99.00mm-3840x2160@59940",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-02-01",
+  "compatible_settings": []
+}

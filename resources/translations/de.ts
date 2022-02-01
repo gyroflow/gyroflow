@@ -225,7 +225,7 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="222"/>
       <source>Are you sure you want to close the calibrator?</source>
-      <translation type="unfinished">Are you sure you want to close the calibrator?</translation>
+      <translation>Die Kalibrierung wirklich beenden?</translation>
     </message>
   </context>
   <context>
@@ -619,7 +619,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="155"/>
       <source>Export .gyroflow file (including gyro data)</source>
-      <translation>Exportiere .gyroflow Datei (einschließlich Gyrodaten)</translation>
+      <translation>Exportiere .gyroflow Datei mit Gyro-Infos</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="29"/>
@@ -1140,7 +1140,7 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Delete all sync points</source>
-      <translation type="unfinished">Delete all sync points</translation>
+      <translation>Alle Syncpunke löschen</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="290"/>

@@ -31,7 +31,7 @@ TextField {
         else value += 0.01;
     }
     Keys.onPressed: (e) => {
-        if (e.key == Qt.Key_Space) {
+        if (!allowText && e.key == Qt.Key_Space) {
             root.focus = false;
             window.videoArea.timeline.focus = true;
             const vid = window.videoArea.vid;

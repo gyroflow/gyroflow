@@ -143,7 +143,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         let smoothed1: TimeQuat = quats.iter().map(|(ts, x)| {
             let ratio = ratios[ts];
             let val = alpha * (1.0 - ratio) + high_alpha * ratio;
-            q = q.slerp(x, val);
+            q = q.slerp(x, val.min(1.0));
             (*ts, q)
         }).collect();
 
@@ -152,7 +152,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         smoothed1.iter().rev().map(|(ts, x)| {
             let ratio = ratios[ts];
             let val = alpha * (1.0 - ratio) + high_alpha * ratio;
-            q = q.slerp(x, val);
+            q = q.slerp(x, val.min(1.0));
             (*ts, q)
         }).collect()
     }

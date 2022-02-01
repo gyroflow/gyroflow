@@ -674,17 +674,17 @@ Vil du indsende din profil?</translation>
       <translation>Lås horisonten</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
       <source>No cropping</source>
       <translation>Ingen beskæring</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
       <source>Dynamic cropping</source>
       <translation>Dynamisk beskæring</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
       <source>Static crop</source>
       <translation>Statisk beskæring</translation>
     </message>
@@ -743,21 +743,26 @@ Vil du indsende din profil?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="141"/>
+      <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
+      <translation>Kræver nøjagtig bestemmelse af rotation. Prøv med Complementary, Mahony, eller Madgwick integrationsmetode.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
       <source>Yaw angle</source>
       <translation>Yaw vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
       <source>Pitch angle</source>
       <translation>Pitch vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="144"/>
       <source>Roll angle</source>
       <translation>Roll vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="147"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
       <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
@@ -766,7 +771,7 @@ Pitch: %1, så: %2, Roll: %3.
 Ændr dæmpningsindstillinger indtil du får de ønskede værdier (anbefales omkring 6 på alle akser).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
       <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify velocity factor until you get the desired values (recommended less than 20).</source>
@@ -775,82 +780,82 @@ Pitch: %1, så: %2, Roll: %3.
 Ændr hastighedsfaktor, indtil du får de ønskede værdier (mindre end 20 anbefales).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="150"/>
       <source>Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
       <translation>Ændr dæmpningsindstillingerne, indtil du får de ønskede værdier (anbefales omkring 6 på alle akser).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="150"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="151"/>
       <source>Modify velocity factor until you get the desired values (recommended less than 20).</source>
       <translation>Ændr hastighedsfaktor, indtil du får de ønskede værdier (mindre end 20 anbefales).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="151"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="152"/>
       <source>Smoothness at high velocity</source>
       <translation>Udjævning ved høj hastighed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="152"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="153"/>
       <source>Velocity factor</source>
       <translation>Hastighedsfaktor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="153"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="154"/>
       <source>Smoothness multiplier</source>
       <translation>Udjævningsmultiplikator</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="154"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
       <source>Responsiveness</source>
       <translation>Respons evne</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>FOV er større end 1.0, sorte kanter kan opstå</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="176"/>
       <source>FOV</source>
       <translation>Synsfelt/FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Maks rotation: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
       <source>Max zoom: %1</source>
       <translation>Maks zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="288"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="289"/>
       <source>Smoothing window</source>
       <translation>Tidsramme for udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="295"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="296"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="303"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="304"/>
       <source>Rolling shutter correction</source>
       <translation>Rolling shutter korrektion</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="309"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="310"/>
       <source>Frame readout time</source>
       <translation>Udlæsningstid for billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="314"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="315"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="326"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
       <source>Bottom to top</source>
       <translation>Bund til top</translation>
     </message>
