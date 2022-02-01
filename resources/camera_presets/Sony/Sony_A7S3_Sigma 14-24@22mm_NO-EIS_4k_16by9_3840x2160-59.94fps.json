@@ -1,10 +1,10 @@
 {
-  "name": "Sony_ILCE-7SM3_Sigma 14-24@24mm_NO-EIS_4k_16by9_3840x2160-59.94fps",
+  "name": "Sony_A7S3_Sigma 14-24@22mm_NO-EIS_4k_16by9_3840x2160-59.94fps",
   "note": "NO-EIS",
   "calibrated_by": "Eddy",
   "camera_brand": "Sony",
-  "camera_model": "ILCE-7SM3",
-  "lens_model": "Sigma 14-24@24mm",
+  "camera_model": "A7S3",
+  "lens_model": "Sigma 14-24@22mm",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -20,22 +20,22 @@
   },
   "frame_readout_time": 8.7,
   "input_horizontal_stretch": 1.0,
-  "num_images": 28,
+  "num_images": 29,
   "fps": 59.94006,
   "official": true,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.4873009443975946,
+    "RMS_error": 0.41589383518311873,
     "camera_matrix": [
       [
-        2476.525579869695,
+        2350.234986351225,
         0.0,
-        1929.101437882598
+        1932.4859952014779
       ],
       [
         0.0,
-        2480.1524840910106,
-        1098.5191390280788
+        2350.778154799105,
+        1089.1918843818016
       ],
       [
         0.0,
@@ -44,10 +44,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.3719978171883925,
-      0.056809845042611815,
-      0.3167927311116707,
-      -0.14469974223776078
+      0.3607448403181446,
+      0.11503777451449303,
+      0.07823719088199972,
+      0.07249159754546695
     ],
     "radial_distortion_limit": null
   },
@@ -58,7 +58,7 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "sony-ilce-7sm3-24.00mm-3840x2160@59940",
+  "identifier": "sony-ilce-7sm3-22.00mm-3840x2160@59940",
   "calibrator_version": "1.0.0-rc0",
   "date": "2022-02-01",
   "compatible_settings": []
