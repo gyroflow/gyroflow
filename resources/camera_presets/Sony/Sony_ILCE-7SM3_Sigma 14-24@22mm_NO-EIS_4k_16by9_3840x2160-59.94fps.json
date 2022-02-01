@@ -22,7 +22,7 @@
   "input_horizontal_stretch": 1.0,
   "num_images": 29,
   "fps": 59.94006,
-  "official": false,
+  "official": true,
   "use_opencv_fisheye": true,
   "fisheye_params": {
     "RMS_error": 0.41589383518311873,
