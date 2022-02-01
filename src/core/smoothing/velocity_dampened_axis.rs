@@ -49,7 +49,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_pitch,
-                "unit": "s",
+                "unit": "",
                 "precision": 3
             },
             {
@@ -59,7 +59,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_yaw,
-                "unit": "s",
+                "unit": "",
                 "precision": 3
             },
             {
@@ -69,7 +69,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_roll,
-                "unit": "s",
+                "unit": "",
                 "precision": 3
             }
         ])
@@ -86,12 +86,10 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
-        let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
-        let end_ts = (params.trim_end * params.get_scaled_duration_ms() * 1000.0) as i64;
-
+        const MAX_VELOCITY: f64 = 500.0;
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
         let alpha = 1.0 - (-(1.0 / sample_rate) / 1.0).exp();
@@ -103,14 +101,15 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
         velocity.insert(*first_quat.0, Vector3::from_element(0.0));
 
         // Calculate velocity
+        let rad_to_deg_per_sec: f64 = sample_rate * 180.0 / std::f64::consts::PI;
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
             let dist = prev_quat.inverse() * quat;
             let euler = dist.euler_angles();
             velocity.insert(*timestamp, Vector3::new(
-                euler.0.abs(),
-                euler.1.abs(),
-                euler.2.abs()
+                euler.0.abs() * rad_to_deg_per_sec,
+                euler.1.abs() * rad_to_deg_per_sec,
+                euler.2.abs() * rad_to_deg_per_sec
             ));
             prev_quat = *quat;
         }
@@ -127,16 +126,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
         }
 
         // Calculate max velocity
-        let mut max_velocity = Vector3::from_element(0.0001);
-        for (ts, vec) in velocity.iter_mut() {
-            if ts >= &start_ts && ts <= &end_ts {
-                if vec[0] > max_velocity[0] { max_velocity[0] = vec[0] }
-                if vec[1] > max_velocity[1] { max_velocity[1] = vec[1] }
-                if vec[2] > max_velocity[2] { max_velocity[2] = vec[2] }
-            }
-        }
-
-        // Apply smoothness coeficients
+        let mut max_velocity = Vector3::from_element(MAX_VELOCITY);
         max_velocity[0] *= self.smoothness_pitch;
         max_velocity[1] *= self.smoothness_yaw;
         max_velocity[2] *= self.smoothness_roll;
