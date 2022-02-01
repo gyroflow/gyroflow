@@ -1,31 +1,36 @@
 {
-    "name": "Hawkeye_Firefly X Lite__4k Ultra Wide",
+    "name": "Hawkeye Firefly 2160p 60fps 16by9",
     "note": "",
-    "calibrated_by": "deadmoo",
+    "calibrated_by": "KhoPhi",
     "camera_brand": "Hawkeye",
-    "camera_model": "Firefly X Lite",
+    "camera_model": "Firefly",
     "lens_model": "",
-    "camera_setting": "4k Ultra Wide",
-    "calibrator_version": "0.2.1-alpha",
-    "date": "2021-08-23",
+    "camera_setting": "2160p 60fps 16by9",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-11-18",
     "official": true,
     "calib_dimension": {
         "w": 3840,
         "h": 2160
     },
-    "num_images": 16,
+    "orig_dimension": {
+        "w": 3840,
+        "h": 2160
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 34,
     "use_opencv_fisheye": true,
     "fisheye_params": {
-        "RMS_error": 1.37617120895551,
+        "RMS_error": 1.863032410042856,
         "camera_matrix": [
             [
-                1899.5441875505342,
+                1990.871281787997,
                 0.0,
                 1920.0
             ],
             [
                 0.0,
-                1425.3289503090905,
+                1990.092851074829,
                 1080.0
             ],
             [
@@ -35,10 +40,10 @@
             ]
         ],
         "distortion_coeffs": [
-            -0.04048086944649209,
-            0.024162499785652793,
-            -0.009614423183174505,
-            -0.009665050311279665
+            -0.037654022399763724,
+            0.017095566060479243,
+            -0.02190153875122065,
+            0.0073232425035748725
         ]
     },
     "use_opencv_standard": false,

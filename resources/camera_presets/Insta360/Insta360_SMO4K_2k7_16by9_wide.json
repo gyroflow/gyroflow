@@ -1,0 +1,50 @@
+{
+    "name": "Insta360 SMO4K 2k7 16by9 wide",
+    "note": "",
+    "calibrated_by": "Fabien Devaux",
+    "camera_brand": "Insta360",
+    "camera_model": "SMO4K",
+    "lens_model": "",
+    "camera_setting": "2k7 16by9 wide ",
+    "calibrator_version": "0.3.0-beta",
+    "date": "2021-11-28",
+    "calib_dimension": {
+        "w": 3072,
+        "h": 2304
+    },
+    "orig_dimension": {
+        "w": 3072,
+        "h": 2304
+    },
+    "input_horizontal_stretch": 1,
+    "num_images": 39,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.406957453090786,
+        "camera_matrix": [
+            [
+                1480.0313360667014,
+                0.0,
+                1536.0
+            ],
+            [
+                0.0,
+                1479.6420177707469,
+                1152.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.0033588129760865333,
+            -0.0020912595437008147,
+            0.008048660823953523,
+            -0.008820258999759505
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}
