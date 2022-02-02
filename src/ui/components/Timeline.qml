@@ -207,7 +207,7 @@ Item {
 
                     scrollbar.position = root.visibleAreaLeft;
                 }
-                if (wheel.modifiers & Qt.AltModifier) {
+                if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
                     const factor = (wheel.angleDelta.x / 120) / 10;
                     chart.vscale += factor;
                 }
@@ -489,6 +489,12 @@ Item {
     Item {
         width: parent.width; 
         anchors.bottom: parent.bottom;
-        ToolTip { text: qsTr("Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom"); visible: ma.containsMouse; delay: 2000; }
+        ToolTip {
+            text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, double click to reset zoom")
+                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Command+Scroll") + "</b>" : "<b>" + qsTr("Ctrl+Scroll") + "</b>")
+                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Control+Scroll") + "</b>" : "<b>" + qsTr("Alt+Scroll") + "</b>");
+            visible: ma.containsMouse;
+            delay: 2000;
+        }
     }
 }

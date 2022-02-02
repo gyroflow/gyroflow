@@ -18,7 +18,9 @@ pub struct AutosyncProcess {
     sync_search_size: f64,
     frame_count: usize,
     duration_ms: f64,
+    scaled_fps: f64,
     org_fps: f64,
+    fps_scale: Option<f64>,
     for_rs: bool, // for rolling shutter estimation
     ranges_ms: Vec<(f64, f64)>,
     frame_ranges: Vec<(i32, i32)>,
@@ -36,11 +38,14 @@ impl AutosyncProcess {
         let params = stab.params.read(); 
         let frame_count = params.frame_count;
         let org_fps = params.fps;
+        let scaled_fps = params.get_scaled_fps();
         let size = params.size;
+        let video_size = params.video_size;
         let org_duration_ms = params.duration_ms;
+        let fps_scale = params.fps_scale;
         let duration_ms = params.get_scaled_duration_ms();
 
-        if let Some(scale) = params.fps_scale {
+        if let Some(scale) = &fps_scale {
             sync_duration_ms *= scale;
         }
 
@@ -71,7 +76,7 @@ impl AutosyncProcess {
         if img_ratio < 0.1 || !img_ratio.is_finite() {
             img_ratio = 1.0;
         }
-        let mtrx = stab.lens.write().get_camera_matrix(size);
+        let mtrx = stab.lens.write().get_camera_matrix(size, video_size);
         estimator.set_lens_params(
             mtrx / img_ratio,
             stab.lens.read().get_distortion_coeffs()
@@ -88,12 +93,14 @@ impl AutosyncProcess {
             frame_count,
             duration_ms,
             org_fps,
+            scaled_fps,
             for_rs,
             method,
             ranges_ms,
             frame_ranges,
             frame_status,
             estimator,
+            fps_scale,
             initial_offset,
             sync_search_size,
             total_read_frames: Arc::new(AtomicUsize::new(0)),
@@ -107,20 +114,23 @@ impl AutosyncProcess {
     pub fn get_ranges(&self) -> Vec<(f64, f64)> {
         self.ranges_ms.clone()
     }
-    pub fn is_frame_wanted(&self, frame: i32, timestamp_us: i64) -> bool {
+    pub fn is_frame_wanted(&self, frame: i32, mut timestamp_us: i64) -> bool {
         if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)) {
+            if let Some(scale) = self.fps_scale {
+                timestamp_us = (timestamp_us as f64 / scale).round() as i64;
+            }
             if frame % self.estimator.every_nth_frame.load(SeqCst) as i32 != 0 {
                 // Don't analyze this frame
                 self.frame_status.write().insert(frame as usize, true);
                 self.estimator.insert_empty_result(frame as usize, timestamp_us, self.method);
                 return false;
             }
-            return true;    
+            return true;
         }
 
         false
     }
-    pub fn feed_frame(&self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
+    pub fn feed_frame(&self, mut timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);
@@ -133,8 +143,11 @@ impl AutosyncProcess {
         let progress_cb = self.progress_cb.clone();
         let frame_count = self.frame_count;
         let duration_ms = self.duration_ms;
-        //let fps = self.fps;
+        let scaled_fps = self.scaled_fps;
         let org_fps = self.org_fps;
+        if let Some(scale) = self.fps_scale {
+            timestamp_us = (timestamp_us as f64 / scale) as i64;
+        }
         if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)).copied() {
             crate::THREAD_POOL.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
@@ -146,7 +159,7 @@ impl AutosyncProcess {
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame % 7 == 0 {
-                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps);
+                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps, scaled_fps);
                         estimator.recalculate_gyro_data(frame_count, duration_ms, org_fps, false);
                     }
 
@@ -173,7 +186,7 @@ impl AutosyncProcess {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps);
+        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps, self.scaled_fps);
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.org_fps, true);
 
         if let Some(cb) = &self.finished_cb {

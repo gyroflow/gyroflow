@@ -585,67 +585,67 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Pliki z danymi o ruchu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="93"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="96"/>
       <source>Open file</source>
       <translation>Otwórz plik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="113"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="116"/>
       <source>Low pass filter</source>
       <translation>Filtr dolnoprzepustowy</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="118"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="121"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="130"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="133"/>
       <source>Rotation</source>
       <translation>Obrót</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="142"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="145"/>
       <source>Pitch</source>
       <translation>Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="146"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="149"/>
       <source>Pitch is camera angle up/down when using FPV blackbox data</source>
       <translation>Pitch to kąt kamery góra/dół, gdy używasz danych blackbox FPV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="150"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="153"/>
       <source>Roll</source>
       <translation>Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="158"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="161"/>
       <source>Yaw</source>
       <translation>Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
       <source>IMU orientation</source>
       <translation>Orientacja IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="182"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
       <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
       <translation>Duża litera to orientacja bez zmian, mała litera to orientacja zanegowana, np. zYX</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="188"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="191"/>
       <source>Integration method</source>
       <translation>Metoda integracji</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="199"/>
       <source>Use built-in quaternions instead of IMU data</source>
       <translation>Użyj wbudowanych kwaternionów zamiast danych z IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="199"/>
       <source>IMU integration method for calculating motion data</source>
       <translation>Metoda integracji IMU, aby wyliczyć dane o ruchu</translation>
     </message>
@@ -684,7 +684,7 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Ciemny</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="193"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
       <source>None</source>
       <translation>Brak</translation>
     </message>
@@ -1029,13 +1029,13 @@ Wynikowy offset będzie tym, gdzie długość linii będzie najkrótsza, co ozna
   <context>
     <name>TableList</name>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="102"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="105"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="23"/>
       <source>File name</source>
       <translation>Nazwa pliku</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="103"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="106"/>
       <source>Detected format</source>
       <translation>Wykryty format</translation>
     </message>
@@ -1223,6 +1223,31 @@ Czy na pewno chcesz kontynuować?</translation>
       <translation>px</translation>
     </message>
     <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="493"/>
+      <source>%1 to zoom horizontally, %2 to zoom vertically, double click to reset zoom</source>
+      <translation>%1, aby przybliżyć w osi X, %2, aby przybliżyć w osi Y, dwuklik, aby zresetować przybliżenie</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="494"/>
+      <source>Command+Scroll</source>
+      <translation>Command+Scroll</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="494"/>
+      <source>Ctrl+Scroll</source>
+      <translation>Ctrl+Scroll</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="495"/>
+      <source>Control+Scroll</source>
+      <translation>Control+Scroll</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="495"/>
+      <source>Alt+Scroll</source>
+      <translation>Alt+Scroll</translation>
+    </message>
+    <message>
       <location filename="../../src/ui/components/Timeline.qml" line="363"/>
       <location filename="../../src/ui/components/Timeline.qml" line="447"/>
       <location filename="../../src/ui/components/Timeline.qml" line="454"/>
@@ -1233,11 +1258,6 @@ Czy na pewno chcesz kontynuować?</translation>
       <location filename="../../src/ui/components/Timeline.qml" line="474"/>
       <source>Save</source>
       <translation>Zapisz</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="492"/>
-      <source>Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom</source>
-      <translation>Ctrl+Scroll, aby przybliżyć w osi X, Alt+Scroll, aby przybliżyć w osi Y, dwuklik, aby zresetować przybliżenie</translation>
     </message>
   </context>
   <context>

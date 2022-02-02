@@ -111,7 +111,7 @@ impl PoseEstimator {
             .collect()
     }
 
-    pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64) {
+    pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64, scaled_fps: f64) {
         let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut frames_to_process = Vec::new();
         {
@@ -151,7 +151,7 @@ impl PoseEstimator {
                             if let Some(x) = l.get_mut(frame) {
                                 x.rotation = Some(rot);
                                 x.quat = Some(Quat64::from(rot));
-                                let rotvec = rot.scaled_axis() * (fps / every_nth_frame as f64);
+                                let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame as f64);
                                 x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                             } else {
                                 log::warn!("Failed to get frame {}", frame);

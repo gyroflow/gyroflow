@@ -22,6 +22,7 @@ use ui::ui_tools::UITools;
 
 // TODO ASAP:
 // TODO: fix loader that stays on after load sometimes
+// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
 
 // v1.1.0:
 // TODO: wgpu convert to using textures

@@ -582,67 +582,67 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="93"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="96"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="113"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="116"/>
         <source>Low pass filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="118"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="121"/>
         <source>Hz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="130"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="133"/>
         <source>Rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="142"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="145"/>
         <source>Pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="146"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="149"/>
         <source>Pitch is camera angle up/down when using FPV blackbox data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="150"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="153"/>
         <source>Roll</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="158"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="161"/>
         <source>Yaw</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
         <source>IMU orientation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="182"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
         <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="188"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="191"/>
         <source>Integration method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="199"/>
         <source>Use built-in quaternions instead of IMU data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="199"/>
         <source>IMU integration method for calculating motion data</source>
         <translation type="unfinished"></translation>
     </message>
@@ -681,7 +681,7 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="193"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1019,13 +1019,13 @@ Resulting offset is the one where lines were the shortest, meaning the video was
 <context>
     <name>TableList</name>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="102"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="105"/>
         <location filename="../../src/ui/menu/VideoInformation.qml" line="23"/>
         <source>File name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/MotionData.qml" line="103"/>
+        <location filename="../../src/ui/menu/MotionData.qml" line="106"/>
         <source>Detected format</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1210,6 +1210,31 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/ui/components/Timeline.qml" line="493"/>
+        <source>%1 to zoom horizontally, %2 to zoom vertically, double click to reset zoom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/components/Timeline.qml" line="494"/>
+        <source>Command+Scroll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/components/Timeline.qml" line="494"/>
+        <source>Ctrl+Scroll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/components/Timeline.qml" line="495"/>
+        <source>Control+Scroll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/components/Timeline.qml" line="495"/>
+        <source>Alt+Scroll</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/ui/components/Timeline.qml" line="363"/>
         <location filename="../../src/ui/components/Timeline.qml" line="447"/>
         <location filename="../../src/ui/components/Timeline.qml" line="454"/>
@@ -1219,11 +1244,6 @@ Are you sure you want to continue?</source>
     <message>
         <location filename="../../src/ui/components/Timeline.qml" line="474"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/components/Timeline.qml" line="492"/>
-        <source>Ctrl+Scroll to zoom horizontally, Alt+Scroll to zoom vertically, double click to reset zoom</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -13,63 +13,65 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
     let gyro = &params.gyro;
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (from_frame, to_frame) in ranges {
-            let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();
-            let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
-            let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                let ts = x.timestamp_ms + initial_offset;
-                if ts >= of_item[0].timestamp_ms - search_size && ts <= last_of_timestamp + search_size {
-                    Some(x.clone())
-                } else {
-                    None
+            if *from_frame >= 0 && *to_frame < estimated_gyro.len() as i32 {
+                let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();
+                let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
+                let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
+                    let ts = x.timestamp_ms + initial_offset;
+                    if ts >= of_item[0].timestamp_ms - search_size && ts <= last_of_timestamp + search_size {
+                        Some(x.clone())
+                    } else {
+                        None
+                    }
+                }).collect();
+
+                let max_angle = get_max_angle(&of_item);
+                if max_angle < 6.0 {
+                    ::log::info!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
+                    continue;
                 }
-            }).collect();
 
-            let max_angle = get_max_angle(&of_item);
-            if max_angle < 6.0 {
-                ::log::info!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
-                continue;
-            }
+                let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
+                let _ = Lowpass::filter_gyro_forward_backward(20.0, gyro.fps, &mut of_item);
+                let _ = Lowpass::filter_gyro_forward_backward(20.0, sample_rate, &mut gyro_item);
 
-            let sample_rate = gyro.raw_imu.len() as f64 / (gyro.duration_ms / 1000.0);
-            let _ = Lowpass::filter_gyro_forward_backward(20.0, gyro.fps, &mut of_item);
-            let _ = Lowpass::filter_gyro_forward_backward(20.0, sample_rate, &mut gyro_item);
+                let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
 
-            let gyro_bintree: BTreeMap<usize, TimeIMU> = gyro_item.into_iter().map(|x| ((x.timestamp_ms * 1000.0) as usize, x)).collect();
+                let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
-            let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
+                // First search every 1 ms
+                let steps = search_size as usize * 2;
+                let lowest = (0..steps)
+                    .into_par_iter()
+                    .map(|i| {
+                        let offs = initial_offset - search_size + (i as f64);
+                        (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+                    })
+                    .reduce_with(find_min)
+                    .and_then(|lowest| {
+                        // Then refine to 0.01 ms accuracy
+                        let search_size = 2.0; // ms
+                        let steps = (search_size * 100.0) as usize; // 100 times per ms
+                        let step = search_size / steps as f64;
+                        (0..steps)
+                            .into_par_iter()
+                            .map(|i| {
+                                let offs = lowest.0 + (-search_size + (i as f64 * step));
+                                (offs, calculate_cost(offs, &of_item, &gyro_bintree))
+                            })
+                            .reduce_with(find_min)
+                    });
 
-            // First search every 1 ms
-            let steps = search_size as usize * 2;
-            let lowest = (0..steps)
-                .into_par_iter()
-                .map(|i| {
-                    let offs = initial_offset - search_size + (i as f64);
-                    (offs, calculate_cost(offs, &of_item, &gyro_bintree))
-                })
-                .reduce_with(find_min)
-                .and_then(|lowest| {
-                    // Then refine to 0.01 ms accuracy
-                    let search_size = 2.0; // ms
-                    let steps = (search_size * 100.0) as usize; // 100 times per ms
-                    let step = search_size / steps as f64;
-                    (0..steps)
-                        .into_par_iter()
-                        .map(|i| {
-                            let offs = lowest.0 + (-search_size + (i as f64 * step));
-                            (offs, calculate_cost(offs, &of_item, &gyro_bintree))
-                        })
-                        .reduce_with(find_min)
-                });
+                if let Some(lowest) = lowest {
+                    let middle_frame = from_frame + (to_frame - from_frame) / 2;
+                    let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
 
-            if let Some(lowest) = lowest {
-                let middle_frame = from_frame + (to_frame - from_frame) / 2;
-                let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
-
-                // Only accept offsets that are within 90% of search size range
-                if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
-                    offsets.push((middle_timestamp, lowest.0, lowest.1));
-                } else {
-                    log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
+                    // Only accept offsets that are within 90% of search size range
+                    if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
+                        offsets.push((middle_timestamp, lowest.0, lowest.1));
+                    } else {
+                        log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
+                    }
                 }
             }
         }

@@ -76,6 +76,9 @@ MenuItem {
             // Twice to trigger change signal
             integrator.hasQuaternions = !contains_quats;
             integrator.hasQuaternions = contains_quats;
+            if (integrator.hasQuaternions && !is_main_video) {
+                Qt.callLater(() => integrator.currentIndex = 1);
+            }
 
             const chart = window.videoArea.timeline.getChart();
             chart.setDurationMs(controller.get_scaled_duration_ms());
@@ -190,7 +193,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
-            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Madgwick", "Complementary", "Mahony", "Gyroflow"] :  ["Madgwick", "Complementary", "Mahony", "Gyroflow"];
+            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");

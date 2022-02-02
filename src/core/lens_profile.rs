@@ -182,7 +182,7 @@ impl LensProfile {
             None
         }
     }
-    pub fn get_camera_matrix(&mut self, video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
+    pub fn get_camera_matrix(&mut self, size: (usize, usize), video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mat = self.get_camera_matrix_internal().unwrap();
 
@@ -194,10 +194,10 @@ impl LensProfile {
         } else {
             // Default camera matrix
             let mut mat = nalgebra::Matrix3::<f64>::identity();
-            mat[(0, 0)] = video_size.0 as f64 * 0.8;
-            mat[(1, 1)] = video_size.0 as f64 * 0.8;
-            mat[(0, 2)] = video_size.0 as f64 / 2.0;
-            mat[(1, 2)] = video_size.1 as f64 / 2.0;
+            mat[(0, 0)] = size.0 as f64 * 0.8;
+            mat[(1, 1)] = size.0 as f64 * 0.8;
+            mat[(0, 2)] = size.0 as f64 / 2.0;
+            mat[(1, 2)] = size.1 as f64 / 2.0;
             mat
         }
     }
