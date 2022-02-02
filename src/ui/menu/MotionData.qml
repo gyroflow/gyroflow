@@ -60,6 +60,10 @@ MenuItem {
             }
         }
     }
+    function setGyroLpf(v) {
+        lpf.value = v;
+        lpfcb.checked = +v > 0;
+    }
 
     Connections {
         target: controller;
@@ -191,7 +195,7 @@ MenuItem {
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
             function setMethod() {
-                controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
+                Qt.callLater(() => controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1));
             }
             onCurrentIndexChanged: Qt.callLater(integrator.setMethod);
             onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);

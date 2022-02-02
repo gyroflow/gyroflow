@@ -109,44 +109,49 @@ Powinno to zapewnić dużo lepszą wydajność interfejsu.</translation>
       <translation>Renderowanie %1... %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="206"/>
+      <location filename="../../src/ui/App.qml" line="214"/>
       <source>Rendering completed. The file was written to: %1.</source>
       <translation>Renderowanie zakończone. Plik został zapisany w: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="207"/>
+      <location filename="../../src/ui/App.qml" line="215"/>
       <source>Open rendered file</source>
       <translation>Otwórz wyrenderowany plik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="208"/>
-      <location filename="../../src/ui/App.qml" line="260"/>
-      <location filename="../../src/ui/App.qml" line="263"/>
+      <location filename="../../src/ui/App.qml" line="216"/>
+      <source>Open file location</source>
+      <translation>Otwórz lokalizację pliku</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="217"/>
+      <location filename="../../src/ui/App.qml" line="269"/>
+      <location filename="../../src/ui/App.qml" line="272"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="270"/>
+      <location filename="../../src/ui/App.qml" line="279"/>
       <source>There&apos;s a newer version available: %1.</source>
       <translation>Dostępna jest nowsza wersja: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="270"/>
+      <location filename="../../src/ui/App.qml" line="279"/>
       <source>Download</source>
       <translation>Pobierz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="270"/>
+      <location filename="../../src/ui/App.qml" line="279"/>
       <source>Close</source>
       <translation>Zamknij</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="278"/>
+      <location filename="../../src/ui/App.qml" line="287"/>
       <source>An error occured: %1</source>
       <translation>Wystąpił błąd: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="279"/>
+      <location filename="../../src/ui/App.qml" line="288"/>
       <source>Gyroflow file exported to %1.</source>
       <translation>Plik gyroflow został zapisany do %1.</translation>
     </message>
@@ -343,13 +348,13 @@ Powinno to zapewnić dużo lepszą wydajność interfejsu.</translation>
       <translation>Kalibracja automatyczna</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="169"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="170"/>
       <source>Max calibration points</source>
       <translation>Liczba punktów kalibracji</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="123"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="284"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="285"/>
       <source>Export lens profile</source>
       <translation>Eksportuj profil obiektywu</translation>
     </message>
@@ -376,72 +381,82 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Nie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="230"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="231"/>
       <source>Invalid format</source>
       <translation>Nieprawidłowy format</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="230"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="231"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="295"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>Upload lens profile to the database</source>
       <translation>Prześlij profil obiektywu do bazy danych</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="301"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="303"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="312"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="314"/>
       <source>Analyze every n-th frame</source>
       <translation>Analizuj co n-tą klatkę</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="324"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
       <source>Sharpness limit</source>
       <translation>Limit ostrości</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="333"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="340"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="342"/>
       <source>Iterations</source>
       <translation>Iteracje</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="354"/>
+      <source>Low pass filter</source>
+      <translation>Filtr dolnoprzepustowy</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
+      <source>Hz</source>
+      <translation>Hz</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="376"/>
       <source>Preview resolution</source>
       <translation>Rozdzielczość podglądu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="373"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="397"/>
       <source>Radial distortion limit</source>
       <translation>Limit dystorsji</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="244"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="245"/>
       <source>Rolling shutter correction</source>
       <translation>Korekcja rolling shutter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="252"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="253"/>
       <source>Frame readout time</source>
       <translation>Czas odczytu klatki</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="257"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="273"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="274"/>
       <source>Bottom to top</source>
       <translation>Z dołu do góry</translation>
     </message>
@@ -464,52 +479,52 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Profile obiektywów</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="110"/>
       <source>Search...</source>
       <translation>Szukaj...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="120"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="123"/>
       <source>Open file</source>
       <translation>Otwórz plik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="125"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="128"/>
       <source>Create new</source>
       <translation>Utwórz nowy</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="147"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="150"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Ten profil obiektywu jest nieoficjalny, nie możemy zagwarantować jego poprawności. Używaj na własne ryzyko.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="155"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="158"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Proporcje profilu nie zgadzają się z proporcjami pliku. Stabilizacja nie będzie działać poprawnie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="156"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="159"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Wymiary profilu nie zgadzają się z wymiarami pliku wideo. Stabilizacja może nie wyglądać poprawnie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="165"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="168"/>
       <source>Adjust parameters</source>
       <translation>Dostosuj parametry</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="198"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="201"/>
       <source>Pixel focal length</source>
       <translation>Ogniskowa w pikselach</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="208"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="211"/>
       <source>Focal center</source>
       <translation>Środek ogniskowej</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="218"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="221"/>
       <source>Distortion coefficients</source>
       <translation>Współczynniki dystorsji</translation>
     </message>
@@ -517,7 +532,37 @@ Czy chcesz przesłać swój profil?</translation>
   <context>
     <name>LoaderOverlay</name>
     <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="54"/>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="38"/>
+      <source>d</source>
+      <translation>d</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="39"/>
+      <source>h</source>
+      <translation>g</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="40"/>
+      <source>m</source>
+      <translation>m</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="41"/>
+      <source>s</source>
+      <translation>s</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="43"/>
+      <source>&amp;lt; 1s</source>
+      <translation>&amp;lt; 1s</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="87"/>
+      <source>Elapsed: %1. Remaining: %2</source>
+      <translation>Upłynęło: %1. Pozostało: %2</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="97"/>
       <source>Cancel</source>
       <translation>Anuluj</translation>
     </message>
@@ -540,67 +585,67 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Pliki z danymi o ruchu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="89"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="93"/>
       <source>Open file</source>
       <translation>Otwórz plik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="109"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="113"/>
       <source>Low pass filter</source>
       <translation>Filtr dolnoprzepustowy</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="114"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="118"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="126"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="130"/>
       <source>Rotation</source>
       <translation>Obrót</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="138"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="142"/>
       <source>Pitch</source>
       <translation>Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="142"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="146"/>
       <source>Pitch is camera angle up/down when using FPV blackbox data</source>
       <translation>Pitch to kąt kamery góra/dół, gdy używasz danych blackbox FPV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="146"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="150"/>
       <source>Roll</source>
       <translation>Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="154"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="158"/>
       <source>Yaw</source>
       <translation>Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="171"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
       <source>IMU orientation</source>
       <translation>Orientacja IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="182"/>
       <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
       <translation>Duża litera to orientacja bez zmian, mała litera to orientacja zanegowana, np. zYX</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="184"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="188"/>
       <source>Integration method</source>
       <translation>Metoda integracji</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="192"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
       <source>Use built-in quaternions instead of IMU data</source>
       <translation>Użyj wbudowanych kwaternionów zamiast danych z IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="192"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
       <source>IMU integration method for calculating motion data</source>
       <translation>Metoda integracji IMU, aby wyliczyć dane o ruchu</translation>
     </message>
@@ -624,7 +669,7 @@ Czy chcesz przesłać swój profil?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="29"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="355"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="379"/>
       <source>Full</source>
       <translation>Pełna</translation>
     </message>
@@ -639,7 +684,7 @@ Czy chcesz przesłać swój profil?</translation>
       <translation>Ciemny</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="189"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="193"/>
       <source>None</source>
       <translation>Brak</translation>
     </message>
@@ -984,13 +1029,13 @@ Wynikowy offset będzie tym, gdzie długość linii będzie najkrótsza, co ozna
   <context>
     <name>TableList</name>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="98"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="102"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="23"/>
       <source>File name</source>
       <translation>Nazwa pliku</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="99"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="103"/>
       <source>Detected format</source>
       <translation>Wykryty format</translation>
     </message>

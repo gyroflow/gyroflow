@@ -32,6 +32,7 @@ pub struct LensProfile {
     pub output_dimension: Option<Dimensions>,
 
     pub frame_readout_time: Option<f64>,
+    pub gyro_lpf: Option<f64>,
 
     pub input_horizontal_stretch: f64,
     pub num_images: usize,

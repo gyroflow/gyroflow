@@ -37,7 +37,7 @@ impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
         let params = mgr.params.read();
 
-        let mut camera_matrix = mgr.lens.write().get_camera_matrix(params.size);
+        let mut camera_matrix = mgr.lens.write().get_camera_matrix(params.video_size);
         let lens = mgr.lens.read();
         let distortion_coeffs = lens.get_distortion_coeffs();
         let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];

@@ -240,6 +240,7 @@ impl Controller {
             this.update_offset_model();
             this.request_recompute();
         });
+        self.sync_progress(0.0, QString::from("---"));
 
         if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
             sync.on_progress(move |ready, total| {
@@ -672,8 +673,8 @@ impl Controller {
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
-    wrap_simple_method!(set_trim_start,         v: f64; recompute);
-    wrap_simple_method!(set_trim_end,           v: f64; recompute);
+    wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);

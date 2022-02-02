@@ -11,7 +11,7 @@ MenuItem {
     id: calib;
     text: qsTr("Calibration");
     icon: "lens";
-    innerItem.enabled: calibrator_window.videoArea.vid.loaded && !controller.calib_in_progress;
+    innerItem.enabled: !controller.calib_in_progress;
     loader: controller.calib_in_progress;
 
     property alias rms: rms.value;
@@ -157,6 +157,7 @@ MenuItem {
     Button {
         id: autoCalibBtn;
         text: qsTr("Auto calibrate");
+        enabled: calibrator_window.videoArea.vid.loaded;
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
@@ -284,6 +285,7 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         icon.name: "save"
+        enabled: rms.value > 0 && rms.value < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             fileDialog.currentFile = controller.export_lens_profile_filename(calib.calibrationInfo);
@@ -345,6 +347,28 @@ MenuItem {
                 height: 25 * dpiScale;
                 value: 500;
                 from: 1;
+            }
+        }
+        CheckBoxWithContent {
+            id: lpfcb;
+            text: qsTr("Low pass filter");
+            onCheckedChanged: {
+                const v = checked? lpf.value : 0;
+                controller.set_imu_lpf(v);
+                calib.calibrationInfo.gyro_lpf = v;
+            }
+            NumberField {
+                id: lpf;
+                unit: qsTr("Hz");
+                precision: 2;
+                value: 0;
+                from: 0;
+                width: parent.width;
+                onValueChanged: {
+                    const v = lpfcb.checked? value : 0;
+                    controller.set_imu_lpf(v);
+                    calib.calibrationInfo.gyro_lpf = v;
+                }
             }
         }
         Label {

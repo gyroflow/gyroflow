@@ -202,9 +202,18 @@ Rectangle {
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
                             videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
                             videoArea.videoLoader.cancelable = true;
+
+                            function getFolder(v) {
+                                let idx = v.lastIndexOf("/");
+                                if (idx == -1) idx = v.lastIndexOf("\\");
+                                if (idx == -1) return "";
+                                return v.substring(0, idx + 1);
+                            }
+
                             if (total_frames > 0 && finished) {
                                 messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + outputFile.text + "</b>"), [
                                     { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(outputFile.text) },
+                                    { text: qsTr("Open file location"), clicked: () => controller.open_file_externally(getFolder(outputFile.text)) },
                                     { text: qsTr("Ok") }
                                 ]);
                             }

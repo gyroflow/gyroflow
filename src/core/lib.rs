@@ -281,7 +281,9 @@ impl<T: PixelType> StabilizationManager<T> {
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
             self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
+            self.lens.write().optimal_fov = None;
             
+            self.smoothness_checksum.store(0, SeqCst);
             self.adaptive_zoom_checksum.store(0, SeqCst);
         }
     }
@@ -291,7 +293,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let mut params = self.params.write();
             params.size = (width, height);
 
-            let ratio = params.size.0 as f64 / params.video_size.0 as f64;
+            let ratio = params.size.0 as f64 / params.video_output_size.0 as f64;
             params.output_size = ((params.video_output_size.0 as f64 * ratio) as usize, (params.video_output_size.1 as f64 * ratio) as usize);
         }
         self.init_size();
@@ -300,7 +302,7 @@ impl<T: PixelType> StabilizationManager<T> {
         if width > 0 && height > 0 {
             {
                 let mut params = self.params.write();
-                let ratio = params.size.0 as f64 / params.video_size.0 as f64;
+                let ratio = params.size.0 as f64 / width as f64;
                 params.output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
                 params.video_output_size = (width, height);
             }

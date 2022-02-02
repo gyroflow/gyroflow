@@ -21,16 +21,7 @@ use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
 // TODO ASAP:
-// TODO: "Open file location" on the rendered dialog
-// TODO: add elapsed and remaining times when rendering
-// TODO: allow changing settings in calibrator before loading video
-// TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
-// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
-// TODO: preview resolution calculation is wrong when setting the output size to 1280x720 and the source size is 4k
-// TODO: fix integration method not correctly set sometimes for gopro quaterions on load
-// TODO: Changing the trim recalculates smoothness, but doesn't update the quaternions chart.
 // TODO: fix loader that stays on after load sometimes
-// TODO: low pass filter in the camera preset
 
 // v1.1.0:
 // TODO: wgpu convert to using textures
