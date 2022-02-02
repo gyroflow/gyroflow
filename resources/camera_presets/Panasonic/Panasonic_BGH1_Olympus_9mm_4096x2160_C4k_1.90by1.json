@@ -1,11 +1,11 @@
 {
-    "name": "BGH1 Olympus 9mm C4K",
+    "name": "Panasonic BGH1 Olympus 9mm",
     "note": "",
     "calibrated_by": "Csajtai Kristof",
-    "camera_brand": "BGH1",
-    "camera_model": "Olympus",
-    "lens_model": "9mm",
-    "camera_setting": "C4K",
+    "camera_brand": "Panasonic",
+    "camera_model": "BGH1",
+    "lens_model": "Olympus 9mm",
+    "camera_setting": "",
     "calibrator_version": "0.3.0-beta",
     "date": "2021-12-26",
     "calib_dimension": {

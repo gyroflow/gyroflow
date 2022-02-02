@@ -6,6 +6,7 @@
 
 use cpp::*;
 use qmetaobject::*;
+use qml_video_rs::video_item::MDKVideoItem;
 use std::cell::RefCell;
 
 pub use gyroflow_core as core;
@@ -19,24 +20,37 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO: fix loader that stays on after load sometimes
-// TODO: fix integration method not correctly set sometimes for gopro quaterions on load
-// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
-// TODO: Changing the trim recalculates smoothness, but doesn't update the quaternions chart.
+// TODO ASAP:
+// TODO: "Open file location" on the rendered dialog
+// TODO: add elapsed and remaining times when rendering
 // TODO: allow changing settings in calibrator before loading video
+// TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
+// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
+// TODO: preview resolution calculation is wrong when setting the output size to 1280x720 and the source size is 4k
+// TODO: fix integration method not correctly set sometimes for gopro quaterions on load
+// TODO: Changing the trim recalculates smoothness, but doesn't update the quaternions chart.
+// TODO: fix loader that stays on after load sometimes
+// TODO: low pass filter in the camera preset
+
+// v1.1.0:
+// TODO: wgpu convert to using textures
+// TODO: add vertical labels and scale lines to gyro chart
+// TODO: add horizon lock checkbox to all smoothing algos
+// TODO: Batch processing when loaded multiple files
+// TODO: timeline panning
+// TODO: drop mutliple files at once (video, lens profile, gyro data)
+// TODO: exporting .gyroflow: include output settings
+// TODO: audio slightly off sync when exporting trimmed video
+// TODO: save panel sizes, menu opened states and window dimensions
 
 // TODO: use quaternions for finding offset, not gyro samples
-// TODO: add horizon lock checkbox to all smoothing algos
 // TODO: support horizon lock using GRAV for CORI
-// TODO: Batch processing when loaded multiple files
-// TODO: wgpu convert to using textures
 // TODO: dragging numbers on the numberfield left and right
 // TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
 // TODO: smoothing presets
 // TODO: cli interface
 // TODO: Calibrator: Allow for multiple zoom values, could be interpolated later (Sony)
 // TODO: UI: activeFocus indicators
-// TODO: timeline panning
 // TODO: add lens distortion back after stabilization
 // TODO: hyperlapse mode
 // TODO: video speed 
@@ -44,9 +58,6 @@ use ui::ui_tools::UITools;
 // TODO: export pixel format conversion (ComboBox in the UI)
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
-// TODO: drop mutliple files at once (video, lens profile, gyro data)
-// TODO: add elapsed and remaining times when rendering
-// TODO: add vertical labels and scale lines to gyro chart
 // TODO: render queue
 // TODO: When rendering, it should be possible to "minimize" the status and let it render in render queue
 // TODO: keyframes for stabilization params
@@ -55,13 +66,8 @@ use ui::ui_tools::UITools;
 // TODO: Add cache for the undistortion if the video is not playing
 // TODO: OpenFX plugin
 // TODO: Adobe plugin
-// TODO: exporting .gyroflow: include output settings and allow user to choose thin or full file
-// TODO: preview resolution calculation is wrong when setting the output size to 1280x720 and the source size is 4k
 // TODO: support GoPro's superview lens correction
 // TODO: Figure out Sony lens distortion parameters
-// TODO: save panel sizes, menu opened states and window dimensions
-// TODO: audio slightly off sync when using exporting trimmed video
-// TODO: when optical flow data already exists, using "Auto sync here" doesn't show the loading thing
 // TODO: optical only stabilization
 // TODO: undo framework
 
@@ -123,6 +129,14 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
+
+    if cfg!(target_os = "android") || cfg!(target_os = "ios") {
+        MDKVideoItem::setGlobalOption("MDK_KEY", "B75BC812C266C3E2D967840494C8866773E4E5FC596729F7D9895BFB2DB3B9AE2515F306FBF29BF20290E1093E9A5B5796B778F866F5F631831\
+            0431F1E34810348A437EDC2663C1D26987BFB6B37799871E4E984201D0790A0FB349D41DCCEAE15E8C6B790A89ADA30C4B6EB323303B0603B3A2BBF50C294456F377CA8FEF103");
+    } else {
+        MDKVideoItem::setGlobalOption("MDK_KEY", "47FA7B212D5FF2F649A245E6D8DC2D88BAB67C208282CB3E2DEB95B9B4F9EC575102303FB92448ED49454E027A31B48ED08824EB904B58F693AD\
+            B52FA63A4008B80584DE2D5F0D09B65DBA192723D277B8B67447FBF0A4584184E2659155D95CFBEB08626CBE3C94416B2FC50B1FA1201AA7381CE3E85DF3F3BF9BCB59677808");
+    }
 
     // if cfg!(target_os = "android") {
     //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
