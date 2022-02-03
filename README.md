@@ -43,8 +43,8 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 ![Screenshot](resources/screenshot.jpg)
 
 <p align="center">
-  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison1.mp4"><img src="resources/comparison1.gif"></a>
-  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison2.mp4"><img src="resources/comparison2.gif"></a>
+  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison1.mp4"><img src="resources/comparison1.gif" height="200"></a>
+  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison2.mp4"><img src="resources/comparison2.gif" height="200"></a>
 </p>
 
 ## Features
