@@ -38,7 +38,7 @@
 </p>
 
 ## About the project
-Gyroflow is an application that can stabilize your video by using motion data from gyroscope (IMU). Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilizes the captured footage precisely by using them. It can also use gyro data from an external source (eg. from Betaflight blackbox).
+Gyroflow is an application that can stabilize your video by using motion data from a gyroscope and optionally an accelerometer. Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilizes the captured footage precisely by using them. It can also use gyro data from an external source (eg. from Betaflight blackbox).
 
 ![Screenshot](resources/screenshot.png)
 
@@ -54,14 +54,15 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Real time offset adjustments
 - Two optical flow methods
 - Two offsets calculation methods
-- Dark and Light theme
+- Modern responsive user interface with Dark and Light theme
 - Adaptive zoom (dynamic cropping)
 - Based on [telemetry-parser](https://github.com/AdrianEddy/telemetry-parser) - supports all gyro sources out of the box
 - Gyro low pass filter, arbitrary rotation (pitch, roll, yaw angles) and orientation
-- Multiple gyro integration methods
+- Multiple gyro integration methods for orientation determination
+- Multiple video orientation smoothing algorithms, including horizon levelling and per-axis smoothness adjustment.
 - Cross-platform - currently works on Windows/Linux/Mac, with Android and iOS apps coming
 - Multiple UI languages
-- Supports variable frame rate videos, all calculations are done on timestamps
+- Supports variable and high frame rate videos, all calculations are done on timestamps
 - x264, x265, ProRes and PNG outputs, with x264 and x265 fully GPU accelerated
 - Automatic lens calibration process
 - Fully zero-copy GPU preview rendering is possible, implemented and *almost* working (😀)
@@ -80,7 +81,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 
 ### Info for cameras not on the list
 
-- For cameras which do have built-in gyro, please contact us and we will implement support for that camera
+- For cameras which do have built-in gyro, please contact us and we will implement support for that camera. Refer to the [documentation](https://docs.gyroflow.xyz) for information about the gyro logging process.
 - For cameras which don't have built-in gyro, please consider using Betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
 
 ## Minimum system requirements:
@@ -96,6 +97,11 @@ Gyroflow is an application that can stabilize your video by using motion data fr
         - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
         - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 - Android 6+
+
+## Help and support
+For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D). 
+
+For companies or people wishing to get in touch with the team privately for collaborative purposes: devteam@gyroflow.xyz.
 
 ## Roadmap
 
@@ -198,5 +204,5 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy
 
 ## Acknowledgements
 
-* [Gyroflow python version (legacy code)](https://github.com/ElvinC/gyroflow)
+* [Gyroflow Python version (legacy code)](https://github.com/ElvinC/gyroflow)
 * [telemetry-parser](https://github.com/AdrianEddy/telemetry-parser)
