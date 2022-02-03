@@ -247,80 +247,97 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="12"/>
       <source>Export settings</source>
-      <translation>Eksportér innstillinger</translation>
+      <translation>Eksport innstillinger</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="120"/>
+      <location filename="../../src/ui/menu/Export.qml" line="63"/>
+      <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
+      <translation>GPU akselerert enkoding støtter ikke dette pikselformatet (%1).
+Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnelige og enkode med CPU?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="64"/>
+      <source>Render using CPU</source>
+      <translation>Bruk CPU enkoder</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="65"/>
+      <source>Cancel</source>
+      <translation>Avbryt</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="126"/>
       <source>Output size</source>
       <translation>Oppløsning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="126"/>
+      <location filename="../../src/ui/menu/Export.qml" line="132"/>
       <source>Width</source>
       <translation>Bredde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="135"/>
+      <location filename="../../src/ui/menu/Export.qml" line="141"/>
       <source>Height</source>
       <translation>Høyde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="153"/>
+      <location filename="../../src/ui/menu/Export.qml" line="159"/>
       <source>Lock aspect ratio</source>
       <translation>Lås størrelsesforhold</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="164"/>
+      <location filename="../../src/ui/menu/Export.qml" line="170"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>Denne oppløsningen støttes ikke av den valgte kodeken.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="165"/>
+      <location filename="../../src/ui/menu/Export.qml" line="171"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>Maksimal støttet oppløsning er %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="171"/>
+      <location filename="../../src/ui/menu/Export.qml" line="177"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>Oppløsning må være delelig med 2.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="176"/>
+      <location filename="../../src/ui/menu/Export.qml" line="182"/>
       <source>Bitrate</source>
       <translation>Bitrate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="181"/>
+      <location filename="../../src/ui/menu/Export.qml" line="187"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="188"/>
+      <location filename="../../src/ui/menu/Export.qml" line="194"/>
       <source>Use GPU encoding</source>
       <translation>Bruk GPU enkoding</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="192"/>
+      <location filename="../../src/ui/menu/Export.qml" line="198"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>GPU enkodere gir ofte lavere kvalitet enn progmravare baserte enkodere, men er adskillig raskere.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="193"/>
+      <location filename="../../src/ui/menu/Export.qml" line="199"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>De krever en høyere bitrate for å oppnå resultater med den samme visuelle kvaliteten som en programvare basert enkoder.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="194"/>
+      <location filename="../../src/ui/menu/Export.qml" line="200"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>Ikke bruk denne instillingen for maksimal kvalitet.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="196"/>
+      <location filename="../../src/ui/menu/Export.qml" line="202"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>GPU akselerasjon er ikke tilgjengelig for pikselformatet på denne videoen.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="200"/>
+      <location filename="../../src/ui/menu/Export.qml" line="206"/>
       <source>Export audio</source>
       <translation>Eksporter lyd</translation>
     </message>
@@ -769,7 +786,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="137"/>
       <source>Smoothness</source>
-      <translation>Mykhet</translation>
+      <translation>Smoothness</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="138"/>
@@ -1063,7 +1080,7 @@ Resulterende offset er den hvor linjene er kortest, altså der videoen beveget s
       <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="25"/>
       <source>Dimensions</source>
-      <translation>Dimensjoner</translation>
+      <translation>Oppløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="57"/>
@@ -1231,22 +1248,22 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="494"/>
       <source>Command+Scroll</source>
-      <translation type="unfinished">Command+Scroll</translation>
+      <translation>Command+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="494"/>
       <source>Ctrl+Scroll</source>
-      <translation type="unfinished">Ctrl+Scroll</translation>
+      <translation>Ctrl+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="495"/>
       <source>Control+Scroll</source>
-      <translation type="unfinished">Control+Scroll</translation>
+      <translation>Control+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="495"/>
       <source>Alt+Scroll</source>
-      <translation type="unfinished">Alt+Scroll</translation>
+      <translation>Alt+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="363"/>

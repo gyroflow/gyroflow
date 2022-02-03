@@ -34,6 +34,7 @@ use ui::ui_tools::UITools;
 // TODO: exporting .gyroflow: include output settings
 // TODO: audio slightly off sync when exporting trimmed video
 // TODO: save panel sizes, menu opened states and window dimensions
+// TODO: export pixel format conversion (ComboBox in the UI)
 
 // TODO: use quaternions for finding offset, not gyro samples
 // TODO: support horizon lock using GRAV for CORI
@@ -47,7 +48,6 @@ use ui::ui_tools::UITools;
 // TODO: hyperlapse mode
 // TODO: video speed 
 // TODO: export framerate
-// TODO: export pixel format conversion (ComboBox in the UI)
 // TODO: Setup CI for packaging for Android
 // TODO: Setup CI for packaging for iOS
 // TODO: render queue

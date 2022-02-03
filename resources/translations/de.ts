@@ -249,77 +249,94 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
       <translation>Export Einstellungen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="120"/>
+      <location filename="../../src/ui/menu/Export.qml" line="63"/>
+      <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
+      <translation>Der GPU-beschleunigte Encoder unterstützt dieses Pixelformat nicht (%1).
+Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="64"/>
+      <source>Render using CPU</source>
+      <translation>Rendern auf CPU</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="65"/>
+      <source>Cancel</source>
+      <translation>Abbrechen</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="126"/>
       <source>Output size</source>
       <translation>Ausgabe Größe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="126"/>
+      <location filename="../../src/ui/menu/Export.qml" line="132"/>
       <source>Width</source>
       <translation>Breite</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="135"/>
+      <location filename="../../src/ui/menu/Export.qml" line="141"/>
       <source>Height</source>
       <translation>Höhe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="153"/>
+      <location filename="../../src/ui/menu/Export.qml" line="159"/>
       <source>Lock aspect ratio</source>
       <translation>Seitenverhältnis beibehalten</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="164"/>
+      <location filename="../../src/ui/menu/Export.qml" line="170"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>Diese Auflösung wird vom gewählten Codec nicht unterstützt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="165"/>
+      <location filename="../../src/ui/menu/Export.qml" line="171"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>Maximale, unterstützte Auflösung ist %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="171"/>
+      <location filename="../../src/ui/menu/Export.qml" line="177"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>Werte müssen durch 2 teilbar sein.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="176"/>
+      <location filename="../../src/ui/menu/Export.qml" line="182"/>
       <source>Bitrate</source>
       <translation>Bitrate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="181"/>
+      <location filename="../../src/ui/menu/Export.qml" line="187"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="188"/>
+      <location filename="../../src/ui/menu/Export.qml" line="194"/>
       <source>Use GPU encoding</source>
       <translation>GPU Encoding benutzen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="192"/>
+      <location filename="../../src/ui/menu/Export.qml" line="198"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>GPU Encoder erzeugen typischerweise ein Ergebnis mit vergleichsweise schlechterer Qualität wie Software Encoder. Sind aber deutlich schneller.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="193"/>
+      <location filename="../../src/ui/menu/Export.qml" line="199"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>Es wird eine höhere Bitrate benötigt, um ein Ergebnis mit ähnlichem qualitativen Eindruck zu erzeugen bzw. das Ergebnis mit derselben Bitrate liefert einen qualitativ weniger guten Eindruck.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="194"/>
+      <location filename="../../src/ui/menu/Export.qml" line="200"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>Wähle diese Option ab für maximale Qualität.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="196"/>
+      <location filename="../../src/ui/menu/Export.qml" line="202"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>GPU-Beschleunigung ist für das Pixel-Format dieses Videos nicht verfügbar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="200"/>
+      <location filename="../../src/ui/menu/Export.qml" line="206"/>
       <source>Export audio</source>
       <translation>Ton exportieren</translation>
     </message>
@@ -558,7 +575,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="87"/>
       <source>Elapsed: %1. Remaining: %2</source>
-      <translation>Bearbeitet: %1. Verbleibend: %2</translation>
+      <translation>Vergangen: %1. Verbleibend: %2</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="97"/>
@@ -1230,22 +1247,22 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="494"/>
       <source>Command+Scroll</source>
-      <translation type="unfinished">Command+Scroll</translation>
+      <translation>Command+Scrollen</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="494"/>
       <source>Ctrl+Scroll</source>
-      <translation type="unfinished">Ctrl+Scroll</translation>
+      <translation>Strg+Scrollen</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="495"/>
       <source>Control+Scroll</source>
-      <translation type="unfinished">Control+Scroll</translation>
+      <translation>Control+Scrollen</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="495"/>
       <source>Alt+Scroll</source>
-      <translation type="unfinished">Alt+Scroll</translation>
+      <translation>Alt+Scrollen</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="363"/>

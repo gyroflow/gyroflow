@@ -1,9 +1,3 @@
-# cargo install --git https://github.com/zer0def/android-ndk-rs.git cargo-apk
-# rustup target add aarch64-linux-android
-# update Cargo.toml to comment [[bin]] and uncomment [lib] section
-
-# Change if cfg!(target_env = "msvc") to std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc" in opencv-0.61.3\build.rs
-
 $PROJECT_DIR="$PSScriptRoot\.."
 
 $QT_LIBS = "D:\Programy\Qt\6.2.3\android_arm64_v8a\lib"

@@ -101,6 +101,8 @@ MenuItem {
         let pt = md["stream.video[0].codec.format_name"] || "";
         let bits = "8 bit";
         if (pt.indexOf("p10le") > -1) { bits = "10 bit"; pt = pt.replace("p10le", ""); } // TODO detect more formats
+        if (pt.indexOf("p12le") > -1) { bits = "12 bit"; pt = pt.replace("p12le", ""); }
+        if (pt.indexOf("p16le") > -1) { bits = "16 bit"; pt = pt.replace("p16le", ""); }
 
         return pt.toUpperCase() + (pt? " " : "") + bits;
     }

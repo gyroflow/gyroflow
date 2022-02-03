@@ -59,6 +59,12 @@ MenuItem {
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
 
+    Component.onCompleted: {
+        QT_TRANSLATE_NOOP("Export", "GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?");
+        QT_TRANSLATE_NOOP("Export", "Render using CPU");
+        QT_TRANSLATE_NOOP("Export", "Cancel");
+    }
+
     function setOutputSize(w, h) {
         orgWidth = w;
         orgHeight = h;

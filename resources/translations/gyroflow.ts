@@ -248,77 +248,93 @@ This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="120"/>
-        <source>Output size</source>
+        <location filename="../../src/ui/menu/Export.qml" line="63"/>
+        <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Export.qml" line="64"/>
+        <source>Render using CPU</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Export.qml" line="65"/>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/menu/Export.qml" line="126"/>
+        <source>Output size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Export.qml" line="132"/>
         <source>Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="135"/>
+        <location filename="../../src/ui/menu/Export.qml" line="141"/>
         <source>Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="153"/>
+        <location filename="../../src/ui/menu/Export.qml" line="159"/>
         <source>Lock aspect ratio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="164"/>
+        <location filename="../../src/ui/menu/Export.qml" line="170"/>
         <source>This resolution is not supported by the selected codec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="165"/>
+        <location filename="../../src/ui/menu/Export.qml" line="171"/>
         <source>Maximum supported resolution is %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="171"/>
+        <location filename="../../src/ui/menu/Export.qml" line="177"/>
         <source>Resolution must be divisible by 2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="176"/>
+        <location filename="../../src/ui/menu/Export.qml" line="182"/>
         <source>Bitrate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="181"/>
+        <location filename="../../src/ui/menu/Export.qml" line="187"/>
         <source>Mbps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="188"/>
+        <location filename="../../src/ui/menu/Export.qml" line="194"/>
         <source>Use GPU encoding</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="192"/>
+        <location filename="../../src/ui/menu/Export.qml" line="198"/>
         <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="193"/>
+        <location filename="../../src/ui/menu/Export.qml" line="199"/>
         <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="194"/>
+        <location filename="../../src/ui/menu/Export.qml" line="200"/>
         <source>Uncheck this option for maximum possible quality.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="196"/>
+        <location filename="../../src/ui/menu/Export.qml" line="202"/>
         <source>GPU acceleration is not available for the pixel format of this video.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Export.qml" line="200"/>
+        <location filename="../../src/ui/menu/Export.qml" line="206"/>
         <source>Export audio</source>
         <translation type="unfinished"></translation>
     </message>

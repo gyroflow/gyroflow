@@ -161,15 +161,16 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Install Qt 6.2.3 or higher: https://www.qt.io/download-qt-installer or [aqtinstall](https://github.com/miurahr/aqtinstall)
-3. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
-4. Download `FFmpeg`, `OpenCV` and `llvm` and put them in `ext` directory according to paths in `__env.ps1`: 
-5. - https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z
-6. - https://sourceforge.net/projects/opencvlibrary/files/4.5.4/opencv-4.5.4-vc14_vc15.exe/download
-7. - https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe
-8. Update Qt path in `__env.ps1`
-9. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
-10. Compile and run: `cargo run --release`
+2. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
+    - `Qt 6.2.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.2.3 win64_msvc2019_64` or use the [official installer](https://www.qt.io/download-qt-installer)
+    - `FFmpeg 4.4`: https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download
+    - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat`
+    - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
+    - LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe
+4. Update dependencies paths in `__env.ps1` if needed.
+5. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
+6. Compile and run: `cargo run --release`
 
 ### Building on MacOS
 1. Get latest stable Rust language from: https://rustup.rs/
@@ -188,6 +189,16 @@ The project also supports UI live reload, it's a super quick way of working with
 4. Update PROJECT_DIR in `__env-linux.sh`
 5. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
 6. Compile and run: `cargo run --release`
+
+### Building on Android
+1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested
+2. Install Qt for Android: `aqt install-qt windows android 6.2.3 android_arm64_v8a` and `aqt install-qt windows desktop 6.2.3 win64_mingw`
+3. Install `cargo-apk`: `cargo install --git https://github.com/zer0def/android-ndk-rs.git cargo-apk`
+4. Add a Rust target: `rustup target add aarch64-linux-android`
+5. Update `Cargo.toml` to comment out `[[[bin]]` section and uncomment `[lib]` section
+6. Patch `C:\Users\you\.cargo\registry\src\github.com-1ecc6299db9ec823\opencv-0.61.3\build.rs`: Change `if cfg!(target_env = "msvc")` to `if std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc"`
+7. Update paths in `_deployment/build-android.ps1` and in `_deployment/android/android-deploy.json`
+8. Run `.\_deployment\build-android.ps1` in Powershell
 
 ## License
 
