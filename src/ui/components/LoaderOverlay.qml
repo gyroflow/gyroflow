@@ -86,7 +86,7 @@ Item {
             property string remaining: "";
             text: qsTr("Elapsed: %1. Remaining: %2").arg("<b>" + elapsed + "</b>").arg("<b>" + remaining + "</b>");
             visible: elapsed.length > 0 && remaining.length > 0;
-            font.pixelSize: 12 * dpiScale;
+            font.pixelSize: 11 * dpiScale;
             anchors.horizontalCenter: parent.horizontalCenter;
             topPadding: 0;
             bottomPadding: 4 * dpiScale;

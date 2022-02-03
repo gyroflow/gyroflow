@@ -31,7 +31,7 @@
     <a href="https://github.com/AdrianEddy/gyroflow/issues/">
       <img src="https://img.shields.io/github/issues/AdrianEddy/gyroflow" alt="Issues">
     </a>
-    <a href="https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE">
+    <a href="https://github.com/AdrianEddy/gyroflow/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/AdrianEddy/gyroflow" alt="License">
     </a>
   </p>
@@ -40,7 +40,12 @@
 ## About the project
 Gyroflow is an application that can stabilize your video by using motion data from a gyroscope and optionally an accelerometer. Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilizes the captured footage precisely by using them. It can also use gyro data from an external source (eg. from Betaflight blackbox).
 
-![Screenshot](resources/screenshot.png)
+![Screenshot](resources/screenshot.jpg)
+
+<p align="center">
+  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison1.mp4"><img src="resources/comparison1.gif"></a>
+  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison2.mp4"><img src="resources/comparison2.gif"></a>
+</p>
 
 ## Features
 - Real time preview, params adjustments and all calculations
