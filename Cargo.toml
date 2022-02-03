@@ -14,6 +14,7 @@ cpp = "*"
 serde_json = "*"
 bytemuck = "*"
 nalgebra = "0.29"
+semver = "*"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}

@@ -1,9 +1,9 @@
 <p align="center">
   <h1 align="center">
-    <a href="https://github.com/AdrianEddy/gyroflow#gh-light-mode-only">
+    <a href="https://github.com/gyroflow/gyroflow#gh-light-mode-only">
       <img src="./resources/logo_black.svg" alt="Gyroflow logo" height="100">
     </a>
-    <a href="https://github.com/AdrianEddy/gyroflow#gh-dark-mode-only">
+    <a href="https://github.com/gyroflow/gyroflow#gh-dark-mode-only">
       <img src="./resources/logo_white.svg" alt="Gyroflow logo" height="100">
     </a>
   </h1>
@@ -13,26 +13,26 @@
     <br/>
     <br/>
     <a href="https://gyroflow.xyz">Homepage</a> •
-    <a href="https://github.com/AdrianEddy/gyroflow/releases">Download</a> •
+    <a href="https://github.com/gyroflow/gyroflow/releases">Download</a> •
     <a href="https://docs.gyroflow.xyz">Documentation</a> •
     <a href="https://discord.gg/WfxZZXjpke">Discord</a> •
-    <a href="https://github.com/AdrianEddy/gyroflow/issues">Report bug</a> •
-    <a href="https://github.com/AdrianEddy/gyroflow/issues">Request feature</a>
+    <a href="https://github.com/gyroflow/gyroflow/issues">Report bug</a> •
+    <a href="https://github.com/gyroflow/gyroflow/issues">Request feature</a>
   </p>
   <p align="center">
-    <a href="https://github.com/AdrianEddy/gyroflow/releases">
-      <img src="https://img.shields.io/github/downloads/AdrianEddy/gyroflow/total" alt="Downloads">
+    <a href="https://github.com/gyroflow/gyroflow/releases">
+      <img src="https://img.shields.io/github/downloads/gyroflow/gyroflow/total" alt="Downloads">
     </a>
-    <a href="https://github.com/AdrianEddy/gyroflow/">
-      <img src="https://img.shields.io/github/contributors/AdrianEddy/gyroflow?color=dark-green" alt="Contributors">
+    <a href="https://github.com/gyroflow/gyroflow/">
+      <img src="https://img.shields.io/github/contributors/gyroflow/gyroflow?color=dark-green" alt="Contributors">
     </a>
     <a title="Crowdin" target="_blank" href="https://crowdin.com/project/gyroflow"><img src="https://badges.crowdin.net/gyroflow/localized.svg">
     </a>
-    <a href="https://github.com/AdrianEddy/gyroflow/issues/">
-      <img src="https://img.shields.io/github/issues/AdrianEddy/gyroflow" alt="Issues">
+    <a href="https://github.com/gyroflow/gyroflow/issues/">
+      <img src="https://img.shields.io/github/issues/gyroflow/gyroflow" alt="Issues">
     </a>
-    <a href="https://github.com/AdrianEddy/gyroflow/blob/master/LICENSE">
-      <img src="https://img.shields.io/github/license/AdrianEddy/gyroflow" alt="License">
+    <a href="https://github.com/gyroflow/gyroflow/blob/master/LICENSE">
+      <img src="https://img.shields.io/github/license/gyroflow/gyroflow" alt="License">
     </a>
   </p>
 </p>
@@ -43,8 +43,8 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 ![Screenshot](resources/screenshot.jpg)
 
 <p align="center">
-  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison1.mp4"><img src="resources/comparison1.gif" height="200"></a>
-  <a href="https://github.com/AdrianEddy/gyroflow/blob/master/resources/comparison2.mp4"><img src="resources/comparison2.gif" height="200"></a>
+  <a href="resources/comparison1.mp4"><img src="resources/comparison1.gif" height="200"></a>
+  <a href="resources/comparison2.mp4"><img src="resources/comparison2.gif" height="200"></a>
 </p>
 
 ## Features
@@ -110,7 +110,7 @@ For companies or people wishing to get in touch with the team privately for coll
 
 ## Roadmap
 
-See the [open issues](https://github.com/AdrianEddy/gyroflow/issues) for a list of proposed features and known issues.
+See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of proposed features and known issues.
 
 ### Video editor plugins 
 Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
@@ -118,7 +118,7 @@ Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributors are **greatly appreciated**.
-* If you have suggestions for adding or removing features, feel free to [open an issue](https://github.com/AdrianEddy/gyroflow/issues/new) to discuss it.
+* If you have suggestions for adding or removing features, feel free to [open an issue](https://github.com/gyroflow/gyroflow/issues/new) to discuss it.
 * If you want to implement a feature, you can fork this project, implement your code and open a pull request.
 
 ### Translations
@@ -166,7 +166,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.2.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.2.3 win64_msvc2019_64` or use the [official installer](https://www.qt.io/download-qt-installer)
     - `FFmpeg 4.4`: https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download
@@ -180,7 +180,7 @@ The project also supports UI live reload, it's a super quick way of working with
 ### Building on MacOS
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install Xcode command line tools: `xcode-select --install`
-3. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
 5. Update PROJECT_DIR in `__env-macos.sh`
 6. Setup the environment in terminal: `source __env-macos.sh` - I do this in VS Code built-in terminal
@@ -189,7 +189,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Linux
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Clone the repo: `git clone https://github.com/AdrianEddy/gyroflow.git`
+2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies: `cd gyroflow/ext && ./install-deps-linux.sh` (Debian based apt)
 4. Update PROJECT_DIR in `__env-linux.sh`
 5. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
@@ -207,7 +207,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ## License
 
-Distributed under the GPLv3 License. See [LICENSE](https://github.com/AdrianEddy/gyroflow/blob/main/LICENSE) for more information.
+Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.
 
 ## Authors
 

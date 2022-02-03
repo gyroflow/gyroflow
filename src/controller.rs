@@ -703,7 +703,7 @@ impl Controller {
             this.updates_available(QString::from(version), QString::from(changelog))
         });
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/AdrianEddy/gyroflow/releases").call().map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/releases").call().map(|x| x.into_string()) {
                 if let Ok(v) = serde_json::from_str(&body) as serde_json::Result<serde_json::Value> {
                     if let Some(obj) = v.as_array().and_then(|x| x.first()).and_then(|x| x.as_object()) {
                         let name = obj.get("name").and_then(|x| x.as_str());
@@ -711,7 +711,8 @@ impl Controller {
 
                         if let Some(name) = name {
                             ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
-                            if name.trim_start_matches('v') != env!("CARGO_PKG_VERSION") {
+                            
+                            if semver::Version::parse(name.trim_start_matches('v')) > semver::Version::parse(env!("CARGO_PKG_VERSION")) {
                                 update((name.to_owned(), body.unwrap_or_default().to_owned()));
                             }
                         }
@@ -952,7 +953,7 @@ impl Controller {
         });
 
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/AdrianEddy/gyroflow/git/trees/master?recursive=1").call().map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/git/trees/master?recursive=1").call().map(|x| x.into_string()) {
                 (|| -> Option<()> {
                     let v: serde_json::Value = serde_json::from_str(&body).ok()?;
                     for obj in v.get("tree")?.as_array()? {

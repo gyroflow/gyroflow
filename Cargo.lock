@@ -1052,6 +1052,7 @@ dependencies = [
  "qmetaobject",
  "qml-video-rs",
  "qttypes",
+ "semver 0.1.20",
  "serde_json",
  "simplelog",
  "ureq",

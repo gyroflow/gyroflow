@@ -276,7 +276,7 @@ Rectangle {
         }
         function onUpdates_available(version, changelog) {
             const body = changelog? "<p align=\"left\">" + changelog + "</p>" : "";
-            const el = messageBox(Modal.Info, qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + body, [ { text: qsTr("Download"), accent: true, clicked: () => Qt.openUrlExternally("https://github.com/AdrianEddy/gyroflow/releases") }, { text: qsTr("Close") }])
+            const el = messageBox(Modal.Info, qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + body, [ { text: qsTr("Download"), accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") }, { text: qsTr("Close") }])
             el.t.textFormat = Text.RichText;
         }
     }
