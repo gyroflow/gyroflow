@@ -1,0 +1,45 @@
+name: Bug Report
+description: File a bug report
+title: ""
+labels: ["bug"]
+body:
+  - type: input
+    id: gyroflow-version
+    attributes:
+      label: Gyroflow version
+      description: What version of Gyroflow are you running?
+      placeholder: Version nr or commit id
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: What operating system are you using?
+      description: Please be specific, for example "macOS Catalina 10.15.4"
+      placeholder: OS and version nr
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: What GPU are you using?
+      description: If you are using a GPU please tell us what model you have.
+      placeholder: Brand and model
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please try to run Gyroflow via terminal and paste any relevant log output here. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: false

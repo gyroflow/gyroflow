@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Gyroflow documentation
+    url: https://docs.gyroflow.xyz/
+    about: Please read the docs here
+  - name: Gyroflow website
+    url: https://gyroflow.xyz/
+    about: Gyroflow website with general info
