@@ -49,7 +49,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_pitch,
-                "default": VelocityDampenedAxis::default().smoothness_pitch,
+                "default": 0.2,
                 "unit": "",
                 "precision": 3
             },

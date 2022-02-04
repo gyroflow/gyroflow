@@ -37,8 +37,7 @@ Row {
 
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    timelineContextMenu.pressedX = mouse.x;
-                    timelineContextMenu.popup();
+                    contextMenu.popup();
                     mouse.accepted = true;
                 } else {
                     mouse.accepted = false;
@@ -46,8 +45,7 @@ Row {
             }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
-                    timelineContextMenu.pressedX = mouse.x;
-                    timelineContextMenu.popup();
+                    contextMenu.popup();
                     mouse.accepted = true;
                 }
                 else {
@@ -57,8 +55,7 @@ Row {
 
             onPressed: (mouse) => {
                 if (mouse.button === Qt.RightButton) {
-                    timelineContextMenu.pressedX = mouse.x;
-                    timelineContextMenu.popup();
+                    contextMenu.popup();
                     mouse.accepted = true;
                 }
                 else {
@@ -69,9 +66,7 @@ Row {
         }
 
         Menu {
-            id: timelineContextMenu;
-            property real pressedX: x;
-
+            id: contextMenu;
             font.pixelSize: 11.5 * dpiScale;
             function setDisplayMode(i) {
                 chart.viewMode = i;
