@@ -13,7 +13,7 @@ TextField {
     property alias from: validator.bottom;
     property alias to: validator.top;
     property bool live: true;
-    property real defaultValue: 0;
+    property real defaultValue: NaN;
     property bool allowText: false;
 
     Keys.onDownPressed: (e) => {
@@ -53,7 +53,10 @@ TextField {
     onTextChanged: if (live) updateValue();
     onEditingFinished: updateValue();
     
-    Component.onCompleted: { defaultValue = value; valueChanged(); }
+    Component.onCompleted: {
+        if (isNaN(defaultValue)) defaultValue = value;
+        valueChanged();
+    }
     onAccepted: valueChanged();
     onFocusChanged: if (!activeFocus) valueChanged();
 

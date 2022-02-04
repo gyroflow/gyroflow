@@ -49,6 +49,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_pitch,
+                "default": 0.2,
                 "unit": "",
                 "precision": 3
             },
@@ -59,6 +60,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_yaw,
+                "default": 0.2,
                 "unit": "",
                 "precision": 3
             },
@@ -69,6 +71,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness_roll,
+                "default": 0.2,
                 "unit": "",
                 "precision": 3
             }

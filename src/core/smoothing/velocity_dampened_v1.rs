@@ -46,6 +46,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.01,
                 "to": 1.0,
                 "value": 0.4,
+                "default": 0.4,
                 "unit": "s"
             },
             {
@@ -55,6 +56,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.0,
                 "to": 100.0,
                 "value": self.pitch_vel_damp,
+                "default": 2.0,
                 "unit": "",
                 "precision": 1
             },
@@ -65,6 +67,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.0,
                 "to": 100.0,
                 "value": self.yaw_vel_damp,
+                "default": 2.0,
                 "unit": "",
                 "precision": 1
             },
@@ -75,6 +78,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.0,
                 "to": 100.0,
                 "value": self.roll_vel_damp,
+                "default": 2.0,
                 "unit": "",
                 "precision": 1
             }

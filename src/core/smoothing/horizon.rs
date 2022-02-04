@@ -8,60 +8,15 @@ use crate::gyro_source::TimeQuat;
 #[derive(Clone)]
 pub struct HorizonLock {
     pub time_constant: f64,
-    pub roll: f64,
-    pub pitch: f64,
-    pub yaw: f64
+    pub roll: f64
 }
 
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        roll: 0.0,
-        pitch: 0.0,
-        yaw: 0.0
+        roll: 0.0
     } }
 }
-
-// Alternative implementation adapted from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles for the "standard" order
-/*
-fn from_euler_angles(roll: f64, pitch: f64, yaw: f64) -> UnitQuaternion<f64> {
-    let (sr, cr) = (roll * 0.5f64).simd_sin_cos();
-    let (sp, cp) = (pitch * 0.5f64).simd_sin_cos();
-    let (sy, cy) = (yaw * 0.5f64).simd_sin_cos();
-    
-
-    let q = Quaternion::<f64>::new(
-        cr.clone() * cp.clone() * cy.clone() + sr.clone() * sp.clone() * sy.clone(),
-        sr.clone() * cp.clone() * cy.clone() - cr.clone() * sp.clone() * sy.clone(),
-        cr.clone() * sp.clone() * cy.clone() + sr.clone() * cp.clone() * sy.clone(),
-        cr * cp * sy - sr * sp * cy,
-    );
-
-    UnitQuaternion::<f64>::from_quaternion(q)
-}
-
-fn to_euler_angles(q: UnitQuaternion<f64>) -> (f64, f64, f64) {
-    // roll (x-axis rotation)
-    let sinr_cosp = 2. * (q.w * q.i + q.j * q.k);
-    let cosr_cosp = 1. - 2. * (q.i * q.i + q.j * q.j);
-    let roll = sinr_cosp.simd_atan2(cosr_cosp);
-
-    // pitch (y-axis rotation)
-    let sinp = 2. * (q.w * q.j - q.k * q.i);
-    let pitch = if sinp.abs() >= 1. {
-        std::f64::consts::FRAC_PI_2.simd_copysign(sinp) // use 90 degrees if out of range
-    } else {
-        sinp.asin()
-    };
-
-    // yaw (z-axis rotation)
-    let siny_cosp = 2. * (q.w * q.k + q.i * q.j);
-    let cosy_cosp = 1. - 2. * (q.j * q.j + q.k * q.k);
-    let yaw = siny_cosp.simd_atan2(cosy_cosp);
-
-    (roll, pitch, yaw)
-}
-*/
 
 fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
 
@@ -105,8 +60,6 @@ impl SmoothingAlgorithm for HorizonLock {
         match name {
             "time_constant" => self.time_constant = val,
             "roll" => self.roll = val,
-            "pitch" => self.pitch = val,
-            "yaw" => self.yaw = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
@@ -119,6 +72,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "from": 0.01,
                 "to": 10.0,
                 "value": self.time_constant,
+                "default": 0.25,
                 "unit": "s"
             },
             {
@@ -128,26 +82,9 @@ impl SmoothingAlgorithm for HorizonLock {
                 "from": -180,
                 "to": 180,
                 "value": self.roll,
+                "default": 0,
                 "unit": "°"
-            } /* , 
-            {
-                "name": "pitch", // shouldn't be needed with adequite orientation filtering
-                "description": "Pitch angle correction (todo)",
-                "type": "SliderWithField",
-                "from": -180,
-                "to": 180,
-                "value": self.pitch,
-                "unit": "°"
-            },
-            {
-                "name": "yaw",
-                "description": "Yaw angle correction (todo)",
-                "type": "SliderWithField",
-                "from": -180,
-                "to": 180,
-                "value": self.yaw,
-                "unit": "°"
-            },*/
+            }
         ])
     }
     fn get_status_json(&self) -> serde_json::Value {
@@ -165,8 +102,6 @@ impl SmoothingAlgorithm for HorizonLock {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hasher.write_u64(self.time_constant.to_bits());
         hasher.write_u64(self.roll.to_bits());
-        //hasher.write_u64(self.pitch.to_bits());
-        //hasher.write_u64(self.yaw.to_bits());
         hasher.finish()
     }
 
@@ -194,11 +129,11 @@ impl SmoothingAlgorithm for HorizonLock {
             (*x.0, q)
         }).collect();
 
+        // level horizon
         smoothed2.iter().map(|x| {
             (*x.0, lock_horizon_angle(*x.1, self.roll * DEG2RAD))
         }).collect()
 
-        // level horizon
         // No need to reverse the BTreeMap, because it's sorted by definition
     }
 }

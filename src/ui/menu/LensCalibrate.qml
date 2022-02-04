@@ -253,6 +253,7 @@ MenuItem {
             text: qsTr("Frame readout time");
             SliderWithField {
                 id: shutter;
+                defaultValue: 0.0;
                 to: 1000 / Math.max(1, calibrator_window.videoArea.vid.frameRate);
                 width: parent.width;
                 unit: qsTr("ms");
@@ -305,6 +306,7 @@ MenuItem {
                 from: 0.1;
                 to: 3;
                 value: 1.0;
+                defaultValue: 1.0;
                 width: parent.width;
                 onValueChanged: controller.fov = value;
             }
@@ -401,6 +403,7 @@ MenuItem {
 
             SliderWithField {
                 id: rLimit;
+                defaultValue: 0;
                 width: parent.width;
                 precision: 2;
                 from: 0;

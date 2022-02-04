@@ -47,6 +47,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.01,
                 "to": 2.0,
                 "value": self.time_constant,
+                "default": 0.6,
                 "unit": "s"
             },
             {
@@ -56,6 +57,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.001,
                 "to": 0.3,
                 "value": self.time_constant2,
+                "default": 0.1,
                 "unit": "s"
             },
             {
@@ -65,6 +67,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.01,
                 "to": 5.0,
                 "value": self.velocity_factor,
+                "default": 0.9,
                 "unit": ""
             }
         ])
