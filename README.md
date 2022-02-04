@@ -40,6 +40,8 @@
 ## About the project
 Gyroflow is an application that can stabilize your video by using motion data from a gyroscope and optionally an accelerometer. Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilizes the captured footage precisely by using them. It can also use gyro data from an external source (eg. from Betaflight blackbox).
 
+[Trailer / results video](https://www.youtube.com/watch?v=QR-SINyvNyI)
+
 ![Screenshot](resources/screenshot.jpg)
 
 <p align="center">

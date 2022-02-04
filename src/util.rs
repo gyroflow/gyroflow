@@ -160,7 +160,9 @@ impl std::io::Write for AndroidLog {
 
 pub fn get_version() -> String {
     let ver = env!("CARGO_PKG_VERSION");
-    if let Some(gh_run) = option_env!("GITHUB_RUN_NUMBER") {
+    if option_env!("GITHUB_REF").map_or(false, |x| x.contains("tags")) {
+        ver.to_string() // Official, tagged version
+    } else if let Some(gh_run) = option_env!("GITHUB_RUN_NUMBER") {
         format!("{} (gh{})", ver, gh_run)
     } else if let Some(time) = option_env!("BUILD_TIME") {
         format!("{} (dev{})", ver, time)

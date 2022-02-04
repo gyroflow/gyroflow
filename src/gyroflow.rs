@@ -20,49 +20,6 @@ pub mod qt_gpu { pub mod qrhi_undistort; }
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::ui_tools::UITools;
 
-// TODO ASAP:
-// TODO: fix loader that stays on after load sometimes
-// TODO: If I set the resolution to 1080x720, and load a 4k 4:3 hero10 video again, it becomes 1080x2250 (should be 4000x2250)
-
-// v1.1.0:
-// TODO: wgpu convert to using textures
-// TODO: add vertical labels and scale lines to gyro chart
-// TODO: add horizon lock checkbox to all smoothing algos
-// TODO: Batch processing when loaded multiple files
-// TODO: timeline panning
-// TODO: drop mutliple files at once (video, lens profile, gyro data)
-// TODO: exporting .gyroflow: include output settings
-// TODO: audio slightly off sync when exporting trimmed video
-// TODO: save panel sizes, menu opened states and window dimensions
-// TODO: export pixel format conversion (ComboBox in the UI)
-
-// TODO: use quaternions for finding offset, not gyro samples
-// TODO: support horizon lock using GRAV for CORI
-// TODO: dragging numbers on the numberfield left and right
-// TODO: Review offsets interpolation code, it doesn't seem to behave correctly with large offsets
-// TODO: smoothing presets
-// TODO: cli interface
-// TODO: Calibrator: Allow for multiple zoom values, could be interpolated later (Sony)
-// TODO: UI: activeFocus indicators
-// TODO: add lens distortion back after stabilization
-// TODO: hyperlapse mode
-// TODO: video speed 
-// TODO: export framerate
-// TODO: Setup CI for packaging for Android
-// TODO: Setup CI for packaging for iOS
-// TODO: render queue
-// TODO: When rendering, it should be possible to "minimize" the status and let it render in render queue
-// TODO: keyframes for stabilization params
-// TODO: detect imu orientation automatically, basically try all combinations for a closest match to OF
-// TODO: mask for optical flow
-// TODO: Add cache for the undistortion if the video is not playing
-// TODO: OpenFX plugin
-// TODO: Adobe plugin
-// TODO: support GoPro's superview lens correction
-// TODO: Figure out Sony lens distortion parameters
-// TODO: optical only stabilization
-// TODO: undo framework
-
 cpp! {{
     #include <QQuickStyle>
     #include <QQuickWindow>
