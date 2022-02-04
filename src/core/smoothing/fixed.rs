@@ -36,28 +36,31 @@ impl SmoothingAlgorithm for Fixed {
             {
                 "name": "roll",
                 "description": "Roll angle",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
                 "value": self.roll,
+                "default": 0,
                 "unit": "°"
             },
             {
                 "name": "pitch",
                 "description": "Pitch angle",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -90,
                 "to": 90,
                 "value": self.pitch,
+                "default": 0,
                 "unit": "°"
             },
             {
                 "name": "yaw",
                 "description": "Yaw angle",
-                "type": "Slider",
+                "type": "SliderWithField",
                 "from": -180,
                 "to": 180,
                 "value": self.yaw,
+                "default": 0,
                 "unit": "°"
             }
         ])

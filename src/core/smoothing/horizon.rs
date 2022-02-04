@@ -119,6 +119,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "from": 0.01,
                 "to": 10.0,
                 "value": self.time_constant,
+                "default": 0.25,
                 "unit": "s"
             },
             {
@@ -128,6 +129,7 @@ impl SmoothingAlgorithm for HorizonLock {
                 "from": -180,
                 "to": 180,
                 "value": self.roll,
+                "default": 0,
                 "unit": "°"
             } /* , 
             {

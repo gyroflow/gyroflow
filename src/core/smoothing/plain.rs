@@ -30,6 +30,7 @@ impl SmoothingAlgorithm for Plain {
                 "from": 0.01,
                 "to": 1.0,
                 "value": self.time_constant,
+                "default": 0.25,
                 "unit": "s"
             }
         ])

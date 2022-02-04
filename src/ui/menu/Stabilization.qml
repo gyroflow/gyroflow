@@ -215,7 +215,7 @@ MenuItem {
                                     from: ${x.from};
                                     to: ${x.to};
                                     value: root.getSmoothingParam("${x.name}", ${x.value});
-                                    defaultValue: ${x.value};
+                                    defaultValue: ${x.default};
                                     objectName: "param-${x.name}";
                                     unit: qsTranslate("Stabilization", "${x.unit}");
                                     //live: false;
