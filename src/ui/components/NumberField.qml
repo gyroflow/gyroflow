@@ -55,7 +55,8 @@ TextField {
     
     Component.onCompleted: {
         if (isNaN(defaultValue)) defaultValue = value;
-        valueChanged(); }
+        valueChanged();
+    }
     onAccepted: valueChanged();
     onFocusChanged: if (!activeFocus) valueChanged();
 

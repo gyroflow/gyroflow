@@ -47,8 +47,7 @@ Row {
                 if (mouse.button === Qt.RightButton) {
                     contextMenu.popup();
                     mouse.accepted = true;
-                }
-                else {
+                } else {
                     mouse.accepted = false;
                 }
             }
@@ -57,30 +56,22 @@ Row {
                 if (mouse.button === Qt.RightButton) {
                     contextMenu.popup();
                     mouse.accepted = true;
-                }
-                else {
+                } else {
                     mouse.accepted = false;
                 }
             }
-             
         }
 
         Menu {
             id: contextMenu;
             font.pixelSize: 11.5 * dpiScale;
-            function setDisplayMode(i) {
-                chart.viewMode = i;
-                controller.update_chart(chart);
-            }
             Action {
-                id: addCalibAction;
-                icon.name: "spinner";
-                text: qsTr("Reset Value");
+                icon.name: "undo";
+                text: qsTr("Reset value");
                 onTriggered: {
                     field.value = defaultValue;
                 }
             }
-
         }
     }
     NumberField {
