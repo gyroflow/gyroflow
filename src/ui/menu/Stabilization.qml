@@ -179,6 +179,7 @@ MenuItem {
             from: 0.1;
             to: 3;
             value: 1.0;
+            defaultValue: 1.0;
             width: parent.width;
             onValueChanged: controller.fov = value;
         }
@@ -291,6 +292,7 @@ MenuItem {
         SliderWithField {
             id: adaptiveZoom;
             value: 4;
+            defaultValue: 4;
             from: 0.1;
             to: 15;
             unit: qsTr("s");
@@ -310,6 +312,7 @@ MenuItem {
             text: qsTr("Frame readout time");
             SliderWithField {
                 id: shutter;
+                defaultValue: 0;
                 to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
                 width: parent.width;
                 unit: qsTr("ms");
