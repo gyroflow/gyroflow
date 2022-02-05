@@ -712,8 +712,12 @@ impl Controller {
                         if let Some(name) = name {
                             ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
                             
-                            if semver::Version::parse(name.trim_start_matches('v')) > semver::Version::parse(env!("CARGO_PKG_VERSION")) {
-                                update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                            if let Ok(latest_version) = semver::Version::parse(name.trim_start_matches('v')) {
+                                if let Ok(this_version) = semver::Version::parse(env!("CARGO_PKG_VERSION")) {
+                                    if latest_version > this_version {
+                                        update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                                    }
+                                }
                             }
                         }
                     }

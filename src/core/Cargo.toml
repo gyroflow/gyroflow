@@ -14,7 +14,7 @@ telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" 
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", features = ["field_access"] }
 
 mimalloc = { version = "*", default-features = false }
-nalgebra = "0.29"
+nalgebra = "0.30"
 rayon = "*"
 biquad = "*"
 fastrand = "*"
@@ -41,7 +41,7 @@ cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git" }
 sample-consensus = "*"
 arrsac = "*"
 rand_xoshiro = "*"
-image = "*"
+image = "0.23"
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "*"

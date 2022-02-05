@@ -13,7 +13,7 @@ cstr = "*"
 cpp = "*"
 serde_json = "*"
 bytemuck = "*"
-nalgebra = "0.29"
+nalgebra = "0.30"
 semver = "*"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }

@@ -79,13 +79,18 @@ MenuItem {
         ComboBox {
             id: langList;
             property var langs: [
-                ["English",           "en"],
-                ["Danish (dansk)",    "da"],
-                ["German (Deutsch)",  "de"],
-                ["Norwegian (norsk)", "no"],
-                ["Polish (polski)",   "pl"],
+                ["English",            "en"],
                 ["Chinese - Simplified (简体中文)", "zh_CN"],
-                ["Chinese - Traditional (繁體中文)", "zh_TW"]
+                ["Chinese - Traditional (繁體中文)", "zh_TW"],
+                ["Danish (dansk)",     "da"],
+                ["Finnish (suomi)",    "fi"],
+                ["French (français)",  "fr"],
+                ["German (Deutsch)",   "de"],
+                ["Italian (italiano)", "it"],
+                ["Norwegian (norsk)",  "no"],
+                ["Polish (polski)",    "pl"],
+                ["Slovak (slovenský)", "sk"],
+                ["Ukrainian (украї́нська мо́ва)", "uk"]
             ];
             Component.onCompleted: {
                 let selectedIndex = 0;
