@@ -329,8 +329,10 @@ impl<'a> VideoTranscoder<'a> {
                             final_sw_frame.set_color_range(frame_color_range);
                             final_sw_frame.set_color_space(frame_color_space);
                             final_sw_frame.set_color_transfer_characteristic(frame_color_transfer_characteristic);
-                            encoder.send_frame(final_sw_frame)?;
-                        }                     
+                            // Clone the frame because we use threaded encoder, so we need to guarantee it won't change
+                            // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
+                            encoder.send_frame(&final_sw_frame.clone())?;
+                        }
                     }
                     if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
                         status = Status::Finish;

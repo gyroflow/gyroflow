@@ -33,9 +33,9 @@ impl UITools {
             cpp!(unsafe [engine_ptr as "QQmlEngine *", lang_id as "QString"] {
                 static QTranslator translator;
                 QCoreApplication::removeTranslator(&translator);
-
                 if (lang_id != "en") {
                     if (translator.load(":/resources/translations/" + lang_id + ".qm")) {
+                        qApp->setLayoutDirection((lang_id == "ar" || lang_id == "fa" || lang_id == "he")? Qt::RightToLeft : Qt::LeftToRight);
                         QCoreApplication::installTranslator(&translator);
                     }
                 }

@@ -90,7 +90,7 @@ MenuItem {
                 ["Norwegian (norsk)",  "no"],
                 ["Polish (polski)",    "pl"],
                 ["Slovak (slovenský)", "sk"],
-                ["Ukrainian (украї́нська мо́ва)", "uk"]
+                ["Ukrainian (Українська мова)", "uk"]
             ];
             Component.onCompleted: {
                 let selectedIndex = 0;
@@ -102,6 +102,9 @@ MenuItem {
             width: parent.width;
             onCurrentIndexChanged: {
                 settings.lang = langs[currentIndex][1];
+                
+                window.LayoutMirroring.enabled = settings.lang == "ar" || settings.lang == "fa" || settings.lang == "he";
+                window.LayoutMirroring.childrenInherit = true;
                 ui_tools.set_language(settings.lang);
             }
         }

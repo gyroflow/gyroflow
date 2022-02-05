@@ -29,23 +29,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="106"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="111"/>
         <source>Safe area guide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="107"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="112"/>
         <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="114"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
         <source>Experimental zero-copy GPU preview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="115"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
         <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
@@ -151,6 +151,12 @@ This should provide much better UI performance.</source>
     <message>
         <location filename="../../src/ui/App.qml" line="288"/>
         <source>Gyroflow file exported to %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/App.qml" line="289"/>
+        <source>NATIVE_LANGUAGE_NAME</source>
+        <comment>Translate this to the native name of your language</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -368,7 +374,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     </message>
     <message>
         <location filename="../../src/ui/menu/LensCalibrate.qml" line="123"/>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="285"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="286"/>
         <source>Export lens profile</source>
         <translation type="unfinished"></translation>
     </message>
@@ -404,52 +410,52 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="298"/>
         <source>Upload lens profile to the database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="303"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="304"/>
         <source>FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="314"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="316"/>
         <source>Analyze every n-th frame</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="328"/>
         <source>Sharpness limit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="337"/>
         <source>px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="342"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="344"/>
         <source>Iterations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="354"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="356"/>
         <source>Low pass filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="364"/>
         <source>Hz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="376"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="378"/>
         <source>Preview resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="397"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="399"/>
         <source>Radial distortion limit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -464,12 +470,12 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="259"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="274"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="275"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>
@@ -682,7 +688,7 @@ Do you want to submit your profile?</source>
     </message>
     <message>
         <location filename="../../src/ui/menu/Advanced.qml" line="29"/>
-        <location filename="../../src/ui/menu/LensCalibrate.qml" line="379"/>
+        <location filename="../../src/ui/menu/LensCalibrate.qml" line="381"/>
         <source>Full</source>
         <translation type="unfinished"></translation>
     </message>
@@ -732,18 +738,18 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
-        <source>No cropping</source>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="279"/>
+        <source>No zooming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
-        <source>Dynamic cropping</source>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="279"/>
+        <source>Dynamic zooming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
-        <source>Static crop</source>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="279"/>
+        <source>Static zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -754,6 +760,23 @@ Do you want to submit your profile?</source>
     <message>
         <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
         <source>Using visual features</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QGuiApplication</name>
+    <message>
+        <location filename="../../src/ui/App.qml" line="290"/>
+        <source>QT_LAYOUT_DIRECTION</source>
+        <comment>Either LTR (default) or RTL (for right-to-left languages)</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SliderWithField</name>
+    <message>
+        <location filename="../../src/ui/components/SliderWithField.qml" line="70"/>
+        <source>Reset value</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -874,42 +897,42 @@ Modify velocity factor until you get the desired values (recommended less than 2
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="267"/>
         <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="272"/>
         <source>Max zoom: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="289"/>
-        <source>Smoothing window</source>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="290"/>
+        <source>Zooming speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="296"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="298"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="304"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="306"/>
         <source>Rolling shutter correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="310"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="312"/>
         <source>Frame readout time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="315"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="318"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1397,7 +1420,7 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/VideoInformation.qml" line="115"/>
+        <location filename="../../src/ui/menu/VideoInformation.qml" line="117"/>
         <source>Open file</source>
         <translation type="unfinished"></translation>
     </message>

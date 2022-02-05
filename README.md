@@ -92,7 +92,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - For cameras which don't have built-in gyro, please consider using Betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
 
 ## Minimum system requirements:
-- Windows 10 64-bit (1809 or later)
+- Windows 10 64-bit (1809 or later) [Install VC redist if it doesn't run](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 - macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
 - Linux: 
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
@@ -113,6 +113,7 @@ For companies or people wishing to get in touch with the team privately for coll
 ## Roadmap
 
 See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of proposed features and known issues.
+There's also a ton of TODO comments throughout the code.
 
 ### Video editor plugins 
 Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
@@ -162,7 +163,7 @@ For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU imple
 4. `src/rendering` contains all FFmpeg related code for rendering final video and processing for synchronization
 5. `src/core/gpu` contains GPU implementations of the undistortion
 6. `src/qt_gpu` contains zero-copy GPU undistortion path, using Qt RHI and GLSL compute shader, but this method is experimental and buggy for now
-7. `src/gyroflow.rs` is the main entry point and contains a TODO list of things that still need to be done. Also there's a ton of TODO comments throughout the code
+7. `src/gyroflow.rs` is the main entry point
 8. `mod.rs` or `lib.rs` in each directory act as a main entry of the module (directory name is the module name and `mod.rs` is kind of an entry point)
 
 ### Dev environment

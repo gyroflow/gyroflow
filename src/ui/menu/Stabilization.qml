@@ -276,7 +276,7 @@ MenuItem {
         id: croppingMode;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        model: [QT_TRANSLATE_NOOP("Popup", "No cropping"), QT_TRANSLATE_NOOP("Popup", "Dynamic cropping"), QT_TRANSLATE_NOOP("Popup", "Static crop")];
+        model: [QT_TRANSLATE_NOOP("Popup", "No zooming"), QT_TRANSLATE_NOOP("Popup", "Dynamic zooming"), QT_TRANSLATE_NOOP("Popup", "Static zoom")];
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             switch (currentIndex) {
@@ -287,7 +287,7 @@ MenuItem {
         }
     }
     Label {
-        text: qsTr("Smoothing window");
+        text: qsTr("Zooming speed");
         visible: croppingMode.currentIndex == 1;
         SliderWithField {
             id: adaptiveZoom;

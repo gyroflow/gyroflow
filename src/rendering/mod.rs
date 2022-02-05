@@ -98,6 +98,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
     proc.video.hw_device_type = encoder.2;
+    proc.video.codec_options.set("threads", "auto");
     log::debug!("proc.video_codec: {:?}", &proc.video_codec);
 
     if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
