@@ -242,8 +242,9 @@ Rectangle {
         }
     }
 
-    function messageBox(type, text, buttons, parent) {
-        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { text: text, iconType: type });
+    function messageBox(type, text, buttons, parent, textFormat) {
+        if (textFormat === undefined ) textFormat = Text.AutoText; // default
+        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, text: text, iconType: type});
         el.onClicked.connect((index) => {
             if (buttons[index].clicked)
                 buttons[index].clicked();
@@ -275,9 +276,9 @@ Rectangle {
             Qt.callLater(controller.recompute_threaded);
         }
         function onUpdates_available(version, changelog) {
-            const body = changelog? "<p align=\"left\">" + changelog + "</p>" : "";
-            const el = messageBox(Modal.Info, qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + body, [ { text: qsTr("Download"), accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") }, { text: qsTr("Close") }])
-            el.t.textFormat = Text.RichText;
+            const heading = "<p align=\"center\">" + qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + "</p>\n\n";
+            const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
+            el.t.horizontalAlignment = Text.AlignLeft;
         }
     }
 
