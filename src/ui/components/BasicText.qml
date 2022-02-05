@@ -6,6 +6,7 @@ import QtQuick.Controls as QQC
 
 Text {
     leftPadding: 10 * dpiScale;
+    onLinkActivated: (link) => Qt.openUrlExternally(link);
     color: styleTextColor;
     font.pixelSize: 12 * dpiScale;
     font.family: styleFont;

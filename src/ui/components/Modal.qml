@@ -8,14 +8,15 @@ import QtQuick.Controls.impl as QQCI
 Rectangle {
     id: root;
     property alias t: t;
+    property alias textFormat: t.textFormat;
     property alias text: t.text;
     property alias buttons: btns.model;
     property bool opened: false;
     property int accentButton: -1;
     onTextChanged: {
-        if (text.indexOf("<") > -1) {
+        if (text.indexOf("<") > -1 && textFormat != Text.MarkdownText) {
             text = text.replace(/\n/g, "<br>");
-            t.textFormat = Text.StyledText;
+            textFormat = Text.StyledText;
         }
     }
 
