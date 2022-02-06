@@ -5,6 +5,7 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use serde::{ Serialize, Deserialize };
+#[cfg(feature = "opencv")]
 use super::LensCalibrator;
 
 #[derive(Deserialize, Serialize, Default, Clone, Debug)]
@@ -80,6 +81,7 @@ impl LensProfile {
         Ok(())
     }
 
+    #[cfg(feature = "opencv")]
     pub fn set_from_calibrator(&mut self, cal: &LensCalibrator) {
         self.input_horizontal_stretch = 1.0;
         self.use_opencv_fisheye = true;

@@ -6,6 +6,7 @@ pub mod integration;
 pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod lens_profile;
 pub mod lens_profile_database;
+#[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
 pub mod undistortion;
@@ -28,7 +29,9 @@ pub use undistortion::PixelType;
 
 use crate::lens_profile_database::LensProfileDatabase;
 
-use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom, calibration::LensCalibrator };
+use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
+#[cfg(feature = "opencv")]
+use self::calibration::LensCalibrator;
 
 use nalgebra::Vector4;
 use gyro_source::{ GyroSource, Quat64 };
@@ -141,6 +144,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub undistortion: Arc<RwLock<Undistortion<T>>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
+    #[cfg(feature = "opencv")]
     pub lens_calibrator: Arc<RwLock<Option<LensCalibrator>>>,
 
     pub current_compute_id: Arc<AtomicU64>,
@@ -175,6 +179,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
 
+            #[cfg(feature = "opencv")]
             lens_calibrator: Arc::new(RwLock::new(None)),
 
             camera_id: Arc::new(RwLock::new(None)),
@@ -500,6 +505,7 @@ impl<T: PixelType> StabilizationManager<T> {
                         }
                     }
                 }
+                #[cfg(feature = "opencv")]
                 if is_calibrator {
                     let lock = self.lens_calibrator.read();
                     if let Some(ref cal) = *lock {
@@ -575,6 +581,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "k3" => lens.fisheye_params.distortion_coeffs[2] = value,
                 "k4" => lens.fisheye_params.distortion_coeffs[3] = value,
                 "r_limit" => {
+                    #[cfg(feature = "opencv")]
                     if let Some(ref mut calib) = *self.lens_calibrator.write() {
                         calib.r_limit = value;
                     }
