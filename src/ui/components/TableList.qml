@@ -15,6 +15,8 @@ Row {
     property var editableFields: ({});
     property var editableKeys: Object.keys(editableFields);
 
+    signal commitAll();
+
     function updateEntry(key, value) {
         model[key] = value;
         modelChanged();
@@ -79,6 +81,10 @@ Row {
                     parent.parent.parent.children[0].visible = true;
                     if (desc.onChange)
                         desc.onChange(newValue.allowText? text.trim() : value);
+                }
+                Connections {
+                    target: tl;
+                    function onCommitAll() { if (newValue.visible) newValue.accepted(); }
                 }
             }
             LinkButton {

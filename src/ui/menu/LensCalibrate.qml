@@ -289,6 +289,7 @@ MenuItem {
         enabled: rms.value > 0 && rms.value < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
+            list.commitAll();
             fileDialog.currentFile = controller.export_lens_profile_filename(calib.calibrationInfo);
             fileDialog.open();
         }
