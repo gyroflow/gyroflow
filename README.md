@@ -134,9 +134,11 @@ Currently *Gyroflow* is available in:
 * **French** (by KennyDorion)
 * **German** (by [Grommi](https://github.com/Gro2mi) and [Nicecrash](https://github.com/B-nutze-RR))
 * **Italian** (by Rosario Casciello)
+* **Japanese** (by 井上康)
 * **Norwegian** (by [MiniGod](https://github.com/MiniGod) and [alexagv](https://github.com/alexagv))
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
 * **Slovak** (by Radovan Leitman)
+* **Spanish** (by Pelado-Mat)
 * **Ukrainian** (by Artem Alexandrov)
 
 Help us translate *Gyroflow* to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow

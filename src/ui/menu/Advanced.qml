@@ -87,9 +87,11 @@ MenuItem {
                 ["French (français)",  "fr"],
                 ["German (Deutsch)",   "de"],
                 ["Italian (italiano)", "it"],
+                ["Japanese (言語名)",  "ja"],
                 ["Norwegian (norsk)",  "no"],
                 ["Polish (polski)",    "pl"],
                 ["Slovak (slovenský)", "sk"],
+                ["Spanish (español)",  "es"],
                 ["Ukrainian (Українська мова)", "uk"]
             ];
             Component.onCompleted: {
