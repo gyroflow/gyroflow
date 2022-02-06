@@ -164,6 +164,11 @@ MenuItem {
                 from: 1;
             }
         }
+        InfoMessageSmall {
+            id: akazeWarning;
+            show: syncMethod.currentValue == "AKAZE";
+            text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results"); 
+        }
         Label {
             position: Label.Left;
             text: qsTr("Optical flow method");
