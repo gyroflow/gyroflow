@@ -241,7 +241,7 @@ impl GyroSource {
 
     pub fn apply_transforms(&mut self) {
         self.raw_imu = self.org_raw_imu.clone();
-        if self.imu_lpf > 0.0 {
+        if self.imu_lpf > 0.0 && !self.org_raw_imu.is_empty() && self.duration_ms > 0.0 {
             let sample_rate = self.org_raw_imu.len() as f64 / (self.duration_ms / 1000.0);
             if let Err(e) = super::filtering::Lowpass::filter_gyro_forward_backward(self.imu_lpf, sample_rate, &mut self.raw_imu) {
                 log::error!("Filter error {:?}", e);
@@ -283,8 +283,7 @@ impl GyroSource {
     }
 
     fn quat_at_timestamp(&self, quats: &TimeQuat, mut timestamp_ms: f64) -> Quat64 {
-        if quats.len() < 2 { return Quat64::identity(); }
-        assert!(self.duration_ms > 0.0);
+        if quats.len() < 2 || self.duration_ms <= 0.0 { return Quat64::identity(); }
 
         timestamp_ms -= self.offset_at_timestamp(timestamp_ms);
     
