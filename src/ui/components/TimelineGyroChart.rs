@@ -111,10 +111,12 @@ impl TimelineGyroChart {
 
         let map_to_visible_area = |v: f64| -> f64 { (v - self.visibleAreaLeft) / (self.visibleAreaRight - self.visibleAreaLeft) };
 
+        let duration_us = self.duration_ms * 1000.0;
+
         for serie in &mut self.series  {
             if serie.visible && !serie.data.is_empty() {
-                let from_timestamp = ((self.visibleAreaLeft - 0.01) * self.duration_ms * 1000.0).floor() as i64;
-                let mut to_timestamp = ((self.visibleAreaRight + 0.01) * self.duration_ms * 1000.0).ceil() as i64;
+                let from_timestamp = ((self.visibleAreaLeft - 0.01) * duration_us).floor() as i64;
+                let mut to_timestamp = ((self.visibleAreaRight + 0.01) * duration_us).ceil() as i64;
                 if from_timestamp >= to_timestamp { to_timestamp = from_timestamp + 1; }
 
                 let resolution = rect.width * 10.0;
@@ -126,16 +128,17 @@ impl TimelineGyroChart {
                     if let Some(first_item) = range.next() {
                         let mut line = Vec::new();
                         let mut prev_point = (*first_item.0, QPointF {
-                            x: map_to_visible_area((*first_item.0 as f64 / 1000.0) / self.duration_ms) * rect.width,
+                            x: map_to_visible_area(*first_item.0 as f64 / duration_us) * rect.width,
                             y: (1.0 - *first_item.1 * self.vscale) * half_height
                         });
                         let step = (num_samples / resolution as usize).max(1);
                         for data in range.step_by(step) {
                             let point = QPointF {
-                                x: map_to_visible_area((*data.0 as f64 / 1000.0) / self.duration_ms) * rect.width,
+                                x: map_to_visible_area(*data.0 as f64 / duration_us) * rect.width,
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
-                            if *data.0 - prev_point.0 > 100_000 { // if more than 100 ms difference, create a new line
+                            
+                            if point.x - prev_point.1.x > 10.0 { // if more than 10px difference, create a new line
                                 serie.lines.push(line);
                                 line = Vec::new();
                             } else {

@@ -25,6 +25,7 @@ Rectangle {
 
     signal changeTrimStart(real val);
     signal changeTrimEnd(real val);
+    signal reset();
 
     Rectangle {
         color: parent.border.color;
@@ -34,6 +35,7 @@ Rectangle {
         MouseArea {
             anchors.fill: parent;
             cursorShape: Qt.SizeHorCursor;
+            onDoubleClicked: root.reset();
         }
         DragHandler {
             id: leftTrimDrag;
@@ -60,6 +62,7 @@ Rectangle {
         MouseArea {
             anchors.fill: parent;
             cursorShape: Qt.SizeHorCursor;
+            onDoubleClicked: root.reset();
         }
         DragHandler {
             id: rightTrimDrag;

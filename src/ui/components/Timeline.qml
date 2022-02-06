@@ -310,6 +310,7 @@ Item {
                 visible: root.trimActive;
                 onChangeTrimStart: (val) => { root.trimStart = val; if (root.trimStart >= root.trimEnd) { root.trimStart = 0; root.trimEnd = 1.0; } }
                 onChangeTrimEnd:   (val) => { root.trimEnd   = val; if (root.trimStart >= root.trimEnd) { root.trimStart = 0; root.trimEnd = 1.0; } }
+                onReset: () => { root.trimStart = 0; root.trimEnd = 1.0; }
             }
         }
 
