@@ -133,6 +133,10 @@ fn entry() {
 
     rendering::init().unwrap();
 
+    if let Some(name) = core::gpu::initialize_contexts() {
+        rendering::set_gpu_type_from_name(&name);
+    }
+
     engine.exec();
 }
 

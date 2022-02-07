@@ -15,9 +15,34 @@ use std::os::raw::c_char;
 use std::sync::{Arc, atomic::AtomicBool};
 use parking_lot::RwLock;
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+enum GpuType {
+    NVIDIA, AMD, Intel, Unknown
+}
+lazy_static::lazy_static! {
+    static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
+}
+pub fn set_gpu_type_from_name(name: &str) {
+    let name = name.to_ascii_lowercase();
+         if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::NVIDIA; }
+    else if name.contains("amd")    { *GPU_TYPE.write() = GpuType::AMD; }
+    else if name.contains("intel")  { *GPU_TYPE.write() = GpuType::Intel; }
+    else {
+        log::warn!("Unknown GPU {}", name);
+    }
+
+    let gpu_type = *GPU_TYPE.read();
+    if gpu_type == GpuType::NVIDIA {
+        ffmpeg_hw::initialize_cuda_ctx();
+    }
+
+    dbg!(gpu_type);
+}
+
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
-    if use_gpu {
+    
+    let mut encoders = if use_gpu {
         match codec {
             "x264" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -69,7 +94,17 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "ProRes" => vec![("prores_ks", false)],
             _        => vec![]
         }
+    };
+
+    let gpu_type = *GPU_TYPE.read();
+    if gpu_type != GpuType::NVIDIA {
+        encoders = encoders.into_iter().filter(|x| !x.0.contains("nvenc")).collect();
     }
+    if gpu_type != GpuType::AMD {
+        encoders = encoders.into_iter().filter(|x| !x.0.contains("_amf")).collect();
+    }
+    log::debug!("Possible encoders with {:?}: {:?}", gpu_type, encoders);
+    encoders
 }
 
 pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, codec: &str, codec_options: &str, output_path: &str, trim_start: f64, trim_end: f64, 

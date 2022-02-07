@@ -4,7 +4,9 @@
 use std::borrow::Cow;
 use bytemuck::Pod;
 use bytemuck::Zeroable;
+use wgpu::Adapter;
 use wgpu::BufferUsages;
+use parking_lot::RwLock;
 
 #[repr(C, align(32))]
 #[derive(Clone, Copy)]
@@ -41,7 +43,25 @@ pub struct WgpuWrapper  {
     globals: Globals
 }
 
-impl WgpuWrapper  {
+lazy_static::lazy_static! {
+    static ref ADAPTER: RwLock<Option<Adapter>> = RwLock::new(None);
+}
+
+impl WgpuWrapper {
+    pub fn initialize_context() -> Option<String> {
+        let instance = wgpu::Instance::new(wgpu::Backends::all());
+
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))?;
+        let info = adapter.get_info();
+        log::debug!("WGPU adapter: {:?}", &info);
+
+        let name = info.name.clone();
+
+        *ADAPTER.write() = Some(adapter);
+        
+        Some(name)
+    }
+
     pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, bg: nalgebra::Vector4<f32>) -> Option<Self> {
         let params_count = 9 * (height + 1);
 
@@ -51,73 +71,79 @@ impl WgpuWrapper  {
         let out_size = (output_stride * output_height) as wgpu::BufferAddress;
         let params_size = (params_count * std::mem::size_of::<f32>()) as wgpu::BufferAddress;
 
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
+        //let instance = wgpu::Instance::new(wgpu::Backends::all());
 
-        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))?;
+        //let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))?;
+        let adapter_initialized = ADAPTER.read().is_some();
+        if !adapter_initialized { Self::initialize_context(); }
+        let lock = ADAPTER.read();
+        if let Some(ref adapter) = *lock {
+            let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+                label: None,
+                features: wgpu::Features::empty(),
+                limits: wgpu::Limits::default(),
+            }, None)).ok()?;
 
-        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-            label: None,
-            features: wgpu::Features::empty(),
-            limits: wgpu::Limits::default(),
-        }, None)).ok()?;
+            let info = adapter.get_info();
+            log::debug!("WGPU adapter: {:?}", &info);
 
-        let info = adapter.get_info();
-        log::debug!("WGPU adapter: {:?}", &info);
+            let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+                source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("wgpu_undistort.wgsl"))),
+                label: None
+            });
 
-        let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("wgpu_undistort.wgsl"))),
-            label: None
-        });
+            let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: out_size, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let in_pixels      = device.create_buffer(&wgpu::BufferDescriptor { size: in_size,  usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let out_pixels     = device.create_buffer(&wgpu::BufferDescriptor { size: out_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_SRC, label: None, mapped_at_creation: false });
+            let params_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            
+            let params2_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<Globals>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
-        let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: out_size, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
-        let in_pixels      = device.create_buffer(&wgpu::BufferDescriptor { size: in_size,  usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
-        let out_pixels     = device.create_buffer(&wgpu::BufferDescriptor { size: out_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_SRC, label: None, mapped_at_creation: false });
-        let params_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
-        
-        let params2_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<Globals>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor { module: &shader, entry_point: "undistort", label: None, layout: None });
 
-        let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor { module: &shader, entry_point: "undistort", label: None, layout: None });
+            let bind_group_layout = compute_pipeline.get_bind_group_layout(0);
+            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: None,
+                layout: &bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry { binding: 0, resource: in_pixels.as_entire_binding() }, 
+                    wgpu::BindGroupEntry { binding: 1, resource: params_buffer.as_entire_binding() }, 
+                    wgpu::BindGroupEntry { binding: 2, resource: out_pixels.as_entire_binding() },
+                    wgpu::BindGroupEntry { binding: 3, resource: params2_buffer.as_entire_binding() },
+                ],
+            });
+            let globals = Globals {
+                width: width as u32,
+                height: height as u32,
+                stride: stride as u32,
 
-        let bind_group_layout = compute_pipeline.get_bind_group_layout(0);
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: in_pixels.as_entire_binding() }, 
-                wgpu::BindGroupEntry { binding: 1, resource: params_buffer.as_entire_binding() }, 
-                wgpu::BindGroupEntry { binding: 2, resource: out_pixels.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 3, resource: params2_buffer.as_entire_binding() },
-            ],
-        });
-        let globals = Globals {
-            width: width as u32,
-            height: height as u32,
-            stride: stride as u32,
+                output_width: output_width as u32,
+                output_height: output_height as u32,
+                output_stride: output_stride as u32,
+                bytes_per_pixel: bytes_per_pixel as u32,
+                pix_element_count: pix_element_count as u32,
+                num_params: 2,
+                bg: [bg[0], bg[1], bg[2], bg[3]]
+            };
 
-            output_width: output_width as u32,
-            output_height: output_height as u32,
-            output_stride: output_stride as u32,
-            bytes_per_pixel: bytes_per_pixel as u32,
-            pix_element_count: pix_element_count as u32,
-            num_params: 2,
-            bg: [bg[0], bg[1], bg[2], bg[3]]
-        };
-
-        Some(Self {
-            device,
-            queue,
-            staging_buffer,
-            out_pixels,
-            in_pixels,
-            params_buffer,
-            params2_buffer,
-            bind_group,
-            compute_pipeline,
-            in_size,
-            out_size,
-            params_size,
-            globals
-        })
+            Some(Self {
+                device,
+                queue,
+                staging_buffer,
+                out_pixels,
+                in_pixels,
+                params_buffer,
+                params2_buffer,
+                bind_group,
+                compute_pipeline,
+                in_size,
+                out_size,
+                params_size,
+                globals
+            })
+        } else {
+            None
+        }
     }
 
     pub fn set_background(&mut self, bg: nalgebra::Vector4<f32>) {
