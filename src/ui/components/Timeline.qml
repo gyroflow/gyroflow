@@ -64,8 +64,8 @@ Item {
             case Qt.Key_Home:         vid.currentFrame = frameAtPosition(root.trimStart);             e.accepted = true; break;
             case Qt.Key_End:          vid.currentFrame = frameAtPosition(root.trimEnd);               e.accepted = true; break;
             // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
-            case Qt.Key_BracketLeft:  root.trimStart = root.getPosition();                                    e.accepted = true; break;
-            case Qt.Key_BracketRight: root.trimEnd   = root.getPosition();                                    e.accepted = true; break;
+            case Qt.Key_BracketLeft:  root.trimStart = root.getPosition();                            e.accepted = true; break;
+            case Qt.Key_BracketRight: root.trimEnd   = root.getPosition();                            e.accepted = true; break;
         }
     }
 
