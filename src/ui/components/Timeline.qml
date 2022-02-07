@@ -33,6 +33,12 @@ Item {
     function redrawChart() { chart.update(); }
     function getChart() { return chart; }
 
+    function setPosition(pos) {
+        vid.currentFrame = frameAtPosition(pos);
+    }
+    function getPosition() {
+        return vid.currentFrame / (vid.frameCount - 1);
+    }
     function frameAtPosition(pos) {
         return Math.floor(pos * (vid.frameCount - 1));
     }
@@ -58,8 +64,8 @@ Item {
             case Qt.Key_Home:         vid.currentFrame = frameAtPosition(root.trimStart);             e.accepted = true; break;
             case Qt.Key_End:          vid.currentFrame = frameAtPosition(root.trimEnd);               e.accepted = true; break;
             // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
-            case Qt.Key_BracketLeft:  root.trimStart = root.value;                                    e.accepted = true; break;
-            case Qt.Key_BracketRight: root.trimEnd   = root.value;                                    e.accepted = true; break;
+            case Qt.Key_BracketLeft:  root.trimStart = root.getPosition();                            e.accepted = true; break;
+            case Qt.Key_BracketRight: root.trimEnd   = root.getPosition();                            e.accepted = true; break;
         }
     }
 
@@ -181,7 +187,7 @@ Item {
             anchors.fill: parent;
             hoverEnabled: true;
             onMouseXChanged: {
-                if (pressed) root.value = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
+                if (pressed) root.setPosition(Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width))));
             }
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
@@ -325,7 +331,7 @@ Item {
 
         // Handle
         Rectangle {
-            x: Math.max(0, root.mapToVisibleArea(root.value) * (parent.width) - width / 2)
+            x: Math.max(0, root.mapToVisibleArea(root.getPosition()) * (parent.width) - width / 2)
             y: (parent.height - height) / 2
             radius: width;
             height: parent.height;

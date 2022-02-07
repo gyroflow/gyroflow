@@ -155,13 +155,6 @@ Item {
                 anchors.fill: parent;
                 property bool loaded: false;
 
-                onTimestampChanged: {
-                    if (!timeline.pressed) {
-                        timeline.preventChange = true;
-                        timeline.value = timestamp / duration;
-                        timeline.preventChange = false;
-                    }
-                }
                 onCurrentFrameChanged: {
                     const fov = controller.get_current_fov();
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
@@ -358,7 +351,7 @@ Item {
                 anchors.centerIn: parent;
                 spacing: 5 * dpiScale;
                 enabled: vid.loaded;
-                Button { text: "["; font.bold: true; onClicked: timeline.trimStart = timeline.value; tooltip: qsTr("Trim start"); }
+                Button { text: "["; font.bold: true; onClicked: timeline.trimStart = timeline.getPosition(); tooltip: qsTr("Trim start"); }
                 Button { icon.name: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
                 Button {
                     onClicked: if (vid.playing) vid.pause(); else vid.play();
@@ -366,7 +359,7 @@ Item {
                     icon.name: vid.playing? "pause" : "play";
                 }
                 Button { icon.name: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
-                Button { text: "]"; font.bold: true; onClicked: timeline.trimEnd = timeline.value; tooltip: qsTr("Trim end"); }
+                Button { text: "]"; font.bold: true; onClicked: timeline.trimEnd = timeline.getPosition(); tooltip: qsTr("Trim end"); }
             }
             Row {
                 enabled: vid.loaded;
@@ -441,13 +434,6 @@ Item {
                 onTrimEndChanged: {
                     controller.set_trim_end(trimEnd);
                     vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
-                }
-
-                property bool preventChange: false;
-                onValueChanged: {
-                    if (!preventChange) {
-                        vid.timestamp = value * vid.duration;
-                    }
                 }
             }
         }
