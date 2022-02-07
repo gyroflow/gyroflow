@@ -25,16 +25,18 @@ lazy_static::lazy_static! {
 pub fn set_gpu_type_from_name(name: &str) {
     let name = name.to_ascii_lowercase();
          if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::NVIDIA; }
-    else if name.contains("amd")    { *GPU_TYPE.write() = GpuType::AMD; }
-    else if name.contains("intel")  { *GPU_TYPE.write() = GpuType::Intel; }
+    else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::AMD; }
+    else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
     else {
         log::warn!("Unknown GPU {}", name);
     }
 
     let gpu_type = *GPU_TYPE.read();
     if gpu_type == GpuType::NVIDIA {
-        ffmpeg_hw::initialize_cuda_ctx();
+        ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
     }
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
 
     dbg!(gpu_type);
 }

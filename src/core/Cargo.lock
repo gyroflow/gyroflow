@@ -744,7 +744,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.1.1"
-source = "git+https://github.com/ilya-epifanov/fc-blackbox.git#bf493a01e7f8c81ff53ab260d341b027c8b21cfc"
+source = "git+https://github.com/AdrianEddy/fc-blackbox.git#fc9bb236fd550fb942c3e08855d25e48be4ad801"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2221,7 +2221,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#838d31bfb3905afceae4f0d5ad4b9387e7b935ac"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#9e393224689bf013172282e7960d17640c03c012"
 dependencies = [
  "argh",
  "byteorder",

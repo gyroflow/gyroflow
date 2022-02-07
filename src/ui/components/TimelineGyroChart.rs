@@ -113,7 +113,8 @@ impl TimelineGyroChart {
 
         let duration_us = self.duration_ms * 1000.0;
 
-        for serie in &mut self.series  {
+        for serie in &mut self.series {
+            let px_limit = if serie.data.len() < 2000 { 200.0 } else { 10.0 };
             if serie.visible && !serie.data.is_empty() {
                 let from_timestamp = ((self.visibleAreaLeft - 0.01) * duration_us).floor() as i64;
                 let mut to_timestamp = ((self.visibleAreaRight + 0.01) * duration_us).ceil() as i64;
@@ -138,7 +139,7 @@ impl TimelineGyroChart {
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
                             
-                            if point.x - prev_point.1.x > 10.0 { // if more than 10px difference, create a new line
+                            if point.x - prev_point.1.x > px_limit { // if more than 10px difference, create a new line
                                 serie.lines.push(line);
                                 line = Vec::new();
                             } else {

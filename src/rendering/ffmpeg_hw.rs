@@ -66,8 +66,7 @@ lazy_static::lazy_static! {
     static ref DEC_DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
 }
 
-pub fn initialize_cuda_ctx() {
-    let type_ = ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA;
+pub fn initialize_ctx(type_: ffi::AVHWDeviceType) {
     let mut devices = ENC_DEVICES.lock();
     if let Entry::Vacant(e) = devices.entry(type_) {
         ::log::debug!("create {:?}", type_);
