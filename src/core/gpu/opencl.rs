@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use ocl::*;
+use parking_lot::RwLock;
 
 pub struct OclWrapper {
     kernel: Kernel,
@@ -12,11 +13,17 @@ pub struct OclWrapper {
     params_buf: Buffer<f32>,
 }
 
+struct CtxWrapper {
+    device: Device,
+    context: Context,
+}
+
+lazy_static::lazy_static! {
+    static ref CONTEXT: RwLock<Option<CtxWrapper>> = RwLock::new(None);
+}
+
 impl OclWrapper {
-    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
-        
-        if height < 4 || output_height < 4 || stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
-        
+    pub fn initialize_context() -> ocl::Result<String> {
         let platform = Platform::default();
         let device = Device::first(platform)?;
         ::log::info!("OpenCL Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
@@ -26,60 +33,77 @@ impl OclWrapper {
             .devices(device)
             .build()?;
 
-        let queue = Queue::new(&context, device, None)?;
+        let name = device.name();
 
-        let program = Program::builder()
-            .src(include_str!("opencl_undistort.cl"))
-            .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPE"    .into(), val: ocl_names.0.into() })
-            .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERT" .into(), val: ocl_names.1.into() })
-            .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPEF"   .into(), val: ocl_names.2.into() })
-            .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERTF".into(), val: ocl_names.3.into() })
-            .bo(builders::BuildOpt::CmplrDefine { ident: "PIXEL_BYTES"  .into(), val: format!("{}", bytes_per_pixel) })
-            .devices(device)
-            .build(&context)?;
+        *CONTEXT.write() = Some(CtxWrapper { device, context });
+        
+        name
+    }
 
-        let source_buffer = Buffer::builder().queue(queue.clone()).len(stride*height)
-            .flags(MemFlags::new().read_only().host_write_only()).build()?;
+    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
+        if height < 4 || output_height < 4 || stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
+        
+        let context_initialized = CONTEXT.read().is_some();
+        if !context_initialized { Self::initialize_context()?; }
+        let lock = CONTEXT.read();
+        if let Some(ref ctx) = *lock {
+            let queue = Queue::new(&ctx.context, ctx.device, None)?;
 
-        let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height)
-            .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
+            let program = Program::builder()
+                .src(include_str!("opencl_undistort.cl"))
+                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPE"    .into(), val: ocl_names.0.into() })
+                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERT" .into(), val: ocl_names.1.into() })
+                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPEF"   .into(), val: ocl_names.2.into() })
+                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERTF".into(), val: ocl_names.3.into() })
+                .bo(builders::BuildOpt::CmplrDefine { ident: "PIXEL_BYTES"  .into(), val: format!("{}", bytes_per_pixel) })
+                .devices(ctx.device)
+                .build(&ctx.context)?;
 
-        let params_len = 9 * (height + 1);
-        let params_buf = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(params_len).build()?;
+            let source_buffer = Buffer::builder().queue(queue.clone()).len(stride*height)
+                .flags(MemFlags::new().read_only().host_write_only()).build()?;
 
-        let mut builder = Kernel::builder();
-        unsafe {
-            builder.program(&program).name("undistort_image").queue(queue)
-            .global_work_size((output_width, output_height))
-            .disable_arg_type_check()
-            .arg(&source_buffer)
-            .arg(&dest_buffer)
-            .arg(ocl::prm::Ushort::new(width as u16))
-            .arg(ocl::prm::Ushort::new(height as u16))
-            .arg(ocl::prm::Ushort::new(stride as u16))
-            .arg(ocl::prm::Ushort::new(output_width as u16))
-            .arg(ocl::prm::Ushort::new(output_height as u16))
-            .arg(ocl::prm::Ushort::new(output_stride as u16))
-            .arg(&params_buf)
-            .arg(ocl::prm::Ushort::new(2));
+            let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height)
+                .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
+
+            let params_len = 9 * (height + 1);
+            let params_buf = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(params_len).build()?;
+
+            let mut builder = Kernel::builder();
+            unsafe {
+                builder.program(&program).name("undistort_image").queue(queue)
+                .global_work_size((output_width, output_height))
+                .disable_arg_type_check()
+                .arg(&source_buffer)
+                .arg(&dest_buffer)
+                .arg(ocl::prm::Ushort::new(width as u16))
+                .arg(ocl::prm::Ushort::new(height as u16))
+                .arg(ocl::prm::Ushort::new(stride as u16))
+                .arg(ocl::prm::Ushort::new(output_width as u16))
+                .arg(ocl::prm::Ushort::new(output_height as u16))
+                .arg(ocl::prm::Ushort::new(output_stride as u16))
+                .arg(&params_buf)
+                .arg(ocl::prm::Ushort::new(2));
+            }
+
+            match pix_element_count {
+                1 => builder.arg(ocl::prm::Float::new(bg[0])),
+                2 => builder.arg(ocl::prm::Float2::new(bg[0], bg[1])),
+                3 => builder.arg(ocl::prm::Float3::new(bg[0], bg[1], bg[2])),
+                4 => builder.arg(ocl::prm::Float4::new(bg[0], bg[1], bg[2], bg[3])),
+                _ => panic!("Unknown pix_element_count {}", pix_element_count)
+            };
+            let kernel = builder.build()?;
+        
+            Ok(Self {
+                pix_element_count,
+                kernel,
+                src: source_buffer,
+                dst: dest_buffer,
+                params_buf,
+            })
+        } else {
+            Err(ocl::BufferCmdError::AlreadyMapped.into())
         }
-
-        match pix_element_count {
-            1 => builder.arg(ocl::prm::Float::new(bg[0])),
-            2 => builder.arg(ocl::prm::Float2::new(bg[0], bg[1])),
-            3 => builder.arg(ocl::prm::Float3::new(bg[0], bg[1], bg[2])),
-            4 => builder.arg(ocl::prm::Float4::new(bg[0], bg[1], bg[2], bg[3])),
-            _ => panic!("Unknown pix_element_count {}", pix_element_count)
-        };
-        let kernel = builder.build()?;
-    
-        Ok(Self {
-            pix_element_count,
-            kernel,
-            src: source_buffer,
-            dst: dest_buffer,
-            params_buf,
-        })
     }
     
     pub fn set_background(&mut self, bg: nalgebra::Vector4<f32>) -> ocl::Result<()> {
