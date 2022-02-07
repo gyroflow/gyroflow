@@ -180,11 +180,31 @@ Item {
             id: ma;
             anchors.fill: parent;
             hoverEnabled: true;
-            onMouseXChanged: {
-                if (pressed) root.value = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
-            }
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton;
 
+            property var panInit: ({ x: 0, y: 0, visibleAreaLeft: 0, visibleAreaWidth: 1});
+            
+            onMouseXChanged: {
+                if (pressed)  {
+                    if (pressedButtons & Qt.MiddleButton) {
+                        const dx = mouseX - panInit.x;
+                        const stepsPerPixel = panInit.visibleAreaWidth / parent.width;
+
+                        visibleAreaLeft  = Math.max(0.0, Math.min(1.0 - panInit.visibleAreaWidth, panInit.visibleAreaLeft - dx*stepsPerPixel));
+                        visibleAreaRight = visibleAreaLeft + panInit.visibleAreaWidth;
+
+                        scrollbar.position = visibleAreaLeft;
+                    } else {
+                        root.value = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
+                    }
+                }
+            }
+            onPressed: (mouse) => {
+                panInit.x = mouse.x;
+                panInit.y = mouse.y;
+                panInit.visibleAreaLeft  = root.visibleAreaLeft;
+                panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
+            }
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
                     timelineContextMenu.pressedX = mouse.x;
