@@ -16,6 +16,7 @@ pub struct UITools {
     base: qt_base_class!(trait QObject), 
     set_theme: qt_method!(fn(&self, theme: String)),
     set_language: qt_method!(fn(&self, lang_id: QString)),
+    get_default_language: qt_method!(fn(&self) -> QString),
     init_calibrator: qt_method!(fn(&mut self)),
     set_icon: qt_method!(fn(&self, wnd: QJSValue)),
 
@@ -44,6 +45,15 @@ impl UITools {
             });
             self.language_changed();
         }
+    }
+    pub fn get_default_language(&self) -> QString {
+        cpp!(unsafe [] -> QString as "QString" {
+            QString lang  = QLocale::system().name();
+            QString lang2 = lang.mid(0, 2);
+            if (QFile::exists(":/resources/translations/" + lang + ".qm")) return lang;
+            if (QFile::exists(":/resources/translations/" + lang2 + ".qm")) return lang2;
+            return "en";
+        })
     }
 
     pub fn set_theme(&self, theme: String) {

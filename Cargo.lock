@@ -2563,7 +2563,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#ca05723c7af0cdf16e328bbc79c1d32159d196c2"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#ed806f021f0040be93f3e4f295a38f67f99b7efc"
 dependencies = [
  "argh",
  "byteorder",
@@ -2686,9 +2686,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-segmentation"
-version = "1.8.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8895849a949e7845e06bd6dc1aa51731a103c42707010a5b591c0038fb73385b"
+checksum = "7e8820f5d777f6224dc4be3632222971ac30164d4a258d595640799554ebfd99"
 
 [[package]]
 name = "unicode-width"

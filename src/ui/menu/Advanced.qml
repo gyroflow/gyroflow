@@ -17,7 +17,7 @@ MenuItem {
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
         property alias safeAreaGuide: safeAreaGuide.checked;
-        property string lang: "en";
+        property string lang: ui_tools.get_default_language();
     }
 
     Label {
@@ -102,13 +102,14 @@ MenuItem {
             }
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
-            onCurrentIndexChanged: {
+            function setLang() {
                 settings.lang = langs[currentIndex][1];
                 
                 window.LayoutMirroring.enabled = settings.lang == "ar" || settings.lang == "fa" || settings.lang == "he";
                 window.LayoutMirroring.childrenInherit = true;
                 ui_tools.set_language(settings.lang);
             }
+            onCurrentIndexChanged: Qt.callLater(setLang);
         }
     }
     CheckBox {
