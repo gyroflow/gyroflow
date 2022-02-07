@@ -26,6 +26,7 @@ Item {
     property alias inner: inner;
 
     property real value: 0;
+    readonly property real position: vid.currentFrame / (vid.frameCount - 1);
 
     function mapToVisibleArea(pos) { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos) { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
@@ -35,9 +36,6 @@ Item {
 
     function setPosition(pos) {
         vid.currentFrame = frameAtPosition(pos);
-    }
-    function getPosition() {
-        return vid.currentFrame / (vid.frameCount - 1);
     }
     function frameAtPosition(pos) {
         return Math.floor(pos * (vid.frameCount - 1));
@@ -64,8 +62,8 @@ Item {
             case Qt.Key_Home:         vid.currentFrame = frameAtPosition(root.trimStart);             e.accepted = true; break;
             case Qt.Key_End:          vid.currentFrame = frameAtPosition(root.trimEnd);               e.accepted = true; break;
             // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
-            case Qt.Key_BracketLeft:  root.trimStart = root.getPosition();                            e.accepted = true; break;
-            case Qt.Key_BracketRight: root.trimEnd   = root.getPosition();                            e.accepted = true; break;
+            case Qt.Key_BracketLeft:  root.trimStart = root.position;                            e.accepted = true; break;
+            case Qt.Key_BracketRight: root.trimEnd   = root.position;                            e.accepted = true; break;
         }
     }
 
@@ -196,7 +194,7 @@ Item {
                         const dx = mouseX - panInit.x;
                         const stepsPerPixel = panInit.visibleAreaWidth / parent.width;
 
-                        visibleAreaLeft  = Math.max(0.0, Math.min(1.0 - panInit.visibleAreaWidth, panInit.visibleAreaLeft - dx*stepsPerPixel));
+                        visibleAreaLeft  = Math.max(0.0, Math.min(1.0 - panInit.visibleAreaWidth, panInit.visibleAreaLeft - dx * stepsPerPixel));
                         visibleAreaRight = visibleAreaLeft + panInit.visibleAreaWidth;
 
                         scrollbar.position = visibleAreaLeft;
@@ -351,7 +349,7 @@ Item {
 
         // Handle
         Rectangle {
-            x: Math.max(0, root.mapToVisibleArea(root.getPosition()) * (parent.width) - width / 2)
+            x: Math.max(0, root.mapToVisibleArea(root.position) * (parent.width) - width / 2)
             y: (parent.height - height) / 2
             radius: width;
             height: parent.height;
