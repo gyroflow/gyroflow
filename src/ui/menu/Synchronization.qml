@@ -165,7 +165,6 @@ MenuItem {
             }
         }
         InfoMessageSmall {
-            id: akazeWarning;
             show: syncMethod.currentValue == "AKAZE";
             text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results"); 
         }
