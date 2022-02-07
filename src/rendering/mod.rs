@@ -21,6 +21,7 @@ enum GpuType {
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
+    pub static ref GPU_DECODING: RwLock<bool> = RwLock::new(true);
 }
 pub fn set_gpu_type_from_name(name: &str) {
     let name = name.to_ascii_lowercase();
@@ -34,6 +35,9 @@ pub fn set_gpu_type_from_name(name: &str) {
     let gpu_type = *GPU_TYPE.read();
     if gpu_type == GpuType::NVIDIA {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
+    }
+    if gpu_type == GpuType::AMD {
+        ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
     }
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
@@ -128,7 +132,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     drop(params);
 
-    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
+    let mut proc = FfmpegProcessor::from_file(video_path, *GPU_DECODING.read() && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, use_gpu));

@@ -62,12 +62,11 @@ unsafe impl Sync for HWDevice { }
 unsafe impl Send for HWDevice { }
 
 lazy_static::lazy_static! {
-    static ref ENC_DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
-    static ref DEC_DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
+    static ref DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
 }
 
 pub fn initialize_ctx(type_: ffi::AVHWDeviceType) {
-    let mut devices = ENC_DEVICES.lock();
+    let mut devices = DEVICES.lock();
     if let Entry::Vacant(e) = devices.entry(type_) {
         ::log::debug!("create {:?}", type_);
         if let Ok(dev) = HWDevice::from_type(type_) {
@@ -119,7 +118,7 @@ pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, stream: 
                 return Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None));
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
-            let mut devices = DEC_DEVICES.lock();
+            let mut devices = DEVICES.lock();
             if let Entry::Vacant(e) = devices.entry(type_) {
                 if let Ok(dev) = HWDevice::from_type(type_) {
                     e.insert(dev);
@@ -144,21 +143,27 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
             
             for i in 0..20 {
                 unsafe {
-                    let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
-                    if config.is_null() {
-                        println!("config is null {}", x.0);
-                        continue;
-                    }
-                    let type_ = (*config).device_type;
-                    ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
-                    let mut devices = ENC_DEVICES.lock();
-                    if let Entry::Vacant(e) = devices.entry(type_) {
-                        ::log::debug!("create {:?}", type_);
-                        if let Ok(dev) = HWDevice::from_type(type_) {
-                            ::log::debug!("created ok {:?}", type_);
-                            e.insert(dev);
+                    let type_ = if !x.0.contains("videotoolbox") {
+                        let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
+                        if config.is_null() {
+                            println!("config is null {}", x.0);
+                            break;
                         }
-                    }
+                        let type_ = (*config).device_type;
+                        ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
+                        let mut devices = DEVICES.lock();
+                        if let Entry::Vacant(e) = devices.entry(type_) {
+                            ::log::debug!("create {:?}", type_);
+                            if let Ok(dev) = HWDevice::from_type(type_) {
+                                ::log::debug!("created ok {:?}", type_);
+                                e.insert(dev);
+                            }
+                        }
+                        type_
+                    } else {
+                        ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX
+                    };
+                    let mut devices = DEVICES.lock();
                     if let Some(dev) = devices.get_mut(&type_) {
                         let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), std::ptr::null());
                         if !constraints.is_null() {
@@ -166,6 +171,9 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                             dev.sw_formats = pix_formats_to_vec((*constraints).valid_sw_formats);
                             dev.min_size = ((*constraints).min_width as i32, (*constraints).min_height as i32);
                             dev.max_size = ((*constraints).max_width as i32, (*constraints).max_height as i32);
+
+                            dbg!(&dev.hw_formats);
+                            dbg!(&dev.sw_formats);
                 
                             ffi::av_hwframe_constraints_free(&mut constraints);
                         }
@@ -205,15 +213,33 @@ pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::
 }
 
 pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32)) -> Result<(), ()> {
-    let devices = ENC_DEVICES.lock();
-    if let Some(dev) = devices.get(&type_) {
-        unsafe {                
-            let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
-            if hw_frames_ref.is_null() {
-                super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
-                return Err(());
+    let mut devices = DEVICES.lock();
+    if let Some(dev) = devices.get_mut(&type_) {
+        unsafe {
+            if (*encoder_ctx).hw_frames_ctx.is_null() {
+                let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
+                if hw_frames_ref.is_null() {
+                    super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
+                    return Err(());
+                }
+                (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
+                ffi::av_buffer_unref(&mut hw_frames_ref);
+            } else {
+                log::debug!("hwframes already exists");
             }
 
+            dbg!(&dev.hw_formats);
+            let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
+            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX {
+                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_VIDEOTOOLBOX);
+            }
+            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA {
+                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_D3D11);
+            }
+            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2 {
+                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_DXVA2_VLD);
+            }
+            dbg!(&dev.hw_formats);
             if !dev.hw_formats.is_empty() {
                 let target_format = {
                     if !dev.sw_formats.contains(&pixel_format) {
@@ -238,28 +264,31 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
 
                 if target_format != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
                     let hw_format = *dev.hw_formats.first().unwrap(); // Safe because we check !is_empty() above
-                    let mut frames_ctx = (*hw_frames_ref).data as *mut ffi::AVHWFramesContext;
-                    (*frames_ctx).format    = hw_format;
-                    (*frames_ctx).sw_format = target_format;
+                    let mut frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
+                    dbg!(&(*frames_ctx).format);
+                    dbg!(&(*frames_ctx).sw_format);
+                    if (*frames_ctx).format    == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).format    = hw_format; }
+                    if (*frames_ctx).sw_format == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).sw_format = target_format; }
                     (*frames_ctx).width     = size.0 as i32;
                     (*frames_ctx).height    = size.1 as i32;
-                    (*frames_ctx).initial_pool_size = 20;
+                    // (*frames_ctx).initial_pool_size = 20;
                     
-                    let err = ffi::av_hwframe_ctx_init(hw_frames_ref);
+                    let err = ffi::av_hwframe_ctx_init(frames_ctx_ref);
                     if err < 0 {
                         super::append_log(&format!("Failed to initialize frame context. Error code: {}\n", err));
-                        ffi::av_buffer_unref(&mut hw_frames_ref);
+                        ffi::av_buffer_unref(&mut frames_ctx_ref);
                         return Err(());
+                    } else {
+                        log::debug!("inited hwframe ctx");
                     }
-                    (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
-                    (*encoder_ctx).pix_fmt = hw_format;
+                    dbg!(&(*frames_ctx).format);
+                    (*encoder_ctx).pix_fmt = (*frames_ctx).format;
                 
-                    ffi::av_buffer_unref(&mut hw_frames_ref);
                 }
             }
         }
     } else {
-        log::warn!("ENC_DEVICES didn't have {:?}", type_);
+        log::warn!("DEVICES didn't have {:?}", type_);
     }
     Ok(())
 }
