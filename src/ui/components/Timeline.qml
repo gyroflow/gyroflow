@@ -33,6 +33,10 @@ Item {
     function redrawChart() { chart.update(); }
     function getChart() { return chart; }
 
+     function frameAtPosition(pos) {
+        return Math.floor(pos * (vid.frameCount - 1));
+    }
+
     function timeAtPosition(pos) {
         const time = Math.max(0, durationMs * pos);
         return new Date(time).toISOString().substr(11, 8);
@@ -47,8 +51,13 @@ Item {
         const vid = window.videoArea.vid;
         switch (e.key) {
             case Qt.Key_Space:        if (vid.playing) vid.pause(); else vid.play();                  e.accepted = true; break;
+            case Qt.Key_Left:
             case Qt.Key_PageUp:       vid.currentFrame -= (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
+            case Qt.Key_Right:
             case Qt.Key_PageDown:     vid.currentFrame += (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
+            case Qt.Key_Home:         vid.currentFrame = frameAtPosition(root.trimStart);             e.accepted = true; break;
+            case Qt.Key_End:          vid.currentFrame = frameAtPosition(root.trimEnd);               e.accepted = true; break;
+            // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
             case Qt.Key_BracketLeft:  root.trimStart = root.value;                                    e.accepted = true; break;
             case Qt.Key_BracketRight: root.trimEnd   = root.value;                                    e.accepted = true; break;
         }
