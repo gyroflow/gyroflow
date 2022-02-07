@@ -90,6 +90,7 @@ MenuItem {
                 ["Japanese (言語名)",  "ja"],
                 ["Norwegian (norsk)",  "no"],
                 ["Polish (polski)",    "pl"],
+                ["Russian (русский)",  "ru"],
                 ["Slovak (slovenský)", "sk"],
                 ["Spanish (español)",  "es"],
                 ["Ukrainian (Українська мова)", "uk"]

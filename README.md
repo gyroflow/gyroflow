@@ -138,6 +138,7 @@ Currently *Gyroflow* is available in:
 * **Japanese** (by 井上康)
 * **Norwegian** (by [MiniGod](https://github.com/MiniGod) and [alexagv](https://github.com/alexagv))
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
+* **Russian** (by Андрей Гурьянов, redstar01 and lukdut)
 * **Slovak** (by Radovan Leitman)
 * **Spanish** (by Pelado-Mat)
 * **Ukrainian** (by Artem Alexandrov)
