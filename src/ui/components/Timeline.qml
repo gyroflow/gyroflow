@@ -182,7 +182,7 @@ Item {
             hoverEnabled: true;
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton;
 
-            property var panInit: ({ x: 0, y: 0, visibleAreaLeft: 0, visibleAreaWidth: 1});
+            property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0});
             
             onMouseXChanged: {
                 if (pressed)  {
