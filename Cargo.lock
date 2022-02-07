@@ -435,9 +435,9 @@ checksum = "a2df960f5d869b2dd8532793fde43eb5427cceb126c929747a26823ab0eeb536"
 
 [[package]]
 name = "core-foundation"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6888e10551bb93e424d8df1d07f1a8b4fceb0001a3a4b048bfc47554946f47b3"
+checksum = "194a7a9e6de53fa55116934067c844d9d749312f75c6f6d0980e8c252f8c2146"
 dependencies = [
  "core-foundation-sys",
  "libc",
@@ -845,7 +845,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.1.1"
-source = "git+https://github.com/AdrianEddy/fc-blackbox.git#fc9bb236fd550fb942c3e08855d25e48be4ad801"
+source = "git+https://github.com/ilya-epifanov/fc-blackbox.git?rev=61ce1b4ba9df55978c31d3c9f54a359b6c77204a#61ce1b4ba9df55978c31d3c9f54a359b6c77204a"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2563,7 +2563,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#9e393224689bf013172282e7960d17640c03c012"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#223cc8daf3fe259f7641636a1a3b25900d40530c"
 dependencies = [
  "argh",
  "byteorder",

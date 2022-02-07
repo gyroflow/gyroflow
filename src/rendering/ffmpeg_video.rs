@@ -145,6 +145,7 @@ impl<'a> VideoTranscoder<'a> {
             encoder.set_flags(codec::Flags::GLOBAL_HEADER);
         }
 
+        log::debug!("hw_device_type {:?}", hw_device_type);
         if let Some(hw_type) = hw_device_type {
             unsafe {
                 if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size).is_err() {
@@ -253,6 +254,10 @@ impl<'a> VideoTranscoder<'a> {
                         unsafe {
                             // retrieve data from GPU to CPU
                             let err = ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0);
+                            if err < 0 {
+                                return Err(FFmpegError::FromHWTransferError(err));
+                            }
+                            let err = ffi::av_frame_copy_props(sw_frame.as_mut_ptr(), frame.as_mut_ptr());
                             if err < 0 {
                                 return Err(FFmpegError::FromHWTransferError(err));
                             }
