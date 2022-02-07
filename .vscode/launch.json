@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Gyroflow.exe",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processName": "Gyroflow.exe"
+        }
+    ]
+}

@@ -9,5 +9,4 @@ ext/*.xz
 ext/*.7z
 ext/*.tar
 ext/*.log
-.vscode/
 *.code-workspace
