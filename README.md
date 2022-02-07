@@ -93,6 +93,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 
 ## Minimum system requirements:
 - Windows 10 64-bit (1809 or later) [Install VC redist if it doesn't run](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+    - If you have Windows "N" install, go to `Settings` -> `Apps` -> `Optional features` -> `Add a feature` -> enable `Media Feature Pack`
 - macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
 - Linux: 
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
@@ -182,8 +183,9 @@ The project also supports UI live reload, it's a super quick way of working with
     - `FFmpeg 4.4`: https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download
     - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat`
     - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
+    - OpenCL: `.\vcpkg\vcpkg install "opencl:x64-windows-release"`
     - LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe
-4. Update dependencies paths in `__env.ps1` if needed.
+4. Make sure you have `7z` in PATH.
 5. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
 6. Compile and run: `cargo run --release`
 
@@ -205,7 +207,7 @@ The project also supports UI live reload, it's a super quick way of working with
 5. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
 6. Compile and run: `cargo run --release`
 
-### Building on Android
+### Building for Android
 1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested
 2. Install Qt for Android: `aqt install-qt windows android 6.2.3 android_arm64_v8a` and `aqt install-qt windows desktop 6.2.3 win64_mingw`
 3. Install `cargo-apk`: `cargo install --git https://github.com/zer0def/android-ndk-rs.git cargo-apk`

@@ -4,8 +4,10 @@ _binaries/
 cache/
 target/
 ext/*/*
+ext/vcpkg
 ext/*.xz
 ext/*.7z
 ext/*.tar
+ext/*.log
 .vscode/
 *.code-workspace
