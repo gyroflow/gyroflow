@@ -229,9 +229,9 @@ impl GyroSource {
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
             self.imu_rotation = Some(Rotation3::from_euler_angles(
-                roll_deg * DEG2RAD, 
+                yaw_deg * DEG2RAD, 
                 pitch_deg * DEG2RAD, 
-                yaw_deg * DEG2RAD
+                roll_deg * DEG2RAD
             ))
         } else {
             self.imu_rotation = None;
