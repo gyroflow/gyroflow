@@ -33,7 +33,7 @@ Item {
     function redrawChart() { chart.update(); }
     function getChart() { return chart; }
 
-     function frameAtPosition(pos) {
+    function frameAtPosition(pos) {
         return Math.floor(pos * (vid.frameCount - 1));
     }
 
