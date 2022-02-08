@@ -13,9 +13,9 @@ QQC.AbstractButton {
 
     background: Rectangle {
         color: if (style === "light") {
-                   return root.checked? Qt.lighter(styleAccentColor) : root.hovered? Qt.darker(styleButtonColor, 1.2) : styleHrColor;
+                   return root.checked? root.hovered || root.activeFocus ? Qt.lighter(styleAccentColor, 1.1) : Qt.lighter(styleAccentColor) : root.hovered || root.activeFocus? Qt.darker(styleButtonColor, 1.2) : styleHrColor;
                } else {
-                   return root.checked? Qt.darker(styleAccentColor) : root.hovered? Qt.lighter(styleButtonColor, 1.2) : Qt.darker(styleButtonColor, 1.2);
+                   return root.checked? root.activeFocus ? Qt.darker(styleAccentColor, 1.1) : Qt.darker(styleAccentColor) : root.hovered || root.activeFocus? Qt.lighter(styleButtonColor, 1.2) : Qt.darker(styleButtonColor, 1.2);
                }
 
         opacity: root.down || !parent.enabled? 0.75 : 1.0;
@@ -33,4 +33,6 @@ QQC.AbstractButton {
         verticalAlignment: Text.AlignVCenter;
     }
     onClicked: checked = !checked;
+    Keys.onReturnPressed: checked = !checked;
+    Keys.onEnterPressed: checked = !checked;
 }

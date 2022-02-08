@@ -23,7 +23,7 @@ QQC.ComboBox {
     indicator: DropdownChevron { height: pp.itemHeight / 2.4; }
 
     background: Rectangle {
-        color: root.hovered? Qt.lighter(styleButtonColor, 1.2) : styleButtonColor;
+        color: root.hovered || root.activeFocus? Qt.lighter(styleButtonColor, 1.2) : styleButtonColor;
         opacity: root.down || !parent.enabled? 0.75 : 1.0;
         Ease on opacity { duration: 100; }
         radius: 6 * dpiScale;
@@ -38,8 +38,11 @@ QQC.ComboBox {
             const vid = window.videoArea.vid;
             if (vid.playing) vid.pause(); else vid.play();
             e.accepted = true;
+        } else if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
+            pp.open();
         }
     }
+    
 
     scale: root.pressed? 0.98 : 1.0;
     Ease on scale {  }
