@@ -31,17 +31,20 @@ Window {
     Component.onCompleted: ui_tools.set_icon(main_window);
 
     property bool closeConfirmationModal: false;
-    onClosing: (close) => {
+    property bool closeConfirmed: false;
+    onClosing: (close) => {        
         let app = getApp();
-        if (app && !closeConfirmationModal) {
-            app.messageBox(Modal.NoIcon, qsTr("Are you sure you want to exit?"), [
-                { text: qsTr("Yes"), accent: true, clicked: () => main_window.close() },
-                { text: qsTr("No"), clicked: () => main_window.closeConfirmationModal = false },
-            ]);
-            close.accepted = false;
-            closeConfirmationModal = true;
+        if (app) {
+            close.accepted = closeConfirmed || !app.wasModified;
+            if (!close.accepted && !closeConfirmationModal) {
+                closeConfirmationModal = true;
+                app.messageBox(Modal.NoIcon, qsTr("Are you sure you want to exit?"), [
+                    { text: qsTr("Yes"), accent: true, clicked: () => {main_window.closeConfirmed = true; main_window.close();} },
+                    { text: qsTr("No"), clicked: () => main_window.closeConfirmationModal = false }
+                ]);                
+            }
         }
     }
-    
+
     App { objectName: "App"; }
 }
