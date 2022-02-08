@@ -9,6 +9,9 @@ QQC.CheckBox {
     onCheckedChanged: if (checked) { cm1.width = 0; cm2.width = 0; cbanim.start(); }
     implicitHeight: 30 * dpiScale;
 
+    Keys.onReturnPressed: checked = !checked;
+    Keys.onEnterPressed: checked = !checked;
+
     indicator: Rectangle {
         implicitWidth: 20 * dpiScale
         implicitHeight: 20 * dpiScale
@@ -19,7 +22,7 @@ QQC.CheckBox {
         Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo; } }
         border.color: cb.checked? styleAccentColor : "#999999";
 
-        opacity: cb.down? 0.8 : 1.0;
+        opacity: cb.down || cb.activeFocus? 0.8 : 1.0;
         Ease on opacity { }
 
         Item {

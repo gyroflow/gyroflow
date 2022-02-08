@@ -88,13 +88,16 @@ Row {
                 }
             }
             LinkButton {
+                id: editLinkBtn;
                 anchors.verticalCenter: parent.verticalCenter;
                 icon.name: newValue.visible? "checkmark" : "pencil";
                 icon.height: parent.height * 0.8;
                 icon.width: parent.height * 0.8;
+                opacity: editLinkBtn.activeFocus ? 0.8 : 1;
                 height: newValue.visible? newValue.height + 5 * dpiScale : undefined;
                 leftPadding: newValue.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
-                onClicked: {
+                
+                function _onClicked() {
                     if (newValue.visible) {
                         newValue.accepted();
                     } else {
@@ -103,8 +106,14 @@ Row {
                         else newValue.value = val;
                         newValue.visible = true;
                         parent.parent.parent.children[0].visible = false;
+                        newValue.focus = true;
                     }
                 }
+
+                onClicked: _onClicked();
+                Keys.onReturnPressed: _onClicked();
+                Keys.onEnterPressed: _onClicked();
+
             }
             Component.onCompleted: {
                 if (desc.hasOwnProperty("from"))      newValue.from      = desc.from;

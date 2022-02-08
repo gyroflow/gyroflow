@@ -25,7 +25,7 @@ QQC.Button {
     opacity: root.hovered && transparent? 0.8 : 1.0;
 
     background: Rectangle {
-        color: root.hovered && !root.transparent? Qt.lighter(styleButtonColor, 1.2) : "transparent";
+        color: (root.hovered || root.activeFocus) && !root.transparent? Qt.lighter(styleButtonColor, 1.2) : "transparent";
         opacity: root.down || !parent.enabled? 0.1 : 0.3;
         Ease on opacity { duration: 100; }
         radius: 5 * dpiScale;
@@ -36,4 +36,7 @@ QQC.Button {
 
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
+
+    Keys.onReturnPressed: checked = !checked;
+    Keys.onEnterPressed: checked = !checked;
 }

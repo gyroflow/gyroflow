@@ -55,7 +55,7 @@ Item {
         font.capitalization: Font.Normal
 
         background: Rectangle {
-            color: parent.down? Qt.darker(styleButtonColor, 1.1) : parent.hovered? styleButtonColor : "transparent";
+            color: parent.down? Qt.darker(styleButtonColor, 1.1) : parent.hovered || parent.activeFocus? styleButtonColor : "transparent";
             radius: 5 * dpiScale;
             anchors.fill: parent;
 
@@ -76,6 +76,9 @@ Item {
 
         DropdownChevron { visible: col.children.length > 0; opened: root.opened; anchors.rightMargin: 5 * dpiScale; }
         onClicked: if (col.children.length > 0) { root.opened = !root.opened; } else { root.clicked(); }
+
+        Keys.onReturnPressed: btn.clicked();
+        Keys.onEnterPressed: btn.clicked();
     }
 
     Item {
