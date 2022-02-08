@@ -129,7 +129,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened per axis"),
         // QT_TRANSLATE_NOOP("Popup", "Velocity dampened 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
-        QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
+        // QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
         QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
@@ -231,15 +231,22 @@ MenuItem {
                 qml += "}";
 
                 Qt.createQmlObject(qml, smoothingOptions);
+
+                Qt.callLater(() => {
+                    root.setSmoothingParam("horizonlockpercent", horizonCb.cb.checked? horizonSlider.value : 0.0);
+                    root.setSmoothingParam("horizonroll", horizonCb.cb.checked? horizonRollSlider.value : 0.0);
+                });
             }
         }
     }
+
     Column {
         id: smoothingOptions;
         x: 5 * dpiScale;
         width: parent.width - x;
         visible: children.length > 0;
     }
+
     Column {
         id: smoothingStatus;
         x: 5 * dpiScale;
@@ -247,6 +254,62 @@ MenuItem {
         visible: children.length > 0;
     }
     
+    Column {
+        id: horizonLock;
+        x: 5 * dpiScale;
+        width: parent.width - x;
+        visible: children.length > 0;
+    }
+
+    CheckBoxWithContent {
+        id: horizonCb;
+        text: qsTr("Lock horizon");
+        cb.onCheckedChanged: {
+            root.setSmoothingParam("horizonlockpercent", cb.checked? horizonSlider.value : 0.0);
+            root.setSmoothingParam("horizonroll", cb.checked? horizonRollSlider.value : 0.0);
+        }
+
+        Label {
+            text: qsTr("Lock amount");
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            SliderWithField {
+                id: horizonSlider;
+                defaultValue: 100;
+                to: 100;
+                width: parent.width;
+                unit: qsTr("%");
+                precision: 1;
+                value: root.getSmoothingParam("horizonlockpercent", 100);
+                onValueChanged: () => root.setSmoothingParam("horizonlockpercent", horizonSlider.value);
+            }
+        }
+
+        Label {
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            text: qsTr("Roll angle correction")
+            SliderWithField {
+                id: horizonRollSlider;
+                width: parent.width;
+                from: -180;
+                to: 180;
+                value: root.getSmoothingParam("horizonroll", 0);
+                defaultValue: 0;
+                unit: qsTr("°");
+                precision: 1;
+                onValueChanged: root.setSmoothingParam("horizonroll", value);
+            }
+        }
+
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            textFormat: Text.StyledText;
+            text: qsTr("Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.");
+        }
+    }
+
     InfoMessageSmall {
         id: maxValues;
         property real maxPitch: 0;

@@ -9,14 +9,18 @@ use crate::gyro_source::TimeQuat;
 pub struct Fixed {
     pub roll: f64,
     pub pitch: f64,
-    pub yaw: f64
+    pub yaw: f64,
+    pub horizonlockpercent: f64,
+    pub horizonroll: f64
 }
 
 impl Default for Fixed {
     fn default() -> Self { Self {
         roll: 0.0,
         pitch: 0.0,
-        yaw: 0.0
+        yaw: 0.0,
+        horizonlockpercent: 0.0,
+        horizonroll: 0.0
     } }
 }
 
@@ -28,6 +32,8 @@ impl SmoothingAlgorithm for Fixed {
             "roll" => self.roll = val,
             "pitch" => self.pitch = val,
             "yaw" => self.yaw = val,
+            "horizonroll" => self.horizonroll = val,
+            "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
@@ -72,6 +78,8 @@ impl SmoothingAlgorithm for Fixed {
         hasher.write_u64(self.roll.to_bits());
         hasher.write_u64(self.pitch.to_bits());
         hasher.write_u64(self.yaw.to_bits());
+        hasher.write_u64(self.horizonroll.to_bits());
+        hasher.write_u64(self.horizonlockpercent.to_bits());
         hasher.finish()
     }
 
@@ -92,10 +100,13 @@ impl SmoothingAlgorithm for Fixed {
         // Z rotation corresponds to body-centric roll, so placed last
         // using x as second rotation corresponds gives the usual pan/tilt combination
         let combined_rot = rot_z * rot_x * rot_y * correction;
-        let fixed_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
-        
-        //let fixed_quat = UnitQuaternion::from_euler_angles(self.yaw * DEG2RAD,self.roll * DEG2RAD,self.pitch * DEG2RAD);
-        
+        let fixed_quat = if self.horizonlockpercent == 0.0 {
+            UnitQuaternion::from_rotation_matrix(&combined_rot)
+        } else {
+            let initial_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
+            lock_horizon_angle(initial_quat, self.horizonroll * DEG2RAD).slerp(&initial_quat, 1.0-self.horizonlockpercent/100.0)
+        };
+
         quats.iter().map(|x| {
             (*x.0, fixed_quat)
         }).collect()
