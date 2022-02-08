@@ -30,6 +30,7 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(calibrator_window);
+        Qt.callLater(() => calibrator_window.width += 1);
     }
 
     function messageBox(type, text, buttons, parent) {
