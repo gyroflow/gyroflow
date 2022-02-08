@@ -178,6 +178,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
+    - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer 
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.2.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.2.3 win64_msvc2019_64` or use the [official installer](https://www.qt.io/download-qt-installer)
