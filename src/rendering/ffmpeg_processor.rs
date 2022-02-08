@@ -181,6 +181,7 @@ impl<'a> FfmpegProcessor<'a> {
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
 
+                output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
                 if stream.codec().id() == self.audio_codec {
                     // Direct stream copy
@@ -192,8 +193,8 @@ impl<'a> FfmpegProcessor<'a> {
                     // Transcode audio
                     atranscoders.insert(i, AudioTranscoder::new(self.audio_codec, &stream, &mut octx, output_index as _)?);
                 }
+                output_index += 1;
             }
-            output_index += 1;
         }
 
         octx.set_metadata(self.input_context.metadata().to_owned());

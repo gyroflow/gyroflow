@@ -107,9 +107,9 @@ pub struct VideoTranscoder<'a> {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational) -> Result<encoder::video::Video, FFmpegError> {
+    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
-        let mut ost = octx.stream_mut(0).unwrap();
+        let mut ost = octx.stream_mut(output_index).unwrap();
         let ost_codec = ost.codec();
         let mut encoder = ost_codec.encoder().video()?;
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
@@ -185,7 +185,7 @@ impl<'a> VideoTranscoder<'a> {
                         let formats = super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr());
                         log::debug!("Hardware transfer formats from GPU: {:?}, frame.is_empty: {}", formats, frame.is_empty());
                         let dl_format = *formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
-                        let codec = octx.stream(0).unwrap().codec().as_mut_ptr();
+                        let codec = octx.stream(self.output_index.unwrap_or_default()).unwrap().codec().as_mut_ptr();
                         if !(*codec).codec.is_null() {
                             let sw_formats = super::ffmpeg_hw::pix_formats_to_vec((*(*codec).codec).pix_fmts);
                             log::debug!("Codec formats: {:?}", sw_formats);
@@ -200,7 +200,7 @@ impl<'a> VideoTranscoder<'a> {
 
                 // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                let result = Self::init_encoder(&mut frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap());
+                let result = Self::init_encoder(&mut frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
 
                 // let mut output = String::new();
                 // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();

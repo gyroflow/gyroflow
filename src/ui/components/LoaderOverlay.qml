@@ -43,7 +43,7 @@ Item {
         return qsTr("&lt; 1s");
     }
     onProgressChanged: {
-        if (progress > 0 && startTime > 0) {
+        if (progress > 0 && progress <= 1.0 && startTime > 0) {
             const elapsedMs = Date.now() - startTime;
             const totalEstimatedMs = elapsedMs / progress;
             const remainingMs = totalEstimatedMs - elapsedMs;
@@ -51,6 +51,8 @@ Item {
                 time.elapsed = timeToStr(elapsedMs / 1000);
                 time.remaining = timeToStr(remainingMs / 1000);
             }
+        } else {
+            time.elapsed = "";
         }
     }
 
