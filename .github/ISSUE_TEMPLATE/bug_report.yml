@@ -11,8 +11,8 @@ body:
         required: true
   - type: checkboxes
     attributes:
-      label: Have you tried [downloading latest development build](https://nightly.link/gyroflow/gyroflow/workflows/release/master/gyroflow.zip)?
-      description: Please run the latest development build to see if the issue still persists.
+      label: Have you tried the latest build?
+      description: Please [download the latest development build](https://nightly.link/gyroflow/gyroflow/workflows/release/master/gyroflow.zip) to see if the issue still persists.
       options:
       - label: I have tried the latest build
         required: true
