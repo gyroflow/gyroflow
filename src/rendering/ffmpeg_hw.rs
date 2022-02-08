@@ -143,7 +143,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
             
             for i in 0..20 {
                 unsafe {
-                    let type_ = if !x.0.contains("videotoolbox") {
+                    let type_ = /*if !x.0.contains("videotoolbox") */{
                         let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
                         if config.is_null() {
                             println!("config is null {}", x.0);
@@ -160,9 +160,9 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                             }
                         }
                         type_
-                    } else {
+                    }/* else {
                         ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX
-                    };
+                    }*/;
                     let mut devices = DEVICES.lock();
                     if let Some(dev) = devices.get_mut(&type_) {
                         let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), std::ptr::null());
