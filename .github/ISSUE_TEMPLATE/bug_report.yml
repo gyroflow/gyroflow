@@ -1,8 +1,22 @@
 name: Bug Report
 description: File a bug report
-title: "[Bug]: "
+title: ""
 labels: ["bug"]
 body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: checkboxes
+    attributes:
+      label: Have you tried [downloading latest development build](https://nightly.link/gyroflow/gyroflow/workflows/release/master/gyroflow.zip)?
+      description: Please run the latest development build to see if the issue still persists.
+      options:
+      - label: I have tried the latest build
+        required: true
   - type: input
     id: gyroflow-version
     attributes:

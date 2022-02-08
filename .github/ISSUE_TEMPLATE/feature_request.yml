@@ -1,6 +1,6 @@
 name: Feature Request
 description: Propose a new feature to the Gyroflow project.
-title: "[Feature request]: "
+title: ""
 labels: ["enhancement"]
 body:
   - type: checkboxes
