@@ -182,13 +182,14 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.2.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.2.3 win64_msvc2019_64` or use the [official installer](https://www.qt.io/download-qt-installer)
-    - `FFmpeg 4.4`: https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download
+    - `FFmpeg 4.4`: download [ffmpeg 4.4 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download) and unzip it to `ext/ffmpeg-4.4-windows-desktop-clang-gpl-lite`
     - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat`
     - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
     - OpenCL: `.\vcpkg\vcpkg install "opencl:x64-windows-release"`
-    - LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe
+    - LLVM: download and install [LLVM](https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe)
 4. Make sure you have `7z` in PATH.
 5. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
+    - some machines might have issue that scripts are forbidden to run, try to `set-executionpolicy remotesigned` in powershell with admin
 6. Compile and run: `cargo run --release`
 
 ### Building on MacOS
