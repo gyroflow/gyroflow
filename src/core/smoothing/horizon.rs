@@ -8,52 +8,17 @@ use crate::gyro_source::TimeQuat;
 #[derive(Clone)]
 pub struct HorizonLock {
     pub time_constant: f64,
-    pub roll: f64,
-    pub lockamount: f64
+    pub horizonlockpercent: f64,
+    pub horizonroll: f64,
 }
 
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        roll: 0.0,
-        lockamount: 100.0
+        horizonlockpercent: 0.0,
+        horizonroll: 0.0,
     } }
 }
-
-fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
-
-    let x_axis = nalgebra::Vector3::<f64>::x_axis();
-    let y_axis = nalgebra::Vector3::<f64>::y_axis();
-    let z_axis = nalgebra::Vector3::<f64>::z_axis();
-    
-    let rot_x = Rotation3::from_axis_angle(&x_axis, x);
-    let rot_y = Rotation3::from_axis_angle(&y_axis, y + std::f64::consts::FRAC_PI_2);
-    let rot_z = Rotation3::from_axis_angle(&z_axis, z);
-
-    let correction = Rotation3::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2);
-
-    let combined_rot = rot_z * rot_x * rot_y * correction;
-    UnitQuaternion::from_rotation_matrix(&combined_rot)
-}
-
-fn lock_horizon_angle(q: UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
-    // z axis points in view direction, use as reference
-    let axis = nalgebra::Vector3::<f64>::y_axis();
-
-    // let x_axis = nalgebra::Vector3::<f64>::x_axis();
-    let y_axis = nalgebra::Vector3::<f64>::y_axis();
-    let z_axis = nalgebra::Vector3::<f64>::z_axis();
-
-    let corrected_transform = q.to_rotation_matrix() * Rotation3::from_axis_angle(&y_axis, -std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&z_axis, -std::f64::consts::FRAC_PI_2);
-    // since this coincides with roll axis, the roll is neglected when transformed back
-    let axis_transformed = corrected_transform * axis;
-
-    let pitch = (axis_transformed.z).asin();
-    let yaw = axis_transformed.y.simd_atan2(axis_transformed.x) - std::f64::consts::FRAC_PI_2;
-    
-    from_euler_yxz(pitch, roll_correction, yaw)
-}
-
 
 impl SmoothingAlgorithm for HorizonLock {
     fn get_name(&self) -> String { "Lock horizon".to_owned() }
@@ -61,8 +26,8 @@ impl SmoothingAlgorithm for HorizonLock {
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
             "time_constant" => self.time_constant = val,
-            "roll" => self.roll = val,
-            "lockamount" => self.lockamount = val,
+            "horizonroll" => self.horizonroll = val,
+            "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
@@ -77,44 +42,18 @@ impl SmoothingAlgorithm for HorizonLock {
                 "value": self.time_constant,
                 "default": 0.25,
                 "unit": "s"
-            },
-            {
-                "name": "roll",
-                "description": "Roll angle correction",
-                "type": "SliderWithField",
-                "from": -180,
-                "to": 180,
-                "value": self.roll,
-                "default": 0.0,
-                "unit": "°"
-            },
-            {
-                "name": "lockamount",
-                "description": "Horizon lock amount",
-                "type": "SliderWithField",
-                "from": 0,
-                "to": 100,
-                "value": self.lockamount,
-                "default": 100.0,
-                "unit": "%"
             }
         ])
     }
     fn get_status_json(&self) -> serde_json::Value {
-        serde_json::json!([
-            {
-                "name": "label",
-                "text": "Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.",
-                "text_args": [],
-                "type": "Label"
-            }
-        ])
+        serde_json::json!([])
     }
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hasher.write_u64(self.time_constant.to_bits());
-        hasher.write_u64(self.roll.to_bits());
+        hasher.write_u64(self.horizonroll.to_bits());
+        hasher.write_u64(self.horizonlockpercent.to_bits());
         hasher.finish()
     }
 
@@ -143,10 +82,13 @@ impl SmoothingAlgorithm for HorizonLock {
         }).collect();
 
         // level horizon
-        smoothed2.iter().map(|x| {
-            (*x.0,  lock_horizon_angle(*x.1, self.roll * DEG2RAD).slerp(x.1, 1.0-self.lockamount/100.0))
-        }).collect()
-
-        // No need to reverse the BTreeMap, because it's sorted by definition
+        if self.horizonlockpercent == 0.0 {
+            println!("No Smoothing");
+            smoothed2
+        } else {
+            smoothed2.iter().map(|x| {
+                (*x.0,  lock_horizon_angle(*x.1, self.horizonroll * DEG2RAD).slerp(x.1, 1.0-self.horizonlockpercent/100.0))
+            }).collect()
+        }
     }
 }
