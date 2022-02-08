@@ -35,7 +35,13 @@ Row {
         property var keys: Object.keys(tl.model);
         Repeater {
             model: col1.keys;
-            BasicText { text: qsTr(modelData) + ":"; anchors.right: parent.right; leftPadding: 0; }
+            BasicText {
+                text: qsTr(modelData) + ":";
+                onTextChanged: Qt.callLater(updateHeights);
+                anchors.right: parent.right;
+                leftPadding: 0;
+                objectName: "left";
+            }
         }
     }
     Column {
@@ -46,15 +52,28 @@ Row {
             Row {
                 height: t2.height;
                 spacing: 5 * dpiScale;
+                objectName: "right";
                 BasicText {
                     id: t2;
                     text: modelData;
+                    onTextChanged: Qt.callLater(updateHeights);
                     font.bold: true;
                 }
                 Loader {
                     height: parent.height;
                     property var name: col1.keys[index];
                     sourceComponent: editableKeys.includes(col1.keys[index])? editable : undefined;
+                }
+            }
+        }
+    }
+    function updateHeights() {
+        for (let i = 0; i < col1.children.length; ++i) {
+            if (i < col2.children.length) {
+                const l = col1.children[i];
+                const r = col2.children[i];
+                if (l.objectName == "left" && r.objectName == "right") {
+                    r.height = l.height = Math.max(l.height, r.height);
                 }
             }
         }

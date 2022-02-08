@@ -743,8 +743,9 @@ dependencies = [
 
 [[package]]
 name = "fc-blackbox"
-version = "0.1.1"
-source = "git+https://github.com/ilya-epifanov/fc-blackbox.git?rev=65405d58bd46404c0a267a2a816c4190eb91f508#65405d58bd46404c0a267a2a816c4190eb91f508"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6616d815efe117378f150e37c1374c650bf52b2380f0159fe3e654162927414e"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2221,7 +2222,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#87fd2384a2a3f73cd37ae65680a7b40e1df6351a"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#665f9b0a4f5d62cf93be9f747c739a8cdc0e85ac"
 dependencies = [
  "argh",
  "byteorder",
