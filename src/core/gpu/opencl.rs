@@ -33,11 +33,11 @@ impl OclWrapper {
             .devices(device)
             .build()?;
 
-        let name = device.name();
+        let name = format!("{} {}", device.vendor()?, device.name()?);
 
         *CONTEXT.write() = Some(CtxWrapper { device, context });
         
-        name
+        Ok(name)
     }
 
     pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {

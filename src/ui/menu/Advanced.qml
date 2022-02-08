@@ -17,6 +17,7 @@ MenuItem {
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
         property alias safeAreaGuide: safeAreaGuide.checked;
+        property alias gpudecode: gpudecode.checked;
         property string lang: ui_tools.get_default_language();
     }
 
@@ -90,6 +91,7 @@ MenuItem {
                 ["Japanese (言語名)",  "ja"],
                 ["Norwegian (norsk)",  "no"],
                 ["Polish (polski)",    "pl"],
+                ["Russian (русский)",  "ru"],
                 ["Slovak (slovenský)", "sk"],
                 ["Spanish (español)",  "es"],
                 ["Ukrainian (Українська мова)", "uk"]
@@ -120,11 +122,16 @@ MenuItem {
         onCheckedChanged: window.videoArea.safeArea = checked;
     }
     CheckBox {
-        id: zerocopy;
         visible: Qt.platform.os != "osx";
         text: qsTr("Experimental zero-copy GPU preview");
         tooltip: qsTr("Render and undistort the preview video entirely on the GPU.\nThis should provide much better UI performance.");
         checked: false;
         onCheckedChanged: controller.set_zero_copy(window.videoArea.vid, checked);
+    }
+    CheckBox {
+        id: gpudecode;
+        text: qsTr("Use GPU decoding");
+        checked: true;
+        onCheckedChanged: controller.set_gpu_decoding(checked);
     }
 }

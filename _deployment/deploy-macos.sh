@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : "${PROJECT_DIR:=/Users/admin/gyroflow}"
-: "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
+: "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.3/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-macOS-gpl-lite}"

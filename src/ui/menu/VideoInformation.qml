@@ -58,19 +58,21 @@ MenuItem {
 
         root.pixelFormat = getPixelFormat(md) || "---";
 
+        root.videoRotation = (360 - (md["stream.video[0].rotation"] || 0)) % 360; // Constrain to 0-360
+
         list.model["Dimensions"]   = w && h? w + "x" + h : "---";
         list.model["Duration"]     = getDuration(md) || "---";
         list.model["Frame rate"]   = framerate? framerate.toFixed(3) + " fps" : "---";
         list.model["Codec"]        = getCodec(md) || "---";
         list.model["Pixel format"] = root.pixelFormat;
-        list.model["Rotation"]     = (md["stream.video[0].rotation"] || 0) + " °";
+        list.model["Rotation"]     = (root.videoRotation) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
         list.modelChanged();
 
-        root.videoRotation = +(md["stream.video[0].rotation"] || 0);
         root.fps = framerate;
         root.org_fps = framerate;
-        // controller.set_video_rotation(-root.videoRotation);
+        
+        controller.set_video_rotation(root.videoRotation)
 
         Qt.callLater(() => window.exportSettings.vidInfoLoaded());
     }

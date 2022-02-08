@@ -12,6 +12,7 @@ echo F | xcopy /y translations\no\gyroflow.ts no.ts
 echo F | xcopy /y translations\pl\gyroflow.ts pl.ts
 echo F | xcopy /y translations\sk\gyroflow.ts sk.ts
 echo F | xcopy /y translations\uk\gyroflow.ts uk.ts
+echo F | xcopy /y translations\ru\gyroflow.ts ru.ts
 echo F | xcopy /y translations\zh-CN\gyroflow.ts zh_CN.ts
 echo F | xcopy /y translations\zh-TW\gyroflow.ts zh_TW.ts
 rmdir /s /q translations

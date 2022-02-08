@@ -147,6 +147,7 @@ pub struct Controller {
     updates_available: qt_signal!(version: QString, changelog: QString),
 
     set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
+    set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
@@ -258,7 +259,7 @@ impl Controller {
             let video_path = self.video_path.clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
-                match FfmpegProcessor::from_file(&video_path, true, 0) {
+                match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
@@ -468,6 +469,10 @@ impl Controller {
                 qrhi_undistort::deinit_player(vid.get_mdkplayer());
             }
         }
+    }
+
+    fn set_gpu_decoding(&self, enabled: bool) {
+        *rendering::GPU_DECODING.write() = enabled;
     }
 
     fn reset_player(&self, player: QJSValue) {
@@ -795,7 +800,7 @@ impl Controller {
         
         let video_path = self.video_path.clone();
         core::run_threaded(move || {
-            match FfmpegProcessor::from_file(&video_path, true, 0) {
+            match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
                 Ok(mut proc) => {
                     proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                         let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
