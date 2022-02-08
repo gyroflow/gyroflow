@@ -40,6 +40,7 @@ impl AdaptiveZoom {
         compute_params.fov_scale = 1.0;
         compute_params.fovs.clear();
         
+        let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
         // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
         // Then we can use real `output_dim` to fit the fov
         compute_params.width = compute_params.video_width;
@@ -48,7 +49,7 @@ impl AdaptiveZoom {
         compute_params.output_height = compute_params.video_height;
 
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
-        let output_dim = (compute_params.video_output_width as f64, compute_params.video_output_height as f64);
+        let output_dim = (compute_params.video_output_width as f64 * ratio, compute_params.video_output_height as f64 * ratio);
 
         Self {
             input_dim,

@@ -17,8 +17,7 @@ impl FrameTransform {
         if can_invert && params.framebuffer_inverted {
             frame_readout_time *= -1.0;
         }
-        frame_readout_time /= 2.0;
-        frame_readout_time
+        frame_readout_time / 2.0
     }
     fn get_new_k(params: &ComputeParams, fov: f64) -> Matrix3<f64> {
         let img_dim_ratio = Self::get_ratio(params);
