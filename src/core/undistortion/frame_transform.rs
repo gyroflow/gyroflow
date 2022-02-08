@@ -45,7 +45,7 @@ impl FrameTransform {
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
         let img_dim_ratio = Self::get_ratio(params);
         let mut fov = Self::get_fov(params, frame, true);
-        let mut ui_fov = fov;
+        let mut ui_fov = fov / (params.width as f64 / params.output_width.max(1) as f64);
         if params.lens_fov_adjustment > 0.0001 {
             if params.fovs.is_empty() {
                 fov *= params.lens_fov_adjustment;
@@ -116,7 +116,7 @@ impl FrameTransform {
 
         Self {
             params: transform_params,
-            fov: ui_fov,
+            fov: ui_fov
         }
     }
 

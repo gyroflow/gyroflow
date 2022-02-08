@@ -539,6 +539,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
 
+    pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
     pub fn get_min_fov               (&self) -> f64 { self.params.read().min_fov }
 

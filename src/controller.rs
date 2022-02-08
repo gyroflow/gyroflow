@@ -136,6 +136,7 @@ pub struct Controller {
     remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
 
     get_current_fov: qt_method!(fn(&self) -> f64),
+    get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
 
     init_calibrator: qt_method!(fn(&mut self)),
@@ -693,6 +694,7 @@ impl Controller {
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_current_fov       (&self) -> f64 { self.stabilizer.get_current_fov() }
+    fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
 
     fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {

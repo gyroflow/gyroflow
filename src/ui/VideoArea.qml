@@ -157,6 +157,7 @@ Item {
 
                 onCurrentFrameChanged: {
                     const fov = controller.get_current_fov();
+                    // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame as it locks the params mutex
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
                     if (window.stab.fovSlider.value > 1) {
                         safeAreaRect.width = safeAreaRect.parent.width / window.stab.fovSlider.value;
