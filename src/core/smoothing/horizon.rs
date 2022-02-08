@@ -8,13 +8,15 @@ use crate::gyro_source::TimeQuat;
 #[derive(Clone)]
 pub struct HorizonLock {
     pub time_constant: f64,
-    pub roll: f64
+    pub roll: f64,
+    pub lockamount: f64
 }
 
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        roll: 0.0
+        roll: 0.0,
+        lockamount: 100.0
     } }
 }
 
@@ -60,6 +62,7 @@ impl SmoothingAlgorithm for HorizonLock {
         match name {
             "time_constant" => self.time_constant = val,
             "roll" => self.roll = val,
+            "lockamount" => self.lockamount = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
@@ -82,8 +85,18 @@ impl SmoothingAlgorithm for HorizonLock {
                 "from": -180,
                 "to": 180,
                 "value": self.roll,
-                "default": 0,
+                "default": 0.0,
                 "unit": "°"
+            },
+            {
+                "name": "lockamount",
+                "description": "Horizon lock amount",
+                "type": "SliderWithField",
+                "from": 0,
+                "to": 100,
+                "value": self.lockamount,
+                "default": 100.0,
+                "unit": "%"
             }
         ])
     }
@@ -131,7 +144,7 @@ impl SmoothingAlgorithm for HorizonLock {
 
         // level horizon
         smoothed2.iter().map(|x| {
-            (*x.0, lock_horizon_angle(*x.1, self.roll * DEG2RAD))
+            (*x.0,  lock_horizon_angle(*x.1, self.roll * DEG2RAD).slerp(x.1, 1.0-self.lockamount/100.0))
         }).collect()
 
         // No need to reverse the BTreeMap, because it's sorted by definition
