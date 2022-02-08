@@ -715,7 +715,7 @@ impl Controller {
                         let body = obj.get("body").and_then(|x| x.as_str());
 
                         if let Some(name) = name {
-                            ::log::info!("Latest version: {}, current version: v{}", name, env!("CARGO_PKG_VERSION"));
+                            ::log::info!("Latest version: {}, current version: {}", name, util::get_version());
                             
                             if let Ok(latest_version) = semver::Version::parse(name.trim_start_matches('v')) {
                                 if let Ok(this_version) = semver::Version::parse(env!("CARGO_PKG_VERSION")) {

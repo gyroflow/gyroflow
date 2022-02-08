@@ -9,12 +9,12 @@ build = "build.rs"
 gyroflow-core = { path = "src/core/", features = ["use-opencl", "use-opencv"], default-features = false }
 
 [dependencies]
-cstr = "*"
-cpp = "*"
-serde_json = "*"
-bytemuck = "*"
+cstr = "0.2.9"
+cpp = "0.5.6"
+serde_json = "1.0.78"
+bytemuck = "1.7.3"
 nalgebra = "0.30"
-semver = "*"
+semver = "1.0.5"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
@@ -22,19 +22,19 @@ qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "4.4.0-next.2", git = "https://github.com/zmwangx/rust-ffmpeg", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
-lazy_static = "*"
-parking_lot = "*"
+lazy_static = "1.4.0"
+parking_lot = "0.12.0"
 
-winapi = "*"
-simplelog = "*"
-log = "*"
+winapi = "0.3.9"
+simplelog = "0.11.2"
+log = "0.4.14"
 
 ureq = "2.4"
-whoami = "*"
+whoami = "1.2.1"
 
 [build-dependencies]
-cpp_build = "*"
-winres = "*"
+cpp_build = "0.5.6"
+winres = "0.1.12"
 
 [[bin]]
 name = "gyroflow"
@@ -66,4 +66,4 @@ name = "android.permission.WRITE_EXTERNAL_STORAGE"
 gyroflow-core = { path = "src/core/", features = ["use-opencv"], default-features = false }
 # ndk = { version = "*", features = ["trace"] }
 # ndk-glue = { version = "*", features = ["logger"] }
-ndk-sys = { version = "*" }
+ndk-sys = { version = "0.3.0" }

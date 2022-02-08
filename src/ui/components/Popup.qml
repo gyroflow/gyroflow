@@ -59,16 +59,16 @@ QQC.Popup {
 
             MouseArea { anchors.fill: parent; acceptedButtons: Qt.NoButton; cursorShape: Qt.PointingHandCursor; }
 
-            function _onClicked() {
+            function clickHandler() {
                 popup.focus = false;
                 popup.parent.focus = true;
-                popup.clicked(currentIndex);
+                popup.clicked(index);
                 popup.visible = false;
             }
 
-            onClicked: _onClicked();
-            Keys.onReturnPressed: _onClicked();
-            Keys.onEnterPressed: _onClicked();
+            onClicked: clickHandler();
+            Keys.onReturnPressed: clickHandler();
+            Keys.onEnterPressed: clickHandler();
 
             background: Rectangle {
                 color: dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent";

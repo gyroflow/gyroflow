@@ -96,6 +96,12 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter;
                     wrapMode: Text.WordWrap;
                     font.pixelSize: 14 * dpiScale;
+
+                    MouseArea {
+                        anchors.fill: parent;
+                        cursorShape: parent.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
+                        acceptedButtons: Qt.NoButton;
+                    }
                 }
             }
             Item { height: 25 * dpiScale; width: 1; }

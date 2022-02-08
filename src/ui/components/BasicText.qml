@@ -11,4 +11,5 @@ Text {
     font.pixelSize: 12 * dpiScale;
     font.family: styleFont;
     opacity: enabled? 1.0 : 0.6;
+    linkColor: styleAccentColor;
 }
