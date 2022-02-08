@@ -56,3 +56,9 @@ body:
       render: shell
     validations:
       required: false
+  - type: markdown
+    value: "### Please share any relevant files"
+  - type: markdown
+    attributes:
+      value: |
+        This can be motion data files, video files, screenshots etc. Smaller files can be zipped and uploaded here. Larger files can be shared using Google Drive, Dropbox, WeTransfer, mega.nz, or similar.

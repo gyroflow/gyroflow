@@ -4,8 +4,8 @@ labels: ["enhancement"]
 body:
   - type: checkboxes
     attributes:
-      label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered.
+      label: Is there an existing feature request for this?
+      description: Please search to see if the feature has already been requested.
       options:
       - label: I have searched the existing issues
         required: true
@@ -16,3 +16,9 @@ body:
       placeholder: Tell us your idea!
     validations:
       required: true
+  - type: markdown
+    value: "### Please share any relevant files"
+  - type: markdown
+    attributes:
+      value: |
+        This can be motion data files, video files, screenshots etc. Smaller files can be zipped and uploaded here. Larger files can be shared using Google Drive, Dropbox, WeTransfer, mega.nz, or similar.
