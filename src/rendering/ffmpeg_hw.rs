@@ -271,7 +271,9 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                     if (*frames_ctx).sw_format == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).sw_format = target_format; }
                     (*frames_ctx).width     = size.0 as i32;
                     (*frames_ctx).height    = size.1 as i32;
-                    // (*frames_ctx).initial_pool_size = 20;
+                    if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_QSV || type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VAAPI {
+                        (*frames_ctx).initial_pool_size = 20;
+                    }
                     
                     let err = ffi::av_hwframe_ctx_init(frames_ctx_ref);
                     if err < 0 {
@@ -282,6 +284,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                         log::debug!("inited hwframe ctx");
                     }
                     dbg!(&(*frames_ctx).format);
+                    dbg!(&(*frames_ctx).sw_format);
                     (*encoder_ctx).pix_fmt = (*frames_ctx).format;
                 
                 }
