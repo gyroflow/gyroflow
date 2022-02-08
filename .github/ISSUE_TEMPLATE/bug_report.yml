@@ -57,7 +57,8 @@ body:
     validations:
       required: false
   - type: markdown
-    value: "### Please share any relevant files"
+    attributes:
+      value: "### Please share any relevant files"
   - type: markdown
     attributes:
       value: |
