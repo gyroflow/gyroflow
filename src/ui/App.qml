@@ -52,6 +52,8 @@ Rectangle {
     property alias sync: sync;
     property alias stab: stab;
 
+    readonly property bool wasModified: window.videoArea.vid.loaded;
+
     FileDialog {
         id: fileDialog;
         property var extensions: [
