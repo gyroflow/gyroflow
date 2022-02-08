@@ -58,7 +58,17 @@ QQC.Popup {
             Ease on scale { }
 
             MouseArea { anchors.fill: parent; acceptedButtons: Qt.NoButton; cursorShape: Qt.PointingHandCursor; }
-            onClicked: popup.clicked(index);
+
+            function _onClicked() {
+                popup.focus = false;
+                popup.parent.focus = true;
+                popup.clicked(currentIndex);
+                popup.visible = false;
+            }
+
+            onClicked: _onClicked();
+            Keys.onReturnPressed: _onClicked();
+            Keys.onEnterPressed: _onClicked();
 
             background: Rectangle {
                 color: dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent";

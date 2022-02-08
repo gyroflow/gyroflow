@@ -40,9 +40,9 @@ QQC.ComboBox {
             e.accepted = true;
         } else if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
             pp.open();
+            pp.focus = true;
         }
     }
-    
 
     scale: root.pressed? 0.98 : 1.0;
     Ease on scale {  }

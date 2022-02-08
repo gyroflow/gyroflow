@@ -50,7 +50,6 @@ QQC.Button {
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
     
-    // Enable enter to click
-    Keys.onReturnPressed: root.onClicked();
-    Keys.onEnterPressed: root.onClicked();
+    Keys.onReturnPressed: root.clicked();
+    Keys.onEnterPressed: root.clicked();
 }
