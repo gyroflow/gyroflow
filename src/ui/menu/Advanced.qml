@@ -88,7 +88,7 @@ MenuItem {
                 ["French (français)",  "fr"],
                 ["German (Deutsch)",   "de"],
                 ["Italian (italiano)", "it"],
-                ["Japanese (言語名)",  "ja"],
+                ["Japanese (日本語)",  "ja"],
                 ["Norwegian (norsk)",  "no"],
                 ["Polish (polski)",    "pl"],
                 ["Russian (русский)",  "ru"],

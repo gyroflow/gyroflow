@@ -8,4 +8,4 @@ sed -i'' -E "0,/versionName=\"[0-9\.a-z-]+\"/s//versionName=\"${ver}\"/" _deploy
 git commit -a -m "Release v${ver}"
 git tag -a "v${ver}" -m "Release v${ver}"
 git.exe push origin
-git.exe push origin --tags
+git.exe push origin "v${ver}"
