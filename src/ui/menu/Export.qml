@@ -59,17 +59,27 @@ MenuItem {
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
 
+    onOutWidthChanged: Qt.callLater(applyOutputSize);
+    onOutHeightChanged: Qt.callLater(applyOutputSize);
+
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Export", "GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?");
         QT_TRANSLATE_NOOP("Export", "Render using CPU");
         QT_TRANSLATE_NOOP("Export", "Cancel");
     }
 
+    function applyOutputSize() {
+        controller.set_output_size(outWidth, outHeight);
+    }
     function setOutputSize(w, h) {
         orgWidth = w;
         orgHeight = h;
-
-        controller.set_output_size(outWidth, outHeight);
+        outputHeight.preventChange2 = true;
+        outputWidth.preventChange2 = true;
+        outputWidth.value = w;
+        outputHeight.value = h;
+        outputWidth.preventChange2 = false;
+        outputHeight.preventChange2 = false;
     }
     function updateOutputSize(isWidth) {
         if (lockAspectRatio.checked && ratioHeight > 0) {
@@ -84,7 +94,7 @@ MenuItem {
                 outputWidth.preventChange2 = false;
             }
         }
-        controller.set_output_size(outWidth, outHeight);
+        Qt.callLater(applyOutputSize);
     }
     function vidInfoLoaded() { codec.updateGpuStatus(); }
 
