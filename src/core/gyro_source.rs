@@ -292,15 +292,13 @@ impl GyroSource {
                 let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
 
                 if let Some(quat1) = quats.range(..=lookup_ts).next_back() {
+                     if *quat1.0 == lookup_ts {
+                        return *quat1.1;
+                    }
                     if let Some(quat2) = quats.range(lookup_ts..).next() {
-
                         let time_delta = (quat2.0 - quat1.0) as f64;
-                        if time_delta != 0.0 {
-                            let fract = (lookup_ts - quat1.0) as f64 / time_delta;
-                            return quat1.1.slerp(quat2.1, fract);
-                        } else {
-                            return *quat1.1;
-                        }
+                        let fract = (lookup_ts - quat1.0) as f64 / time_delta;
+                        return quat1.1.slerp(quat2.1, fract);
                     }
                 }
             }
@@ -316,25 +314,23 @@ impl GyroSource {
             0 => 0.0,
             1 => *self.offsets.values().next().unwrap(),
             _ => {
-                let first_ts = *self.offsets.keys().next().unwrap();
-                let last_ts = *self.offsets.keys().next_back().unwrap();
-        
-                let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
-        
-                if let Some(offs1) = self.offsets.range(..=lookup_ts).next_back() {
-                    if let Some(offs2) = self.offsets.range(lookup_ts..).next() {
-                        let time_delta = (offs2.0 - offs1.0) as f64 / 1000.0;
-                        if time_delta != 0.0 {
-                            offs1.1 + ((offs2.1 - offs1.1) / time_delta) * ((lookup_ts - offs1.0) as f64 / 1000.0)
-                        } else {
-                            *offs1.1
+                if let Some(&first_ts) = self.offsets.keys().next() {
+                    if let Some(&last_ts) = self.offsets.keys().next_back() {
+                        let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
+                        if let Some(offs1) = self.offsets.range(..=lookup_ts).next_back() {
+                            if *offs1.0 == lookup_ts {
+                                return *offs1.1;
+                            }
+                            if let Some(offs2) = self.offsets.range(lookup_ts..).next() {
+                                let time_delta = (offs2.0 - offs1.0) as f64;
+                                let fract = (lookup_ts - offs1.0) as f64 / time_delta;
+                                return offs1.1 + (offs2.1 - offs1.1) * fract;
+                            }
                         }
-                    } else {
-                        0.0
                     }
-                } else {
-                    0.0
                 }
+
+                0.0
             }
         }
     }
