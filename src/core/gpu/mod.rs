@@ -7,14 +7,24 @@ pub mod wgpu;
 
 pub fn initialize_contexts() -> Option<String> {
     #[cfg(feature = "use-opencl")]
-    match opencl::OclWrapper::initialize_context() {
-        Ok(name) => { return Some(name); },
-        Err(e) => { log::error!("OpenCL error: {:?}", e); }
+    {
+        let cl = std::panic::catch_unwind(|| {
+            opencl::OclWrapper::initialize_context()
+        });
+        match cl {
+            Ok(Ok(name)) => { return Some(name); },
+            Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
+            Err(e) => { log::error!("OpenCL error: {:?}", e); }
+        }
     }
 
-    match wgpu::WgpuWrapper::initialize_context() {
-        Some(name) => { return Some(name); },
-        None => { log::error!("WGPU init error"); }
+    let wgpu = std::panic::catch_unwind(|| {
+        wgpu::WgpuWrapper::initialize_context()
+    });
+    match wgpu {
+        Ok(Some(name)) => { return Some(name); },
+        Ok(None) => { log::error!("wgpu init error"); },
+        Err(e) => { log::error!("wgpu init error: {:?}", e); }
     }
 
     None

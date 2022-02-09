@@ -39,8 +39,8 @@ pub fn set_gpu_type_from_name(name: &str) {
     if gpu_type == GpuType::AMD {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
     }
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
+    // #[cfg(any(target_os = "macos", target_os = "ios"))]
+    // ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
 
     dbg!(gpu_type);
 }
