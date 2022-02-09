@@ -183,7 +183,7 @@ The project also supports UI live reload, it's a super quick way of working with
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.2.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.2.3 win64_msvc2019_64` or use the [official installer](https://www.qt.io/download-qt-installer)
     - `FFmpeg 4.4`: download [ffmpeg 4.4 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-4.4-windows-desktop-clang-gpl-lite.tar.xz/download) and unzip it to `ext/ffmpeg-4.4-windows-desktop-clang-gpl-lite`
-    - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat`
+    - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat -disableMetrics`
     - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
     - OpenCL: `.\vcpkg\vcpkg install "opencl:x64-windows-release"`
     - LLVM: download and install [LLVM](https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe)

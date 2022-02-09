@@ -5,7 +5,7 @@ if [ "$1" != "CI" ]; then
 
     # Install vcpkg
     git clone --depth 1 https://github.com/Microsoft/vcpkg.git
-    ./vcpkg/bootstrap-vcpkg.sh
+    ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
     # Install Qt
     pip3 install -U pip

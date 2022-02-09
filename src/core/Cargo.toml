@@ -11,7 +11,7 @@ path = "lib.rs"
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
-ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", features = ["field_access"] }
+ahrs = { version = "0.5.0", features = ["field_access"] }
 
 mimalloc = { version = "0.1.27", default-features = false }
 nalgebra = "0.30"

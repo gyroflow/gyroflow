@@ -6,7 +6,7 @@ sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-driv
 if [ "$1" != "CI" ] && [ "$1" != "docker" ]; then
     # Install vcpkg
     git clone --depth 1 https://github.com/Microsoft/vcpkg.git
-    ./vcpkg/bootstrap-vcpkg.sh
+    ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
     export VCPKG_ROOT=$PWD/vcpkg
 
     # Install Qt
