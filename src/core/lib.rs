@@ -342,7 +342,11 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_smoothness(&self) {
-        self.gyro.write().recompute_smoothness(self.smoothing.write().current().as_mut(), &self.params.read());
+        let mut gyro = self.gyro.write();
+        let params = self.params.read();
+        let mut smoothing = self.smoothing.write();
+
+        gyro.recompute_smoothness(smoothing.current().as_mut(), &params);
     }
 
     pub fn recompute_undistortion(&self) {
@@ -557,8 +561,10 @@ impl<T: PixelType> StabilizationManager<T> {
         self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
     }
     pub fn set_imu_orientation(&self, orientation: String) {
-        self.gyro.write().set_imu_orientation(orientation);
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        let mut gyro = self.gyro.write();
+        let mut smoothing = self.smoothing.write();
+        gyro.set_imu_orientation(orientation);
+        smoothing.update_quats_checksum(&gyro.quaternions);
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
