@@ -292,7 +292,7 @@ impl GyroSource {
                 let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
 
                 if let Some(quat1) = quats.range(..=lookup_ts).next_back() {
-                     if *quat1.0 == lookup_ts {
+                    if *quat1.0 == lookup_ts {
                         return *quat1.1;
                     }
                     if let Some(quat2) = quats.range(lookup_ts..).next() {
