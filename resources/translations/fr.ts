@@ -29,31 +29,31 @@
       <translation>Langue</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
       <translation>Guide de rendu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Lorsque FOV &gt; 1, affiche un rectangle simulant FOV = 1 sur la vidéo de prévisualisation.
 Notez que ce n'est qu'un indicateur visuel, il n'affecte pas le rendu.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>Apercu GPU sans recopie (expérimental)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>Rendre et redresser la vidéo d'aperçu entièrement sur le GPU.
 Cela devrait fournir de bien meilleures performances de l'interface utilisateur.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
       <translation>Décoder avec le GPU</translation>
     </message>
@@ -162,9 +162,9 @@ Cela devrait fournir de bien meilleures performances de l'interface utilisateur.
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>NATIVE_LANGUAGE_NAME</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -905,6 +905,7 @@ Modifiez les paramètres de vitesse jusqu'à ce que vous obteniez les valeurs so
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>

@@ -29,33 +29,33 @@
       <translation>言語</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
       <translation>セーフエリアの表示</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>FOV &gt; 1の場合、FOV = 1にあたる四角形をプレビュー映像の上に表示します。
 これは視覚的なインジケータであり、レンダリング出力には影響しません。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>ゼロコピーGPUプレビュー [試験的]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>プレビュー映像の、レンダリングと歪み補正を全てGPUを使用して行います。
 再生時のパフォーマンスが大幅に改善されるはずです。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
-      <translation type="unfinished">Use GPU decoding</translation>
+      <translation>GPUデコーダを使用</translation>
     </message>
   </context>
   <context>
@@ -91,7 +91,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="187"/>
       <source>Output file already exists, do you want to overwrite it?</source>
-      <translation>出力ファイルは既に存在します。上書きしますか？</translation>
+      <translation>同名のファイルが既に存在します。上書きしますか？</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="188"/>
@@ -133,7 +133,7 @@ This should provide much better UI performance.</source>
       <location filename="../../src/ui/App.qml" line="272"/>
       <location filename="../../src/ui/App.qml" line="275"/>
       <source>Ok</source>
-      <translation>はい</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="281"/>
@@ -162,9 +162,9 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>日本語</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -335,7 +335,8 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="209"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
-      <translation>同じ画質で出力するためにはより高いビットレートが必要です。ビットレートが同じだと画質が落ちる出力になります。</translation>
+      <translation>同じ画質で出力するためにはより高いビットレートが必要です。
+ビットレートが同じだと出力の画質が落ちます。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="210"/>
@@ -822,7 +823,7 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/menu/Stabilization.qml" line="141"/>
       <location filename="../../src/ui/menu/Stabilization.qml" line="309"/>
       <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
-      <translation>正確な方位決定が必要です。Complementary、Mahony、Madgwickの統合方法を試してみてください。</translation>
+      <translation>正確な方位決定が必要です。Complementary、Mahony、Madgwickの積分方法を試してみてください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
@@ -900,22 +901,23 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Lock horizon</source>
-      <translation type="unfinished">Lock horizon</translation>
+      <translation>水平線をロック</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
       <source>%</source>
-      <translation type="unfinished">%</translation>
+      <translation>%</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
       <source>°</source>
-      <translation type="unfinished">°</translation>
+      <translation>°</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
@@ -1035,7 +1037,7 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation type="unfinished">The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</translation>
+      <translation>AKAZEはより精度が上がりますがOpenCVよりかなり遅いです。OpenCVが良い結果をもたらさない場合にのみ使用してください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
@@ -1254,7 +1256,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="323"/>
       <source>Chart display mode</source>
-      <translation>グラフ表示モード</translation>
+      <translation>グラフの表示を変更</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="324"/>

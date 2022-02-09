@@ -29,32 +29,32 @@
       <translation>Lingua</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
       <translation>Guida area sicura</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Quando il FOV &gt; 1, mostra un rettangolo che simula FOV=1 nell'anteprima del video.
 È un riferimento visivo, non influenza il rendering.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>Anteprima GPU zero-copy sperimentale</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>Renderizza e linearizza l'anteprima del video interamente con la GPU. Migliora la reattività della UI.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
-      <translation type="unfinished">Use GPU decoding</translation>
+      <translation>Usa decodifica GPU</translation>
     </message>
   </context>
   <context>
@@ -161,9 +161,9 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>LINGUA_NATIVA_NOME</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -898,22 +898,23 @@ Modifica il fattore di velocità fino a ottenere i valori desiderati (consigliat
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Lock horizon</source>
-      <translation type="unfinished">Lock horizon</translation>
+      <translation>Blocca orizzonte</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
       <source>%</source>
-      <translation type="unfinished">%</translation>
+      <translation>%</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
       <source>°</source>
-      <translation type="unfinished">°</translation>
+      <translation>°</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
@@ -1033,7 +1034,7 @@ Modifica il fattore di velocità fino a ottenere i valori desiderati (consigliat
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation type="unfinished">The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</translation>
+      <translation>Il metodo AKAZE è più accurato ma decisamente più lento di OpenCV. Usalo soltanto se OpenCV non dà buoni risultati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
@@ -1425,7 +1426,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="390"/>
       <source>Toggle stabilization</source>
-      <translation>Cambia stabilizzazione</translation>
+      <translation>Attiva / Disattiva stabilizzazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="396"/>

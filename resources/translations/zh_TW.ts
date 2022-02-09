@@ -29,33 +29,33 @@
       <translation>語言</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
-      <translation>安全區域指南</translation>
+      <translation>安全區域指示</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>儅視場 &gt; 1時，在預覽視頻上顯示一個矩形模擬視場= 1。
 請注意，這只是一個視覺指標，它不會影響渲染。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>實驗性零拷貝 GPU 預覽</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>將影片的渲染和消除失真完全交由 GPU 完成。
 這將提供更加流暢的界面體驗。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
-      <translation type="unfinished">Use GPU decoding</translation>
+      <translation>使用 GPU 解碼</translation>
     </message>
   </context>
   <context>
@@ -162,9 +162,9 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>繁體中文</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -900,22 +900,23 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Lock horizon</source>
-      <translation type="unfinished">Lock horizon</translation>
+      <translation>鎖定水平</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
       <source>%</source>
-      <translation type="unfinished">%</translation>
+      <translation>%</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
       <source>°</source>
-      <translation type="unfinished">°</translation>
+      <translation>°</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
@@ -1035,7 +1036,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation type="unfinished">The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</translation>
+      <translation>AKAZE 方法或許更精準但明顯慢於 OpenCV。請僅在 OpenCV 並未產生好結果的情況下使用。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>

@@ -289,7 +289,7 @@ Rectangle {
 
         QT_TRANSLATE_NOOP("App", "An error occured: %1");
         QT_TRANSLATE_NOOP("App", "Gyroflow file exported to %1.");
-        QT_TRANSLATE_NOOP("App", "NATIVE_LANGUAGE_NAME", "Translate this to the native name of your language");
+        QT_TRANSLATE_NOOP("App", "--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--", "Translate this to the native name of your language");
 
         if (!isLandscape) {
             isLandscapeChanged();

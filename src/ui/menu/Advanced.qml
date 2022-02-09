@@ -80,20 +80,21 @@ MenuItem {
         ComboBox {
             id: langList;
             property var langs: [
-                ["English",            "en"],
-                ["Chinese - Simplified (简体中文)", "zh_CN"],
+                ["English",                     "en"],
+                ["Chinese - Simplified (简体中文)",  "zh_CN"],
                 ["Chinese - Traditional (繁體中文)", "zh_TW"],
-                ["Danish (dansk)",     "da"],
-                ["Finnish (suomi)",    "fi"],
-                ["French (français)",  "fr"],
-                ["German (Deutsch)",   "de"],
-                ["Italian (italiano)", "it"],
-                ["Japanese (日本語)",  "ja"],
-                ["Norwegian (norsk)",  "no"],
-                ["Polish (polski)",    "pl"],
-                ["Russian (русский)",  "ru"],
-                ["Slovak (slovenský)", "sk"],
-                ["Spanish (español)",  "es"],
+                ["Danish (dansk)",              "da"],
+                ["Finnish (suomi)",             "fi"],
+                ["French (français)",           "fr"],
+                ["German (Deutsch)",            "de"],
+                ["Italian (italiano)",          "it"],
+                ["Japanese (日本語)",            "ja"],
+                ["Norwegian (norsk)",           "no"],
+                ["Polish (polski)",             "pl"],
+                ["Portuguese (português)",      "pt"],
+                ["Russian (русский)",           "ru"],
+                ["Slovak (slovenský)",          "sk"],
+                ["Spanish (español)",           "es"],
                 ["Ukrainian (Українська мова)", "uk"]
             ];
             Component.onCompleted: {

@@ -29,30 +29,30 @@
       <translation>Sprache</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
       <translation>Sicherer Bereich</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Bei einem FOV über 1.0 wird ein Rechteck angezeigt, das einen FOV von 1.0 in der Vorschau simuliert. Das Rechteck ist nur eine visuelle Hilfe, die das Rendern NICHT beeinflusst.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
-      <translation>Experimentelle GPU zero-copy Vorschau</translation>
+      <translation>Experimentelle GPU 0-copy Vorschau</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>Rendern und entzerren des Vorschau-Videos auf der GPU.
 Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
       <translation>GPU-Decoding nutzen</translation>
     </message>
@@ -161,9 +161,9 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>Deutsch</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -324,12 +324,12 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="204"/>
       <source>Use GPU encoding</source>
-      <translation>GPU Encoding benutzen</translation>
+      <translation>GPU-Encoding nutzen</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="208"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
-      <translation>GPU Encoder erzeugen typischerweise ein Ergebnis mit vergleichsweise schlechterer Qualität wie Software Encoder. Sind aber deutlich schneller.</translation>
+      <translation>GPU Encoder erzeugen typischerweise ein Ergebnis mit etwas schlechterer Qualität im Vergleich zu Software Encodern. Sind aber deutlich schneller.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="209"/>
@@ -692,7 +692,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="157"/>
       <source>Export .gyroflow file (including gyro data)</source>
-      <translation>Exportiere .gyroflow Datei mit Gyro-Infos</translation>
+      <translation>.gyroflow Datei mit Gyro-Info exportieren</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="30"/>
@@ -904,6 +904,7 @@ Passe die Bewegungs-Energie an, bis dir die Werte zu sagen (empfohlen: 20 oder w
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>

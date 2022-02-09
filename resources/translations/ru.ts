@@ -29,33 +29,33 @@
       <translation>Язык</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Safe area guide</source>
       <translation>Показать безопасную зону (когда Fov > 1)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Показывать прямоугольник, симулирующий FOV = 1 поверх превью, в случае когда FOV больше единицы.
 Обратите внимание, что это влияет на индикацию отображения и не затронет результат рендера.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
       <source>Experimental zero-copy GPU preview</source>
       <translation>Экспериментальный прямой GPU предпросмотр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
       <translation>Рендерить и убирать искажения в превью полностью с использованием GPU.
 Это должно значительно улучшить скорость работы.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="133"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Use GPU decoding</source>
-      <translation type="unfinished">Use GPU decoding</translation>
+      <translation>Использовать GPU для декодирования</translation>
     </message>
   </context>
   <context>
@@ -162,9 +162,9 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="292"/>
-      <source>NATIVE_LANGUAGE_NAME</source>
+      <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>русский</translation>
+      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
     </message>
   </context>
   <context>
@@ -790,7 +790,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="135"/>
       <source>Yaw smoothness</source>
-      <translation>Сглаживание по яву</translation>
+      <translation>Сглаживание по yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="136"/>
@@ -900,22 +900,23 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Lock horizon</source>
-      <translation type="unfinished">Lock horizon</translation>
+      <translation>Блокировка горизонта</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
+      <comment>Horizon locking amount</comment>
       <translation type="unfinished">Lock amount</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
       <source>%</source>
-      <translation type="unfinished">%</translation>
+      <translation>%</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
       <source>°</source>
-      <translation type="unfinished">°</translation>
+      <translation>°</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
@@ -1035,7 +1036,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation type="unfinished">The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</translation>
+      <translation>Метод AKAZE может быть более точным, но значительно медленнее, чем OpenCV. Используйте только если OpenCV не дает&apos;t хорошие результаты</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>

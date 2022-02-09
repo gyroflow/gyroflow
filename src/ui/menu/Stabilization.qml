@@ -270,7 +270,7 @@ MenuItem {
         }
 
         Label {
-            text: qsTr("Lock amount");
+            text: qsTr("Lock amount", "Horizon locking amount");
             width: parent.width;
             spacing: 2 * dpiScale;
             SliderWithField {
