@@ -21,7 +21,7 @@ pub struct VelocityDampened {
 
 impl Default for VelocityDampened {
     fn default() -> Self { Self {
-        smoothness: 0.2,
+        smoothness: 0.3,
         horizonlockpercent: 0.0,
         horizonroll: 0.0
     } }
@@ -47,7 +47,7 @@ impl SmoothingAlgorithm for VelocityDampened {
                 "from": 0.001,
                 "to": 1.0,
                 "value": self.smoothness,
-                "default": 0.2,
+                "default": 0.5,
                 "unit": "",
                 "precision": 3
             }
@@ -83,9 +83,6 @@ impl SmoothingAlgorithm for VelocityDampened {
         let rad_to_deg_per_sec: f64 = sample_rate * 180.0 / std::f64::consts::PI;
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
-            // let euler = (prev_quat.inverse() * quat).scaled_axis().abs();
-            // let dist = euler[0].max(euler[1]).max(euler[2]);
-
             let dist = (prev_quat.inverse() * quat).angle();
             velocity.insert(*timestamp, dist.abs() * rad_to_deg_per_sec);
             prev_quat = *quat;

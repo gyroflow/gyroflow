@@ -8,6 +8,7 @@ pub mod fixed;
 // pub mod velocity_dampened_v1;
 pub mod velocity_dampened;
 pub mod velocity_dampened_axis;
+pub mod velocity_dampened_advanced;
 
 pub use nalgebra::*;
 use super::gyro_source::TimeQuat;
@@ -81,6 +82,7 @@ impl Default for Smoothing {
                 // Box::new(self::velocity_dampened_v1::VelocityDampened::default()),
                 Box::new(self::velocity_dampened::VelocityDampened::default()),
                 Box::new(self::velocity_dampened_axis::VelocityDampenedAxis::default()),
+                Box::new(self::velocity_dampened_advanced::VelocityDampenedAdvanced::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
             quats_checksum: 0,
