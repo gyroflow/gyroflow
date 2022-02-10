@@ -83,7 +83,7 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat {
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;

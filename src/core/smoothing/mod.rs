@@ -17,6 +17,7 @@ use dyn_clone::{ clone_trait_object, DynClone };
 
 use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
+use crate::stabilization_params::StabilizationParams;
 
 fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
 
@@ -61,7 +62,7 @@ pub trait SmoothingAlgorithm: DynClone {
 
     fn get_checksum(&self) -> u64;
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat;
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat;
 }
 clone_trait_object!(SmoothingAlgorithm);
 
@@ -125,7 +126,7 @@ impl Smoothing {
         self.algs.iter().map(|x| x.get_name()).collect()
     }
 
-    pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &crate::BasicParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
+    pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &StabilizationParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
         let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
         let end_ts   = (params.trim_end   * params.get_scaled_duration_ms() * 1000.0) as i64;
         let identity_quat = crate::Quat64::identity();

@@ -19,6 +19,7 @@ pub mod filtering;
 pub mod gpu;
 
 pub mod util;
+pub mod stabilization_params;
 
 use std::{sync::Arc, collections::BTreeMap};
 use std::sync::atomic::AtomicU64;
@@ -35,105 +36,13 @@ use self::calibration::LensCalibrator;
 
 use nalgebra::Vector4;
 use gyro_source::{ GyroSource, Quat64 };
+use stabilization_params::StabilizationParams;
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 lazy_static::lazy_static! {
     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
-}
-
-#[derive(Clone)]
-pub struct BasicParams {
-    pub size: (usize, usize), // Processing input size
-    pub output_size: (usize, usize), // Processing output size
-    pub video_size: (usize, usize), // Full resolution input size
-    pub video_output_size: (usize, usize), // Full resoution output size
-
-    pub background: Vector4<f32>,
-
-    pub frame_readout_time: f64,
-    pub adaptive_zoom_window: f64,
-    pub fov: f64,
-    pub fovs: Vec<f64>,
-    pub min_fov: f64,
-    pub fps: f64,
-    pub fps_scale: Option<f64>,
-    pub frame_count: usize,
-    pub duration_ms: f64,
-
-    pub trim_start: f64,
-    pub trim_end: f64,
-
-    pub video_rotation: f64,
-
-    pub framebuffer_inverted: bool,
-    pub is_calibrator: bool,
-    
-    pub stab_enabled: bool,
-    pub show_detected_features: bool,
-    pub show_optical_flow: bool,
-}
-impl Default for BasicParams {
-    fn default() -> Self {
-        Self {
-            fov: 1.0,
-            min_fov: 1.0,
-            fovs: vec![],
-            stab_enabled: true,
-            show_detected_features: true,
-            show_optical_flow: true,
-            frame_readout_time: 0.0, 
-            adaptive_zoom_window: 0.0, 
-
-            size: (0, 0),
-            output_size: (0, 0),
-            video_size: (0, 0),
-            video_output_size: (0, 0),
-
-            video_rotation: 0.0,
-            
-            framebuffer_inverted: false,
-            is_calibrator: false,
-
-            trim_start: 0.0,
-            trim_end: 1.0,
-        
-            background: Vector4::new(0.0, 0.0, 0.0, 0.0),
-    
-            fps: 0.0,
-            fps_scale: None,
-            frame_count: 0,
-            duration_ms: 0.0,
-        }
-    }
-}
-
-impl BasicParams {
-    pub fn get_scaled_duration_ms(&self) -> f64 {
-        match self.fps_scale {
-            Some(scale) => self.duration_ms / scale,
-            None            => self.duration_ms
-        }
-    }
-    pub fn get_scaled_fps(&self) -> f64 {
-        match self.fps_scale {
-            Some(scale) => self.fps * scale,
-            None            => self.fps
-        }
-    }
-
-    pub fn set_fovs(&mut self, fovs: Vec<f64>, mut lens_fov_adjustment: f64) {
-        if let Some(mut min_fov) = fovs.iter().copied().reduce(f64::min) {
-            min_fov *= self.video_size.0 as f64 / self.video_output_size.0.max(1) as f64;
-            if lens_fov_adjustment <= 0.0001 { lens_fov_adjustment = 1.0 };
-            self.min_fov = min_fov / lens_fov_adjustment;
-        }
-        if fovs.is_empty() {
-            self.min_fov = 1.0;
-        }
-        self.fovs = fovs;
-    }
 }
 
 pub struct StabilizationManager<T: PixelType> {
@@ -155,7 +64,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
 
-    pub params: Arc<RwLock<BasicParams>>
+    pub params: Arc<RwLock<StabilizationParams>>
 }
 
 impl<T: PixelType> Default for StabilizationManager<T> {
@@ -163,7 +72,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
-            params: Arc::new(RwLock::new(BasicParams::default())),
+            params: Arc::new(RwLock::new(StabilizationParams::default())),
             
             undistortion: Arc::new(RwLock::new(Undistortion::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
@@ -316,7 +225,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<BasicParams>) -> Vec<f64> {
+    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<StabilizationParams>) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
@@ -366,7 +275,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut params = undistortion::ComputeParams::from_manager(self);
 
         let smoothing = self.smoothing.clone();
-        let basic_params = self.params.clone();
+        let stabilization_params = self.params.clone();
         let gyro = self.gyro.clone();
 
         let compute_id = fastrand::u64(..);
@@ -384,7 +293,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
                 let mut smoothing = smoothing.write().current().clone();
-                params.gyro.recompute_smoothness(smoothing.as_mut(), &basic_params.read());
+                params.gyro.recompute_smoothness(smoothing.as_mut(), &stabilization_params.read());
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
@@ -399,8 +308,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let mut zoom = AdaptiveZoom::from_compute_params(params.clone());
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &basic_params);
-                basic_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
+                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
+                stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
             }
             
             if current_compute_id.load(SeqCst) != compute_id { return; }
@@ -652,7 +561,7 @@ impl<T: PixelType> StabilizationManager<T> {
             (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted)
         };
 
-        *self.params.write() = BasicParams {
+        *self.params.write() = StabilizationParams {
             stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, ..Default::default()
         };
         if !self.gyro.read().prevent_next_load {
