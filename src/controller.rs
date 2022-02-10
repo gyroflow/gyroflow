@@ -13,6 +13,7 @@ use qml_video_rs::video_item::MDKVideoItem;
 
 use crate::core;
 use crate::core::StabilizationManager;
+#[cfg(feature = "opencv")]
 use crate::core::calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
 use crate::rendering;
@@ -734,146 +735,155 @@ impl Controller {
     }
 
     pub fn init_calibrator(&self) {
-        self.stabilizer.params.write().is_calibrator = true;
-        *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
-        self.stabilizer.set_smoothing_method(1); // Plain 3D
-        self.stabilizer.set_smoothing_param("time_constant", 2.0);
+        #[cfg(feature = "opencv")]
+        {
+            self.stabilizer.params.write().is_calibrator = true;
+            *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
+            self.stabilizer.set_smoothing_method(1); // Plain 3D
+            self.stabilizer.set_smoothing_param("time_constant", 2.0);
+        }
     }
 
     fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64) {
-        rendering::clear_log();
+        #[cfg(feature = "opencv")]
+        {
+            rendering::clear_log();
 
-        self.calib_in_progress = true;
-        self.calib_in_progress_changed();
-        self.calib_progress(0.0, 0.0, 0, 0, 0);
+            self.calib_in_progress = true;
+            self.calib_in_progress_changed();
+            self.calib_progress(0.0, 0.0, 0, 0, 0);
 
-        let stab = self.stabilizer.clone();
+            let stab = self.stabilizer.clone();
 
-        let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
-            let params = stab.params.read();
-            (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
-        };
-
-        let is_forced = custom_timestamp_ms > -0.5;
-        let ranges = if is_forced {
-            vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
-        } else {
-            vec![(trim_start_ms, trim_end_ms)]
-        };
-
-        let cal = stab.lens_calibrator.clone();
-        if max_points > 0 {
-            let mut lock = cal.write();
-            let cal = lock.as_mut().unwrap();
-            let saved: std::collections::BTreeMap<i32, core::calibration::Detected> = {
-                let lock = cal.image_points.read();
-                cal.forced_frames.iter().filter_map(|f| Some((*f, lock.get(f)?.clone()))).collect()
+            let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
+                let params = stab.params.read();
+                (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
             };
-            *cal.image_points.write() = saved;
-            cal.max_images = max_points;
-            cal.iterations = iterations;
-            cal.max_sharpness = max_sharpness;
-        }
 
-        let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
-            this.calib_in_progress = ready < total;
-            this.calib_in_progress_changed();
-            this.calib_progress(ready as f64 / total as f64, rms, ready, total, good);
-            if rms > 0.0 {
-                this.update_calib_model();
+            let is_forced = custom_timestamp_ms > -0.5;
+            let ranges = if is_forced {
+                vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
+            } else {
+                vec![(trim_start_ms, trim_end_ms)]
+            };
+
+            let cal = stab.lens_calibrator.clone();
+            if max_points > 0 {
+                let mut lock = cal.write();
+                let cal = lock.as_mut().unwrap();
+                let saved: std::collections::BTreeMap<i32, core::calibration::Detected> = {
+                    let lock = cal.image_points.read();
+                    cal.forced_frames.iter().filter_map(|f| Some((*f, lock.get(f)?.clone()))).collect()
+                };
+                *cal.image_points.write() = saved;
+                cal.max_images = max_points;
+                cal.iterations = iterations;
+                cal.max_sharpness = max_sharpness;
             }
-        });
-        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
-            arg.push_str("\n\n");
-            arg.push_str(&rendering::get_log());
 
-            this.error(QString::from(msg), QString::from(arg), QString::default());
+            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
+                this.calib_in_progress = ready < total;
+                this.calib_in_progress_changed();
+                this.calib_progress(ready as f64 / total as f64, rms, ready, total, good);
+                if rms > 0.0 {
+                    this.update_calib_model();
+                }
+            });
+            let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+                arg.push_str("\n\n");
+                arg.push_str(&rendering::get_log());
 
-            this.calib_in_progress = false;
-            this.calib_in_progress_changed();
-        });
+                this.error(QString::from(msg), QString::from(arg), QString::default());
 
-        self.cancel_flag.store(false, SeqCst);
-        let cancel_flag = self.cancel_flag.clone();
+                this.calib_in_progress = false;
+                this.calib_in_progress_changed();
+            });
 
-        let total = ((frame_count as f64 * trim_ratio) / every_nth_frame as f64) as usize;
-        let total_read = Arc::new(AtomicUsize::new(0));
-        let processed = Arc::new(AtomicUsize::new(0));
-        
-        let video_path = self.video_path.clone();
-        core::run_threaded(move || {
-            match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
-                Ok(mut proc) => {
-                    proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
-                        let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
+            self.cancel_flag.store(false, SeqCst);
+            let cancel_flag = self.cancel_flag.clone();
 
-                        if is_forced && total_read.load(SeqCst) > 0 {
-                            return Ok(());
-                        }
+            let total = ((frame_count as f64 * trim_ratio) / every_nth_frame as f64) as usize;
+            let total_read = Arc::new(AtomicUsize::new(0));
+            let processed = Arc::new(AtomicUsize::new(0));
+            
+            let video_path = self.video_path.clone();
+            core::run_threaded(move || {
+                match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
+                    Ok(mut proc) => {
+                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                            let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
-                        if (frame % every_nth_frame as i32) == 0 {
-                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, input_frame.width(), input_frame.height()) {
-                                Ok(mut small_frame) => {
-                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+                            if is_forced && total_read.load(SeqCst) > 0 {
+                                return Ok(());
+                            }
 
-                                    total_read.fetch_add(1, SeqCst);
-                                    let mut lock = cal.write();
-                                    let cal = lock.as_mut().unwrap();
-                                    if is_forced {
-                                        cal.forced_frames.insert(frame);
+                            if (frame % every_nth_frame as i32) == 0 {
+                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, input_frame.width(), input_frame.height()) {
+                                    Ok(mut small_frame) => {
+                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+
+                                        total_read.fetch_add(1, SeqCst);
+                                        let mut lock = cal.write();
+                                        let cal = lock.as_mut().unwrap();
+                                        if is_forced {
+                                            cal.forced_frames.insert(frame);
+                                        }
+                                        cal.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
+                                    },
+                                    Err(e) => {
+                                        err(("An error occured: %1".to_string(), e.to_string()))
                                     }
-                                    cal.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
-                                },
-                                Err(e) => {
-                                    err(("An error occured: %1".to_string(), e.to_string()))
                                 }
                             }
+                            Ok(())
+                        });
+                        if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                            err(("An error occured: %1".to_string(), e.to_string()));
                         }
-                        Ok(())
-                    });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                    }
+                    Err(error) => {
+                        err(("An error occured: %1".to_string(), error.to_string()));
                     }
                 }
-                Err(error) => {
-                    err(("An error occured: %1".to_string(), error.to_string()));
+                while processed.load(SeqCst) < total_read.load(SeqCst) {
+                    std::thread::sleep(std::time::Duration::from_millis(100));
                 }
-            }
-            while processed.load(SeqCst) < total_read.load(SeqCst) {
-                std::thread::sleep(std::time::Duration::from_millis(100));
-            }
-            // Don't lock the UI trying to draw chessboards while we calibrate
-            stab.params.write().is_calibrator = false;
-            
-            let mut lock = cal.write();
-            let cal = lock.as_mut().unwrap();
-            if let Err(e) = cal.calibrate(is_forced) {
-                err(("An error occured: %1".to_string(), format!("{:?}", e)));
-            } else {
-                stab.lens.write().set_from_calibrator(cal);
-                ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
-            }
+                // Don't lock the UI trying to draw chessboards while we calibrate
+                stab.params.write().is_calibrator = false;
+                
+                let mut lock = cal.write();
+                let cal = lock.as_mut().unwrap();
+                if let Err(e) = cal.calibrate(is_forced) {
+                    err(("An error occured: %1".to_string(), format!("{:?}", e)));
+                } else {
+                    stab.lens.write().set_from_calibrator(cal);
+                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+                }
 
-            progress((total, total, 0, cal.rms));
+                progress((total, total, 0, cal.rms));
 
-            stab.params.write().is_calibrator = true;
-        });
+                stab.params.write().is_calibrator = true;
+            });
+        }
     }
 
     fn update_calib_model(&mut self) {
-        let cal = self.stabilizer.lens_calibrator.clone();
+        #[cfg(feature = "opencv")]
+        {
+            let cal = self.stabilizer.lens_calibrator.clone();
 
-        let used_points = cal.read().as_ref().map(|x| x.used_points.clone()).unwrap_or_default();
+            let used_points = cal.read().as_ref().map(|x| x.used_points.clone()).unwrap_or_default();
 
-        self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
-            timestamp_us: v.timestamp_us, 
-            sharpness: v.avg_sharpness,
-            is_forced: v.is_forced
-        }).collect());
+            self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
+                timestamp_us: v.timestamp_us, 
+                sharpness: v.avg_sharpness,
+                is_forced: v.is_forced
+            }).collect());
 
-        util::qt_queued_callback(self, |this, _| {
-            this.calib_model_updated();
-        })(());
+            util::qt_queued_callback(self, |this, _| {
+                this.calib_model_updated();
+            })(());
+        }
     }
     
     fn add_calibration_point(&mut self, timestamp_us: i64) {
@@ -882,31 +892,34 @@ impl Controller {
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
-        let cal = self.stabilizer.lens_calibrator.clone();
-        let mut rms = 0.0;
+        #[cfg(feature = "opencv")]
         {
-            let mut lock = cal.write();
-            let cal = lock.as_mut().unwrap();
-            let mut frame_to_remove = None;
-            for x in &cal.used_points {
-                if x.1.timestamp_us == timestamp_us {
-                    frame_to_remove = Some(*x.0);
-                    break;
+            let cal = self.stabilizer.lens_calibrator.clone();
+            let mut rms = 0.0;
+            {
+                let mut lock = cal.write();
+                let cal = lock.as_mut().unwrap();
+                let mut frame_to_remove = None;
+                for x in &cal.used_points {
+                    if x.1.timestamp_us == timestamp_us {
+                        frame_to_remove = Some(*x.0);
+                        break;
+                    }
+                }
+                if let Some(f) = frame_to_remove {
+                    cal.forced_frames.remove(&f);
+                    cal.used_points.remove(&f);
+                }
+                if cal.calibrate(true).is_ok() {
+                    rms = cal.rms;
+                    self.stabilizer.lens.write().set_from_calibrator(cal);
+                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
                 }
             }
-            if let Some(f) = frame_to_remove {
-                cal.forced_frames.remove(&f);
-                cal.used_points.remove(&f);
+            self.update_calib_model();
+            if rms > 0.0 {
+                self.calib_progress(1.0, rms, 1, 1, 1);
             }
-            if cal.calibrate(true).is_ok() {
-                rms = cal.rms;
-                self.stabilizer.lens.write().set_from_calibrator(cal);
-                ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
-            }
-        }
-        self.update_calib_model();
-        if rms > 0.0 {
-            self.calib_progress(1.0, rms, 1, 1, 1);
         }
     }
 
@@ -914,6 +927,7 @@ impl Controller {
         let mut info_json = info.to_json().to_string();
  
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&mut info_json) {
+            #[cfg(feature = "opencv")]
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                 profile.set_from_calibrator(cal);
             }
@@ -928,6 +942,7 @@ impl Controller {
  
         match core::lens_profile::LensProfile::from_json(&mut info_json) {
             Ok(mut profile) => {
+                #[cfg(feature = "opencv")]
                 if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                     profile.set_from_calibrator(cal);
                 }
