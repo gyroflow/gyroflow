@@ -3,9 +3,9 @@
 
 // 1. Calculate velocity for each quaternion
 // 2. Smooth the velocities
-// 3. Get max velocity and convert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
-// 4. Perform plain 3D smoothing with varying alpha, where each alpha is between `Smoothness` and `Smoothness at high velocity`, according to velocity ratio
-// 5. This way, low velocities are smoothed using `Smoothness`, but high velocities are smoothed using `Smoothness at high velocity`
+// 3. Multiply max velocity (500 deg/s) with slider value
+// 4. Perform plain 3D smoothing with varying alpha, where each alpha is interpolated between 1s smoothness at 0 velocity, 0.1s smoothness at max velocity and extrapolated above that
+// 5. This way, low velocities are smoothed using 1s smoothness, but high velocities are smoothed using 0.1s smoothness at max velocity (500 deg/s multiplied by slider) and gradually lower smoothness above that
 
 use std::collections::BTreeMap;
 
@@ -14,18 +14,14 @@ use crate::gyro_source::TimeQuat;
 
 #[derive(Clone)]
 pub struct VelocityDampened {
-    pub time_constant: f64,
-    pub time_constant2: f64,
-    pub velocity_factor: f64,
+    pub smoothness: f64,
     pub horizonlockpercent: f64,
     pub horizonroll: f64
 }
 
 impl Default for VelocityDampened {
     fn default() -> Self { Self {
-        time_constant: 0.6,
-        time_constant2: 0.1,
-        velocity_factor: 0.9,
+        smoothness: 0.2,
         horizonlockpercent: 0.0,
         horizonroll: 0.0
     } }
@@ -36,9 +32,7 @@ impl SmoothingAlgorithm for VelocityDampened {
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
-            "time_constant"   => self.time_constant   = val,
-            "time_constant2"  => self.time_constant2  = val,
-            "velocity_factor" => self.velocity_factor = val,
+            "smoothness" => self.smoothness = val,
             "horizonroll" => self.horizonroll = val,
             "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
@@ -47,34 +41,15 @@ impl SmoothingAlgorithm for VelocityDampened {
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {
-                "name": "time_constant",
+                "name": "smoothness",
                 "description": "Smoothness",
                 "type": "SliderWithField",
-                "from": 0.01,
-                "to": 2.0,
-                "value": self.time_constant,
-                "default": 0.6,
-                "unit": "s"
-            },
-            {
-                "name": "time_constant2",
-                "description": "Smoothness at high velocity",
-                "type": "SliderWithField",
                 "from": 0.001,
-                "to": 0.3,
-                "value": self.time_constant2,
-                "default": 0.1,
-                "unit": "s"
-            },
-            {
-                "name": "velocity_factor",
-                "description": "Velocity factor",
-                "type": "SliderWithField",
-                "from": 0.01,
-                "to": 5.0,
-                "value": self.velocity_factor,
-                "default": 0.9,
-                "unit": ""
+                "to": 1.0,
+                "value": self.smoothness,
+                "default": 0.2,
+                "unit": "",
+                "precision": 3
             }
         ])
     }
@@ -84,28 +59,20 @@ impl SmoothingAlgorithm for VelocityDampened {
 
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        hasher.write_u64(self.time_constant.to_bits());
-        hasher.write_u64(self.time_constant2.to_bits());
-        hasher.write_u64(self.velocity_factor.to_bits());
+        hasher.write_u64(self.smoothness.to_bits());
         hasher.write_u64(self.horizonroll.to_bits());
         hasher.write_u64(self.horizonlockpercent.to_bits());
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
-        let start_ts = (params.trim_start * params.get_scaled_duration_ms() * 1000.0) as i64;
-        let end_ts = (params.trim_end * params.get_scaled_duration_ms() * 1000.0) as i64;
-
+        const MAX_VELOCITY: f64 = 500.0;
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
-        let mut alpha = 1.0;
-        let mut high_alpha = 1.0;
-        if self.time_constant > 0.0 {
-            alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
-            high_alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant2).exp();
-        }
+        let alpha = 1.0 - (-(1.0 / sample_rate) / 1.0).exp();
+        let high_alpha = 1.0 - (-(1.0 / sample_rate) / 0.1).exp();
 
         let mut velocity = BTreeMap::<i64, f64>::new();
 
@@ -113,38 +80,32 @@ impl SmoothingAlgorithm for VelocityDampened {
         velocity.insert(*first_quat.0, 0.0);
 
         // Calculate velocity
+        let rad_to_deg_per_sec: f64 = sample_rate * 180.0 / std::f64::consts::PI;
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
             // let euler = (prev_quat.inverse() * quat).scaled_axis().abs();
             // let dist = euler[0].max(euler[1]).max(euler[2]);
 
             let dist = (prev_quat.inverse() * quat).angle();
-            velocity.insert(*timestamp, dist.abs());
+            velocity.insert(*timestamp, dist.abs() * rad_to_deg_per_sec);
             prev_quat = *quat;
         }
 
         // Smooth velocity
-        let mut max_velocity = 0.0000001;
         let mut prev_velocity = *velocity.iter().next().unwrap().1; // First velocity
         for (_timestamp, vel) in velocity.iter_mut().skip(1) {
             *vel = prev_velocity * (1.0 - high_alpha) + *vel * high_alpha;
             prev_velocity = *vel;
         }
-        for (timestamp, vel) in velocity.iter_mut().rev().skip(1) {
+        for (_timestamp, vel) in velocity.iter_mut().rev().skip(1) {
             *vel = prev_velocity * (1.0 - high_alpha) + *vel * high_alpha;
             prev_velocity = *vel;
-
-            if timestamp >= &start_ts && timestamp <= &end_ts {
-                if *vel > max_velocity { max_velocity = *vel; }
-            }
         }
 
-        log::debug!("Max velocity: {}", max_velocity);
+        // Calculate max velocity
+        let max_velocity = MAX_VELOCITY * self.smoothness;
 
-        if self.velocity_factor > 0.0 {
-            max_velocity *= self.velocity_factor;
-        }
-
+        // Calculate ratios
         let ratios: BTreeMap<i64, f64> = velocity.iter().map(|(k, vel)| {
             (*k, vel / max_velocity)
         }).collect();
@@ -167,7 +128,7 @@ impl SmoothingAlgorithm for VelocityDampened {
             (*ts, q)
         }).collect();
 
-        // level horizon
+        // Level horizon
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
         if self.horizonlockpercent == 0.0 {

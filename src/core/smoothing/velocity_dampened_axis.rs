@@ -3,9 +3,10 @@
 
 // 1. Calculate velocity for each quaternion
 // 2. Smooth the velocities
-// 3. Get max velocity and convert all velocities to ratio from 0.0 to 1.0, where 1.0 is max velocity
-// 4. Perform plain 3D smoothing with varying alpha, where each alpha is between `Smoothness` and `Smoothness at high velocity`, according to velocity ratio
-// 5. This way, low velocities are smoothed using `Smoothness`, but high velocities are smoothed using `Smoothness at high velocity`
+// 3. Multiply max velocity (500 deg/s) with slider values (per axis)
+// 4. Divide velocities by max velocity (per axis)
+// 5. Perform plain 3D smoothing with varying alpha, where each alpha is interpolated between 1s smoothness at 0 velocity, 0.1s smoothness at max velocity and extrapolated above that
+// 6. This way, low velocities are smoothed using 1s smoothness, but high velocities are smoothed using 0.1s smoothness at max velocity (500 deg/s multiplied by slider) and gradually lower smoothness above that
 
 use std::collections::BTreeMap;
 
