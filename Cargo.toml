@@ -5,8 +5,13 @@ authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
 edition = "2021"
 build = "build.rs"
 
+[features]
+default = ["opencv", "opencl"]
+opencv = ["gyroflow-core/use-opencv"]
+opencl = ["gyroflow-core/use-opencl"]
+
 [target.'cfg(not(target_os = "android"))'.dependencies]
-gyroflow-core = { path = "src/core/", features = ["use-opencl", "use-opencv"], default-features = false }
+gyroflow-core = { path = "src/core/", default-features = false }
 
 [dependencies]
 cstr = "0.2.9"
