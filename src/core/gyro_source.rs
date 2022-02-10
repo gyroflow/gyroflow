@@ -6,14 +6,15 @@ use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::fs::File;
 use std::path::Path;
-use std::io::Result;
 use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
-use crate::processing_params::ProcessingParams;
 use crate::camera_identifier::CameraIdentifier;
-use crate::integration::*;
-use crate::smoothing::SmoothingAlgorithm;
+
+use super::integration::*;
+use super::smoothing::SmoothingAlgorithm;
+use std::io::Result;
+use crate::StabilizationParams;
 
 pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
@@ -87,9 +88,9 @@ impl GyroSource {
             ..Default::default()
         }
     }
-    pub fn init_from_params(&mut self, params: &ProcessingParams) {
-        self.fps = params.get_scaled_fps();
-        self.duration_ms = params.get_scaled_duration_ms();
+    pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
+        self.fps = stabilization_params.get_scaled_fps();
+        self.duration_ms = stabilization_params.get_scaled_duration_ms();
         self.offsets.clear();
     }
     pub fn parse_telemetry_file(path: &str, size: (usize, usize), fps: f64) -> Result<FileMetadata> {
@@ -200,9 +201,9 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, params: &ProcessingParams) {
-        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, params);
-        self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, params);
+    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, stabilization_params: &StabilizationParams) {
+        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params);
+        self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
 
         for (sq, q) in self.smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {

@@ -1,41 +1,42 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-pub mod adaptive_zoom;
-pub mod processing_params;
-pub mod camera_identifier;
-pub mod filtering;
-pub mod gpu;
 pub mod gyro_source;
-pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod integration;
-pub mod lens_profile_database;
+pub mod integration_complementary; // TODO: add this to `ahrs` crate
 pub mod lens_profile;
-pub mod smoothing;
-pub mod synchronization;
-pub mod undistortion;
-pub mod util;
-
+pub mod lens_profile_database;
 #[cfg(feature = "opencv")]
 pub mod calibration;
+pub mod synchronization;
+pub mod undistortion;
+pub mod adaptive_zoom;
+pub mod camera_identifier;
 
-use nalgebra::Vector4;
-use parking_lot::RwLock;
-use std::collections::BTreeMap;
-use std::sync::{Arc, atomic::AtomicU64, atomic::Ordering::SeqCst};
+pub mod smoothing;
+pub mod filtering;
 
-use adaptive_zoom::AdaptiveZoom;
-use processing_params::ProcessingParams;
+pub mod gpu;
+
+pub mod util;
+pub mod stabilization_params;
+
+use std::{sync::Arc, collections::BTreeMap};
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering::SeqCst;
 use camera_identifier::CameraIdentifier;
-use gyro_source::{ GyroSource, Quat64 };
-use lens_profile::LensProfile;
-use lens_profile_database::LensProfileDatabase;
-use smoothing::Smoothing;
-use undistortion::{PixelType, Undistortion};
+use parking_lot::RwLock;
+pub use undistortion::PixelType;
 
+use crate::lens_profile_database::LensProfileDatabase;
+
+use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
 #[cfg(feature = "opencv")]
 use self::calibration::LensCalibrator;
 
+use nalgebra::Vector4;
+use gyro_source::{ GyroSource, Quat64 };
+use stabilization_params::StabilizationParams;
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -63,7 +64,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
 
-    pub params: Arc<RwLock<ProcessingParams>>
+    pub params: Arc<RwLock<StabilizationParams>>
 }
 
 impl<T: PixelType> Default for StabilizationManager<T> {
@@ -71,7 +72,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
-            params: Arc::new(RwLock::new(ProcessingParams::default())),
+            params: Arc::new(RwLock::new(StabilizationParams::default())),
             
             undistortion: Arc::new(RwLock::new(Undistortion::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
@@ -224,7 +225,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<ProcessingParams>) -> Vec<f64> {
+    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<StabilizationParams>) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
@@ -274,7 +275,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut params = undistortion::ComputeParams::from_manager(self);
 
         let smoothing = self.smoothing.clone();
-        let processing_params = self.params.clone();
+        let stabilization_params = self.params.clone();
         let gyro = self.gyro.clone();
 
         let compute_id = fastrand::u64(..);
@@ -292,7 +293,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
                 let mut smoothing = smoothing.write().current().clone();
-                params.gyro.recompute_smoothness(smoothing.as_mut(), &processing_params.read());
+                params.gyro.recompute_smoothness(smoothing.as_mut(), &stabilization_params.read());
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
@@ -307,8 +308,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let mut zoom = AdaptiveZoom::from_compute_params(params.clone());
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &processing_params);
-                processing_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
+                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
+                stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
             }
             
             if current_compute_id.load(SeqCst) != compute_id { return; }
@@ -560,7 +561,7 @@ impl<T: PixelType> StabilizationManager<T> {
             (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted)
         };
 
-        *self.params.write() = ProcessingParams {
+        *self.params.write() = StabilizationParams {
             stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, ..Default::default()
         };
         if !self.gyro.read().prevent_next_load {

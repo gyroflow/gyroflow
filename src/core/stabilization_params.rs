@@ -2,7 +2,7 @@
 use nalgebra::Vector4;
 
 #[derive(Clone)]
-pub struct ProcessingParams {
+pub struct StabilizationParams {
     pub size: (usize, usize), // Processing input size
     pub output_size: (usize, usize), // Processing output size
     pub video_size: (usize, usize), // Full resolution input size
@@ -32,7 +32,7 @@ pub struct ProcessingParams {
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
 }
-impl Default for ProcessingParams {
+impl Default for StabilizationParams {
     fn default() -> Self {
         Self {
             fov: 1.0,
@@ -67,7 +67,7 @@ impl Default for ProcessingParams {
     }
 }
 
-impl ProcessingParams {
+impl StabilizationParams {
     pub fn get_scaled_duration_ms(&self) -> f64 {
         match self.fps_scale {
             Some(scale) => self.duration_ms / scale,

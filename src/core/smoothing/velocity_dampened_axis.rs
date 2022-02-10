@@ -8,12 +8,12 @@
 // 5. Perform plain 3D smoothing with varying alpha, where each alpha is interpolated between 1s smoothness at 0 velocity, 0.1s smoothness at max velocity and extrapolated above that
 // 6. This way, low velocities are smoothed using 1s smoothness, but high velocities are smoothed using 0.1s smoothness at max velocity (500 deg/s multiplied by slider) and gradually lower smoothness above that
 
-
-use nalgebra::*;
 use std::collections::BTreeMap;
 
 use super::*;
-use crate::gyro_source::{Quat64, TimeQuat};
+use nalgebra::*;
+use crate::gyro_source::TimeQuat;
+use crate::Quat64;
 
 #[derive(Clone)]
 pub struct VelocityDampenedAxis {
@@ -98,7 +98,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &ProcessingParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const MAX_VELOCITY: f64 = 500.0;

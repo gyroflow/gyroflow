@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Aphobius
 
-use nalgebra::*;
 use std::collections::BTreeMap;
 
 use super::*;
-use crate::gyro_source::{Quat64, TimeQuat};
+use nalgebra::*;
+use crate::gyro_source::TimeQuat;
+use crate::Quat64;
 
 #[derive(Clone)]
 pub struct VelocityDampened {
@@ -111,7 +112,7 @@ impl SmoothingAlgorithm for VelocityDampened {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, params: &ProcessingParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &crate::StabilizationParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);

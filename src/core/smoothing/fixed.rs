@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Elvin Chen
 
-use nalgebra::*;
-
 use super::*;
+use nalgebra::*;
 use crate::gyro_source::TimeQuat;
 
 #[derive(Clone)]
@@ -84,7 +83,7 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &ProcessingParams) -> TimeQuat {
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
