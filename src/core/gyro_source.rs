@@ -6,15 +6,14 @@ use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::fs::File;
 use std::path::Path;
+use std::io::Result;
 use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
-use crate::BasicParams;
+use crate::processing_params::ProcessingParams;
 use crate::camera_identifier::CameraIdentifier;
-
-use super::integration::*;
-use super::smoothing::SmoothingAlgorithm;
-use std::io::Result;
+use crate::integration::*;
+use crate::smoothing::SmoothingAlgorithm;
 
 pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
@@ -88,7 +87,7 @@ impl GyroSource {
             ..Default::default()
         }
     }
-    pub fn init_from_params(&mut self, params: &BasicParams) {
+    pub fn init_from_params(&mut self, params: &ProcessingParams) {
         self.fps = params.get_scaled_fps();
         self.duration_ms = params.get_scaled_duration_ms();
         self.offsets.clear();
@@ -201,7 +200,7 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, params: &BasicParams) {
+    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, params: &ProcessingParams) {
         self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, params);
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();

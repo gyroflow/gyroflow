@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Elvin Chen
 
 use super::*;
+use crate::processing_params::ProcessingParams;
 use crate::gyro_source::TimeQuat;
 
 #[derive(Clone)]
@@ -37,7 +38,7 @@ impl SmoothingAlgorithm for None {
         hasher.write_u64(self.horizonroll.to_bits());
         hasher.finish()
     }
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &crate::BasicParams) -> TimeQuat {
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _params: &ProcessingParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         if self.horizonlockpercent == 0.0 {
