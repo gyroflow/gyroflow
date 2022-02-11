@@ -6,6 +6,7 @@ pub mod none;
 pub mod plain;
 pub mod fixed;
 // pub mod velocity_dampened_v1;
+pub mod default_algo;
 pub mod velocity_dampened;
 pub mod velocity_dampened_axis;
 pub mod velocity_dampened_advanced;
@@ -47,6 +48,7 @@ impl Default for Smoothing {
             algs: vec![
                 Box::new(self::none::None::default()),
                 Box::new(self::plain::Plain::default()),
+                Box::new(self::default_algo::DefaultAlgo::default()),
                 // Box::new(self::velocity_dampened_v1::VelocityDampened::default()),
                 Box::new(self::velocity_dampened::VelocityDampened::default()),
                 Box::new(self::velocity_dampened_axis::VelocityDampenedAxis::default()),
