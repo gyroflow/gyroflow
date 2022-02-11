@@ -17,8 +17,7 @@ pub struct VelocityDampenedAdvanced {
     pub time_constant: f64,
     pub time_constant2: f64,
     pub velocity_factor: f64,
-    pub horizonlockpercent: f64,
-    pub horizonroll: f64
+    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for VelocityDampenedAdvanced {
@@ -26,8 +25,7 @@ impl Default for VelocityDampenedAdvanced {
         time_constant: 0.6,
         time_constant2: 0.1,
         velocity_factor: 0.9,
-        horizonlockpercent: 0.0,
-        horizonroll: 0.0
+        horizonlock: Default::default()
     } }
 }
 
@@ -39,11 +37,14 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
             "time_constant"   => self.time_constant   = val,
             "time_constant2"  => self.time_constant2  = val,
             "velocity_factor" => self.velocity_factor = val,
-            "horizonroll" => self.horizonroll = val,
-            "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
+
+    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
+        self.horizonlock.set_horizon(lock_percent, roll);
+    }
+
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {
@@ -89,8 +90,7 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
         hasher.write_u64(self.time_constant.to_bits());
         hasher.write_u64(self.time_constant2.to_bits());
         hasher.write_u64(self.velocity_factor.to_bits());
-        hasher.write_u64(self.horizonroll.to_bits());
-        hasher.write_u64(self.horizonlockpercent.to_bits());
+        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -157,15 +157,6 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
             (*ts, q)
         }).collect();
 
-        // level horizon
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-
-        if self.horizonlockpercent == 0.0 {
-            smoothed2
-        } else {
-            smoothed2.iter().map(|x| {
-                (*x.0,  lock_horizon_angle(*x.1, self.horizonroll * DEG2RAD).slerp(x.1, 1.0-self.horizonlockpercent/100.0))
-            }).collect()
-        }
+        self.horizonlock.lock(&smoothed2)
     }
 }

@@ -185,6 +185,14 @@ MenuItem {
         }
     }
 
+    function updateHorizonLock() {
+        const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
+        const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
+        settings.setValue("horizon-lockamount", lockAmount);
+        settings.setValue("horizon-roll", roll);
+        controller.set_horizon_lock(lockAmount, roll);
+    }
+
     ComboBox {
         id: smoothingMethod;
         model: smoothingAlgorithms;
@@ -232,10 +240,7 @@ MenuItem {
 
                 Qt.createQmlObject(qml, smoothingOptions);
 
-                Qt.callLater(() => {
-                    root.setSmoothingParam("horizonlockpercent", horizonCb.cb.checked? horizonSlider.value : 0.0);
-                    root.setSmoothingParam("horizonroll", horizonCb.cb.checked? horizonRollSlider.value : 0.0);
-                });
+                Qt.callLater(updateHorizonLock);
             }
         }
     }
@@ -264,9 +269,9 @@ MenuItem {
     CheckBoxWithContent {
         id: horizonCb;
         text: qsTr("Lock horizon");
+
         cb.onCheckedChanged: {
-            root.setSmoothingParam("horizonlockpercent", cb.checked? horizonSlider.value : 0.0);
-            root.setSmoothingParam("horizonroll", cb.checked? horizonRollSlider.value : 0.0);
+            updateHorizonLock();
         }
 
         Label {
@@ -280,8 +285,8 @@ MenuItem {
                 width: parent.width;
                 unit: qsTr("%");
                 precision: 1;
-                value: root.getSmoothingParam("horizonlockpercent", 100);
-                onValueChanged: () => root.setSmoothingParam("horizonlockpercent", horizonSlider.value);
+                value: settings.value("horizon-lockamount", 100);
+                onValueChanged: updateHorizonLock();
             }
         }
 
@@ -294,11 +299,11 @@ MenuItem {
                 width: parent.width;
                 from: -180;
                 to: 180;
-                value: root.getSmoothingParam("horizonroll", 0);
+                value: settings.value("horizon-roll", 0);
                 defaultValue: 0;
                 unit: qsTr("°");
                 precision: 1;
-                onValueChanged: root.setSmoothingParam("horizonroll", value);
+                onValueChanged: updateHorizonLock();
             }
         }
 

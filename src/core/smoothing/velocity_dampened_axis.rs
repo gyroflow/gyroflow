@@ -20,8 +20,7 @@ pub struct VelocityDampenedAxis {
     pub smoothness_pitch: f64,
     pub smoothness_yaw: f64,
     pub smoothness_roll: f64,
-    pub horizonlockpercent: f64,
-    pub horizonroll: f64
+    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for VelocityDampenedAxis {
@@ -29,8 +28,7 @@ impl Default for VelocityDampenedAxis {
         smoothness_pitch: 0.2,
         smoothness_yaw: 0.2,
         smoothness_roll: 0.2,
-        horizonlockpercent: 0.0,
-        horizonroll: 0.0
+        horizonlock: Default::default()
     } }
 }
 
@@ -42,11 +40,14 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
             "smoothness_pitch" => self.smoothness_pitch = val,
             "smoothness_yaw" => self.smoothness_yaw = val,
             "smoothness_roll" => self.smoothness_roll = val,
-            "horizonroll" => self.horizonroll = val,
-            "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
+    
+    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
+        self.horizonlock.set_horizon(lock_percent, roll);
+    }
+
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {
@@ -84,6 +85,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
             }
         ])
     }
+
     fn get_status_json(&self) -> serde_json::Value {
         serde_json::json!([])
     }
@@ -93,8 +95,7 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
         hasher.write_u64(self.smoothness_pitch.to_bits());
         hasher.write_u64(self.smoothness_yaw.to_bits());
         hasher.write_u64(self.smoothness_roll.to_bits());
-        hasher.write_u64(self.horizonroll.to_bits());
-        hasher.write_u64(self.horizonlockpercent.to_bits());
+        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -188,15 +189,6 @@ impl SmoothingAlgorithm for VelocityDampenedAxis {
             (*ts, q)
         }).collect();
 
-        // level horizon
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-
-        if self.horizonlockpercent == 0.0 {
-            smoothed2
-        } else {
-            smoothed2.iter().map(|x| {
-                (*x.0,  lock_horizon_angle(*x.1, self.horizonroll * DEG2RAD).slerp(x.1, 1.0-self.horizonlockpercent/100.0))
-            }).collect()
-        }
+        self.horizonlock.lock(&smoothed2)
     }
 }
