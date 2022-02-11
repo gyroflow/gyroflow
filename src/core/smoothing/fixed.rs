@@ -5,21 +5,12 @@ use super::*;
 use nalgebra::*;
 use crate::gyro_source::TimeQuat;
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct Fixed {
     pub roll: f64,
     pub pitch: f64,
     pub yaw: f64,
     pub horizonlock: horizon::HorizonLock
-}
-
-impl Default for Fixed {
-    fn default() -> Self { Self {
-        roll: 0.0,
-        pitch: 0.0,
-        yaw: 0.0,
-        horizonlock: Default::default()
-    } }
 }
 
 impl SmoothingAlgorithm for Fixed {

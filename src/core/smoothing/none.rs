@@ -5,15 +5,9 @@ use super::*;
 use crate::gyro_source::TimeQuat;
 
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct None {
     pub horizonlock: horizon::HorizonLock
-}
-
-impl Default for None {
-    fn default() -> Self { Self {
-        horizonlock: Default::default()
-    } }
 }
 
 impl SmoothingAlgorithm for None {
