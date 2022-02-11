@@ -127,10 +127,10 @@ impl<'a> VideoTranscoder<'a> {
             pixel_format = format::Pixel::YUV420P;
             color_range = util::color::Range::JPEG;
         }
-        // if codec_name == "hevc_videotoolbox" {
-        //     log::debug!("Overriding to MPEG color range");
-        //     color_range = util::color::Range::MPEG;
-        // }
+        if codec_name == "hevc_videotoolbox" {
+            log::debug!("Overriding to MPEG color range");
+            color_range = util::color::Range::MPEG;
+        }
         encoder.set_width(size.0);
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(decoder.aspect_ratio());
@@ -142,9 +142,9 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_color_range(color_range);
         encoder.set_colorspace(decoder.color_space());
         unsafe {
-            //if codec_name != "hevc_videotoolbox" {
+            if codec_name != "hevc_videotoolbox" {
                 (*encoder.as_mut_ptr()).color_trc = (*decoder.as_ptr()).color_trc;
-            //}
+            }
             (*encoder.as_mut_ptr()).color_primaries = (*decoder.as_ptr()).color_primaries;
         }
 
