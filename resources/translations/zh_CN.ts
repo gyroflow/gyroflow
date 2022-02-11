@@ -164,7 +164,7 @@ This should provide much better UI performance.</source>
       <location filename="../../src/ui/App.qml" line="292"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
+      <translation>简体中文</translation>
     </message>
   </context>
   <context>
@@ -906,7 +906,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation type="unfinished">Lock amount</translation>
+      <translation>锁定量</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>

@@ -163,7 +163,7 @@ Esto debería ofrecer mayor rendimiento en la UI.</translation>
       <location filename="../../src/ui/App.qml" line="292"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
+      <translation>Español</translation>
     </message>
   </context>
   <context>

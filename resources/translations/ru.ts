@@ -11,7 +11,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="26"/>
       <source>Preview resolution</source>
-      <translation>Разрешение предварительного просмотра</translation>
+      <translation>Разрешение превью</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
@@ -164,7 +164,7 @@ This should provide much better UI performance.</source>
       <location filename="../../src/ui/App.qml" line="292"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
+      <translation>Русский</translation>
     </message>
   </context>
   <context>
@@ -906,7 +906,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation type="unfinished">Lock amount</translation>
+      <translation>Степень блокировки</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
@@ -999,7 +999,7 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="79"/>
       <source>Rough gyro offset</source>
-      <translation>Грубое смещение данных гироскопа</translation>
+      <translation>Примерное смещение</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="86"/>
@@ -1011,12 +1011,12 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
       <source>Sync search size</source>
-      <translation>Диапазон поиска для синхронизации</translation>
+      <translation>Диапазон поиска</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="105"/>
       <source>Max sync points</source>
-      <translation>Максимальное количество точек синхронизации</translation>
+      <translation>Макс. точек синхронизации</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>

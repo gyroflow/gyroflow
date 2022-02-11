@@ -164,7 +164,7 @@ Cela devrait fournir de bien meilleures performances de l'interface utilisateur.
       <location filename="../../src/ui/App.qml" line="292"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
+      <translation>Français</translation>
     </message>
   </context>
   <context>
@@ -805,7 +805,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="138"/>
       <source>Yaw angle correction</source>
-      <translation>Correction de l'angle du lacet</translation>
+      <translation>Correction de l'angle du lacet (yaw)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="139"/>
@@ -900,28 +900,28 @@ Modifiez les paramètres de vitesse jusqu'à ce que vous obteniez les valeurs so
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Lock horizon</source>
-      <translation type="unfinished">Lock horizon</translation>
+      <translation>Verrouiller l'horizon</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation type="unfinished">Lock amount</translation>
+      <translation>Force du vérouillage d'horizon</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
       <source>%</source>
-      <translation type="unfinished">%</translation>
+      <translation>%</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
       <source>°</source>
-      <translation type="unfinished">°</translation>
+      <translation>°</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
-      <translation>Rotation max : Tangage: %1, Lacet: %2, Roulis : %3</translation>
+      <translation>Rotation max : Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="335"/>
@@ -1082,7 +1082,7 @@ Le résultat du décalage est celui où les lignes ont été les plus courtes, c
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
       <source>Show optical flow</source>
-      <translation>Afficher le flux optique</translation>
+      <translation>Afficher "optical flow"</translation>
     </message>
   </context>
   <context>

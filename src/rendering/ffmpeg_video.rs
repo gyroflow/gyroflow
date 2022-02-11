@@ -240,16 +240,15 @@ impl<'a> VideoTranscoder<'a> {
 
                     let timestamp = Some(ts.rescale((1, 1000000), time_base));
 
-                    let mut input_frame = unsafe {
-                        if !(*frame.as_mut_ptr()).hw_frames_ctx.is_null() {
+                    let mut input_frame = 
+                        if unsafe { !(*frame.as_mut_ptr()).hw_frames_ctx.is_null() } {
                             // retrieve data from GPU to CPU
                             ffmpeg!(ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0); FromHWTransferError);
                             ffmpeg!(ffi::av_frame_copy_props(sw_frame.as_mut_ptr(), frame.as_mut_ptr()); FromHWTransferError);
                             &mut sw_frame
                         } else {
                             &mut frame
-                        }
-                    };
+                        };
 
                     // input_frame.set_pts(frame_timestamp);
 

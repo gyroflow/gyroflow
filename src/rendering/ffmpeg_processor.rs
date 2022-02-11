@@ -299,7 +299,7 @@ impl<'a> FfmpegProcessor<'a> {
                 transcoder.encoder.send_eof()?;
                 transcoder.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
             }
-        }    
+        }
 
         octx.write_trailer()?;
 
