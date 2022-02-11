@@ -7,6 +7,7 @@ Column {
     spacing: parent.spacing;
     width: parent.width;
 
+    property real diff: -10 * dpiScale;
     default property alias data: advanced.data;
 
     LinkButton {
@@ -21,7 +22,7 @@ Column {
         width: parent.width;
         visible: opacity > 0;
         opacity: opened? 1 : 0;
-        height: opened? implicitHeight : -10 * dpiScale;
+        height: opened? implicitHeight : diff
         Ease on opacity { }
         Ease on height { id: anim; }
         onOpenedChanged: {

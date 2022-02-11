@@ -75,6 +75,22 @@ MenuItem {
     function getSmoothingParam(name, defaultValue) {
         return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
+    function getParamElement(name) {
+        function traverseChildren(node) {
+            for (let i = node.children.length; i > 0; --i) {
+                const child = node.children[i - 1];
+                if (child) {
+                    if (child.objectName == ("param-" + name)) {
+                        return child;
+                    }
+                    const found = traverseChildren(child);
+                    if (found !== null) return found;
+                }
+            }
+            return null;
+        }
+        return traverseChildren(smoothingOptions);
+    }
 
     Connections {
         target: controller;
@@ -209,16 +225,20 @@ MenuItem {
             const opt_json = controller.set_smoothing_method(currentIndex);
             if (opt_json.length > 0) {
                 let qml = "import QtQuick; import '../components/'; Column { width: parent.width; ";
+                let adv_qml = "AdvancedSection { diff: 0; ";
                 for (const x of opt_json) {
                     // TODO: figure out a better way than constructing a string
+                    let str = "";
+                    const add = x.custom_qml || "";
                     switch (x.type) {
                         case 'Slider': 
                         case 'SliderWithField': 
-                        case 'NumberField': 
-                            qml += `Label {
+                        case 'NumberField':
+                            str = `Label {
                                 width: parent.width;
                                 spacing: 2 * dpiScale;
-                                text: qsTranslate("Stabilization", "${x.description}")
+                                text: qsTranslate("Stabilization", "${x.description}");
+                                objectName: "param-${x.name}-label";
                                 ${x.type} {
                                     width: parent.width;
                                     from: ${x.from};
@@ -227,15 +247,27 @@ MenuItem {
                                     defaultValue: ${x.default};
                                     objectName: "param-${x.name}";
                                     unit: qsTranslate("Stabilization", "${x.unit}");
-                                    //live: false;
                                     precision: ${x.precision} || 2;
                                     onValueChanged: root.setSmoothingParam("${x.name}", value);
+                                    ${add}
                                 }
                             }`;
                         break;
-                        case 'QML': qml += x.custom_qml; break;
+                        case 'CheckBox':
+                            str = `CheckBox {
+                                text: qsTranslate("Stabilization", "${x.description}")
+                                checked: +root.getSmoothingParam("${x.name}", ${x.default}) > 0;
+                                onCheckedChanged: root.setSmoothingParam("${x.name}", checked? 1 : 0);
+                                objectName: "param-${x.name}";
+                                ${add}
+                            }`;
+                        break;
+                        case 'QML': str = x.custom_qml; break;
                     }
+                    if (x.advanced) adv_qml += str
+                    else qml += str;
                 }
+                qml += adv_qml.length > 40? (adv_qml + "}") : "";
                 qml += "}";
 
                 Qt.createQmlObject(qml, smoothingOptions);
