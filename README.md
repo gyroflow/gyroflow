@@ -200,18 +200,16 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Install Xcode command line tools: `xcode-select --install`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
-5. Update PROJECT_DIR in `__env-macos.sh`
-6. Setup the environment in terminal: `source __env-macos.sh` - I do this in VS Code built-in terminal
-7. Compile and run: `cargo run --release`
-8. If it fails to run, do: `./_deployment/deploy-macos.sh` once
+5. Setup the environment in terminal: `source __env-macos.sh` - I do this in VS Code built-in terminal
+6. Compile and run: `cargo run --release`
+7. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
 ### Building on Linux
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies: `cd gyroflow/ext && ./install-deps-linux.sh` (Debian based apt)
-4. Update PROJECT_DIR in `__env-linux.sh`
-5. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
-6. Compile and run: `cargo run --release`
+4. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
+5. Compile and run: `cargo run --release`
 
 ### Building for Android
 1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested

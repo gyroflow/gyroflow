@@ -127,10 +127,6 @@ impl<'a> VideoTranscoder<'a> {
             pixel_format = format::Pixel::YUV420P;
             color_range = util::color::Range::JPEG;
         }
-        if codec_name.contains("videotoolbox") {
-            log::debug!("Overriding to MPEG color range");
-            color_range = util::color::Range::MPEG;
-        }
         encoder.set_width(size.0);
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(decoder.aspect_ratio());
@@ -286,7 +282,6 @@ impl<'a> VideoTranscoder<'a> {
                         final_sw_frame.set_kind(picture::Type::None);
 
                         let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
-                        // final_sw_frame.set_color_range(encoder.color_range());
                         if self.gpu_encoding && unsafe { !(*encoder.as_mut_ptr()).hw_frames_ctx.is_null() } {
                             // Hardware encoder
 
@@ -300,12 +295,17 @@ impl<'a> VideoTranscoder<'a> {
                             ffmpeg!(ffi::av_hwframe_transfer_data(hw_frame.as_mut_ptr(), output_frame.as_mut_ptr(), 0); ToHWBufferError);
                             ffmpeg!(ffi::av_frame_copy_props(hw_frame.as_mut_ptr(), output_frame.as_mut_ptr()); ToHWBufferError);
                             
+                            hw_frame.set_format(encoder.format());
+                            hw_frame.set_color_range(encoder.color_range());
                             encoder.send_frame(&hw_frame)?;
                         } else {
                             // Software encoder
                             // Clone the frame because we use threaded encoder, so we need to guarantee it won't change
                             // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
-                            encoder.send_frame(&final_sw_frame.clone())?;
+                            let mut frame = final_sw_frame.clone();
+                            frame.set_format(encoder.format());
+                            frame.set_color_range(encoder.color_range());
+                            encoder.send_frame(&frame)?;
                         }
                     }
                     if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>, Aphobius
+// Copyright © 2021-2022 Aphobius
 
 // 1. Calculate velocity for each quaternion
 // 2. Smooth the velocities
@@ -107,8 +107,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "description": "Per axis",
                 "advanced": true,
                 "type": "CheckBox",
-                "value": self.per_axis,
-                "default": false,
+                "default": self.per_axis,
                 "custom_qml": "Connections { function onCheckedChanged() {
                     const checked = root.getParamElement('per_axis').checked;
                     root.getParamElement('smoothness-label').visible = !checked;
@@ -165,17 +164,14 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
             let dist = prev_quat.inverse() * quat;
-            if self.per_axis
-            {
+            if self.per_axis {
                 let euler = dist.euler_angles();
                 velocity.insert(*timestamp, Vector3::new(
                     euler.0.abs() * rad_to_deg_per_sec,
                     euler.1.abs() * rad_to_deg_per_sec,
                     euler.2.abs() * rad_to_deg_per_sec
                 ));
-            }
-            else
-            {
+            } else {
                 velocity.insert(*timestamp, Vector3::from_element(dist.angle().abs() * rad_to_deg_per_sec));
             }
             prev_quat = *quat;
@@ -194,23 +190,18 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         // Calculate max velocity
         let mut max_velocity = Vector3::from_element(MAX_VELOCITY);
-        if self.per_axis
-        {
+        if self.per_axis {
             max_velocity[0] *= self.smoothness_pitch;
             max_velocity[1] *= self.smoothness_yaw;
             max_velocity[2] *= self.smoothness_roll;
-        }
-        else
-        {
+        } else {
             max_velocity[0] *= self.smoothness;
         }
 
         // Normalize velocity
-        for (_ts, vel) in velocity.iter_mut()
-        {
+        for (_ts, vel) in velocity.iter_mut() {
             vel[0] /= max_velocity[0];
-            if self.per_axis
-            {
+            if self.per_axis {
                 vel[1] /= max_velocity[1];
                 vel[2] /= max_velocity[2];
             }
@@ -220,8 +211,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|(ts, x)| {
             let ratio = velocity[ts];
-            if self.per_axis
-            {
+            if self.per_axis {
                 let pitch_factor = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 let yaw_factor = alpha * (1.0 - ratio[1]) + high_alpha * ratio[1];
                 let roll_factor = alpha * (1.0 - ratio[2]) + high_alpha * ratio[2];
@@ -234,9 +224,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                     euler_rot.2 * roll_factor.min(1.0),
                 );
                 q *= quat_rot;
-            }
-            else
-            {
+            } else {
                 let val = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 q = q.slerp(x, val.min(1.0));
             }
@@ -247,8 +235,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
             let ratio = velocity[ts];
-            if self.per_axis
-            {
+            if self.per_axis {
                 let pitch_factor = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 let yaw_factor = alpha * (1.0 - ratio[1]) + high_alpha * ratio[1];
                 let roll_factor = alpha * (1.0 - ratio[2]) + high_alpha * ratio[2];
@@ -261,9 +248,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                     euler_rot.2 * roll_factor.min(1.0),
                 );
                 q *= quat_rot;
-            }
-            else
-            {
+            } else {
                 let val = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 q = q.slerp(x, val.min(1.0));
             }

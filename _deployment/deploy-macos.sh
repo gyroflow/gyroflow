@@ -1,6 +1,6 @@
 #!/bin/bash
 
-: "${PROJECT_DIR:=/Users/admin/gyroflow}"
+: "${PROJECT_DIR:=$(readlink -f $(dirname $(readlink -f $0))/..)}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.3/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_DIR="/Users/Admin/gyroflow"
+PROJECT_DIR=$(dirname $(readlink -f $0))
 
 export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
 export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/x64-osx-release/lib
