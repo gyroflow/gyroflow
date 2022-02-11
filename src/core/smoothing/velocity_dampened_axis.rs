@@ -28,7 +28,7 @@ impl Default for VelocityDampenedAxis {
         smoothness_pitch: 0.2,
         smoothness_yaw: 0.2,
         smoothness_roll: 0.2,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 

@@ -14,7 +14,7 @@ pub struct Plain {
 impl Default for Plain {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 

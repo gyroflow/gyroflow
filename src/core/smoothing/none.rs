@@ -12,7 +12,7 @@ pub struct None {
 
 impl Default for None {
     fn default() -> Self { Self {
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 

@@ -21,7 +21,7 @@ pub struct VelocityDampened {
 impl Default for VelocityDampened {
     fn default() -> Self { Self {
         smoothness: 0.3,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 

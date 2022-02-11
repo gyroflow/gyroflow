@@ -18,7 +18,7 @@ impl Default for Fixed {
         roll: 0.0,
         pitch: 0.0,
         yaw: 0.0,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 

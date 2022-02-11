@@ -186,8 +186,8 @@ MenuItem {
     }
 
     function updateHorizonLock() {
-        let lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
-        let roll = horizonCb.checked? horizonRollSlider.value : 0.0;
+        const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
+        const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         settings.setValue("horizon-lockamount", lockAmount);
         settings.setValue("horizon-roll", roll);
         controller.set_horizon_lock(lockAmount, roll);
@@ -240,9 +240,7 @@ MenuItem {
 
                 Qt.createQmlObject(qml, smoothingOptions);
 
-                Qt.callLater(() => {
-                    updateHorizonLock();
-                });
+                Qt.callLater(updateHorizonLock);
             }
         }
     }
@@ -288,7 +286,7 @@ MenuItem {
                 unit: qsTr("%");
                 precision: 1;
                 value: settings.value("horizon-lockamount", 100);
-                onValueChanged: () => updateHorizonLock();
+                onValueChanged: updateHorizonLock();
             }
         }
 
@@ -305,7 +303,7 @@ MenuItem {
                 defaultValue: 0;
                 unit: qsTr("°");
                 precision: 1;
-                onValueChanged: () => updateHorizonLock();
+                onValueChanged: updateHorizonLock();
             }
         }
 

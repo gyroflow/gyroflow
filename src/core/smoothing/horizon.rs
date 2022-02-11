@@ -50,7 +50,7 @@ pub struct HorizonLock {
 
 impl Default for HorizonLock {
     fn default() -> Self { Self {
-        lock_enabled: true,
+        lock_enabled: false,
         horizonlockpercent: 100.0,
         horizonroll: 0.0,
     } }

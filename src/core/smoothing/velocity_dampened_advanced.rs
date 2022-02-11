@@ -25,7 +25,7 @@ impl Default for VelocityDampenedAdvanced {
         time_constant: 0.6,
         time_constant2: 0.1,
         velocity_factor: 0.9,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 
@@ -156,7 +156,7 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
             q = q.slerp(x, val.min(1.0));
             (*ts, q)
         }).collect();
-        
+
         self.horizonlock.lock(&smoothed2)
     }
 }

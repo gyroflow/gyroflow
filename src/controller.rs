@@ -548,11 +548,7 @@ impl Controller {
         self.chart_data_changed();
         self.request_recompute();
     }
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64){
-        self.stabilizer.set_horizon_lock(lock_percent, roll);
-        self.chart_data_changed();
-        self.request_recompute();
-    }
+    wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64; recompute; chart_data_changed);
     pub fn get_smoothing_algs(&self) -> QVariantList {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
     }

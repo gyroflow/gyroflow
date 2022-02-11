@@ -23,7 +23,7 @@ impl Default for VelocityDampened {
         pitch_vel_damp: 2.0,
         yaw_vel_damp: 2.0,
         roll_vel_damp: 2.0,
-        horizonlock: horizon::HorizonLock::default()
+        horizonlock: Default::default()
     } }
 }
 
