@@ -11,9 +11,11 @@ use std::collections::BTreeMap;
 
 use super::*;
 use crate::gyro_source::TimeQuat;
+use nalgebra::*;
+use crate::Quat64;
 
 #[derive(Clone)]
-pub struct Default {
+pub struct DefaultAlgo {
     pub smoothness: f64,
     pub smoothness_pitch: f64,
     pub smoothness_yaw: f64,
@@ -44,7 +46,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "smoothness_pitch" => self.smoothness_pitch = val,
             "smoothness_yaw" => self.smoothness_yaw = val,
             "smoothness_roll" => self.smoothness_roll = val,
-            "per_axis" => self.per_axis = val,
+            "per_axis" => self.per_axis = val > 0.1,
             "max_smoothness" => self.max_smoothness = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
@@ -139,7 +141,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.write_u64(self.smoothness_pitch.to_bits());
         hasher.write_u64(self.smoothness_yaw.to_bits());
         hasher.write_u64(self.smoothness_roll.to_bits());
-        hasher.write_u64(self.per_axis.to_bits());
+        hasher.write_u8(if self.per_axis { 1 } else { 0 });
         hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
@@ -150,7 +152,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         const MAX_VELOCITY: f64 = 500.0;
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
-        let alpha = 1.0 - (-(1.0 / sample_rate) / 1.0).exp();
+        let alpha = 1.0 - (-(1.0 / sample_rate) / self.max_smoothness).exp();
         let high_alpha = 1.0 - (-(1.0 / sample_rate) / 0.1).exp();
 
         let mut velocity = BTreeMap::<i64, Vector3<f64>>::new();
@@ -163,7 +165,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut prev_quat = *quats.iter().next().unwrap().1; // First quat
         for (timestamp, quat) in quats.iter().skip(1) {
             let dist = prev_quat.inverse() * quat;
-            if per_axis
+            if self.per_axis
             {
                 let euler = dist.euler_angles();
                 velocity.insert(*timestamp, Vector3::new(
@@ -174,7 +176,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             }
             else
             {
-                velocity.insert(*timestamp, dist.angle().abs() * rad_to_deg_per_sec);    
+                velocity.insert(*timestamp, Vector3::from_element(dist.angle().abs() * rad_to_deg_per_sec));
             }
             prev_quat = *quat;
         }
@@ -192,7 +194,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         // Calculate max velocity
         let mut max_velocity = Vector3::from_element(MAX_VELOCITY);
-        if per_axis
+        if self.per_axis
         {
             max_velocity[0] *= self.smoothness_pitch;
             max_velocity[1] *= self.smoothness_yaw;
@@ -207,7 +209,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         for (_ts, vel) in velocity.iter_mut()
         {
             vel[0] /= max_velocity[0];
-            if per_axis
+            if self.per_axis
             {
                 vel[1] /= max_velocity[1];
                 vel[2] /= max_velocity[2];
@@ -218,7 +220,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|(ts, x)| {
             let ratio = velocity[ts];
-            if per_axis
+            if self.per_axis
             {
                 let pitch_factor = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 let yaw_factor = alpha * (1.0 - ratio[1]) + high_alpha * ratio[1];
@@ -235,7 +237,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             }
             else
             {
-                let val = alpha * (1.0 - ratio) + high_alpha * ratio;
+                let val = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 q = q.slerp(x, val.min(1.0));
             }
             (*ts, q)
@@ -244,8 +246,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
-            let ratio = ratios[ts];
-            if per_axis
+            let ratio = velocity[ts];
+            if self.per_axis
             {
                 let pitch_factor = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 let yaw_factor = alpha * (1.0 - ratio[1]) + high_alpha * ratio[1];
@@ -262,7 +264,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             }
             else
             {
-                let val = alpha * (1.0 - ratio) + high_alpha * ratio;
+                let val = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
                 q = q.slerp(x, val.min(1.0));
             }
             (*ts, q)
