@@ -143,7 +143,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
             
             for i in 0..20 {
                 unsafe {
-                    let type_ = /*if !x.0.contains("videotoolbox") */{
+                    let type_ = if !x.0.contains("videotoolbox") {
                         let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
                         if config.is_null() {
                             println!("config is null {}", x.0);
@@ -160,9 +160,9 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                             }
                         }
                         type_
-                    }/* else {
+                    } else {
                         ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX
-                    }*/;
+                    };
                     let mut devices = DEVICES.lock();
                     if let Some(dev) = devices.get_mut(&type_) {
                         let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), std::ptr::null());
@@ -216,29 +216,13 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
     let mut devices = DEVICES.lock();
     if let Some(dev) = devices.get_mut(&type_) {
         unsafe {
-            if (*encoder_ctx).hw_frames_ctx.is_null() {
-                let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
-                if hw_frames_ref.is_null() {
-                    super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
-                    return Err(());
-                }
-                (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
-                ffi::av_buffer_unref(&mut hw_frames_ref);
-            } else {
-                log::debug!("hwframes already exists");
+            if dev.sw_formats.is_empty() && !(*encoder_ctx).codec.is_null() {
+                dev.sw_formats = pix_formats_to_vec((*(*encoder_ctx).codec).pix_fmts);
+                log::debug!("Setting codec formats: {:?}", dev.sw_formats);
             }
 
+            dbg!(&dev.sw_formats);
             dbg!(&dev.hw_formats);
-            let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
-            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX {
-                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_VIDEOTOOLBOX);
-            }
-            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA {
-                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_D3D11);
-            }
-            if dev.hw_formats.is_empty() && type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2 {
-                dev.hw_formats.push(ffi::AVPixelFormat::AV_PIX_FMT_DXVA2_VLD);
-            }
             dbg!(&dev.hw_formats);
             if !dev.hw_formats.is_empty() {
                 let target_format = {
@@ -264,6 +248,20 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
 
                 if target_format != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
                     let hw_format = *dev.hw_formats.first().unwrap(); // Safe because we check !is_empty() above
+
+                    if (*encoder_ctx).hw_frames_ctx.is_null() {
+                        let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
+                        if hw_frames_ref.is_null() {
+                            super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
+                            return Err(());
+                        }
+                        (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
+                        ffi::av_buffer_unref(&mut hw_frames_ref);
+                    } else {
+                        log::debug!("hwframes already exists");
+                    }
+                    let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
+
                     let mut frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
                     dbg!(&(*frames_ctx).format);
                     dbg!(&(*frames_ctx).sw_format);
@@ -286,7 +284,6 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                     dbg!(&(*frames_ctx).format);
                     dbg!(&(*frames_ctx).sw_format);
                     (*encoder_ctx).pix_fmt = (*frames_ctx).format;
-                
                 }
             }
         }

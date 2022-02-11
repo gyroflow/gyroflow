@@ -79,7 +79,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
-- [x] Sony (a1, a6600, a7c, a7r IV, a7 IV, a7s III, a9 II, FX3, FX6, RX0 II, RX100 VII, ZV1, ZV-E10)
+- [x] Sony (a1, a7c, a7r IV, a7 IV, a7s III, a9 II, FX3, FX6, RX0 II, RX100 VII, ZV1, ZV-E10)
 - [x] Insta360 (OneR, SMO 4k, GO2)
 - [x] Betaflight blackbox (CSV and binary)
 - [x] Mobile apps: `Sensor Logger`, `G-Field Recorder`, `Gyro`

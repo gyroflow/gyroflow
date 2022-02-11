@@ -55,10 +55,6 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_nvenc",        true),
-                #[cfg(any(target_os = "windows", target_os = "linux"))]
-                ("nvenc",             true),
-                #[cfg(any(target_os = "windows", target_os = "linux"))]
-                ("nvenc_h264",        true),
                 #[cfg(target_os = "windows")]
                 ("h264_amf",          true),
                 #[cfg(target_os = "windows")]
@@ -76,8 +72,6 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_nvenc",        true),
-                #[cfg(any(target_os = "windows", target_os = "linux"))]
-                ("nvenc_hevc",        true),
                 #[cfg(target_os = "windows")]
                 ("hevc_amf",          true),
                 #[cfg(target_os = "windows")]
@@ -353,41 +347,54 @@ pub fn clear_log() { FFMPEG_LOG.write().clear() }
 
 /*
 pub fn test() {
-    log::debug!("FfmpegProcessor::supported_gpu_backends: {:?}", FfmpegProcessor::supported_gpu_backends());
+    log::debug!("FfmpegProcessor::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
-    let mut stab = StabilizationManager::default();
+    let mut stab = StabilizationManager::<crate::core::undistortion::RGBA8>::default();
     let duration_ms = 15015.0;
     let frame_count = 900;
     let fps = 60000.0/1001.0;
     let video_size = (3840, 2160);
 
-    stab.init_from_video_data("E:/clips/GoPro/rs/C0752.MP4", duration_ms, fps, frame_count, video_size);
-    stab.gyro.set_offset(0, -26.0);
-    stab.gyro.integration_method = 1;
-    stab.gyro.integrate();
-    stab.load_lens_profile("E:/clips/GoPro/rs/Sony_A7s3_Tamron_28-200_4k60p.json");
-    stab.init_size(video_size.0, video_size.1);
-    stab.smoothing_id = 1;
-    stab.smoothing_algs[1].as_mut().set_parameter("time_constant", 0.4);
-    stab.frame_readout_time = 8.9;
-    stab.fov = 1.0;
-    stab.background = nalgebra::Vector4::new(0.0, 0.0, 0.0, 0.0);
+    let vid = "/Users/jst/Downloads/C0752.MP4";
+
+    stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size);
+    {
+        let mut gyro = stab.gyro.write();
+
+        gyro.set_offset(0, -26.0);
+        gyro.integration_method = 1;
+        gyro.integrate();
+    }
+    stab.load_lens_profile("/Users/jst/Downloads/gyroflow/resources/camera_presets/Sony/Sony_A7S3_Tamron 28-200@28mm_NO-EIS_4k_16by9_3840x2160-59.94fps.json");
+    stab.set_size(video_size.0, video_size.1);
+    //stab.set_smoo
+    //stab.smoothing_id = 1;
+    //stab.smoothing_algs[1].as_mut().set_parameter("time_constant", 0.4);
+    {
+        let mut params = stab.params.write();
+        params.frame_readout_time = 8.9;
+        params.fov = 1.0;
+        params.background = nalgebra::Vector4::new(0.0, 0.0, 0.0, 0.0);
+    }
     stab.recompute_blocking();
 
     render(
-        stab, 
-        move |params: (f64, usize, usize)| {
+        Arc::new(stab), 
+        move |params: (f64, usize, usize, bool)| {
             ::log::debug!("frame {}/{}", params.1, params.2);
         }, 
-        "E:/clips/GoPro/rs/C0752.MP4".into(),
+        vid.into(),
         "x265".into(),
-        "E:/clips/GoPro/rs/C0752-test.MP4".into(), 
-        0.0,
+        "",
+        &format!("{}_stab.mp4", vid), 
+        0.5,
         1.0,
         video_size.0,
         video_size.1,
+        100.0,
         true, 
-        true,
+        false,
+        0, 
         Arc::new(AtomicBool::new(false))
     );
 }
