@@ -65,6 +65,7 @@ pub struct Controller {
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
     get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
+    set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
     set_integration_method: qt_method!(fn(&self, index: usize)),
@@ -544,6 +545,11 @@ impl Controller {
     }
     fn set_smoothing_param(&mut self, name: QString, val: f64) {
         self.stabilizer.set_smoothing_param(&name.to_string(), val);
+        self.chart_data_changed();
+        self.request_recompute();
+    }
+    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64){
+        self.stabilizer.set_horizon_lock(lock_percent, roll);
         self.chart_data_changed();
         self.request_recompute();
     }

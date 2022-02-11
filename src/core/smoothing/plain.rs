@@ -8,15 +8,13 @@ use crate::gyro_source::TimeQuat;
 #[derive(Clone)]
 pub struct Plain {
     pub time_constant: f64,
-    pub horizonlockpercent: f64,
-    pub horizonroll: f64
+    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for Plain {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        horizonlockpercent: 0.0,
-        horizonroll: 0.0
+        horizonlock: horizon::HorizonLock::default()
     } }
 }
 
@@ -26,11 +24,14 @@ impl SmoothingAlgorithm for Plain {
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
             "time_constant" => self.time_constant = val,
-            "horizonroll" => self.horizonroll = val,
-            "horizonlockpercent" => self.horizonlockpercent = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
+
+    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
+        self.horizonlock.set_horizon(lock_percent, roll);
+    }
+    
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {
@@ -52,8 +53,7 @@ impl SmoothingAlgorithm for Plain {
     fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hasher.write_u64(self.time_constant.to_bits());
-        hasher.write_u64(self.horizonroll.to_bits());
-        hasher.write_u64(self.horizonlockpercent.to_bits());
+        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -66,7 +66,6 @@ impl SmoothingAlgorithm for Plain {
         if self.time_constant > 0.0 {
             alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
         }
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
@@ -81,13 +80,6 @@ impl SmoothingAlgorithm for Plain {
             (*x.0, q)
         }).collect();
 
-        // level horizon
-        if self.horizonlockpercent == 0.0 {
-            smoothed2
-        } else {
-            smoothed2.iter().map(|x| {
-                (*x.0,  lock_horizon_angle(*x.1, self.horizonroll * DEG2RAD).slerp(x.1, 1.0-self.horizonlockpercent/100.0))
-            }).collect()
-        }
+        self.horizonlock.lock(&smoothed2)
     }
 }

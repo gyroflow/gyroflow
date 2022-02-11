@@ -528,6 +528,12 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.smoothing.write().current().as_mut().set_parameter(name, val);
     }
+    pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64) {
+        self.smoothness_checksum.store(0, SeqCst);
+        self.adaptive_zoom_checksum.store(0, SeqCst);
+
+        self.smoothing.write().current().as_mut().set_horizon_lock(lock_percent, roll);
+    }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
         self.gyro.read().max_angles
     }

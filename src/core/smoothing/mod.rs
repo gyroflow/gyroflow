@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+pub mod horizon;
 pub mod none;
 pub mod plain;
-// pub mod horizon;
 pub mod fixed;
 // pub mod velocity_dampened_v1;
 pub mod velocity_dampened;
@@ -19,46 +19,13 @@ use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
 use crate::stabilization_params::StabilizationParams;
 
-fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
-
-    let x_axis = nalgebra::Vector3::<f64>::x_axis();
-    let y_axis = nalgebra::Vector3::<f64>::y_axis();
-    let z_axis = nalgebra::Vector3::<f64>::z_axis();
-    
-    let rot_x = Rotation3::from_axis_angle(&x_axis, x);
-    let rot_y = Rotation3::from_axis_angle(&y_axis, y + std::f64::consts::FRAC_PI_2);
-    let rot_z = Rotation3::from_axis_angle(&z_axis, z);
-
-    let correction = Rotation3::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2);
-
-    let combined_rot = rot_z * rot_x * rot_y * correction;
-    UnitQuaternion::from_rotation_matrix(&combined_rot)
-}
-
-fn lock_horizon_angle(q: UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
-    // z axis points in view direction, use as reference
-    let axis = nalgebra::Vector3::<f64>::y_axis();
-
-    // let x_axis = nalgebra::Vector3::<f64>::x_axis();
-    let y_axis = nalgebra::Vector3::<f64>::y_axis();
-    let z_axis = nalgebra::Vector3::<f64>::z_axis();
-
-    let corrected_transform = q.to_rotation_matrix() * Rotation3::from_axis_angle(&y_axis, -std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&z_axis, -std::f64::consts::FRAC_PI_2);
-    // since this coincides with roll axis, the roll is neglected when transformed back
-    let axis_transformed = corrected_transform * axis;
-
-    let pitch = (axis_transformed.z).asin();
-    let yaw = axis_transformed.y.simd_atan2(axis_transformed.x) - std::f64::consts::FRAC_PI_2;
-    
-    from_euler_yxz(pitch, roll_correction, yaw)
-}
-
 pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
     
     fn get_parameters_json(&self) -> serde_json::Value;
     fn get_status_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
+    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64);
 
     fn get_checksum(&self) -> u64;
 
