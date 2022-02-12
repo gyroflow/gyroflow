@@ -259,6 +259,7 @@ MenuItem {
                                 checked: +root.getSmoothingParam("${x.name}", ${x.default}) > 0;
                                 onCheckedChanged: root.setSmoothingParam("${x.name}", checked? 1 : 0);
                                 objectName: "param-${x.name}";
+                                Component.onCompleted: checkedChanged();
                                 ${add}
                             }`;
                         break;

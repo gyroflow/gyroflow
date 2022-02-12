@@ -47,11 +47,11 @@ impl Default for Smoothing {
         Self {
             algs: vec![
                 Box::new(self::none::None::default()),
-                Box::new(self::plain::Plain::default()),
                 Box::new(self::default_algo::DefaultAlgo::default()),
+                Box::new(self::plain::Plain::default()),
                 // Box::new(self::velocity_dampened_v1::VelocityDampened::default()),
-                Box::new(self::velocity_dampened::VelocityDampened::default()),
-                Box::new(self::velocity_dampened_axis::VelocityDampenedAxis::default()),
+                // Box::new(self::velocity_dampened::VelocityDampened::default()),
+                // Box::new(self::velocity_dampened_axis::VelocityDampenedAxis::default()),
                 Box::new(self::velocity_dampened_advanced::VelocityDampenedAdvanced::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
