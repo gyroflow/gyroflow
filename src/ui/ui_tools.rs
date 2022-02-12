@@ -17,6 +17,7 @@ pub struct UITools {
     set_theme: qt_method!(fn(&self, theme: String)),
     set_language: qt_method!(fn(&self, lang_id: QString)),
     get_default_language: qt_method!(fn(&self) -> QString),
+    set_scaling: qt_method!(fn(&self, dpiScale: f64)),
     init_calibrator: qt_method!(fn(&mut self)),
     set_icon: qt_method!(fn(&self, wnd: QJSValue)),
 
@@ -96,6 +97,14 @@ impl UITools {
                 },
                 _ => { }
             }
+        }
+    }
+
+    pub fn set_scaling(&self, dpi_scale: f64) {
+        if let Some(engine) = self.engine_ptr {
+            let engine = unsafe { &mut *(engine) };
+            let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; }) * dpi_scale;
+            engine.set_property("dpiScale".into(), QVariant::from(dpi).into());
         }
     }
 

@@ -34,9 +34,7 @@ QQC.ComboBox {
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Space) {
             root.focus = false;
-            window.videoArea.timeline.focus = true;
-            const vid = window.videoArea.vid;
-            if (vid.playing) vid.pause(); else vid.play();
+            window.togglePlay();
             e.accepted = true;
         } else if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
             pp.open();
