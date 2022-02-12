@@ -140,9 +140,11 @@ MenuItem {
     
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
+        QT_TRANSLATE_NOOP("Popup", "Default"),
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened"),
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened per axis"),
+        QT_TRANSLATE_NOOP("Popup", "Velocity dampened (advanced)"),
         // QT_TRANSLATE_NOOP("Popup", "Velocity dampened 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
         // QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
@@ -151,6 +153,8 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Roll smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Per axis");
+        QT_TRANSLATE_NOOP("Stabilization", "Max smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
@@ -214,7 +218,7 @@ MenuItem {
         model: smoothingAlgorithms;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
-        currentIndex: 2;
+        currentIndex: 1;
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             // Clear current params

@@ -30,7 +30,7 @@ impl Default for VelocityDampenedAdvanced {
 }
 
 impl SmoothingAlgorithm for VelocityDampenedAdvanced {
-    fn get_name(&self) -> String { "Velocity dampened (Advanced)".to_owned() }
+    fn get_name(&self) -> String { "Velocity dampened (advanced)".to_owned() }
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {

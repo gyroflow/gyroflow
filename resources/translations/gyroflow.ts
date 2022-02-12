@@ -29,29 +29,29 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="123"/>
         <source>Safe area guide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="121"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="124"/>
         <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="127"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="130"/>
         <source>Experimental zero-copy GPU preview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="131"/>
         <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
+        <location filename="../../src/ui/menu/Advanced.qml" line="137"/>
         <source>Use GPU decoding</source>
         <translation type="unfinished"></translation>
     </message>
@@ -59,7 +59,7 @@ This should provide much better UI performance.</source>
 <context>
     <name>AdvancedSection</name>
     <message>
-        <location filename="../../src/ui/components/AdvancedSection.qml" line="13"/>
+        <location filename="../../src/ui/components/AdvancedSection.qml" line="14"/>
         <source>Advanced</source>
         <translation type="unfinished"></translation>
     </message>
@@ -713,52 +713,62 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="126"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
         <source>No smoothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="127"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="144"/>
         <source>Plain 3D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="128"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="145"/>
         <source>Velocity dampened</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="129"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="146"/>
         <source>Velocity dampened per axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="131"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="147"/>
+        <source>Velocity dampened (advanced)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
         <source>Fixed camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="342"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
         <source>No zooming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="342"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
         <source>Dynamic zooming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="342"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
         <source>Static zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="189"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="165"/>
         <source>Using essential matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="189"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="165"/>
         <source>Using visual features</source>
         <translation type="unfinished"></translation>
     </message>
@@ -779,174 +789,184 @@ Do you want to submit your profile?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="134"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="152"/>
         <source>Pitch smoothness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="135"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="153"/>
         <source>Yaw smoothness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="136"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="154"/>
         <source>Roll smoothness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="137"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
         <source>Smoothness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="138"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
+        <source>Per axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
+        <source>Max smoothness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="158"/>
         <source>Yaw angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="139"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="159"/>
         <source>Pitch angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="140"/>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="291"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="160"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="333"/>
         <source>Roll angle correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="141"/>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="309"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="161"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="351"/>
         <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="142"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="162"/>
         <source>Yaw angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="163"/>
         <source>Pitch angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="144"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
         <source>Roll angle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="148"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="168"/>
         <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="169"/>
         <source>Max rotation:
 Pitch: %1, Yaw: %2, Roll: %3.
 Modify velocity factor until you get the desired values (recommended less than 20).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="150"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
         <source>Modify dampening settings until you get the desired values (recommended around 6 on all axes).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="151"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
         <source>Modify velocity factor until you get the desired values (recommended less than 20).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="152"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="172"/>
         <source>Smoothness at high velocity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="153"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="173"/>
         <source>Velocity factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="154"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="174"/>
         <source>Smoothness multiplier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="175"/>
         <source>Responsiveness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
         <source>FOV is greater than 1.0, you may see black borders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="176"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
         <source>FOV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="308"/>
         <source>Lock horizon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="315"/>
         <source>Lock amount</source>
         <comment>Horizon locking amount</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="281"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="323"/>
         <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="299"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="341"/>
         <source>°</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
         <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="335"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="377"/>
         <source>Max zoom: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="353"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="395"/>
         <source>Zooming speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="361"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="403"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="369"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="411"/>
         <source>Rolling shutter correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="375"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="417"/>
         <source>Frame readout time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="381"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="423"/>
         <source>ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
+        <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
         <source>Bottom to top</source>
         <translation type="unfinished"></translation>
     </message>
@@ -996,7 +1016,7 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
         <location filename="../../src/ui/menu/Synchronization.qml" line="86"/>
         <location filename="../../src/ui/menu/Synchronization.qml" line="100"/>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="163"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>
         <source>s</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1011,65 +1031,60 @@ Modify velocity factor until you get the desired values (recommended less than 2
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
-        <source>Advanced</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="143"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="119"/>
         <source>Analyze every n-th frame</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="155"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="131"/>
         <source>Time to analyze per sync point</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
         <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="149"/>
         <source>Optical flow method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
         <source>Offset calculation method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
         <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="195"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="171"/>
         <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="200"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="176"/>
         <source>Low pass filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="205"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
         <source>Hz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
         <source>Show detected features</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
+        <location filename="../../src/ui/menu/Synchronization.qml" line="199"/>
         <source>Show optical flow</source>
         <translation type="unfinished"></translation>
     </message>
