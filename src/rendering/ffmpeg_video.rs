@@ -122,6 +122,9 @@ impl<'a> VideoTranscoder<'a> {
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let mut pixel_format = format.unwrap_or_else(|| decoder.format());
         let mut color_range = decoder.color_range();
+        // let pixel_format = Self::get_format_range(pixel_format);
+        // let color_range = if pixel_format.0 { util::color::Range::JPEG } else { util::color::Range::MPEG };
+        // let pixel_format = pixel_format.1;
         if pixel_format == format::Pixel::YUVJ420P {
             log::debug!("Overriding YUVJ420P ({:?}) with YUV420P and JPEG range", color_range);
             pixel_format = format::Pixel::YUV420P;
@@ -236,7 +239,7 @@ impl<'a> VideoTranscoder<'a> {
 
                     let timestamp = Some(ts.rescale((1, 1000000), time_base));
 
-                    let mut input_frame = 
+                    let input_frame = 
                         if unsafe { !(*frame.as_mut_ptr()).hw_frames_ctx.is_null() } {
                             // retrieve data from GPU to CPU
                             ffmpeg!(ffi::av_hwframe_transfer_data(sw_frame.as_mut_ptr(), frame.as_mut_ptr(), 0); FromHWTransferError);
@@ -251,9 +254,9 @@ impl<'a> VideoTranscoder<'a> {
                     if !self.decode_only && self.output_frame.is_none()  {
                         self.output_frame = Some(frame::Video::new(input_frame.format(), size.0, size.1));
                     }
-                    if let Some(ref mut output_frame) = self.output_frame {
-                        ffmpeg!(ffi::av_frame_copy_props(output_frame.as_mut_ptr(), input_frame.as_mut_ptr()); FromHWTransferError);
-                    }
+                    // if let Some(ref mut output_frame) = self.output_frame {
+                    //     ffmpeg!(ffi::av_frame_copy_props(output_frame.as_mut_ptr(), input_frame.as_mut_ptr()); FromHWTransferError);
+                    // }
 
                     // Process frame
                     if let Some(ref mut cb) = self.on_frame_callback {
@@ -262,22 +265,42 @@ impl<'a> VideoTranscoder<'a> {
 
                     // Encode output frame
                     if !self.decode_only {
-                        let mut final_sw_frame = if let Some(ref mut fr) = self.output_frame { fr } else { &mut input_frame };
-
+                        let mut final_sw_frame = self.output_frame.as_mut().unwrap();
                         if let Some(target_format) = self.encoder_pixel_format {
                             if final_sw_frame.format() != target_format {
                                 println!("converting to {:?}", target_format);
+
                                 if self.encoder_converter.is_none() {
-                                    self.buffers.encoder_frame = frame::Video::new(target_format, final_sw_frame.width(), final_sw_frame.height());
-                                    self.encoder_converter = Some(software::converter((final_sw_frame.width(), final_sw_frame.height()), final_sw_frame.format(), target_format)?);
+                                    let src_format = Self::get_format_range(input_frame.format());
+                                    let dst_format = Self::get_format_range(target_format);
+                                    self.buffers.encoder_frame = frame::Video::new(dst_format.1, final_sw_frame.width(), final_sw_frame.height());
+                                    let mut conv = software::converter((final_sw_frame.width(), final_sw_frame.height()), src_format.1, dst_format.1)?;
+                                    
+                                    unsafe {
+                                        use std::os::raw::c_int;
+                                        if src_format.0 || dst_format.0 {
+                                            let mut dummy: [c_int; 4] = [0; 4];
+                                            let mut src_range: c_int = 0;
+                                            let mut dst_range: c_int = 0;
+                                            let mut brightness: c_int = 0;
+                                            let mut contrast: c_int = 0;
+                                            let mut saturation: c_int = 0;
+                                            ffi::sws_getColorspaceDetails(conv.as_mut_ptr(), &mut dummy.as_mut_ptr(), &mut src_range, &mut dummy.as_mut_ptr(), &mut dst_range, &mut brightness, &mut contrast, &mut saturation);
+                                            let coefs = ffi::sws_getCoefficients(ffi::SWS_CS_DEFAULT);
+                                            if src_format.0 { src_range |= 1; }
+                                            if dst_format.0 { dst_range |= 1; }                                
+                                            ffi::sws_setColorspaceDetails(conv.as_mut_ptr(), coefs, src_range, coefs, dst_range, brightness, contrast, saturation);
+                                        }
+                                    }
+                                    self.encoder_converter = Some(conv);
                                 }
                                 let conv = self.encoder_converter.as_mut().ok_or(FFmpegError::EncoderConverterEmpty)?;
                                 let buff = &mut self.buffers.encoder_frame;
                                 conv.run(final_sw_frame, buff)?;
-                                ffmpeg!(ffi::av_frame_copy_props(buff.as_mut_ptr(), final_sw_frame.as_mut_ptr()); FromHWTransferError);
                                 final_sw_frame = buff;
                             }
                         }
+                        ffmpeg!(ffi::av_frame_copy_props(final_sw_frame.as_mut_ptr(), input_frame.as_mut_ptr()); FromHWTransferError);
                         final_sw_frame.set_pts(timestamp);
                         final_sw_frame.set_kind(picture::Type::None);
 
@@ -340,5 +363,22 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
         Ok(())
+    }
+
+    fn get_format_range(format: format::Pixel) -> (bool, format::Pixel) {
+        match format {
+            format::Pixel::YUVJ420P => (true, format::Pixel::YUV420P),
+            format::Pixel::YUVJ411P => (true, format::Pixel::YUV411P),
+            format::Pixel::YUVJ422P => (true, format::Pixel::YUV422P),
+            format::Pixel::YUVJ444P => (true, format::Pixel::YUV444P),
+            format::Pixel::YUVJ440P => (true, format::Pixel::YUV440P),
+            format::Pixel::GRAY8 |
+            format::Pixel::YA8 |
+            format::Pixel::GRAY16LE |
+            format::Pixel::GRAY16BE |
+            format::Pixel::YA16BE |
+            format::Pixel::YA16LE => (true, format),
+            _ => (false, format)
+        }
     }
 }
