@@ -11,5 +11,8 @@ export OPENCV_LINK_LIBS="opencv_core,opencv_calib3d,opencv_features2d,opencv_img
 
 #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
 export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
-#export LD_LIBRARY_PATH="$PROJECT_DIR/ext/6.2.3/macos/lib"
+
 export MACOSX_DEPLOYMENT_TARGET="10.11"
+
+# Launch same shell with environment set
+exec $SHELL -i

@@ -133,14 +133,15 @@ Currently *Gyroflow* is available in:
 * **Danish** (by [ElvinC](https://github.com/ElvinC))
 * **Finnish** (by Jesse Julkunen)
 * **French** (by KennyDorion)
+* **Galician** (by Martín Costas)
 * **German** (by [Grommi](https://github.com/Gro2mi) and [Nicecrash](https://github.com/B-nutze-RR))
 * **Indonesian** (by Aloysius Puspandono)
 * **Italian** (by Rosario Casciello)
 * **Japanese** (by 井上康)
 * **Norwegian** (by [MiniGod](https://github.com/MiniGod) and [alexagv](https://github.com/alexagv))
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
-* **Portuguese** (by Ricardo Pimentel)
 * **Portuguese Brazilian** (by KallelGaNewk)
+* **Portuguese** (by Ricardo Pimentel)
 * **Russian** (by Андрей Гурьянов, redstar01 and lukdut)
 * **Slovak** (by Radovan Leitman)
 * **Spanish** (by Pelado-Mat)
@@ -200,7 +201,7 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Install Xcode command line tools: `xcode-select --install`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
-5. Setup the environment in terminal: `source __env-macos.sh` - I do this in VS Code built-in terminal
+5. Setup the environment in terminal: `./__env-macos.sh` - I do this in VS Code built-in terminal
 6. Compile and run: `cargo run --release`
 7. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
@@ -208,7 +209,7 @@ The project also supports UI live reload, it's a super quick way of working with
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies: `cd gyroflow/ext && ./install-deps-linux.sh` (Debian based apt)
-4. Setup the environment in terminal: `source __env-linux.sh` - I do this in VS Code built-in terminal
+4. Setup the environment in terminal: `./__env-linux.sh` - I do this in VS Code built-in terminal
 5. Compile and run: `cargo run --release`
 
 ### Building for Android
