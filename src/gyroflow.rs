@@ -35,7 +35,7 @@ cpp! {{
 }}
 
 fn entry() {
-    let ui_live_reload = true;
+    let ui_live_reload = false;
 
     #[cfg(target_os = "windows")]
     unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
