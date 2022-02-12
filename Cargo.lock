@@ -1038,7 +1038,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.0.0-rc2"
+version = "1.0.0-rc3"
 dependencies = [
  "bytemuck",
  "cpp",
@@ -1065,7 +1065,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.0.0-rc2"
+version = "1.0.0-rc3"
 dependencies = [
  "ahrs",
  "akaze",
