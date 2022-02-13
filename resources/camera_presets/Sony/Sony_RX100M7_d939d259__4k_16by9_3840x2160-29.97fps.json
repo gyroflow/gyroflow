@@ -1,0 +1,66 @@
+{
+  "name": "Sony_DSC-RX100M7_d939d259__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Eddy",
+  "camera_brand": "Sony",
+  "camera_model": "DSC-RX100M7",
+  "lens_model": "d939d259",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 29,
+  "fps": 29.97003,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.927228306007805,
+    "camera_matrix": [
+      [
+        2878.3845878826414,
+        0.0,
+        1925.719194492808
+      ],
+      [
+        0.0,
+        2878.3389869957964,
+        1073.7168032981742
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34541612015676115,
+      -0.01755912336720871,
+      1.0733768815410638,
+      -1.9354181692609402
+    ],
+    "radial_distortion_limit": 1.0
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-dsc-rx100m7-d939d259-3840x2160@29970",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

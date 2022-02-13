@@ -861,7 +861,7 @@ dependencies = [
 [[package]]
 name = "ffmpeg-next"
 version = "4.4.0-next.2"
-source = "git+https://github.com/zmwangx/rust-ffmpeg#5ed41c84ff877dc9ae9bd76412c86ee03afb5282"
+source = "git+https://github.com/zmwangx/rust-ffmpeg?rev=84abf1bac48ae8a6137dfe08e88ccdeb2d14f50a#84abf1bac48ae8a6137dfe08e88ccdeb2d14f50a"
 dependencies = [
  "bitflags",
  "ffmpeg-sys-next",
@@ -2445,9 +2445,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.78"
+version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d23c1ba4cf0efd44be32017709280b32d1cea5c3f1275c3b6d9e8bc54f758085"
+checksum = "8e8d9fa5c3b304765ce1fd9c4c8a3de2c8db365a5b91be52f186efc675681d95"
 dependencies = [
  "indexmap",
  "itoa 1.0.1",
@@ -2565,7 +2565,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#665f9b0a4f5d62cf93be9f747c739a8cdc0e85ac"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#73a4703a151b3e20ccad8266a80d13294143c966"
 dependencies = [
  "argh",
  "byteorder",
