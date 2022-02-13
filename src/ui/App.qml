@@ -58,7 +58,6 @@ Rectangle {
         window.videoArea.timeline.focus = true;
         const vid = window.videoArea.vid;
         if (vid.playing) vid.pause(); else vid.play();
-        console.log(window.visibility);
     }
 
     FileDialog {

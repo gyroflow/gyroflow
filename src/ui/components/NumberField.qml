@@ -15,7 +15,7 @@ TextField {
     property bool live: true;
     property real defaultValue: NaN;
     property bool allowText: false;
-    property bool thousandSep: true;
+    property bool intNoThousandSep: false;
 
     Keys.onDownPressed: (e) => {
         const lastDigit = Math.pow(10, precision);
@@ -40,10 +40,9 @@ TextField {
             e.accepted = true;
         }
     }
-
     onValueChanged: {
         if (preventChange || allowText) return;
-        text = value.toLocaleString(Qt.locale(), "f", precision);
+        text = intNoThousandSep ? (Math.round(value)).toString() : value.toLocaleString(Qt.locale(), "f", precision);
     }
     function updateValue() {
         if (allowText) return;

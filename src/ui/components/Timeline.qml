@@ -531,9 +531,9 @@ Item {
         anchors.bottom: parent.bottom;
         ToolTip {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
-                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Scroll") + "</b>" : "<b>" + qsTr("Scroll") + "</b>")
-                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Control+Scroll") + "</b>" : "<b>" + qsTr("Alt+Scroll") + "</b>")
-                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Command+Scroll") + "</b>" : "<b>" + qsTr("Ctrl+Scroll") + "</b>");
+                    .arg("<b>" + qsTr("Scroll") + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Control+Scroll") : qsTr("Alt+Scroll")) + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: ma.containsMouse;
             delay: 2000;
         }

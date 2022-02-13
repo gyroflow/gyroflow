@@ -741,7 +741,7 @@ impl Controller {
         {
             self.stabilizer.params.write().is_calibrator = true;
             *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
-            self.stabilizer.set_smoothing_method(1); // Plain 3D
+            self.stabilizer.set_smoothing_method(2); // Plain 3D
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
         }
     }
