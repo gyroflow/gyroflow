@@ -45,6 +45,10 @@ winres = "0.1.12"
 name = "gyroflow"
 path = "src/gyroflow.rs"
 
+[profile.profile]
+inherits = "release"
+debug = true
+
 [profile.deploy]
 inherits = "release"
 lto = true
