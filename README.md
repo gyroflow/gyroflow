@@ -202,9 +202,11 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Install Xcode command line tools: `xcode-select --install`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
-5. Setup the environment in terminal: `./__env-macos.sh` - I do this in VS Code built-in terminal
-6. Compile and run: `cargo run --release`
-7. If it fails to run, do: `./_deployment/deploy-macos.sh` once
+5. For building on Apple M1, change `ffmpeg-x64_64` -> `ffmpeg-arm64` and `x64-osx-release` -> `arm64-osx` in `__env-macos.sh`
+6. Setup the environment in terminal: `./__env-macos.sh` - I do this in VS Code built-in terminal
+7. For some reason `DYLD_FALLBACK_LIBRARY_PATH` may be overwritten so export it again in terminal: `export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"` (if you have build errors, try the other one from __env-macos.sh)
+8. Compile and run: `cargo run --release`
+9. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
 ### Building on Linux
 1. Get latest stable Rust language from: https://rustup.rs/
