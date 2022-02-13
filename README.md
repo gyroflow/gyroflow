@@ -85,6 +85,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] Mobile apps: `Sensor Logger`, `G-Field Recorder`, `Gyro`
 - [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR)
 - [x] WitMotion (WT901SDCL binary and *.txt)
+- [x] ArduPilot VideoStabilization logging (*.log)
 
 ### Info for cameras not on the list
 

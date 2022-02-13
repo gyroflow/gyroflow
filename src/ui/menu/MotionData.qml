@@ -21,7 +21,7 @@ MenuItem {
         id: fileDialog;
         property var extensions: [
             "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", 
-            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "INSV", "GCSV"
+            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "INSV", "GCSV", "log"
         ];
 
         title: qsTr("Choose a motion data file")
