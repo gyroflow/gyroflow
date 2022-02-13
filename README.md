@@ -225,6 +225,12 @@ The project also supports UI live reload, it's a super quick way of working with
 7. Update paths in `_deployment/build-android.ps1` and in `_deployment/android/android-deploy.json`
 8. Run `.\_deployment\build-android.ps1` in Powershell
 
+### Profiling on Windows
+1. Install and run `Visual Studio Community Edition`
+2. Compile and run GyroFlow with the `profile` profile: `cargo run --profile profile`
+3. In Visual Studio, go to `Debug -> Performance Profiler...`
+    - Under `Target`, open `Change Target` and select `Running Process...`, select the running `gyroflow.exe` process
+    
 ## License
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.
