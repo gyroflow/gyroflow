@@ -208,8 +208,6 @@ MenuItem {
     function updateHorizonLock() {
         const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
-        settings.setValue("horizon-lockamount", lockAmount);
-        settings.setValue("horizon-roll", roll);
         controller.set_horizon_lock(lockAmount, roll);
     }
 
@@ -321,8 +319,8 @@ MenuItem {
                 to: 100;
                 width: parent.width;
                 unit: qsTr("%");
-                precision: 1;
-                value: settings.value("horizon-lockamount", 100);
+                precision: 0;
+                value: 100;
                 onValueChanged: updateHorizonLock();
             }
         }
@@ -336,7 +334,7 @@ MenuItem {
                 width: parent.width;
                 from: -180;
                 to: 180;
-                value: settings.value("horizon-roll", 0);
+                value: 0;
                 defaultValue: 0;
                 unit: qsTr("°");
                 precision: 1;

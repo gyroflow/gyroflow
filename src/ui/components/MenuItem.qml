@@ -77,8 +77,15 @@ Item {
         DropdownChevron { visible: col.children.length > 0; opened: root.opened; anchors.rightMargin: 5 * dpiScale; }
         onClicked: if (col.children.length > 0) { root.opened = !root.opened; } else { root.clicked(); }
 
-        Keys.onReturnPressed: btn.clicked();
-        Keys.onEnterPressed: btn.clicked();
+        Keys.onPressed: (e) => {
+            if (e.key == Qt.Key_Space) {
+                root.focus = false;
+                window.togglePlay();
+                e.accepted = true;
+            } else if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
+                btn.clicked();
+            }
+        }
     }
 
     Item {

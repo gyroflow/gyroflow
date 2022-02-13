@@ -16,6 +16,7 @@ MenuItem {
         property alias previewResolution: previewResolution.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
+        property alias uiScaling: uiScaling.currentIndex;
         property alias safeAreaGuide: safeAreaGuide.checked;
         property alias gpudecode: gpudecode.checked;
         property string lang: ui_tools.get_default_language();
@@ -70,6 +71,20 @@ MenuItem {
             onCurrentIndexChanged: {
                 const themes = ["light", "dark"];
                 ui_tools.set_theme(themes[currentIndex]);
+            }
+        }
+    }
+    Label {
+        position: Label.Left;
+        text: qsTr("UI scaling");
+        ComboBox {
+            id: uiScaling;
+            model: ["50%", "75%", "100%", "125%", "150%", "175%", "200%"];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 2;
+            onCurrentIndexChanged: {
+                ui_tools.set_scaling([0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0][currentIndex]);
             }
         }
     }

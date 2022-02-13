@@ -364,7 +364,7 @@ MenuItem {
                 id: lpf;
                 unit: qsTr("Hz");
                 precision: 2;
-                value: 0;
+                value: 50;
                 from: 0;
                 width: parent.width;
                 onValueChanged: {

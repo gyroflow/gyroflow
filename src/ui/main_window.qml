@@ -28,7 +28,13 @@ Window {
         return null;
     }
 
-    Component.onCompleted: ui_tools.set_icon(main_window);
+    Component.onCompleted: {
+        ui_tools.set_icon(main_window);
+        Qt.callLater(() => {
+            width = width + 1;
+            height = height;
+        });
+    }
 
     property bool closeConfirmationModal: false;
     property bool closeConfirmed: false;

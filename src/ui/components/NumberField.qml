@@ -15,34 +15,34 @@ TextField {
     property bool live: true;
     property real defaultValue: NaN;
     property bool allowText: false;
+    property bool intNoThousandSep: false;
 
     Keys.onDownPressed: (e) => {
+        const lastDigit = Math.pow(10, precision);
         if (allowText) return;
-             if (e.modifiers & Qt.AltModifier) value -= 0.001;
-        else if (e.modifiers & Qt.ControlModifier) value -= 0.1;
-        else if (e.modifiers & Qt.ShiftModifier) value -= 1;
-        else value -= 0.01;
+             if (e.modifiers & Qt.AltModifier) value -= 1 / lastDigit;
+        else if (e.modifiers & Qt.ControlModifier) value -= 100 / lastDigit;
+        else if (e.modifiers & Qt.ShiftModifier) value -= 1000 / lastDigit;
+        else value -= 10 / lastDigit;
     }
     Keys.onUpPressed: (e) => {
+        const lastDigit = Math.pow(10, precision);
         if (allowText) return;
-             if (e.modifiers & Qt.AltModifier) value += 0.001;
-        else if (e.modifiers & Qt.ControlModifier) value += 0.1;
-        else if (e.modifiers & Qt.ShiftModifier) value += 1;
-        else value += 0.01;
+             if (e.modifiers & Qt.AltModifier) value += 1 / lastDigit;
+        else if (e.modifiers & Qt.ControlModifier) value += 100 / lastDigit;
+        else if (e.modifiers & Qt.ShiftModifier) value += 1000 / lastDigit;
+        else value += 10 / lastDigit;
     }
     Keys.onPressed: (e) => {
         if (!allowText && e.key == Qt.Key_Space) {
             root.focus = false;
-            window.videoArea.timeline.focus = true;
-            const vid = window.videoArea.vid;
-            if (vid.playing) vid.pause(); else vid.play();
+            window.togglePlay();
             e.accepted = true;
         }
     }
-
     onValueChanged: {
         if (preventChange || allowText) return;
-        text = value.toLocaleString(Qt.locale(), "f", precision);
+        text = intNoThousandSep ? (Math.round(value)).toString() : value.toLocaleString(Qt.locale(), "f", precision);
     }
     function updateValue() {
         if (allowText) return;

@@ -230,7 +230,17 @@ Item {
                 chart.vscale = 1.0;
             }
             onWheel: (wheel) => {
-                if (wheel.modifiers & Qt.ControlModifier) {
+                if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
+                    const factor = (wheel.angleDelta.x / 120) / 10;
+                    chart.vscale += factor;
+                } else if ((wheel.modifiers & Qt.ControlModifier)) { // move horizontally
+                    const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
+                    const factor = (wheel.angleDelta.y / 120) / (50 / remainingWindow);
+                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1-remainingWindow, root.visibleAreaLeft + factor)));
+                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight + factor)));
+
+                    scrollbar.position = root.visibleAreaLeft;
+                } else { // zoom by default
                     const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
 
                     const factor = (wheel.angleDelta.y / 120) / (10 / remainingWindow);
@@ -239,10 +249,6 @@ Item {
                     root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, root.visibleAreaRight - factor * (1.0 - xPosFactor)));
 
                     scrollbar.position = root.visibleAreaLeft;
-                }
-                if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
-                    const factor = (wheel.angleDelta.x / 120) / 10;
-                    chart.vscale += factor;
                 }
             }
         }
@@ -484,7 +490,7 @@ Item {
             id: syncPointEditField;
 
             width: 90 * dpiScale;
-            precision: 4;
+            precision: 3;
             unit: qsTr("ms");
             anchors.verticalCenter: parent.verticalCenter;
             property bool preventChange: true;
@@ -524,9 +530,10 @@ Item {
         width: parent.width; 
         anchors.bottom: parent.bottom;
         ToolTip {
-            text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, double click to reset zoom")
-                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Command+Scroll") + "</b>" : "<b>" + qsTr("Ctrl+Scroll") + "</b>")
-                    .arg(Qt.platform.os == "osx"? "<b>" + qsTr("Control+Scroll") + "</b>" : "<b>" + qsTr("Alt+Scroll") + "</b>");
+            text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
+                    .arg("<b>" + qsTr("Scroll") + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Control+Scroll") : qsTr("Alt+Scroll")) + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: ma.containsMouse;
             delay: 2000;
         }

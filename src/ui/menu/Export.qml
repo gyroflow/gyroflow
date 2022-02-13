@@ -141,6 +141,7 @@ MenuItem {
                 id: outputWidth;
                 tooltip: qsTr("Width");
                 width: 60 * dpiScale;
+                intNoThousandSep: true;
                 onValueChanged: if (!preventChange2) root.updateOutputSize(true);
                 live: false;
             }
@@ -150,6 +151,7 @@ MenuItem {
                 id: outputHeight;
                 tooltip: qsTr("Height");
                 width: 60 * dpiScale;
+                intNoThousandSep: true;
                 onValueChanged: if (!preventChange2) root.updateOutputSize(false);
                 live: false;
             }
