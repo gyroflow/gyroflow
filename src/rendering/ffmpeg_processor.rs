@@ -175,7 +175,14 @@ impl<'a> FfmpegProcessor<'a> {
                 self.video.input_index = i;
                 self.video.output_index = Some(output_index);
 
-                octx.add_stream(encoder::find_by_name(self.video_codec.as_ref().ok_or(Error::EncoderNotFound)?))?;
+                let codec = encoder::find_by_name(self.video_codec.as_ref().ok_or(Error::EncoderNotFound)?).ok_or(Error::EncoderNotFound)?;
+                unsafe {
+                    if !codec.as_ptr().is_null() {
+                        self.video.codec_supported_formats = super::ffmpeg_hw::pix_formats_to_vec((*codec.as_ptr()).pix_fmts);
+                        log::debug!("Codec formats: {:?}", self.video.codec_supported_formats);
+                    }
+                }
+                octx.add_stream(codec)?;
 
                 self.video.decoder = Some(stream.codec().decoder().video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();

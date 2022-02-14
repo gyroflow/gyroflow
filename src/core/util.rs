@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::Result;
 use std::io::ErrorKind;
 
-pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64)> {
+pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64)> { // -> (width, height, fps)
     let mut stream = File::open(&filepath)?;
     let filesize = stream.metadata().unwrap().len() as usize;
     let mp = telemetry_parser::util::parse_mp4(&mut stream, filesize)?;

@@ -103,6 +103,9 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     if gpu_type != GpuType::AMD {
         encoders = encoders.into_iter().filter(|x| !x.0.contains("_amf")).collect();
     }
+    if gpu_type != GpuType::Intel {
+        encoders = encoders.into_iter().filter(|x| !x.0.contains("qsv")).collect();
+    }
     log::debug!("Possible encoders with {:?}: {:?}", gpu_type, encoders);
     encoders
 }
@@ -147,6 +150,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 proc.video.codec_options.set("profile", &format!("{}", profile));
                 proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
             }
+            proc.video.clone_frames = true;
         }
         Some("png") => {
             if codec_options.contains("16-bit") {
@@ -154,6 +158,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             } else {
                 proc.video.encoder_pixel_format = Some(Pixel::RGB24);
             }
+            proc.video.clone_frames = true;
         }
         _ => { }
     }
@@ -355,10 +360,10 @@ pub fn test() {
     let mut stab = StabilizationManager::<crate::core::undistortion::RGBA8>::default();
     let duration_ms = 15015.0;
     let frame_count = 900;
-    let fps = 60000.0/1001.0;
+    let fps = 30000.0/1001.0;
     let video_size = (3840, 2160);
 
-    let vid = "/Users/jst/Downloads/C0752.MP4";
+    let vid = "E:/clips/Sony RX100 VII/New folder/C1362.MP4";
 
     stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size);
     {
@@ -390,7 +395,7 @@ pub fn test() {
         "x265".into(),
         "",
         &format!("{}_stab.mp4", vid), 
-        0.5,
+        0.0,
         1.0,
         video_size.0,
         video_size.1,

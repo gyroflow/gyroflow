@@ -216,13 +216,17 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
     let mut devices = DEVICES.lock();
     if let Some(dev) = devices.get_mut(&type_) {
         unsafe {
-            if dev.sw_formats.is_empty() && !(*encoder_ctx).codec.is_null() {
+            if (*encoder_ctx).hw_device_ctx.is_null() {
+                (*encoder_ctx).hw_device_ctx = dev.add_ref();
+                log::debug!("Setting hw_device_ctx {:?}", (*encoder_ctx).hw_device_ctx);
+            }
+            return Ok(());
+            /*if dev.sw_formats.is_empty() && !(*encoder_ctx).codec.is_null() {
                 dev.sw_formats = pix_formats_to_vec((*(*encoder_ctx).codec).pix_fmts);
                 log::debug!("Setting codec formats: {:?}", dev.sw_formats);
             }
 
             dbg!(&dev.sw_formats);
-            dbg!(&dev.hw_formats);
             dbg!(&dev.hw_formats);
             if !dev.hw_formats.is_empty() {
                 let target_format = {
@@ -285,7 +289,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                     dbg!(&(*frames_ctx).sw_format);
                     (*encoder_ctx).pix_fmt = (*frames_ctx).format;
                 }
-            }
+            }*/
         }
     } else {
         log::warn!("DEVICES didn't have {:?}", type_);
