@@ -30,28 +30,26 @@ pub trait ZoomingAlgorithm : DynClone {
 }
 clone_trait_object!(ZoomingAlgorithm);
 
-pub struct Zooming;
-impl Zooming {
-    pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
-        compute_params.fov_scale = 1.0;
-        compute_params.fovs.clear();
-        
-        // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
-        // Then we can use real `output_dim` to fit the fov
-        compute_params.width = compute_params.video_width;
-        compute_params.height = compute_params.video_height;
-        compute_params.output_width = compute_params.video_width;
-        compute_params.output_height = compute_params.video_height;
-        
 
-        let mode = if compute_params.adaptive_zoom_window < -0.9 {
-            Mode::StaticZoom
-        } else if compute_params.adaptive_zoom_window > 0.0001 {
-            Mode::DynamicZoom(compute_params.adaptive_zoom_window)
-        } else {
-            Mode::Disabled
-        };
+pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
+    compute_params.fov_scale = 1.0;
+    compute_params.fovs.clear();
+    
+    // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
+    // Then we can use real `output_dim` to fit the fov
+    compute_params.width = compute_params.video_width;
+    compute_params.height = compute_params.video_height;
+    compute_params.output_width = compute_params.video_width;
+    compute_params.output_height = compute_params.video_height;
+    
 
-        Box::new(adaptive::AdaptiveZoom::new(compute_params, mode))
-    }
+    let mode = if compute_params.adaptive_zoom_window < -0.9 {
+        Mode::StaticZoom
+    } else if compute_params.adaptive_zoom_window > 0.0001 {
+        Mode::DynamicZoom(compute_params.adaptive_zoom_window)
+    } else {
+        Mode::Disabled
+    };
+
+    Box::new(adaptive::AdaptiveZoom::new(compute_params, mode))
 }
