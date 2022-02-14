@@ -10,9 +10,9 @@ pub mod lens_profile_database;
 pub mod calibration;
 pub mod synchronization;
 pub mod undistortion;
-pub mod adaptive_zoom;
 pub mod camera_identifier;
 
+pub mod zooming;
 pub mod smoothing;
 pub mod filtering;
 
@@ -30,7 +30,7 @@ pub use undistortion::PixelType;
 
 use crate::lens_profile_database::LensProfileDatabase;
 
-use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, adaptive_zoom::AdaptiveZoom };
+use self::{ lens_profile::LensProfile, smoothing::Smoothing, undistortion::Undistortion, zooming::ZoomingAlgorithm };
 #[cfg(feature = "opencv")]
 use self::calibration::LensCalibrator;
 
@@ -225,7 +225,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &mut AdaptiveZoom, params: &RwLock<StabilizationParams>) -> Vec<f64> {
+    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
@@ -245,7 +245,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_adaptive_zoom(&self) {
         let params = undistortion::ComputeParams::from_manager(self);
         let lens_fov_adjustment = params.lens_fov_adjustment;
-        let mut zoom = AdaptiveZoom::from_compute_params(params);
+        let mut zoom = zooming::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
         self.params.write().set_fovs(fovs, lens_fov_adjustment);
     }
@@ -306,7 +306,7 @@ impl<T: PixelType> StabilizationManager<T> {
             
             if current_compute_id.load(SeqCst) != compute_id { return; }
 
-            let mut zoom = AdaptiveZoom::from_compute_params(params.clone());
+            let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
                 stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
