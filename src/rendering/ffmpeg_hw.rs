@@ -212,7 +212,7 @@ pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::
     }
 }
 
-pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32)) -> Result<(), ()> {
+pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, _pixel_format: ffi::AVPixelFormat, _size: (u32, u32)) -> Result<(), ()> {
     let mut devices = DEVICES.lock();
     if let Some(dev) = devices.get_mut(&type_) {
         unsafe {

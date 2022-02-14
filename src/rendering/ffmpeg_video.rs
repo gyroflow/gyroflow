@@ -123,8 +123,8 @@ impl<'a> VideoTranscoder<'a> {
         let ost_codec = ost.codec();
         let mut encoder = ost_codec.encoder().video()?;
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
-        let mut pixel_format = format.unwrap_or_else(|| frame.format());
-        let mut color_range = frame.color_range();
+        let pixel_format = format.unwrap_or_else(|| frame.format());
+        let color_range = frame.color_range();
         // let pixel_format = Self::get_format_range(pixel_format);
         // let color_range = if pixel_format.0 { util::color::Range::JPEG } else { util::color::Range::MPEG };
         // let pixel_format = pixel_format.1;
@@ -182,7 +182,7 @@ impl<'a> VideoTranscoder<'a> {
         
         let mut frame = frame::Video::empty();
         let mut sw_frame = &mut self.buffers.sw_frame;
-        let mut hw_frame = frame::Video::empty();
+        // let mut hw_frame = frame::Video::empty();
         
         while decoder.receive_frame(&mut frame).is_ok() {
             let time_base = self.time_base.unwrap();
@@ -309,7 +309,7 @@ impl<'a> VideoTranscoder<'a> {
                                 final_sw_frame = buff;
                             }
                         }
-                        let mut encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
+                        let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
                         // encoder.set_format(final_sw_frame.format());
                         // encoder.set_color_range(final_sw_frame.color_range());
 
@@ -372,7 +372,7 @@ impl<'a> VideoTranscoder<'a> {
         Ok(())
     }
 
-    fn get_format_range(format: format::Pixel) -> (bool, format::Pixel) {
+    /*fn get_format_range(format: format::Pixel) -> (bool, format::Pixel) {
         match format {
             format::Pixel::YUVJ420P => (true, format::Pixel::YUV420P),
             format::Pixel::YUVJ411P => (true, format::Pixel::YUV411P),
@@ -387,7 +387,7 @@ impl<'a> VideoTranscoder<'a> {
             format::Pixel::YA16LE => (true, format),
             _ => (false, format)
         }
-    }
+    }*/
 
     unsafe fn copy_frame_props(dst: *mut ffi::AVFrame, src: *const ffi::AVFrame) {
         // (*dst).key_frame              = (*src).key_frame;

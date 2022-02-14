@@ -190,13 +190,13 @@ impl<'a> FfmpegProcessor<'a> {
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
-                if stream.codec().id() == self.audio_codec {
+                /*if stream.codec().id() == self.audio_codec {
                     // Direct stream copy
                     let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
                     ost.set_parameters(stream.parameters());
                     // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format.
                     unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = 0; }
-                } else {
+                } else */{
                     // Transcode audio
                     atranscoders.insert(i, AudioTranscoder::new(self.audio_codec, &stream, &mut octx, output_index as _)?);
                 }
@@ -223,6 +223,7 @@ impl<'a> FfmpegProcessor<'a> {
                 }
                 None => {
                     // Direct stream copy
+                    // TODO: Wrong pts, shifted by length of packet, would need to synchronize with first video frame pts
                     if copied_stream_first_pts.is_none() {
                         copied_stream_first_pts = packet.pts();
                         copied_stream_first_dts = packet.dts();
