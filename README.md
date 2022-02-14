@@ -118,6 +118,8 @@ See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of
 There's also a ton of TODO comments throughout the code.
 
 ### Video editor plugins 
+Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx).
+
 Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
 
 ## Contributing
