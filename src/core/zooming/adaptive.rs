@@ -4,26 +4,10 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
-use enterpolation::{ Curve, Merge, bspline::BSpline };
-use crate::undistortion::{ self, ComputeParams };
+use super::*;
+use crate::undistortion::undistort_points_with_rolling_shutter;
+use enterpolation::{ Curve, bspline::BSpline };
 
-#[derive(Default, Clone, Copy, Debug)]
-pub struct Point2D(f64, f64);
-impl Merge<f64> for Point2D {
-    fn merge(self, other: Self, factor: f64) -> Self {
-        Point2D(
-            self.0 * (1.0 - factor) + other.0 * factor,
-            self.1 * (1.0 - factor) + other.1 * factor
-        )
-    }
-}
-
-#[derive(PartialEq, Clone)]
-enum Mode {
-    Disabled,
-    DynamicZoom(f64), // f64 - smoothing focus window in seconds
-    StaticZoom
-}
 
 #[derive(Clone)]
 pub struct AdaptiveZoom {
@@ -35,40 +19,8 @@ pub struct AdaptiveZoom {
     range: (f64, f64),
 }
 
-impl AdaptiveZoom {
-    pub fn from_compute_params(mut compute_params: ComputeParams) -> Self {
-        compute_params.fov_scale = 1.0;
-        compute_params.fovs.clear();
-        
-        let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
-        // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
-        // Then we can use real `output_dim` to fit the fov
-        compute_params.width = compute_params.video_width;
-        compute_params.height = compute_params.video_height;
-        compute_params.output_width = compute_params.video_width;
-        compute_params.output_height = compute_params.video_height;
-
-        let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
-        let output_dim = (compute_params.video_output_width as f64 * ratio, compute_params.video_output_height as f64 * ratio);
-
-        Self {
-            input_dim,
-            output_dim,
-            fps: compute_params.scaled_fps,
-            range: (compute_params.trim_start, compute_params.trim_end),
-
-            mode: if compute_params.adaptive_zoom_window < -0.9 {
-                Mode::StaticZoom
-            } else if compute_params.adaptive_zoom_window > 0.0001 {
-                Mode::DynamicZoom(compute_params.adaptive_zoom_window)
-            } else {
-                Mode::Disabled
-            },
-            compute_params
-        }
-    }
-
-    pub fn get_state_checksum(&self) -> u64 {
+impl ZoomingAlgorithm for AdaptiveZoom {    
+    fn get_state_checksum(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         if self.compute_params.distortion_coeffs.len() >= 4 {
             hasher.write_u64(self.compute_params.distortion_coeffs[0].to_bits());
@@ -90,6 +42,92 @@ impl AdaptiveZoom {
             Mode::DynamicZoom(w) => hasher.write_u64(w.to_bits())
         }
         hasher.finish()
+    }    
+
+    fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
+        if self.mode == Mode::Disabled || timestamps.is_empty() {
+            return Vec::new();
+        }
+        let boundary_polygons: Vec<Vec<Point2D>> = timestamps.iter().map(|&ts| self.bounding_polygon(ts, 9)).collect();
+        // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
+
+        // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
+        let crop_center_positions: Vec<Point2D> = timestamps.into_iter().map(|_| Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0)).collect();
+
+        // if smoothing_center > 0 {
+        //     let mut smoothing_num_frames = (smoothing_center * fps).floor() as usize;
+        //     if smoothing_num_frames % 2 == 0 {
+        //         smoothing_num_frames += 1;
+        //     }
+        //     let focus_windows_pad = pad_edge(&focus_windows, (smoothing_num_frames / 2, smoothing_num_frames / 2));
+        //     let gaussian = gaussian_window_normalized(smoothing_num_frames, smoothing_num_frames as f64 / 6.0);
+        //     focus_windows = convolve(&focus_windows_pad.map(|v| v.0).collect(), &gaussian).iter().zip(
+        //         convolve(&focus_windows_pad.map(|v| v.1).collect(), &gaussian).iter()
+        //     ).map(|v| Point2D(v.0, v.1)).collect()
+        // }
+        let mut fov_values: Vec<f64> = crop_center_positions.iter()
+                                                            .zip(boundary_polygons.iter())
+                                                            .filter_map(|(&center, polygon)| 
+                                                                self.find_fov(center, polygon)
+                                                            ).collect();
+
+        if self.range.0 > 0.0 || self.range.1 < 1.0 {
+            // Only within render range.
+            if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
+                let l = (timestamps.len() - 1) as f64;
+                let first_ind = (l * self.range.0).floor() as usize;
+                let last_ind  = (l * self.range.1).ceil() as usize;
+                if fov_values.len() > first_ind {
+                    fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
+                }
+                if fov_values.len() > last_ind {
+                    fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+                }
+            }
+        }
+
+        match self.mode {
+            Mode::DynamicZoom(window_s) => {
+                let mut frames = (window_s * self.fps).floor() as usize;
+                if frames % 2 == 0 {
+                    frames += 1;
+                }
+    
+                let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
+                let fov_min = min_rolling(&fov_values_pad, frames);
+                let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
+    
+                let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
+                fov_values = convolve(&fov_min_pad, &gaussian);
+            },
+            Mode::StaticZoom => {
+                if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {
+                    fov_values.iter_mut().for_each(|v| *v = max_f);
+                } else {
+                    log::warn!("Unable to find min of fov_values, len: {}", fov_values.len());
+                }
+            }
+            _ => { }
+        }
+
+        fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
+    }
+}
+
+impl AdaptiveZoom {
+    pub fn new(compute_params: ComputeParams, mode: Mode) -> Self {
+        let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
+        let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
+        let output_dim = (compute_params.video_output_width as f64 * ratio, compute_params.video_output_height as f64 * ratio);
+
+        Self {
+            input_dim,
+            output_dim,
+            fps: compute_params.scaled_fps,
+            range: (compute_params.trim_start, compute_params.trim_end),
+            mode,
+            compute_params
+        }
     }
 
     fn find_fcorr(&self, center: Point2D, polygon: &[Point2D]) -> (f64, usize) {
@@ -172,75 +210,6 @@ impl AdaptiveZoom {
 
         Some(1.0 / fcorr.max(fcorr_i))
     }
-    
-    pub fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> { // Vec<fovValue, focalCenter>
-        if self.mode == Mode::Disabled || timestamps.is_empty() {
-            return Vec::new();
-        }
-        let boundary_polygons: Vec<Vec<Point2D>> = timestamps.iter().map(|&ts| self.bounding_polygon(ts, 9)).collect();
-        // let focus_windows: Vec<Point2D> = boundary_boxes.iter().map(|b| self.find_focal_center(b, output_dim)).collect();
-
-        // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
-        let crop_center_positions: Vec<Point2D> = timestamps.into_iter().map(|_| Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0)).collect();
-
-        // if smoothing_center > 0 {
-        //     let mut smoothing_num_frames = (smoothing_center * fps).floor() as usize;
-        //     if smoothing_num_frames % 2 == 0 {
-        //         smoothing_num_frames += 1;
-        //     }
-        //     let focus_windows_pad = pad_edge(&focus_windows, (smoothing_num_frames / 2, smoothing_num_frames / 2));
-        //     let gaussian = gaussian_window_normalized(smoothing_num_frames, smoothing_num_frames as f64 / 6.0);
-        //     focus_windows = convolve(&focus_windows_pad.map(|v| v.0).collect(), &gaussian).iter().zip(
-        //         convolve(&focus_windows_pad.map(|v| v.1).collect(), &gaussian).iter()
-        //     ).map(|v| Point2D(v.0, v.1)).collect()
-        // }
-        let mut fov_values: Vec<f64> = crop_center_positions.iter()
-                                                            .zip(boundary_polygons.iter())
-                                                            .filter_map(|(&center, polygon)| 
-                                                                self.find_fov(center, polygon)
-                                                            ).collect();
-
-        if self.range.0 > 0.0 || self.range.1 < 1.0 {
-            // Only within render range.
-            if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
-                let l = (timestamps.len() - 1) as f64;
-                let first_ind = (l * self.range.0).floor() as usize;
-                let last_ind  = (l * self.range.1).ceil() as usize;
-                if fov_values.len() > first_ind {
-                    fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
-                }
-                if fov_values.len() > last_ind {
-                    fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
-                }
-            }
-        }
-
-        match self.mode {
-            Mode::DynamicZoom(window_s) => {
-                let mut frames = (window_s * self.fps).floor() as usize;
-                if frames % 2 == 0 {
-                    frames += 1;
-                }
-    
-                let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
-                let fov_min = min_rolling(&fov_values_pad, frames);
-                let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
-    
-                let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
-                fov_values = convolve(&fov_min_pad, &gaussian);
-            },
-            Mode::StaticZoom => {
-                if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {
-                    fov_values.iter_mut().for_each(|v| *v = max_f);
-                } else {
-                    log::warn!("Unable to find min of fov_values, len: {}", fov_values.len());
-                }
-            }
-            _ => { }
-        }
-
-        fov_values.iter().copied().zip(crop_center_positions.iter().copied()).collect()
-    }
 
     fn bounding_polygon(&self, timestamp_ms: f64, num_points: usize) -> Vec<Point2D> {
         if num_points < 1 { return Vec::new(); }
@@ -254,7 +223,7 @@ impl AdaptiveZoom {
         for i in 0..pts { distorted_points.push(((pts - i) as f64 * dim_ratio.0,      h)); }
         for i in 0..pts { distorted_points.push((0.0,                                 (pts - i) as f64 * dim_ratio.1)); }
 
-        let undistorted_points = undistortion::undistort_points_with_rolling_shutter(&distorted_points, timestamp_ms, &self.compute_params);
+        let undistorted_points = undistort_points_with_rolling_shutter(&distorted_points, timestamp_ms, &self.compute_params);
 
         undistorted_points.into_iter().map(|v| Point2D(v.0, v.1)).collect()
     }

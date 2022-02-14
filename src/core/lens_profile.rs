@@ -5,6 +5,8 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use serde::{ Serialize, Deserialize };
+use super::Zooming;
+
 #[cfg(feature = "opencv")]
 use super::LensCalibrator;
 
@@ -338,7 +340,7 @@ impl LensProfile {
         let distortion_coeffs = self.get_distortion_coeffs();
         params.distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
 
-        let zoom = crate::AdaptiveZoom::from_compute_params(params);
+        let zoom = Zooming::from_compute_params(params);
         zoom.compute(&[0.0]).first().map(|x| x.0).unwrap_or(1.0)
     }
 }
