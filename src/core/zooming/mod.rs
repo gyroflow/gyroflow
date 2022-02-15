@@ -1,4 +1,6 @@
+pub mod field_of_view;
 pub mod adaptive;
+pub mod adaptive_new;
 
 use dyn_clone::{ clone_trait_object, DynClone };
 use enterpolation::Merge;
@@ -51,5 +53,6 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
         Mode::Disabled
     };
 
-    Box::new(adaptive::AdaptiveZoom::new(compute_params, mode))
+    // Box::new(adaptive::AdaptiveZoom::new(compute_params, mode))
+    Box::new(adaptive_new::AdaptiveNew::new(compute_params, mode))
 }

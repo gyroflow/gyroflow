@@ -11,3 +11,4 @@ ext/*.7z
 ext/*.tar
 ext/*.log
 *.code-workspace
+gyroflow.log
