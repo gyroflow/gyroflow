@@ -313,14 +313,15 @@ impl GyroSource {
             _ => {
                 if let Some(&first_ts) = self.offsets.keys().next() {
                     if let Some(&last_ts) = self.offsets.keys().next_back() {
-                        let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
+                        let timestamp_us = (timestamp_ms * 1000.0) as i64; 
+                        let lookup_ts = (timestamp_us).min(last_ts-1).max(first_ts+1);
                         if let Some(offs1) = self.offsets.range(..=lookup_ts).next_back() {
                             if *offs1.0 == lookup_ts {
                                 return *offs1.1;
                             }
                             if let Some(offs2) = self.offsets.range(lookup_ts..).next() {
                                 let time_delta = (offs2.0 - offs1.0) as f64;
-                                let fract = (lookup_ts - offs1.0) as f64 / time_delta;
+                                let fract = (timestamp_us - offs1.0) as f64 / time_delta;
                                 return offs1.1 + (offs2.1 - offs1.1) * fract;
                             }
                         }
