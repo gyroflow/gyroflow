@@ -41,8 +41,12 @@ impl AudioTranscoder {
         let encoder = encoder.open_as(codec)?;
         output.set_parameters(&encoder);
 
+        let mut in_channel_layout = decoder.channel_layout();
+        if in_channel_layout.is_empty() {
+            in_channel_layout = ChannelLayout::STEREO;
+        }
         let resampler = software::resampler(
-            (decoder.format(), encoder.channel_layout(), decoder.rate()), // TODO source channel layout?
+            (decoder.format(), in_channel_layout, decoder.rate()),
             (encoder.format(), encoder.channel_layout(), encoder.rate())
         )?;
 

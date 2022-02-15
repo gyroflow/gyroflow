@@ -182,13 +182,16 @@ impl<'a> FfmpegProcessor<'a> {
                         log::debug!("Codec formats: {:?}", self.video.codec_supported_formats);
                     }
                 }
-                octx.add_stream(codec)?;
+                let mut out_stream = octx.add_stream(codec)?;
 
                 let mut input_codec = stream.codec();
-                input_codec.set_threading(ffmpeg_next::threading::Config{kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false});
+                input_codec.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
                 self.video.decoder = Some(input_codec.decoder().video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
+
+                out_stream.set_rate(stream.rate());
+                out_stream.set_avg_frame_rate(self.video.frame_rate.unwrap());
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
