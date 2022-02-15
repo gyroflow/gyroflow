@@ -19,6 +19,7 @@ pub struct ChartData {
 struct Series {
     data: BTreeMap<i64, f64>, // timestamp, value
     lines: Vec<Vec<QLineF>>,
+    is_optflow: bool,
     visible: bool,
 }
 
@@ -114,7 +115,6 @@ impl TimelineGyroChart {
         let duration_us = self.duration_ms * 1000.0;
 
         for serie in &mut self.series {
-            let limit_by_px = if serie.data.len() < 2000 { false } else { true };
             if serie.visible && !serie.data.is_empty() {
                 let from_timestamp = ((self.visibleAreaLeft - 0.01) * duration_us).floor() as i64;
                 let mut to_timestamp = ((self.visibleAreaRight + 0.01) * duration_us).ceil() as i64;
@@ -139,7 +139,7 @@ impl TimelineGyroChart {
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
                             
-                            let new_line = if limit_by_px { point.x - prev_point.1.x > 10.0 } else { *data.0 - prev_point.0 > 100_000 };
+                            let new_line = serie.is_optflow && *data.0 - prev_point.0 > 100_000;
                             if new_line {
                                 serie.lines.push(line);
                                 line = Vec::new();
@@ -288,6 +288,9 @@ impl TimelineGyroChart {
                 self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
                 self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
                 self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
+                self.series[4].is_optflow = true;
+                self.series[5].is_optflow = true;
+                self.series[6].is_optflow = true;
             }
             1 => { // Accelerometer
                 self.series[0].data = Self::get_serie_vector(&self.accl, 0);
