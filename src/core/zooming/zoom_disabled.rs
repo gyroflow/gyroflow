@@ -1,5 +1,4 @@
 use super::*;
-use super::field_of_view::FieldOfView;
 
 #[derive(Clone)]
 pub struct ZoomDisabled {
@@ -7,11 +6,8 @@ pub struct ZoomDisabled {
 }
 
 impl ZoomingAlgorithm for ZoomDisabled {
-    fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> {
-        let fov_est = FieldOfView::new(self.compute_params.clone());
-        let (fov_values, center_position) = fov_est.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
-
-        fov_values.iter().copied().zip(center_position.iter().copied()).collect()
+    fn compute(&self, _timestamps: &[f64]) -> Vec<(f64, Point2D)> {
+        Vec::new()
     }
 
     fn compute_params(&self) -> &ComputeParams {

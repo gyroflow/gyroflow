@@ -8,6 +8,9 @@ pub struct ZoomStatic {
 
 impl ZoomingAlgorithm for ZoomStatic {
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> {
+        if timestamps.is_empty() {
+            return Vec::new();
+        }
         let fov_est = FieldOfView::new(self.compute_params.clone());
         let (mut fov_values, center_position) = fov_est.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
