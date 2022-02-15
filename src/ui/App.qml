@@ -139,6 +139,28 @@ Rectangle {
                         text: "";
                         anchors.verticalCenter: parent.verticalCenter;
                         width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 30 * dpiScale;
+
+                        LinkButton {
+                            anchors.right: parent.right;
+                            height: parent.height - 1 * dpiScale;
+                            text: "...";
+                            font.underline: false;
+                            font.pixelSize: 15 * dpiScale;
+                            onClicked: {
+                                outputFileDialog.defaultSuffix = outputFile.text.substring(outputFile.text.length - 3);
+                                outputFileDialog.currentFile = controller.path_to_url(outputFile.text);
+                                outputFileDialog.open();
+                            }
+                        }
+                    }
+                    FileDialog {
+                        id: outputFileDialog;
+                        fileMode: FileDialog.SaveFile;
+                        title: qsTr("Select file destination");
+                        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png)"];
+                        onAccepted: {
+                            outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
+                        }
                     }
                 }
 
@@ -188,7 +210,25 @@ Rectangle {
                         outputFile.text = output;
                         clicked();
                     }
+                    property bool allow1: false;
+                    property bool allow2: false;
                     onClicked: {
+                        if (!controller.lens_loaded && !allow1) {
+                            messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
+                                { text: qsTr("Yes"), clicked: function() { allow1 = true; renderBtn.clicked(); }},
+                                { text: qsTr("No"), accent: true },
+                            ]);
+                            return;
+                        }
+                        const usesQuats = window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && window.motionData.filename == window.vidInfo.filename;
+                        if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allow2) {
+                            messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
+                                { text: qsTr("Yes"), clicked: function() { allow2 = true; renderBtn.clicked(); }},
+                                { text: qsTr("No"), accent: true },
+                            ]);
+                            return;
+                        }
+
                         if (controller.file_exists(outputFile.text)) {
                             messageBox(Modal.NoIcon, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: doRender },
@@ -275,7 +315,8 @@ Rectangle {
     Connections {
         target: controller;
         function onError(text, arg, callback) {
-            messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+            text = getReadableError(qsTr(text).arg(arg));
+            messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onMessage(text, arg, callback) {
             messageBox(Modal.Info, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
@@ -300,5 +341,14 @@ Rectangle {
         if (!isLandscape) {
             isLandscapeChanged();
         }
+    }
+
+    function getReadableError(text) {
+        if (text.includes("ffmpeg")) {
+            if (text.includes("Permission denied")) return qsTr("Permission denied. Unable to create or write file.\nChange the output path or run the program as administrator.\nMake sure you have write permissions to the target directory and make sure target file is not used by any other application.");
+            if (text.includes("required nvenc API version")) return qsTr("NVIDIA GPU driver is too old, GPU encoding will not work for this format.\nUpdate your NVIDIA drivers to the newest version: %1.\nIf the issue is still present after driver update, your GPU probably doesn't support GPU encoding with this format. Disable GPU encoding in this case.").arg("<a href=\"https://www.nvidia.com/download/index.aspx\">https://www.nvidia.com/download/index.aspx</a>");
+        }
+
+        return text;
     }
 }

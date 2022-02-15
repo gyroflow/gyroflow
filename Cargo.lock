@@ -1314,9 +1314,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.117"
+version = "0.2.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e74d72e0f9b65b5b4ca49a346af3976df0f9c61d550727f349ecd559f251a26c"
+checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
 
 [[package]]
 name = "libloading"
@@ -2555,7 +2555,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#0d58be32385f92f7e80cd0ff03fbce5b8ce81fb6"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#e3b8d83fd1a22b6cfb16ff68bf3bd0d38c12a5d0"
 dependencies = [
  "argh",
  "byteorder",

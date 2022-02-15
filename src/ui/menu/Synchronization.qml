@@ -110,6 +110,8 @@ MenuItem {
             height: 25 * dpiScale;
             value: 3;
             from: 1;
+            to: 10;
+            onValueChanged: { if (value < 1) value = 1; if (value > 10) value = 10; }
         }
     }
 
