@@ -198,7 +198,7 @@ Item {
                         visibleAreaRight = visibleAreaLeft + panInit.visibleAreaWidth;
 
                         scrollbar.position = visibleAreaLeft;
-                    } else {
+                    } else if (!(pressedButtons & Qt.RightButton)) {
                         root.setPosition(Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width))));
                     }
                 }
