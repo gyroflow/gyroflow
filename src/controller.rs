@@ -387,7 +387,7 @@ impl Controller {
                     let camera_id = stab.camera_id.read();
 
                     let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
-                    if !id_str.is_empty() {
+                    if is_main_video && !id_str.is_empty() {
                         let db = stab.lens_profile_db.read();
                         if db.contains_id(&id_str) {
                             load_lens(id_str.clone());
