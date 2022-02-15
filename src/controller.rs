@@ -847,11 +847,12 @@ impl Controller {
                         err(("An error occured: %1".to_string(), error.to_string()));
                     }
                 }
-                while processed.load(SeqCst) < total_read.load(SeqCst) {
-                    std::thread::sleep(std::time::Duration::from_millis(100));
-                }
                 // Don't lock the UI trying to draw chessboards while we calibrate
                 stab.params.write().is_calibrator = false;
+
+                while processed.load(SeqCst) < total_read.load(SeqCst) {
+                    std::thread::sleep(std::time::Duration::from_millis(500));
+                }
                 
                 let mut lock = cal.write();
                 let cal = lock.as_mut().unwrap();

@@ -123,7 +123,7 @@ impl LensCalibrator {
             
                 let mut corners = Mat::default();
 
-                if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK)? {
+                if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK)? {
                     if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE)? {
                         
                         opencv::imgproc::corner_sub_pix(&inp, &mut corners, Size::new(11, 11), Size::new(-1, -1), subpix_criteria)?;
