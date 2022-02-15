@@ -13,28 +13,35 @@ pub struct LensProfileDatabase {
 
 impl LensProfileDatabase {
     pub fn get_path() -> PathBuf {
-        #[cfg(any(target_os = "macos", target_os = "ios"))]
-        let path = PathBuf::from("../Resources/camera_presets/");
-        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-        let path = PathBuf::from("./resources/camera_presets/");
-
         let candidates = [
-            path,
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            PathBuf::from("../Resources/camera_presets/"),
+            PathBuf::from("./resources/camera_presets/"),
             PathBuf::from("./camera_presets/"),
             PathBuf::from("./lens_profiles/")
         ];
+        let exe = std::env::current_exe().unwrap_or_default();
+        let exe_parent = exe.parent();
         for path in &candidates {
             if let Ok(path) = std::fs::canonicalize(&path) {
                 if path.exists() {
                     return path;
                 }
             }
-            if let Ok(path) = std::fs::canonicalize(std::env::current_exe().unwrap_or_default().parent().map(|x| x.join(&path)).unwrap_or_default()) {
+            if let Ok(path) = std::fs::canonicalize(exe_parent.map(|x| x.join(&path)).unwrap_or_default()) {
                 if path.exists() {
                     return path;
                 }
             }
         }
+        if let Ok(path) = std::fs::canonicalize(exe_parent.map(|x| x.join("./camera_presets/")).unwrap_or_default()) {
+            if !path.exists() {
+                let _ = std::fs::create_dir_all(&path);
+            }
+            return path;
+        }
+
+        log::warn!("Unknown lens directory: {:?}, exe: {:?}", candidates[0], exe_parent);
 
         std::fs::canonicalize(&candidates[0]).unwrap_or_default()
     }

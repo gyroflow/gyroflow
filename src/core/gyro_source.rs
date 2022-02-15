@@ -5,7 +5,6 @@ use nalgebra::*;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::fs::File;
-use std::path::Path;
 use telemetry_parser::{Input, util};
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
@@ -97,9 +96,7 @@ impl GyroSource {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
     
-        let filename = Path::new(&path).file_name().unwrap().to_str().unwrap();
-    
-        let input = Input::from_stream(&mut stream, filesize, filename)?;
+        let input = Input::from_stream(&mut stream, filesize, &path)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
     

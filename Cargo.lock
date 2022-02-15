@@ -1342,9 +1342,9 @@ checksum = "33a33a362ce288760ec6a508b94caaec573ae7d3bbbd91b87aa0bad4456839db"
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.23"
+version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9636c194f9db483f4d0adf2f99a65011a99f904bd222bbd67fb4df4f37863c30"
+checksum = "7705fc40f6ed493f73584abbb324e74f96b358ff60dfe5659a0f8fc12c590a69"
 dependencies = [
  "cc",
 ]
@@ -1452,9 +1452,9 @@ dependencies = [
 
 [[package]]
 name = "mimalloc"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf5f78c1d9892fb5677a8b2f543f967ab891ac0f71feecd961435b74f877283a"
+checksum = "b0dfa131390c2f6bdb3242f65ff271fcdaca5ff7b6c08f28398be7f2280e3926"
 dependencies = [
  "libmimalloc-sys",
 ]
@@ -2555,7 +2555,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#e3b8d83fd1a22b6cfb16ff68bf3bd0d38c12a5d0"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#71dd89241ac931f88020bf929f70a347fb7c1252"
 dependencies = [
  "argh",
  "byteorder",
