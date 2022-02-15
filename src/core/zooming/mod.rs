@@ -1,17 +1,22 @@
 pub mod field_of_view;
-pub mod adaptive;
-pub mod adaptive_new;
 
+pub mod zoom_disabled;
+pub mod zoom_static;
+pub mod zoom_dynamic;
+
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
 use dyn_clone::{ clone_trait_object, DynClone };
 use enterpolation::Merge;
+
 use crate::undistortion::{ ComputeParams };
 
 
 #[derive(PartialEq, Clone)]
 pub enum Mode {
     Disabled,
-    DynamicZoom(f64), // f64 - smoothing focus window in seconds
-    StaticZoom
+    Dynamic(f64), // f64 - smoothing focus window in seconds
+    Static
 }
 
 #[derive(Default, Clone, Copy, Debug)]
@@ -27,8 +32,9 @@ impl Merge<f64> for Point2D {
 
 
 pub trait ZoomingAlgorithm : DynClone {
-    fn get_state_checksum(&self) -> u64;
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)>;
+    fn compute_params(&self) -> &ComputeParams;    
+    fn hash(&self, hasher: &mut dyn Hasher);
 }
 clone_trait_object!(ZoomingAlgorithm);
 
@@ -46,13 +52,41 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
     
 
     let mode = if compute_params.adaptive_zoom_window < -0.9 {
-        Mode::StaticZoom
+        Mode::Static
     } else if compute_params.adaptive_zoom_window > 0.0001 {
-        Mode::DynamicZoom(compute_params.adaptive_zoom_window)
+        Mode::Dynamic(compute_params.adaptive_zoom_window)
     } else {
         Mode::Disabled
     };
 
-    // Box::new(adaptive::AdaptiveZoom::new(compute_params, mode))
-    Box::new(adaptive_new::AdaptiveNew::new(compute_params, mode))
+    match mode {
+        Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
+        Mode::Static              => Box::new(zoom_static::ZoomStatic::new(compute_params)),
+        Mode::Dynamic(window) => Box::new(zoom_dynamic::ZoomDynamic::new(compute_params, window)),
+    }
+}
+
+pub fn get_checksum(zoom: &Box<dyn ZoomingAlgorithm>) -> u64 {
+    let compute_params = zoom.compute_params();
+
+    let mut hasher = DefaultHasher::new();
+    if compute_params.distortion_coeffs.len() >= 4 {
+        hasher.write_u64(compute_params.distortion_coeffs[0].to_bits());
+        hasher.write_u64(compute_params.distortion_coeffs[1].to_bits());
+        hasher.write_u64(compute_params.distortion_coeffs[2].to_bits());
+        hasher.write_u64(compute_params.distortion_coeffs[3].to_bits());
+    }
+    
+    hasher.write_usize(compute_params.video_width);
+    hasher.write_usize(compute_params.video_height);
+    hasher.write_usize(compute_params.video_output_width);
+    hasher.write_usize(compute_params.video_output_height);
+    hasher.write_u64(compute_params.scaled_fps.to_bits());
+    hasher.write_u64(compute_params.trim_start.to_bits());
+    hasher.write_u64(compute_params.trim_end.to_bits());
+    hasher.write_u64(compute_params.video_rotation.to_bits());
+
+    zoom.hash(&mut hasher);
+
+    hasher.finish() 
 }

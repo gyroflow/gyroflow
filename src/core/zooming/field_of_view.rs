@@ -15,6 +15,9 @@ pub struct FieldOfView {
 
 impl FieldOfView { 
     pub fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
+        if timestamps.is_empty() {
+            return (Vec::new(), Vec::new());
+        }
         let boundary_polygons: Vec<Vec<Point2D>> = timestamps.iter().map(|&ts| self.bounding_polygon(ts, 9)).collect();
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon

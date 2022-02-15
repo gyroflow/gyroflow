@@ -57,8 +57,8 @@ pub struct StabilizationManager<T: PixelType> {
     pub lens_calibrator: Arc<RwLock<Option<LensCalibrator>>>,
 
     pub current_compute_id: Arc<AtomicU64>,
-    pub smoothness_checksum: Arc<AtomicU64>,
-    pub adaptive_zoom_checksum: Arc<AtomicU64>,
+    pub smoothing_checksum: Arc<AtomicU64>,
+    pub zooming_checksum: Arc<AtomicU64>,
     pub current_fov_10000: Arc<AtomicU64>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
@@ -79,8 +79,8 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             lens: Arc::new(RwLock::new(LensProfile::default())),
             
             current_compute_id: Arc::new(AtomicU64::new(0)),
-            smoothness_checksum: Arc::new(AtomicU64::new(0)),
-            adaptive_zoom_checksum: Arc::new(AtomicU64::new(0)),
+            smoothing_checksum: Arc::new(AtomicU64::new(0)),
+            zooming_checksum: Arc::new(AtomicU64::new(0)),
 
             current_fov_10000: Arc::new(AtomicU64::new(0)),
             
@@ -197,8 +197,8 @@ impl<T: PixelType> StabilizationManager<T> {
             self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
             self.lens.write().optimal_fov = None;
             
-            self.smoothness_checksum.store(0, SeqCst);
-            self.adaptive_zoom_checksum.store(0, SeqCst);
+            self.smoothing_checksum.store(0, SeqCst);
+            self.zooming_checksum.store(0, SeqCst);
         }
     }
 
@@ -282,8 +282,8 @@ impl<T: PixelType> StabilizationManager<T> {
         self.current_compute_id.store(compute_id, SeqCst);
 
         let current_compute_id = self.current_compute_id.clone();
-        let smoothness_checksum = self.smoothness_checksum.clone();
-        let adaptive_zoom_checksum = self.adaptive_zoom_checksum.clone();
+        let smoothing_checksum = self.smoothing_checksum.clone();
+        let zooming_checksum = self.zooming_checksum.clone();
 
         let undistortion = self.undistortion.clone();
         THREAD_POOL.spawn(move || {
@@ -291,7 +291,7 @@ impl<T: PixelType> StabilizationManager<T> {
             if current_compute_id.load(SeqCst) != compute_id { return; }
 
             let mut smoothing_changed = false;
-            if smoothing.read().get_state_checksum() != smoothness_checksum.load(SeqCst) {
+            if smoothing.read().get_state_checksum() != smoothing_checksum.load(SeqCst) {
                 let mut smoothing = smoothing.write().current().clone();
                 params.gyro.recompute_smoothness(smoothing.as_mut(), &stabilization_params.read());
 
@@ -307,7 +307,7 @@ impl<T: PixelType> StabilizationManager<T> {
             if current_compute_id.load(SeqCst) != compute_id { return; }
 
             let mut zoom = zooming::from_compute_params(params.clone());
-            if smoothing_changed || zoom.get_state_checksum() != adaptive_zoom_checksum.load(SeqCst) {
+            if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
                 stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
             }
@@ -316,8 +316,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
             undistortion.write().set_compute_params(params);
 
-            smoothness_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
-            adaptive_zoom_checksum.store(zoom.get_state_checksum(), SeqCst);
+            smoothing_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
+            zooming_checksum.store(zooming::get_checksum(&zoom), SeqCst);
             cb(compute_id);
         });
         compute_id
@@ -442,8 +442,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
 
-    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.smoothness_checksum.store(0, SeqCst); }
-    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.smoothness_checksum.store(0, SeqCst); }
+    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.smoothing_checksum.store(0, SeqCst); }
+    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.smoothing_checksum.store(0, SeqCst); }
 
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
@@ -517,20 +517,20 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);
         
-        self.smoothness_checksum.store(0, SeqCst);
-        self.adaptive_zoom_checksum.store(0, SeqCst);
+        self.smoothing_checksum.store(0, SeqCst);
+        self.zooming_checksum.store(0, SeqCst);
 
         smooth.current().get_parameters_json()
     }
     pub fn set_smoothing_param(&self, name: &str, val: f64) {
-        self.smoothness_checksum.store(0, SeqCst);
-        self.adaptive_zoom_checksum.store(0, SeqCst);
+        self.smoothing_checksum.store(0, SeqCst);
+        self.zooming_checksum.store(0, SeqCst);
 
         self.smoothing.write().current().as_mut().set_parameter(name, val);
     }
     pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64) {
-        self.smoothness_checksum.store(0, SeqCst);
-        self.adaptive_zoom_checksum.store(0, SeqCst);
+        self.smoothing_checksum.store(0, SeqCst);
+        self.zooming_checksum.store(0, SeqCst);
 
         self.smoothing.write().current().as_mut().set_horizon_lock(lock_percent, roll);
     }
@@ -589,8 +589,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.undistortion.write().set_compute_params(undistortion::ComputeParams::from_manager(self));
 
-        self.smoothness_checksum.store(0, SeqCst);
-        self.adaptive_zoom_checksum.store(0, SeqCst);
+        self.smoothing_checksum.store(0, SeqCst);
+        self.zooming_checksum.store(0, SeqCst);
     }
 
     pub fn export_gyroflow(&self, video_path: &str, filepath: impl AsRef<std::path::Path>, thin: bool) -> std::io::Result<()> {
