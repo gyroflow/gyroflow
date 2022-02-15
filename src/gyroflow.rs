@@ -47,19 +47,38 @@ fn entry() {
         .add_filter_ignore_str("akaze")
         .add_filter_ignore_str("ureq")
         .add_filter_ignore_str("rustls")
+        .add_filter_ignore_str("mdk")
+        .build();
+
+    let file_log_config = simplelog::ConfigBuilder::new()
+        .add_filter_ignore_str("mp4parse")
+        .add_filter_ignore_str("wgpu")
+        .add_filter_ignore_str("naga")
+        .add_filter_ignore_str("akaze")
+        .add_filter_ignore_str("ureq")
+        .add_filter_ignore_str("rustls")
         .build();
 
     #[cfg(target_os = "android")]
     simplelog::WriteLogger::init(simplelog::LevelFilter::Debug, log_config, util::AndroidLog::default()).unwrap();
 
     #[cfg(not(target_os = "android"))]
-    simplelog::TermLogger::init(simplelog::LevelFilter::Debug, log_config, simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto).unwrap();
+    let _ = simplelog::CombinedLogger::init(
+        vec![
+            simplelog::TermLogger::new(simplelog::LevelFilter::Debug, log_config, simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto),
+            simplelog::WriteLogger::new(simplelog::LevelFilter::Debug, file_log_config, std::fs::File::create("gyroflow.log").unwrap())
+        ]
+    );
 
     qmetaobject::log::init_qt_to_rust();
 
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
+
+    // rendering::set_gpu_type_from_name("nvidia");
+    // rendering::test();
+    // return;
 
     let icons_path = if ui_live_reload {
         QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")))
@@ -77,6 +96,16 @@ fn entry() {
 
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+    });
+
+    MDKVideoItem::setLogHandler(|level: i32, text: String| {
+        match level {
+            1 => { ::log::error!(target: "mdk", "[MDK] {}", text.trim()); },
+            2 => { ::log::warn!(target: "mdk", "[MDK] {}", text.trim()); },
+            3 => { ::log::info!(target: "mdk", "[MDK] {}", text.trim()); },
+            4 => { ::log::debug!(target: "mdk", "[MDK] {}", text.trim()); },
+            _ => { }
+        }
     });
 
     if cfg!(target_os = "android") || cfg!(target_os = "ios") {

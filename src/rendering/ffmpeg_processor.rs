@@ -184,7 +184,7 @@ impl<'a> FfmpegProcessor<'a> {
                 }
                 let mut out_stream = octx.add_stream(codec)?;
 
-                let mut input_codec = stream.codec();
+                let input_codec = stream.codec();
                 // input_codec.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
                 self.video.decoder = Some(input_codec.decoder().video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
