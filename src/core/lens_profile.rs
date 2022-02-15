@@ -76,6 +76,9 @@ impl LensProfile {
         let data = std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?;
         *self = Self::from_json(&data)?;
 
+        // Trust lens profiles loaded from file
+        self.official = true;
+
         if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
             return Err(serde_json::Error::io(std::io::ErrorKind::InvalidData.into()));
         }
