@@ -55,6 +55,14 @@ impl ItemOpenCV {
             (0.0, 0.0)
         }
     }
+    pub fn rescale(&mut self, ratio: f32) {
+        use opencv::prelude::MatTrait;
+        for i in 0..self.features.rows() {
+            let mut pt = self.features.at_mut::<Point2f>(i).unwrap();
+            pt.x *= ratio;
+            pt.y *= ratio;
+        }
+    }
     
     pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;

@@ -38,6 +38,7 @@ pub type GrayImage = image::GrayImage;
 pub struct FrameResult {
     item: EstimatorItem,
     pub timestamp_us: i64,
+    pub frame_size: (u32, u32),
     pub rotation: Option<Rotation3<f64>>,
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>
@@ -66,6 +67,18 @@ impl PoseEstimator {
         #[cfg(feature = "use-opencv")]
         let _ = opencv::init();
     }
+    pub fn rescale(&self, width: u32, height: u32) {
+        let mut results = self.sync_results.write();
+        for (_k, v) in results.iter_mut() {
+            let ratio = width as f32 / v.frame_size.0 as f32;
+            v.frame_size = (width, height);
+            match v.item {
+                #[cfg(feature = "use-opencv")]
+                EstimatorItem::OpenCV(ref mut x) => { x.rescale(ratio); },
+                EstimatorItem::Akaze (ref mut x)  => { x.rescale(ratio); }
+            };
+        }
+    }
 
     pub fn insert_empty_result(&self, frame: usize, timestamp_us: i64, method: u32) {
         let item = match method {
@@ -78,6 +91,7 @@ impl PoseEstimator {
             let mut l = self.sync_results.write();
             l.entry(frame).or_insert(FrameResult {
                 item,
+                frame_size: (0, 0),
                 timestamp_us,
                 rotation: None,
                 quat: None,
@@ -86,6 +100,7 @@ impl PoseEstimator {
         }
     }
     pub fn detect_features(&self, frame: usize, timestamp_us: i64, method: u32, img: image::GrayImage) {
+        let frame_size = (img.width(), img.height());
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
             #[cfg(feature = "use-opencv")]
@@ -96,6 +111,7 @@ impl PoseEstimator {
             let mut l = self.sync_results.write();
             l.entry(frame).or_insert(FrameResult {
                 item,
+                frame_size,
                 timestamp_us,
                 rotation: None,
                 quat: None,

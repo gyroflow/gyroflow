@@ -63,6 +63,12 @@ impl ItemAkaze {
     pub fn get_feature_at_index(&self, i: usize) -> (f32, f32) {
         self.features.0[i].point
     }
+    pub fn rescale(&mut self, ratio: f32) {
+        for v in self.features.0.iter_mut() {
+            v.point.0 *= ratio;
+            v.point.1 *= ratio;
+        }
+    }
 
     pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>) -> Option<Rotation3<f64>> {        
         let a1 = &self.features;

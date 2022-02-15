@@ -433,7 +433,7 @@ impl Controller {
                 let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
                 ::log::info!("surface size: {}x{}", new_w, new_h);
 
-                self.stabilizer.pose_estimator.clear();
+                self.stabilizer.pose_estimator.rescale(new_w, new_h);
                 self.chart_data_changed();
 
                 vid.setSurfaceSize(new_w, new_h);
