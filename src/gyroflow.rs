@@ -50,6 +50,7 @@ fn entry() {
         .add_filter_ignore_str("mdk")
         .build();
 
+    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
     let file_log_config = simplelog::ConfigBuilder::new()
         .add_filter_ignore_str("mp4parse")
         .add_filter_ignore_str("wgpu")
@@ -66,6 +67,7 @@ fn entry() {
     let _ = simplelog::CombinedLogger::init(
         vec![
             simplelog::TermLogger::new(simplelog::LevelFilter::Debug, log_config, simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto),
+            #[cfg(not(any(target_os = "macos", target_os = "ios")))]
             simplelog::WriteLogger::new(simplelog::LevelFilter::Debug, file_log_config, std::fs::File::create("gyroflow.log").unwrap())
         ]
     );
