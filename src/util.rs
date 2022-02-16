@@ -130,6 +130,57 @@ pub fn open_file_externally(path: QString) {
     cpp!(unsafe [path as "QString"] { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
 }
 
+pub fn init_logging() {
+    use simplelog::*;
+    use std::path::*;
+    let log_config = ConfigBuilder::new()
+        .add_filter_ignore_str("mp4parse")
+        .add_filter_ignore_str("wgpu")
+        .add_filter_ignore_str("naga")
+        .add_filter_ignore_str("akaze")
+        .add_filter_ignore_str("ureq")
+        .add_filter_ignore_str("rustls")
+        .add_filter_ignore_str("mdk")
+        .build();
+
+    let file_log_config = ConfigBuilder::new()
+        .add_filter_ignore_str("mp4parse")
+        .add_filter_ignore_str("wgpu")
+        .add_filter_ignore_str("naga")
+        .add_filter_ignore_str("akaze")
+        .add_filter_ignore_str("ureq")
+        .add_filter_ignore_str("rustls")
+        .build();
+
+    #[cfg(target_os = "android")]
+    WriteLogger::init(LevelFilter::Debug, log_config, util::AndroidLog::default()).unwrap();
+
+    #[cfg(not(target_os = "android"))]
+    {
+        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or(PathBuf::from("./gyroflow.log"));
+        if let Ok(file_log) = std::fs::File::create(exe_loc) {
+            let _ = CombinedLogger::init(vec![
+                TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
+                WriteLogger::new(LevelFilter::Debug, file_log_config, file_log)
+            ]);
+        } else {
+            let _ = TermLogger::init(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto);
+        }
+    }
+
+    qmetaobject::log::init_qt_to_rust();
+
+    qml_video_rs::video_item::MDKVideoItem::setLogHandler(|level: i32, text: String| {
+        match level {
+            1 => { ::log::error!(target: "mdk", "[MDK] {}", text.trim()); },
+            2 => { ::log::warn!(target: "mdk", "[MDK] {}", text.trim()); },
+            3 => { ::log::info!(target: "mdk", "[MDK] {}", text.trim()); },
+            4 => { ::log::debug!(target: "mdk", "[MDK] {}", text.trim()); },
+            _ => { }
+        }
+    });
+}
+
 #[cfg(target_os = "android")]
 pub fn android_log(v: String) {
     use std::ffi::{CStr, CString};

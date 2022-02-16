@@ -267,7 +267,7 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add calibration point");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                     controller.add_calibration_point(pos * root.durationMs * 1000);
                 }
             }
@@ -277,7 +277,7 @@ Item {
                 icon.name: "spinner";
                 text: qsTr("Auto sync here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                     controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
                 }
             }
@@ -286,7 +286,7 @@ Item {
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
+                    const pos = root.position * root.durationMs * 1000; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
                     const offset = controller.offset_at_timestamp(pos);
                     const final_pos = Math.round(pos - offset * 1000);
                     const final_offset = controller.offset_at_timestamp(final_pos)
@@ -305,7 +305,7 @@ Item {
                 icon.name: "readout_time";
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
-                    const pos = (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
 
                     const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" + 
                                       "This feature is experimental, the results may not be correct at all.\n" + 

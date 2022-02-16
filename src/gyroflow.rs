@@ -40,39 +40,7 @@ fn entry() {
     #[cfg(target_os = "windows")]
     unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
 
-    let log_config = simplelog::ConfigBuilder::new()
-        .add_filter_ignore_str("mp4parse")
-        .add_filter_ignore_str("wgpu")
-        .add_filter_ignore_str("naga")
-        .add_filter_ignore_str("akaze")
-        .add_filter_ignore_str("ureq")
-        .add_filter_ignore_str("rustls")
-        .add_filter_ignore_str("mdk")
-        .build();
-
-    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-    let file_log_config = simplelog::ConfigBuilder::new()
-        .add_filter_ignore_str("mp4parse")
-        .add_filter_ignore_str("wgpu")
-        .add_filter_ignore_str("naga")
-        .add_filter_ignore_str("akaze")
-        .add_filter_ignore_str("ureq")
-        .add_filter_ignore_str("rustls")
-        .build();
-
-    #[cfg(target_os = "android")]
-    simplelog::WriteLogger::init(simplelog::LevelFilter::Debug, log_config, util::AndroidLog::default()).unwrap();
-
-    #[cfg(not(target_os = "android"))]
-    let _ = simplelog::CombinedLogger::init(
-        vec![
-            simplelog::TermLogger::new(simplelog::LevelFilter::Debug, log_config, simplelog::TerminalMode::Mixed, simplelog::ColorChoice::Auto),
-            #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-            simplelog::WriteLogger::new(simplelog::LevelFilter::Debug, file_log_config, std::fs::File::create("gyroflow.log").unwrap())
-        ]
-    );
-
-    qmetaobject::log::init_qt_to_rust();
+    util::init_logging();
 
     crate::resources::rsrc();
     qml_video_rs::register_qml_types();
@@ -99,16 +67,9 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
-
-    MDKVideoItem::setLogHandler(|level: i32, text: String| {
-        match level {
-            1 => { ::log::error!(target: "mdk", "[MDK] {}", text.trim()); },
-            2 => { ::log::warn!(target: "mdk", "[MDK] {}", text.trim()); },
-            3 => { ::log::info!(target: "mdk", "[MDK] {}", text.trim()); },
-            4 => { ::log::debug!(target: "mdk", "[MDK] {}", text.trim()); },
-            _ => { }
-        }
-    });
+    // if cfg!(target_os = "android") {
+    //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
+    // }
 
     if cfg!(target_os = "android") || cfg!(target_os = "ios") {
         MDKVideoItem::setGlobalOption("MDK_KEY", "B75BC812C266C3E2D967840494C8866773E4E5FC596729F7D9895BFB2DB3B9AE2515F306FBF29BF20290E1093E9A5B5796B778F866F5F631831\
@@ -117,10 +78,6 @@ fn entry() {
         MDKVideoItem::setGlobalOption("MDK_KEY", "47FA7B212D5FF2F649A245E6D8DC2D88BAB67C208282CB3E2DEB95B9B4F9EC575102303FB92448ED49454E027A31B48ED08824EB904B58F693AD\
             B52FA63A4008B80584DE2D5F0D09B65DBA192723D277B8B67447FBF0A4584184E2659155D95CFBEB08626CBE3C94416B2FC50B1FA1201AA7381CE3E85DF3F3BF9BCB59677808");
     }
-
-    // if cfg!(target_os = "android") {
-    //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
-    // }
 
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };
