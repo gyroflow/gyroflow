@@ -1,8 +1,8 @@
 use super::*;
-use super::field_of_view::FieldOfView;
 
 #[derive(Clone)]
 pub struct ZoomStatic {
+    fov_estimator: Box<dyn FieldOfViewAlgorithm>,
     compute_params: ComputeParams
 }
 
@@ -11,8 +11,8 @@ impl ZoomingAlgorithm for ZoomStatic {
         if timestamps.is_empty() {
             return Vec::new();
         }
-        let fov_est = FieldOfView::new(self.compute_params.clone());
-        let (mut fov_values, center_position) = fov_est.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
+        
+        let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
         if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {
             fov_values.iter_mut().for_each(|v| *v = max_f);
@@ -35,8 +35,9 @@ impl ZoomingAlgorithm for ZoomStatic {
 }
 
 impl ZoomStatic {
-    pub fn new(compute_params: ComputeParams) -> Self {
+    pub fn new(fov_estimator: Box<dyn FieldOfViewAlgorithm>, compute_params: ComputeParams) -> Self {
         Self {
+            fov_estimator,
             compute_params
         }
     }

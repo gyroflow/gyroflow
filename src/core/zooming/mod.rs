@@ -1,4 +1,5 @@
-pub mod field_of_view;
+pub mod fov_default;
+pub mod fov_direct;
 
 pub mod zoom_disabled;
 pub mod zoom_static;
@@ -39,6 +40,12 @@ pub trait ZoomingAlgorithm : DynClone {
 clone_trait_object!(ZoomingAlgorithm);
 
 
+pub trait FieldOfViewAlgorithm : DynClone {
+    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>);
+}
+clone_trait_object!(FieldOfViewAlgorithm);
+
+
 pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
     compute_params.fov_scale = 1.0;
     compute_params.fovs.clear();
@@ -59,10 +66,13 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
         Mode::Disabled
     };
 
+
+    let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
+    //let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
     match mode {
         Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
-        Mode::Static              => Box::new(zoom_static::ZoomStatic::new(compute_params)),
-        Mode::Dynamic(window) => Box::new(zoom_dynamic::ZoomDynamic::new(compute_params, window)),
+        Mode::Static              => Box::new(zoom_static::ZoomStatic::new(fov_estimator, compute_params)),
+        Mode::Dynamic(window) => Box::new(zoom_dynamic::ZoomDynamic::new(window, fov_estimator, compute_params)),
     }
 }
 
