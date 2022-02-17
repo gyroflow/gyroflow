@@ -198,8 +198,15 @@ Item {
                         visibleAreaRight = visibleAreaLeft + panInit.visibleAreaWidth;
 
                         scrollbar.position = visibleAreaLeft;
-                    } else if (!(pressedButtons & Qt.RightButton)) {
-                        root.setPosition(Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width))));
+                    } else {
+                        const newPos = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
+                        const currentX = root.mapToVisibleArea(root.position) * parent.width;
+                        if (pressedButtons & Qt.RightButton) {
+                            if (Math.abs(mouseX - currentX) > 100) // If right click was more than 100px away from the current playhead
+                                root.setPosition(newPos);
+                        } else {
+                            root.setPosition(newPos);
+                        }
                     }
                 }
             }
@@ -355,7 +362,7 @@ Item {
 
         // Handle
         Rectangle {
-            x: Math.max(0, root.mapToVisibleArea(root.position) * (parent.width) - width / 2)
+            x: Math.max(0, (root.mapToVisibleArea(root.position) * parent.width) - width / 2)
             y: (parent.height - height) / 2
             radius: width;
             height: parent.height;

@@ -293,6 +293,7 @@ Item {
         }
         LoaderOverlay {
             id: videoLoader;
+            onActiveChanged: vid.forceRedraw();
             onCancel: controller.cancel_current_operation();
         }
 
