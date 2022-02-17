@@ -25,7 +25,7 @@ use std::{sync::Arc, collections::BTreeMap};
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::SeqCst;
 use camera_identifier::CameraIdentifier;
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 pub use undistortion::PixelType;
 
 use crate::lens_profile_database::LensProfileDatabase;
@@ -215,10 +215,19 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_output_size(&self, width: usize, height: usize) {
         if width > 0 && height > 0 {
             {
-                let mut params = self.params.write();
+                let params = self.params.upgradable_read();
+                
                 let ratio = params.size.0 as f64 / width as f64;
-                params.output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
-                params.video_output_size = (width, height);
+                let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
+                let video_output_size = (width, height);
+
+                if params.output_size == output_size && params.video_output_size == video_output_size {
+                     return; 
+                }
+
+                let mut params = RwLockUpgradableReadGuard::upgrade(params);
+                params.output_size = output_size;
+                params.video_output_size = video_output_size;
             }
             self.init_size();
             self.recompute_undistortion();
