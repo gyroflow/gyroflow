@@ -367,7 +367,9 @@ impl Controller {
                         if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
-                            stab.set_output_size(video_size.0, video_size.1);
+                            if stab.set_output_size(video_size.0, video_size.1) {
+                                stab.recompute_undistortion();
+                            }
                         }
                     } else if let Err(e) = stab.load_gyro_data(&s) {
                         err(("An error occured: %1".to_string(), e.to_string()));
@@ -678,9 +680,11 @@ impl Controller {
     }
 
     fn set_output_size(&self, w: usize, h: usize) {
-        self.stabilizer.set_output_size(w, h);
-        self.request_recompute();
-        qrhi_undistort::resize_player(self.stabilizer.clone());
+        if self.stabilizer.set_output_size(w, h) {
+            self.stabilizer.recompute_undistortion();
+            self.request_recompute();
+            qrhi_undistort::resize_player(self.stabilizer.clone());
+        }
     }
 
     wrap_simple_method!(override_video_fps,         v: f64; recompute; update_offset_model);
