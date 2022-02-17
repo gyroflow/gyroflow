@@ -186,8 +186,8 @@ impl<'a> FfmpegProcessor<'a> {
                 }
                 let mut out_stream = octx.add_stream(codec)?;
 
-                let input_codec = stream.codec();
-                // input_codec.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
+                let mut input_codec = stream.codec();
+                input_codec.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
                 self.video.decoder = Some(input_codec.decoder().video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
@@ -302,6 +302,7 @@ impl<'a> FfmpegProcessor<'a> {
         {
             let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
+            self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
             self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
             self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;

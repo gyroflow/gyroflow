@@ -413,11 +413,11 @@ pub fn test() {
         0,
         "",
         Arc::new(AtomicBool::new(false))
-    );
+    ).unwrap();
 }
 // use opencv::core::{Mat, Size, CV_8UC1};
 // use std::os::raw::c_void;
-        
+
 pub fn test_decode() {
     let mut proc = FfmpegProcessor::from_file("E:/clips/GoPro/rs/C0752.MP4", true).unwrap();
 

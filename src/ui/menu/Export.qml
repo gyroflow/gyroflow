@@ -67,22 +67,22 @@ MenuItem {
         target: controller;
         function onConvert_format(format, supported) {
             supported = supported.split(",").filter(v => !["CUDA", "D3D11", "BGRZ", "RGBZ", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].includes(v));
-            let buttons = supported.map(f => {
-                return { text: f, clicked: () => {
+            let buttons = supported.map(f => ({
+                text: f,
+                clicked: () => {
                     overridePixelFormat = f;
                     window.renderBtn.render();
-                } };
-            });
+                }
+            }));
             buttons.push({
                 text: qsTr("Render using CPU"),
+                accent: true,
                 clicked: () => {
                     gpu.checked = false;
                     window.renderBtn.render();
                 }
             });
-            buttons.push({
-                text: qsTr("Cancel")
-            });
+            buttons.push({ text: qsTr("Cancel") });
 
             messageBox(Modal.Question, qsTr("GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?").arg(format), buttons);
         }
