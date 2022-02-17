@@ -212,26 +212,26 @@ impl<T: PixelType> StabilizationManager<T> {
         }
         self.init_size();
     }
-    pub fn set_output_size(&self, width: usize, height: usize) {
+    pub fn set_output_size(&self, width: usize, height: usize) -> bool {
         if width > 0 && height > 0 {
-            {
-                let params = self.params.upgradable_read();
-                
-                let ratio = params.size.0 as f64 / width as f64;
-                let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
-                let video_output_size = (width, height);
+            let params = self.params.upgradable_read();
+            
+            let ratio = params.size.0 as f64 / width as f64;
+            let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
+            let video_output_size = (width, height);
 
-                if params.output_size == output_size && params.video_output_size == video_output_size {
-                     return; 
+            if params.output_size != output_size || params.video_output_size != video_output_size {
+                {
+                    let mut params = RwLockUpgradableReadGuard::upgrade(params);
+                    params.output_size = output_size;
+                    params.video_output_size = video_output_size;
                 }
+                self.init_size();
 
-                let mut params = RwLockUpgradableReadGuard::upgrade(params);
-                params.output_size = output_size;
-                params.video_output_size = video_output_size;
+                return true;
             }
-            self.init_size();
-            self.recompute_undistortion();
         }
+        false
     }
 
     pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>) -> Vec<f64> {
