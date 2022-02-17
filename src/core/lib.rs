@@ -221,7 +221,9 @@ impl<T: PixelType> StabilizationManager<T> {
                 let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
                 let video_output_size = (width, height);
 
-                if params.output_size == output_size && params.video_output_size == video_output_size { return; }
+                if params.output_size == output_size && params.video_output_size == video_output_size {
+                     return; 
+                }
 
                 let mut params = RwLockUpgradableReadGuard::upgrade(params);
                 params.output_size = output_size;
