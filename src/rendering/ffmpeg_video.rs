@@ -143,6 +143,9 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
         encoder.set_color_range(color_range);
         encoder.set_colorspace(frame.color_space());
+        let gop: f64 = frame_rate.unwrap_or(Rational::new(30, 1)).into();
+        encoder.set_gop((gop as u32).max(1));
+
         unsafe {
             if !codec_name.contains("videotoolbox") {
                 (*encoder.as_mut_ptr()).color_trc = (*frame.as_ptr()).color_trc;
