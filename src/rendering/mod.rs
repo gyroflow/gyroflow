@@ -111,7 +111,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
 }
 
 pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, codec: &str, codec_options: &str, output_path: &str, trim_start: f64, trim_end: f64, 
-                               output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
+                               output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, gpu_decoder_index: i32, pixel_format: &str, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
@@ -141,6 +141,14 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
     if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
+
+    if !pixel_format.is_empty() {
+        use std::str::FromStr;
+        match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
+            Ok(px) => { proc.video.encoder_pixel_format = Some(px); },
+            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", pixel_format, e); }
+        }
+    }
 
     match proc.video_codec.as_deref() {
         Some("prores_ks") => {
@@ -219,32 +227,32 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             // https://gist.github.com/Jim-Bar/3cbba684a71d1a9d468a6711a6eddbeb
             match input_frame.format() {
                 Pixel::NV12 => {
-                    create_planes_proc!(planes, 
+                    create_planes_proc!(planes,
                         (Luma8, input_frame, output_frame, 0, [0]),
                         (UV8,   input_frame, output_frame, 1, [1,2]),
                     );
                 },
                 Pixel::NV21 => {
-                    create_planes_proc!(planes, 
+                    create_planes_proc!(planes,
                         (Luma8, input_frame, output_frame, 0, [0]),
                         (UV8,   input_frame, output_frame, 1, [2,1]),
                     );
                 },
                 Pixel::P010LE | Pixel::P016LE => {
-                    create_planes_proc!(planes, 
+                    create_planes_proc!(planes,
                         (Luma16, input_frame, output_frame, 0, [0]),
                         (UV16,   input_frame, output_frame, 1, [1,2]),
                     );
                 },
                 Pixel::YUV420P | Pixel::YUVJ420P => {
-                    create_planes_proc!(planes, 
+                    create_planes_proc!(planes,
                         (Luma8, input_frame, output_frame, 0, [0]),
                         (Luma8, input_frame, output_frame, 1, [1]),
                         (Luma8, input_frame, output_frame, 2, [2]),
                     );
                 },
                 Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
-                    create_planes_proc!(planes, 
+                    create_planes_proc!(planes,
                         (Luma16, input_frame, output_frame, 0, [0]),
                         (Luma16, input_frame, output_frame, 1, [1]),
                         (Luma16, input_frame, output_frame, 2, [2]),
@@ -254,10 +262,10 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                     ::log::info!("Unknown format {:?}, converting to YUV444P16LE", format);
                     // Go through 4:4:4 because of even plane dimensions
                     converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
-                        create_planes_proc!(planes, 
-                            (Luma16, converted_frame, converted_output, 0, [0]), 
-                            (Luma16, converted_frame, converted_output, 1, [1]), 
-                            (Luma16, converted_frame, converted_output, 2, [2]), 
+                        create_planes_proc!(planes,
+                            (Luma16, converted_frame, converted_output, 0, [0]),
+                            (Luma16, converted_frame, converted_output, 1, [1]),
+                            (Luma16, converted_frame, converted_output, 2, [2]),
                         );
                     })?;
                 }
@@ -402,7 +410,8 @@ pub fn test() {
         100.0,
         true, 
         false,
-        0, 
+        0,
+        "",
         Arc::new(AtomicBool::new(false))
     );
 }

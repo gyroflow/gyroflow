@@ -57,15 +57,35 @@ MenuItem {
     property alias outBitrate: bitrate.value;
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
+    property string overridePixelFormat: "";
     property string outCodecOptions: "";
 
     onOutWidthChanged: Qt.callLater(applyOutputSize);
     onOutHeightChanged: Qt.callLater(applyOutputSize);
 
-    Component.onCompleted: {
-        QT_TRANSLATE_NOOP("Export", "GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?");
-        QT_TRANSLATE_NOOP("Export", "Render using CPU");
-        QT_TRANSLATE_NOOP("Export", "Cancel");
+    Connections {
+        target: controller;
+        function onConvert_format(format, supported) {
+            supported = supported.split(",").filter(v => !["CUDA", "D3D11", "BGRZ", "RGBZ", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].includes(v));
+            let buttons = supported.map(f => {
+                return { text: f, clicked: () => {
+                    overridePixelFormat = f;
+                    window.renderBtn.render();
+                } };
+            });
+            buttons.push({
+                text: qsTr("Render using CPU"),
+                clicked: () => {
+                    gpu.checked = false;
+                    window.renderBtn.render();
+                }
+            });
+            buttons.push({
+                text: qsTr("Cancel")
+            });
+
+            messageBox(Modal.Question, qsTr("GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?").arg(format), buttons);
+        }
     }
 
     function applyOutputSize() {
@@ -109,8 +129,7 @@ MenuItem {
         function updateGpuStatus() {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
-            if ((format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit"))
-             || (window.vidInfo.pixelFormat.includes("422"))) {
+            if ((format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit"))) {
                 gpu.enabled2 = false;
             }
             gpu.checked = gpu.enabled2;

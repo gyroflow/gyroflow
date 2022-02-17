@@ -119,7 +119,7 @@ pub struct Controller {
 
     chart_data_changed: qt_signal!(),
 
-    render: qt_method!(fn(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool)),
+    render: qt_method!(fn(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, pixel_format: String)),
     render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize, finished: bool),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
@@ -162,6 +162,7 @@ pub struct Controller {
 
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
+    convert_format: qt_signal!(format: QString, supported: QString),
 
     video_path: String,
 
@@ -574,7 +575,7 @@ impl Controller {
         self.compute_progress(id, 0.0);
     }
 
-    fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool) {
+    fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, pixel_format: String) {
         rendering::clear_log();
 
         let rendered_frames = Arc::new(AtomicUsize::new(0));
@@ -591,6 +592,10 @@ impl Controller {
             this.render_progress(1.0, 0, 0, true);
         });
 
+        let convert_format = util::qt_queued_callback_mut(self, |this, (format, supported): (String, String)| {
+            this.convert_format(QString::from(format), QString::from(supported));
+            this.render_progress(1.0, 0, 0, true);
+        });
         let trim_ratio = trim_end - trim_start;
         let total_frame_count = self.stabilizer.params.read().frame_count;
         let video_path = self.video_path.clone();
@@ -607,8 +612,12 @@ impl Controller {
 
             let mut i = 0;
             loop {
-                let result = rendering::render(stab.clone(), progress.clone(), &video_path, &codec, &codec_options, &output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, i, cancel_flag.clone());
+                let result = rendering::render(stab.clone(), progress.clone(), &video_path, &codec, &codec_options, &output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, i, &pixel_format, cancel_flag.clone());
                 if let Err(e) = result {
+                    if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
+                        convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
+                        break;
+                    }
                     if rendered_frames2.load(SeqCst) == 0 {
                         if i >= 0 && i < 4 {
                             // Try 4 times with different GPU decoders

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use ffmpeg_next::{ ffi, encoder, Stream };
+use ffmpeg_next::{ ffi, format, encoder, Stream };
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
@@ -15,8 +15,8 @@ pub struct HWDevice {
     type_: DeviceType,
     device_ref: *mut ffi::AVBufferRef,
 
-    pub hw_formats: Vec<ffi::AVPixelFormat>,
-    pub sw_formats: Vec<ffi::AVPixelFormat>,
+    pub hw_formats: Vec<format::Pixel>,
+    pub sw_formats: Vec<format::Pixel>,
     pub min_size: (i32, i32),
     pub max_size: (i32, i32)
 }
@@ -93,14 +93,14 @@ pub fn supported_gpu_backends() -> Vec<String> {
     ret
 }
 
-pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<ffi::AVPixelFormat> {
+pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<format::Pixel> {
     let mut ret = Vec::new();
     for i in 0..100 {
         let p = *formats.offset(i);
         if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
             break;
         }
-        ret.push(p);
+        ret.push(p.into());
     }
     ret
 }
@@ -189,7 +189,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
     (x.0, x.1, None)
 }
 
-pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::AVPixelFormat> {
+pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
     let mut formats = std::ptr::null_mut();
     if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
         ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_FROM, &mut formats, 0);
@@ -200,7 +200,7 @@ pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi
         pix_formats_to_vec(formats)
     }
 }
-pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<ffi::AVPixelFormat> {
+pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
     let mut formats = std::ptr::null_mut();
     if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
         ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_TO, &mut formats, 0);

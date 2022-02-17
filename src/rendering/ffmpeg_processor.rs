@@ -51,13 +51,14 @@ pub enum FFmpegError {
     CannotCreateGPUDecoding,
     NoFramesContext,
     ToHWBufferError(i32),
+    PixelFormatNotSupported((format::Pixel, Vec<format::Pixel>)),
     UnknownPixelFormat(format::Pixel),
     InternalError(ffmpeg_next::Error),
 }
 
 impl std::fmt::Display for FFmpegError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match *self {
+        match self {
             FFmpegError::EncoderNotFound             => write!(f, "Encoder not found"),
             FFmpegError::DecoderNotFound             => write!(f, "Decoder not found"),
             FFmpegError::NoSupportedFormats          => write!(f, "No supported formats"),
@@ -66,14 +67,15 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::ConverterEmpty              => write!(f, "Converter is null"),
             FFmpegError::FrameEmpty                  => write!(f, "Frame is null"),
             FFmpegError::NoHWTransferFormats         => write!(f, "No hardware transfer formats"),
-            FFmpegError::FromHWTransferError(i)  => write!(f, "Error transferring frame from the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
-            FFmpegError::ToHWTransferError(i)    => write!(f, "Error transferring frame to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
-            FFmpegError::ToHWBufferError(i)      => write!(f, "Error getting HW transfer buffer to the GPU: {:?}", ffmpeg_next::Error::Other { errno: i }),
+            FFmpegError::FromHWTransferError(i) => write!(f, "Error transferring frame from the GPU: {:?}", ffmpeg_next::Error::Other { errno: *i }),
+            FFmpegError::ToHWTransferError(i)   => write!(f, "Error transferring frame to the GPU: {:?}", ffmpeg_next::Error::Other { errno: *i }),
+            FFmpegError::ToHWBufferError(i)     => write!(f, "Error getting HW transfer buffer to the GPU: {:?}", ffmpeg_next::Error::Other { errno: *i }),
             FFmpegError::NoFramesContext             => write!(f, "Empty hw frames context"),
             FFmpegError::CannotCreateGPUDecoding     => write!(f, "Unable to create HW devices context"),
             FFmpegError::NoGPUDecodingDevice         => write!(f, "Unable to create any HW decoding context"),
             FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
-            FFmpegError::InternalError(e)      => write!(f, "ffmpeg error: {:?}", e),
+            FFmpegError::PixelFormatNotSupported(v) => write!(f, "Pixel format {:?} is not supported. Supported ones: {:?}", v.0, v.1),
+            FFmpegError::InternalError(e)     => write!(f, "ffmpeg error: {:?}", e),
         }
     }
 }

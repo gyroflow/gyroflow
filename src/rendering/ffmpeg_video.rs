@@ -88,7 +88,7 @@ pub struct VideoTranscoder<'a> {
 
     pub hw_device_type: Option<ffi::AVHWDeviceType>,
 
-    pub codec_supported_formats: Vec<ffi::AVPixelFormat>,
+    pub codec_supported_formats: Vec<format::Pixel>,
 
     pub encoder_pixel_format: Option<format::Pixel>,
     pub encoder_converter: Option<software::scaling::Context>,
@@ -221,19 +221,23 @@ impl<'a> VideoTranscoder<'a> {
                     if !self.decode_only && self.encoder.is_none() {
                         let octx = octx.as_deref_mut().ok_or(FFmpegError::NoOutputContext)?;
             
-                        if self.gpu_decoding && self.encoder_pixel_format.is_none() {
-                            log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
-                            if let Some(hw_formats) = hw_formats {
-                                if !hw_formats.is_empty() {
-                                    let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
-                                    let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
-                                    if picked != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
-                                        self.encoder_pixel_format = Some(format::Pixel::from(picked));
-                                    }
-                                }
-                            }
-                        }
+                        // if self.gpu_decoding && self.encoder_pixel_format.is_none() {
+                        //     log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
+                        //     if let Some(hw_formats) = hw_formats {
+                        //         if !hw_formats.is_empty() {
+                        //             let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
+                        //             let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
+                        //             if picked != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
+                        //                 self.encoder_pixel_format = Some(format::Pixel::from(picked));
+                        //             }
+                        //         }
+                        //     }
+                        // }
                         log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.hw_device_type, self.encoder_pixel_format);
+                        let pixel_format = self.encoder_pixel_format.unwrap_or_else(|| input_frame.format());
+                        if !self.codec_supported_formats.contains(&pixel_format) {
+                            return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
+                        }
             
                         // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
             

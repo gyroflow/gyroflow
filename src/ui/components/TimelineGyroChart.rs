@@ -75,7 +75,7 @@ impl TimelineGyroChart {
         let rect = (self as &dyn QQuickItem).bounding_rect();
         let mut min_height = f64::MAX;
         let mut max_height = 0.0;
-        for serie in &mut self.series  {
+        for serie in &mut self.series {
             if serie.visible && !serie.lines.is_empty() {
                 for a in &serie.lines {
                     for b in a {

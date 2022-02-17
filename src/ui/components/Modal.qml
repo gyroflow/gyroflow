@@ -55,7 +55,7 @@ Rectangle {
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: Math.max(btnsRow.width + 100 * dpiScale, root.text.length > 200? parent.width * 0.8 : 400 * dpiScale);
+        width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.text.length > 200? parent.width * 0.8 : 400 * dpiScale));
         height: col.height + 30 * dpiScale;
         property real offs: 0;
         color: styleBackground2;
@@ -105,10 +105,17 @@ Rectangle {
                 }
             }
             Item { height: 25 * dpiScale; width: 1; }
-            Row {
+            Flow {
                 id: btnsRow;
                 anchors.horizontalCenter: parent.horizontalCenter;
                 spacing: 10 * dpiScale;
+                onWidthChanged: {
+                    Qt.callLater(() => {
+                        if (btnsRow.width > parent.width - 20 * dpiScale) {
+                            btnsRow.width = parent.width - 20 * dpiScale;
+                        }
+                    });
+                }
                 Repeater {
                     id: btns;
                     Button {

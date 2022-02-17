@@ -51,6 +51,7 @@ Rectangle {
     property alias outputFile: outputFile.text;
     property alias sync: sync;
     property alias stab: stab;
+    property alias renderBtn: renderBtn;
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
 
@@ -184,20 +185,6 @@ Rectangle {
 
                     model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file"), ];
 
-                    function doRender() {
-                        controller.render(
-                            exportSettings.outCodec, 
-                            exportSettings.outCodecOptions, 
-                            outputFile.text, 
-                            videoArea.trimStart, 
-                            videoArea.trimEnd, 
-                            exportSettings.outWidth, 
-                            exportSettings.outHeight, 
-                            exportSettings.outBitrate, 
-                            exportSettings.outGpu, 
-                            exportSettings.outAudio
-                        );
-                    }
                     function renameOutput() {
                         const orgOutput = outputFile.text;
                         let output = orgOutput;
@@ -210,34 +197,55 @@ Rectangle {
                         outputFile.text = output;
                         clicked();
                     }
-                    property bool allow1: false;
-                    property bool allow2: false;
-                    onClicked: {
-                        if (!controller.lens_loaded && !allow1) {
+                    property bool allowFile: false;
+                    property bool allowLens: false;
+                    property bool allowSync: false;
+
+                    function render() {
+                        if (!controller.lens_loaded && !allowLens) {
                             messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
-                                { text: qsTr("Yes"), clicked: function() { allow1 = true; renderBtn.clicked(); }},
+                                { text: qsTr("Yes"), clicked: () => { allowLens = true; renderBtn.render(); }},
                                 { text: qsTr("No"), accent: true },
                             ]);
                             return;
                         }
                         const usesQuats = window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && window.motionData.filename == window.vidInfo.filename;
-                        if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allow2) {
+                        if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
                             messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
-                                { text: qsTr("Yes"), clicked: function() { allow2 = true; renderBtn.clicked(); }},
+                                { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},
+                                { text: qsTr("No"), accent: true },
+                            ]);
+                            return;
+                        }
+                        if (controller.file_exists(outputFile.text) && !allowFile) {
+                            messageBox(Modal.NoIcon, qsTr("Output file already exists, do you want to overwrite it?"), [
+                                { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
+                                { text: qsTr("Rename"), clicked: renameOutput },
                                 { text: qsTr("No"), accent: true },
                             ]);
                             return;
                         }
 
-                        if (controller.file_exists(outputFile.text)) {
-                            messageBox(Modal.NoIcon, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                { text: qsTr("Yes"), clicked: doRender },
-                                { text: qsTr("Rename"), clicked: renameOutput },
-                                { text: qsTr("No"), accent: true },
-                            ]);
-                        } else {
-                            doRender();
-                        }
+                        controller.render(
+                            exportSettings.outCodec, 
+                            exportSettings.outCodecOptions, 
+                            outputFile.text, 
+                            videoArea.trimStart, 
+                            videoArea.trimEnd, 
+                            exportSettings.outWidth, 
+                            exportSettings.outHeight, 
+                            exportSettings.outBitrate, 
+                            exportSettings.outGpu, 
+                            exportSettings.outAudio,
+                            exportSettings.overridePixelFormat
+                        );
+                    }
+                    onClicked: {
+                        allowFile = false;
+                        allowLens = false;
+                        allowSync = false;
+                        exportSettings.overridePixelFormat = "";
+                        render();
                     }
                     popup.onClicked: (index) => {
                         controller.export_gyroflow(index == 1);
