@@ -20,6 +20,7 @@ struct Globals {
     bytes_per_pixel: u32,
     pix_element_count: u32,
     num_params: u32,
+    interpolation: u32,
     bg: [f32; 4]
 }
 unsafe impl Zeroable for Globals {}
@@ -62,7 +63,7 @@ impl WgpuWrapper {
         Some(name)
     }
 
-    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, bg: nalgebra::Vector4<f32>) -> Option<Self> {
+    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, bg: nalgebra::Vector4<f32>, mut interpolation: u32) -> Option<Self> {
         let params_count = 9 * (height + 1);
 
         if height < 4 || output_height < 4 || stride < 1 { return None; }
@@ -70,6 +71,10 @@ impl WgpuWrapper {
         let in_size = (stride * height) as wgpu::BufferAddress;
         let out_size = (output_stride * output_height) as wgpu::BufferAddress;
         let params_size = (params_count * std::mem::size_of::<f32>()) as wgpu::BufferAddress;
+
+        if interpolation != 2 {
+            interpolation = 2; // TODO: Bicubic and Lanczos are not working
+        }
 
         //let instance = wgpu::Instance::new(wgpu::Backends::all());
 
@@ -122,6 +127,7 @@ impl WgpuWrapper {
                 output_stride: output_stride as u32,
                 bytes_per_pixel: bytes_per_pixel as u32,
                 pix_element_count: pix_element_count as u32,
+                interpolation,
                 num_params: 2,
                 bg: [bg[0], bg[1], bg[2], bg[3]]
             };

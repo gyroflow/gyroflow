@@ -40,7 +40,7 @@ impl OclWrapper {
         Ok(name)
     }
 
-    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>) -> ocl::Result<Self> {
+    pub fn new(width: usize, height: usize, stride: usize, bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, pix_element_count: usize, ocl_names: (&str, &str, &str, &str), bg: nalgebra::Vector4<f32>, interpolation: u32) -> ocl::Result<Self> {
         if height < 4 || output_height < 4 || stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
         
         let context_initialized = CONTEXT.read().is_some();
@@ -56,6 +56,7 @@ impl OclWrapper {
                 .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPEF"   .into(), val: ocl_names.2.into() })
                 .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERTF".into(), val: ocl_names.3.into() })
                 .bo(builders::BuildOpt::CmplrDefine { ident: "PIXEL_BYTES"  .into(), val: format!("{}", bytes_per_pixel) })
+                .bo(builders::BuildOpt::CmplrDefine { ident: "INTERPOLATION".into(), val: format!("{}", interpolation) })
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 

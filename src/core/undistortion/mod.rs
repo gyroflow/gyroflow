@@ -17,6 +17,16 @@ pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
 pub use cpu_undistort::{ undistort_points, undistort_points_with_rolling_shutter };
 
+#[derive(Clone, Copy)]
+pub enum Interpolation {
+    Bilinear = 2,
+    Bicubic = 4, 
+    Lanczos4 = 8
+}
+impl Default for Interpolation {
+    fn default() -> Self { Interpolation::Bilinear }
+}
+
 #[derive(Default)]
 pub struct Undistortion<T: PixelType> {
     stab_data: BTreeMap<i64, FrameTransform>,
@@ -24,6 +34,8 @@ pub struct Undistortion<T: PixelType> {
     size: (usize, usize, usize), // width, height, stride
     output_size: (usize, usize, usize), // width, height, stride
     pub background: Vector4<f32>,
+
+    pub interpolation: Interpolation,
 
     #[cfg(feature = "use-opencl")]
     cl: Option<opencl::OclWrapper>,
@@ -86,12 +98,13 @@ impl<T: PixelType> Undistortion<T> {
     }
 
     pub fn init_backends(&mut self) {
+        let interp = self.interpolation as u32;
         if !self.backend_initialized {
             let mut _opencl_initialized = false;
             #[cfg(feature = "use-opencl")]
             {
                 let cl = std::panic::catch_unwind(|| {
-                    opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background)
+                    opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background, interp)
                 });
                 match cl {
                     Ok(Ok(cl)) => { self.cl = Some(cl); _opencl_initialized = true; },
@@ -103,7 +116,7 @@ impl<T: PixelType> Undistortion<T> {
             // TODO: Support other pixel types
             if !_opencl_initialized && T::COUNT == 4 && T::SCALAR_BYTES == 1 {
                 let wgpu = std::panic::catch_unwind(|| {
-                    wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background)
+                    wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, self.background, interp)
                 });
                 match wgpu {
                     Ok(Some(wgpu)) => self.wgpu = Some(wgpu),
@@ -145,7 +158,7 @@ impl<T: PixelType> Undistortion<T> {
         }
 
         // CPU path
-        Self::undistort_image_cpu(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background);
+        Self::undistort_image_cpu(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background, self.interpolation as i32);
 
         true
     }
@@ -158,7 +171,7 @@ pub trait PixelType: Default + Copy + Send + Sync + bytemuck::Pod {
 
     fn to_float(v: Self) -> Vector4<f32>;
     fn from_float(v: Vector4<f32>) -> Self;
-    fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32>;
+    fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32>;
     fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str);
 }
 
@@ -173,7 +186,10 @@ fn rgb_to_yuv(v: Vector4<f32>) -> Vector4<f32> {
 
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct Luma8(u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct Luma16(u16);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGB8(u8, u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA8(u8, u8, u8, u8);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGB16(u16, u16, u16);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBAf(f32, f32, f32, f32);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV8(u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV16(u16, u16);
@@ -186,7 +202,7 @@ impl PixelType for Luma8 {
     type Scalar = u8;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, 0.0, 0.0, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v)[ind[0]] * Self::Scalar::MAX as f32, 0.0, 0.0, 0.0) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v)[ind[0]] * max_val, 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar", "convert_uchar", "float", "convert_float") }
 }
 unsafe impl bytemuck::Zeroable for Luma16 { }
@@ -197,8 +213,19 @@ impl PixelType for Luma16 {
     type Scalar = u16;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, 0.0, 0.0, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v)[ind[0]] * Self::Scalar::MAX as f32, 0.0, 0.0, 0.0) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v)[ind[0]] * max_val, 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort", "convert_ushort", "float", "convert_float") }
+}
+unsafe impl bytemuck::Zeroable for RGB8 { }
+unsafe impl bytemuck::Pod for RGB8 { }
+impl PixelType for RGB8 {
+    const COUNT: usize = 3;
+    const SCALAR_BYTES: usize = 1;
+    type Scalar = u8;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, 0.0) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar3", "convert_uchar3", "float4", "convert_float4") }
 }
 unsafe impl bytemuck::Zeroable for RGBA8 { }
 unsafe impl bytemuck::Pod for RGBA8 { }
@@ -208,8 +235,30 @@ impl PixelType for RGBA8 {
     type Scalar = u8;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize]) -> Vector4<f32> { v }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar4", "convert_uchar4", "float4", "convert_float4") }
+}
+unsafe impl bytemuck::Zeroable for RGB16 { }
+unsafe impl bytemuck::Pod for RGB16 { }
+impl PixelType for RGB16 {
+    const COUNT: usize = 3;
+    const SCALAR_BYTES: usize = 1;
+    type Scalar = u16;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, 0.0) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort3", "convert_ushort3", "float4", "convert_float4") }
+}
+unsafe impl bytemuck::Zeroable for RGBA16 { }
+unsafe impl bytemuck::Pod for RGBA16 { }
+impl PixelType for RGBA16 {
+    const COUNT: usize = 4;
+    const SCALAR_BYTES: usize = 1;
+    type Scalar = u16;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort4", "convert_ushort4", "float4", "convert_float4") }
 }
 unsafe impl bytemuck::Zeroable for RGBAf { }
 unsafe impl bytemuck::Pod for RGBAf { }
@@ -219,7 +268,7 @@ impl PixelType for RGBAf {
     type Scalar = f32;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0, v.1, v.2, v.3) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0], v[1], v[2], v[3]) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize]) -> Vector4<f32> { v }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float4", "convert_float4", "float4", "convert_float4") }
 }
 unsafe impl bytemuck::Zeroable for UV8 { }
@@ -230,7 +279,7 @@ impl PixelType for UV8 {
     type Scalar = u8;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, 0.0, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * Self::Scalar::MAX as f32, yuv[ind[1]] * Self::Scalar::MAX as f32, 0.0, 0.0) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * max_val, yuv[ind[1]] * max_val, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar2", "convert_uchar2", "float2", "convert_float2") }
 }
 unsafe impl bytemuck::Zeroable for UV16 { }
@@ -241,7 +290,7 @@ impl PixelType for UV16 {
     type Scalar = u16;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, 0.0, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize]) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * Self::Scalar::MAX as f32, yuv[ind[1]] * Self::Scalar::MAX as f32, 0.0, 0.0) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * max_val, yuv[ind[1]] * max_val, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort2", "convert_ushort2", "float2", "convert_float2") }
 }
 
