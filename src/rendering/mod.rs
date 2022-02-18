@@ -142,14 +142,6 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
     if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
 
-    if !pixel_format.is_empty() {
-        use std::str::FromStr;
-        match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
-            Ok(px) => { proc.video.encoder_pixel_format = Some(px); },
-            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", pixel_format, e); }
-        }
-    }
-
     match proc.video_codec.as_deref() {
         Some("prores_ks") => {
             let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
@@ -162,13 +154,21 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         }
         Some("png") => {
             if codec_options.contains("16-bit") {
-                proc.video.encoder_pixel_format = Some(Pixel::RGB48BE);
+                proc.video.encoder_pixel_format = Some(Pixel::RGBA64BE);
             } else {
-                proc.video.encoder_pixel_format = Some(Pixel::RGB24);
+                proc.video.encoder_pixel_format = Some(Pixel::RGBA);
             }
             proc.video.clone_frames = true;
         }
         _ => { }
+    }
+
+    if !pixel_format.is_empty() {
+        use std::str::FromStr;
+        match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
+            Ok(px) => { proc.video.encoder_pixel_format = Some(px); },
+            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", pixel_format, e); }
+        }
     }
 
     //proc.video.codec_options.set("preset", "medium");
@@ -188,7 +188,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let mut process_frame = 0;
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
         process_frame += 1;
-        log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
+        // log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
             
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
@@ -197,7 +197,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         let output_frame = output_frame.unwrap();
 
         macro_rules! create_planes_proc {
-            ($planes:ident, $(($t:tt, $in_frame:expr, $out_frame:expr, $ind:expr, $yuvi:expr), )*) => {
+            ($planes:ident, $(($t:tt, $in_frame:expr, $out_frame:expr, $ind:expr, $yuvi:expr, $max_val:expr), )*) => {
                 $({
                     let in_size  = ($in_frame .plane_width($ind) as usize, $in_frame .plane_height($ind) as usize, $in_frame .stride($ind) as usize);
                     let out_size = ($out_frame.plane_width($ind) as usize, $out_frame.plane_height($ind) as usize, $out_frame.stride($ind) as usize);
@@ -205,10 +205,13 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                         let mut params = stab.params.write();
                         params.size        = (in_size.0,  in_size.1);
                         params.output_size = (out_size.0, out_size.1);
+                        params.video_size  = params.size;
+                        params.video_output_size = params.output_size;
                         params.background
                     };
                     let mut plane = Undistortion::<$t>::default();
-                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
+                    plane.interpolation = Interpolation::Lanczos4;
+                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
                     plane.set_compute_params(ComputeParams::from_manager(&stab));
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
                         let (w, h, s)    = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
@@ -228,44 +231,73 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             match input_frame.format() {
                 Pixel::NV12 => {
                     create_planes_proc!(planes,
-                        (Luma8, input_frame, output_frame, 0, [0]),
-                        (UV8,   input_frame, output_frame, 1, [1,2]),
+                        (Luma8, input_frame, output_frame, 0, [0], 255.0),
+                        (UV8,   input_frame, output_frame, 1, [1,2], 255.0),
                     );
                 },
                 Pixel::NV21 => {
                     create_planes_proc!(planes,
-                        (Luma8, input_frame, output_frame, 0, [0]),
-                        (UV8,   input_frame, output_frame, 1, [2,1]),
+                        (Luma8, input_frame, output_frame, 0, [0], 255.0),
+                        (UV8,   input_frame, output_frame, 1, [2,1], 255.0),
                     );
                 },
                 Pixel::P010LE | Pixel::P016LE => {
+                    let max_val = match input_frame.format() {
+                        Pixel::P010LE => 1024.0,
+                        _ => 65535.0
+                    };
                     create_planes_proc!(planes,
-                        (Luma16, input_frame, output_frame, 0, [0]),
-                        (UV16,   input_frame, output_frame, 1, [1,2]),
+                        (Luma16, input_frame, output_frame, 0, [0], max_val),
+                        (UV16,   input_frame, output_frame, 1, [1,2], max_val),
                     );
                 },
                 Pixel::YUV420P | Pixel::YUVJ420P => {
                     create_planes_proc!(planes,
-                        (Luma8, input_frame, output_frame, 0, [0]),
-                        (Luma8, input_frame, output_frame, 1, [1]),
-                        (Luma8, input_frame, output_frame, 2, [2]),
+                        (Luma8, input_frame, output_frame, 0, [0], 255.0),
+                        (Luma8, input_frame, output_frame, 1, [1], 255.0),
+                        (Luma8, input_frame, output_frame, 2, [2], 255.0),
                     );
                 },
-                Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
+                Pixel::YUV420P10LE | Pixel::YUV420P12LE | Pixel::YUV420P14LE | Pixel::YUV420P16LE |
+                Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
+                Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE => {
+                    let max_val = match input_frame.format() {
+                        Pixel::YUV420P10LE | Pixel::YUV422P10LE | Pixel::YUV444P10LE => 1024.0,
+                        Pixel::YUV420P12LE | Pixel::YUV422P12LE | Pixel::YUV444P12LE => 4095.0,
+                        Pixel::YUV420P14LE | Pixel::YUV422P14LE | Pixel::YUV444P14LE => 16383.0,
+                        _ => 65535.0
+                    };
                     create_planes_proc!(planes,
-                        (Luma16, input_frame, output_frame, 0, [0]),
-                        (Luma16, input_frame, output_frame, 1, [1]),
-                        (Luma16, input_frame, output_frame, 2, [2]),
+                        (Luma16, input_frame, output_frame, 0, [0], max_val),
+                        (Luma16, input_frame, output_frame, 1, [1], max_val),
+                        (Luma16, input_frame, output_frame, 2, [2], max_val),
                     );
                 },
+                Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE => {
+                    let max_val = match input_frame.format() {
+                        Pixel::YUVA444P10LE => 1024.0,
+                        Pixel::YUVA444P12LE => 4095.0,
+                        _ => 65535.0
+                    };
+                    create_planes_proc!(planes,
+                        (Luma16, input_frame, output_frame, 0, [0], max_val),
+                        (Luma16, input_frame, output_frame, 1, [1], max_val),
+                        (Luma16, input_frame, output_frame, 2, [2], max_val),
+                        (Luma16, input_frame, output_frame, 3, [3], max_val),
+                    );
+                },
+                Pixel::RGB24    => { create_planes_proc!(planes, (RGB8,   input_frame, output_frame, 0, [], 255.0), ); },
+                Pixel::RGBA     => { create_planes_proc!(planes, (RGBA8,  input_frame, output_frame, 0, [], 255.0), ); },
+                Pixel::RGB48BE  => { create_planes_proc!(planes, (RGB16,  input_frame, output_frame, 0, [], 65535.0), ); },
+                Pixel::RGBA64BE => { create_planes_proc!(planes, (RGBA16, input_frame, output_frame, 0, [], 65535.0), ); },
                 format => { // All other convert to YUV444P16LE
                     ::log::info!("Unknown format {:?}, converting to YUV444P16LE", format);
                     // Go through 4:4:4 because of even plane dimensions
                     converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
                         create_planes_proc!(planes,
-                            (Luma16, converted_frame, converted_output, 0, [0]),
-                            (Luma16, converted_frame, converted_output, 1, [1]),
-                            (Luma16, converted_frame, converted_output, 2, [2]),
+                            (Luma16, converted_frame, converted_output, 0, [0], 65535.0),
+                            (Luma16, converted_frame, converted_output, 1, [1], 65535.0),
+                            (Luma16, converted_frame, converted_output, 2, [2], 65535.0),
                         );
                     })?;
                 }
@@ -283,7 +315,12 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         };
 
         match input_frame.format() {
-            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P | Pixel::P010LE | Pixel::P016LE | Pixel::YUV420P10LE | Pixel::YUV420P16LE => {
+            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P | Pixel::P010LE | Pixel::P016LE | 
+            Pixel::YUV420P10LE | Pixel::YUV420P12LE | Pixel::YUV420P14LE | Pixel::YUV420P16LE |
+            Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
+            Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE |
+            Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE |
+            Pixel::RGB24 | Pixel::RGBA | Pixel::RGB48BE | Pixel::RGBA64BE => {
                 undistort_frame(input_frame, output_frame)
             },
             _ => {

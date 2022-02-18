@@ -297,12 +297,12 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
     Ok(())
 }
 
-pub fn find_best_matching_codec(codec: ffi::AVPixelFormat, supported: &[ffi::AVPixelFormat]) -> ffi::AVPixelFormat {
-    if supported.is_empty() { return ffi::AVPixelFormat::AV_PIX_FMT_NONE; }
+pub fn find_best_matching_codec(codec: format::Pixel, supported: &[format::Pixel]) -> format::Pixel {
+    if supported.is_empty() { return format::Pixel::None; }
 
     if supported.contains(&codec) { return codec; }
-    if codec == ffi::AVPixelFormat::AV_PIX_FMT_P010LE && supported.contains(&ffi::AVPixelFormat::AV_PIX_FMT_YUV420P10LE) { return ffi::AVPixelFormat::AV_PIX_FMT_YUV420P10LE; }
-    if codec == ffi::AVPixelFormat::AV_PIX_FMT_NV12   && supported.contains(&ffi::AVPixelFormat::AV_PIX_FMT_YUV420P)     { return ffi::AVPixelFormat::AV_PIX_FMT_YUV420P; }
+    if codec == format::Pixel::P010LE && supported.contains(&format::Pixel::YUV420P10LE) { return format::Pixel::YUV420P10LE; }
+    if codec == format::Pixel::NV12   && supported.contains(&format::Pixel::YUV420P)     { return format::Pixel::YUV420P; }
 
     super::append_log(&format!("No matching codec, we need {:?} and supported are: {:?}\n", codec, supported));
 

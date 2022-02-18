@@ -387,7 +387,7 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     icon.name: "gyroflow";
-                    onCheckedChanged: controller.stab_enabled = checked;
+                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
@@ -399,7 +399,7 @@ Item {
                 }
 
                 ComboBox {
-                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "8x", "10x", "20x"];
+                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x"];
                     width: 60 * dpiScale;
                     currentIndex: 3;
                     height: 25 * dpiScale;

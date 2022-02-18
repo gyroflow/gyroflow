@@ -43,17 +43,18 @@ impl ComputeParams {
         let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
 
-        let (calib_width, _calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
+        let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
             (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
         } else {
             (params.size.0.max(1) as f64, params.size.1.max(1) as f64)
         };
         
-        let lens_ratio = params.video_size.0 as f64 / calib_width;
-        camera_matrix[(0, 0)] *= lens_ratio;
-        camera_matrix[(1, 1)] *= lens_ratio;
-        camera_matrix[(0, 2)] *= lens_ratio;
-        camera_matrix[(1, 2)] *= lens_ratio;
+        let lens_ratiox = params.video_size.0 as f64 / calib_width;
+        let lens_ratioy = params.video_size.1 as f64 / calib_height;
+        camera_matrix[(0, 0)] *= lens_ratiox;
+        camera_matrix[(1, 1)] *= lens_ratioy;
+        camera_matrix[(0, 2)] *= lens_ratiox;
+        camera_matrix[(1, 2)] *= lens_ratioy;
 
         Self {
             gyro: mgr.gyro.read().clone_quaternions(),
