@@ -213,7 +213,11 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
             if (r != 0.0) {
                 scale = theta_d / r;
             }
-            let uv = f * pos * scale + c;
+
+            var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
+            let offset = offsets[params.interpolation >> 2u];
+
+            let uv = f * pos * scale + c - offset;
         
             let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
             let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));

@@ -158,7 +158,11 @@ impl<T: PixelType> Undistortion<T> {
         }
 
         // CPU path
-        Self::undistort_image_cpu(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background, self.interpolation as i32);
+        match self.interpolation {
+            Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background); },
+            Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background); },
+            Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(pixels, out_pixels, width, height, stride, output_width, output_height, output_stride, &itm.params, self.background); },
+        }
 
         true
     }

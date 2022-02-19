@@ -12,6 +12,7 @@ enum {
 // #endif
 
 #if INTERPOLATION == 2 // Bilinear
+#define S_OFFSET 0.0f
 __constant float coeffs[64] = {
     1.000000f, 0.000000f, 0.968750f, 0.031250f, 0.937500f, 0.062500f, 0.906250f, 0.093750f, 0.875000f, 0.125000f, 0.843750f, 0.156250f,
     0.812500f, 0.187500f, 0.781250f, 0.218750f, 0.750000f, 0.250000f, 0.718750f, 0.281250f, 0.687500f, 0.312500f, 0.656250f, 0.343750f,
@@ -21,6 +22,7 @@ __constant float coeffs[64] = {
     0.062500f, 0.937500f, 0.031250f, 0.968750f
 }; 
 #elif INTERPOLATION == 4 // Bicubic
+#define S_OFFSET 1.0f
 __constant float coeffs[128] = {
      0.000000f, 1.000000f, 0.000000f,  0.000000f, -0.021996f, 0.997841f, 0.024864f, -0.000710f, -0.041199f, 0.991516f, 0.052429f, -0.002747f,
     -0.057747f, 0.981255f, 0.082466f, -0.005974f, -0.071777f, 0.967285f, 0.114746f, -0.010254f, -0.083427f, 0.949837f, 0.149040f, -0.015450f,
@@ -35,6 +37,7 @@ __constant float coeffs[128] = {
     -0.002747f, 0.052429f, 0.991516f, -0.041199f, -0.000710f, 0.024864f, 0.997841f, -0.021996f
 };
 #elif INTERPOLATION == 8 // Lanczos4
+#define S_OFFSET 3.0f
 __constant float coeffs[256] = {
      0.000000f,  0.000000f,  0.000000f,  1.000000f,  0.000000f,  0.000000f,  0.000000f,  0.000000f, -0.002981f,  0.009625f, -0.027053f,  0.998265f, 
      0.029187f, -0.010246f,  0.003264f, -0.000062f, -0.005661f,  0.018562f, -0.051889f,  0.993077f,  0.060407f, -0.021035f,  0.006789f, -0.000250f, 
@@ -148,7 +151,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
 
             float scale = r == 0? 1.0 : theta_d / r;
-            float2 uv = f * pos * scale + c;
+            float2 uv = (f * pos * scale + c) - S_OFFSET;
 
             const int shift = (INTERPOLATION >> 2) + 1;
             

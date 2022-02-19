@@ -56,7 +56,7 @@ impl<T: PixelType> Undistortion<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap 
     // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
     // https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-    pub fn undistort_image_cpu(pixels: &mut [u8], out_pixels: &mut [u8], width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>, interpolation: i32) {
+    pub fn undistort_image_cpu<const I: i32>(pixels: &mut [u8], out_pixels: &mut [u8], width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>) {
         let bg_t: T = PixelType::from_float(bg);
         
         const INTER_BITS: usize = 5;
@@ -66,6 +66,11 @@ impl<T: PixelType> Undistortion<T> {
         let c = &undistortion_params[0][2..4];
         let k = &undistortion_params[0][4..8];
         let r_limit = undistortion_params[0][8];
+
+        let bytes_per_pixel = T::COUNT * T::SCALAR_BYTES;
+        let shift = (I >> 2) + 1;
+        let offset = [0.0, 1.0, 3.0][I as usize >> 2];
+        let ind = [0, 64, 64 + 128][I as usize >> 2];
 
         out_pixels.par_chunks_mut(output_stride).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(T::COUNT * T::SCALAR_BYTES).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
@@ -120,8 +125,8 @@ impl<T: PixelType> Undistortion<T> {
                         let theta_d = theta * (1.0 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
                 
                         let scale =  if r == 0.0 { 1.0 } else { theta_d / r };
-                        let u = f[0] * posx * scale + c[0];
-                        let v = f[1] * posy * scale + c[1];
+                        let u = f[0] * posx * scale + c[0] - offset;
+                        let v = f[1] * posy * scale + c[1] - offset;
                 
                         let sx0 = (u * INTER_TAB_SIZE as f32).round() as i32;
                         let sy0 = (v * INTER_TAB_SIZE as f32).round() as i32;
@@ -129,20 +134,16 @@ impl<T: PixelType> Undistortion<T> {
                         let sx = sx0 >> INTER_BITS;
                         let sy = sy0 >> INTER_BITS;
 
-                        let shift = (interpolation >> 2) + 1;
-                        let ind = [0, 64, 64 + 128][interpolation as usize >> 2];
-                
                         let coeffs_x = &COEFFS[ind + ((sx0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
                         let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
                 
                         let mut sum = Vector4::from_element(0.0);
-                        let bytes_per_pixel = T::COUNT * T::SCALAR_BYTES;
                         let mut src_index = (sy * stride as i32 + sx * bytes_per_pixel as i32) as isize;
 
-                        for yp in 0..interpolation {
+                        for yp in 0..I {
                             if sy + yp >= 0 && sy + yp < height as i32 {
                                 let mut xsum = Vector4::<f32>::from_element(0.0);
-                                for xp in 0..interpolation {
+                                for xp in 0..I {
                                     let pixel = if sx + xp >= 0 && sx + xp < width as i32 {
                                         let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (bytes_per_pixel * xp as usize)..src_index as usize + bytes_per_pixel * (xp as usize + 1)]); 
                                         PixelType::to_float(*px1)
