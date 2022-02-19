@@ -1,0 +1,66 @@
+{
+  "name": "RED_V-Raptor_Laowa_11mm_F3.5_8K_1.90by1_8192x4320-23.98fps",
+  "note": "",
+  "calibrated_by": "Rapha",
+  "camera_brand": "RED",
+  "camera_model": "V-Raptor",
+  "lens_model": "Laowa 11mm F3.5",
+  "camera_setting": "8K",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 16,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.16251558653415962,
+    "camera_matrix": [
+      [
+        2292.79772964,
+        0.0,
+        4111.51328642
+      ],
+      [
+        0.0,
+        2294.03658309,
+        2155.12967123
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3202682526035201,
+      0.12190134475825881,
+      -0.0432488100233525,
+      0.09448529930254208
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}
