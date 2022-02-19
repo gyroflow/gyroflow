@@ -310,10 +310,7 @@ impl<'a> FfmpegProcessor<'a> {
         if self.audio_codec != codec::Id::None {
             for (ost_index, transcoder) in atranscoders.iter_mut() {
                 let ost_time_base = self.ost_time_bases[*ost_index];
-                transcoder.decoder.send_eof()?;
-                transcoder.receive_and_process_decoded_frames(&mut octx, ost_time_base, self.start_ms)?;
-                transcoder.encoder.send_eof()?;
-                transcoder.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
+                transcoder.flush(&mut octx, ost_time_base, self.start_ms)?;
             }
         }
 

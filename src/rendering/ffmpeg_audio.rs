@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>, Maik <myco at gmx>
 
-use ffmpeg_next::{ codec, format, decoder, encoder, frame, software, Packet, Rescale, Rational, Error, format::context::Output, channel_layout::ChannelLayout };
+use ffmpeg_next::{ codec, format, decoder, encoder, frame, Packet, Rescale, Rational, Error, format::context::Output, channel_layout::ChannelLayout};
+use super::audio_resampler::AudioResampler;
+
 
 pub struct AudioTranscoder {
     pub ost_index: usize,
     pub decoder: decoder::Audio,
     pub encoder: encoder::Audio,
     pub first_frame_ts: Option<i64>,
-    pub resampler: software::resampling::Context
+    resampler: AudioResampler
 }
 
 impl AudioTranscoder {
@@ -45,9 +47,10 @@ impl AudioTranscoder {
         if in_channel_layout.is_empty() {
             in_channel_layout = ChannelLayout::STEREO;
         }
-        let resampler = software::resampler(
+        let resampler = AudioResampler::new(
             (decoder.format(), in_channel_layout, decoder.rate()),
-            (encoder.format(), encoder.channel_layout(), encoder.rate())
+            (encoder.format(), encoder.channel_layout(), encoder.rate()),
+            1024
         )?;
 
         Ok(Self {
@@ -61,29 +64,26 @@ impl AudioTranscoder {
 
     pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational, start_ms: Option<f64>) -> Result<(), Error> {
         let mut frame = frame::Audio::empty();
-        let mut out_frame = frame::Audio::empty();
         
         while self.decoder.receive_frame(&mut frame).is_ok() {
-
+            
             if let Some(mut ts) = frame.timestamp() {
                 let timestamp_us = ts.rescale(self.decoder.time_base(), (1, 1000000));
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
-
+                
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
                     if self.first_frame_ts.is_none() {
                         self.first_frame_ts = frame.timestamp();
                     }
                     ts -= self.first_frame_ts.unwrap();
-
+                    
                     frame.set_pts(Some(ts));
-                    frame.set_channel_layout(self.resampler.input().channel_layout);
-        
-                    let _ = self.resampler.run(&frame, &mut out_frame)?;
-        
-                    out_frame.set_pts(Some(ts));
-                    self.encoder.send_frame(&out_frame)?;
-        
-                    self.receive_and_process_encoded_packets(octx, ost_time_base)?;
+
+                    self.resampler.new_frame(&mut frame)?;
+                    while let Some(out_frame) = self.resampler.run() {
+                        self.encoder.send_frame(&out_frame)?;
+                        self.receive_and_process_encoded_packets(octx, ost_time_base)?;
+                    }
                 }
             }
         }
@@ -97,6 +97,19 @@ impl AudioTranscoder {
             encoded.rescale_ts(self.decoder.time_base(), ost_time_base);
             encoded.write_interleaved(octx)?;
         }
+        Ok(())
+    }
+
+    pub fn flush(&mut self, octx: &mut Output, ost_time_base: Rational, start_ms: Option<f64>) -> Result<(), Error> {
+        self.decoder.send_eof()?;
+        self.receive_and_process_decoded_frames(octx, ost_time_base, start_ms)?;
+
+        if let Some(out_frame) = self.resampler.flush() {
+            self.encoder.send_frame(&out_frame)?;
+        }
+
+        self.encoder.send_eof()?;
+        self.receive_and_process_encoded_packets(octx, ost_time_base)?;
         Ok(())
     }
 }
