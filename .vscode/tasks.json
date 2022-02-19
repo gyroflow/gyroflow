@@ -1,0 +1,103 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "Build GyroFlow (Debug)",
+            "group": "build",
+            "type": "cargo",
+            "command": "build",
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Build GyroFlow (Release)",
+            "group": "build",
+            "type": "cargo",
+            "command": "build",
+            "args": [
+                "--release"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Build GyroFlow (Profile)",
+            "group": "build",
+            "type": "cargo",
+            "command": "build",
+            "args": [
+                "--profile",
+                "profile"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Run GyroFlow (Debug)",
+            "group": "build",
+            "type": "cargo",
+            "command": "run",
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Run GyroFlow (Release)",
+            "group": "build",
+            "type": "cargo",
+            "command": "run",
+            "args": [
+                "--release"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Run GyroFlow (Profile)",
+            "group": "build",
+            "type": "cargo",
+            "command": "run",
+            "args": [
+                "--profile",
+                "profile"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        }
+    ]
+}

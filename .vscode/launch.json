@@ -2,10 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to Gyroflow.exe",
+            "name": "Build+Debug GyroFlow",
+            "request": "launch",
+            "preLaunchTask" : "Build GyroFlow (Debug)",
+            "program": "${workspaceFolder}/target/debug/gyroflow.exe",
+            "cwd": "${workspaceFolder}",
+            "type":"cppvsdbg",
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Debug GyroFlow",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/gyroflow.exe",
+            "cwd": "${workspaceFolder}",
+            "type":"cppvsdbg",
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Attach to Gyroflow",
             "type": "cppvsdbg",
             "request": "attach",
-            "processName": "Gyroflow.exe"
+            "processName": "gyroflow.exe",
+            "console": "integratedTerminal",
         }
     ]
 }
