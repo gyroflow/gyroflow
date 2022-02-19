@@ -8,6 +8,7 @@
             "program": "${workspaceFolder}/target/debug/gyroflow.exe",
             "cwd": "${workspaceFolder}",
             "type":"cppvsdbg",
+            "console": "integratedTerminal",
         },
         {
             "name": "Debug GyroFlow",
@@ -15,12 +16,14 @@
             "program": "${workspaceFolder}/target/debug/gyroflow.exe",
             "cwd": "${workspaceFolder}",
             "type":"cppvsdbg",
+            "console": "integratedTerminal",
         },
         {
             "name": "Attach to Gyroflow",
             "type": "cppvsdbg",
             "request": "attach",
-            "processName": "gyroflow.exe"
+            "processName": "gyroflow.exe",
+            "console": "integratedTerminal",
         }
     ]
 }
