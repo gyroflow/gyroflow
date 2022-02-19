@@ -3,6 +3,7 @@
 
 mod ffmpeg_audio;
 mod ffmpeg_video;
+mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
 
