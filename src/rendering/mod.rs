@@ -243,7 +243,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 },
                 Pixel::P010LE | Pixel::P016LE => {
                     let max_val = match input_frame.format() {
-                        Pixel::P010LE => 1024.0,
+                        Pixel::P010LE => 1023.0,
                         _ => 65535.0
                     };
                     create_planes_proc!(planes,
@@ -262,7 +262,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
                 Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE => {
                     let max_val = match input_frame.format() {
-                        Pixel::YUV420P10LE | Pixel::YUV422P10LE | Pixel::YUV444P10LE => 1024.0,
+                        Pixel::YUV420P10LE | Pixel::YUV422P10LE | Pixel::YUV444P10LE => 1023.0,
                         Pixel::YUV420P12LE | Pixel::YUV422P12LE | Pixel::YUV444P12LE => 4095.0,
                         Pixel::YUV420P14LE | Pixel::YUV422P14LE | Pixel::YUV444P14LE => 16383.0,
                         _ => 65535.0
@@ -275,7 +275,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 },
                 Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE => {
                     let max_val = match input_frame.format() {
-                        Pixel::YUVA444P10LE => 1024.0,
+                        Pixel::YUVA444P10LE => 1023.0,
                         Pixel::YUVA444P12LE => 4095.0,
                         _ => 65535.0
                     };

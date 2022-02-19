@@ -833,7 +833,15 @@ impl Controller {
                             }
 
                             if (frame % every_nth_frame as i32) == 0 {
-                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, input_frame.width(), input_frame.height()) {
+                                let mut width = input_frame.width();
+                                let mut height = input_frame.height();
+                                let mut pt_scale = 1.0;
+                                if height > 2160 {
+                                    pt_scale = height as f32 / 2160.0;
+                                    width = (width as f32 / pt_scale).round() as u32;
+                                    height = (height as f32 / pt_scale).round() as u32;
+                                }
+                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, width, height) {
                                     Ok(mut small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
 
@@ -843,7 +851,7 @@ impl Controller {
                                         if is_forced {
                                             cal.forced_frames.insert(frame);
                                         }
-                                        cal.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
+                                        cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
                                         err(("An error occured: %1".to_string(), e.to_string()))

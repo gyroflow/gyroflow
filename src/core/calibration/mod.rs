@@ -9,7 +9,7 @@
 use opencv::{
     core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 }, 
     prelude::MatTraitConst, 
-    calib3d::{ CALIB_CB_ADAPTIVE_THRESH, CALIB_CB_NORMALIZE_IMAGE, CALIB_CB_FAST_CHECK, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
+    calib3d::{ CALIB_CB_ADAPTIVE_THRESH, CALIB_CB_FAST_CHECK, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
 use rand::prelude::IteratorRandom;
@@ -90,15 +90,15 @@ impl LensCalibrator {
         self.used_points.clear();
     }
 
-    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
+    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pt_scale: f32, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
     where F: Fn((usize, usize, usize, f64)) + Send + Sync + Clone + 'static {
 
-        self.width = width as usize;
-        self.height = height as usize;
+        self.width = (width as f32 * pt_scale) as usize;
+        self.height = (height as f32 * pt_scale) as usize;
         let grid_size = Size::new(self.columns as i32, self.rows as i32);
         let max_sharpness = self.max_sharpness;
 
-        let pixels = pixels.to_vec();
+        let mut pixels = pixels.to_vec();
         let img_points = self.image_points.clone();
         let all_matches = self.all_matches.clone();
         let is_forced = self.forced_frames.contains(&frame);
@@ -119,12 +119,22 @@ impl LensCalibrator {
                     return Ok(());
                 }
 
-                let inp = unsafe { Mat::new_size_with_data(Size::new(width as i32, height as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
-            
+                // Apply contrast and brightness
+                let contrast = 2.0;
+                let brightness = -50.0;
+                for px in pixels.iter_mut() {
+                    *px = (*px as f64 * contrast + brightness).min(255.0) as u8;
+                }
+
+                let inp1 = unsafe { Mat::new_size_with_data(Size::new(width as i32, height as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+                let mut inp = unsafe { Mat::new_size_with_data(Size::new(width as i32, height as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+
+                let _ = opencv::imgproc::equalize_hist(&inp1, &mut inp);
+
                 let mut corners = Mat::default();
 
-                if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK)? {
-                    if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE)? {
+                if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_FAST_CHECK)? {
+                    if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH)? {
                         
                         opencv::imgproc::corner_sub_pix(&inp, &mut corners, Size::new(11, 11), Size::new(-1, -1), subpix_criteria)?;
 
@@ -133,7 +143,7 @@ impl LensCalibrator {
                             let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
                             let mut points = Vec::with_capacity(corners.rows() as usize);
                             for (_pos, pt) in corners.iter::<Point2f>()? {
-                                points.push((pt.x, pt.y));
+                                points.push((pt.x * pt_scale, pt.y * pt_scale));
                             }
                             log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
                             if avg_sharpness < max_sharpness || is_forced { 
