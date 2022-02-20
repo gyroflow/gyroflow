@@ -97,6 +97,7 @@ qrc!(pub rsrc,
 
         "resources/translations/da.qm",
         "resources/translations/de.qm",
+        "resources/translations/el.qm",
         "resources/translations/es.qm",
         "resources/translations/fi.qm",
         "resources/translations/fr.qm",

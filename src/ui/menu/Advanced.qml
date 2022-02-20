@@ -103,6 +103,7 @@ MenuItem {
                 ["French (français)",            "fr"],
                 ["Galician (Galego)",            "gl"],
                 ["German (Deutsch)",             "de"],
+                ["Greek (Ελληνικά)",             "el"],
                 ["Indonesian (Bahasa Indonesia)","id"],
                 ["Italian (italiano)",           "it"],
                 ["Japanese (日本語)",             "ja"],

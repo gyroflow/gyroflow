@@ -26,7 +26,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="79"/>
       <source>UI scaling</source>
-      <translation type="unfinished">UI scaling</translation>
+      <translation>Ridimensionamento UI</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="93"/>
@@ -120,17 +120,17 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="159"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Seleziona destinazione file</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="217"/>
       <source>Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation type="unfinished">Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</translation>
+      <translation>Il profilo lente non è caricato, il risultato non sarà corretto. Sei sicuro di voler renderizzare questo file?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="225"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation type="unfinished">There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</translation>
+      <translation>Non ci sono punti di sincronizzazione presenti, il risultato non sarà corretto. Sei sicuro di voler renderizzare questo file?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="251"/>
@@ -188,25 +188,24 @@ This should provide much better UI performance.</source>
       <location filename="../../src/ui/App.qml" line="339"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation type="unfinished">--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</translation>
+      <translation>--SOSTITUISCI_CON_IL_NOME_DELLA_TUA_LINGUA_NELLA_TUA_LINGUA--</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="348"/>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
-      <translation type="unfinished">Permission denied. Unable to create or write file.
-Change the output path or run the program as administrator.
-Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</translation>
+      <translation>Permesso negato. Impossibile creare o scrivere il file.
+Cambia il percorso di output o esegui il programma come amministratore.
+Assicurati di avere i permessi di scrittura nella cartella di destinazione e assicurati che il file di destinazione non sia utilizzato da altre applicazioni.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="349"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
-      <translation type="unfinished">NVIDIA GPU driver is too old, GPU encoding will not work for this format.
-Update your NVIDIA drivers to the newest version: %1.
-If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</translation>
+      <translation>Il driver della GPU NVIDIA è vecchio, la codifica GPU non funzionerà per questo formato. Aggiorna i tuoi driver NVIDIA alla versione più recente: %1.
+Se il problema persiste dopo l'aggiornamento, probabilmente la tua GPU non supporta la codifica GPU con questo formato. Disabilita la codifica GPU per questa volta.</translation>
     </message>
   </context>
   <context>
@@ -671,7 +670,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="130"/>
       <source>Lower cutoff frequency means more filtering</source>
-      <translation type="unfinished">Lower cutoff frequency means more filtering</translation>
+      <translation>Una frequenza di cutoff più bassa significa più filtraggio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="138"/>
@@ -770,7 +769,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="143"/>
       <source>Default</source>
-      <translation type="unfinished">Default</translation>
+      <translation>Predefinito</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="144"/>
@@ -790,7 +789,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="147"/>
       <source>Velocity dampened (advanced)</source>
-      <translation type="unfinished">Velocity dampened (advanced)</translation>
+      <translation>Velocità attenuata (avanzata)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="149"/>
@@ -800,17 +799,17 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="382"/>
       <source>No zooming</source>
-      <translation>Nessun zoom</translation>
+      <translation>Nessun ingrandimento</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="382"/>
       <source>Dynamic zooming</source>
-      <translation>Zoom dinamico</translation>
+      <translation>Crop dinamico</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="382"/>
       <source>Static zoom</source>
-      <translation>Zoom statico</translation>
+      <translation>Crop statico</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="167"/>
@@ -861,12 +860,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
       <source>Per axis</source>
-      <translation type="unfinished">Per axis</translation>
+      <translation>Per asse</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
       <source>Max smoothness</source>
-      <translation type="unfinished">Max smoothness</translation>
+      <translation>Smoothness massima</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="158"/>
@@ -972,7 +971,7 @@ Modifica il fattore di velocità fino a ottenere i valori desiderati (consigliat
       <location filename="../../src/ui/menu/Stabilization.qml" line="313"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation type="unfinished">Lock amount</translation>
+      <translation>Blocca quantità</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="321"/>
@@ -1361,12 +1360,12 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="533"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
-      <translation type="unfinished">%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</translation>
+      <translation>%1 per ingrandire orizzontalmente, %2 per ingrandire verticalmente, %3 per scorrere orizzontalmente, doppio clic per ripristinare lo zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="534"/>
       <source>Scroll</source>
-      <translation type="unfinished">Scroll</translation>
+      <translation>Scorri verticalmente</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="535"/>

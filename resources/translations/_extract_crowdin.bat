@@ -3,6 +3,7 @@
 
 echo F | xcopy /y translations\da\gyroflow.ts da.ts
 echo F | xcopy /y translations\de\gyroflow.ts de.ts
+echo F | xcopy /y translations\el\gyroflow.ts el.ts
 echo F | xcopy /y translations\es-ES\gyroflow.ts es.ts
 echo F | xcopy /y translations\fi\gyroflow.ts fi.ts
 echo F | xcopy /y translations\fr\gyroflow.ts fr.ts

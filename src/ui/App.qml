@@ -195,7 +195,7 @@ Rectangle {
                         }
 
                         outputFile.text = output;
-                        clicked();
+                        render();
                     }
                     property bool allowFile: false;
                     property bool allowLens: false;
