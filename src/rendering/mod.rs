@@ -3,6 +3,7 @@
 
 mod ffmpeg_audio;
 mod ffmpeg_video;
+mod ffmpeg_video_converter;
 mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
@@ -128,6 +129,13 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let render_duration = params.duration_ms * trim_ratio;
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
 
+    // Only use post-conversion processing when background is not opaque
+    let order = if params.background[3] < 255.0 {
+        ffmpeg_video::ProcessingOrder::PostConversion
+    } else {
+        ffmpeg_video::ProcessingOrder::PreConversion
+    };
+
     drop(params);
 
     let mut proc = FfmpegProcessor::from_file(video_path, *GPU_DECODING.read() && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
@@ -138,7 +146,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     proc.video.gpu_encoding = encoder.1;
     proc.video.hw_device_type = encoder.2;
     proc.video.codec_options.set("threads", "auto");
-    log::debug!("proc.video_codec: {:?}", &proc.video_codec);
+    proc.video.processing_order = order;
+    log::debug!("proc.video_codec: {:?}, proc.video.processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
     if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
     if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
@@ -403,23 +412,23 @@ pub fn clear_log() { FFMPEG_LOG.write().clear() }
 pub fn test() {
     log::debug!("FfmpegProcessor::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
-    let mut stab = StabilizationManager::<crate::core::undistortion::RGBA8>::default();
+    let stab = StabilizationManager::<crate::core::undistortion::RGBA8>::default();
     let duration_ms = 15015.0;
     let frame_count = 900;
-    let fps = 30000.0/1001.0;
+    let fps = 60000.0/1001.0;
     let video_size = (3840, 2160);
 
-    let vid = "E:/clips/Sony RX100 VII/New folder/C1362.MP4";
+    let vid = "E:/clips/GoPro/h9-test3.mov";
 
-    stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size);
+    stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size).unwrap();
     {
         let mut gyro = stab.gyro.write();
 
-        gyro.set_offset(0, -26.0);
+        //gyro.set_offset(0, -26.0);
         gyro.integration_method = 1;
         gyro.integrate();
     }
-    stab.load_lens_profile("/Users/jst/Downloads/gyroflow/resources/camera_presets/Sony/Sony_A7S3_Tamron 28-200@28mm_NO-EIS_4k_16by9_3840x2160-59.94fps.json");
+    stab.load_lens_profile("E:/clips/GoPro/GoPro_Hero_7_Black_4K_60_wide_16by9_1_120.json").unwrap();
     stab.set_size(video_size.0, video_size.1);
     //stab.set_smoo
     //stab.smoothing_id = 1;
@@ -433,20 +442,20 @@ pub fn test() {
     stab.recompute_blocking();
 
     render(
-        Arc::new(stab), 
-        move |params: (f64, usize, usize, bool)| {
-            ::log::debug!("frame {}/{}", params.1, params.2);
-        }, 
+        Arc::new(stab),
+        move |_params: (f64, usize, usize, bool)| {
+            // ::log::debug!("frame {}/{}", params.1, params.2);
+        },
         vid.into(),
-        "x265".into(),
-        "",
-        &format!("{}_stab.mp4", vid), 
+        "ProRes".into(),
+        "HQ",
+        &format!("{}_stab.mov", vid),
         0.0,
-        1.0,
+        0.1,
         video_size.0,
         video_size.1,
         100.0,
-        true, 
+        false, 
         false,
         0,
         "",

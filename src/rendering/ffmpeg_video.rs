@@ -5,95 +5,30 @@ use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, softwar
 
 use super::ffmpeg_processor::Status;
 use super::ffmpeg_processor::FFmpegError;
-
-#[derive(Default)]
-pub struct Converter {
-    pub convert_to: Option<software::scaling::Context>,
-    pub convert_from: Option<software::scaling::Context>,
-    pub sw_frame_converted: Option<frame::Video>,
-    pub sw_frame_converted_out: Option<frame::Video>,
-}
-impl<'a> Converter {
-    pub fn convert_pixel_format<F>(&mut self, frame: &mut frame::Video, out_frame: &mut frame::Video, format: format::Pixel, mut cb: F) -> Result<(), FFmpegError> where F: FnMut(&mut frame::Video, &mut frame::Video) + 'a {
-        if frame.format() != format {
-            if self.sw_frame_converted.is_none() {
-                self.sw_frame_converted = Some(frame::Video::new(format, frame.width(), frame.height()));
-                //self.convert_from = Some(software::converter((frame.width(), frame.height()), frame.format(), format)?);
-                self.convert_from = Some(software::scaling::Context::get(
-                    frame.format(), // input
-                    frame.width(),
-                    frame.height(),
-                    format, // output
-                    frame.width(),
-                    frame.height(),
-                    software::scaling::flag::Flags::LANCZOS,
-                )?);
-            }
-
-            if self.sw_frame_converted_out.is_none() {
-                self.sw_frame_converted_out = Some(frame::Video::new(format, out_frame.width(), out_frame.height()));
-                //self.convert_to = Some(software::converter((out_frame.width(), out_frame.height()), format, out_frame.format())?);
-                self.convert_to = Some(software::scaling::Context::get(
-                    format, // input
-                    out_frame.width(),
-                    out_frame.height(),
-                    out_frame.format(), // output
-                    out_frame.width(),
-                    out_frame.height(),
-                    software::scaling::flag::Flags::LANCZOS,
-                )?);
-            }
-
-            let sw_frame_converted = self.sw_frame_converted.as_mut().ok_or(FFmpegError::FrameEmpty)?;
-            let sw_frame_converted_out = self.sw_frame_converted_out.as_mut().ok_or(FFmpegError::FrameEmpty)?;
-            let convert_from = self.convert_from.as_mut().ok_or(FFmpegError::ConverterEmpty)?;
-            let convert_to = self.convert_to.as_mut().ok_or(FFmpegError::ConverterEmpty)?;
-
-            convert_from.run(frame, sw_frame_converted)?;
-
-            cb(sw_frame_converted, sw_frame_converted_out);
-            
-            convert_to.run(sw_frame_converted_out, out_frame)?;
-        } else {
-            cb(frame, out_frame);
-        }
-        Ok(())
-    }
-
-    // Scale is only used for autosync
-    pub fn scale(&mut self, frame: &mut frame::Video, format: format::Pixel, width: u32, height: u32) -> Result<frame::Video, FFmpegError> {
-        if frame.width() != width || frame.height() != height || frame.format() != format {
-            if self.sw_frame_converted.is_none() {
-                self.sw_frame_converted = Some(frame::Video::new(format, width, height));
-                self.convert_to = Some(
-                    software::scaling::Context::get(
-                        frame.format(), frame.width(), frame.height(), format, width, height, software::scaling::Flags::BILINEAR,
-                    )?
-                );
-            }
-
-            let sw_frame_converted = self.sw_frame_converted.as_mut().ok_or(FFmpegError::FrameEmpty)?;
-            let convert_to = self.convert_to.as_mut().ok_or(FFmpegError::ConverterEmpty)?;
-
-            convert_to.run(frame, sw_frame_converted)?;
-
-            Ok(unsafe { frame::Video::wrap(ffi::av_frame_clone(sw_frame_converted.as_ptr())) })
-        } else {
-            Ok(unsafe { frame::Video::wrap(ffi::av_frame_clone(frame.as_ptr())) })
-        }
-    }
-}
+use super::ffmpeg_video_converter::Converter;
 
 pub struct FrameBuffers {
     pub sw_frame: frame::Video,
-    pub encoder_frame: frame::Video,
+    pub converted_frame: frame::Video,
+
+    pub output_frame_pre: Option<frame::Video>,
+    pub output_frame_post: Option<frame::Video>,
 }
 impl Default for FrameBuffers {
     fn default() -> Self { Self {
         sw_frame: frame::Video::empty(),
-        encoder_frame: frame::Video::empty(),
+        converted_frame: frame::Video::empty(),
+        output_frame_pre: None,
+        output_frame_post: None,
     } }
 }
+
+#[derive(PartialEq, Debug)]
+pub enum ProcessingOrder {
+    PreConversion,
+    PostConversion
+}
+impl Default for ProcessingOrder { fn default() -> Self { Self::PreConversion } }
 
 #[derive(Default)]
 pub struct VideoTranscoder<'a> {
@@ -126,7 +61,7 @@ pub struct VideoTranscoder<'a> {
 
     pub first_frame_ts: Option<i64>,
 
-    pub output_frame: Option<frame::Video>,
+    pub processing_order: ProcessingOrder
 }
 
 macro_rules! ffmpeg {
@@ -145,18 +80,12 @@ impl<'a> VideoTranscoder<'a> {
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let pixel_format = format.unwrap_or_else(|| frame.format());
         let color_range = frame.color_range();
-        // let pixel_format = Self::get_format_range(pixel_format);
-        // let color_range = if pixel_format.0 { util::color::Range::JPEG } else { util::color::Range::MPEG };
-        // let pixel_format = pixel_format.1;
-        // if pixel_format == format::Pixel::YUVJ420P {
-        //     log::debug!("Overriding YUVJ420P ({:?}) with YUV420P and JPEG range", color_range);
-        //     pixel_format = format::Pixel::YUV420P;
-        //     color_range = util::color::Range::JPEG;
-        // }
+
+        log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
+
         encoder.set_width(size.0);
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(frame.aspect_ratio());
-        log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
         encoder.set_format(pixel_format);
         encoder.set_frame_rate(frame_rate);
         encoder.set_time_base(time_base);
@@ -205,8 +134,7 @@ impl<'a> VideoTranscoder<'a> {
         
         let mut frame = frame::Video::empty();
         let mut sw_frame = &mut self.buffers.sw_frame;
-        // let mut hw_frame = frame::Video::empty();
-        
+
         while decoder.receive_frame(&mut frame).is_ok() {
             let time_base = self.time_base.unwrap();
 
@@ -219,8 +147,6 @@ impl<'a> VideoTranscoder<'a> {
                         self.first_frame_ts = frame.timestamp();
                     }
                     ts -= self.first_frame_ts.unwrap();
-        
-                    // let frame_timestamp = frame.timestamp();
 
                     let timestamp = Some(ts.rescale((1, 1000000), time_base));
 
@@ -237,40 +163,32 @@ impl<'a> VideoTranscoder<'a> {
                             &mut frame
                         };
 
-                    // log::debug!("In frame: {:?} {:?}", input_frame.format(), input_frame.color_range());
-
                     if input_frame.format() == format::Pixel::YUVJ420P {
-                        // log::debug!("Overriding YUVJ420P ({:?}) with YUV420P and JPEG range", input_frame.color_range());
                         input_frame.set_format(format::Pixel::YUV420P);
                         input_frame.set_color_range(util::color::Range::JPEG);
                     }
-            
-                    // input_frame.set_pts(frame_timestamp);
 
-                    // if !self.decode_only && self.output_frame.is_none()  {
-                    //     self.output_frame = Some(frame::Video::new(input_frame.format(), size.0, size.1));
-                    // }
-                    // if let Some(ref mut output_frame) = self.output_frame {
-                    //     ffmpeg!(ffi::av_frame_copy_props(output_frame.as_mut_ptr(), input_frame.as_mut_ptr()); FromHWTransferError);
-                    // }
+                    if self.processing_order == ProcessingOrder::PreConversion && self.buffers.output_frame_pre.is_none()  {
+                        let mut out_frame = frame::Video::new(input_frame.format(), size.0, size.1);
+                        unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), input_frame.as_ptr()) }
+                        self.buffers.output_frame_pre = Some(out_frame);
+                    }
 
                     // Process frame
-                    if self.decode_only {
+                    if self.decode_only || self.processing_order == ProcessingOrder::PreConversion {
                         if let Some(ref mut cb) = self.on_frame_callback {
-                            cb(timestamp_us, input_frame, self.output_frame.as_mut(), &mut self.converter)?;
+                            cb(timestamp_us, input_frame, self.buffers.output_frame_pre.as_mut(), &mut self.converter)?;
                         }
                     }
 
                     // Encode output frame
                     if !self.decode_only {
                         let in_format = input_frame.format();
-                        let mut final_sw_frame = input_frame;
-
-                        //let mut final_sw_frame = self.output_frame.as_mut().unwrap();
-
-                        //final_sw_frame.set_format(input_frame.format());
-                        //final_sw_frame.set_color_range(input_frame.color_range());
-                        //unsafe { Self::copy_frame_props(final_sw_frame.as_mut_ptr(), input_frame.as_ptr()) }
+                        let mut final_frame = if self.processing_order == ProcessingOrder::PreConversion { 
+                            self.buffers.output_frame_pre.as_mut().unwrap()
+                        } else {
+                            input_frame
+                        };
 
                         if self.gpu_decoding && self.encoder_pixel_format.is_none() {
                             log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
@@ -285,76 +203,76 @@ impl<'a> VideoTranscoder<'a> {
                             }
                         }
 
-                        let mut target_format = in_format;
-                        if let Some(target_format2) = self.encoder_pixel_format {
-                            target_format = target_format2;
-                            if in_format != target_format {
-                                log::debug!("converting from {:?} to {:?}", final_sw_frame.format(), target_format);
-                                if self.encoder_converter.is_none() {
-                                    self.buffers.encoder_frame = frame::Video::new(target_format, final_sw_frame.width(), final_sw_frame.height());
-                                    
-                                    unsafe { Self::copy_frame_props(self.buffers.encoder_frame.as_mut_ptr(), final_sw_frame.as_ptr()) }
-                                    let mut conv = software::scaling::Context::get(
-                                        final_sw_frame.format(), // input
-                                        final_sw_frame.width(),
-                                        final_sw_frame.height(),
-                                        self.buffers.encoder_frame.format(), // output
-                                        self.buffers.encoder_frame.width(),
-                                        self.buffers.encoder_frame.height(),
-                                        software::scaling::flag::Flags::LANCZOS,
-                                    )?;
+                        let target_format = self.encoder_pixel_format.unwrap_or(in_format);
+                        if in_format != target_format {
+                            if self.encoder_converter.is_none() {
+                                log::debug!("Converting from {:?} to {:?}", final_frame.format(), target_format);
+                                self.buffers.converted_frame = frame::Video::new(target_format, final_frame.width(), final_frame.height());
+                                
+                                unsafe { Self::copy_frame_props(self.buffers.converted_frame.as_mut_ptr(), final_frame.as_ptr()) }
+                                let mut conv = software::scaling::Context::get(
+                                    final_frame.format(), // input
+                                    final_frame.width(),
+                                    final_frame.height(),
+                                    self.buffers.converted_frame.format(), // output
+                                    self.buffers.converted_frame.width(),
+                                    self.buffers.converted_frame.height(),
+                                    software::scaling::flag::Flags::LANCZOS,
+                                )?;
 
-                                    unsafe {
-                                        use std::os::raw::c_int;
-                                        // let mut dummy: [c_int; 4] = [0; 4];
-                                        let mut src_range: c_int = 0;
-                                        let dst_range: c_int = 0;
-                                        // let mut brightness: c_int = 0;
-                                        // let mut contrast: c_int = 0;
-                                        // let mut saturation: c_int = 0;
-                                        // ffi::sws_getColorspaceDetails(conv.as_mut_ptr(), &mut dummy.as_mut_ptr(), &mut src_range, &mut dummy.as_mut_ptr(), &mut dst_range, &mut brightness, &mut contrast, &mut saturation);
-                                        let coefs = ffi::sws_getCoefficients(ffi::SWS_CS_DEFAULT);
-                                        if final_sw_frame.color_range() == util::color::Range::JPEG {
-                                            src_range |= 1;
-                                        }
-                                        // if self.buffers.encoder_frame.color_range() == util::color::Range::JPEG {
-                                        //     dst_range |= 1;
-                                        // }
-                                        ffi::sws_setColorspaceDetails(conv.as_mut_ptr(), coefs, src_range, coefs, dst_range, 0, 1 << 16, 1 << 16);
-                                        //self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.set_color_range(self.buffers.encoder_frame.color_range());
+                                unsafe {
+                                    use std::os::raw::c_int;
+                                    // let mut dummy: [c_int; 4] = [0; 4];
+                                    let mut src_range: c_int = 0;
+                                    let dst_range: c_int = 0;
+                                    // let mut brightness: c_int = 0;
+                                    // let mut contrast: c_int = 0;
+                                    // let mut saturation: c_int = 0;
+                                    // ffi::sws_getColorspaceDetails(conv.as_mut_ptr(), &mut dummy.as_mut_ptr(), &mut src_range, &mut dummy.as_mut_ptr(), &mut dst_range, &mut brightness, &mut contrast, &mut saturation);
+                                    let coefs = ffi::sws_getCoefficients(ffi::SWS_CS_DEFAULT);
+                                    if final_frame.color_range() == util::color::Range::JPEG {
+                                        src_range |= 1;
                                     }
-                                    self.encoder_converter = Some(conv);
+                                    // if self.buffers.converted_frame.color_range() == util::color::Range::JPEG {
+                                    //     dst_range |= 1;
+                                    // }
+                                    ffi::sws_setColorspaceDetails(conv.as_mut_ptr(), coefs, src_range, coefs, dst_range, 0, 1 << 16, 1 << 16);
+                                    //self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.set_color_range(self.buffers.converted_frame.color_range());
                                 }
-                                let conv = self.encoder_converter.as_mut().ok_or(FFmpegError::EncoderConverterEmpty)?;
-                                let buff = &mut self.buffers.encoder_frame;
-                                conv.run(final_sw_frame, buff)?;
-                                final_sw_frame = buff;
+                                self.encoder_converter = Some(conv);
+                            }
+                            let conv = self.encoder_converter.as_mut().ok_or(FFmpegError::EncoderConverterEmpty)?;
+                            let buff = &mut self.buffers.converted_frame;
+                            conv.run(final_frame, buff)?;
+                            final_frame = buff;
+                        }
+
+                        if self.processing_order == ProcessingOrder::PostConversion {
+                            if let Some(ref mut cb) = self.on_frame_callback {
+                                if self.buffers.output_frame_post.is_none()  {
+                                    let mut out_frame = frame::Video::new(target_format, size.0, size.1);
+                                    unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), final_frame.as_ptr()) }
+                                    self.buffers.output_frame_post = Some(out_frame);
+                                }
+    
+                                cb(timestamp_us, final_frame, self.buffers.output_frame_post.as_mut(), &mut self.converter)?;
+
+                                final_frame = self.buffers.output_frame_post.as_mut().unwrap();
                             }
                         }
-                        if self.output_frame.is_none()  {
-                            let mut out_frame = frame::Video::new(target_format, size.0, size.1);
-                            unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), final_sw_frame.as_ptr()) }
-                            self.output_frame = Some(out_frame);
-                        }
-
-                        if let Some(ref mut cb) = self.on_frame_callback {
-                            cb(timestamp_us, final_sw_frame, self.output_frame.as_mut(), &mut self.converter)?;
-                            final_sw_frame = self.output_frame.as_mut().unwrap();
-                        }
-                        // log::debug!("Out frame: {:?} {:?}", final_sw_frame.format(), final_sw_frame.color_range());
                             
                         if self.encoder.is_none() {
                             let octx = octx.as_deref_mut().ok_or(FFmpegError::NoOutputContext)?;
                 
                             log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.hw_device_type, self.encoder_pixel_format);
-                            let pixel_format = self.encoder_pixel_format.unwrap_or_else(|| final_sw_frame.format());
+                            let pixel_format = self.encoder_pixel_format.unwrap_or_else(|| final_frame.format());
                             if !self.codec_supported_formats.contains(&pixel_format) {
                                 return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
                             }
                 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
                 
-                            let result = Self::init_encoder(final_sw_frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
+                            let result = Self::init_encoder(final_frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
                 
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -364,39 +282,24 @@ impl<'a> VideoTranscoder<'a> {
                             self.encoder = Some(result?);  
                 
                             octx.write_header()?;
-                            //format::context::output::dump(&octx, 0, Some(&output_path));
+                            // format::context::output::dump(&octx, 0, Some(&output_path));
                     
                             for (ost_index, _) in octx.streams().enumerate() {
                                 ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
                             }
                         }
                         let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
-                        encoder.set_format(final_sw_frame.format());
-                        encoder.set_color_range(final_sw_frame.color_range());
+                        encoder.set_format(final_frame.format());
+                        encoder.set_color_range(final_frame.color_range());
 
-                        final_sw_frame.set_pts(timestamp);
-                        final_sw_frame.set_kind(picture::Type::None);
+                        final_frame.set_pts(timestamp);
+                        final_frame.set_kind(picture::Type::None);
 
-                        /*if self.gpu_encoding && unsafe { !(*encoder.as_mut_ptr()).hw_frames_ctx.is_null() } {
-                            // Hardware encoder
-
-                            let output_frame = self.output_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
-                            // output_frame.set_pts(timestamp);
-                            hw_frame.set_width(output_frame.width());
-                            hw_frame.set_height(output_frame.height());
-
-                            // Upload back to GPU
-                            ffmpeg!(ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, hw_frame.as_mut_ptr(), 0); ToHWBufferError);
-                            ffmpeg!(ffi::av_hwframe_transfer_data(hw_frame.as_mut_ptr(), output_frame.as_mut_ptr(), 0); ToHWBufferError);
-                            ffmpeg!(ffi::av_frame_copy_props(hw_frame.as_mut_ptr(), output_frame.as_mut_ptr()); ToHWBufferError);
-                            encoder.send_frame(&hw_frame)?;
-                        } else */{
+                        if self.clone_frames {
                             // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
-                            if self.clone_frames {
-                                encoder.send_frame(&final_sw_frame.clone())?;
-                            } else {
-                                encoder.send_frame(final_sw_frame)?;
-                            }
+                            encoder.send_frame(&final_frame.clone())?;
+                        } else {
+                            encoder.send_frame(final_frame)?;
                         }
 
                         // Copy of receive_and_process_encoded_packets
