@@ -168,7 +168,7 @@ impl<'a> VideoTranscoder<'a> {
                         input_frame.set_color_range(util::color::Range::JPEG);
                     }
 
-                    if self.processing_order == ProcessingOrder::PreConversion && self.buffers.output_frame_pre.is_none()  {
+                    if !self.decode_only && self.processing_order == ProcessingOrder::PreConversion && self.buffers.output_frame_pre.is_none()  {
                         let mut out_frame = frame::Video::new(input_frame.format(), size.0, size.1);
                         unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), input_frame.as_ptr()) }
                         self.buffers.output_frame_pre = Some(out_frame);
