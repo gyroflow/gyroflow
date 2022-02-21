@@ -43,16 +43,8 @@ Row {
                     mouse.accepted = false;
                 }
             }
-            onClicked: (mouse) => {
-                if (mouse.button === Qt.RightButton) {
-                    contextMenu.popup();
-                    mouse.accepted = true;
-                } else {
-                    mouse.accepted = false;
-                }
-            }
 
-            onPressed: (mouse) => {
+            function _onClicked(mouse) {
                 if (mouse.button === Qt.RightButton) {
                     contextMenu.popup();
                     mouse.accepted = true;
@@ -60,6 +52,9 @@ Row {
                     mouse.accepted = false;
                 }
             }
+            
+            onClicked: (mouse) => _onClicked(mouse);
+            onPressed: (mouse) => _onClicked(mouse);
         }
 
         Menu {
@@ -68,6 +63,7 @@ Row {
             Action {
                 icon.name: "undo";
                 text: qsTr("Reset value");
+                enabled: field.value != defaultValue;
                 onTriggered: {
                     field.value = defaultValue;
                 }

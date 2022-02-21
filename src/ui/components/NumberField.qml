@@ -77,6 +77,49 @@ TextField {
         if (allowText) root.validator = null;
     }
 
+    MouseArea {
+        id: ma;
+        anchors.fill: parent;
+        acceptedButtons: Qt.LeftButton | Qt.RightButton;
+        propagateComposedEvents: true;
+        preventStealing: true;
+        cursorShape: Qt.ibeam;
+
+        onPressAndHold: (mouse) => {
+            if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                contextMenu.popup();
+                mouse.accepted = true;
+            } else {
+                mouse.accepted = false;
+            }
+        }
+
+        function _onClicked(mouse) {
+            if (mouse.button === Qt.RightButton) {
+                contextMenu.popup();
+                mouse.accepted = true;
+            } else {
+                mouse.accepted = false;
+            }
+        }
+
+        onClicked: (mouse) => _onClicked(mouse);
+        onPressed: (mouse) => _onClicked(mouse);
+    }
+
+    Menu {
+        id: contextMenu;
+        font.pixelSize: 11.5 * dpiScale;
+        Action {
+            icon.name: "undo";
+            text: qsTr("Reset value");
+            enabled: value != defaultValue;
+            onTriggered: {
+                value = defaultValue;
+            }
+        }
+    }
+
     BasicText {
         visible: !!root.unit;
         x: parent.contentWidth;

@@ -82,6 +82,7 @@ MenuItem {
             id: initialOffset;
             width: parent.width;
             height: 25 * dpiScale;
+            defaultValue: 0;
             precision: 1;
             unit: qsTr("s");
         }

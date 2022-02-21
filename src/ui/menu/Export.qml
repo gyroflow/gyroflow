@@ -215,6 +215,7 @@ MenuItem {
         NumberField {
             id: bitrate;
             value: 0;
+            defaultValue: 20;
             unit: qsTr("Mbps");
             width: parent.width;
         }
