@@ -24,12 +24,8 @@ Grid {
         verticalAlignment: Text.AlignVCenter;
         height: root.position === Label.Top? undefined : inner.height;
         MouseArea {
-            id: ma;
             anchors.fill: t;
-            hoverEnabled: true;
-            acceptedButtons: Qt.LeftButton | Qt.RightButton;
-            propagateComposedEvents: true;
-            preventStealing: true;
+            acceptedButtons: Qt.LeftButton;
 
             onDoubleClicked: (mouse) => {
                 function traverseChildren(node) {
