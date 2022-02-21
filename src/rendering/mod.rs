@@ -59,12 +59,12 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_nvenc",        true),
                 #[cfg(target_os = "windows")]
                 ("h264_amf",          true),
-                #[cfg(target_os = "windows")]
-                ("h264_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("h264_vaapi",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_qsv",          true),
+                #[cfg(target_os = "windows")]
+                ("h264_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("h264_v4l2m2m",      true),
                 ("libx264",           false),
@@ -76,12 +76,12 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_nvenc",        true),
                 #[cfg(target_os = "windows")]
                 ("hevc_amf",          true),
-                #[cfg(target_os = "windows")]
-                ("hevc_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("hevc_vaapi",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_qsv",          true),
+                #[cfg(target_os = "windows")]
+                ("hevc_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("hevc_v4l2m2m",      true),
                 ("libx265",           false),
@@ -147,7 +147,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     proc.video.hw_device_type = encoder.2;
     proc.video.codec_options.set("threads", "auto");
     proc.video.processing_order = order;
-    log::debug!("proc.video_codec: {:?}, proc.video.processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
+    log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
     if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
     if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }

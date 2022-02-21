@@ -286,6 +286,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a"
 
 [[package]]
+name = "breakpad-sys"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d7d4bd80f98519db02af69b5aec85253a9cb5e83654f4ffbd7fc8e552dfe2c7"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "bstr"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1040,6 +1049,7 @@ dependencies = [
 name = "gyroflow"
 version = "1.0.0-rc3"
 dependencies = [
+ "breakpad-sys",
  "bytemuck",
  "cpp",
  "cpp_build",

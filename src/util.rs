@@ -181,6 +181,73 @@ pub fn init_logging() {
     });
 }
 
+pub fn install_crash_handler() -> std::io::Result<()> {
+    let cur_dir = std::env::current_dir()?;
+    let os_str = cur_dir.as_os_str();
+
+    let path: Vec<breakpad_sys::PathChar> = {
+        #[cfg(windows)]
+        {
+            use std::os::windows::ffi::OsStrExt;
+            os_str.encode_wide().collect()
+        }
+        #[cfg(unix)]
+        {
+            use std::os::unix::ffi::OsStrExt;
+            Vec::from(os_str.as_bytes())
+        }
+    };
+
+    unsafe {
+        extern "C" fn callback(path: *const breakpad_sys::PathChar, path_len: usize, _ctx: *mut std::ffi::c_void) {
+            let path_slice = unsafe { std::slice::from_raw_parts(path, path_len) };
+
+            let path = {
+                #[cfg(windows)]
+                {
+                    use std::os::windows::ffi::OsStringExt;
+                    std::path::PathBuf::from(std::ffi::OsString::from_wide(path_slice))
+                }
+                #[cfg(unix)]
+                {
+                    use std::os::unix::ffi::OsStrExt;
+                    std::path::PathBuf::from(std::ffi::OsStr::from_bytes(path_slice).to_owned())
+                }
+            };
+
+            println!("Crashdump written to {}", path.display());
+        }
+
+        breakpad_sys::attach_exception_handler(
+            path.as_ptr(),
+            path.len(),
+            callback,
+            std::ptr::null_mut(),
+            breakpad_sys::INSTALL_BOTH_HANDLERS,
+        );
+    }
+
+    // Upload crash dumps
+    crate::core::run_threaded(move || {
+        if let Ok(files) = std::fs::read_dir(cur_dir) {
+            for path in files {
+                if let Ok(path) = path {
+                    let path = path.path();
+                    if path.to_string_lossy().ends_with(".dmp") {
+                        if let Ok(content) = std::fs::read(&path) {
+                            if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_dump").set("Content-Type", "application/octet-stream").send_bytes(&content).map(|x| x.into_string()) {
+                                ::log::debug!("Minidump uploaded: {}", body.as_str());
+                                let _ = std::fs::remove_file(path);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    Ok(())
+}
+
 #[cfg(target_os = "android")]
 pub fn android_log(v: String) {
     use std::ffi::{CStr, CString};

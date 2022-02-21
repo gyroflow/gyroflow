@@ -40,6 +40,7 @@ fn entry() {
     #[cfg(target_os = "windows")]
     unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
 
+    let _ = util::install_crash_handler();
     util::init_logging();
 
     crate::resources::rsrc();

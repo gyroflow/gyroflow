@@ -21,6 +21,8 @@ bytemuck = "1.7.3"
 nalgebra = "0.30"
 semver = "1.0.5"
 
+breakpad-sys = "0.1.1"
+
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
