@@ -23,6 +23,32 @@ Grid {
         leftPadding: 0;
         verticalAlignment: Text.AlignVCenter;
         height: root.position === Label.Top? undefined : inner.height;
+        MouseArea {
+            id: ma;
+            anchors.fill: t;
+            hoverEnabled: true;
+            acceptedButtons: Qt.LeftButton | Qt.RightButton;
+            propagateComposedEvents: true;
+            preventStealing: true;
+
+            onDoubleClicked: (mouse) => {
+                function traverseChildren(node) {
+                    for (let i = node.children.length; i > 0; --i) {
+                        const child = node.children[i - 1];
+                        if (child) {
+                            if (child.toString().startsWith("NumberField")) {
+                                child.value = child.defaultValue;
+                                return child;
+                            }
+                            const found = traverseChildren(child);
+                            if (found !== null) return found;
+                        }
+                    }
+                    return null;
+                }
+                traverseChildren(inner);
+            }
+        }
     }
 
     Item {

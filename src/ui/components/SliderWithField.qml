@@ -20,7 +20,7 @@ Row {
 
     Slider {
         id: slider;
-        width: parent.width - field.width - resetBtn.width - root.spacing * 2;
+        width: parent.width - field.width - root.spacing;
         anchors.verticalCenter: parent.verticalCenter;
         property bool preventChange: false;
         onValueChanged: if (!preventChange) field.value = value;
@@ -47,9 +47,6 @@ Row {
             function _onClicked(mouse) {
                 if (mouse.button === Qt.RightButton) {
                     contextMenu.popup();
-                    mouse.accepted = true;
-                } else if (mouse.button === Qt.LeftButton && (mouse.modifiers & Qt.ControlModifier)) {
-                    field.value = defaultValue;
                     mouse.accepted = true;
                 } else {
                     mouse.accepted = false;
@@ -86,20 +83,4 @@ Row {
             Qt.callLater(() => { if (slider) slider.preventChange = false; });
         }
     }
-    
-    Button {
-        width: 18 * dpiScale;
-        height: 25 * dpiScale;
-        leftPadding: 4 * dpiScale;
-        rightPadding: 4 * dpiScale;
-        topPadding: 1 * dpiScale;
-        bottomPadding: 1 * dpiScale;
-        font.pixelSize: 3 * dpiScale;
-        id: resetBtn;
-        icon.name: "undo";
-        enabled: field.value != defaultValue;
-        tooltip: qsTr("Reset value");
-        onClicked: field.value = defaultValue;
-    }
-
 }

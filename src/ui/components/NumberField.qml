@@ -98,14 +98,11 @@ TextField {
             if (mouse.button === Qt.RightButton) {
                 contextMenu.popup();
                 mouse.accepted = true;
-            } else if (mouse.button === Qt.LeftButton && (mouse.modifiers & Qt.ControlModifier)) {
-                value = defaultValue;
-                mouse.accepted = true;
             } else {
                 mouse.accepted = false;
             }
         }
-        
+
         onClicked: (mouse) => _onClicked(mouse);
         onPressed: (mouse) => _onClicked(mouse);
     }
