@@ -197,8 +197,7 @@ impl<T: PixelType> StabilizationManager<T> {
             self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
             self.lens.write().optimal_fov = None;
             
-            self.smoothing_checksum.store(0, SeqCst);
-            self.zooming_checksum.store(0, SeqCst);
+            self.invalidate_smoothing();
         }
     }
 
@@ -277,6 +276,10 @@ impl<T: PixelType> StabilizationManager<T> {
         self.recompute_adaptive_zoom();
         self.recompute_undistortion();
     }
+
+    pub fn invalidate_ongoing_computations(&self) {
+        self.current_compute_id.store(fastrand::u64(..), SeqCst);
+    }
     
     pub fn recompute_threaded<F: Fn(u64) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
@@ -304,6 +307,8 @@ impl<T: PixelType> StabilizationManager<T> {
                 let mut smoothing = smoothing.write().current().clone();
                 params.gyro.recompute_smoothness(smoothing.as_mut(), &stabilization_params.read());
 
+                if current_compute_id.load(SeqCst) != compute_id { return; }
+
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
                 lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
@@ -318,6 +323,9 @@ impl<T: PixelType> StabilizationManager<T> {
             let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
+
+                if current_compute_id.load(SeqCst) != compute_id { return; }
+
                 stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
             }
             
@@ -451,8 +459,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
 
-    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.smoothing_checksum.store(0, SeqCst); }
-    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.smoothing_checksum.store(0, SeqCst); }
+    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.invalidate_smoothing(); }
+    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.invalidate_smoothing(); }
 
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
@@ -465,10 +473,24 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
     pub fn get_min_fov               (&self) -> f64 { self.params.read().min_fov }
 
-    pub fn remove_offset      (&self, timestamp_us: i64)                 { self.gyro.write().remove_offset(timestamp_us); }
-    pub fn set_offset         (&self, timestamp_us: i64, offset_ms: f64) { self.gyro.write().set_offset(timestamp_us, offset_ms); }
-    pub fn clear_offsets      (&self) { self.gyro.write().offsets.clear(); }
-    pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64          { self.gyro.read() .offset_at_timestamp(timestamp_us as f64 / 1000.0) }
+    pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); }
+    pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
+
+    pub fn remove_offset(&self, timestamp_us: i64) {
+        self.gyro.write().remove_offset(timestamp_us);
+        self.invalidate_zooming();
+    }
+    pub fn set_offset(&self, timestamp_us: i64, offset_ms: f64) {
+        self.gyro.write().set_offset(timestamp_us, offset_ms);
+        self.invalidate_zooming();
+    }
+    pub fn clear_offsets(&self) {
+        self.gyro.write().offsets.clear();
+        self.invalidate_zooming();
+    }
+    pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
+        self.gyro.read().offset_at_timestamp(timestamp_us as f64 / 1000.0)
+    }
 
     pub fn set_imu_lpf(&self, lpf: f64) {
         self.gyro.write().set_lowpass_filter(lpf);
@@ -526,22 +548,17 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);
         
-        self.smoothing_checksum.store(0, SeqCst);
-        self.zooming_checksum.store(0, SeqCst);
+        self.invalidate_smoothing();
 
         smooth.current().get_parameters_json()
     }
     pub fn set_smoothing_param(&self, name: &str, val: f64) {
-        self.smoothing_checksum.store(0, SeqCst);
-        self.zooming_checksum.store(0, SeqCst);
-
         self.smoothing.write().current().as_mut().set_parameter(name, val);
+        self.invalidate_smoothing();
     }
     pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64) {
-        self.smoothing_checksum.store(0, SeqCst);
-        self.zooming_checksum.store(0, SeqCst);
-
         self.smoothing.write().current().as_mut().set_horizon_lock(lock_percent, roll);
+        self.invalidate_smoothing();
     }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
         self.gyro.read().max_angles
@@ -598,8 +615,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.undistortion.write().set_compute_params(undistortion::ComputeParams::from_manager(self));
 
-        self.smoothing_checksum.store(0, SeqCst);
-        self.zooming_checksum.store(0, SeqCst);
+        self.invalidate_smoothing();
     }
 
     pub fn export_gyroflow(&self, video_path: &str, filepath: impl AsRef<std::path::Path>, thin: bool) -> std::io::Result<()> {
@@ -691,6 +707,7 @@ impl<T: PixelType> StabilizationManager<T> {
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut duration_ms = 0.0;
             let mut fps = 0.0;
+            let video_path = obj.get("videofile").map(|x| x.to_string()).unwrap_or_default();
             if let Some(vid_info) = obj.get("video_info") {
                 duration_ms = vid_info.get("vfr_duration_ms").and_then(|x| x.as_f64()).unwrap_or_default();
                 fps = vid_info.get("vfr_fps").and_then(|x| x.as_f64()).unwrap_or_default();
@@ -701,6 +718,7 @@ impl<T: PixelType> StabilizationManager<T> {
             obj.remove("frame_orientation");
             obj.remove("stab_transform");
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+                let gyro_path = obj.get("filepath").map(|x| x.to_string()).unwrap_or_default();
                 use crate::gyro_source::TimeIMU;
                 /*let quaternions = obj.get("quaternions")
                     .and_then(|x| x.as_object())
@@ -722,24 +740,27 @@ impl<T: PixelType> StabilizationManager<T> {
                     });*/
             
                 if let Some(ri) = obj.get("raw_imu") {
-                    let raw_imu: Option<Vec<TimeIMU>> = serde_json::from_value(ri.clone()).ok();
-                    if let Some(raw_imu) = raw_imu {
-                        if raw_imu.len() > 0 {
-                            let mut gyro_mut = self.gyro.write();
-                            gyro_mut.prevent_next_load = true;
-                            gyro_mut.fps = fps;
-                            gyro_mut.duration_ms = duration_ms;
+                    // Load IMU data only if it's from another file
+                    if gyro_path != video_path {
+                        let raw_imu: Option<Vec<TimeIMU>> = serde_json::from_value(ri.clone()).ok();
+                        if let Some(raw_imu) = raw_imu {
+                            if raw_imu.len() > 0 {
+                                let mut gyro_mut = self.gyro.write();
+                                gyro_mut.prevent_next_load = true;
+                                gyro_mut.fps = fps;
+                                gyro_mut.duration_ms = duration_ms;
 
-                            let md = crate::gyro_source::FileMetadata {
-                                imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
-                                detected_source: Some("Gyroflow file".to_string()),
-                                quaternions: None,
-                                raw_imu: Some(raw_imu),
-                                frame_readout_time: None,
-                                camera_identifier: None,
-                            };
-                            gyro_mut.load_from_telemetry(&md);
-                            self.smoothing.write().update_quats_checksum(&gyro_mut.quaternions);
+                                let md = crate::gyro_source::FileMetadata {
+                                    imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
+                                    detected_source: Some("Gyroflow file".to_string()),
+                                    quaternions: None,
+                                    raw_imu: Some(raw_imu),
+                                    frame_readout_time: None,
+                                    camera_identifier: None,
+                                };
+                                gyro_mut.load_from_telemetry(&md);
+                                self.smoothing.write().update_quats_checksum(&gyro_mut.quaternions);
+                            }
                         }
                     }
                 }

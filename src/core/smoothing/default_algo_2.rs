@@ -277,9 +277,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
                 if euler.0.abs() > max_distance[0] { max_distance[0] = euler.0.abs(); }
                 if euler.1.abs() > max_distance[1] { max_distance[1] = euler.0.abs(); }
                 if euler.2.abs() > max_distance[2] { max_distance[2] = euler.0.abs(); }
-            }
-            else
-            {
+            } else {
                 distance.insert(*ts, Vector3::from_element(dist.angle()));
                 if dist.angle() > max_distance[0] { max_distance[0] = dist.angle(); }
             }

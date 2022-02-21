@@ -230,6 +230,7 @@ impl Controller {
                     remove_keys.into_iter().for_each(|k| { gyro.offsets.remove(&k); });
                     gyro.set_offset(new_ts, x.1);
                 }
+                this.stabilizer.invalidate_zooming();
             }
             this.update_offset_model();
             this.request_recompute();
@@ -455,6 +456,8 @@ impl Controller {
         let stab = self.stabilizer.clone();
         core::run_threaded(move || {
             {
+                stab.invalidate_ongoing_computations();
+
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
                 gyro.integrate();

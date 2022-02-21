@@ -179,14 +179,21 @@ Item {
                 onMetadataChanged: {
                     if (vid.frameCount > 0) {
                         // Trigger seek to buffer the video frames
-                        Qt.callLater(() => {
-                            vid.currentFrame++;
-                            Qt.callLater(() => vid.currentFrame--);
-                        })
+                        bufferTrigger.start();
                     } else if (!errorShown) {
                         messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
                         errorShown = true;
                         dropText.loadingFile = "";
+                    }
+                }
+                Timer {
+                    id: bufferTrigger;
+                    interval: 500;
+                    onTriggered: {
+                        Qt.callLater(() => {
+                            vid.currentFrame++;
+                            Qt.callLater(() => vid.currentFrame--);
+                        })
                     }
                 }
 

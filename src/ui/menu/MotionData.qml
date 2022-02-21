@@ -203,7 +203,7 @@ MenuItem {
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
             function setMethod() {
-                Qt.callLater(() => controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1));
+                controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
             }
             onCurrentIndexChanged: Qt.callLater(integrator.setMethod);
             onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);

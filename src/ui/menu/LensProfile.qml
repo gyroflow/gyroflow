@@ -82,10 +82,10 @@ MenuItem {
                         Qt.callLater(() => window.exportSettings.setOutputSize(obj.output_dimension.w, obj.output_dimension.h));
                     }
                     if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
-                        Qt.callLater(() => window.stab.setFrameReadoutTime(obj.frame_readout_time));
+                        window.stab.setFrameReadoutTime(obj.frame_readout_time);
                     }
                     if (+obj.gyro_lpf && Math.abs(+obj.gyro_lpf) > 0) {
-                        Qt.callLater(() => window.motionData.setGyroLpf(obj.gyro_lpf));
+                        window.motionData.setGyroLpf(obj.gyro_lpf);
                     }
 
                     root.calibWidth  = obj.calib_dimension.w;

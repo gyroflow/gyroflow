@@ -165,16 +165,18 @@ impl GyroSource {
         self.imu_orientation = telemetry.imu_orientation.clone();
         self.detected_source = telemetry.detected_source.clone();
 
-        if let Some(imu) = &telemetry.raw_imu {
-            self.org_raw_imu = imu.clone();
-            self.apply_transforms();
-        }
         if let Some(quats) = &telemetry.quaternions {
             self.quaternions = quats.clone();
             self.org_quaternions = self.quaternions.clone();
         }
-
-        if self.quaternions.is_empty() {
+        if !self.quaternions.is_empty() {
+            self.integration_method = 0;
+        }
+        
+        if let Some(imu) = &telemetry.raw_imu {
+            self.org_raw_imu = imu.clone();
+            self.apply_transforms();
+        } else if self.quaternions.is_empty() {
             self.integrate();
         }
     }
