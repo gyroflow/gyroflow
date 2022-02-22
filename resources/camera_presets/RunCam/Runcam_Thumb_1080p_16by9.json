@@ -1,0 +1,57 @@
+{
+    "name": "Runcam Thumb 1080p 16by9 1920x1080",
+    "note": "",
+    "calibrated_by": "Anonymous",
+    "camera_brand": "Runcam",
+    "camera_model": "Thumb",
+    "lens_model": "",
+    "camera_setting": "1080p 16by9",
+    "calibrator_version": "0.3.0-beta-dev",
+    "date": "2021-11-30",
+    "calib_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "orig_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "output_dimension": {
+        "w": 1920,
+        "h": 1080
+    },
+    "frame_readout_time": null,
+    "gyro_lpf": null,
+    "input_horizontal_stretch": 1,
+    "num_images": 34,
+    "official": true,
+    "use_opencv_fisheye": true,
+    "fisheye_params": {
+        "RMS_error": 1.0107818826551256,
+        "camera_matrix": [
+            [
+                1045.049077921512,
+                0.0,
+                960.0
+            ],
+            [
+                0.0,
+                1045.5120596258241,
+                540.0
+            ],
+            [
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "distortion_coeffs": [
+            0.003102967048566147,
+            -0.20829259507652745,
+            0.20908528282539313,
+            -0.09622936401717025
+        ]
+    },
+    "use_opencv_standard": false,
+    "calib_params": {}
+}
