@@ -116,13 +116,13 @@ impl FovDefault {
         // };
 
         let bspline = BSpline::builder()
-                    .clamped()
-                    .elements(&relevant_p)
-                    .equidistant::<f64>()
-                    .degree(2) // 1 - linear, 2 - quadratic, 3 - cubic
-                    .normalized()
-                    .constant::<3>()
-                    .build();
+            .clamped()
+            .elements(&relevant_p)
+            .equidistant::<f64>()
+            .degree(2) // 1 - linear, 2 - quadratic, 3 - cubic
+            .normalized()
+            .constant::<3>()
+            .build();
         if let Err(ref err) = bspline {
             log::error!("{:?}", err);
         }

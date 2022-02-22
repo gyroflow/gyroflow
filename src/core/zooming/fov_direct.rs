@@ -78,22 +78,20 @@ impl FovDirect {
         }
     }
 
-    fn find_fov(&self, polygon: &[(f64,f64)], center: &Point2D, default_fov: f64) -> f64
-    {
-        let relpoints: Vec<(f64,f64)> = polygon.iter().map(|(x,y)| (x-center.0, y-center.1)).collect();
-        let intersections_up = polygon_line_intersections( &(0.0,0.0), self.output_inv_aspect, &relpoints);
+    fn find_fov(&self, polygon: &[(f64, f64)], center: &Point2D, default_fov: f64) -> f64 {
+        let relpoints: Vec<(f64, f64)> = polygon.iter().map(|(x, y)| (x - center.0, y - center.1)).collect();
+        let intersections_up = polygon_line_intersections(&(0.0, 0.0), self.output_inv_aspect, &relpoints);
         let left_crossings: u32 = intersections_up.iter().map( |p| if p.0 < 0.0 { 0 } else { 1 } ).sum();
-        if  left_crossings & 1 == 0 { return default_fov; } // center point is outside of polygon
+        if left_crossings & 1 == 0 { return default_fov; } // center point is outside of polygon
 
-        let intersections_down = polygon_line_intersections( &(0.0,0.0), -self.output_inv_aspect, &relpoints);
+        let intersections_down = polygon_line_intersections(&(0.0, 0.0), -self.output_inv_aspect, &relpoints);
 
-        let min_intersection: (f64,f64) = intersections_up
+        let min_intersection: (f64, f64) = intersections_up
             .iter()
             .chain(&intersections_down)
             .fold(intersections_up[0], |mp, &point| { 
                 if point.0.abs() < mp.0.abs() { point } else { mp } 
             });
-
         
         let nearest_point = relpoints
             .iter()
@@ -101,23 +99,21 @@ impl FovDirect {
                 let ap = (point.0.abs(), point.1.abs());
                 if ap.0 < mp.0 && ap.1 < mp.1 {
                     if ap.1 > ap.0 * self.output_inv_aspect {
-                        return (ap.1/self.output_inv_aspect, ap.1);
+                        return (ap.1 / self.output_inv_aspect, ap.1);
                     } else {
-                        return (ap.0, ap.0*self.output_inv_aspect);
+                        return (ap.0, ap.0 * self.output_inv_aspect);
                     }
                 }
                 mp
             });
 
-        nearest_point.0*2.0 / self.output_dim.0
+        nearest_point.0 * 2.0 / self.output_dim.0
     }
 }
 
-/*
-    Returns points placed around a rectangle in a continous order
-*/
+// Returns points placed around a rectangle in a continous order
 fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f64)> {
-    let (wcnt, hcnt) = (w_div.max(2)-1, h_div.max(2)-1);
+    let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
     let (wstep, hstep) = (w / wcnt as f64, h / hcnt as f64);
     
     // ordered!
@@ -130,12 +126,9 @@ fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f
     distorted_points
 }
 
-/*
-    Return Some( (x,y) ), where the ray p0->[x,x*rise] intersects the line p2->p3
-    Returns None, when they don't intersect
-*/
-fn line_intersection(p0: &(f64,f64), rise: f64, p2: &(f64,f64), p3: &(f64,f64)) -> Option<(f64,f64)>
-{
+// Return Some((x, y)), where the ray p0->[x,x*rise] intersects the line p2->p3
+// Returns None, when they don't intersect
+fn line_intersection(p0: &(f64,f64), rise: f64, p2: &(f64,f64), p3: &(f64,f64)) -> Option<(f64,f64)> {
 	let s32 = (p3.0 - p2.0, p3.1 - p2.1);
 	
 	let denom = s32.0 * rise - s32.1;
@@ -152,10 +145,8 @@ fn line_intersection(p0: &(f64,f64), rise: f64, p2: &(f64,f64), p3: &(f64,f64)) 
     }
 }
 
-/*
-    Return a Vector with all the points where the line p0->[x,x*rise] intersects with the polygon
-*/
-fn polygon_line_intersections(p0: &(f64,f64), rise: f64, polygon: &[(f64,f64)]) -> Vec<(f64,f64)> {
+// Return a Vector with all the points where the line p0->[x,x*rise] intersects with the polygon
+fn polygon_line_intersections(p0: &(f64,f64), rise: f64, polygon: &[(f64, f64)]) -> Vec<(f64, f64)> {
     let len = polygon.len();
     polygon
         .iter()

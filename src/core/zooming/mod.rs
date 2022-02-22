@@ -12,7 +12,6 @@ use enterpolation::Merge;
 
 use crate::undistortion::{ ComputeParams };
 
-
 #[derive(PartialEq, Clone)]
 pub enum Mode {
     Disabled,
@@ -31,7 +30,6 @@ impl Merge<f64> for Point2D {
     }
 }
 
-
 pub trait ZoomingAlgorithm : DynClone {
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)>;
     fn compute_params(&self) -> &ComputeParams;    
@@ -39,12 +37,10 @@ pub trait ZoomingAlgorithm : DynClone {
 }
 clone_trait_object!(ZoomingAlgorithm);
 
-
 pub trait FieldOfViewAlgorithm : DynClone {
     fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>);
 }
 clone_trait_object!(FieldOfViewAlgorithm);
-
 
 pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
     compute_params.fov_scale = 1.0;
@@ -56,7 +52,6 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
     compute_params.height = compute_params.video_height;
     compute_params.output_width = compute_params.video_width;
     compute_params.output_height = compute_params.video_height;
-    
 
     let mode = if compute_params.adaptive_zoom_window < -0.9 {
         Mode::Static
@@ -65,7 +60,6 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
     } else {
         Mode::Disabled
     };
-
 
     let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
     //let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
