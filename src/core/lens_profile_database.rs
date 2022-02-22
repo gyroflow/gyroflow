@@ -8,7 +8,8 @@ use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct LensProfileDatabase {
-    map: HashMap<String, LensProfile>
+    map: HashMap<String, LensProfile>,
+    loaded: bool
 }
 
 impl LensProfileDatabase {
@@ -66,7 +67,9 @@ impl LensProfileDatabase {
                                     f_name.clone()
                                 };
                                 if self.map.contains_key(&key) {
-                                    log::warn!("Lens profile already present: {}, filename: {}", key, f_name);
+                                    if !self.loaded {
+                                        log::warn!("Lens profile already present: {}, filename: {}", key, f_name);
+                                    }
                                 } else {
                                     self.map.insert(key, profile);
                                 }
@@ -81,6 +84,7 @@ impl LensProfileDatabase {
         });
         
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
+        self.loaded = true;
     }
 
     pub fn get_all_names(&self) -> Vec<(String, String)> {

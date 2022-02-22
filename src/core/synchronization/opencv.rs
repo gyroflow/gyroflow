@@ -100,7 +100,7 @@ impl ItemOpenCV {
             
             let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
             if inliers < 20 {
-                return Err(opencv::Error::new(0, "Model not found".into()));
+                return Err(opencv::Error::new(0, "Model not found".to_string()));
             }
             
             cv_to_rot2(r1)
@@ -201,7 +201,7 @@ pub fn init() -> Result<(), opencv::Error> {
 
 fn cv_to_rot2(r1: Mat) -> Result<Rotation3<f64>, opencv::Error> {
     if r1.typ() != opencv::core::CV_64FC1 {
-        return Err(opencv::Error::new(0, "Invalid matrix type".into()));
+        return Err(opencv::Error::new(0, "Invalid matrix type".to_string()));
     }
     Ok(Rotation3::from_matrix_unchecked(nalgebra::Matrix3::new(
         *r1.at_2d::<f64>(0, 0)?, *r1.at_2d::<f64>(0, 1)?, *r1.at_2d::<f64>(0, 2)?,

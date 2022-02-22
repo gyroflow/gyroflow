@@ -256,7 +256,7 @@ impl LensCalibrator {
 #[cfg(feature = "use-opencv")]
 fn cv_to_mat3(r1: Mat) -> Result<Matrix3<f64>, opencv::Error> {
     if r1.typ() != opencv::core::CV_64FC1 {
-        return Err(opencv::Error::new(0, "Invalid matrix type".into()));
+        return Err(opencv::Error::new(0, "Invalid matrix type".to_string()));
     }
     Ok(Matrix3::new(
         *r1.at_2d::<f64>(0, 0)?, *r1.at_2d::<f64>(0, 1)?, *r1.at_2d::<f64>(0, 2)?,
@@ -268,7 +268,7 @@ fn cv_to_mat3(r1: Mat) -> Result<Matrix3<f64>, opencv::Error> {
 #[cfg(feature = "use-opencv")]
 fn cv_to_vec4(v: Mat) -> Result<Vector4<f64>, opencv::Error> {
     if v.typ() != opencv::core::CV_64FC1 {
-        return Err(opencv::Error::new(0, "Invalid matrix type".into()));
+        return Err(opencv::Error::new(0, "Invalid matrix type".to_string()));
     }
     Ok(Vector4::new(
         *v.at::<f64>(0)?,
