@@ -39,7 +39,8 @@
             0.0119564903049774,
             0.3295762041789016,
             -0.2854187395581136
-        ]
+        ],
+        "radial_distortion_limit": 0.0
     },
     "use_opencv_standard": false,
     "calib_params": {}
