@@ -1,10 +1,10 @@
 use super::*;
-use super::field_of_view::FieldOfView;
 
 #[derive(Clone)]
 pub struct ZoomDynamic {
-    compute_params: ComputeParams,
     window: f64, 
+    fov_estimator: Box<dyn FieldOfViewAlgorithm>,
+    compute_params: ComputeParams,
 }
 
 impl ZoomingAlgorithm for ZoomDynamic {
@@ -12,8 +12,8 @@ impl ZoomingAlgorithm for ZoomDynamic {
         if timestamps.is_empty() {
             return Vec::new();
         }
-        let fov_est = FieldOfView::new(self.compute_params.clone());
-        let (mut fov_values, center_position) = fov_est.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
+
+        let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
         let mut frames = (self.window * self.compute_params.scaled_fps).floor() as usize;
         if frames % 2 == 0 {
@@ -40,10 +40,11 @@ impl ZoomingAlgorithm for ZoomDynamic {
 }
 
 impl ZoomDynamic {
-    pub fn new(compute_params: ComputeParams, window: f64) -> Self {
+    pub fn new(window: f64, fov_estimator: Box<dyn FieldOfViewAlgorithm>, compute_params: ComputeParams) -> Self {
         Self {
+            window,
+            fov_estimator,
             compute_params,
-            window
         }
     }
 }

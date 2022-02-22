@@ -7,14 +7,14 @@ use enterpolation::{ Curve, bspline::BSpline };
 
 
 #[derive(Clone)]
-pub struct FieldOfView {
+pub struct FovDefault {
     compute_params: ComputeParams,
     input_dim: (f64, f64), 
     output_dim: (f64, f64),
 }
 
-impl FieldOfView { 
-    pub fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
+impl FieldOfViewAlgorithm for FovDefault { 
+    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
         if timestamps.is_empty() {
             return (Vec::new(), Vec::new());
         }
@@ -45,7 +45,9 @@ impl FieldOfView {
         }
         (fov_values, crop_center_positions)
     }
+}
 
+impl FovDefault { 
     pub fn new(compute_params: ComputeParams) -> Self {
         let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
