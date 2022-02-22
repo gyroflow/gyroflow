@@ -7,8 +7,6 @@ pub mod plain;
 pub mod fixed;
 pub mod default_algo;
 pub mod default_algo_2;
-pub mod velocity_dampened;
-pub mod velocity_dampened_axis;
 pub mod velocity_dampened_advanced;
 
 pub use nalgebra::*;
