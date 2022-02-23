@@ -192,15 +192,14 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
 
         if (w_ > 0.0) {
             let pos = x_y_ / w_;
-        
             let r = length(pos);
-            let theta = atan(r);
         
             if (r_limit > 0.0 && r > r_limit) {
                 put_pixel(dst_index, bg);
                 return;
             }
             
+            let theta = atan(r);
             let theta2 = theta*theta;
             let theta4 = theta2*theta2;
             let theta6 = theta4*theta2;
