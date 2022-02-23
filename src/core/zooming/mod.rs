@@ -1,5 +1,6 @@
 pub mod fov_default;
 pub mod fov_direct;
+pub mod fov_iterative;
 
 pub mod zoom_disabled;
 pub mod zoom_static;
@@ -61,7 +62,8 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
         Mode::Disabled
     };
 
-    let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
+    let fov_estimator = Box::new(fov_iterative::FovIterative::new(compute_params.clone()));
+    //let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
     //let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
     match mode {
         Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
