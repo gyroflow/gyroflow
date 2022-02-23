@@ -101,22 +101,25 @@ impl<'a> FfmpegProcessor<'a> {
         // format::context::input::dump(&input_context, 0, Some(path));
 
         let best_video_stream = unsafe {
-            let mut decoder = std::ptr::null_mut();
+            let mut decoder = std::ptr::null_mut() as *const ffi::AVCodec;
             let index = ffi::av_find_best_stream(input_context.as_mut_ptr(), media::Type::Video.into(), -1i32, -1i32, &mut decoder, 0);
             if index >= 0 && !decoder.is_null() {
-                Ok((Stream::wrap(&input_context, index as usize), decoder))
+                Ok((Stream::wrap(&input_context, index as usize), decoder as *mut ffi::AVCodec))
             } else {
                 Err(Error::StreamNotFound)
             }
         };
 
         let strm = best_video_stream?;
-        let mut stream = strm.0;
+        let stream = strm.0;
         let decoder = strm.1;
+
+        let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?.decoder().video()?;
+        decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
 
         let mut hw_backend = String::new();
         if gpu_decoding {
-            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut stream)?;
+            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut decoder_ctx)?;
             super::append_log(&format!("Selected HW backend {:?} ({}) with format {:?}\n", hw.1, hw.2, hw.3));
             hw_backend = hw.2;
         }
@@ -139,6 +142,7 @@ impl<'a> FfmpegProcessor<'a> {
                 gpu_decoding,
                 input_index: stream.index(),
                 codec_options: Dictionary::new(),
+                decoder: Some(decoder_ctx),
                 ..VideoTranscoder::default()
             },
 
@@ -161,7 +165,7 @@ impl<'a> FfmpegProcessor<'a> {
         let mut octx = format::output(&output_path)?;
 
         for (i, stream) in self.input_context.streams().enumerate() {
-            let medium = stream.codec().medium();
+            let medium = stream.parameters().medium();
             if medium != media::Type::Audio && medium != media::Type::Video {
                 stream_mapping[i] = -1;
                 continue;
@@ -185,15 +189,15 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 }
                 let mut out_stream = octx.add_stream(codec)?;
+                self.video.encoder_codec = Some(codec);
 
-                let mut input_codec = stream.codec();
-                input_codec.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
-                self.video.decoder = Some(input_codec.decoder().video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
 
                 out_stream.set_rate(stream.rate());
-                out_stream.set_avg_frame_rate(self.video.frame_rate.unwrap());
+                if let Some(fr) = self.video.frame_rate {
+                    out_stream.set_avg_frame_rate(fr);
+                }
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
@@ -334,16 +338,14 @@ impl<'a> FfmpegProcessor<'a> {
         self.video.decode_only = true;
 
         for (i, stream) in self.input_context.streams().enumerate() {
-            if stream.codec().medium() == media::Type::Video {
+            if stream.parameters().medium() == media::Type::Video {
                 self.video.input_index = i;
 
-                let codec = stream.codec().decoder();
                 // TODO this doesn't work for some reason
                 // let c_name = CString::new("resize").unwrap();
                 // let c_val = CString::new("1280x720").unwrap();
                 // unsafe { ffi::av_opt_set((*codec.as_mut_ptr()).priv_data, c_name.as_ptr(), c_val.as_ptr(), 1); } 
 
-                self.video.decoder = Some(codec.video()?);
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
                 break;

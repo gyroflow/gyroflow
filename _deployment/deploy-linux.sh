@@ -3,7 +3,7 @@
 : "${PROJECT_DIR:=$(readlink -f $(dirname $(readlink -f $0))/..)}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.2.3/gcc_64}"
-: "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-4.4-linux-clang-gpl-lite}"
+: "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-5.0-linux-clang-gpl-lite}"
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
 
 if [ "$1" == "build-docker" ]; then

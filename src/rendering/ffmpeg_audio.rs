@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>, Maik <myco at gmx>
 
-use ffmpeg_next::{ codec, format, decoder, encoder, frame, Packet, Rescale, Rational, Error, format::context::Output, channel_layout::ChannelLayout};
+use ffmpeg_next::{ ffi, codec, format, decoder, encoder, frame, Packet, Rescale, Rational, Error, format::context::Output, channel_layout::ChannelLayout};
 use super::audio_resampler::AudioResampler;
-
 
 pub struct AudioTranscoder {
     pub ost_index: usize,
@@ -15,14 +14,18 @@ pub struct AudioTranscoder {
 
 impl AudioTranscoder {
     pub fn new(codec_id: codec::Id, ist: &format::stream::Stream, octx: &mut Output, ost_index: usize) -> Result<Self, Error> {
-        let mut decoder = ist.codec().decoder().audio()?;
+        let ctx = codec::context::Context::from_parameters(ist.parameters())?;
+        let mut decoder = ctx.decoder().audio()?;
         let codec = encoder::find(codec_id).expect("failed to find encoder").audio()?;
         let global = octx.format().flags().contains(format::flag::Flags::GLOBAL_HEADER);
 
         decoder.set_parameters(ist.parameters())?;
 
         let mut output = octx.add_stream(codec)?;
-        let mut encoder = output.codec().encoder().audio()?;
+        //let ctx = codec::context::Context::from_parameters(output.parameters())?;
+        let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(codec.as_ptr()) };
+        let ctx = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
+        let mut encoder = ctx.encoder().audio()?;
 
         let channel_layout = codec.channel_layouts().map_or(ChannelLayout::STEREO, |cls| cls.best(decoder.channel_layout().channels()));
 

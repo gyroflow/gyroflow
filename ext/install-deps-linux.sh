@@ -40,7 +40,7 @@ if [ "$1" == "docker" ]; then
 fi
 
 # Download and extract ffmpeg
-curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-4.4-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-5.0-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
 7z x -aoa ffmpeg.tar.xz
 tar -xf ffmpeg.tar.xz
 

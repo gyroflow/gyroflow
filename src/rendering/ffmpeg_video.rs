@@ -36,6 +36,7 @@ pub struct VideoTranscoder<'a> {
     pub output_index: Option<usize>,
     pub decoder: Option<decoder::Video>,
     pub encoder: Option<encoder::video::Video>,
+    pub encoder_codec: Option<codec::codec::Codec>,
     pub frame_rate: Option<Rational>,
     pub time_base: Option<Rational>,
 
@@ -72,11 +73,14 @@ macro_rules! ffmpeg {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
+    fn init_encoder(frame: &mut frame::Video, encoder_codec: Option<&mut codec::codec::Codec>, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(output_index).unwrap();
-        let ost_codec = ost.codec();
-        let mut encoder = ost_codec.encoder().video()?;
+        let encoder_codec = encoder_codec.unwrap();
+        
+        let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(encoder_codec.as_ptr()) };
+        let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
+        let mut encoder = context.encoder().video()?;
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let pixel_format = format.unwrap_or_else(|| frame.format());
         let color_range = frame.color_range();
@@ -115,16 +119,16 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
     
-        encoder.open_with(codec_options)?;
-        encoder = ost.codec().encoder().video()?;
-        ost.set_parameters(encoder);
+        let encoder = encoder.open_with(codec_options)?;
+        ost.set_parameters(&encoder);
+        let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
         
         if codec_name.contains("hevc") || codec_name.contains("x265") {
             let hvc1_tag: u32 = (b'h' as u32) | ((b'v' as u32) << 8) | ((b'c' as u32) << 16) | ((b'1' as u32) << 24);
             unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = hvc1_tag; }
         }
         
-        Ok(ost.codec().encoder().video()?)
+        Ok(context.encoder().video()?)
     }
     
     pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>) -> Result<Status, FFmpegError> {
@@ -272,7 +276,7 @@ impl<'a> VideoTranscoder<'a> {
                 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
                 
-                            let result = Self::init_encoder(final_frame, decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
+                            let result = Self::init_encoder(final_frame, self.encoder_codec.as_mut(), decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
                 
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();

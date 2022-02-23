@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use ffmpeg_next::{ ffi, format, encoder, Stream };
+use ffmpeg_next::{ ffi, format, codec, encoder };
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
@@ -105,7 +105,7 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<form
     ret
 }
 
-pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, stream: &mut Stream) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
+pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, decoder_ctx: &mut codec::decoder::Decoder) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
     for i in index..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i as i32);
@@ -125,7 +125,6 @@ pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, stream: 
                 }
             }
             if let Some(dev) = devices.get(&type_) {
-                let mut decoder_ctx = stream.codec().decoder();
                 (*decoder_ctx.as_mut_ptr()).hw_device_ctx = dev.add_ref();
                 return Ok((i, type_, dev.name(), Some((*config).pix_fmt)));
             }
