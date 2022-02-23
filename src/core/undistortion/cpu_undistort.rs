@@ -108,15 +108,14 @@ impl<T: PixelType> Undistortion<T> {
                     if _w > 0.0 {
                         let posx = _x / _w;
                         let posy = _y / _w;
-                
                         let r = (posx*posx + posy*posy).sqrt();
-                        let theta = r.atan();
-
+                        
                         if r_limit > 0.0 && r > r_limit {
                             *pix_out = bg_t;
                             return;
                         }
-                
+                        
+                        let theta = r.atan();
                         let theta2 = theta*theta;
                         let theta4 = theta2*theta2;
                         let theta6 = theta4*theta2;

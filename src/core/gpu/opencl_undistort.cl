@@ -137,15 +137,14 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         if (_w > 0) {
 
             float2 pos = (float2)(_x, _y) / _w;
-
             float r = length(pos);
-            float theta = atan(r);
 
             if (r_limit > 0.0 && r > r_limit) {
                 *out_pix = DATA_CONVERT(bg);
                 return;
             }
 
+            float theta = atan(r);
             float theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;
 
             float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
