@@ -101,10 +101,10 @@ impl<'a> FfmpegProcessor<'a> {
         // format::context::input::dump(&input_context, 0, Some(path));
 
         let best_video_stream = unsafe {
-            let mut decoder = std::ptr::null_mut() as *const ffi::AVCodec;
+            let mut decoder: *const ffi::AVCodec = std::ptr::null();
             let index = ffi::av_find_best_stream(input_context.as_mut_ptr(), media::Type::Video.into(), -1i32, -1i32, &mut decoder, 0);
             if index >= 0 && !decoder.is_null() {
-                Ok((Stream::wrap(&input_context, index as usize), decoder as *mut ffi::AVCodec))
+                Ok((Stream::wrap(&input_context, index as usize), decoder))
             } else {
                 Err(Error::StreamNotFound)
             }
@@ -142,7 +142,7 @@ impl<'a> FfmpegProcessor<'a> {
                 gpu_decoding,
                 input_index: stream.index(),
                 codec_options: Dictionary::new(),
-                decoder: Some( decoder_ctx.decoder().video()?),
+                decoder: Some(decoder_ctx.decoder().video()?),
                 ..VideoTranscoder::default()
             },
 
