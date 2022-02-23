@@ -26,6 +26,8 @@ pub struct FfmpegProcessor<'a> {
     pub start_ms: Option<f64>,
     pub end_ms: Option<f64>,
 
+    pub decoder_fps: f64,
+
     ost_time_bases: Vec<Rational>,
 }
 
@@ -114,6 +116,8 @@ impl<'a> FfmpegProcessor<'a> {
         let stream = strm.0;
         let decoder = strm.1;
 
+        let decoder_fps = stream.rate().into();
+
         let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?;
         decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
 
@@ -136,6 +140,8 @@ impl<'a> FfmpegProcessor<'a> {
 
             start_ms: None,
             end_ms: None,
+
+            decoder_fps,
         
             video: VideoTranscoder {
                 gpu_encoding: true,

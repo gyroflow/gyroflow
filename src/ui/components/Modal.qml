@@ -11,6 +11,7 @@ Rectangle {
     property alias textFormat: t.textFormat;
     property alias text: t.text;
     property alias buttons: btns.model;
+    property alias mainColumn: mainColumn;
     property bool opened: false;
     property int accentButton: -1;
     onTextChanged: {
@@ -86,21 +87,26 @@ Rectangle {
                 width: parent.width;
                 height: Math.min(contentHeight, root.height - icon.height - btnsRow.height - 150 * dpiScale);
                 contentWidth: width;
-                contentHeight: t.height;
+                contentHeight: mainColumn.height;
                 clip: true;
                 QQC.ScrollBar.vertical: QQC.ScrollBar { }
-                BasicText {
-                    id: t;
+                Column {
+                    id: mainColumn;
                     x: 15 * dpiScale;
                     width: parent.width - 2*x;
-                    horizontalAlignment: Text.AlignHCenter;
-                    wrapMode: Text.WordWrap;
-                    font.pixelSize: 14 * dpiScale;
+                    spacing: 10 * dpiScale;
+                    BasicText {
+                        id: t;
+                        width: parent.width;
+                        horizontalAlignment: Text.AlignHCenter;
+                        wrapMode: Text.WordWrap;
+                        font.pixelSize: 14 * dpiScale;
 
-                    MouseArea {
-                        anchors.fill: parent;
-                        cursorShape: parent.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
-                        acceptedButtons: Qt.NoButton;
+                        MouseArea {
+                            anchors.fill: parent;
+                            cursorShape: parent.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
+                            acceptedButtons: Qt.NoButton;
+                        }
                     }
                 }
             }

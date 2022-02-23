@@ -256,7 +256,7 @@ impl Controller {
                 set_offsets(offsets);
             });
 
-            let ranges = sync.get_ranges();
+            let mut ranges = sync.get_ranges();
 
             self.cancel_flag.store(false, SeqCst);
             let cancel_flag = self.cancel_flag.clone();
@@ -264,9 +264,20 @@ impl Controller {
             let video_path = self.video_path.clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
+                let mut fps_scale = None;
+                
                 match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
                     Ok(mut proc) => {
-                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                        if fps > 0.0 && proc.decoder_fps > 0.0 && (fps - proc.decoder_fps).abs() > 0.1 {
+                            ::log::debug!("Rescaling timestamp from {fps}fps to {}fps", proc.decoder_fps);
+                            let scale = proc.decoder_fps / fps;
+                            ranges.iter_mut().for_each(|(f, t)| { *f /= scale; *t /= scale; });
+                            fps_scale = Some(scale);
+                        }
+                        proc.on_frame(|mut timestamp_us, input_frame, _output_frame, converter| {
+                            if let Some(scale) = fps_scale {
+                                timestamp_us = (timestamp_us as f64 * scale).round() as i64;
+                            }
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
       
                             assert!(_output_frame.is_none());

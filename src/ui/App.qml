@@ -64,8 +64,8 @@ Rectangle {
     FileDialog {
         id: fileDialog;
         property var extensions: [
-            "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow",
-            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV", "GYROFLOW"
+            "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr",
+            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV", "GYROFLOW", "PNG", "EXR"
         ];
 
         title: qsTr("Choose a video file")
