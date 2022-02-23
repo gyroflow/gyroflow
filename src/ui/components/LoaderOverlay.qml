@@ -51,7 +51,9 @@ Item {
                 time.elapsed = timeToStr(elapsedMs / 1000);
                 time.remaining = timeToStr(remainingMs / 1000);
             }
+            ui_tools.set_progress(progress);
         } else {
+            ui_tools.set_progress(-1.0);
             time.elapsed = "";
         }
     }

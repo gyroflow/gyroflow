@@ -1071,6 +1071,7 @@ dependencies = [
  "ureq",
  "whoami",
  "winapi",
+ "windows",
  "winres",
 ]
 
@@ -2067,8 +2068,8 @@ dependencies = [
 
 [[package]]
 name = "qmetaobject"
-version = "0.2.5"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
+version = "0.2.7"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#aa91b6d06cd8bc7579d77787253e31c7fabc86f8"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2081,8 +2082,8 @@ dependencies = [
 
 [[package]]
 name = "qmetaobject_impl"
-version = "0.2.5"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
+version = "0.2.7"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#aa91b6d06cd8bc7579d77787253e31c7fabc86f8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2092,7 +2093,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#93d986e88f5f861a4e6db24f945ef7fc275fb8a1"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#e1c471d7bd55abb7c41cd4d364980d857970547d"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2104,8 +2105,8 @@ dependencies = [
 
 [[package]]
 name = "qttypes"
-version = "0.2.6"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?branch=android_build_fix#032d74407288510d8a2a9f5da2c251e4cae14f2a"
+version = "0.2.7"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#aa91b6d06cd8bc7579d77787253e31c7fabc86f8"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3012,6 +3013,19 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "windows"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbedf6db9096bc2364adce0ae0aa636dcd89f3c3f2cd67947062aaf0ca2a10ec"
+dependencies = [
+ "windows_aarch64_msvc",
+ "windows_i686_gnu",
+ "windows_i686_msvc",
+ "windows_x86_64_gnu",
+ "windows_x86_64_msvc",
+]
 
 [[package]]
 name = "windows-sys"

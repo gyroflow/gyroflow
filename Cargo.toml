@@ -23,8 +23,8 @@ semver = "1.0.5"
 
 breakpad-sys = "0.1.1"
 
-qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["log"] }
-qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", branch = "android_build_fix", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
+qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
@@ -38,6 +38,16 @@ log = "0.4.14"
 
 ureq = "2.4"
 whoami = "1.2.1"
+
+[target."cfg(target_os = \"windows\")".dependencies.windows]
+version = "0.32.0"
+features = [
+    "alloc",
+    "Win32_System_Com",
+    "Win32_System_SystemServices",
+    "Win32_UI_Shell",
+    "Win32_Foundation",
+]
 
 [build-dependencies]
 cpp_build = "0.5.6"

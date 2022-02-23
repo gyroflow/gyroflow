@@ -7,6 +7,9 @@ use std::cell::RefCell;
 use crate::controller::Controller;
 use crate::util;
 
+#[cfg(target_os = "windows")]
+use windows::Win32::{ Foundation::HWND, UI::Shell::{ ITaskbarList4, TaskbarList }, System::Com::{ CoInitializeEx, CoCreateInstance, CLSCTX_ALL, COINIT_MULTITHREADED } };
+
 cpp! {{
     #include <QTranslator>
 }}
@@ -19,11 +22,17 @@ pub struct UITools {
     get_default_language: qt_method!(fn(&self) -> QString),
     set_scaling: qt_method!(fn(&self, dpiScale: f64)),
     init_calibrator: qt_method!(fn(&mut self)),
-    set_icon: qt_method!(fn(&self, wnd: QJSValue)),
+    set_icon: qt_method!(fn(&mut self, wnd: QJSValue)),
+    set_progress: qt_method!(fn(&self, progress: f64)),
 
     language_changed: qt_signal!(),
 
     calibrator_ctl: Option<RefCell<Controller>>,
+
+    #[cfg(target_os = "windows")]
+    taskbar: Option<ITaskbarList4>,
+
+    main_window_handle: Option<isize>,
 
     pub engine_ptr: Option<*mut QmlEngine>
 }
@@ -108,11 +117,37 @@ impl UITools {
         }
     }
 
-    pub fn set_icon(&self, wnd: QJSValue) {
-        cpp!(unsafe [wnd as "QJSValue"] {
+    pub fn set_icon(&mut self, wnd: QJSValue) {
+        let hwnd = cpp!(unsafe [wnd as "QJSValue"] -> isize as "int64_t" {
             auto obj = qobject_cast<QQuickWindow *>(wnd.toQObject());
             obj->setIcon(QIcon(":/resources/icon.png"));
+            return int64_t(obj->winId());
         });
+        if self.main_window_handle.is_none() {
+            self.main_window_handle = Some(hwnd);
+            
+            #[cfg(target_os = "windows")]
+            unsafe {
+                let _ = CoInitializeEx(std::ptr::null_mut(), COINIT_MULTITHREADED);
+                if let Ok(tb) = CoCreateInstance(&TaskbarList, None, CLSCTX_ALL) {
+                    self.taskbar = Some(tb);
+                }
+            }
+        }
+    }
+
+    pub fn set_progress(&self, progress: f64) {
+        const MAX_PROGRESS: u64 = 100_000;
+        
+        #[cfg(target_os = "windows")]
+        if let Some(hwnd) = self.main_window_handle {
+            let progress = (progress.clamp(0.0, 1.0) * MAX_PROGRESS as f64) as u64;
+            unsafe {
+                if let Some(ref tb) = self.taskbar {
+                    let _ = tb.SetProgressValue(HWND(hwnd), progress, MAX_PROGRESS);
+                }
+            }
+        }
     }
 
     pub fn init_calibrator(&mut self) {
