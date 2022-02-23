@@ -49,6 +49,7 @@ pub fn set_gpu_type_from_name(name: &str) {
 
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
+    if codec.contains("EXR") || codec.contains("exr") { return vec![("exr", false)]; }
     
     let mut encoders = if use_gpu {
         match codec {
@@ -86,7 +87,11 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_v4l2m2m",      true),
                 ("libx265",           false),
             ],
-            "ProRes" => vec![("prores_ks", false)],
+            "ProRes" => vec![
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                ("prores_videotoolbox", true),
+                ("prores_ks", false)
+            ],
             _        => vec![]
         }
     } else {
@@ -123,6 +128,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let total_frame_count = params.frame_count;
     let _fps = params.fps;
     let fps_scale = params.fps_scale;
+    let has_alpha = params.background[3] < 255.0;
 
     let duration_ms = params.duration_ms;
 
@@ -164,11 +170,39 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         }
         Some("png") => {
             if codec_options.contains("16-bit") {
-                proc.video.encoder_pixel_format = Some(Pixel::RGBA64BE);
+                proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA64BE } else { Pixel::RGB48BE });
             } else {
-                proc.video.encoder_pixel_format = Some(Pixel::RGBA);
+                proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA } else { Pixel::RGB24 });
             }
             proc.video.clone_frames = true;
+        }
+        Some("exr") => {
+            proc.video.clone_frames = true;
+            proc.video.codec_options.set("compression", "1"); // RLE compression
+            proc.video.codec_options.set("gamma", "1.0");
+            proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::GBRAPF32LE } else { Pixel::GBRPF32LE });
+            /*Decoder options:
+                -layer             <string>     .D.V....... Set the decoding layer (default "")
+                -part              <int>        .D.V....... Set the decoding part (from 0 to INT_MAX) (default 0)
+                -gamma             <float>      .D.V....... Set the float gamma value when decoding (from 0.001 to FLT_MAX) (default 1)
+                -apply_trc         <int>        .D.V....... color transfer characteristics to apply to EXR linear input (from 1 to 18) (default gamma)
+                    bt709           1            .D.V....... BT.709
+                    gamma           2            .D.V....... gamma
+                    gamma22         4            .D.V....... BT.470 M
+                    gamma28         5            .D.V....... BT.470 BG
+                    smpte170m       6            .D.V....... SMPTE 170 M
+                    smpte240m       7            .D.V....... SMPTE 240 M
+                    linear          8            .D.V....... Linear
+                    log             9            .D.V....... Log
+                    log_sqrt        10           .D.V....... Log square root
+                    iec61966_2_4    11           .D.V....... IEC 61966-2-4
+                    bt1361          12           .D.V....... BT.1361
+                    iec61966_2_1    13           .D.V....... IEC 61966-2-1
+                    bt2020_10bit    14           .D.V....... BT.2020 - 10 bit
+                    bt2020_12bit    15           .D.V....... BT.2020 - 12 bit
+                    smpte2084       16           .D.V....... SMPTE ST 2084
+                    smpte428_1      17           .D.V....... SMPTE ST 428-1
+            */
         }
         _ => { }
     }
@@ -418,7 +452,7 @@ pub fn test() {
     let fps = 60000.0/1001.0;
     let video_size = (3840, 2160);
 
-    let vid = "E:/clips/GoPro/h9-test3.mov";
+    let vid = "E:/clips/GoPro/h9-test3.mp4";
 
     stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size).unwrap();
     {
@@ -447,16 +481,16 @@ pub fn test() {
             // ::log::debug!("frame {}/{}", params.1, params.2);
         },
         vid.into(),
-        "ProRes".into(),
-        "HQ",
-        &format!("{}_stab.mov", vid),
+        "x265".into(),
+        "",
+        &format!("{}_stab.mp4", vid),
         0.0,
         0.1,
         video_size.0,
         video_size.1,
         100.0,
-        false, 
-        false,
+        true, 
+        true,
         0,
         "",
         Arc::new(AtomicBool::new(false))
