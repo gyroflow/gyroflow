@@ -105,7 +105,7 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<form
     ret
 }
 
-pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, decoder_ctx: &mut codec::decoder::Decoder) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
+pub fn init_device_for_decoding(index: usize, codec: *mut ffi::AVCodec, decoder_ctx: &mut codec::context::Context) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
     for i in index..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i as i32);

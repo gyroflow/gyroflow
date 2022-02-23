@@ -22,9 +22,7 @@ impl AudioTranscoder {
         decoder.set_parameters(ist.parameters())?;
 
         let mut output = octx.add_stream(codec)?;
-        //let ctx = codec::context::Context::from_parameters(output.parameters())?;
-        let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(codec.as_ptr()) };
-        let ctx = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
+        let ctx = unsafe { codec::context::Context::wrap(ffi::avcodec_alloc_context3(codec.as_ptr()), None) };
         let mut encoder = ctx.encoder().audio()?;
 
         let channel_layout = codec.channel_layouts().map_or(ChannelLayout::STEREO, |cls| cls.best(decoder.channel_layout().channels()));

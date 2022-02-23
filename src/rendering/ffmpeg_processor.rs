@@ -114,7 +114,7 @@ impl<'a> FfmpegProcessor<'a> {
         let stream = strm.0;
         let decoder = strm.1;
 
-        let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?.decoder().video()?;
+        let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?;
         decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
 
         let mut hw_backend = String::new();
@@ -142,7 +142,7 @@ impl<'a> FfmpegProcessor<'a> {
                 gpu_decoding,
                 input_index: stream.index(),
                 codec_options: Dictionary::new(),
-                decoder: Some(decoder_ctx),
+                decoder: Some( decoder_ctx.decoder().video()?),
                 ..VideoTranscoder::default()
             },
 
