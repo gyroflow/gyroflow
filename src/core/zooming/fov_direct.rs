@@ -4,14 +4,13 @@ use crate::undistortion::undistort_points_with_rolling_shutter;
 /*
 Direct FOV calculation:
     - gets polygon points around the outline of the undistorted image
-    - casts an infinite ray from the center point of the view diagonally (with the output aspect ratio determining the angle)
-    - finds the intersections between the ray an the polygon lines
-    - determins if the center point is inside the polygon by counting the intersections in one direction (odd nr = inside)
-    - casts a second mirrored ray and finds intersections with the polygon
-    - gets the nearest intersections from both rays
-    - from the nearest point, draws a symetric rectangle around center
-    - if a polygon point happens to be inside the rectangle, it becomes the nearest point and the rectangle shrinks, repeat for all points
-    - from the nearest point, calculate the FOV
+    - (1) draws a symetric rectangle around center with max. distance
+    -     if a polygon point happens to be inside the rectangle, it becomes the nearest point and the rectangle shrinks, repeat for all points
+    - (2) casts an infinite ray from the center point of the view diagonally (with the output aspect ratio determining the angle)
+    -     finds the intersections between the ray an the polygon lines
+    - (3) casts a second mirrored ray and finds intersections with the polygon
+    -     gets the nearest intersections from both rays
+    - from the nearest point of (1),(2) or (3), calculate the FOV
 */
 
 #[derive(Clone)]
@@ -26,7 +25,7 @@ impl FieldOfViewAlgorithm for FovDirect {
         if timestamps.is_empty() {
             return (Vec::new(), Vec::new());
         }
-        let src_rect = points_around_rect(self.input_dim.0, self.input_dim.1, 9, 9);
+        let src_rect = points_around_rect(self.input_dim.0, self.input_dim.1, 15, 15);
         let polygons: Vec<Vec<(f64, f64)>> = timestamps
             .iter()
             .map(|&ts| undistort_points_with_rolling_shutter(&src_rect, ts, &self.compute_params))
@@ -35,13 +34,9 @@ impl FieldOfViewAlgorithm for FovDirect {
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
         let center_positions: Vec<Point2D> = polygons.iter().map(|_| cp).collect();
 
-        let mut prev_fov = 1.0;
         let mut fov_values: Vec<f64> = polygons.iter()
             .zip(&center_positions)
-            .map(|(polygon, center)| { 
-                prev_fov = self.find_fov(polygon, center, prev_fov);
-                prev_fov
-            })
+            .map(|(polygon, center)| self.find_fov(polygon, center))
             .collect();
 
         if range.0 > 0.0 || range.1 < 1.0 {
@@ -78,24 +73,13 @@ impl FovDirect {
         }
     }
 
-    fn find_fov(&self, polygon: &[(f64, f64)], center: &Point2D, default_fov: f64) -> f64 {
+    fn find_fov(&self, polygon: &[(f64, f64)], center: &Point2D) -> f64 {
         let relpoints: Vec<(f64, f64)> = polygon.iter().map(|(x, y)| (x - center.0, y - center.1)).collect();
-        let intersections_up = polygon_line_intersections(&(0.0, 0.0), self.output_inv_aspect, &relpoints);
-        let left_crossings: u32 = intersections_up.iter().map( |p| if p.0 < 0.0 { 0 } else { 1 } ).sum();
-        if left_crossings & 1 == 0 { return default_fov; } // center point is outside of polygon
+        let initial_nearest: (f64,f64) = (1000000.0, 1000000.0*self.output_inv_aspect);
 
-        let intersections_down = polygon_line_intersections(&(0.0, 0.0), -self.output_inv_aspect, &relpoints);
-
-        let min_intersection: (f64, f64) = intersections_up
+        let mut nearest_point = relpoints
             .iter()
-            .chain(&intersections_down)
-            .fold(intersections_up[0], |mp, &point| { 
-                if point.0.abs() < mp.0.abs() { point } else { mp } 
-            });
-        
-        let nearest_point = relpoints
-            .iter()
-            .fold((min_intersection.0.abs(), min_intersection.1.abs()), |mp, &point| {
+            .fold(initial_nearest, |mp, &point| {
                 let ap = (point.0.abs(), point.1.abs());
                 if ap.0 < mp.0 && ap.1 < mp.1 {
                     if ap.1 > ap.0 * self.output_inv_aspect {
@@ -106,6 +90,16 @@ impl FovDirect {
                 }
                 mp
             });
+
+        let intersections_up = polygon_line_intersections(&(0.0, 0.0), self.output_inv_aspect, &relpoints);
+        let intersections_down = polygon_line_intersections(&(0.0, 0.0), -self.output_inv_aspect, &relpoints);
+        let min_intersection: (f64, f64) = intersections_up
+            .iter()
+            .chain(&intersections_down)
+            .fold(nearest_point, |mp, &point| { 
+                if point.0.abs() < mp.0.abs() { point } else { mp } 
+            });
+        nearest_point = (min_intersection.0.abs(), min_intersection.1.abs());
 
         nearest_point.0 * 2.0 / self.output_dim.0
     }
@@ -153,7 +147,11 @@ fn polygon_line_intersections(p0: &(f64,f64), rise: f64, polygon: &[(f64, f64)])
         .enumerate()
         .filter_map(|(i, pp)| {
             let j = (i + len - 1) % len;
-            line_intersection(p0, rise, pp, &polygon[j])
+            if pp.0.abs() > 500000.0 || pp.1.abs() > 500000.0 || polygon[j].0.abs() > 500000.0 || polygon[j].1.abs() > 500000.0 {
+                None
+            } else {
+                line_intersection(p0, rise, pp, &polygon[j])
+            }
         })
         .collect()
 }
