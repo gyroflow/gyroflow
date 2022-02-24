@@ -31,7 +31,7 @@ pub struct WgpuWrapper  {
     params_buffer: wgpu::Buffer,
     globals_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
-    compute_pipeline: wgpu::ComputePipeline,
+    render_pipeline: wgpu::RenderPipeline,
 
     in_stride: u32,
     out_stride: u32,
@@ -39,6 +39,7 @@ pub struct WgpuWrapper  {
     in_size: u64,
     out_size: u64,
     params_size: u64,
+    bg_scaler: f32,
 
     globals: Globals
 }
@@ -51,7 +52,11 @@ impl WgpuWrapper {
     pub fn initialize_context() -> Option<String> {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
 
-        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))?;
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::HighPerformance,
+            force_fallback_adapter: false,
+            compatible_surface: None,
+        }))?;
         let info = adapter.get_info();
         log::debug!("WGPU adapter: {:?}", &info);
 
@@ -62,7 +67,7 @@ impl WgpuWrapper {
         Some(name)
     }
 
-    pub fn new(width: usize, height: usize, stride: usize, _bytes_per_pixel: usize, output_width: usize, output_height: usize, output_stride: usize, _pix_element_count: usize, bg: nalgebra::Vector4<f32>, interpolation: u32) -> Option<Self> {
+    pub fn new(width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, bg: nalgebra::Vector4<f32>, interpolation: u32, wgpu_format: (wgpu::TextureFormat, &str, f64)) -> Option<Self> {
         let params_count = 9 * (height + 1);
 
         if height < 4 || output_height < 4 || stride < 1 || width > 8192 || output_width > 8192 { return None; }
@@ -82,8 +87,7 @@ impl WgpuWrapper {
             }, None)).ok()?;
 
             let mut shader_str = include_str!("wgpu_undistort.wgsl").to_string();
-            shader_str = shader_str.replace("texture_2d<f32>", "texture_2d<f32>");
-            shader_str = shader_str.replace("rgba8unorm", "rgba8unorm");
+            shader_str = shader_str.replace("SCALAR", wgpu_format.1);
 
             let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
                 source: wgpu::ShaderSource::Wgsl(Cow::Owned(shader_str)),
@@ -97,7 +101,7 @@ impl WgpuWrapper {
 
             let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: staging_size as u64, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let params_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
-            let globals_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<Globals>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let globals_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<Globals>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
             let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
                 label: None,
@@ -105,7 +109,7 @@ impl WgpuWrapper {
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
-                format: wgpu::TextureFormat::Rgba8Unorm,
+                format: wgpu_format.0,
                 usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING,
             });
             let out_pixels = device.create_texture(&wgpu::TextureDescriptor {
@@ -114,26 +118,50 @@ impl WgpuWrapper {
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
-                format: wgpu::TextureFormat::Rgba8Unorm,
-                usage: wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::COPY_SRC,
+                format: wgpu_format.0,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
             });
 
-            let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor { module: &shader, entry_point: "undistort", label: None, layout: None });
+            let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: None,
+                layout: None,
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: "undistort_vertex",
+                    buffers: &[],
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: "undistort_fragment",
+                    targets: &[wgpu::ColorTargetState {
+                        format: wgpu_format.0,
+                        blend: None,
+                        write_mask: wgpu::ColorWrites::ALL,
+                    }],
+                }),
+                primitive: wgpu::PrimitiveState {
+                    topology: wgpu::PrimitiveTopology::TriangleList,
+                    ..Default::default()
+                },
+                multiview: None,
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState::default(),
+            });
 
             let view = in_pixels.create_view(&wgpu::TextureViewDescriptor::default());
-            let out_view = out_pixels.create_view(&wgpu::TextureViewDescriptor::default());
 
-            let bind_group_layout = compute_pipeline.get_bind_group_layout(0);
+            let bind_group_layout = render_pipeline.get_bind_group_layout(0);
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: None,
                 layout: &bind_group_layout,
                 entries: &[
                     wgpu::BindGroupEntry { binding: 0, resource: globals_buffer.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 1, resource: params_buffer.as_entire_binding() }, 
-                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) }, 
-                    wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(&out_view) },
+                    wgpu::BindGroupEntry { binding: 1, resource: params_buffer.as_entire_binding() },
+                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) }
                 ],
             });
+
+            let bg_scaler = wgpu_format.2 as f32;
             let globals = Globals {
                 width: width as u32,
                 height: height as u32,
@@ -142,7 +170,7 @@ impl WgpuWrapper {
                 output_height: output_height as u32,
                 interpolation,
                 num_params: 2,
-                bg: [bg[0] / 255.0, bg[1] / 255.0, bg[2] / 255.0, bg[3] / 255.0]
+                bg: [bg[0] / bg_scaler, bg[1] / bg_scaler, bg[2] / bg_scaler, bg[3] / bg_scaler]
             };
 
             Some(Self {
@@ -154,11 +182,12 @@ impl WgpuWrapper {
                 params_buffer,
                 globals_buffer,
                 bind_group,
-                compute_pipeline,
+                render_pipeline,
                 in_size,
                 out_size,
                 params_size,
                 globals,
+                bg_scaler,
                 in_stride: stride as u32,
                 out_stride: output_stride as u32,
                 padded_out_stride: padded_out_stride as u32
@@ -169,7 +198,7 @@ impl WgpuWrapper {
     }
 
     pub fn set_background(&mut self, bg: nalgebra::Vector4<f32>) {
-        self.globals.bg = [bg[0] / 255.0, bg[1] / 255.0, bg[2] / 255.0, bg[3] / 255.0];
+        self.globals.bg = [bg[0] / self.bg_scaler, bg[1] / self.bg_scaler, bg[2] / self.bg_scaler, bg[3] / self.bg_scaler];
     }
 
     pub fn undistort_image(&mut self, pixels: &mut [u8], output_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) {
@@ -199,11 +228,23 @@ impl WgpuWrapper {
         );
 
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let view = self.out_pixels.create_view(&wgpu::TextureViewDescriptor::default());
         {
-            let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None });
-            cpass.set_pipeline(&self.compute_pipeline);
-            cpass.set_bind_group(0, &self.bind_group, &[]);
-            cpass.dispatch(self.globals.width as u32 / 16 + 1, self.globals.height as u32 / 16 + 1, 1);
+            let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: None,
+                color_attachments: &[wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: true,
+                    },
+                }],
+                depth_stencil_attachment: None,
+            });
+            rpass.set_pipeline(&self.render_pipeline);
+            rpass.set_bind_group(0, &self.bind_group, &[]);
+            rpass.draw(0..6, 0..1);
         }
 
         encoder.copy_texture_to_buffer(wgpu::ImageCopyTexture {

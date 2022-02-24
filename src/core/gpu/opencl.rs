@@ -47,6 +47,9 @@ impl OclWrapper {
         if !context_initialized { Self::initialize_context()?; }
         let lock = CONTEXT.read();
         if let Some(ref ctx) = *lock {
+            if ctx.device.name()?.to_ascii_lowercase().contains("core(tm)") {
+                return Err(ocl::BufferCmdError::AlreadyMapped.into());
+            }
             let queue = Queue::new(&ctx.context, ctx.device, None)?;
 
             let program = Program::builder()

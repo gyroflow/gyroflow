@@ -136,12 +136,11 @@ impl UITools {
         }
     }
 
-    pub fn set_progress(&self, progress: f64) {
-        const MAX_PROGRESS: u64 = 100_000;
-        
+    pub fn set_progress(&self, _progress: f64) {
         #[cfg(target_os = "windows")]
         if let Some(hwnd) = self.main_window_handle {
-            let progress = (progress.clamp(0.0, 1.0) * MAX_PROGRESS as f64) as u64;
+            const MAX_PROGRESS: u64 = 100_000;
+            let progress = (_progress.clamp(0.0, 1.0) * MAX_PROGRESS as f64) as u64;
             unsafe {
                 if let Some(ref tb) = self.taskbar {
                     let _ = tb.SetProgressValue(HWND(hwnd), progress, MAX_PROGRESS);

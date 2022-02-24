@@ -532,7 +532,7 @@ impl Controller {
 
                 let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
                 
-                // ::log::info!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
+                // println!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {
                     (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                 } else {
