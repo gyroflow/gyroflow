@@ -159,14 +159,14 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
 
     match proc.video_codec.as_deref() {
-        Some("prores_ks") => {
+        Some("prores_ks") | Some("prores_videotoolbox") => {
             let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
             let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
             if let Some(profile) = profiles.iter().position(|&x| x == codec_options) {
                 proc.video.codec_options.set("profile", &format!("{}", profile));
                 proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
             }
-            proc.video.clone_frames = true;
+            proc.video.clone_frames = proc.video_codec.as_deref() == Some("prores_ks");
         }
         Some("png") => {
             if codec_options.contains("16-bit") {
