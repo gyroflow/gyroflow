@@ -33,38 +33,21 @@ MenuItem {
         property alias exportAudio: audio.checked;
     }
 
-    property int orgWidth: 0;
-    property int orgHeight: 0;
+    property real aspectRatio: 1.0;
+    property alias outWidth: outputWidth.value;
+    property alias outHeight: outputHeight.value;
+    property alias defaultWidth: outputWidth.defaultValue;
+    property alias defaultHeight: outputHeight.defaultValue;
 
-    property int ratioWidth: orgWidth;
-    property int ratioHeight: orgHeight;
-
-    onOrgWidthChanged: {
-        outputWidth.preventChange2 = true;
-        outputWidth.value = orgWidth;
-        ratioWidth = orgWidth;
-        outputWidth.preventChange2 = false;
-    }
-    onOrgHeightChanged: {
-        outputHeight.preventChange2 = true;
-        outputHeight.value = orgHeight;
-        ratioHeight = orgHeight;
-        outputHeight.preventChange2 = false;
-    }
-
-    property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
-
-    property int outWidth: outputWidth.value;
-    property int outHeight: outputHeight.value;
     property alias outCodec: codec.currentText;
     property alias outBitrate: bitrate.value;
+    property alias defaultBitrate: bitrate.defaultValue;
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
     property string overridePixelFormat: "";
     property string outCodecOptions: "";
 
-    onOutWidthChanged: Qt.callLater(applyOutputSize);
-    onOutHeightChanged: Qt.callLater(applyOutputSize);
+    property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
     Connections {
         target: controller;
@@ -91,35 +74,41 @@ MenuItem {
         }
     }
 
-    function applyOutputSize() {
-        controller.set_output_size(outWidth, outHeight);
+    property bool disableUpdate: false;        
+    function notifySizeChanged() {
+        Qt.callLater(() => controller.set_output_size(outWidth, outHeight));
     }
-    function setOutputSize(w, h) {
-        orgWidth = w;
-        orgHeight = h;
-        outputHeight.preventChange2 = true;
-        outputWidth.preventChange2 = true;
-        outputWidth.value = w;
-        outputHeight.value = h;
-        outputWidth.preventChange2 = false;
-        outputHeight.preventChange2 = false;
-    }
-    function updateOutputSize(isWidth) {
-        if (lockAspectRatio.checked && ratioHeight > 0) {
-            const ratio = ratioWidth / ratioHeight;
-            if (isWidth) {
-                outputHeight.preventChange2 = true;
-                outputHeight.value = Math.round(outputWidth.value / ratio);
-                outputHeight.preventChange2 = false;
+    function ensureAspectRatio(byWidth) {
+        if (lockAspectRatio.checked && aspectRatio > 0) {
+            if (byWidth) {
+                outHeight = Math.round(outWidth / aspectRatio);
             } else {
-                outputWidth.preventChange2 = true;
-                outputWidth.value = Math.round(outputHeight.value * ratio);
-                outputWidth.preventChange2 = false;
+                outWidth = Math.round(outHeight * aspectRatio);
             }
         }
-        Qt.callLater(applyOutputSize);
     }
-    function vidInfoLoaded() { codec.updateGpuStatus(); }
+    function setDefaultSize(w, h) {
+        aspectRatio   = w / h;
+        defaultWidth  = w;
+        defaultHeight = h;
+
+        disableUpdate = true;
+        outWidth      = w;
+        outHeight     = h;
+        disableUpdate = false;
+    }
+    function videoInfoLoaded(w, h, br) {
+        setDefaultSize(w, h);
+        notifySizeChanged();
+
+        outBitrate     = br;
+        defaultBitrate = br;
+        
+        codec.updateGpuStatus();
+    }
+    function lensProfileLoaded(w, h) {
+         setDefaultSize(w, h);
+    }
 
     ComboBox {
         id: codec;
@@ -159,23 +148,23 @@ MenuItem {
         Row {
             spacing: 5 * dpiScale;
             NumberField {
-                property bool preventChange2: false;
                 id: outputWidth;
                 tooltip: qsTr("Width");
                 width: 60 * dpiScale;
                 intNoThousandSep: true;
-                onValueChanged: if (!preventChange2) root.updateOutputSize(true);
+                reset: () => { aspectRatio = defaultValue / Math.max(1,outHeight); value = defaultValue; };
+                onValueChanged: if (!disableUpdate) { disableUpdate = true; ensureAspectRatio(true); notifySizeChanged(); disableUpdate = false; }
                 live: false;
             }
             BasicText { leftPadding: 0; text: "x"; anchors.verticalCenter: parent.verticalCenter; }
             NumberField {
-                property bool preventChange2: false;
                 id: outputHeight;
                 tooltip: qsTr("Height");
                 width: 60 * dpiScale;
-                intNoThousandSep: true;
-                onValueChanged: if (!preventChange2) root.updateOutputSize(false);
+                intNoThousandSep: true;                
+                onValueChanged: if (!disableUpdate) { disableUpdate = true; ensureAspectRatio(false); notifySizeChanged(); disableUpdate = false; }
                 live: false;
+                reset: () => { aspectRatio = outWidth / Math.max(1,defaultValue); value = defaultValue; };
             }
             LinkButton {
                 id: lockAspectRatio;
@@ -191,7 +180,7 @@ MenuItem {
                 textColor: checked? styleAccentColor : styleTextColor;
                 display: QQC.Button.IconOnly;
                 tooltip: qsTr("Lock aspect ratio");
-                onCheckedChanged: if (checked) { ratioWidth = outWidth; ratioHeight = outHeight; }
+                onCheckedChanged: if (checked) { aspectRatio = outWidth / Math.max(1,outHeight); }
             }
         }
     }

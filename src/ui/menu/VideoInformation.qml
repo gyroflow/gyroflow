@@ -39,21 +39,19 @@ MenuItem {
     signal selectFileRequest();
 
     function loadFromVideoMetadata(md) {
-        const framerate = +md["stream.video[0].codec.frame_rate"];
-        const w = md["stream.video[0].codec.width"];
-        const h = md["stream.video[0].codec.height"];
+        const framerate = +md["stream.video[0].codec.frame_rate"] || 0;
+        const w = md["stream.video[0].codec.width"] || 0;
+        const h = md["stream.video[0].codec.height"] || 0;
+        const bitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
 
         if (window) {
-            window.exportSettings.orgWidth  = w || 0;
-            window.exportSettings.orgHeight = h || 0;
-            window.lensProfile.videoWidth   = w || 0;
-            window.lensProfile.videoHeight  = h || 0;
-            window.exportSettings.outBitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
+            window.lensProfile.videoWidth   = w;
+            window.lensProfile.videoHeight  = h;
         }
         if (typeof calibrator_window !== "undefined") {
-            calibrator_window.lensCalib.videoWidth   = w || 0;
-            calibrator_window.lensCalib.videoHeight  = h || 0;
-            calibrator_window.lensCalib.fps = framerate || 0;
+            calibrator_window.lensCalib.videoWidth   = w;
+            calibrator_window.lensCalib.videoHeight  = h;
+            calibrator_window.lensCalib.fps = framerate;
         }
 
         root.pixelFormat = getPixelFormat(md) || "---";
@@ -74,7 +72,7 @@ MenuItem {
         
         controller.set_video_rotation(root.videoRotation)
 
-        Qt.callLater(() => window.exportSettings.vidInfoLoaded());
+        Qt.callLater(() => window.exportSettings.videoInfoLoaded(w, h, bitrate));
     }
     function updateEntry(key, value) {
         if (key == "File name") root.filename = value;

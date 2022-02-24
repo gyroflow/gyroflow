@@ -33,11 +33,10 @@ Grid {
                         const child = node.children[i - 1];
                         if (child) {
                             if (child.toString().startsWith("NumberField")) {
-                                child.value = child.defaultValue;
-                                return child;
+                                child.reset();
+                            } else {
+                                traverseChildren(child);
                             }
-                            const found = traverseChildren(child);
-                            if (found !== null) return found;
                         }
                     }
                     return null;
