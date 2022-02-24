@@ -222,21 +222,37 @@ impl PoseEstimator {
         }).unzip())
     }
 
+    pub fn optical_flow(&self, num_frames: usize) {
+        let mut to_items= BTreeMap::<usize, EstimatorItem>::new();
+        if let Some(l) = self.sync_results.try_read() {
+            l.iter().for_each(|(&i, fr)| {to_items.insert(i, fr.item.clone());} );
+        }
+
+        if let Some(mut l) = self.sync_results.try_write() {
+            l.iter_mut().for_each(|(frame, from_fr)| {
+                for d in 1..=num_frames {
+                     if let Some(to_item) = to_items.get_mut(&(frame + d)) {
+                        match (&mut from_fr.item, to_item) {
+                            #[cfg(feature = "use-opencv")]
+                            (EstimatorItem::OpenCV(from), EstimatorItem::OpenCV(to)) => { from.optical_flow_to_frame(to, d, true); }
+                            (EstimatorItem::Akaze (from),  EstimatorItem::Akaze (to))  => { from.optical_flow_to_frame(to, d, true); }
+                            _ => ()
+                        };
+                     }
+                }
+            });
+        }
+    }
+
     pub fn get_of_lines_for_frame(&self, frame: &usize, scale: f64, num_frames: usize) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
         if let Some(l) = self.sync_results.try_read() {
             if let Some(curr) = l.get(frame) {
-                if let Some(next) = l.get(&(frame + num_frames)) {
-                    let mut curr = curr.item.clone();
-                    let mut next = next.item.clone();
-                    drop(l);
-
-                    return match (&mut curr, &mut next) {
-                        #[cfg(feature = "use-opencv")]
-                        (EstimatorItem::OpenCV(curr), EstimatorItem::OpenCV(next)) => { Self::filter_of_lines(curr.get_matched_features_pair(next, scale)) }
-                        (EstimatorItem::Akaze (curr),  EstimatorItem::Akaze (next))  => { Self::filter_of_lines(curr.get_matched_features_pair(next, scale)) }
-                        _ => None
-                    };
-                }
+                return match &curr.item {
+                    #[cfg(feature = "use-opencv")]
+                    EstimatorItem::OpenCV(curr) => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
+                    EstimatorItem::Akaze (curr)  => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
+                    _ => None
+                };
             }
         }
         None

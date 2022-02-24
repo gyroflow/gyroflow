@@ -9,7 +9,7 @@ use nalgebra::{ Rotation3, Matrix3, Vector4 };
 use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
-use std::vec::Vec;
+use std::{vec::Vec, collections::BTreeMap};
 
 use space::{Knn, LinearKnn};
 
@@ -25,7 +25,8 @@ pub type DetectedFeatures = (Vec<akaze::KeyPoint>, Vec<Descriptor>);
 
 #[derive(Default, Clone)]
 pub struct ItemAkaze {
-    features: DetectedFeatures
+    features: DetectedFeatures,
+    optical_flow: BTreeMap<usize, Vec<(akaze::KeyPoint, akaze::KeyPoint)>>
 }
 
 // TODO: add caching checkbox to the UI
@@ -55,7 +56,10 @@ impl ItemAkaze {
             features
         };*/
 
-        Self { features }
+        Self { 
+            features,
+            optical_flow: BTreeMap::new()
+        }
     }
     pub fn get_features_count(&self) -> usize {
         self.features.0.len()
@@ -123,12 +127,28 @@ impl ItemAkaze {
         satisfies_lowes_ratio.map(|(ix1, neighbors)| (ix1, neighbors[0].index)).collect()
     }
 
-    pub fn get_matched_features_pair(&mut self, next: &mut Self, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
-        let matched = Self::match_descriptors(&self.features.1, &next.features.1);
-        Some((
-            matched.iter().map(|(i1, _)| { let pt = self.features.0[*i1].point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
-            matched.iter().map(|(_, i2)| { let pt = next.features.0[*i2].point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
-        ))
+    pub fn optical_flow_to_frame(&mut self, to: &mut Self, frame_offset: usize, force_update: bool) {
+        if force_update || !self.optical_flow.contains_key(&frame_offset) {
+            let matched = Self::match_descriptors(&self.features.1, &to.features.1)
+                .into_iter()
+                .map(|(i1, i2)| {
+                    (self.features.0[i1].clone(), to.features.0[i2].clone())
+                })
+                .collect();
+
+            self.optical_flow.insert(frame_offset, matched);
+        }
+    }
+
+    pub fn get_optical_flow_lines(&self, frame_offset: usize, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+         if let Some(&matched) = self.optical_flow.get(&frame_offset).as_ref() {
+             Some((
+                matched.iter().map(|(kp1, _)| { let pt = kp1.point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
+                matched.iter().map(|(_, kp2)| { let pt = kp2.point; (pt.0 as f64 * scale, pt.1 as f64 * scale)}).collect::<Vec<(f64, f64)>>(),
+            ))
+        } else {
+            None
+        }
     }
 }
 
