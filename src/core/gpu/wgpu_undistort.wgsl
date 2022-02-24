@@ -1,63 +1,28 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
-
-struct PixelsData {
-    data: [[stride(4)]] array<u32>;
-};
-
-[[group(0), binding(0)]]
-var<storage, read> pixels: PixelsData;
-
-struct UndistortionData {
-    data: [[stride(4)]] array<f32>;
-};
-[[group(0), binding(1)]]
-var<storage, read> undistortion_params: UndistortionData;
-
-[[group(0), binding(2)]]
-var<storage, read_write> pixels_out: PixelsData;
-
-let INTER_BITS: u32 = 5u;
-let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
-
-struct Locals {
+struct Globals {
     width: u32;
     height: u32;
-    stride: u32;
     output_width: u32;
     output_height: u32;
-    output_stride: u32;
-    bytes_per_pixel: u32;
-    pix_element_count: u32;
     params_count: u32;
     interpolation: u32;
     background: array<f32, 4>;
 };
-[[group(0), binding(3)]]
-var<uniform> params: Locals;
 
-fn get_pixel(pos: u32) -> vec4<f32> {
-    let px: u32 = pixels.data[pos / params.bytes_per_pixel];
-    return vec4<f32>(
-        f32(px & 0xffu),
-        f32((px & 0xff00u) >> 8u),
-        f32((px & 0xff0000u) >> 16u),
-        f32((px & 0xff000000u) >> 24u),
-    );
-}
-fn put_pixel(pos: u32, px: vec4<f32>) {
-    pixels_out.data[pos / params.bytes_per_pixel] = u32(
-        (u32(px[0]) << 0u) |
-        (u32(px[1]) << 8u) |
-        (u32(px[2]) << 16u) |
-        (u32(px[3]) << 24u) 
-    );
-}
+struct UndistortionData {
+    data: [[stride(4)]] array<f32>;
+};
 
-fn interpolate(src_index1: i32, width_u: i32, height_u: i32, sx: i32, sy: i32, sx0: i32, sy0: i32) -> vec4<f32> {
+[[group(0), binding(0)]] var<uniform> params: Globals;
+[[group(0), binding(1)]] var<storage, read> undistortion_params: UndistortionData;
+[[group(0), binding(2)]] var input: texture_2d<f32>;
+[[group(0), binding(3)]] var output: texture_storage_2d<rgba8unorm, write>;
+
+let INTER_BITS: u32 = 5u;
+let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
+
+fn interpolate(sx: i32, sy: i32, sx0: i32, sy0: i32, width_u: i32, height_u: i32) -> vec4<f32> {
     let bg = vec4<f32>(params.background[0], params.background[1], params.background[2], params.background[3]);
     var sum = vec4<f32>(0.0);
-    var src_index: i32 = src_index1;
     var COEFFS: array<f32, 448> = array<f32, 448>(
         // Bilinear
         1.000000, 0.000000, 0.968750, 0.031250, 0.937500, 0.062500, 0.906250, 0.093750, 0.875000, 0.125000, 0.843750, 0.156250,
@@ -105,8 +70,6 @@ fn interpolate(src_index1: i32, width_u: i32, height_u: i32, sx: i32, sy: i32, s
          0.998265, -0.027053,  0.009625, -0.002981
     );
     
-    // TODO: Bicubic and Lanczos are not working
-
     let shift = (params.interpolation >> 2u) + 1u;
     var indices: array<i32, 3> = array<i32, 3>(0, 64, 192);
     let ind = indices[params.interpolation >> 2u];
@@ -120,7 +83,7 @@ fn interpolate(src_index1: i32, width_u: i32, height_u: i32, sx: i32, sy: i32, s
             for (var xp: i32 = 0; xp < i32(params.interpolation); xp = xp + 1) {
                 var pixel: vec4<f32>;
                 if (sx + xp >= 0 && sx + xp < width_u) {
-                    pixel = get_pixel(u32(src_index + (xp * i32(params.bytes_per_pixel))));
+                    pixel = vec4<f32>(textureLoad(input, vec2<i32>(sx + xp, sy + yp), 0));
                 } else {
                     pixel = bg;
                 }
@@ -130,7 +93,6 @@ fn interpolate(src_index1: i32, width_u: i32, height_u: i32, sx: i32, sy: i32, s
         } else {
             sum = sum + bg * COEFFS[coeffs_y + yp];
         }
-        src_index = src_index + i32(params.stride);
     }
     
     return sum;
@@ -139,8 +101,9 @@ fn interpolate(src_index1: i32, width_u: i32, height_u: i32, sx: i32, sy: i32, s
 // Adapted from OpenCV: initUndistortRectifyMap + remap 
 // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
 // https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-[[stage(compute), workgroup_size(8, 8)]]
+[[stage(compute), workgroup_size(16, 16)]]
 fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
+    let coord = vec2<i32>(global_id.xy);
     let width = params.width;
     let height = params.height;
     let params_count = params.params_count;
@@ -187,15 +150,13 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
         let x_y_ = vec2<f32>(y * undistortion_params.data[params_idx + 1u] + undistortion_params.data[params_idx + 2u] + (x * undistortion_params.data[params_idx + 0u]),
                              y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));
         let w_ = y * undistortion_params.data[params_idx + 7u] + undistortion_params.data[params_idx + 8u] + (x * undistortion_params.data[params_idx + 6u]);
-        
-        let dst_index = global_id.x * params.bytes_per_pixel + global_id.y * params.output_stride;
 
         if (w_ > 0.0) {
             let pos = x_y_ / w_;
             let r = length(pos);
         
             if (r_limit > 0.0 && r > r_limit) {
-                put_pixel(dst_index, bg);
+                textureStore(output, coord, bg);
                 return;
             }
             
@@ -206,7 +167,6 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
             let theta8 = theta4*theta4;
 
             let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));
-            //let theta_d = theta * (1.0 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
         
             var scale: f32 = 1.0;
             if (r != 0.0) {
@@ -224,14 +184,11 @@ fn undistort([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
             let sx = i32(sx0 >> INTER_BITS);
             let sy = i32(sy0 >> INTER_BITS);
         
-            let src_index = sy * i32(params.stride) + sx * i32(params.bytes_per_pixel);
+            let sum = interpolate(sx, sy, sx0, sy0, width_u, height_u);
 
-            let sum = interpolate(src_index, width_u, height_u, sx, sy, sx0, sy0);
-
-            put_pixel(dst_index, sum);
+            textureStore(output, coord, sum);
         } else {
-            put_pixel(dst_index, bg);
+            textureStore(output, coord, bg);
         }
     }
 }
-
