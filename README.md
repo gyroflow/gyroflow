@@ -141,7 +141,7 @@ Currently *Gyroflow* is available in:
 * **French** (by KennyDorion)
 * **Galician** (by Martín Costas)
 * **German** (by [Grommi](https://github.com/Gro2mi) and [Nicecrash](https://github.com/B-nutze-RR))
-* **Greek** (by Stamatis Galiatsatos)
+* **Greek** (by [Stamatis Galiatsatos](https://github.com/Logicenios))
 * **Indonesian** (by Aloysius Puspandono)
 * **Italian** (by Rosario Casciello)
 * **Japanese** (by 井上康)

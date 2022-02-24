@@ -34,8 +34,8 @@ layout(std140, binding = 2) uniform UniformBuffer {
 
 layout(std140, binding = 3) buffer StorageBuffer { vec4 params[]; } ssbo;
 
-layout(std140, binding = 4) buffer StorageBuffer1 { vec4 pixels[]; } features;
-layout(std140, binding = 5) buffer StorageBuffer2 { vec4 pixels[]; } opticalflow;
+// layout(std140, binding = 4) buffer StorageBuffer1 { vec4 pixels[]; } features;
+// layout(std140, binding = 5) buffer StorageBuffer2 { vec4 pixels[]; } opticalflow;
 
 void main() {
     ivec2 texPos = ivec2(gl_GlobalInvocationID.xy);
@@ -113,7 +113,7 @@ void main() {
 
         finalColor = sum;
     }
-
+/*
     // Inefficient
     // We can do this in another compute layer, before undistortion
     for (int i = 0; i < features.pixels.length(); ++i) {
@@ -128,6 +128,6 @@ void main() {
             break;
         }
     }
-
+*/
     imageStore(texOut, texPos, finalColor);
 }

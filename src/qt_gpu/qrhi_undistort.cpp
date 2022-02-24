@@ -85,22 +85,22 @@ public:
         m_computeParams->create();
         m_releasePool << m_computeParams;
 
-        m_featuresPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
-        m_featuresPixels->create();
-        m_releasePool << m_featuresPixels;
+        // m_featuresPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
+        // m_featuresPixels->create();
+        // m_releasePool << m_featuresPixels;
 
-        m_optflowPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
-        m_optflowPixels->create();
-        m_releasePool << m_optflowPixels;
+        // m_optflowPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
+        // m_optflowPixels->create();
+        // m_releasePool << m_optflowPixels;
 
         m_computeBindings = rhi->newShaderResourceBindings();
         m_computeBindings->setBindings({
             QRhiShaderResourceBinding::imageLoad(0, QRhiShaderResourceBinding::ComputeStage, item->rhiTexture(), 0),
             QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage, m_texOut, 0),
             QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::ComputeStage, m_computeUniform),
-            QRhiShaderResourceBinding::bufferLoad(3, QRhiShaderResourceBinding::ComputeStage, m_computeParams),
-            QRhiShaderResourceBinding::bufferLoad(4, QRhiShaderResourceBinding::ComputeStage, m_featuresPixels),
-            QRhiShaderResourceBinding::bufferLoad(5, QRhiShaderResourceBinding::ComputeStage, m_optflowPixels)
+            QRhiShaderResourceBinding::bufferLoad(3, QRhiShaderResourceBinding::ComputeStage, m_computeParams)//,
+            // QRhiShaderResourceBinding::bufferLoad(4, QRhiShaderResourceBinding::ComputeStage, m_featuresPixels),
+            // QRhiShaderResourceBinding::bufferLoad(5, QRhiShaderResourceBinding::ComputeStage, m_optflowPixels)
         });
         m_computeBindings->create();
         m_releasePool << m_computeBindings;
@@ -201,7 +201,7 @@ public:
 
         u->uploadStaticBuffer(m_computeParams, 0, params_count * 12 * sizeof(float), params_padded);
 
-        if (features_pixels && fpx_count) {
+        /*if (features_pixels && fpx_count) {
             m_featuresPixels->setSize(fpx_count * sizeof(float));
             m_featuresPixels->create();
             u->uploadStaticBuffer(m_featuresPixels, features_pixels);
@@ -210,7 +210,7 @@ public:
             m_optflowPixels->setSize(of_count * sizeof(float));
             m_optflowPixels->create();
             u->uploadStaticBuffer(m_optflowPixels, optflow_pixels);
-        }
+        }*/
 
 #ifdef DRAW_TO_RENDERTARGET
         QMatrix4x4 mvp = item->textureMatrix();
@@ -221,7 +221,7 @@ public:
         cb->beginComputePass(u);
         cb->setComputePipeline(m_computePipeline);
         cb->setShaderResources();
-        cb->dispatch(m_outputSize.width() / 16, m_outputSize.height() / 16, 1);
+        cb->dispatch(m_outputSize.width() / 16 + 1, m_outputSize.height() / 16 + 1, 1);
         cb->endComputePass();
 
 #ifndef DRAW_TO_RENDERTARGET
@@ -261,8 +261,8 @@ public:
     QRhiTexture *m_texOut = nullptr;
     QRhiBuffer *m_computeUniform = nullptr;
     QRhiBuffer *m_computeParams = nullptr;
-    QRhiBuffer *m_featuresPixels = nullptr;
-    QRhiBuffer *m_optflowPixels = nullptr;
+    // QRhiBuffer *m_featuresPixels = nullptr;
+    // QRhiBuffer *m_optflowPixels = nullptr;
     QRhiShaderResourceBindings *m_computeBindings = nullptr;
     QRhiComputePipeline *m_computePipeline = nullptr;
 

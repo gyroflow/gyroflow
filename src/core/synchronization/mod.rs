@@ -251,7 +251,6 @@ impl PoseEstimator {
                     #[cfg(feature = "use-opencv")]
                     EstimatorItem::OpenCV(curr) => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
                     EstimatorItem::Akaze (curr)  => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
-                    _ => None
                 };
             }
         }
