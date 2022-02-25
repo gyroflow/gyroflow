@@ -16,7 +16,7 @@ TextField {
     property real defaultValue: NaN;
     property bool allowText: false;
     property bool intNoThousandSep: false;
-    property var reset: () => {value = defaultValue; };
+    property var reset: () => { value = defaultValue; };
     
     Keys.onDownPressed: (e) => {
         const lastDigit = Math.pow(10, precision);

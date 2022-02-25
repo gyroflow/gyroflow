@@ -72,7 +72,7 @@ MenuItem {
         
         controller.set_video_rotation(root.videoRotation)
 
-        Qt.callLater(() => window.exportSettings.videoInfoLoaded(w, h, bitrate));
+        Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
     }
     function updateEntry(key, value) {
         if (key == "File name") root.filename = value;
