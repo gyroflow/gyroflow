@@ -108,6 +108,7 @@ MenuItem {
     }
     function lensProfileLoaded(w, h) {
         setDefaultSize(w, h);
+        Qt.callLater(notifySizeChanged);
     }
 
     ComboBox {
