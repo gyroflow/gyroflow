@@ -121,18 +121,18 @@ fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0
     let height = params.height;
     let params_count = params.params_count;
     let bg = vec4<SCALAR>(SCALAR(params.background[0]), SCALAR(params.background[1]), SCALAR(params.background[2]), SCALAR(params.background[3]));
- 
+
     let x: f32 = f32(gx);
     let y: f32 = f32(gy);
- 
+
     let width_u = i32(width);
     let height_u = i32(height);
- 
+
     let f = vec2<f32>(undistortion_params.data[0], undistortion_params.data[1]);
     let c = vec2<f32>(undistortion_params.data[2], undistortion_params.data[3]);
     let k = vec4<f32>(undistortion_params.data[4], undistortion_params.data[5], undistortion_params.data[6], undistortion_params.data[7]);
     let r_limit = undistortion_params.data[8];
- 
+
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = u32(gy);
@@ -142,9 +142,9 @@ fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0
                              y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));
         let w_ = y * undistortion_params.data[params_idx + 7u] + undistortion_params.data[params_idx + 8u] + (x * undistortion_params.data[params_idx + 6u]);
         if (w_ > 0.0) {
-            let pos = x_y_ / w_;            
+            let pos = x_y_ / w_;
             let r = length(pos);
-            let theta = atan(r);                
+            let theta = atan(r);
             let theta2 = theta*theta; let theta4 = theta2*theta2; let theta6 = theta4*theta2; let theta8 = theta4*theta4;
             let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));            
             var scale: f32 = 1.0;
@@ -166,32 +166,32 @@ fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0
     if (w_ > 0.0) {
         let pos = x_y_ / w_;
         let r = length(pos);
-    
+
         if (r_limit > 0.0 && r > r_limit) {
             return bg;
         }
-        
+
         let theta = atan(r);
         let theta2 = theta*theta;
         let theta4 = theta2*theta2;
         let theta6 = theta4*theta2;
         let theta8 = theta4*theta4;
- 
+
         let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));
-    
+
         var scale: f32 = 1.0;
         if (r != 0.0) {
             scale = theta_d / r;
         }
- 
+
         var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
         let offset = offsets[params.interpolation >> 2u];
- 
+
         let uv = f * pos * scale + c - offset;
-    
+
         let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
         let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));
-    
+
         let sx = i32(sx0 >> INTER_BITS);
         let sy = i32(sy0 >> INTER_BITS);
 
