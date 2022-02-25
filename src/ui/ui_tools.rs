@@ -24,6 +24,7 @@ pub struct UITools {
     init_calibrator: qt_method!(fn(&mut self)),
     set_icon: qt_method!(fn(&mut self, wnd: QJSValue)),
     set_progress: qt_method!(fn(&self, progress: f64)),
+    closing: qt_method!(fn(&mut self)),
 
     language_changed: qt_signal!(),
 
@@ -146,6 +147,13 @@ impl UITools {
                     let _ = tb.SetProgressValue(HWND(hwnd), progress, MAX_PROGRESS);
                 }
             }
+        }
+    }
+
+    pub fn closing(&mut self) {
+        #[cfg(target_os = "windows")]
+        {
+            self.taskbar = None;
         }
     }
 

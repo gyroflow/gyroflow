@@ -42,6 +42,7 @@ Window {
         let app = getApp();
         if (app) {
             close.accepted = closeConfirmed || !app.wasModified;
+            if (close.accepted) ui_tools.closing();
             if (!close.accepted && !closeConfirmationModal) {
                 closeConfirmationModal = true;
                 app.messageBox(Modal.NoIcon, qsTr("Are you sure you want to exit?"), [
