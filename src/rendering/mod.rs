@@ -164,7 +164,9 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
             if let Some(profile) = profiles.iter().position(|&x| x == codec_options) {
                 proc.video.codec_options.set("profile", &format!("{}", profile));
-                proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+                if proc.video_codec.as_deref() == Some("prores_ks") {
+                    proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+                }
             }
             proc.video.clone_frames = proc.video_codec.as_deref() == Some("prores_ks");
         }
