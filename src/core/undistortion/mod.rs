@@ -104,26 +104,25 @@ impl<T: PixelType> Undistortion<T> {
         if !self.backend_initialized {
             let mut gpu_initialized = false;
 
-            if T::wgpu_format().is_some() {
-                let wgpu = std::panic::catch_unwind(|| {
-                    wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, self.output_size.0, self.output_size.1, self.output_size.2, self.background, interp, T::wgpu_format().unwrap())
-                });
-                match wgpu {
-                    Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); gpu_initialized = true; },
-                    Err(e) => { log::error!("Failed to initialize wgpu {:?}", e); },
-                    _ => { log::error!("Failed to initialize wgpu"); }
-                }
-            }
-            
             #[cfg(feature = "use-opencl")]
-            if !gpu_initialized {
+            {
                 let cl = std::panic::catch_unwind(|| {
                     opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background, interp)
                 });
                 match cl {
-                    Ok(Ok(cl)) => { self.cl = Some(cl); },
+                    Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; },
                     Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
                     Err(e) => { log::error!("OpenCL error: {:?}", e); }
+                }
+            }
+            if !gpu_initialized && T::wgpu_format().is_some() {
+                let wgpu = std::panic::catch_unwind(|| {
+                    wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, self.output_size.0, self.output_size.1, self.output_size.2, self.background, interp, T::wgpu_format().unwrap())
+                });
+                match wgpu {
+                    Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); },
+                    Err(e) => { log::error!("Failed to initialize wgpu {:?}", e); },
+                    _ => { log::error!("Failed to initialize wgpu"); }
                 }
             }
 

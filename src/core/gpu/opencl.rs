@@ -24,13 +24,49 @@ lazy_static::lazy_static! {
 
 impl OclWrapper {
     pub fn initialize_context() -> ocl::Result<String> {
+        // List all devices
         Platform::list().iter().for_each(|p| {
             if let Ok(devs) = Device::list_all(p) {
-                ::log::debug!("OpenCL devices: {:?} {:#?}", p.name(), devs.iter().filter_map(|x| x.name().ok()).collect::<Vec<String>>());
+                ::log::debug!("OpenCL devices: {:?} {:?}", p.name(), devs.iter().filter_map(|x| x.name().ok()).collect::<Vec<String>>());
             }
         });
-        let platform = Platform::default();
-        let device = Device::first(platform)?;
+
+        let mut platform = None;
+        let mut device = None;
+        let preference = [ "nvidia", "radeon", "graphics" ];
+        for pref in preference {
+            'outer: for p in Platform::list() {
+                if let Ok(devs) = Device::list_all(p) {
+                    for d in devs.iter() {
+                        let name = d.name().unwrap_or_default();
+                        if name.to_ascii_lowercase().contains(pref) {
+                            platform = Some(p);
+                            device = Some(*d);
+                            break 'outer;
+                        }
+                    }
+                }
+            }
+        }
+        if device.is_none() {
+            // Try first GPU
+            'outer2: for p in Platform::list() {
+                if let Ok(devs) = Device::list_all(p) {
+                    for d in devs.iter() {
+                        if let Ok(ocl::core::DeviceInfoResult::Type(typ)) = d.info(ocl::core::DeviceInfo::Type) {
+                            if typ == ocl::DeviceType::GPU {
+                                platform = Some(p);
+                                device = Some(*d);
+                                break 'outer2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if device.is_none() { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
+        let platform = platform.unwrap();
+        let device = device.unwrap();
         ::log::info!("OpenCL Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
 
         let context = Context::builder()
