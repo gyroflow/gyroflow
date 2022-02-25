@@ -255,8 +255,11 @@ Rectangle {
                         target: controller;
                         function onRender_progress(progress, frame, total_frames, finished) {
                             videoArea.videoLoader.active = !finished;
+                            videoArea.videoLoader.currentFrame = frame;
+                            videoArea.videoLoader.totalFrames = total_frames;
+                            videoArea.videoLoader.additional = "";
+                            videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1...") : "";
                             videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
-                            videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + frame + "/" + total_frames + ")</font>") : "";
                             videoArea.videoLoader.cancelable = true;
 
                             function getFolder(v) {

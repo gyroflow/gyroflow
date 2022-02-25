@@ -210,8 +210,11 @@ Window {
         function onCalib_progress(progress, rms, ready, total, good) {
             lensCalib.rms = rms;
             videoArea.videoLoader.active = progress < 1 || rms == 0;
+            videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
+            videoArea.videoLoader.currentFrame = ready;
+            videoArea.videoLoader.totalFrames = total;
+            videoArea.videoLoader.text = progress < 1? qsTr("Analyzing %1...") : "";
             videoArea.videoLoader.progress = progress < 1? progress : -1;
-            videoArea.videoLoader.text = progress < 1? qsTr("Analyzing %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg(`<font size="2">(${ready}/${total} - ` + qsTr("%1 good frames").arg(good) + ")</font>") : "";
             videoArea.videoLoader.cancelable = true;
             if (!videoArea.videoLoader.active) {
                 Qt.callLater(controller.recompute_threaded);

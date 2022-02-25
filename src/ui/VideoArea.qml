@@ -344,10 +344,13 @@ Item {
                 videoLoader.active = progress < 1;
                 videoLoader.cancelable = false;
             }
-            function onSync_progress(progress, text) {
+            function onSync_progress(progress, ready, total) {
                 videoLoader.active = progress < 1;
+                videoLoader.currentFrame = ready;
+                videoLoader.totalFrames = total;
+                videoLoader.additional = "";
+                videoLoader.text = videoLoader.active? qsTr("Analyzing %1...") : "";
                 videoLoader.progress = videoLoader.active? progress : -1;
-                videoLoader.text = videoLoader.active? qsTr("Analyzing %1... %2").arg("<b>" + (progress * 100).toFixed(2) + "%</b>").arg("<font size=\"2\">(" + text + ")</font>") : "";
                 videoLoader.cancelable = true;
             }
         }

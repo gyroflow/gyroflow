@@ -10,18 +10,22 @@ Item {
     property real progress: -1;
     opacity: active? 1 : 0;
     Ease on opacity { duration: 1000; }
-    property alias text: t.text;
+    property string text;
     property alias t: t;
     property bool cancelable: true;
     property bool canceled: false;
     property real startTime: 0;
+    property int currentFrame: 0;
+    property int totalFrames: 0;
+    property string additional;
+
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
         time.elapsed = "";
         time.remaining = "";
         if (!active) {
             progress = -1;
-            t.text = "";
+            root.text = "";
             startTime = 0;
         } else {
             canceled = false;
@@ -52,6 +56,10 @@ Item {
                 time.remaining = timeToStr(remainingMs / 1000);
             }
             ui_tools.set_progress(progress);
+
+            if (elapsedMs > 5 && root.currentFrame > 0) {
+                time.fps = root.currentFrame / (elapsedMs / 1000.0);
+            }
         } else {
             ui_tools.set_progress(-1.0);
             time.elapsed = "";
@@ -77,6 +85,7 @@ Item {
         width: parent.width;
         BasicText {
             id: t;
+            text: root.text? root.text.arg("<b>" + (root.progress * 100).toFixed(2) + "%</b>") + ` <font size="2">(${root.currentFrame}/${root.totalFrames}${root.additional}${time.fpsText})</font>` : "";
             visible: text.length > 0;
             width: parent.width;
             font.pixelSize: 14 * dpiScale;
@@ -88,10 +97,13 @@ Item {
             id: time;
             property string elapsed: "";
             property string remaining: "";
+            property real fps: 0;
+            property string fpsText: root.progress > 0? qsTr(" @ %1fps").arg(fps.toFixed(1)) : "";
             text: qsTr("Elapsed: %1. Remaining: %2").arg("<b>" + elapsed + "</b>").arg("<b>" + remaining + "</b>");
             visible: elapsed.length > 0 && remaining.length > 0;
             font.pixelSize: 11 * dpiScale;
             anchors.horizontalCenter: parent.horizontalCenter;
+            horizontalAlignment: Text.AlignHCenter;
             topPadding: 0;
             bottomPadding: 4 * dpiScale;
         }

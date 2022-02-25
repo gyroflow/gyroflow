@@ -108,7 +108,7 @@ pub struct Controller {
     gyro_changed: qt_signal!(),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
-    sync_progress: qt_signal!(progress: f64, status: QString),
+    sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
 
     set_video_rotation: qt_method!(fn(&self, angle: f64)),
 
@@ -213,7 +213,7 @@ impl Controller {
             this.sync_in_progress = ready < total;
             this.sync_in_progress_changed();
             this.chart_data_changed();
-            this.sync_progress(ready as f64 / total as f64, QString::from(format!("{}/{}", ready, total)));
+            this.sync_progress(ready as f64 / total as f64, ready, total);
         });
         let set_offsets = util::qt_queued_callback_mut(self, move |this, offsets: Vec<(f64, f64, f64)>| {
             if for_rs {
@@ -246,7 +246,7 @@ impl Controller {
             this.update_offset_model();
             this.request_recompute();
         });
-        self.sync_progress(0.0, QString::from("---"));
+        self.sync_progress(0.0, 0, 0);
 
         if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
             sync.on_progress(move |ready, total| {
