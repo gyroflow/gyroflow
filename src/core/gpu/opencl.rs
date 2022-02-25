@@ -24,8 +24,12 @@ lazy_static::lazy_static! {
 
 impl OclWrapper {
     pub fn initialize_context() -> ocl::Result<String> {
+        Platform::list().iter().for_each(|p| {
+            if let Ok(devs) = Device::list_all(p) {
+                ::log::debug!("OpenCL devices: {:?} {:#?}", p.name(), devs.iter().filter_map(|x| x.name().ok()).collect::<Vec<String>>());
+            }
+        });
         let platform = Platform::default();
-        ::log::debug!("OpenCL devices: {:#?}", Device::list_all(platform)?.iter().filter_map(|x| x.name().ok()).collect::<Vec<String>>());
         let device = Device::first(platform)?;
         ::log::info!("OpenCL Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
 
