@@ -300,8 +300,17 @@ pub fn find_best_matching_codec(codec: format::Pixel, supported: &[format::Pixel
     if supported.is_empty() { return format::Pixel::None; }
 
     if supported.contains(&codec) { return codec; }
-    if codec == format::Pixel::P010LE && supported.contains(&format::Pixel::YUV420P10LE) { return format::Pixel::YUV420P10LE; }
-    if codec == format::Pixel::NV12   && supported.contains(&format::Pixel::YUV420P)     { return format::Pixel::YUV420P; }
+
+    let pairs = vec![
+        (format::Pixel::P210LE, format::Pixel::YUV422P10LE),
+        (format::Pixel::P010LE, format::Pixel::YUV420P10LE),
+        (format::Pixel::NV12,   format::Pixel::YUV420P),
+        (format::Pixel::NV21,   format::Pixel::YUV420P),
+    ];
+    for (a, b) in pairs {
+        if codec == a && supported.contains(&b) { return b; }
+        if codec == b && supported.contains(&a) { return a; }
+    }
 
     super::append_log(&format!("No matching codec, we need {:?} and supported are: {:?}\n", codec, supported));
 

@@ -267,13 +267,6 @@ Item {
                     text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
                 }
             }
-            // For some reason adding this element makes the MDKVideo update properly when using OpenGL
-            Rectangle {
-                visible: isOpenGl;
-                x: 0; y: 0; width: 1; height: 1;
-                parent: isCalibrator? calibrator_window.contentItem : window;
-                color: "#01000000";
-            }
             MouseArea {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;

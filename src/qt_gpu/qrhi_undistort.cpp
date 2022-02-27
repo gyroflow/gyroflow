@@ -13,6 +13,7 @@ class MDKPlayer {
 public:
     QSGDefaultRenderContext *rhiContext();
     QRhiTexture *rhiTexture();
+    QRhiTexture *rhiTexture2();
     QRhiTextureRenderTarget *rhiRenderTarget();
     QRhiRenderPassDescriptor *rhiRenderPassDescriptor();
     QQuickWindow *qmlWindow();
@@ -28,23 +29,24 @@ public:
     MDKPlayer *mdkplayer;
 };
 
-#define DRAW_TO_RENDERTARGET
+static float quadVertexData[16] = { // Y up, CCW
+    -0.5f,  0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f,  0.5f, 1.0f, 0.0f
+};
+static quint16 quadIndexData[6] = { 0, 1, 2, 0, 2, 3 };
 
-#ifdef DRAW_TO_RENDERTARGET
-    static float quadVertexData[16] = { // Y up, CCW
-        -0.5f,  0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f,  0.5f, 1.0f, 0.0f
-    };
-    static quint16 quadIndexData[6] = { 0, 1, 2, 0, 2, 3 };
-#endif
 
 struct Uniforms {
     quint32 params_count;
     quint32 width;
     quint32 height;
+    quint32 output_width;
+    quint32 output_height;
     quint32 _padding;
+    quint32 _padding2;
+    quint32 _padding3;
     float bg[4];
 };
 
@@ -58,62 +60,27 @@ public:
         auto context = item->rhiContext();
         auto rhi = context->rhi();
 
-        if (!rhi->isFeatureSupported(QRhi::Compute)) {
-            qWarning("Compute is not supported");
-            return false;
-        }
-
         m_outputSize = outputSize;
 
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
-        // -------- Compute pass init --------
+        m_texIn = rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedAsTransferSource);
+        m_texIn->create();
+        m_releasePool << m_texIn;
 
-        // m_texIn = rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedWithLoadStore | QRhiTexture::UsedAsTransferSource);
-        // m_texIn->create();
-        // m_releasePool << m_texIn;
-
-        m_texOut = rhi->newTexture(QRhiTexture::RGBA8, m_outputSize, 1, QRhiTexture::UsedWithLoadStore);
-        m_texOut->create();
-        m_releasePool << m_texOut;
+        //m_texOut = rhi->newTexture(QRhiTexture::RGBA8, m_outputSize, 1, QRhiTexture::UsedWithLoadStore);
+        //m_texOut->create();
+        //m_releasePool << m_texOut;
 
         m_computeUniform = rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(Uniforms));
         m_computeUniform->create();
         m_releasePool << m_computeUniform;
 
-        m_computeParams = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (textureSize.height() + 1) * 12 * sizeof(float));
-        m_computeParams->create();
-        m_releasePool << m_computeParams;
+        m_texParams = rhi->newTexture(QRhiTexture::R32F, QSize(9, (textureSize.height() + 1)), 1, QRhiTexture::UsedAsTransferSource);
+        m_texParams->create();
+        m_releasePool << m_texParams;
+        params_buffer.resize((textureSize.height() + 1) * 9);
 
-        // m_featuresPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
-        // m_featuresPixels->create();
-        // m_releasePool << m_featuresPixels;
-
-        // m_optflowPixels = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::StorageBuffer | QRhiBuffer::VertexBuffer, (1 * sizeof(float)));
-        // m_optflowPixels->create();
-        // m_releasePool << m_optflowPixels;
-
-        m_computeBindings = rhi->newShaderResourceBindings();
-        m_computeBindings->setBindings({
-            QRhiShaderResourceBinding::imageLoad(0, QRhiShaderResourceBinding::ComputeStage, item->rhiTexture(), 0),
-            QRhiShaderResourceBinding::imageStore(1, QRhiShaderResourceBinding::ComputeStage, m_texOut, 0),
-            QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::ComputeStage, m_computeUniform),
-            QRhiShaderResourceBinding::bufferLoad(3, QRhiShaderResourceBinding::ComputeStage, m_computeParams)//,
-            // QRhiShaderResourceBinding::bufferLoad(4, QRhiShaderResourceBinding::ComputeStage, m_featuresPixels),
-            // QRhiShaderResourceBinding::bufferLoad(5, QRhiShaderResourceBinding::ComputeStage, m_optflowPixels)
-        });
-        m_computeBindings->create();
-        m_releasePool << m_computeBindings;
-
-        m_computePipeline = rhi->newComputePipeline();
-        m_computePipeline->setShaderResourceBindings(m_computeBindings);
-        m_computePipeline->setShaderStage({ QRhiShaderStage::Compute, getShader(QLatin1String(":/src/qt_gpu/compiled/undistort.comp.qsb")) });
-        m_computePipeline->create();
-        m_releasePool << m_computePipeline;
-
-        // -------- Compute pass init --------
-
-#ifdef DRAW_TO_RENDERTARGET
         // -------- Graphics pass init --------
         m_vertexBuffer = rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData));
         m_vertexBuffer->create();
@@ -131,28 +98,33 @@ public:
         m_drawingUniform->create();
         m_releasePool << m_drawingUniform;
 
-        qint32 flip = 0; // regardless of isYUpInFramebuffer() since the input is not flipped so the end result is good for GL too
+        qint32 flip = rhi->isYUpInFramebuffer();
         m_initialUpdates->updateDynamicBuffer(m_drawingUniform, 64, 4, &flip);
 
         m_drawingSampler = rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge);
         m_releasePool << m_drawingSampler;
         m_drawingSampler->create();
 
+        m_paramsSampler = rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge);
+        m_releasePool << m_paramsSampler;
+        m_paramsSampler->create();
+
         m_srb = rhi->newShaderResourceBindings();
         m_releasePool << m_srb;
         m_srb->setBindings({
             QRhiShaderResourceBinding::uniformBuffer(0, QRhiShaderResourceBinding::VertexStage | QRhiShaderResourceBinding::FragmentStage, m_drawingUniform),
-            QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_texOut, m_drawingSampler)
+            QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_texIn, m_drawingSampler),
+            QRhiShaderResourceBinding::uniformBuffer(2, QRhiShaderResourceBinding::FragmentStage, m_computeUniform),
+            QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texParams, m_paramsSampler),
         });
         m_srb->create();
 
-        // -------- Graphics pass init --------
 
         m_pipeline = rhi->newGraphicsPipeline();
         m_releasePool << m_pipeline;
         m_pipeline->setShaderStages({
             { QRhiShaderStage::Vertex,   getShader(QLatin1String(":/src/qt_gpu/compiled/texture.vert.qsb")) },
-            { QRhiShaderStage::Fragment, getShader(QLatin1String(":/src/qt_gpu/compiled/texture.frag.qsb")) }
+            { QRhiShaderStage::Fragment, getShader(QLatin1String(":/src/qt_gpu/compiled/undistort.frag.qsb")) } 
         });
         QRhiVertexInputLayout inputLayout;
         inputLayout.setBindings({ { 4 * sizeof(float) } });
@@ -164,7 +136,7 @@ public:
         m_pipeline->setShaderResourceBindings(m_srb);
         m_pipeline->setRenderPassDescriptor(item->rhiRenderPassDescriptor());
         m_pipeline->create();
-#endif
+
         return true;
     }
 
@@ -173,13 +145,23 @@ public:
         m_releasePool.clear();
     }
 
-    bool render(MDKPlayer *item, double /*timestamp*/, int /*frame_no*/, const float *params_padded, int params_count, float bg[4], bool /*doRender*/, float *features_pixels, int fpx_count, float *optflow_pixels, int of_count) {
+    bool render(MDKPlayer *item, double /*timestamp*/, int /*frame_no*/, float */*params_padded*/, int params_count, float bg[4], bool /*doRender*/, float */*features_pixels*/, int /*fpx_count*/, float */*optflow_pixels*/, int /*of_count*/) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
 
         const QSize size = item->textureSize();
         QRhiCommandBuffer *cb = context->currentFrameCommandBuffer();
+
+        if (item->qmlWindow()->rendererInterface()->graphicsApi() == QSGRendererInterface::Direct3D11Rhi) {
+            // Workaround for the synchronization issue
+            // For some reason reading a dummy texture causes the pipeline to flush or something
+            auto *u = rhi->nextResourceUpdateBatch();
+            QRhiReadbackResult *rbResult = new QRhiReadbackResult();
+            rbResult->completed = [rbResult] { delete rbResult; };
+            u->readBackTexture({ item->rhiTexture2() }, rbResult);
+            cb->resourceUpdate(u);
+        }
 
         QRhiResourceUpdateBatch *u = rhi->nextResourceUpdateBatch();
         if (m_initialUpdates) {
@@ -188,51 +170,28 @@ public:
             m_initialUpdates = nullptr;
         }
 
-/*#ifndef DRAW_TO_RENDERTARGET
         u->copyTexture(m_texIn, item->rhiTexture(), {});
-#endif*/
 
         Uniforms uniforms;
         uniforms.params_count = params_count - 1;
         uniforms.width = size.width();
         uniforms.height = size.height();
+        uniforms.output_width = m_outputSize.width();
+        uniforms.output_height = m_outputSize.height();
         memcpy(uniforms.bg, bg, 4 * sizeof(float)); // RGBA
         u->updateDynamicBuffer(m_computeUniform, 0, sizeof(Uniforms), (const char *)&uniforms);
 
-        u->uploadStaticBuffer(m_computeParams, 0, params_count * 12 * sizeof(float), params_padded);
+        QRhiTextureSubresourceUploadDescription desc1(params_buffer.data(), params_buffer.size() * sizeof(float));
 
-        /*if (features_pixels && fpx_count) {
-            m_featuresPixels->setSize(fpx_count * sizeof(float));
-            m_featuresPixels->create();
-            u->uploadStaticBuffer(m_featuresPixels, features_pixels);
-        }
-        if (optflow_pixels && of_count) {
-            m_optflowPixels->setSize(of_count * sizeof(float));
-            m_optflowPixels->create();
-            u->uploadStaticBuffer(m_optflowPixels, optflow_pixels);
-        }*/
+        u->uploadTexture(m_texParams, QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc1) }));
 
-#ifdef DRAW_TO_RENDERTARGET
         QMatrix4x4 mvp = item->textureMatrix();
         mvp.scale(2.0f);
         u->updateDynamicBuffer(m_drawingUniform, 0, 64, mvp.constData());
-#endif
 
-        cb->beginComputePass(u);
-        cb->setComputePipeline(m_computePipeline);
-        cb->setShaderResources();
-        cb->dispatch(m_outputSize.width() / 16 + 1, m_outputSize.height() / 16 + 1, 1);
-        cb->endComputePass();
-
-#ifndef DRAW_TO_RENDERTARGET
-        u = rhi->nextResourceUpdateBatch();
-        QRhiTextureCopyDescription desc;
-        desc.setPixelSize(size);
-        u->copyTexture(item->rhiTexture(), m_texOut, desc);
         cb->resourceUpdate(u);
-#endif
+        u = rhi->nextResourceUpdateBatch();
 
-#ifdef DRAW_TO_RENDERTARGET
         QColor clearColor(Qt::black);
         cb->beginPass(item->rhiRenderTarget(), clearColor, { 1.0f, 0 });
         cb->setGraphicsPipeline(m_pipeline);
@@ -241,8 +200,8 @@ public:
         QRhiCommandBuffer::VertexInput vbufBinding(m_vertexBuffer, 0);
         cb->setVertexInput(0, 1, &vbufBinding, m_indexBuffer, 0, QRhiCommandBuffer::IndexUInt16);
         cb->drawIndexed(6);
-        cb->endPass();
-#endif
+        cb->endPass(u);
+
         return true;
     }
 
@@ -257,28 +216,22 @@ public:
 
     QList<QRhiResource *> m_releasePool;
 
-    // QRhiTexture *m_texIn = nullptr;
-    QRhiTexture *m_texOut = nullptr;
+    QRhiTexture *m_texIn = nullptr;
+    // QRhiTexture *m_texOut = nullptr;
+    QRhiTexture *m_texParams = nullptr;
     QRhiBuffer *m_computeUniform = nullptr;
-    QRhiBuffer *m_computeParams = nullptr;
-    // QRhiBuffer *m_featuresPixels = nullptr;
-    // QRhiBuffer *m_optflowPixels = nullptr;
-    QRhiShaderResourceBindings *m_computeBindings = nullptr;
-    QRhiComputePipeline *m_computePipeline = nullptr;
 
     QSize m_outputSize;
 
     MDKPlayerWrapper *m_player{nullptr};
 
-#ifdef DRAW_TO_RENDERTARGET
     QRhiBuffer *m_vertexBuffer = nullptr;
     QRhiBuffer *m_indexBuffer = nullptr;
     QRhiBuffer *m_drawingUniform = nullptr;
     QRhiSampler *m_drawingSampler = nullptr;
+    QRhiSampler *m_paramsSampler = nullptr;
     QRhiShaderResourceBindings *m_srb = nullptr;
     QRhiGraphicsPipeline *m_pipeline = nullptr;
-#endif
 
     QRhiResourceUpdateBatch *m_initialUpdates = nullptr;
-
 };

@@ -52,11 +52,12 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
                     2
                 }
             });
-            
-            rhiUndistortion->params_buffer.resize(params_count * 12);
+            if (rhiUndistortion->params_buffer.size() < params_count * 9) {
+                rhiUndistortion->params_buffer.resize(params_count * 9);
+            }
             auto ptr = rhiUndistortion->params_buffer.data();
             bool ok = rust!(Rust_Controller_RenderRHI [timestamp: f64 as "double", frame: i32 as "int32_t", stab: Arc<StabilizationManager<RGBA8>> as "RustPtr", ptr: *mut f32 as "float *", params_count: u32 as "uint32_t"] -> bool as "bool" {
-                stab.fill_undistortion_data_padded((timestamp * 1_000_000.0) as i64, ptr, params_count as usize * 12)
+                stab.fill_undistortion_data_padded((timestamp * 1_000_000.0) as i64, ptr, params_count as usize * 9)
             });
 
             return ok && rhiUndistortion->render(mdkplayer->mdkplayer, timestamp, frame, ptr, params_count, bg, doRender, nullptr, 0, nullptr, 0);

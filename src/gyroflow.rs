@@ -90,7 +90,6 @@ fn entry() {
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(util::get_version()).into());
-    engine.set_property("isOpenGl".into(), QVariant::from(false));
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
     ui_tools.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
@@ -116,9 +115,7 @@ fn entry() {
         #endif
     });
 
-    let is_opengl = util::is_opengl();
-    engine.set_property("isOpenGl".into(), QVariant::from(is_opengl));
-    ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = is_opengl;
+    ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = util::is_opengl();
 
     rendering::init().unwrap();
 

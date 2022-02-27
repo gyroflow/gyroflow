@@ -121,7 +121,15 @@ impl<T: PixelType> Undistortion<T> {
                 });
                 match wgpu {
                     Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); },
-                    Err(e) => { log::error!("Failed to initialize wgpu {:?}", e); },
+                    Err(e) => {
+                        if let Some(s) = e.downcast_ref::<&str>() {
+                            log::error!("Failed to initialize wgpu {}", s);
+                        } else if let Some(s) = e.downcast_ref::<String>() {
+                            log::error!("Failed to initialize wgpu {}", s);
+                        } else {
+                            log::error!("Failed to initialize wgpu {:?}", e);
+                        }
+                    },
                     _ => { log::error!("Failed to initialize wgpu"); }
                 }
             }

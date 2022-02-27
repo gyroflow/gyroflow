@@ -1010,6 +1010,11 @@ impl Controller {
     }
 
     fn fetch_profiles_from_github(&self) {
+        #[cfg(target_os = "android")]
+        {
+            return;
+        }
+
         use crate::core::lens_profile_database::LensProfileDatabase;
 
         let update = util::qt_queued_callback_mut(self, |this, _| {

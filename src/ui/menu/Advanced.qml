@@ -142,7 +142,7 @@ MenuItem {
         onCheckedChanged: window.videoArea.safeArea = checked;
     }
     CheckBox {
-        visible: Qt.platform.os != "osx";
+        //visible: Qt.platform.os != "osx";
         text: qsTr("Experimental zero-copy GPU preview");
         tooltip: qsTr("Render and undistort the preview video entirely on the GPU.\nThis should provide much better UI performance.");
         checked: false;

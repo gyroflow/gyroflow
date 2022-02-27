@@ -386,13 +386,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 let params_count = itm.params.len() * 9;
                 if params_count <= out_size {
                     let src_ptr = itm.params.as_ptr() as *const f32;
-                    std::ptr::copy_nonoverlapping(src_ptr, out_ptr, 8);
-
-                    let mut j = 2;
-                    for i in (9..params_count).step_by(3) {
-                        std::ptr::copy_nonoverlapping(src_ptr.add(i), out_ptr.offset(j * 4), 3);
-                        j += 1;
-                    }
+                    std::ptr::copy_nonoverlapping(src_ptr, out_ptr, params_count);
                     return true;
                 }
             }

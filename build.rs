@@ -6,12 +6,13 @@ fn main() {
     let qt_library_path = std::env::var("DEP_QT_LIBRARY_PATH").unwrap();
     let qt_version      = std::env::var("DEP_QT_VERSION").unwrap();
 
-    #[allow(unused_mut)]
     let mut config = cpp_build::Config::new();
 
+    for f in std::env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(";") {
+        config.flag(f);
+    }
+    
     if cfg!(target_os = "macos") {
-        config.flag("-F");
-        config.flag(&qt_library_path);
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");
         println!("cargo:rustc-link-lib=xml2");
@@ -58,7 +59,6 @@ fn main() {
         "android" => {
             println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
-            config.flag("-std=c++17");
             config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
         },
         "macos" => {
@@ -94,9 +94,6 @@ fn main() {
 
     config
         .include(&qt_include_path)
-        .flag_if_supported("-std=c++17")
-        .flag_if_supported("/std:c++17")
-        .flag_if_supported("/Zc:__cplusplus")
         .build("src/gyroflow.rs");
 
 }

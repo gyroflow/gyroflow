@@ -101,6 +101,7 @@ cpp! {{
     #   include <QJniObject>
     #endif
     #include <QDesktopServices>
+    #include <QStandardPaths>
 }}
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
@@ -130,6 +131,12 @@ pub fn open_file_externally(path: QString) {
     cpp!(unsafe [path as "QString"] { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
 }
 
+pub fn get_data_location() -> String {
+    cpp!(unsafe [] -> QString as "QString" {
+        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    }).into()
+}
+
 pub fn init_logging() {
     use simplelog::*;
     use std::path::*;
@@ -153,7 +160,7 @@ pub fn init_logging() {
         .build();
 
     #[cfg(target_os = "android")]
-    WriteLogger::init(LevelFilter::Debug, log_config, util::AndroidLog::default()).unwrap();
+    WriteLogger::init(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()).unwrap();
 
     #[cfg(not(target_os = "android"))]
     {

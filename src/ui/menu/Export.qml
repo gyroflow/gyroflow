@@ -52,7 +52,7 @@ MenuItem {
     Connections {
         target: controller;
         function onConvert_format(format, supported) {
-            supported = supported.split(",").filter(v => !["CUDA", "D3D11", "BGRZ", "RGBZ", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].includes(v));
+            supported = supported.split(",").filter(v => !["CUDA", "D3D11", "BGRZ", "RGBZ", "BGRA", "UYVY422", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].includes(v));
             let buttons = supported.map(f => ({
                 text: f,
                 clicked: () => {
