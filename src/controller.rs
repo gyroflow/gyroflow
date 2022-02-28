@@ -488,6 +488,7 @@ impl Controller {
             } else {
                 qrhi_undistort::deinit_player(vid.get_mdkplayer());
             }
+            vid.setCurrentFrame(vid.currentFrame);
         }
     }
 
@@ -514,8 +515,13 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
             vid.onResize(Box::new(move |width, height| {
-                stab.set_size(width as usize, height as usize);
-                stab.recompute_threaded(|_|());
+                let current_size = stab.params.read().size;
+                if current_size.0 != width as usize && current_size.1 != height as usize {
+                    stab.set_size(width as usize, height as usize);
+                    stab.recompute_threaded(|_|());
+
+                    qrhi_undistort::resize_player(stab.clone());
+                }
             }));
 
             let stab = self.stabilizer.clone();

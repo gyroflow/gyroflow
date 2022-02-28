@@ -380,13 +380,19 @@ impl<T: PixelType> StabilizationManager<T> {
         ret
     }
 
-    pub unsafe fn fill_undistortion_data_padded(&self, timestamp_us: i64, out_ptr: *mut f32, out_size: usize) -> bool {
+    pub unsafe fn fill_undistortion_data(&self, timestamp_us: i64, out_ptr: *mut f32, out_size: usize) -> bool {
         if self.params.read().stab_enabled {
-            if let Some(itm) = self.undistortion.write().get_undistortion_data(timestamp_us) {
+            let mut undist = self.undistortion.write();
+            if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
+
                 let params_count = itm.params.len() * 9;
                 if params_count <= out_size {
                     let src_ptr = itm.params.as_ptr() as *const f32;
                     std::ptr::copy_nonoverlapping(src_ptr, out_ptr, params_count);
+
+                    drop(itm);
+
+                    self.current_fov_10000.store((undist.current_fov * 10000.0) as u64, SeqCst);
                     return true;
                 }
             }

@@ -12,12 +12,12 @@ cpp! {{
     struct RustPtr { void *data; };
     #include "src/qt_gpu/qrhi_undistort.cpp"
 
-    static std::unique_ptr<QtRHIUndistort> rhiUndistortion = std::make_unique<QtRHIUndistort>();
+    static std::unique_ptr<QtRHIUndistort> rhiUndistortion;
 }}
 
 pub fn resize_player(stab: Arc<StabilizationManager<RGBA8>>) {
     let player = cpp!(unsafe [] -> *mut MDKPlayerWrapper as "MDKPlayerWrapper *" {
-        if (!rhiUndistortion->m_releasePool.isEmpty() && rhiUndistortion->m_player) {
+        if (rhiUndistortion && !rhiUndistortion->m_pipeline.isNull() && rhiUndistortion->m_player) {
             return rhiUndistortion->m_player;
         } else {
             return nullptr;
@@ -32,6 +32,8 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
         if (!mdkplayer || !mdkplayer->mdkplayer) return;
 
         auto initCb = [mdkplayer, stab](QSize texSize, QSizeF itemSize) -> bool {
+            rhiUndistortion = std::make_unique<QtRHIUndistort>(mdkplayer);
+
             QSize outputSize = rust!(Rust_Controller_InitRHI [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> QSize as "QSize" {
                 let osize = stab.params.read().output_size;
                 QSize { width: osize.0 as u32, height: osize.1 as u32 }
@@ -39,6 +41,8 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
             return rhiUndistortion->init(mdkplayer->mdkplayer, texSize, itemSize, outputSize);
         };
         auto renderCb = [mdkplayer, stab](double timestamp, int32_t frame, bool doRender) -> bool {
+            if (!rhiUndistortion) return false;
+
             float bg[4];
             uint32_t params_count = rust!(Rust_Controller_RenderRHIParams [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr", bg: *mut f32 as "float *"] -> u32 as "uint32_t" {
                 let params = stab.params.read();
@@ -57,13 +61,14 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
             }
             auto ptr = rhiUndistortion->params_buffer.data();
             bool ok = rust!(Rust_Controller_RenderRHI [timestamp: f64 as "double", frame: i32 as "int32_t", stab: Arc<StabilizationManager<RGBA8>> as "RustPtr", ptr: *mut f32 as "float *", params_count: u32 as "uint32_t"] -> bool as "bool" {
-                stab.fill_undistortion_data_padded((timestamp * 1_000_000.0) as i64, ptr, params_count as usize * 9)
+                stab.fill_undistortion_data((timestamp * 1_000_000.0) as i64, ptr, params_count as usize * 9)
             });
 
             return ok && rhiUndistortion->render(mdkplayer->mdkplayer, timestamp, frame, ptr, params_count, bg, doRender, nullptr, 0, nullptr, 0);
         };
-        auto cleanupCb = [] { rhiUndistortion->cleanup(); };
-        rhiUndistortion->m_player = mdkplayer;
+
+        auto cleanupCb = [] { rhiUndistortion.reset(); };
+
         mdkplayer->mdkplayer->cleanupGpuCompute();
         mdkplayer->mdkplayer->setupGpuCompute(initCb, renderCb, cleanupCb);
     });
@@ -72,7 +77,7 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
 pub fn deinit_player(mdkplayer: &mut MDKPlayerWrapper) {
     cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *"] {
         if (!mdkplayer || !mdkplayer->mdkplayer) return;
-        rhiUndistortion->m_player = nullptr;
+        rhiUndistortion.reset();
         mdkplayer->mdkplayer->cleanupGpuCompute();
         mdkplayer->mdkplayer->setupGpuCompute(nullptr, nullptr, nullptr);
     });

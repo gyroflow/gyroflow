@@ -68,6 +68,7 @@ impl<T: PixelType> Undistortion<T> {
             e.insert(FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame));
         }
         if let Some(e) = self.stab_data.get(&timestamp_us) {
+            self.current_fov = e.fov;
             return e;
         } else {
             ::log::error!("Failed to get stab data at timestamp: {}, stab_data.len: {}", timestamp_us, self.stab_data.len());
@@ -95,8 +96,10 @@ impl<T: PixelType> Undistortion<T> {
         }
     }
 
-    pub fn get_undistortion_data(&mut self, timestamp_us: i64) -> Option<FrameTransform> {
-        Some(self.get_stab_data_at_timestamp(timestamp_us).clone())
+    pub fn get_undistortion_data(&mut self, timestamp_us: i64) -> Option<&FrameTransform> {
+        let itm = self.get_stab_data_at_timestamp(timestamp_us);
+        if itm.params.is_empty() { return None; }
+        Some(itm)
     }
 
     pub fn init_backends(&mut self) {
@@ -144,8 +147,6 @@ impl<T: PixelType> Undistortion<T> {
         let itm = self.get_stab_data_at_timestamp(timestamp_us).clone(); // TODO: get rid of this clone
         if itm.params.is_empty() { return false; }
 
-        self.current_fov = itm.fov;
-
         self.init_backends();
 
         // OpenCL path
@@ -158,6 +159,7 @@ impl<T: PixelType> Undistortion<T> {
             }
         }
 
+        // wgpu path
         if let Some(ref mut wgpu) = self.wgpu {
             wgpu.undistort_image(pixels, out_pixels, &itm);
             return true;
