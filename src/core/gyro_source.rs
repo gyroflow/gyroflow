@@ -358,27 +358,25 @@ impl GyroSource {
     }
 
     pub fn find_bias(&mut self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
-        let mut bias_vals = [0.0, 0.0, 0.0];
         let ts_start = timestamp_start - self.offset_at_timestamp(timestamp_start);
         let ts_stop = timestamp_stop - self.offset_at_timestamp(timestamp_stop);
+        let mut bias_vals = [0.0, 0.0, 0.0];
         let mut n = 0;
 
-        for x in &mut self.org_raw_imu {
-            if let Some(g) = x.gyro.as_mut() {
+        for x in &self.org_raw_imu {
+            if let Some(g) = x.gyro {
                 if x.timestamp_ms > ts_start && x.timestamp_ms < ts_stop {
-                    bias_vals[0] += g[0];
-                    bias_vals[1] += g[1];
-                    bias_vals[2] += g[2];
+                    bias_vals[0] -= g[0];
+                    bias_vals[1] -= g[1];
+                    bias_vals[2] -= g[2];
                     n += 1;
                 }
             }
         }
-        if n > 0 {
-            bias_vals[0] /= n as f64;
-            bias_vals[1] /= n as f64;
-            bias_vals[2] /= n as f64;    
+        for b in bias_vals.iter_mut() {
+            *b /= n.max(1) as f64;
         }
         
-        (-bias_vals[0], -bias_vals[1], -bias_vals[2])
+        (bias_vals[0], bias_vals[1], bias_vals[2])
     }
 }

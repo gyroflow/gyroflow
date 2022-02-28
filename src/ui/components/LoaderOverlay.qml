@@ -85,7 +85,7 @@ Item {
         width: parent.width;
         BasicText {
             id: t;
-            text: root.text? root.text.arg("<b>" + (root.progress * 100).toFixed(2) + "%</b>") + ` <font size="2">(${root.currentFrame}/${root.totalFrames}${root.additional}${time.fpsText})</font>` : "";
+            text: root.text? root.text.arg("<b>" + (Math.min(root.progress, 1.0) * 100).toFixed(2) + "%</b>") + ` <font size="2">(${root.currentFrame}/${root.totalFrames}${root.additional}${time.fpsText})</font>` : "";
             visible: text.length > 0;
             width: parent.width;
             font.pixelSize: 14 * dpiScale;
