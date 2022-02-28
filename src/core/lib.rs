@@ -504,6 +504,10 @@ impl<T: PixelType> StabilizationManager<T> {
         let params = self.params.read();
         self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
     }
+    pub fn set_imu_bias(&self, bx: f64, by: f64, bz: f64) {
+        self.gyro.write().set_bias(bx, by, bz);
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+    }
 
     pub fn set_lens_param(&self, param: &str, value: f64) {
         let mut lens = self.lens.write();
@@ -660,6 +664,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "lpf":                gyro.imu_lpf,
                 "rotation":           gyro.imu_rotation_angles,
                 "imu_orientation":    gyro.imu_orientation,
+                "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
                 "raw_imu":            if !thin { &gyro.org_raw_imu } else { &empty_vec2 },
                 "quaternions":        if !thin { quats } else { BTreeMap::new() },

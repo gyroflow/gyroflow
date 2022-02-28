@@ -326,6 +326,16 @@ Item {
                 }
             }
             Action {
+                id: debiasAction;
+                icon.name: "bias";
+                text: qsTr("Estimate gyro bias here");
+                onTriggered: {
+                    const pos = root.position;
+
+                    controller.estimate_bias(pos);
+                }
+            }
+            Action {
                 icon.name: "bin;#f67575";
                 text: qsTr("Delete all sync points");
                 onTriggered: controller.clear_offsets();
