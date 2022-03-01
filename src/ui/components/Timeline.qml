@@ -243,8 +243,8 @@ Item {
                 } else if ((wheel.modifiers & Qt.ControlModifier)) { // move horizontally
                     const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
                     const factor = (wheel.angleDelta.y / 120) / (50 / remainingWindow);
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1-remainingWindow, root.visibleAreaLeft + factor)));
-                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight + factor)));
+                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1-remainingWindow, root.visibleAreaLeft - factor)));
+                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
 
                     scrollbar.position = root.visibleAreaLeft;
                 } else { // zoom by default
@@ -324,6 +324,12 @@ Item {
                         { text: qsTr("No"), accent: true },
                     ]);
                 }
+            }
+            Action {
+                id: debiasAction;
+                icon.name: "bias";
+                text: qsTr("Estimate gyro bias here");
+                onTriggered: controller.estimate_bias(root.position);
             }
             Action {
                 icon.name: "bin;#f67575";

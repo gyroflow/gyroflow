@@ -94,6 +94,12 @@ MenuItem {
                 }
             }
         }
+        function onBias_estimated(biasX, biasY, biasZ) {
+            gyrobias.checked = true;
+            bx.value = biasX;
+            by.value = biasY;
+            bz.value = biasZ;
+        }
     }
 
     Button {
@@ -177,6 +183,43 @@ MenuItem {
             font.pixelSize: 11 * dpiScale;
             text: qsTr("Pitch is camera angle up/down when using FPV blackbox data");
         }*/
+    }
+    CheckBoxWithContent {
+        id: gyrobias;
+        text: qsTr("Gyro bias");
+        onCheckedChanged: update_bias();
+        function update_bias() {
+            Qt.callLater(controller.set_imu_bias, gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0);
+        }
+
+        Flow {
+            width: parent.width;
+            spacing: 5 * dpiScale;
+            Label {
+                position: Label.Left;
+                text: qsTr("X");
+                width: undefined;
+                inner.width: 65 * dpiScale;
+                spacing: 5 * dpiScale;
+                NumberField { id: bx; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
+            }
+            Label {
+                position: Label.Left;
+                text: qsTr("Y");
+                width: undefined;
+                inner.width: 65 * dpiScale;
+                spacing: 5 * dpiScale;
+                NumberField { id: by; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
+            }
+            Label {
+                position: Label.Left;
+                text: qsTr("Z");
+                width: undefined;
+                inner.width: 65 * dpiScale;
+                spacing: 5 * dpiScale;
+                NumberField { id: bz; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
+            }
+        }
     }
     Label {
         position: Label.Left;

@@ -61,6 +61,8 @@ pub struct GyroSource {
     pub imu_rotation: Option<Rotation3<f64>>,
     pub imu_lpf: f64,
 
+    pub gyro_bias: Option<[f64; 3]>,
+
     pub integration_method: usize,
 
     pub quaternions: TimeQuat,
@@ -237,6 +239,10 @@ impl GyroSource {
         }
         self.apply_transforms();
     }
+    pub fn set_bias(&mut self, bx: f64, by: f64, bz: f64) {
+        self.gyro_bias = Some([bx, by, bz]);
+        self.apply_transforms();
+    }
 
     pub fn apply_transforms(&mut self) {
         self.raw_imu = self.org_raw_imu.clone();
@@ -244,6 +250,17 @@ impl GyroSource {
             let sample_rate = self.org_raw_imu.len() as f64 / (self.duration_ms / 1000.0);
             if let Err(e) = super::filtering::Lowpass::filter_gyro_forward_backward(self.imu_lpf, sample_rate, &mut self.raw_imu) {
                 log::error!("Filter error {:?}", e);
+            }
+        }
+        if let Some(bias) = self.gyro_bias {
+            for x in &mut self.raw_imu {
+                if let Some(g) = x.gyro.as_mut() {
+                    *g = [
+                        g[0] + bias[0], 
+                        g[1] + bias[1], 
+                        g[2] + bias[2]
+                    ];
+                }
             }
         }
         if let Some(ref orientation) = self.imu_orientation {
@@ -344,5 +361,28 @@ impl GyroSource {
             offsets:              self.offsets.clone(),
             ..Default::default()
         }
+    }
+
+    pub fn find_bias(&mut self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
+        let ts_start = timestamp_start - self.offset_at_timestamp(timestamp_start);
+        let ts_stop = timestamp_stop - self.offset_at_timestamp(timestamp_stop);
+        let mut bias_vals = [0.0, 0.0, 0.0];
+        let mut n = 0;
+
+        for x in &self.org_raw_imu {
+            if let Some(g) = x.gyro {
+                if x.timestamp_ms > ts_start && x.timestamp_ms < ts_stop {
+                    bias_vals[0] -= g[0];
+                    bias_vals[1] -= g[1];
+                    bias_vals[2] -= g[2];
+                    n += 1;
+                }
+            }
+        }
+        for b in bias_vals.iter_mut() {
+            *b /= n.max(1) as f64;
+        }
+        
+        (bias_vals[0], bias_vals[1], bias_vals[2])
     }
 }

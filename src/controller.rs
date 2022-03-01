@@ -55,6 +55,8 @@ pub struct Controller {
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
     estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
+    estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
+    bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
 
@@ -85,6 +87,7 @@ pub struct Controller {
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
+    set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
 
     override_video_fps: qt_method!(fn(&self, fps: f64)),
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
@@ -308,6 +311,26 @@ impl Controller {
             });
         } else {
             err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+        }
+    }
+
+    fn estimate_bias(&mut self, timestamps_fract: QString) {
+        let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
+
+        let org_duration_ms = self.stabilizer.params.read().duration_ms;
+
+        // sample 400 ms
+        let ranges_ms: Vec<(f64, f64)> = timestamps_fract.iter().map(|x| {
+            let range = (
+                ((x * org_duration_ms) - (200.0)).max(0.0), 
+                ((x * org_duration_ms) + (200.0)).min(org_duration_ms)
+            );
+            (range.0, range.1)
+        }).collect();
+
+        if !ranges_ms.is_empty() {
+            let bias = self.stabilizer.gyro.write().find_bias(ranges_ms[0].0, ranges_ms[0].1);
+            self.bias_estimated(bias.0, bias.1, bias.2);
         }
     }
 
@@ -726,6 +749,7 @@ impl Controller {
     wrap_simple_method!(set_imu_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
 
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
