@@ -189,7 +189,7 @@ MenuItem {
         text: qsTr("Gyro bias");
         onCheckedChanged: update_bias();
         function update_bias() {
-            controller.set_imu_bias(gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0)
+            Qt.callLater(controller.set_imu_bias, gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0);
         }
 
         Flow {
@@ -201,7 +201,7 @@ MenuItem {
                 width: undefined;
                 inner.width: 65 * dpiScale;
                 spacing: 5 * dpiScale;
-                NumberField { id: bx; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias();}
+                NumberField { id: bx; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
             }
             Label {
                 position: Label.Left;

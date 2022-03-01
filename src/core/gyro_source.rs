@@ -254,7 +254,13 @@ impl GyroSource {
         }
         if let Some(bias) = self.gyro_bias {
             for x in &mut self.raw_imu {
-                if let Some(g) = x.gyro.as_mut() { *g = [g[0] + bias[0], g[1] + bias[1], g[2] + bias[2]]; }
+                if let Some(g) = x.gyro.as_mut() {
+                    *g = [
+                        g[0] + bias[0], 
+                        g[1] + bias[1], 
+                        g[2] + bias[2]
+                    ];
+                }
             }
         }
         if let Some(ref orientation) = self.imu_orientation {

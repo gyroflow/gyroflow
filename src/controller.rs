@@ -328,8 +328,10 @@ impl Controller {
             (range.0, range.1)
         }).collect();
 
-        let bias = self.stabilizer.gyro.write().find_bias(ranges_ms[0].0, ranges_ms[0].1);
-        self.bias_estimated(bias.0,bias.1,bias.2);
+        if !ranges_ms.is_empty() {
+            let bias = self.stabilizer.gyro.write().find_bias(ranges_ms[0].0, ranges_ms[0].1);
+            self.bias_estimated(bias.0, bias.1, bias.2);
+        }
     }
 
     fn update_chart(&mut self, chart: QJSValue) {
