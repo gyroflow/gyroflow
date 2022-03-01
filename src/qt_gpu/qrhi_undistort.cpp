@@ -38,14 +38,14 @@ static quint16 quadIndexData[6] = { 0, 1, 2, 0, 2, 3 };
 
 
 struct Uniforms {
-    quint32 params_count;
-    quint32 width;
-    quint32 height;
-    quint32 output_width;
-    quint32 output_height;
-    quint32 _padding;
-    quint32 _padding2;
-    quint32 _padding3;
+    qint32 params_count;
+    qint32 width;
+    qint32 height;
+    qint32 output_width;
+    qint32 output_height;
+    qint32 _padding;
+    qint32 _padding2;
+    qint32 _padding3;
     float bg[4];
 };
 

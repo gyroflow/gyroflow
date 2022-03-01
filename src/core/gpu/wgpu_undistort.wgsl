@@ -11,13 +11,9 @@ struct Globals {
     background: array<f32, 4>;
 };
 
-struct UndistortionData {
-    data: [[stride(4)]] array<f32>;
-};
-
-[[group(0), binding(0), stage(fragment)]] var<uniform> params: Globals;
-[[group(0), binding(1), stage(fragment)]] var<storage, read> undistortion_params: UndistortionData;
-[[group(0), binding(2), stage(fragment)]] var input: texture_2d<SCALAR>;
+@group(0) @binding(0) @stage(fragment) var<uniform> params: Globals;
+@group(0) @binding(1) @stage(fragment) var<storage, read> undistortion_params: array<f32>;
+@group(0) @binding(2) @stage(fragment) var input: texture_2d<SCALAR>;
 
 let INTER_BITS: u32 = 5u;
 let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
@@ -100,8 +96,8 @@ fn interpolate(sx: i32, sy: i32, sx0: i32, sy0: i32, width_u: i32, height_u: i32
     return vec4<SCALAR>(sum);
 }
 
-[[stage(vertex)]]
-fn undistort_vertex([[builtin(vertex_index)]] in_vertex_index: u32) -> [[builtin(position)]] vec4<f32> {
+@stage(vertex)
+fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
     var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
         vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0),
         vec2<f32>( 1.0,  1.0), vec2<f32>(-1.0,  1.0), vec2<f32>(-1.0, -1.0),
@@ -112,8 +108,8 @@ fn undistort_vertex([[builtin(vertex_index)]] in_vertex_index: u32) -> [[builtin
 // Adapted from OpenCV: initUndistortRectifyMap + remap 
 // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
 // https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-[[stage(fragment)]]
-fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0)]] vec4<SCALAR> {
+@stage(fragment)
+fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
     let gx = i32(position.x);
     let gy = i32(position.y);
 
@@ -128,19 +124,19 @@ fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0
     let width_u = i32(width);
     let height_u = i32(height);
 
-    let f = vec2<f32>(undistortion_params.data[0], undistortion_params.data[1]);
-    let c = vec2<f32>(undistortion_params.data[2], undistortion_params.data[3]);
-    let k = vec4<f32>(undistortion_params.data[4], undistortion_params.data[5], undistortion_params.data[6], undistortion_params.data[7]);
-    let r_limit = undistortion_params.data[8];
+    let f = vec2<f32>(undistortion_params[0], undistortion_params[1]);
+    let c = vec2<f32>(undistortion_params[2], undistortion_params[3]);
+    let k = vec4<f32>(undistortion_params[4], undistortion_params[5], undistortion_params[6], undistortion_params[7]);
+    let r_limit = undistortion_params[8];
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = u32(gy);
     if (params_count > 2u) {
         let params_idx: u32 = (params_count / 2u) * 9u; // Use middle matrix
-        let x_y_ = vec2<f32>(y * undistortion_params.data[params_idx + 1u] + undistortion_params.data[params_idx + 2u] + (x * undistortion_params.data[params_idx + 0u]),
-                             y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));
-        let w_ = y * undistortion_params.data[params_idx + 7u] + undistortion_params.data[params_idx + 8u] + (x * undistortion_params.data[params_idx + 6u]);
+        let x_y_ = vec2<f32>(y * undistortion_params[params_idx + 1u] + undistortion_params[params_idx + 2u] + (x * undistortion_params[params_idx + 0u]),
+                             y * undistortion_params[params_idx + 4u] + undistortion_params[params_idx + 5u] + (x * undistortion_params[params_idx + 3u]));
+        let w_ = y * undistortion_params[params_idx + 7u] + undistortion_params[params_idx + 8u] + (x * undistortion_params[params_idx + 6u]);
         if (w_ > 0.0) {
             let pos = x_y_ / w_;
             let r = length(pos);
@@ -159,9 +155,9 @@ fn undistort_fragment([[builtin(position)]] position: vec4<f32>) -> [[location(0
  
     let params_idx: u32 = min((sy + 1u), (params_count - 1u)) * 9u;
  
-    let x_y_ = vec2<f32>(y * undistortion_params.data[params_idx + 1u] + undistortion_params.data[params_idx + 2u] + (x * undistortion_params.data[params_idx + 0u]),
-                         y * undistortion_params.data[params_idx + 4u] + undistortion_params.data[params_idx + 5u] + (x * undistortion_params.data[params_idx + 3u]));
-    let w_ = y * undistortion_params.data[params_idx + 7u] + undistortion_params.data[params_idx + 8u] + (x * undistortion_params.data[params_idx + 6u]);
+    let x_y_ = vec2<f32>(y * undistortion_params[params_idx + 1u] + undistortion_params[params_idx + 2u] + (x * undistortion_params[params_idx + 0u]),
+                         y * undistortion_params[params_idx + 4u] + undistortion_params[params_idx + 5u] + (x * undistortion_params[params_idx + 3u]));
+    let w_ = y * undistortion_params[params_idx + 7u] + undistortion_params[params_idx + 8u] + (x * undistortion_params[params_idx + 6u]);
  
     if (w_ > 0.0) {
         let pos = x_y_ / w_;

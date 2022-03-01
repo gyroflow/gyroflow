@@ -50,7 +50,7 @@ walkdir = "2.3.2"
 
 opencv = { version = "0.63", features = ["clang-runtime"], optional = true }
 
-wgpu = "0.12"
+wgpu = { version = "*", git = "https://github.com/gfx-rs/wgpu.git" }
 bytemuck = "1.7.3"
 pollster = "0.2.5"
 

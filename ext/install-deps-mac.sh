@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" != "CI" ]; then
-    brew install p7zip
+    brew install p7zip pkg-config
 
     # Install vcpkg
     git clone --depth 1 https://github.com/Microsoft/vcpkg.git

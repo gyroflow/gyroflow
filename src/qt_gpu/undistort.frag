@@ -12,25 +12,25 @@ layout(location = 0) out vec4 fragColor;
 layout(binding = 1) uniform sampler2D texIn;
 
 layout(std140, binding = 2) uniform UniformBuffer {
-    uint params_count;
-    uint width;
-    uint height;
-    uint output_width;
-    uint output_height;
-    uint _padding;
-    uint _padding2;
-    uint _padding3;
+    int params_count;
+    int width;
+    int height;
+    int output_width;
+    int output_height;
+    int _padding;
+    int _padding2;
+    int _padding3;
     vec4 bg;
 } uniforms;
 
 layout(binding = 3) uniform sampler2D texParams;
 
-float get_param(int row, int idx) {
-    return texture(texParams, vec2(idx / float(8), (row / float(uniforms.height - 2)))).r;
+float get_param(float row, float idx) {
+    return texture(texParams, vec2(idx / 8.0, row / (float(uniforms.height) - 2.0))).r;
 }
 
 void main() {
-    ivec2 texPos = ivec2(v_texcoord.xy * vec2(uniforms.output_width, uniforms.output_height));
+    vec2 texPos = v_texcoord.xy * vec2(uniforms.output_width, uniforms.output_height);
 
     vec2 f = vec2(get_param(0, 0), get_param(0, 1));
     vec2 c = vec2(get_param(0, 2), get_param(0, 3));
@@ -39,9 +39,9 @@ void main() {
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
-    int sy = texPos.y;
+    float sy = texPos.y;
     if (uniforms.params_count > 2) {
-        int idx = 1 + int(uniforms.params_count / 2); // Use middle matrix
+        float idx = 1.0 + (uniforms.params_count / 2.0); // Use middle matrix
         float _x = (float(texPos.y) * get_param(idx, 1)) + get_param(idx, 2) + (float(texPos.x) * get_param(idx, 0));
         float _y = (float(texPos.y) * get_param(idx, 4)) + get_param(idx, 5) + (float(texPos.x) * get_param(idx, 3));
         float _w = (float(texPos.y) * get_param(idx, 7)) + get_param(idx, 8) + (float(texPos.x) * get_param(idx, 6));
@@ -53,12 +53,12 @@ void main() {
             float theta_d = theta * (1.0 + dot(k, vec4(theta2, theta4, theta6, theta8)));
             float scale = r == 0? 1.0 : theta_d / r;
             vec2 uv = f * pos * scale + c;
-            sy = int(min(uniforms.height, max(0, floor(0.5 + uv.y))));
+            sy = min(uniforms.height, max(0, floor(0.5 + uv.y)));
         }
     }
     ///////////////////////////////////////////////////////////////////
 
-    int idx = int(min(sy + 1, uniforms.params_count));
+    float idx = min(sy + 1.0, uniforms.params_count);
 
     float _x = (float(texPos.y) * get_param(idx, 1)) + get_param(idx, 2) + (float(texPos.x) * get_param(idx, 0));
     float _y = (float(texPos.y) * get_param(idx, 4)) + get_param(idx, 5) + (float(texPos.x) * get_param(idx, 3));

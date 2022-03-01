@@ -139,9 +139,9 @@ dependencies = [
 
 [[package]]
 name = "ash"
-version = "0.34.0+1.2.203"
+version = "0.35.2+1.2.203"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0f780da53d0063880d45554306489f09dd8d1bda47688b4a57bc579119356df"
+checksum = "8f6a491bcad4563b355ac2bb6e3f09d5e1c5d628710c7156e901dad0c416075e"
 dependencies = [
  "libloading",
 ]
@@ -1297,6 +1297,7 @@ checksum = "8c2352bd1d0bceb871cb9d40f24360c8133c11d7486b68b5381c1dd1a32015e3"
 dependencies = [
  "libc",
  "libloading",
+ "pkg-config",
 ]
 
 [[package]]
@@ -1451,8 +1452,7 @@ dependencies = [
 [[package]]
 name = "metal"
 version = "0.23.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0514f491f4cc03632ab399ee01e2c1c1b12d3e1cf2d667c1ff5f87d6dcd2084"
+source = "git+https://github.com/gfx-rs/metal-rs?rev=44af5cc#44af5cca340617d42d701264f9bf71d1f3e68096"
 dependencies = [
  "bitflags",
  "block",
@@ -1513,9 +1513,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3012f2dbcc79e8e0b5825a4836a7106a75dd9b2fe42c528163be0f572538c705"
+version = "0.8.0"
+source = "git+https://github.com/gfx-rs/naga?rev=a45b9a6#a45b9a6cc691a671aa24a32114b51c5acae02420"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -2093,7 +2092,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#d90917ed112c7e53eb3fb32040efc5cf91768069"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#bb823f40700bac43e07b470fa1c8dca5a5483ac2"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2262,9 +2261,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
+checksum = "8380fe0152551244f0747b1bf41737e0f8a74f97a14ccefd1148187271634f3c"
 dependencies = [
  "bitflags",
 ]
@@ -2875,8 +2874,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97cd781ff044d6d697b632a2e212032c2e957d1afaa21dbf58069cbb8f78567"
+source = "git+https://github.com/gfx-rs/wgpu.git#e672974d9dcfd046a49bb959410fb5244cab3f0d"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2895,9 +2893,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.12.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4688c000eb841ca55f7b35db659b78d6e1cd77d7caf8fb929f4e181f754047d"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#e672974d9dcfd046a49bb959410fb5244cab3f0d"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2918,9 +2915,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93b1a9400e8d7f32dd4dd909bb9a391015d70633d639775ddd3f14d1104bc970"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#e672974d9dcfd046a49bb959410fb5244cab3f0d"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2957,8 +2953,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "549533d9e1cdd4b4cda7718d33ff500fc4c34b5467b71d76b547ae0324f3b2a2"
+source = "git+https://github.com/gfx-rs/wgpu.git#e672974d9dcfd046a49bb959410fb5244cab3f0d"
 dependencies = [
  "bitflags",
 ]

@@ -12,6 +12,7 @@ $Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-13-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"
 $Env:OPENCV_LINK_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
 $Env:OPENCV_INCLUDE_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\jni\include"
+$Env:VCPKG_ROOT = "$PROJECT_DIR\ext\vcpkg"
 
 $CLANG_LIB = $Env:LIBCLANG_PATH.replace('\', '/').replace('/bin', '/lib');
 $NDK_REPLACED = $Env:ANDROID_NDK_HOME.replace('\', '/');

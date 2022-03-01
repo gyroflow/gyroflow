@@ -14,7 +14,15 @@ pub fn initialize_contexts() -> Option<String> {
         match cl {
             Ok(Ok(name)) => { return Some(name); },
             Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
-            Err(e) => { log::error!("OpenCL error: {:?}", e); }
+            Err(e) => {
+                if let Some(s) = e.downcast_ref::<&str>() {
+                    log::error!("Failed to initialize OpenCL {}", s);
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    log::error!("Failed to initialize OpenCL {}", s);
+                } else {
+                    log::error!("Failed to initialize OpenCL {:?}", e);
+                }
+            }
         }
     }
 
@@ -24,7 +32,15 @@ pub fn initialize_contexts() -> Option<String> {
     match wgpu {
         Ok(Some(name)) => { return Some(name); },
         Ok(None) => { log::error!("wgpu init error"); },
-        Err(e) => { log::error!("wgpu init error: {:?}", e); }
+        Err(e) => {
+            if let Some(s) = e.downcast_ref::<&str>() {
+                log::error!("Failed to initialize wgpu {}", s);
+            } else if let Some(s) = e.downcast_ref::<String>() {
+                log::error!("Failed to initialize wgpu {}", s);
+            } else {
+                log::error!("Failed to initialize wgpu {:?}", e);
+            }
+        }
     }
 
     None
