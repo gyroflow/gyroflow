@@ -17,7 +17,7 @@ mod pixel_formats;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
-pub use cpu_undistort::{ undistort_points, undistort_points_with_rolling_shutter };
+pub use cpu_undistort::{ undistort_points, undistort_points_with_rolling_shutter, COEFFS };
 
 #[derive(Clone, Copy)]
 pub enum Interpolation {
@@ -115,7 +115,15 @@ impl<T: PixelType> Undistortion<T> {
                 match cl {
                     Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; },
                     Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
-                    Err(e) => { log::error!("OpenCL error: {:?}", e); }
+                    Err(e) => {
+                        if let Some(s) = e.downcast_ref::<&str>() {
+                            log::error!("Failed to initialize OpenCL {}", s);
+                        } else if let Some(s) = e.downcast_ref::<String>() {
+                            log::error!("Failed to initialize OpenCL {}", s);
+                        } else {
+                            log::error!("Failed to initialize OpenCL {:?}", e);
+                        }
+                    }
                 }
             }
             if !gpu_initialized && T::wgpu_format().is_some() {

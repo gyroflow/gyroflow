@@ -6,6 +6,7 @@ use bytemuck::Pod;
 use bytemuck::Zeroable;
 use wgpu::Adapter;
 use wgpu::BufferUsages;
+use wgpu::util::DeviceExt;
 use parking_lot::RwLock;
 
 #[repr(C, align(32))]
@@ -88,6 +89,9 @@ impl WgpuWrapper {
 
             let mut shader_str = include_str!("wgpu_undistort.wgsl").to_string();
             shader_str = shader_str.replace("SCALAR", wgpu_format.1);
+            
+            // Replace it in source to allow for loop unrolling when compiling shader
+            shader_str = shader_str.replace("params.interpolation", &format!("{}u", interpolation));
 
             let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
                 source: wgpu::ShaderSource::Wgsl(Cow::Owned(shader_str)),
@@ -102,6 +106,7 @@ impl WgpuWrapper {
             let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: staging_size as u64, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let params_buffer  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let globals_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<Globals>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let coeffs_buffer  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::undistortion::COEFFS), usage: wgpu::BufferUsages::STORAGE });
 
             let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
                 label: None,
@@ -157,7 +162,8 @@ impl WgpuWrapper {
                 entries: &[
                     wgpu::BindGroupEntry { binding: 0, resource: globals_buffer.as_entire_binding() },
                     wgpu::BindGroupEntry { binding: 1, resource: params_buffer.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) }
+                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) },
+                    wgpu::BindGroupEntry { binding: 3, resource: coeffs_buffer.as_entire_binding() }
                 ],
             });
 

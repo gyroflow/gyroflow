@@ -5,7 +5,7 @@ use super::{ PixelType, Undistortion, ComputeParams, FrameTransform };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 
-const COEFFS: [f32; 64+128+256] = [
+pub const COEFFS: [f32; 64+128+256] = [
     // Bilinear
     1.000000, 0.000000, 0.968750, 0.031250, 0.937500, 0.062500, 0.906250, 0.093750, 0.875000, 0.125000, 0.843750, 0.156250,
     0.812500, 0.187500, 0.781250, 0.218750, 0.750000, 0.250000, 0.718750, 0.281250, 0.687500, 0.312500, 0.656250, 0.343750,
