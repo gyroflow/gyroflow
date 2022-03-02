@@ -26,7 +26,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="79"/>
       <source>UI scaling</source>
-      <translation type="unfinished">UI scaling</translation>
+      <translation>Escalação de Interface</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="93"/>
@@ -120,17 +120,17 @@ Isso deve fornecer um desempenho de interface muito melhor.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="160"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Selecionar arquivo de destino</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="206"/>
       <source>Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation type="unfinished">Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</translation>
+      <translation>O perfil da lente não foi carregado, o resultado poderá ser incerto. Tem certeza de que deseja prosseguir e renderizar esse arquivo?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="214"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation type="unfinished">There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</translation>
+      <translation>Não há pontos de sincronização presentes, o resultado será incerto. Tem certeza que deseja prosseguir e renderizar esse arquivo?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="259"/>
@@ -195,18 +195,18 @@ Isso deve fornecer um desempenho de interface muito melhor.</translation>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
-      <translation type="unfinished">Permission denied. Unable to create or write file.
-Change the output path or run the program as administrator.
-Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</translation>
+      <translation>Permissão negada. Não foi possível criar ou escrever o arquivo.
+Altere o caminho de saída ou execute o programa como administrador.
+Certifique-se de que você tem permissões de gravação no diretório de destino e certifique-se de que o arquivo de destino não está sendo usado por qualquer outro aplicativo.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="357"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
-      <translation type="unfinished">NVIDIA GPU driver is too old, GPU encoding will not work for this format.
-Update your NVIDIA drivers to the newest version: %1.
-If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</translation>
+      <translation>O driver da GPU NVIDIA é muito antigo, a codificação via GPU não funcionará para este formato.
+Atualize seus drivers da NVIDIA para a versão mais recente: %1.
+Se o problema ainda persistir após a atualização do driver, sua GPU provavelmente não suporta a codificação de GPU com este formato. Desative a codificação via GPU neste caso.</translation>
     </message>
   </context>
   <context>
@@ -672,7 +672,7 @@ Você deseja enviar seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="130"/>
       <source>Lower cutoff frequency means more filtering</source>
-      <translation type="unfinished">Lower cutoff frequency means more filtering</translation>
+      <translation>Diminuir a frequência de corte significa maior filtragem</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="138"/>
@@ -730,7 +730,7 @@ Você deseja enviar seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="115"/>
       <source>Reset value</source>
-      <translation type="unfinished">Reset value</translation>
+      <translation>Redefinir valor</translation>
     </message>
   </context>
   <context>
@@ -1370,12 +1370,12 @@ Você tem certeza que quer continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="540"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
-      <translation type="unfinished">%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</translation>
+      <translation>%1 Para ampliar horizontalmente, %2 Para ampliar verticalmente, %3 para rotacionar, duplo clique para redefinir o zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="541"/>
       <source>Scroll</source>
-      <translation type="unfinished">Scroll</translation>
+      <translation>Rolar</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="542"/>

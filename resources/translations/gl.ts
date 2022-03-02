@@ -730,7 +730,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="115"/>
       <source>Reset value</source>
-      <translation type="unfinished">Reset value</translation>
+      <translation>Restaurar valores</translation>
     </message>
   </context>
   <context>

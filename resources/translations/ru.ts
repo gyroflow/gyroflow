@@ -731,7 +731,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="115"/>
       <source>Reset value</source>
-      <translation type="unfinished">Reset value</translation>
+      <translation>Сбросить значение</translation>
     </message>
   </context>
   <context>

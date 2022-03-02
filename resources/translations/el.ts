@@ -43,12 +43,12 @@
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Όταν το οπτικό πεδίο &gt; 1, εμφάνισε ένα ορθογώνιο που προσομοιάζει το οπτικό πεδίο = 1 πάνω από το βίντεο προεπισκόπησης.
-Σημειώστε ότι αυτό είναι μόνο μια οπτική ένδειξη, δεν επηρεάζει&apos; την απόδοση.</translation>
+Σημειώστε ότι αυτό είναι μόνο μια οπτική ένδειξη, δεν επηρεάζει την απόδοση.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="146"/>
       <source>Experimental zero-copy GPU preview</source>
-      <translation>Δοκιμαστική μηδενικής αντιγραφής κάρτας γραφικών επισκόπησή</translation>
+      <translation>Δοκιμαστική ρύθμιση μηδενικής αντιγραφής επισκόπηση με την κάρτα γραφικών</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
@@ -75,13 +75,13 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="71"/>
       <source>Choose a video file</source>
-      <translation>Επιλέξτε ένα αρχείο βίντεο</translation>
+      <translation>Επιλέξτε ένα αρχείο πολυμέσου</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="72"/>
       <location filename="../../src/ui/App.qml" line="161"/>
       <source>Video files</source>
-      <translation>Αρχεία βίντεο</translation>
+      <translation>Αρχεία πολυμέσων</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="135"/>
@@ -162,7 +162,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="336"/>
       <source>There&apos;s a newer version available: %1.</source>
-      <translation>Υπάρχει &apos; μια νεότερη έκδοση διαθέσιμη: %1.</translation>
+      <translation>Υπάρχει μια νεότερη έκδοση διαθέσιμη: %1.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="337"/>
@@ -206,7 +206,7 @@ Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
       <translation>Ο οδηγός της NVIDIA κάρτα γραφικών είναι πολύ παλιός, η κωδικοποίηση της κάρτας γραφικών δεν θα λειτουργήσει για αυτή τη μορφή.
 Ενημερώστε τους οδηγούς NVIDIA στην νεότερη έκδοση: %1.
-Εάν το ζήτημα εξακολουθεί να υπάρχει μετά την ενημέρωση του οδηγού, η κάρτα γραφικών σας πιθανότατα δεν&apos;t υποστηρίζει την κωδικοποίηση με αυτή τη μορφή. Απενεργοποίηστε την κωδικοποίηση με κάρτα γραφικών σε αυτήν την περίπτωση.</translation>
+Εάν το ζήτημα εξακολουθεί να υπάρχει μετά την ενημέρωση του οδηγού, η κάρτα γραφικών σας πιθανότατα δεν υποστηρίζει την κωδικοποίηση αυτής της μορφής. Απενεργοποίηστε την κωδικοποίηση με κάρτα γραφικών σε αυτήν την περίπτωση.</translation>
     </message>
   </context>
   <context>
@@ -222,7 +222,7 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="29"/>
       <source>Lens calibrator</source>
-      <translation>Προσαρμογή φακού</translation>
+      <translation>Προσαρμογέας φακού</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="46"/>
@@ -306,13 +306,13 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
       <location filename="../../src/ui/menu/Export.qml" line="87"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>Η επιτάχυνση κωδικοποίησης της κάρτας γραφικών σας δεν&apos;υποστηρίζει αυτή τη μορφή εικονοστοιχείων (%1).
+      <translation>Η επιτάχυνση κωδικοποίησης της κάρτας γραφικών σας δεν υποστηρίζει αυτή τη μορφή εικονοστοιχείων (%1).
 Θέλετε να μετατρέψετε σε διαφορετική μορφή εικονοστοιχείων ή να κρατήσετε την αρχική και να αποτυπώσετε με τον επεξεργαστή;</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="78"/>
       <source>Render using CPU</source>
-      <translation>Αποτύπωση με χρήση επεξεργαστή</translation>
+      <translation>Αποτύπωση με χρήση του επεξεργαστή</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="85"/>
@@ -367,12 +367,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="226"/>
       <source>Use GPU encoding</source>
-      <translation>Χρησιμοποιήστε την κάρτα γραφικών για αποκωδικοποίηση</translation>
+      <translation>Χρήση αποκωδικοποίησης κάρτας γραφικών</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="230"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
-      <translation>Οι κωδικοποιητές της κάρτας γραφικών συνήθως παράγουν παραγωγή χαμηλότερης ποιότητας από τους κωδικοποιητές λογισμικού, αλλά είναι σημαντικά γρηγορότερη.</translation>
+      <translation>Οι κωδικοποιητές της κάρτας γραφικών συνήθως παράγουν αποτέλεσμα χαμηλότερης ποιότητας από τους κωδικοποιητές λογισμικού, αλλά είναι σημαντικά γρηγορότερη.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="231"/>
@@ -382,12 +382,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="232"/>
       <source>Uncheck this option for maximum possible quality.</source>
-      <translation>Απενεργοποιήστε αυτή τη επιλογή για τη μέγιστη δυνατή ποιότητα.</translation>
+      <translation>Απενεργοποιήστε αυτή την επιλογή για την μέγιστη δυνατή ποιότητα.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="234"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
-      <translation>Η επιτάχυνση της κάρτας γραφικών δεν είναι διαθέσιμη για τη μορφή εικονοστοιχείων αυτού του βίντεο.</translation>
+      <translation>Η επιτάχυνση της κάρτας γραφικών δεν είναι διαθέσιμη για τη μορφή εικονοστοιχείων αυτού του πολυμέσου.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="238"/>
@@ -566,17 +566,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="150"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
-      <translation>Αυτό το προφίλ φακού είναι ανεπίσημο, μπορούμε&apos; να το εγγυηθούμε&apos; ορθότητα. Χρησιμοποιήστε το με δική σας ευθύνη.</translation>
+      <translation>Αυτό το προφίλ φακού είναι ανεπίσημο, δεν μπορούμε να το εγγυηθούμε ορθότητα. Χρησιμοποιήστε το με δική σας ευθύνη.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="158"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
-      <translation>H αναλογία άποψης του προφίλ φακού&apos; δεν αντιστοιχεί με αυτό του αρχείου. Το αποτέλεσμα δε θα είναι σωστό.</translation>
+      <translation>H αναλογία διαστάσεων του προφίλ φακού δεν αντιστοιχεί με αυτό του αρχείου. Το αποτέλεσμα δε θα είναι σωστό.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="159"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
-      <translation>Το μέγεθος από το προφίλ φακού&apos; δεν αντιστοιχεί με αυτό στο αρχείο. Το αποτέλεσμα δε θα είναι σωστό.</translation>
+      <translation>Το μέγεθος από το προφίλ φακού δεν αντιστοιχεί με αυτό στο αρχείο. Το αποτέλεσμα δε θα είναι σωστό.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="168"/>
@@ -619,7 +619,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="41"/>
       <source>s</source>
-      <translation>δευτερόλεπτα</translation>
+      <translation>δ</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="43"/>
@@ -717,7 +717,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="204"/>
       <source>Use built-in quaternions instead of IMU data</source>
-      <translation>Χρήση ενσωματωμένων quaternions αντί δεδομένων IMU</translation>
+      <translation>Χρήση ενσωματωμένων αικατερνίτων αντί δεδομένων IMU</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="204"/>
@@ -730,7 +730,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="115"/>
       <source>Reset value</source>
-      <translation type="unfinished">Reset value</translation>
+      <translation>Επαναφορά τιμών</translation>
     </message>
   </context>
   <context>
@@ -748,7 +748,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="186"/>
       <source>Export .gyroflow file (including gyro data)</source>
-      <translation>Εξαγωγή αρχείου .gyroflow (συμπεριλαμβανομένων δεδομένων γυροσκοπίου)</translation>
+      <translation>Εξαγωγή αρχείου .gyroflow (με δεδομένα γυροσκοπίου)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="31"/>
@@ -897,7 +897,7 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/menu/Stabilization.qml" line="161"/>
       <location filename="../../src/ui/menu/Stabilization.qml" line="349"/>
       <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
-      <translation>Απαιτείται ακριβής προσδιορισμός προσανατολισμού. Δοκιμάστε με συμπληρωματική, Mahony, ή Madgwick μέθοδο ενσωμάτωσης.</translation>
+      <translation>Απαιτείται ακριβής προσδιορισμός προσανατολισμού. Δοκιμάστε με συμπληρωματική, Mahony ή Madgwick μέθοδο ενσωμάτωσης.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="162"/>
@@ -981,7 +981,7 @@ Modify velocity factor until you get the desired values (recommended less than 2
       <location filename="../../src/ui/menu/Stabilization.qml" line="313"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation>Ποσοστό κλειδώματος</translation>
+      <translation>Ένταση κλειδώματος</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="321"/>
@@ -1049,12 +1049,12 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="40"/>
       <source>No motion data loaded, cannot sync.</source>
-      <translation>Δε φορτώθηκαν δεδομένα κίνησης, Δε ήταν δυνατός ο συγχρονισμός.</translation>
+      <translation>Δε φορτώθηκαν δεδομένα κίνησης, δεν ήταν δυνατός ο συγχρονισμός.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="58"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
-      <translation>Το προφίλ φακού δεν έχει φορτωθεί, ο συγχρονισμός πιθανότατα θα αποφέρει λάθος αποτελέσματα. Είστε βέβαιοι ότι θέλετε να συνεχίσετε;</translation>
+      <translation>Το προφίλ φακού δεν έχει φορτωθεί, ο συγχρονισμός πιθανότατα θα αποφέρει μη ικανοποιητικά αποτελέσματα. Είστε βέβαιοι ότι θέλετε να συνεχίσετε;</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="59"/>
@@ -1086,7 +1086,7 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="93"/>
       <source>Sync search size</source>
-      <translation>Συγχρονισμός μέγεθους αναζήτησης</translation>
+      <translation>Μέγεθος αναζήτησης συγχρονισμού</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
@@ -1106,7 +1106,7 @@ Modify velocity factor until you get the desired values (recommended less than 2
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="148"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation>Η μέθοδος AKAZE μπορεί να είναι πιο ακριβής, αλλά είναι σημαντικά πιο αργή από το OpenCV. Χρησιμοποιήστε μόνο αν το OpenCV δεν&apos; παράγει ικανοποιητικά αποτελέσματα</translation>
+      <translation>Η μέθοδος AKAZE μπορεί να είναι πιο ακριβής, αλλά είναι σημαντικά πιο αργή από το OpenCV. Χρησιμοποιήστε μόνο αν το OpenCV δεν παράγει ικανοποιητικά αποτελέσματα</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="152"/>
@@ -1130,9 +1130,9 @@ Then try to match these angles to gyroscope angles.</source>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
-      <translation>Μην παραμορφωμένα σημεία οπτικής ροής χρησιμοποιώντας γυροσκόπιο και υποψήφιο αντισταθμιστή.
+      <translation>Μη παραμορφωμένα σημεία οπτικής ροής χρησιμοποιώντας γυροσκόπιο και υποψήφιας τιμή αντιστάθμισης.
 Στη συνέχεια, υπολογίστε τα μήκη των γραμμών οπτικής ροής.
-Η μετατόπιση που προκύπτει είναι αυτή όπου οι γραμμές ήταν συντομότερες, πράγμα που σημαίνει ότι το βίντεο κινείτο λιγότερα ποιοτικά.</translation>
+Η μετατόπιση που προκύπτει είναι αυτή όπου οι γραμμές ήταν συντομότερες, πράγμα που σημαίνει ότι το βίντεο κινείτο λιγότερο ποιοτικά.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="179"/>
@@ -1298,7 +1298,7 @@ This feature is experimental, the results may not be correct at all.
 Are you sure you want to continue?</source>
       <translation>Το πολυμέσο σας πρέπει να έχει ήδη συγχρονιστεί σωστά και θα πρέπει να το χρησιμοποιήσετε σε ένα μέρος του πολυμέσου σας με σημαντική κίνηση κάμερας (ιδανικά οριζόντια).
 
-Αυτή η λειτουργία είναι πειραματική, τα αποτελέσματα μπορεί να μην είναι καθόλου σωστά.
+Αυτή η λειτουργία είναι πειραματική, τα αποτελέσματα μπορεί να μην είναι καθόλου ικανοποιητικά.
 Είστε σίγουροι ότι θέλετε να συνεχίσετε;</translation>
     </message>
     <message>
@@ -1359,12 +1359,12 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="543"/>
       <source>Ctrl+Scroll</source>
-      <translation>Ctrl+Scroll</translation>
+      <translation>Ctrl+Κύλιση</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="542"/>
       <source>Control+Scroll</source>
-      <translation>Ctrl+Scroll</translation>
+      <translation>Ctrl+Κύλιση</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="540"/>
@@ -1422,7 +1422,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="94"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
-      <translation>Υπάρχει&apos; ένα αρχείο %1 που σχετίζεται με αυτό το βίντεο, θέλετε να το φορτώσετε;</translation>
+      <translation>Υπάρχει ένα αρχείο %1 που σχετίζεται με αυτό το βίντεο, θέλετε να το φορτώσετε;</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="95"/>
