@@ -92,15 +92,23 @@ Rectangle {
                     sourceSize.width: Math.min(300 * dpiScale, parent.width * 0.9);
                     anchors.centerIn: parent;
                 }
-                Hr { anchors.bottom: parent.bottom; }
             }
 
+            Hr {
+                
+            }
             Menu.VideoInformation {
                 id: vidInfo;
                 onSelectFileRequest: fileDialog.open();
             }
+            Hr {
+
+            }
             Menu.LensProfile {
                 id: lensProfile;
+            }
+            Hr {
+
             }
             Menu.MotionData {
                 id: motionData;
@@ -289,11 +297,20 @@ Rectangle {
             Menu.Synchronization {
                 id: sync;
             }
+            Hr {
+
+            }
             Menu.Stabilization {
                 id: stab;
             }
+            Hr {
+
+            }
             Menu.Export {
                 id: exportSettings;
+            }
+            Hr {
+
             }
             Menu.Advanced {
 

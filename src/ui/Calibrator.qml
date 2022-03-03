@@ -167,6 +167,9 @@ Window {
                 onSelectFileRequest: fileDialog.open();
                 opened: false;
             }
+            Hr {
+                
+            }
             Menu.LensCalibrate {
                 id: lensCalib;
             }
