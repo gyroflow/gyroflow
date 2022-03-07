@@ -7,7 +7,7 @@ pub mod wgpu;
 
 pub fn initialize_contexts() -> Option<String> {
     #[cfg(feature = "use-opencl")]
-    {
+    if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
         let cl = std::panic::catch_unwind(|| {
             opencl::OclWrapper::initialize_context()
         });
@@ -26,19 +26,21 @@ pub fn initialize_contexts() -> Option<String> {
         }
     }
 
-    let wgpu = std::panic::catch_unwind(|| {
-        wgpu::WgpuWrapper::initialize_context()
-    });
-    match wgpu {
-        Ok(Some(name)) => { return Some(name); },
-        Ok(None) => { log::error!("wgpu init error"); },
-        Err(e) => {
-            if let Some(s) = e.downcast_ref::<&str>() {
-                log::error!("Failed to initialize wgpu {}", s);
-            } else if let Some(s) = e.downcast_ref::<String>() {
-                log::error!("Failed to initialize wgpu {}", s);
-            } else {
-                log::error!("Failed to initialize wgpu {:?}", e);
+    if std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
+        let wgpu = std::panic::catch_unwind(|| {
+            wgpu::WgpuWrapper::initialize_context()
+        });
+        match wgpu {
+            Ok(Some(name)) => { return Some(name); },
+            Ok(None) => { log::error!("wgpu init error"); },
+            Err(e) => {
+                if let Some(s) = e.downcast_ref::<&str>() {
+                    log::error!("Failed to initialize wgpu {}", s);
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    log::error!("Failed to initialize wgpu {}", s);
+                } else {
+                    log::error!("Failed to initialize wgpu {:?}", e);
+                }
             }
         }
     }

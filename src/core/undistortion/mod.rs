@@ -108,7 +108,7 @@ impl<T: PixelType> Undistortion<T> {
             let mut gpu_initialized = false;
 
             #[cfg(feature = "use-opencl")]
-            {
+            if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
                 let cl = std::panic::catch_unwind(|| {
                     opencl::OclWrapper::new(self.size.0, self.size.1, self.size.2, T::COUNT * T::SCALAR_BYTES, self.output_size.0, self.output_size.1, self.output_size.2, T::COUNT, T::ocl_names(), self.background, interp)
                 });
@@ -126,7 +126,7 @@ impl<T: PixelType> Undistortion<T> {
                     }
                 }
             }
-            if !gpu_initialized && T::wgpu_format().is_some() {
+            if !gpu_initialized && T::wgpu_format().is_some() && std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
                 let wgpu = std::panic::catch_unwind(|| {
                     wgpu::WgpuWrapper::new(self.size.0, self.size.1, self.size.2, self.output_size.0, self.output_size.1, self.output_size.2, self.background, interp, T::wgpu_format().unwrap())
                 });
