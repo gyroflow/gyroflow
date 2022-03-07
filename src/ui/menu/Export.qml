@@ -146,12 +146,16 @@ MenuItem {
     Label {
         position: Label.Left;
         text: qsTr("Output size");
-        Row {
-            spacing: 5 * dpiScale;
+        Item {
+            width: parent.width;
+            height: outputWidth.height;
             NumberField {
                 id: outputWidth;
                 tooltip: qsTr("Width");
-                width: 60 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;               
+                anchors.left: parent.left;
+                width: (sizeMenuBtn.x - outputHeight.anchors.rightMargin - x - lockAspectRatio.width) / 2 - lockAspectRatio.anchors.leftMargin;
+               // width: 60 * dpiScale;
                 intNoThousandSep: true;
                 reset: () => { aspectRatio = defaultValue / Math.max(1,outHeight); value = defaultValue; };
                 onValueChanged: {
@@ -164,12 +168,32 @@ MenuItem {
                 }
                 live: false;
             }
-            BasicText { leftPadding: 0; text: "x"; anchors.verticalCenter: parent.verticalCenter; }
+            LinkButton {
+                id: lockAspectRatio;
+                checked: true;
+                height: parent.height * 0.75;
+                icon.name: checked? "lock" : "unlocked";
+                topPadding: 4 * dpiScale;
+                bottomPadding: 4 * dpiScale;
+                leftPadding: 3 * dpiScale;
+                rightPadding: -3 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;                
+                anchors.left: outputWidth.right;
+                anchors.leftMargin: 5 * dpiScale;
+                onClicked: checked = !checked;
+                textColor: checked? styleAccentColor : styleTextColor;
+                display: QQC.Button.IconOnly;
+                tooltip: qsTr("Lock aspect ratio");
+                onCheckedChanged: if (checked) { aspectRatio = outWidth / Math.max(1,outHeight); }
+            }
             NumberField {
                 id: outputHeight;
                 tooltip: qsTr("Height");
-                width: 60 * dpiScale;
                 intNoThousandSep: true;
+                anchors.verticalCenter: parent.verticalCenter;
+                anchors.right: sizeMenuBtn.left;
+                anchors.rightMargin: 5 * dpiScale;
+                width: outputWidth.width;
                 onValueChanged: {
                     if (!disableUpdate) {
                         disableUpdate = true;
@@ -182,20 +206,39 @@ MenuItem {
                 reset: () => { aspectRatio = outWidth / Math.max(1,defaultValue); value = defaultValue; };
             }
             LinkButton {
-                id: lockAspectRatio;
-                checked: true;
-                height: parent.height * 0.75;
-                icon.name: checked? "lock" : "unlocked";
-                topPadding: 4 * dpiScale;
-                bottomPadding: 4 * dpiScale;
+                id: sizeMenuBtn;
+                height: parent.height;
+                icon.name: "settings";
                 leftPadding: 3 * dpiScale;
-                rightPadding: -3 * dpiScale;
+                rightPadding: 3 * dpiScale;
                 anchors.verticalCenter: parent.verticalCenter;
-                onClicked: checked = !checked;
-                textColor: checked? styleAccentColor : styleTextColor;
+                anchors.right: parent.right;
                 display: QQC.Button.IconOnly;
-                tooltip: qsTr("Lock aspect ratio");
-                onCheckedChanged: if (checked) { aspectRatio = outWidth / Math.max(1,outHeight); }
+                tooltip: qsTr("Output size settings");
+                onClicked: sizeMenu.popup(x, y+height);
+            }
+            Menu {
+                id: sizeMenu;
+                font.pixelSize: 11.5 * dpiScale;
+
+                function setSize(w, h) {
+                    disableUpdate = true;
+                    aspectRatio = w / h;
+                    outWidth = w;
+                    outHeight = h;
+                    Qt.callLater(notifySizeChanged);
+                    disableUpdate = false;
+                }
+
+                Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
+                Action { text: "6k (6016 × 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
+                Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize( 840, 2160) }
+                Action { text: "2k (2048 x 1080)";     onTriggered: sizeMenu.setSize(2048, 1080) }
+                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+                Action { text: "1440p (2560 x 1440)";  onTriggered: sizeMenu.setSize(2560, 1440) }
+                Action { text: "1080p (1920 x 1080)";  onTriggered: sizeMenu.setSize(1920, 1080) }
+                Action { text: "720p (1280 x 720)";    onTriggered: sizeMenu.setSize(1280, 720) }
+                Action { text: "480p (640 x 480)";     onTriggered: sizeMenu.setSize( 640, 480) }
             }
         }
     }
