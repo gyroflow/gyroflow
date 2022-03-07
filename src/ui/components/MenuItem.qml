@@ -54,14 +54,14 @@ Item {
         font.family: styleFont;
         font.capitalization: Font.Normal
 
-        background: Rectangle {
-            color: "transparent";
+        background: Item {
             anchors.fill: parent;
 
             Rectangle {
                 color: styleAccentColor;
                 height: parent.height * 0.45;
                 width: 3 * dpiScale;
+                radius: width;
                 opacity: root.opened? 1 : 0;
                 y: root.opened? (parent.height - height) / 2 : -height;
 
