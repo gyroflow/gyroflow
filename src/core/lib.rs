@@ -470,7 +470,7 @@ impl<T: PixelType> StabilizationManager<T> {
                                     pt = (pt.0 / fov, pt.1 / fov);
                                     pt = (pt.0 + 0.5, pt.1 + 0.5);
                                     let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
-                                    if x >= 0 && y >= 0 && x <= out_width as i32 && y <= out_height as i32 {
+                                    if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
                                         let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
                                         if out_pixels.len() > pos + 2 { 
                                             out_pixels[pos + 0] = 0xff; // R

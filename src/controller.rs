@@ -543,7 +543,7 @@ impl Controller {
             let stab = self.stabilizer.clone();
             vid.onResize(Box::new(move |width, height| {
                 let current_size = stab.params.read().size;
-                if current_size.0 != width as usize && current_size.1 != height as usize {
+                if current_size.0 != width as usize || current_size.1 != height as usize {
                     stab.set_size(width as usize, height as usize);
                     stab.recompute_threaded(|_|());
 
