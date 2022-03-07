@@ -8,8 +8,8 @@ pub mod zoom_dynamic;
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
-use dyn_clone::{ clone_trait_object, DynClone };
 use enterpolation::Merge;
+use std::collections::BTreeMap;
 
 use crate::undistortion::{ ComputeParams };
 
@@ -31,17 +31,17 @@ impl Merge<f64> for Point2D {
     }
 }
 
-pub trait ZoomingAlgorithm : DynClone {
+pub trait ZoomingAlgorithm {
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)>;
-    fn compute_params(&self) -> &ComputeParams;    
+    fn compute_params(&self) -> &ComputeParams;
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
     fn hash(&self, hasher: &mut dyn Hasher);
 }
-clone_trait_object!(ZoomingAlgorithm);
 
-pub trait FieldOfViewAlgorithm : DynClone {
+pub trait FieldOfViewAlgorithm {
     fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>);
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
 }
-clone_trait_object!(FieldOfViewAlgorithm);
 
 pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
     compute_params.fov_scale = 1.0;
@@ -62,9 +62,9 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
         Mode::Disabled
     };
 
-    let fov_estimator = Box::new(fov_iterative::FovIterative::new(compute_params.clone()));
-    //let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
-    //let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
+    // let fov_estimator = Box::new(fov_iterative::FovIterative::new(compute_params.clone()));
+    // let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
+    let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
     match mode {
         Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
         Mode::Static              => Box::new(zoom_static::ZoomStatic::new(fov_estimator, compute_params)),

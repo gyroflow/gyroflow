@@ -74,7 +74,7 @@ public:
         m_computeUniform.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(Uniforms)));
         if (!m_computeUniform->create()) { qDebug() << "failed to create m_computeUniform"; return false; }
 
-        m_texParams.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, (textureSize.height() + 1)), 1, QRhiTexture::UsedAsTransferSource));
+        m_texParams.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, (textureSize.height() + 2)), 1, QRhiTexture::UsedAsTransferSource));
         if (!m_texParams->create()) { qDebug() << "failed to create m_texParams"; return false; }
 
         params_buffer.resize((textureSize.height() + 1) * 9);
@@ -110,7 +110,7 @@ public:
         m_pipeline.reset(rhi->newGraphicsPipeline());
         m_pipeline->setShaderStages({
             { QRhiShaderStage::Vertex,   getShader(QLatin1String(":/src/qt_gpu/compiled/texture.vert.qsb")) },
-            { QRhiShaderStage::Fragment, getShader(QLatin1String(":/src/qt_gpu/compiled/undistort.frag.qsb")) } 
+            { QRhiShaderStage::Fragment, getShader(QLatin1String(":/src/qt_gpu/compiled/undistort.frag.qsb")) }
         });
         QRhiVertexInputLayout inputLayout;
         inputLayout.setBindings({ { 4 * sizeof(float) } });
@@ -151,7 +151,7 @@ public:
         u->copyTexture(m_texIn.get(), item->rhiTexture(), {});
 
         Uniforms uniforms;
-        uniforms.params_count = params_count - 1;
+        uniforms.params_count = params_count;
         uniforms.width = size.width();
         uniforms.height = size.height();
         uniforms.output_width = m_outputSize.width();

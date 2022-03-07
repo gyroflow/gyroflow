@@ -51,6 +51,88 @@ fn interpolate(sx: i32, sy: i32, sx0: i32, sy0: i32, width_u: i32, height_u: i32
     return vec4<SCALAR>(sum);
 }
 
+fn undistort_point(pos: vec2<f32>, f: vec2<f32>, c: vec2<f32>, k: vec4<f32>, amount: f32) -> vec2<f32> {
+    let pos = (pos - c) / f;
+
+    let theta_d = min(max(length(pos), -1.5707963267948966), 1.5707963267948966); // PI/2
+
+    var converged = false;
+    var theta = theta_d;
+
+    var scale = 0.0;
+
+    if (abs(theta_d) > 1e-6) {
+        for (var i: i32 = 0; i < 10; i = i + 1) {
+            let theta2 = theta*theta;
+            let theta4 = theta2*theta2;
+            let theta6 = theta4*theta2;
+            let theta8 = theta6*theta2;
+            let k0_theta2 = k.x * theta2;
+            let k1_theta4 = k.y * theta4;
+            let k2_theta6 = k.z * theta6;
+            let k3_theta8 = k.w * theta8;
+            // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
+            let theta_fix = (theta * (1.0 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
+                            /
+                            (1.0 + 3.0 * k0_theta2 + 5.0 * k1_theta4 + 7.0 * k2_theta6 + 9.0 * k3_theta8);
+
+            theta -= theta_fix;
+            if (abs(theta_fix) < 1e-6) {
+                converged = true;
+                break;
+            }
+        }
+
+        scale = tan(theta) / theta_d;
+    } else {
+        converged = true;
+    }
+    let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
+
+    if (converged && !theta_flipped) {
+        // Apply only requested amount
+        scale = 1.0 + (scale - 1.0) * (1.0 - amount);
+
+        return f * pos * scale + c;
+    }
+    return vec2<f32>(0.0, 0.0);
+}
+
+fn distort_point(pos: vec2<f32>, f: vec2<f32>, c: vec2<f32>, k: vec4<f32>) -> vec2<f32> {
+    let r = length(pos);
+
+    let theta = atan(r);
+    let theta2 = theta*theta;
+    let theta4 = theta2*theta2;
+    let theta6 = theta4*theta2;
+    let theta8 = theta4*theta4;
+
+    let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));
+
+    var scale: f32 = 1.0;
+    if (r != 0.0) {
+        scale = theta_d / r;
+    }
+    return f * pos * scale + c;
+}
+
+fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: vec4<f32>, r_limit: f32) -> vec2<f32> {
+    let _x = (pos.y * undistortion_params[idx + 1u]) + undistortion_params[idx + 2u] + (pos.x * undistortion_params[idx + 0u]);
+    let _y = (pos.y * undistortion_params[idx + 4u]) + undistortion_params[idx + 5u] + (pos.x * undistortion_params[idx + 3u]);
+    let _w = (pos.y * undistortion_params[idx + 7u]) + undistortion_params[idx + 8u] + (pos.x * undistortion_params[idx + 6u]);
+
+    if (_w > 0.0) {
+        let pos = vec2<f32>(_x, _y) / _w;
+        let r = length(pos);
+        if (r_limit > 0.0 && r > r_limit) {
+            return vec2<f32>(-99999.0, -99999.0);
+        }
+        return distort_point(pos, f, c, k);
+    }
+    return vec2<f32>(-99999.0, -99999.0);
+}
+
+
 @stage(vertex)
 fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
     var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
@@ -73,8 +155,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let params_count = params.params_count;
     let bg = vec4<SCALAR>(SCALAR(params.background[0]), SCALAR(params.background[1]), SCALAR(params.background[2]), SCALAR(params.background[3]));
 
-    let x: f32 = f32(gx);
-    let y: f32 = f32(gy);
+    var texPos = vec2<f32>(f32(gx), f32(gy));
 
     let width_u = i32(width);
     let height_u = i32(height);
@@ -83,62 +164,49 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let c = vec2<f32>(undistortion_params[2], undistortion_params[3]);
     let k = vec4<f32>(undistortion_params[4], undistortion_params[5], undistortion_params[6], undistortion_params[7]);
     let r_limit = undistortion_params[8];
+    let lens_correction_amount = undistortion_params[9];
+    let background_mode = undistortion_params[10];
+    let fov = undistortion_params[11];
+    let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
+    let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = u32(gy);
-    if (params_count > 2u) {
-        let params_idx: u32 = (params_count / 2u) * 9u; // Use middle matrix
-        let x_y_ = vec2<f32>(y * undistortion_params[params_idx + 1u] + undistortion_params[params_idx + 2u] + (x * undistortion_params[params_idx + 0u]),
-                             y * undistortion_params[params_idx + 4u] + undistortion_params[params_idx + 5u] + (x * undistortion_params[params_idx + 3u]));
-        let w_ = y * undistortion_params[params_idx + 7u] + undistortion_params[params_idx + 8u] + (x * undistortion_params[params_idx + 6u]);
-        if (w_ > 0.0) {
-            let pos = x_y_ / w_;
-            let r = length(pos);
-            let theta = atan(r);
-            let theta2 = theta*theta; let theta4 = theta2*theta2; let theta6 = theta4*theta2; let theta8 = theta4*theta4;
-            let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));            
-            var scale: f32 = 1.0;
-            if (r != 0.0) {
-                scale = theta_d / r;
-            }
-            let uv = f * pos * scale + c;
-            sy = u32(min(height_u, max(0, i32(floor(0.5 + uv.y * f32(INTER_TAB_SIZE))) >> INTER_BITS)));
+    if (params_count > 3u) {
+        let idx: u32 = 2u + ((params_count - 2u) / 2u) * 9u; // Use middle matrix
+        let uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
+        if (uv.x > -99998.0) {
+            sy = u32(min(height_u, max(0, i32(floor(0.5 + uv.y)))));
         }
     }
     ///////////////////////////////////////////////////////////////////
  
-    let params_idx: u32 = min((sy + 1u), (params_count - 1u)) * 9u;
+    if (lens_correction_amount < 1.0) {
+        // Add lens distortion back
+        let factor = max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
+        texPos = undistort_point(texPos, (f / fov) / factor, c, k, lens_correction_amount);
+    }
+
+    let idx: u32 = min((sy + 2u), (params_count - 1u)) * 9u;
  
-    let x_y_ = vec2<f32>(y * undistortion_params[params_idx + 1u] + undistortion_params[params_idx + 2u] + (x * undistortion_params[params_idx + 0u]),
-                         y * undistortion_params[params_idx + 4u] + undistortion_params[params_idx + 5u] + (x * undistortion_params[params_idx + 3u]));
-    let w_ = y * undistortion_params[params_idx + 7u] + undistortion_params[params_idx + 8u] + (x * undistortion_params[params_idx + 6u]);
- 
-    if (w_ > 0.0) {
-        let pos = x_y_ / w_;
-        let r = length(pos);
+    var uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
 
-        if (r_limit > 0.0 && r > r_limit) {
-            return bg;
+    if (uv.x > -99998.0) {
+        let width_f = f32(width);
+        let height_f = f32(height);
+        if (edge_repeat) {
+            uv = max(vec2<f32>(0.0, 0.0), min(vec2<f32>(width_f - 1.0, height_f - 1.0), uv));
+        } else if (edge_mirror) {
+            let rx = round(uv.x);
+            let ry = round(uv.y);
+            let width3 = (width_f - 3.0);
+            let height3 = (height_f - 3.0);
+            if (rx > width3)  { uv.x = width3  - (rx - width3); }
+            if (rx < 3.0)     { uv.x = 3.0 + width_f - (width3 + rx); }
+            if (ry > height3) { uv.y = height3 - (ry - height3); }
+            if (ry < 3.0)     { uv.y = 3.0 + height_f - (height3 + ry); }
         }
-
-        let theta = atan(r);
-        let theta2 = theta*theta;
-        let theta4 = theta2*theta2;
-        let theta6 = theta4*theta2;
-        let theta8 = theta4*theta4;
-
-        let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));
-
-        var scale: f32 = 1.0;
-        if (r != 0.0) {
-            scale = theta_d / r;
-        }
-
-        var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
-        let offset = offsets[params.interpolation >> 2u];
-
-        let uv = f * pos * scale + c - offset;
 
         let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
         let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));

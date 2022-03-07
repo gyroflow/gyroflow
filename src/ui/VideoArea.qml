@@ -54,6 +54,7 @@ Item {
                 }
                 window.motionData.loadGyroflow(obj);
                 window.stab.loadGyroflow(obj);
+                window.advanced.loadGyroflow(obj);
 
                 const info = obj.video_info || { };
                 if (info) {

@@ -4,29 +4,42 @@
 use super::*;
 use crate::undistortion::undistort_points_with_rolling_shutter;
 use enterpolation::{ Curve, bspline::BSpline };
+use std::collections::BTreeMap;
+use parking_lot::RwLock;
+use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator, IntoParallelRefIterator };
 
-
-#[derive(Clone)]
 pub struct FovDefault {
     compute_params: ComputeParams,
     input_dim: (f64, f64), 
     output_dim: (f64, f64),
+    debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
 
 impl FieldOfViewAlgorithm for FovDefault { 
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
+        self.debug_points.read().clone()
+    }
     fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
         if timestamps.is_empty() {
             return (Vec::new(), Vec::new());
         }
-        let boundary_polygons: Vec<Vec<Point2D>> = timestamps.iter().map(|&ts| self.bounding_polygon(ts, 9)).collect();
+        let boundary_polygons: Vec<Vec<Point2D>> = timestamps.par_iter().map(|&ts| self.bounding_polygon(ts, 9)).collect();
+
+        if self.compute_params.zooming_debug_points {
+            let mut pts = self.debug_points.write();
+            for (i, polygon) in boundary_polygons.iter().enumerate() {
+                let ts_us = (timestamps[i] * 1000.0).round() as i64;
+                pts.insert(ts_us, polygon.iter().map(|pt| (pt.0 / self.input_dim.0, pt.1 / self.input_dim.1)).collect());
+            }
+        }
 
         // TODO: implement smoothing of position of crop, s.t. cropping area can "move" anywhere within bounding polygon
         let crop_center_positions: Vec<Point2D> = timestamps.into_iter().map(|_| Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0)).collect();
 
-        let mut fov_values: Vec<f64> = crop_center_positions.iter()
-                                                            .zip(boundary_polygons.iter())
+        let mut fov_values: Vec<f64> = crop_center_positions.par_iter()
+                                                            .zip(boundary_polygons.into_par_iter())
                                                             .filter_map(|(&center, polygon)| 
-                                                                self.find_fov(center, polygon)
+                                                                self.find_fov(center, &polygon)
                                                             ).collect();
 
         if range.0 > 0.0 || range.1 < 1.0 {
@@ -56,7 +69,8 @@ impl FovDefault {
         Self {
             input_dim,
             output_dim,
-            compute_params
+            compute_params,
+            debug_points: RwLock::new(BTreeMap::new())
         }
     }
 
@@ -143,7 +157,9 @@ impl FovDefault {
 
     fn bounding_polygon(&self, timestamp_ms: f64, num_points: usize) -> Vec<Point2D> {
         if num_points < 1 { return Vec::new(); }
-        let (w, h) = (self.input_dim.0, self.input_dim.1);
+        let margin = 2.0;
+
+        let (w, h) = (self.input_dim.0 - margin*2.0, self.input_dim.1 - margin*2.0);
 
         let pts = num_points - 1;
         let dim_ratio = ((w / pts as f64), (h / pts as f64));
@@ -152,6 +168,12 @@ impl FovDefault {
         for i in 0..pts { distorted_points.push((w,                                   i as f64 * dim_ratio.1)); }
         for i in 0..pts { distorted_points.push(((pts - i) as f64 * dim_ratio.0,      h)); }
         for i in 0..pts { distorted_points.push((0.0,                                 (pts - i) as f64 * dim_ratio.1)); }
+
+        // Add margin
+        for (x, y) in distorted_points.iter_mut() {
+            *x += margin;
+            *y += margin;
+        }
 
         let undistorted_points = undistort_points_with_rolling_shutter(&distorted_points, timestamp_ms, &self.compute_params);
 

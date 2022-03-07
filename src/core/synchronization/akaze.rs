@@ -80,8 +80,8 @@ impl ItemAkaze {
 
         let pts1 = a1.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
         let pts2 = a2.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
-        let pts1 = crate::undistortion::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
-        let pts2 = crate::undistortion::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
+        let pts1 = crate::undistortion::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, 1.0);
+        let pts2 = crate::undistortion::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, 1.0);
 
         let intrinsics = cv_pinhole::CameraIntrinsics::identity();
         let matches: Vec<Match> = Self::match_descriptors(&a1.1, &a2.1).into_iter()

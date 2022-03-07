@@ -1,5 +1,8 @@
 use super::*;
 use crate::undistortion::undistort_points_with_rolling_shutter;
+use std::collections::BTreeMap;
+use parking_lot::RwLock;
+use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };
 
 /*
 Direct FOV calculation:
@@ -13,36 +16,49 @@ Direct FOV calculation:
     - from the nearest point of (1),(2) or (3), calculate the FOV
 */
 
-#[derive(Clone)]
 pub struct FovDirect {
     input_dim: (f64, f64), 
     output_dim: (f64, f64),
     output_inv_aspect: f64,
-    compute_params: ComputeParams
+    compute_params: ComputeParams,
+    debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
 impl FieldOfViewAlgorithm for FovDirect { 
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
+        self.debug_points.read().clone()
+    }
     fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
         if timestamps.is_empty() {
             return (Vec::new(), Vec::new());
         }
+
+        let l = (timestamps.len() - 1) as f64;
+
         let src_rect = points_around_rect(self.input_dim.0, self.input_dim.1, 15, 15);
         let polygons: Vec<Vec<(f64, f64)>> = timestamps
-            .iter()
+            .into_par_iter()
             .map(|&ts| undistort_points_with_rolling_shutter(&src_rect, ts, &self.compute_params))
             .collect();
+
+        if self.compute_params.zooming_debug_points {
+            let mut pts = self.debug_points.write();
+            for (i, polygon) in polygons.iter().enumerate() {
+                let ts_us = (timestamps[i] * 1000.0).round() as i64;
+                pts.insert(ts_us, polygon.iter().map(|pt| (pt.0 / self.input_dim.0, pt.1 / self.input_dim.1)).collect());
+            }
+        }
 
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
         let center_positions: Vec<Point2D> = polygons.iter().map(|_| cp).collect();
 
-        let mut fov_values: Vec<f64> = polygons.iter()
+        let mut fov_values: Vec<f64> = polygons.into_par_iter()
             .zip(&center_positions)
-            .map(|(polygon, center)| self.find_fov(polygon, center))
+            .map(|(polygon, center)| self.find_fov(&polygon, center))
             .collect();
 
         if range.0 > 0.0 || range.1 < 1.0 {
             // Only within render range.
             if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
-                let l = (timestamps.len() - 1) as f64;
                 let first_ind = (l * range.0).floor() as usize;
                 let last_ind  = (l * range.1).ceil() as usize;
                 if fov_values.len() > first_ind {
@@ -69,7 +85,8 @@ impl FovDirect {
             input_dim,
             output_dim,
             output_inv_aspect,
-            compute_params
+            compute_params,
+            debug_points: RwLock::new(BTreeMap::new())
         }
     }
 
@@ -106,7 +123,11 @@ impl FovDirect {
 }
 
 // Returns points placed around a rectangle in a continous order
-fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f64)> {
+fn points_around_rect(mut w: f64, mut h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f64)> {
+    let margin = 2.0;
+    w -= margin * 2.0;
+    h -= margin * 2.0;
+    
     let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
     let (wstep, hstep) = (w / wcnt as f64, h / hcnt as f64);
     
@@ -116,6 +137,12 @@ fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f
     for i in 0..hcnt { distorted_points.push((w,                         i as f64 * hstep)); }
     for i in 0..wcnt { distorted_points.push(((wcnt - i) as f64 * wstep, h)); }
     for i in 0..hcnt { distorted_points.push((0.0,                       (hcnt - i) as f64 * hstep)); }
+
+    // Add margin
+    for (x, y) in distorted_points.iter_mut() {
+        *x += margin;
+        *y += margin;
+    }
 
     distorted_points
 }

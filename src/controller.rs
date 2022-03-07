@@ -103,6 +103,10 @@ pub struct Controller {
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
 
+    lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+
+    background_mode: qt_property!(i32; WRITE set_background_mode),
+
     lens_loaded: qt_property!(bool; NOTIFY lens_changed),
     set_lens_param: qt_method!(fn(&self, param: QString, value: f64)),
     lens_changed: qt_signal!(),
@@ -740,6 +744,9 @@ impl Controller {
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
+
+    wrap_simple_method!(set_lens_correction_amount, v: f64; recompute);
+    wrap_simple_method!(set_background_mode, v: i32; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);

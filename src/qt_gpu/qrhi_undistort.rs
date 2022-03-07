@@ -51,9 +51,9 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
                 *bg.offset(2) = params.background[2] / 255.0;
                 *bg.offset(3) = params.background[3] / 255.0;
                 if params.frame_readout_time.abs() > 0.0 {
-                    (params.size.1 + 1) as u32
+                    (params.size.1 + 2) as u32
                 } else {
-                    2
+                    3
                 }
             });
             if (rhiUndistortion->params_buffer.size() < params_count * 9) {

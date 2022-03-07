@@ -1,6 +1,6 @@
 use super::*;
+use std::collections::BTreeMap;
 
-#[derive(Clone)]
 pub struct ZoomDynamic {
     window: f64, 
     fov_estimator: Box<dyn FieldOfViewAlgorithm>,
@@ -8,6 +8,8 @@ pub struct ZoomDynamic {
 }
 
 impl ZoomingAlgorithm for ZoomDynamic {
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
+
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> {
         if timestamps.is_empty() {
             return Vec::new();

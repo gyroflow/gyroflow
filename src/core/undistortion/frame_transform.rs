@@ -114,13 +114,21 @@ impl FrameTransform {
             params.radial_distortion_limit as f32
         ]);
 
+        // Add additional params after lens params
+        transform_params.insert(1, [
+            params.lens_correction_amount as f32,
+            params.background_mode as i32 as f32, 
+            fov as f32, 
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0 // unused
+        ]);
+
         Self {
             params: transform_params,
             fov: ui_fov
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, lens_correction_amount
         let img_dim_ratio = Self::get_ratio(params);
         let fov = Self::get_fov(params, 0, false);
 
@@ -158,6 +166,6 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        (scaled_k, params.distortion_coeffs, new_k, rotations)
+        (scaled_k, params.distortion_coeffs, new_k, rotations, params.lens_correction_amount)
     }
 }

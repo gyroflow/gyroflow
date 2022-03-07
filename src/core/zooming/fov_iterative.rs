@@ -1,5 +1,8 @@
 use super::*;
 use crate::undistortion::undistort_points_with_rolling_shutter;
+use std::collections::BTreeMap;
+use parking_lot::RwLock;
+use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };
 
 /*
 Iterative FOV calculation:
@@ -10,24 +13,30 @@ Iterative FOV calculation:
     - repeat shrinking the rectangle
 */
 
-#[derive(Clone)]
 pub struct FovIterative {
     input_dim: (f64, f64), 
     output_dim: (f64, f64),
     output_inv_aspect: f64,
-    compute_params: ComputeParams
+    compute_params: ComputeParams,
+    debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
 impl FieldOfViewAlgorithm for FovIterative { 
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
+        self.debug_points.read().clone()
+    }
+
     fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
         if timestamps.is_empty() {
             return (Vec::new(), Vec::new());
         }
+        let l = (timestamps.len() - 1) as f64;
+
         let rect = points_around_rect(self.input_dim.0, self.input_dim.1, 31, 31);
 
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
         let center_positions: Vec<Point2D> = timestamps.iter().map(|_| cp).collect();
 
-        let mut fov_values: Vec<f64> = timestamps.iter()
+        let mut fov_values: Vec<f64> = timestamps.into_par_iter()
             .zip(&center_positions)
             .map(|(&ts, center)| self.find_fov(&rect, ts, center))
             .collect();
@@ -35,7 +44,6 @@ impl FieldOfViewAlgorithm for FovIterative {
         if range.0 > 0.0 || range.1 < 1.0 {
             // Only within render range.
             if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
-                let l = (timestamps.len() - 1) as f64;
                 let first_ind = (l * range.0).floor() as usize;
                 let last_ind  = (l * range.1).ceil() as usize;
                 if fov_values.len() > first_ind {
@@ -51,7 +59,7 @@ impl FieldOfViewAlgorithm for FovIterative {
     }
 }
 
-impl FovIterative { 
+impl FovIterative {
     pub fn new(compute_params: ComputeParams) -> Self {
         let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
@@ -62,12 +70,18 @@ impl FovIterative {
             input_dim,
             output_dim,
             output_inv_aspect,
-            compute_params
+            compute_params,
+            debug_points: RwLock::new(BTreeMap::new())
         }
     }
 
     fn find_fov(&self, rect: &[(f64, f64)], ts: f64, center: &Point2D) -> f64 {
+        let ts_us = (ts * 1000.0).round() as i64;
+
         let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params);
+        if self.compute_params.zooming_debug_points {
+            self.debug_points.write().insert(ts_us, polygon.iter().map(|(x, y)| (x / self.input_dim.0, y / self.input_dim.1)).collect());
+        }
         
         let initial: (f64,f64) = (1000000.0, 1000000.0*self.output_inv_aspect);
         let mut nearest = (None, initial);
@@ -112,7 +126,11 @@ impl FovIterative {
 }
 
 // Returns points placed around a rectangle in a continous order
-fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f64)> {
+fn points_around_rect(mut w: f64, mut h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f64)> {
+    let margin = 2.0;
+    w -= margin * 2.0;
+    h -= margin * 2.0;
+
     let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
     let (wstep, hstep) = (w / wcnt as f64, h / hcnt as f64);
     
@@ -122,6 +140,12 @@ fn points_around_rect(w: f64, h: f64, w_div: usize, h_div: usize) -> Vec<(f64, f
     for i in 0..hcnt { distorted_points.push((w,                         i as f64 * hstep)); }
     for i in 0..wcnt { distorted_points.push(((wcnt - i) as f64 * wstep, h)); }
     for i in 0..hcnt { distorted_points.push((0.0,                       (hcnt - i) as f64 * hstep)); }
+
+    // Add margin
+    for (x, y) in distorted_points.iter_mut() {
+        *x += margin;
+        *y += margin;
+    }
 
     distorted_points
 }

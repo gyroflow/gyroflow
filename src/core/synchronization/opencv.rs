@@ -73,8 +73,8 @@ impl ItemOpenCV {
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
             let pts11 = pts1.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
             let pts22 = pts2.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
-            let pts11 = crate::undistortion::undistort_points(&pts11, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
-            let pts22 = crate::undistortion::undistort_points(&pts22, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None);
+            let pts11 = crate::undistortion::undistort_points(&pts11, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, 1.0);
+            let pts22 = crate::undistortion::undistort_points(&pts22, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, 1.0);
 
             let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
             let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();

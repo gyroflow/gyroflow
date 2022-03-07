@@ -139,9 +139,9 @@ dependencies = [
 
 [[package]]
 name = "ash"
-version = "0.34.0+1.2.203"
+version = "0.35.2+1.2.203"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0f780da53d0063880d45554306489f09dd8d1bda47688b4a57bc579119356df"
+checksum = "8f6a491bcad4563b355ac2bb6e3f09d5e1c5d628710c7156e901dad0c416075e"
 dependencies = [
  "libloading",
 ]
@@ -280,9 +280,9 @@ checksum = "a4a45a46ab1f2412e53d3a0ade76ffad2025804294569aae387231a0cd6e0899"
 
 [[package]]
 name = "bytemuck"
-version = "1.7.3"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "439989e6b8c38d1b6570a384ef1e49c8848128f5a97f3914baef02920842712f"
+checksum = "0e851ca7c24871e7336801608a4797d7376545b6928a10d32d75685687141ead"
 
 [[package]]
 name = "byteorder"
@@ -918,6 +918,7 @@ dependencies = [
  "mimalloc",
  "nalgebra",
  "num 0.4.0",
+ "num-traits 0.2.14",
  "ocl",
  "opencv",
  "parking_lot 0.12.0",
@@ -1088,6 +1089,7 @@ checksum = "8c2352bd1d0bceb871cb9d40f24360c8133c11d7486b68b5381c1dd1a32015e3"
 dependencies = [
  "libc",
  "libloading",
+ "pkg-config",
 ]
 
 [[package]]
@@ -1230,8 +1232,7 @@ dependencies = [
 [[package]]
 name = "metal"
 version = "0.23.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0514f491f4cc03632ab399ee01e2c1c1b12d3e1cf2d667c1ff5f87d6dcd2084"
+source = "git+https://github.com/gfx-rs/metal-rs?rev=a357159#a35715916fec38bbc08a510ecf7d115edc500c72"
 dependencies = [
  "bitflags",
  "block",
@@ -1286,9 +1287,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3012f2dbcc79e8e0b5825a4836a7106a75dd9b2fe42c528163be0f572538c705"
+version = "0.8.0"
+source = "git+https://github.com/gfx-rs/naga?rev=a45b9a6#a45b9a6cc691a671aa24a32114b51c5acae02420"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -1593,9 +1593,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da32515d9f6e6e489d7bc9d84c71b060db7247dc035bbe44eac88cf87486d8d5"
+checksum = "87f3e037eac156d1775da914196f0f37741a274155e34a0b7e427c35d2a2ecb9"
 
 [[package]]
 name = "opencv"
@@ -2232,9 +2232,9 @@ dependencies = [
 
 [[package]]
 name = "termcolor"
-version = "1.1.2"
+version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dfed899f0eb03f32ee8c6a0aabdb8a7949659e3466561fc0adf54e26d88c5f4"
+checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
 dependencies = [
  "winapi-util",
 ]
@@ -2428,8 +2428,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97cd781ff044d6d697b632a2e212032c2e957d1afaa21dbf58069cbb8f78567"
+source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2448,9 +2447,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.12.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4688c000eb841ca55f7b35db659b78d6e1cd77d7caf8fb929f4e181f754047d"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2471,9 +2469,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93b1a9400e8d7f32dd4dd909bb9a391015d70633d639775ddd3f14d1104bc970"
+version = "0.12.0"
+source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2510,8 +2507,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "549533d9e1cdd4b4cda7718d33ff500fc4c34b5467b71d76b547ae0324f3b2a2"
+source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
 dependencies = [
  "bitflags",
 ]

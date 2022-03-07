@@ -64,32 +64,67 @@ __constant float coeffs[256] = {
 };
 #endif
 
-/*float2 distort_back(float2 point, float2 f, float2 c, float4 k) {
-    // To relative coordinates
-    float x = (point.x - c.x) / f.x;
-    float y = (point.y - c.y) / f.y;
+float2 undistort_point(float2 pos, float2 f, float2 c, float4 k, float amount) {
+    pos = (pos - c) / f;
 
-    float r2 = x*x + y*y;
+    float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
 
-    float k1 = k.x;
-    float k2 = k.y;
-    float p1 = k.z;
-    float p2 = k.w;
+    bool converged = false;
+    float theta = theta_d;
 
-    // Radial distorsion
-    float xDistort = x * (1.0 + k1 * r2 + k2 * r2 * r2);
-    float yDistort = y * (1.0 + k1 * r2 + k2 * r2 * r2);
+    float scale = 0.0f;
 
-    // Tangential distorsion
-    xDistort = xDistort + (2.0 * p1 * x * y + p2 * (r2 + 2.0 * x * x));
-    yDistort = yDistort + (p1 * (r2 + 2.0 * y * y) + 2.0 * p2 * x * y);
+    if (fabs(theta_d) > 1e-6f) {
+        for (int i = 0; i < 10; ++i) {
+            float theta2 = theta*theta;
+            float theta4 = theta2*theta2;
+            float theta6 = theta4*theta2;
+            float theta8 = theta6*theta2;
+            float k0_theta2 = k.x * theta2;
+            float k1_theta4 = k.y * theta4;
+            float k2_theta6 = k.z * theta6;
+            float k3_theta8 = k.w * theta8;
+            // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
+            float theta_fix = (theta * (1.0f + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
+                              /
+                              (1.0f + 3.0f * k0_theta2 + 5.0f * k1_theta4 + 7.0f * k2_theta6 + 9.0f * k3_theta8);
 
-    // Back to absolute coordinates.
-    xDistort = xDistort * f.x + c.x;
-    yDistort = yDistort * f.y + c.y;
+            theta -= theta_fix;
+            if (fabs(theta_fix) < 1e-6f) {
+                converged = true;
+                break;
+            }
+        }
 
-    return (float2)(xDistort, yDistort);
-}*/
+        scale = tan(theta) / theta_d;
+    } else {
+        converged = true;
+    }
+    bool theta_flipped = (theta_d < 0.0f && theta > 0.0f) || (theta_d > 0.0f && theta < 0.0f);
+
+    if (converged && !theta_flipped) {
+        // Apply only requested amount
+        scale = 1.0f + (scale - 1.0f) * (1.0f - amount);
+
+        return f * pos * scale + c;
+    }
+    return (float2)(0.0f, 0.0f);
+}
+
+float2 distort_point(float2 pos, float2 f, float2 c, float4 k) {
+    float r = length(pos);
+
+    float theta = atan(r);
+    float theta2 = theta*theta, 
+          theta4 = theta2*theta2, 
+          theta6 = theta4*theta2, 
+          theta8 = theta4*theta4;
+
+    float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
+
+    float scale = r == 0? 1.0 : theta_d / r;
+    return f * pos * scale + c;
+}
 
 // Adapted from OpenCV: initUndistortRectifyMap + remap 
 // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
@@ -104,53 +139,66 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     float2 c = vload2(0, &undistortion_params[2]);
     float4 k = vload4(0, &undistortion_params[4]);
     float r_limit = undistortion_params[8];
+    float lens_correction_amount = undistortion_params[9];
+    float background_mode = undistortion_params[10];
+    float fov = undistortion_params[11];
+    bool edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
+    bool edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
-    if (x < output_width && y < output_height) {
+    if (x >= 0 && y >= 0 && x < output_width && y < output_height) {
         ///////////////////////////////////////////////////////////////////
         // Calculate source `y` for rolling shutter
         int sy = y;
-        if (params_count > 2) {
-            __global const float *params = &undistortion_params[(params_count / 2) * 9]; // Use middle matrix
+        if (params_count > 3) {
+            __global const float *params = &undistortion_params[(2 + ((params_count - 2) / 2)) * 9]; // Use middle matrix
             float _x = y * params[1] + params[2] + (x * params[0]);
             float _y = y * params[4] + params[5] + (x * params[3]);
             float _w = y * params[7] + params[8] + (x * params[6]);
             if (_w > 0) {
                 float2 pos = (float2)(_x, _y) / _w;
-                float r = length(pos);
-                float theta = atan(r);
-                float theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;
-                float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
-                float scale = r == 0? 1.0 : theta_d / r;
-                float2 uv = f * pos * scale + c;
-                sy = min((int)height, max(0, convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE) >> INTER_BITS));
+                float2 uv = distort_point(pos, f, c, k);
+                sy = min((int)height, max(0, (int)round(uv.y)));
             }
         }
         ///////////////////////////////////////////////////////////////////
 
-        __global const float *params = &undistortion_params[min((sy + 1), params_count - 1) * 9];
+        float2 dst_point = (float2)(x, y);
+        if (lens_correction_amount < 1.0) {
+            // Add lens distortion back
+            float2 factor = (float2)max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
+            dst_point = undistort_point(dst_point, (f / fov) / factor, c, k, lens_correction_amount);
+        }
 
-        float _x = y * params[1] + params[2] + (x * params[0]);
-        float _y = y * params[4] + params[5] + (x * params[3]);
-        float _w = y * params[7] + params[8] + (x * params[6]);
+        __global const float *params = &undistortion_params[min((sy + 2), params_count - 1) * 9];
+
+        float _x = dst_point.y * params[1] + params[2] + (dst_point.x * params[0]);
+        float _y = dst_point.y * params[4] + params[5] + (dst_point.x * params[3]);
+        float _w = dst_point.y * params[7] + params[8] + (dst_point.x * params[6]);
 
         __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * output_stride];
         if (_w > 0) {
-
             float2 pos = (float2)(_x, _y) / _w;
-            float r = length(pos);
 
-            if (r_limit > 0.0 && r > r_limit) {
+            if (r_limit > 0.0 && length(pos) > r_limit) {
                 *out_pix = DATA_CONVERT(bg);
                 return;
             }
+            float2 uv = distort_point(pos, f, c, k);
 
-            float theta = atan(r);
-            float theta2 = theta*theta, theta4 = theta2*theta2, theta6 = theta4*theta2, theta8 = theta4*theta4;
+            if (edge_repeat) {
+                uv = max((float2)(0, 0), min((float2)(width - 1, height - 1), uv));
+            } else if (edge_mirror) {
+                int rx = round(uv.x);
+                int ry = round(uv.y);
+                int width3 = (width - 3);
+                int height3 = (height - 3);
+                if (rx > width3)  uv.x = width3  - (rx - width3);
+                if (rx < 3)       uv.x = 3 + width - (width3  + rx);
+                if (ry > height3) uv.y = height3 - (ry - height3);
+                if (ry < 3)       uv.y = 3 + height - (height3 + ry);
+            }
 
-            float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
-
-            float scale = r == 0? 1.0 : theta_d / r;
-            float2 uv = (f * pos * scale + c) - S_OFFSET;
+            uv -= S_OFFSET;
 
             const int shift = (INTERPOLATION >> 2) + 1;
             

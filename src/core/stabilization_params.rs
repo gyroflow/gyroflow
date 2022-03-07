@@ -1,5 +1,26 @@
 
+use std::collections::BTreeMap;
+
 use nalgebra::Vector4;
+
+#[derive(Clone, Copy)] 
+pub enum BackgroundMode {
+    SolidColor = 0,
+    RepeatPixels = 1,
+    MirrorPixels = 2,
+}
+impl Default for BackgroundMode {
+    fn default() -> Self { Self::SolidColor }
+}
+impl From<i32> for BackgroundMode {
+    fn from(v: i32) -> Self {
+        match v {
+            1 => Self::RepeatPixels,
+            2 => Self::MirrorPixels,
+            _ => Self::SolidColor
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct StabilizationParams {
@@ -25,12 +46,17 @@ pub struct StabilizationParams {
 
     pub video_rotation: f64,
 
+    pub lens_correction_amount: f64,
+    pub background_mode: BackgroundMode,
+
     pub framebuffer_inverted: bool,
     pub is_calibrator: bool,
     
     pub stab_enabled: bool,
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
+
+    pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -50,12 +76,17 @@ impl Default for StabilizationParams {
             video_output_size: (0, 0),
 
             video_rotation: 0.0,
+
+            lens_correction_amount: 1.0,
+            background_mode: BackgroundMode::SolidColor,
             
             framebuffer_inverted: false,
             is_calibrator: false,
 
             trim_start: 0.0,
             trim_end: 1.0,
+
+            zooming_debug_points: BTreeMap::new(),
         
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
     

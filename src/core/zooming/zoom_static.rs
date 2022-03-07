@@ -1,12 +1,14 @@
 use super::*;
+use std::collections::BTreeMap;
 
-#[derive(Clone)]
 pub struct ZoomStatic {
     fov_estimator: Box<dyn FieldOfViewAlgorithm>,
     compute_params: ComputeParams
 }
 
 impl ZoomingAlgorithm for ZoomStatic {
+    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
+    
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> {
         if timestamps.is_empty() {
             return Vec::new();

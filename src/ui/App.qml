@@ -48,6 +48,7 @@ Rectangle {
     property alias motionData: motionData;
     property alias lensProfile: lensProfile;
     property alias exportSettings: exportSettings;
+    property alias advanced: advanced;
     property alias outputFile: outputFile.text;
     property alias sync: sync;
     property alias stab: stab;
@@ -94,22 +95,16 @@ Rectangle {
                 }
             }
 
-            Hr {
-                
-            }
+            Hr { }
             Menu.VideoInformation {
                 id: vidInfo;
                 onSelectFileRequest: fileDialog.open();
             }
-            Hr {
-
-            }
+            Hr { }
             Menu.LensProfile {
                 id: lensProfile;
             }
-            Hr {
-
-            }
+            Hr { }
             Menu.MotionData {
                 id: motionData;
             }
@@ -297,23 +292,17 @@ Rectangle {
             Menu.Synchronization {
                 id: sync;
             }
-            Hr {
-
-            }
+            Hr { }
             Menu.Stabilization {
                 id: stab;
             }
-            Hr {
-
-            }
+            Hr { }
             Menu.Export {
                 id: exportSettings;
             }
-            Hr {
-
-            }
+            Hr { }
             Menu.Advanced {
-
+                id: advanced;
             }
         }
     }

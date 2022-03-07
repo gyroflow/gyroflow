@@ -69,7 +69,7 @@ impl WgpuWrapper {
     }
 
     pub fn new(width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, bg: nalgebra::Vector4<f32>, interpolation: u32, wgpu_format: (wgpu::TextureFormat, &str, f64)) -> Option<Self> {
-        let params_count = 9 * (height + 1);
+        let params_count = 9 * (height + 2);
 
         if height < 4 || output_height < 4 || stride < 1 || width > 8192 || output_width > 8192 { return None; }
 
@@ -84,7 +84,11 @@ impl WgpuWrapper {
             let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                 label: None,
                 features: wgpu::Features::empty(),
-                limits: wgpu::Limits::default(),
+                limits: wgpu::Limits {
+                    max_storage_buffers_per_shader_stage: 4,
+                    max_storage_textures_per_shader_stage: 4,
+                    ..wgpu::Limits::default()
+                },
             }, None)).ok()?;
 
             let mut shader_str = include_str!("wgpu_undistort.wgsl").to_string();
@@ -175,7 +179,7 @@ impl WgpuWrapper {
                 output_width: output_width as u32,
                 output_height: output_height as u32,
                 interpolation,
-                num_params: 2,
+                num_params: 3,
                 bg: [bg[0] / bg_scaler, bg[1] / bg_scaler, bg[2] / bg_scaler, bg[3] / bg_scaler]
             };
 

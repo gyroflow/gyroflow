@@ -26,12 +26,16 @@ pub struct ComputeParams {
     pub camera_matrix: Matrix3<f64>,
     pub distortion_coeffs: [f64; 4],
     pub radial_distortion_limit: f64,
+    pub lens_correction_amount: f64,
+    pub background_mode: crate::stabilization_params::BackgroundMode,
     pub frame_readout_time: f64,
     pub trim_start: f64,
     pub trim_end: f64,
     pub scaled_fps: f64,
     pub adaptive_zoom_window: f64,
     pub framebuffer_inverted: bool,
+
+    pub zooming_debug_points: bool
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
@@ -75,12 +79,16 @@ impl ComputeParams {
             video_rotation: params.video_rotation,
             distortion_coeffs,
             radial_distortion_limit,
+            background_mode: params.background_mode,
+            lens_correction_amount: params.lens_correction_amount,
             framebuffer_inverted: params.framebuffer_inverted,
             frame_readout_time: params.frame_readout_time,
             trim_start: params.trim_start,
             trim_end: params.trim_end,
             scaled_fps: params.get_scaled_fps(),
-            adaptive_zoom_window: params.adaptive_zoom_window
+            adaptive_zoom_window: params.adaptive_zoom_window,
+
+            zooming_debug_points: false
         }
     }
 }

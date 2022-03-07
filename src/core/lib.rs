@@ -255,7 +255,10 @@ impl<T: PixelType> StabilizationManager<T> {
         let lens_fov_adjustment = params.lens_fov_adjustment;
         let mut zoom = zooming::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
-        self.params.write().set_fovs(fovs, lens_fov_adjustment);
+
+        let mut stab_params = self.params.write();
+        stab_params.set_fovs(fovs, lens_fov_adjustment);
+        stab_params.zooming_debug_points = zoom.get_debug_points();
     }
 
     pub fn recompute_smoothness(&self) {
@@ -326,7 +329,9 @@ impl<T: PixelType> StabilizationManager<T> {
 
                 if current_compute_id.load(SeqCst) != compute_id { return; }
 
-                stabilization_params.write().set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
+                let mut stab_params = stabilization_params.write();
+                stab_params.set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
+                stab_params.zooming_debug_points = zoom.get_debug_points();
             }
             
             if current_compute_id.load(SeqCst) != compute_id { return; }
@@ -401,9 +406,9 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn process_pixels(&self, mut timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator) = {
+        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator, fov) = {
             let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator)
+            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator, params.fov)
         };
         if enabled && ow == out_width && oh == out_height {
             if let Some(scale) = fps_scale {
@@ -435,6 +440,7 @@ impl<T: PixelType> StabilizationManager<T> {
                         }
                     }
                 }
+
                 #[cfg(feature = "opencv")]
                 if is_calibrator {
                     let lock = self.lens_calibrator.read();
@@ -450,6 +456,35 @@ impl<T: PixelType> StabilizationManager<T> {
             //////////////////////////// Draw detected features ////////////////////////////
             let mut undist = self.undistortion.write();
             let ret = undist.process_pixels(timestamp_us, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels);
+            if ret {
+                //////////////////////////// Draw zooming debug pixels ////////////////////////////
+                let p = self.params.read();
+                if !p.zooming_debug_points.is_empty() {
+                    if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
+                        for i in 0..points.len() {
+                            for xstep in -2..=2i32 {
+                                for ystep in -2..=2i32 {
+                                    let fov = fov * p.fovs[frame];
+                                    let mut pt = points[i];
+                                    pt = (pt.0 - 0.5, pt.1 - 0.5);
+                                    pt = (pt.0 / fov, pt.1 / fov);
+                                    pt = (pt.0 + 0.5, pt.1 + 0.5);
+                                    let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
+                                    if x >= 0 && y >= 0 && x <= out_width as i32 && y <= out_height as i32 {
+                                        let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                                        if out_pixels.len() > pos + 2 { 
+                                            out_pixels[pos + 0] = 0xff; // R
+                                            out_pixels[pos + 1] = 0x00; // G
+                                            out_pixels[pos + 2] = 0x00; // B
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                //////////////////////////// Draw zooming debug pixels ////////////////////////////
+            }
             self.current_fov_10000.store((undist.current_fov * 10000.0) as u64, SeqCst);
             ret
         } else {
@@ -468,6 +503,8 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
+    pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
 
     pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
@@ -592,13 +629,13 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn clear(&self) {
-        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted) = {
+        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted)
+            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted, params.lens_correction_amount, params.background_mode)
         };
 
         *self.params.write() = StabilizationParams {
-            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, ..Default::default()
+            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, ..Default::default()
         };
         if !self.gyro.read().prevent_next_load {
             *self.gyro.write() = GyroSource::new();
@@ -646,6 +683,9 @@ impl<T: PixelType> StabilizationManager<T> {
             "videofile": video_path,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
             "date": chrono::Local::today().naive_local().to_string(),
+
+            "background_color": params.background.as_slice(),
+            "background_mode":  params.background_mode as i32,
     
             "video_info": {
                 "width":       params.video_size.0,
@@ -658,12 +698,13 @@ impl<T: PixelType> StabilizationManager<T> {
                 "vfr_duration_ms": params.get_scaled_duration_ms(),
             },
             "stabilization": {
-                "fov":                  params.fov,
-                "method":               smoothing_name,
-                "smoothing_params":     smoothing_params,
-                "frame_readout_time":   params.frame_readout_time,
-                "adaptive_zoom_window": params.adaptive_zoom_window,
-                "adaptive_zoom_fovs":   if !thin { &params.fovs } else { &empty_vec }
+                "fov":                    params.fov,
+                "method":                 smoothing_name,
+                "smoothing_params":       smoothing_params,
+                "frame_readout_time":     params.frame_readout_time,
+                "adaptive_zoom_window":   params.adaptive_zoom_window,
+                "adaptive_zoom_fovs":     if !thin { &params.fovs } else { &empty_vec },
+                "lens_correction_amount": params.lens_correction_amount,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,

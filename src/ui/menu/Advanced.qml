@@ -19,9 +19,14 @@ MenuItem {
         property alias uiScaling: uiScaling.currentIndex;
         property alias safeAreaGuide: safeAreaGuide.checked;
         property alias gpudecode: gpudecode.checked;
+        property alias backgroundMode: backgroundMode.currentIndex;
         property string lang: ui_tools.get_default_language();
     }
 
+    function loadGyroflow(obj) {
+        if (obj.background_mode) backgroundMode.currentIndex = obj.background_mode;
+        if (obj.background_color) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
+    }
     Label {
         position: Label.Left;
         text: qsTr("Preview resolution");
@@ -47,15 +52,26 @@ MenuItem {
 
     Label {
         position: Label.Left;
+        text: qsTr("Background mode");
+        ComboBox {
+            id: backgroundMode;
+            model: [QT_TRANSLATE_NOOP("Popup", "Solid color"), QT_TRANSLATE_NOOP("Popup", "Repeat edge pixels"), QT_TRANSLATE_NOOP("Popup", "Mirror edge pixels")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            onCurrentIndexChanged: controller.background_mode = currentIndex;
+        }
+    }
+    Label {
+        position: Label.Left;
+        visible: backgroundMode.currentIndex == 0;
         text: qsTr("Render background");
 
         TextField {
             id: renderBackground;
             text: "#111111";
             width: parent.width;
-            onTextChanged: {
-                controller.set_background_color(text, window.videoArea.vid);
-            }
+            onTextChanged: controller.set_background_color(text, window.videoArea.vid);
         }
     }
     Label {

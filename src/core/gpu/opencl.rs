@@ -110,7 +110,7 @@ impl OclWrapper {
             let dest_buffer = Buffer::builder().queue(queue.clone()).len(output_stride*output_height)
                 .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
 
-            let params_len = 9 * (height + 1);
+            let params_len = 9 * (height + 2);
             let params_buf = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(params_len).build()?;
 
             let mut builder = Kernel::builder();

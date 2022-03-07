@@ -20,6 +20,7 @@ MenuItem {
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
+        property alias correctionAmount: correctionAmount.value;
     }
 
     function loadGyroflow(obj) {
@@ -50,6 +51,10 @@ MenuItem {
             }
             setFrameReadoutTime(+stab.frame_readout_time);
 
+            if (typeof stab.lens_correction_amount !== "undefined") {
+                correctionAmount.value = +stab.lens_correction_amount * 100;
+            }
+
             const az = +stab.adaptive_zoom_window;
             if (az < -0.9) {
                 croppingMode.currentIndex = 2; // Static crop
@@ -58,7 +63,7 @@ MenuItem {
                 adaptiveZoom.value = az;
             } else {
                 croppingMode.currentIndex = 0; // No cropping
-            }        
+            }
         }
     }
 
@@ -435,4 +440,20 @@ MenuItem {
             }
         }
     }
+
+    Label {
+        text: qsTr("Lens correction strength");
+        SliderWithField {
+            id: correctionAmount;
+            from: 0.0;
+            to: 100.0;
+            value: 100.0;
+            unit: "%";
+            defaultValue: 100.0;
+            precision: 0;
+            width: parent.width;
+            onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value / 100.0; });
+        }
+    }
+
 }
