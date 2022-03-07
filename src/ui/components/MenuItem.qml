@@ -54,9 +54,7 @@ Item {
         font.family: styleFont;
         font.capitalization: Font.Normal
 
-        background: Rectangle {
-            color: parent.down? Qt.darker(styleButtonColor, 1.1) : parent.hovered || parent.activeFocus? styleButtonColor : "transparent";
-            radius: 5 * dpiScale;
+        background: Item {
             anchors.fill: parent;
 
             Rectangle {
@@ -102,6 +100,7 @@ Item {
             width: root.width - 2*x;
             spacing: 10 * dpiScale;
             topPadding: 10 * dpiScale;
+            bottomPadding: 20 * dpiScale;
         }
     }
     LoaderOverlay { id: loader; }
