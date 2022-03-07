@@ -214,8 +214,8 @@ MenuItem {
                 anchors.verticalCenter: parent.verticalCenter;
                 anchors.right: parent.right;
                 display: QQC.Button.IconOnly;
-                tooltip: qsTr("Output size settings");
-                onClicked: sizeMenu.popup(x, y+height);
+                tooltip: qsTr("Output size preset");
+                onClicked: sizeMenu.popup(x, y + height);
             }
             Menu {
                 id: sizeMenu;
@@ -232,7 +232,7 @@ MenuItem {
 
                 Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
                 Action { text: "6k (6016 × 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
-                Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize( 840, 2160) }
+                Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize(3840, 2160) }
                 Action { text: "2k (2048 x 1080)";     onTriggered: sizeMenu.setSize(2048, 1080) }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Action { text: "1440p (2560 x 1440)";  onTriggered: sizeMenu.setSize(2560, 1440) }
