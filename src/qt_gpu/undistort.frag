@@ -135,7 +135,8 @@ void main() {
     if (lens_correction_amount < 1.0) {
         // Add lens distortion back
         float factor = max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
-        texPos = undistort_point(texPos, (f / fov) / factor, c, k, lens_correction_amount);
+        vec2 out_c = vec2(uniforms.output_width / 2.0, uniforms.output_height / 2.0);
+        texPos = undistort_point(texPos, (f / fov) / factor, out_c, k, lens_correction_amount);
     }
 
     float idx = min(sy + 2.0, uniforms.params_count - 1.0);

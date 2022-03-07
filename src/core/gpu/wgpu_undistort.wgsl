@@ -185,7 +185,8 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     if (lens_correction_amount < 1.0) {
         // Add lens distortion back
         let factor = max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
-        texPos = undistort_point(texPos, (f / fov) / factor, c, k, lens_correction_amount);
+        let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
+        texPos = undistort_point(texPos, (f / fov) / factor, out_c, k, lens_correction_amount);
     }
 
     let idx: u32 = min((sy + 2u), (params_count - 1u)) * 9u;

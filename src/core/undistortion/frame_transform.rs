@@ -128,7 +128,7 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, lens_correction_amount
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         let img_dim_ratio = Self::get_ratio(params);
         let fov = Self::get_fov(params, 0, false);
 
@@ -166,6 +166,6 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        (scaled_k, params.distortion_coeffs, new_k, rotations, params.lens_correction_amount)
+        (scaled_k, params.distortion_coeffs, new_k, rotations)
     }
 }

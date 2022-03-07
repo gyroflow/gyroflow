@@ -159,6 +159,10 @@ impl<T: PixelType> Undistortion<T> {
         let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
         let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
+        let factor = (1.0 - lens_correction_amount).max(0.001); // FIXME: this is close but wrong
+        let f2 = ((f.0 / fov / factor), (f.1 / fov / factor));
+        let out_c = (output_width as f32 / 2.0, output_height as f32 / 2.0);
+
         let bytes_per_pixel = T::COUNT * T::SCALAR_BYTES;
         let shift = (I >> 2) + 1;
         let offset = [0.0, 1.0, 3.0][I as usize >> 2];
@@ -186,13 +190,10 @@ impl<T: PixelType> Undistortion<T> {
                     ///////////////////////////////////////////////////////////////////
                     let mut pt = (x as f32, y as f32);
                     if lens_correction_amount < 1.0 {
-                        // Add lens distortion back
-                        let factor = (1.0 - lens_correction_amount).max(0.001); // FIXME: this is close but wrong
-                        let f2 = ((f.0 / fov / factor), (f.1 / fov / factor));
-                        
-                        pt = ((pt.0 - c.0) / f2.0, (pt.1 - c.1) / f2.1);
+                        // Add lens distortion back         
+                        pt = ((pt.0 - out_c.0) / f2.0, (pt.1 - out_c.1) / f2.1);
                         pt = undistort_point(pt, k, lens_correction_amount).unwrap_or_default();
-                        pt = ((pt.0 * f2.0) + c.0, (pt.1 * f2.1) + c.1);
+                        pt = ((pt.0 * f2.0) + out_c.0, (pt.1 * f2.1) + out_c.1);
                     }
 
                     let undistortion_params = &undistortion_params[(sy + 2).min(undistortion_params.len() - 1)];
@@ -276,13 +277,13 @@ impl<T: PixelType> Undistortion<T> {
 
 pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f64, f64)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, _p, rotations, amount) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
+    let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), amount)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), Some(params))
 }
 
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, lens_correction_amount: f64) -> Vec<(f64, f64)> {
+pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: Option<&ComputeParams>) -> Vec<(f64, f64)> {
     let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
     let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
     let k = distortion_coeffs;
@@ -303,9 +304,12 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
             let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
-            if lens_correction_amount < 1.0 {
-                pt = ((pt.0 - c.0) / f.0, (pt.1 - c.1) / f.1);
-                pt = distort_point(pt, f, c, k, lens_correction_amount);
+            if let Some(params) = params {
+                if params.lens_correction_amount < 1.0 {
+                    let out_c = c; // (params.output_width as f64 / 2.0, params.output_height as f64 / 2.0);
+                    pt = ((pt.0 - out_c.0) / f.0, (pt.1 - out_c.1) / f.1);
+                    pt = distort_point(pt, f, out_c, k, params.lens_correction_amount);
+                }
             }
             pt
         } else {

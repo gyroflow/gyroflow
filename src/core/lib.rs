@@ -462,13 +462,15 @@ impl<T: PixelType> StabilizationManager<T> {
                 if !p.zooming_debug_points.is_empty() {
                     if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
                         for i in 0..points.len() {
+                            let fov = fov * p.fovs[frame];
+                            let mut pt = points[i];
+                            let width_ratio = width as f64 / out_width as f64;
+                            let height_ratio = height as f64 / out_height as f64;
+                            pt = (pt.0 - 0.5, pt.1 - 0.5);
+                            pt = (pt.0 / fov * width_ratio, pt.1 / fov * height_ratio);
+                            pt = (pt.0 + 0.5, pt.1 + 0.5);
                             for xstep in -2..=2i32 {
                                 for ystep in -2..=2i32 {
-                                    let fov = fov * p.fovs[frame];
-                                    let mut pt = points[i];
-                                    pt = (pt.0 - 0.5, pt.1 - 0.5);
-                                    pt = (pt.0 / fov, pt.1 / fov);
-                                    pt = (pt.0 + 0.5, pt.1 + 0.5);
                                     let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
                                     if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
                                         let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
