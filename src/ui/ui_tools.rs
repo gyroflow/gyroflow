@@ -63,6 +63,10 @@ impl UITools {
             QString lang2 = lang.mid(0, 2);
             if (QFile::exists(":/resources/translations/" + lang + ".qm")) return lang;
             if (QFile::exists(":/resources/translations/" + lang2 + ".qm")) return lang2;
+            if (lang2 == "zh") {
+                // If Chinese but unknown locale, use Chinese Simplified by default
+                return "zh_CN";
+            }
             return "en";
         })
     }
