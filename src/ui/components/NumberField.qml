@@ -34,13 +34,6 @@ TextField {
         else if (e.modifiers & Qt.ShiftModifier) value += 1000 / lastDigit;
         else value += 10 / lastDigit;
     }
-    Keys.onPressed: (e) => {
-        if (!allowText && e.key == Qt.Key_Space) {
-            root.focus = false;
-            window.togglePlay();
-            e.accepted = true;
-        }
-    }
     onValueChanged: {
         if (preventChange || allowText) return;
         text = intNoThousandSep ? (Math.round(value)).toString() : value.toLocaleString(Qt.locale(), "f", precision);
