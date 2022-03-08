@@ -190,7 +190,7 @@ Item {
                 anchors.fill: parent;
                 property bool loaded: false;
 
-                onCurrentFrameChanged: {
+                function fovChanged() {
                     const fov = controller.get_current_fov();
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
@@ -199,6 +199,8 @@ Item {
                         safeAreaRect.height = safeAreaRect.parent.height / window.stab.fovSlider.value;
                     }
                 }
+
+                onCurrentFrameChanged: fovChanged();
                 onMetadataLoaded: (md) => {
                     loaded = frameCount > 0;
                     videoLoader.active = false;
@@ -328,7 +330,7 @@ Item {
         }
         LoaderOverlay {
             id: videoLoader;
-            onActiveChanged: vid.forceRedraw();
+            onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
             onCancel: controller.cancel_current_operation();
         }
 
@@ -425,7 +427,7 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     icon.name: "gyroflow";
-                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); }
+                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
