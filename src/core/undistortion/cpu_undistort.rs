@@ -61,6 +61,8 @@ fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> O
     let t_9 = T::from(9.0f32).unwrap();
     let t_fpi = T::from(std::f64::consts::FRAC_PI_2).unwrap();
     let t_eps = T::from(1e-6f64).unwrap();
+    
+    let t_max_fix = T::from(0.75f32).unwrap();
 
     let mut theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
 
@@ -75,6 +77,8 @@ fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> O
     let mut scale = t_0;
 
     if theta_d.abs() > t_eps {
+        theta = t_0;
+
         // compensate distortion iteratively
         for _ in 0..10 {
             let theta2 = theta*theta;
@@ -86,9 +90,11 @@ fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> O
             let k2_theta6 = k[2] * theta6;
             let k3_theta8 = k[3] * theta8;
             // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-            let theta_fix = (theta * (t_1 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
+            let mut theta_fix = (theta * (t_1 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
                             /
                             (t_1 + t_3 * k0_theta2 + t_5 * k1_theta4 + t_7 * k2_theta6 + t_9 * k3_theta8);
+            
+            theta_fix = theta_fix.max(-t_max_fix).min(t_max_fix);
 
             theta = theta - theta_fix;
             if theta_fix.abs() < t_eps {
