@@ -59,7 +59,7 @@ fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> O
     let t_5 = T::from(5.0f32).unwrap();
     let t_7 = T::from(7.0f32).unwrap();
     let t_9 = T::from(9.0f32).unwrap();
-    let t_fpi = T::from(std::f64::consts::FRAC_PI_2).unwrap();
+    let t_fpi = T::from(std::f64::consts::PI).unwrap();
     let t_eps = T::from(1e-6f64).unwrap();
     
     let t_max_fix = T::from(0.9f32).unwrap();
