@@ -462,7 +462,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 if !p.zooming_debug_points.is_empty() {
                     if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
                         for i in 0..points.len() {
-                            let fov = fov * p.fovs[frame];
+                            let fov = (fov * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
                             let mut pt = points[i];
                             let width_ratio = width as f64 / out_width as f64;
                             let height_ratio = height as f64 / out_height as f64;

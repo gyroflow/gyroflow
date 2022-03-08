@@ -62,7 +62,7 @@ fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> O
     let t_fpi = T::from(std::f64::consts::FRAC_PI_2).unwrap();
     let t_eps = T::from(1e-6f64).unwrap();
     
-    let t_max_fix = T::from(0.75f32).unwrap();
+    let t_max_fix = T::from(0.9f32).unwrap();
 
     let mut theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
 
