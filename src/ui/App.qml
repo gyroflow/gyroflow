@@ -56,12 +56,6 @@ Rectangle {
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
 
-    function togglePlay() {
-        window.videoArea.timeline.focus = true;
-        const vid = window.videoArea.vid;
-        if (vid.playing) vid.pause(); else vid.play();
-    }
-
     FileDialog {
         id: fileDialog;
         property var extensions: [

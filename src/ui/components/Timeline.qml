@@ -54,7 +54,6 @@ Item {
     Keys.onPressed: (e) => {
         const vid = window.videoArea.vid;
         switch (e.key) {
-            case Qt.Key_Space:        if (vid.playing) vid.pause(); else vid.play();                  e.accepted = true; break;
             case Qt.Key_Left:
             case Qt.Key_PageUp:       vid.currentFrame -= (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
             case Qt.Key_Right:
@@ -64,6 +63,17 @@ Item {
             // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
             case Qt.Key_BracketLeft:  root.trimStart = root.position;                            e.accepted = true; break;
             case Qt.Key_BracketRight: root.trimEnd   = root.position;                            e.accepted = true; break;
+        }
+    }
+
+    Shortcut {
+        sequence: "Space";
+        onActivated: (e) => {
+            root.focus = true;
+            if (window.videoArea.vid.playing)
+                window.videoArea.vid.pause();
+            else
+                window.videoArea.vid.play();
         }
     }
 
