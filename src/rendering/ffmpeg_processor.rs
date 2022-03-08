@@ -52,6 +52,7 @@ pub enum FFmpegError {
     ToHWTransferError(i32),
     CannotCreateGPUDecoding,
     NoFramesContext,
+    GPUDecodingFailed,
     ToHWBufferError(i32),
     PixelFormatNotSupported((format::Pixel, Vec<format::Pixel>)),
     UnknownPixelFormat(format::Pixel),
@@ -73,6 +74,7 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::ToHWTransferError(i)   => write!(f, "Error transferring frame to the GPU: {:?}", ffmpeg_next::Error::Other { errno: *i }),
             FFmpegError::ToHWBufferError(i)     => write!(f, "Error getting HW transfer buffer to the GPU: {:?}", ffmpeg_next::Error::Other { errno: *i }),
             FFmpegError::NoFramesContext             => write!(f, "Empty hw frames context"),
+            FFmpegError::GPUDecodingFailed           => write!(f, "GPU decoding failed, please try again."),
             FFmpegError::CannotCreateGPUDecoding     => write!(f, "Unable to create HW devices context"),
             FFmpegError::NoGPUDecodingDevice         => write!(f, "Unable to create any HW decoding context"),
             FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
@@ -124,7 +126,7 @@ impl<'a> FfmpegProcessor<'a> {
         let mut hw_backend = String::new();
         if gpu_decoding {
             let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut decoder_ctx)?;
-            super::append_log(&format!("Selected HW backend {:?} ({}) with format {:?}\n", hw.1, hw.2, hw.3));
+            log::debug!("Selected HW backend {:?} ({}) with format {:?}", hw.1, hw.2, hw.3);
             hw_backend = hw.2;
         }
         gpu_decoding = !hw_backend.is_empty();
@@ -270,6 +272,9 @@ impl<'a> FfmpegProcessor<'a> {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                     packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
                     if let Err(err) = decoder.send_packet(&packet) {
+                        if self.gpu_decoding && !*GPU_DECODING.read() {
+                            return Err(FFmpegError::GPUDecodingFailed);
+                        }
                         if !any_encoded {
                             return Err(err.into());
                         }
@@ -369,6 +374,9 @@ impl<'a> FfmpegProcessor<'a> {
 
                     if let Err(err) = decoder.send_packet(&packet) {
                         ::log::error!("Decoder error {:?}", err);
+                        if self.gpu_decoding && !*GPU_DECODING.read() {
+                            return Err(FFmpegError::GPUDecodingFailed);
+                        }
                         if !any_encoded {
                             return Err(err.into());
                         }

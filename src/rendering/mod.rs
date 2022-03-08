@@ -144,7 +144,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     drop(params);
 
-    let mut proc = FfmpegProcessor::from_file(video_path, *GPU_DECODING.read() && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
+    let gpu_decoding = *GPU_DECODING.read();
+    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, use_gpu));

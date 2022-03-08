@@ -272,8 +272,10 @@ impl Controller {
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
                 let mut fps_scale = None;
+
+                let gpu_decoding = *rendering::GPU_DECODING.read();
                 
-                match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
+                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0) {
                     Ok(mut proc) => {
                         if fps > 0.0 && proc.decoder_fps > 0.0 && (fps - proc.decoder_fps).abs() > 0.1 {
                             ::log::debug!("Rescaling timestamp from {fps}fps to {}fps", proc.decoder_fps);
@@ -874,7 +876,8 @@ impl Controller {
             
             let video_path = self.video_path.clone();
             core::run_threaded(move || {
-                match FfmpegProcessor::from_file(&video_path, *rendering::GPU_DECODING.read(), 0) {
+                let gpu_decoding = *rendering::GPU_DECODING.read();
+                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
