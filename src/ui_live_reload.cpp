@@ -36,10 +36,12 @@ void init_live_reload(QQmlApplicationEngine *engine, const QString &path) {
                     delete itm;
                 }
             }
+            /*
             if (previousItem) {
                 previousItem->setParentItem(nullptr);
                 delete previousItem;
             }
+            */
 
             engine->clearComponentCache();
 
