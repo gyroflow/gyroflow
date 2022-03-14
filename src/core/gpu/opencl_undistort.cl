@@ -165,7 +165,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         float2 dst_point = (float2)(x, y);
         if (lens_correction_amount < 1.0) {
             // Add lens distortion back
-            float2 factor = (float2)max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
+            float2 factor = (float2)max(1.0f - lens_correction_amount, 0.001f); // FIXME: this is close but wrong
             float2 out_c = (float2)(output_width / 2.0, output_height / 2.0);
             dst_point = undistort_point(dst_point, (f / fov) / factor, out_c, k, lens_correction_amount);
         }

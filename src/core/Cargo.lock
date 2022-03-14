@@ -601,8 +601,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2daefd788d1e96e0a9d66dee4b828b883509bc3ea9ce30665f04c3246372690c"
+source = "git+https://github.com/gfx-rs/d3d12-rs.git?rev=ffe5e261da0a6cb85332b82ab310abd2a7e849f6#ffe5e261da0a6cb85332b82ab310abd2a7e849f6"
 dependencies = [
  "bitflags",
  "libloading",
@@ -891,7 +890,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.0.0-rc4"
+version = "1.0.0-rc5"
 dependencies = [
  "ahrs",
  "akaze",
@@ -1971,9 +1970,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.4"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d07a8629359eb56f1e2fb1652bb04212c072a87ba68546a04065d525673ac461"
+checksum = "1a11647b6b25ff05a515cb92c365cec08801e83423a235b51e231e1808747286"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2183,9 +2182,9 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "syn"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a65b3f4ffa0092e9887669db0eae07941f023991ab58ea44da8fe8e2d511c6b"
+checksum = "1e59d925cf59d8151f25a3bedf97c9c157597c9df7324d32d68991cc399ed08b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2428,7 +2427,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
+source = "git+https://github.com/gfx-rs/wgpu.git#73f42352f3d80f6a5efd0615b750474ad6ff0338"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2448,7 +2447,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
+source = "git+https://github.com/gfx-rs/wgpu.git#73f42352f3d80f6a5efd0615b750474ad6ff0338"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2470,7 +2469,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
+source = "git+https://github.com/gfx-rs/wgpu.git#73f42352f3d80f6a5efd0615b750474ad6ff0338"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2507,7 +2506,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#0ac9ce002656565ccd05b889f5856f4e2c38fa73"
+source = "git+https://github.com/gfx-rs/wgpu.git#73f42352f3d80f6a5efd0615b750474ad6ff0338"
 dependencies = [
  "bitflags",
 ]
