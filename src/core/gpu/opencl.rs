@@ -33,12 +33,12 @@ impl OclWrapper {
 
         let mut platform = None;
         let mut device = None;
-        let preference = [ "nvidia", "radeon", "graphics" ];
+        let preference = [ "nvidia", "radeon", "geforce", "firepro", "graphics" ];
         'outer: for pref in preference {
             for p in Platform::list() {
                 if let Ok(devs) = Device::list_all(p) {
                     for d in devs.iter() {
-                        let name = d.name().unwrap_or_default();
+                        let name = format!("{} {}", p.name().unwrap_or_default(),  d.name().unwrap_or_default());
                         if name.to_ascii_lowercase().contains(pref) {
                             platform = Some(p);
                             device = Some(*d);
