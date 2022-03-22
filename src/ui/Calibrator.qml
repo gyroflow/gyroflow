@@ -208,6 +208,11 @@ Window {
             }
         }
     }
+    
+    Shortcuts {
+        videoArea: videoArea;
+    }
+
     Connections {
         target: controller;
         function onCalib_progress(progress, rms, ready, total, good) {
