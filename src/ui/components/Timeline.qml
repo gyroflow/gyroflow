@@ -45,37 +45,26 @@ Item {
         const time = Math.max(0, durationMs * pos);
         return new Date(time).toISOString().substr(11, 8);
     }
+    
+    function setTrim(start, end) {
+        if (start >= end)
+            resetTrim();
+        else {
+            trimStart = start;
+            trimEnd   = end;
+        }
+    }
+
+    function resetTrim() {
+        root.trimStart = 0;
+        root.trimEnd = 1.0;
+    }
 
     Settings {
         property alias timelineChart: chart.viewMode;
     }
 
     focus: true;
-    Keys.onPressed: (e) => {
-        const vid = window.videoArea.vid;
-        switch (e.key) {
-            case Qt.Key_Left:
-            case Qt.Key_PageUp:       vid.currentFrame -= (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
-            case Qt.Key_Right:
-            case Qt.Key_PageDown:     vid.currentFrame += (e.modifiers & Qt.ControlModifier)? 10 : 1; e.accepted = true; break;
-            case Qt.Key_Home:         vid.currentFrame = frameAtPosition(root.trimStart);             e.accepted = true; break;
-            case Qt.Key_End:          vid.currentFrame = frameAtPosition(root.trimEnd);               e.accepted = true; break;
-            // FiXME: these are hard to reach key combinations on certain keyboards (eg. on QWERTZ), find alternative
-            case Qt.Key_BracketLeft:  root.trimStart = root.position;                            e.accepted = true; break;
-            case Qt.Key_BracketRight: root.trimEnd   = root.position;                            e.accepted = true; break;
-        }
-    }
-
-    Shortcut {
-        sequence: "Space";
-        onActivated: (e) => {
-            root.focus = true;
-            if (window.videoArea.vid.playing)
-                window.videoArea.vid.pause();
-            else
-                window.videoArea.vid.play();
-        }
-    }
 
     Column {
         x: 3 * dpiScale;
@@ -370,9 +359,9 @@ Item {
                 trimStart: root.trimStart;
                 trimEnd: root.trimEnd;
                 visible: root.trimActive;
-                onChangeTrimStart: (val) => { root.trimStart = val; if (root.trimStart >= root.trimEnd) { root.trimStart = 0; root.trimEnd = 1.0; } }
-                onChangeTrimEnd:   (val) => { root.trimEnd   = val; if (root.trimStart >= root.trimEnd) { root.trimStart = 0; root.trimEnd = 1.0; } }
-                onReset: () => { root.trimStart = 0; root.trimEnd = 1.0; }
+                onChangeTrimStart: (val) => root.setTrim(val, root.trimEnd);
+                onChangeTrimEnd: (val) => root.setTrim(root.trimStart, val);
+                onReset: root.resetTrim();
             }
         }
 

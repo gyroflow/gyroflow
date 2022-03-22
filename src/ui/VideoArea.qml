@@ -19,6 +19,7 @@ Item {
     property alias trimStart: timeline.trimStart;
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
+    property alias stabEnabledBtn: stabEnabledBtn;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -69,8 +70,7 @@ Item {
                 for (const ts in obj.offsets) {
                     controller.set_offset(ts, obj.offsets[ts]);
                 }
-                timeline.trimStart = obj.trim_start;
-                timeline.trimEnd   = obj.trim_end;
+                timeline.setTrim(obj.trim_start, obj.trim_end);
             }
             return;
         }
@@ -205,8 +205,7 @@ Item {
                     loaded = frameCount > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
-                    timeline.trimStart = 0.0;
-                    timeline.trimEnd = 1.0;
+                    timeline.resetTrim();
 
                     controller.load_telemetry(vid.url, true, vid, timeline.getChart());
                     vidInfo.loadFromVideoMetadata(md);
@@ -393,7 +392,7 @@ Item {
                 anchors.centerIn: parent;
                 spacing: 5 * dpiScale;
                 enabled: vid.loaded;
-                Button { text: "["; font.bold: true; onClicked: timeline.trimStart = timeline.position; tooltip: qsTr("Trim start"); }
+                Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); }
                 Button { icon.name: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
                 Button {
                     onClicked: if (vid.playing) vid.pause(); else vid.play();
@@ -401,7 +400,7 @@ Item {
                     icon.name: vid.playing? "pause" : "play";
                 }
                 Button { icon.name: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
-                Button { text: "]"; font.bold: true; onClicked: timeline.trimEnd = timeline.position; tooltip: qsTr("Trim end"); }
+                Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); }
             }
             Row {
                 enabled: vid.loaded;

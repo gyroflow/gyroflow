@@ -301,6 +301,10 @@ Rectangle {
         }
     }
 
+    Shortcuts {
+        videoArea: videoArea;
+    }
+
     function messageBox(type, text, buttons, parent, textFormat) {
         if (textFormat === undefined ) textFormat = Text.AutoText; // default
         const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, text: text, iconType: type});
