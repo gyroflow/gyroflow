@@ -242,6 +242,7 @@ Rectangle {
                         allowLens = false;
                         allowSync = false;
                         exportSettings.overridePixelFormat = "";
+                        window.videoArea.vid.pause();
                         render();
                     }
                     popup.onClicked: (index) => {
