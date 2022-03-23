@@ -79,4 +79,36 @@ Item {
         sequence: "s";
         onActivated: videoArea.stabEnabledBtn.checked = !videoArea.stabEnabledBtn.checked;
     }
+    Shortcut {
+        sequence: "x";
+        onActivated: videoArea.timeline.toggleAxis(0, false);
+    }
+    Shortcut {
+        sequence: "y";
+        onActivated: videoArea.timeline.toggleAxis(1, false);
+    }
+    Shortcut {
+        sequence: "z";
+        onActivated: videoArea.timeline.toggleAxis(2, false);
+    }
+    Shortcut {
+        sequence: "w";
+        onActivated: videoArea.timeline.toggleAxis(3, false);
+    }
+    Shortcut {
+        sequence: "Shift+x";
+        onActivated: videoArea.timeline.toggleAxis(0, true);
+    }
+    Shortcut {
+        sequence: "Shift+y";
+        onActivated: videoArea.timeline.toggleAxis(1, true);
+    }
+    Shortcut {
+        sequence: "Shift+z";
+        onActivated: videoArea.timeline.toggleAxis(2, true);
+    }
+    Shortcut {
+        sequence: "Shift+w";
+        onActivated: videoArea.timeline.toggleAxis(3, true);
+    }
 }
