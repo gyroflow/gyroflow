@@ -288,9 +288,11 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                         (UV8,   input_frame, output_frame, 1, [2,1], 255.0),
                     );
                 },
-                Pixel::P010LE | Pixel::P016LE => {
+                Pixel::P010LE | Pixel::P016LE |
+                Pixel::P210LE | Pixel::P216LE |
+                Pixel::P410LE | Pixel::P416LE => {
                     let max_val = match input_frame.format() {
-                        Pixel::P010LE => 1023.0,
+                        Pixel::P010LE | Pixel::P210LE | Pixel::P410LE => 1023.0,
                         _ => 65535.0
                     };
                     create_planes_proc!(planes,
@@ -362,7 +364,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         };
 
         match input_frame.format() {
-            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P | Pixel::P010LE | Pixel::P016LE | 
+            Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P |
+            Pixel::P010LE | Pixel::P016LE | Pixel::P210LE | Pixel::P216LE | Pixel::P410LE | Pixel::P416LE |
             Pixel::YUV420P10LE | Pixel::YUV420P12LE | Pixel::YUV420P14LE | Pixel::YUV420P16LE |
             Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
             Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE |
