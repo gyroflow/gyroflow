@@ -16,7 +16,23 @@ Window {
     color: styleBackground;
 
     title: "Gyroflow v" + version;
-    
+
+    onVisibilityChanged: {
+        Qt.callLater(() => {
+            if (main_window.visibility != 0)
+                sett.visibility = main_window.visibility;
+        });
+    }
+
+    Settings {
+        id: sett;
+        property alias x: main_window.x;
+        property alias y: main_window.y;
+        property alias width: main_window.width;
+        property alias height: main_window.height;
+        property int visibility: 0;
+    }
+
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
 
@@ -30,10 +46,14 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(main_window);
-        Qt.callLater(() => {
-            width = width + 1;
-            height = height;
-        });
+             if (sett.visibility == Window.FullScreen) main_window.showFullScreen();
+        else if (sett.visibility == Window.Maximized) main_window.showMaximized();
+        else {
+            Qt.callLater(() => {
+                width = width + 1;
+                height = height;
+            });
+        }
     }
 
     property bool closeConfirmationModal: false;
