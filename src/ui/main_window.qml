@@ -58,7 +58,7 @@ Window {
 
     property bool closeConfirmationModal: false;
     property bool closeConfirmed: false;
-    onClosing: (close) => {        
+    onClosing: (close) => {
         let app = getApp();
         if (app) {
             close.accepted = closeConfirmed || !app.wasModified;
