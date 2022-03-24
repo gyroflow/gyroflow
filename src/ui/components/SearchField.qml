@@ -42,21 +42,39 @@ TextField {
     }
 
     onTextChanged: {
-        if (!text) return popup.close();
+        const searchTerm = text.toLowerCase();
+        const words = searchTerm.split(/[\s,;]+/).filter(s => s);
+        
+        if (!words.length) {
+            popup.close();
+            return;
+        }
         if (!popup.opened) popup.open();
-        const s = text.toLowerCase();
+
         let m = [];
         let indexMapping = [];
 
         let i = 0;
         for (const x of root.model) {
-            if (x.toLowerCase().indexOf(s) > -1) {
+            const test = x.toLowerCase();
+            let add = true;
+            for (const word of words) {
+                if (test.indexOf(word) < 0) {
+                    add = false;
+                    break;
+                }
+            }
+            
+            if (add) {
                 m.push(x);
                 indexMapping.push(i);
             }
+
             ++i;
         }
+
         if (!m.length) popup.close();
+        
         popup.model = m;
         popup.indexMapping = indexMapping;
         popup.currentIndex = -1;
