@@ -276,15 +276,9 @@ Item {
         }
         Rectangle {
             id: dropRect;
-            border.width: 3 * dpiScale;
-            border.color: style === "light"? Qt.darker(styleBackground, 1.3) : Qt.lighter(styleBackground, 2);
             anchors.fill: parent;
-            anchors.margins: 20 * dpiScale;
-            anchors.topMargin: 50 * dpiScale;
-            anchors.bottomMargin: 50 * dpiScale;
             color: styleBackground;
-            radius: 5 * dpiScale;
-            opacity: vid.loaded? 0 : da.containsDrag? 0.3 : 1.0;
+            opacity: da.containsDrag? 0.8 : vid.loaded? 0 : 0.3;
             Ease on opacity { duration: 300; }
             visible: opacity > 0;
             onVisibleChanged: if (!visible) dropText.loadingFile = "";
@@ -300,9 +294,9 @@ Item {
             }
             DropTargetRect {
                 visible: !dropText.loadingFile;
-                anchors.fill: dropText;
-                anchors.margins: -30 * dpiScale;
+                anchors.fill: parent;
                 scale: dropText.scale;
+                anchors.margins: 5 * dpiScale;
             }
             MouseArea {
                 visible: !vid.loaded;
@@ -329,6 +323,7 @@ Item {
         }
         LoaderOverlay {
             id: videoLoader;
+            background: styleBackground;
             onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
             onCancel: controller.cancel_current_operation();
         }

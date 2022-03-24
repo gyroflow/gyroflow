@@ -159,6 +159,7 @@ MenuItem {
 
     DropTarget {
         parent: root.innerItem;
+        color: styleBackground2;
         z: 999;
         anchors.rightMargin: -28 * dpiScale;
         anchors.topMargin: 35 * dpiScale;
