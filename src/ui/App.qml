@@ -77,19 +77,23 @@ Rectangle {
             id: leftPanel;
             direction: SidePanel.HandleRight;
             topPadding: gflogo.height;
-            Item {
-                id: gflogo;
-                parent: leftPanel;
+            Column {
                 width: parent.width;
-                height: children[0].height + 35 * dpiScale;
-                Image {
-                    source: "qrc:/resources/logo" + (style === "dark"? "_white" : "_black") + ".svg"
-                    sourceSize.width: Math.min(300 * dpiScale, parent.width * 0.9);
-                    anchors.centerIn: parent;
+                parent: leftPanel;
+                id: gflogo;
+                
+                Item {
+                    width: parent.width;
+                    height: children[0].height * 1.5;
+                    Image {
+                        source: "qrc:/resources/logo" + (style === "dark"? "_white" : "_black") + ".svg"
+                        sourceSize.width: Math.min(300 * dpiScale, parent.width * 0.9);
+                        anchors.centerIn: parent;
+                    }
                 }
+                Hr { }
             }
 
-            Hr { }
             Menu.VideoInformation {
                 id: vidInfo;
                 onSelectFileRequest: fileDialog.open();
