@@ -869,9 +869,9 @@ dependencies = [
 
 [[package]]
 name = "ffmpeg-next"
-version = "5.0.2"
+version = "5.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70a1fc87054b079ade0b081b023c5fef309cd4bbcb569c09eed2aa39b25a0a11"
+checksum = "585e5eaf57eceaa199ba6f6a1f46bdad7992930bb7b45b40275d9445b5ba2bc8"
 dependencies = [
  "bitflags",
  "ffmpeg-sys-next",
@@ -2068,7 +2068,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#9e60580d52aa62399f4ef8dfbc3e05ddcfbfb665"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2082,7 +2082,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject_impl"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#9e60580d52aa62399f4ef8dfbc3e05ddcfbfb665"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2105,7 +2105,7 @@ dependencies = [
 [[package]]
 name = "qttypes"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#9e60580d52aa62399f4ef8dfbc3e05ddcfbfb665"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2261,9 +2261,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.11"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8380fe0152551244f0747b1bf41737e0f8a74f97a14ccefd1148187271634f3c"
+checksum = "8ae183fc1b06c149f0c1793e1eb447c8b04bfe46d48e9e48bfb8d2d7ed64ecf0"
 dependencies = [
  "bitflags",
 ]
@@ -2566,7 +2566,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#141e94393bbd3f25e3eafc6b6f8d846ecd5708f1"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#af6d24ef39cc3cfe837a3afe00c6ff883377a0d3"
 dependencies = [
  "argh",
  "byteorder",
@@ -2874,7 +2874,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e821e185a13f5ce0850d57fa9268520097a18d83"
+source = "git+https://github.com/gfx-rs/wgpu.git#b52d68d5adc3392d3157edcb33f1d5e8470a449a"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2894,7 +2894,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e821e185a13f5ce0850d57fa9268520097a18d83"
+source = "git+https://github.com/gfx-rs/wgpu.git#b52d68d5adc3392d3157edcb33f1d5e8470a449a"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2916,7 +2916,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e821e185a13f5ce0850d57fa9268520097a18d83"
+source = "git+https://github.com/gfx-rs/wgpu.git#b52d68d5adc3392d3157edcb33f1d5e8470a449a"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2953,7 +2953,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e821e185a13f5ce0850d57fa9268520097a18d83"
+source = "git+https://github.com/gfx-rs/wgpu.git#b52d68d5adc3392d3157edcb33f1d5e8470a449a"
 dependencies = [
  "bitflags",
 ]
