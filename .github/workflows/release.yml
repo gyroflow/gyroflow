@@ -58,7 +58,7 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
         with:
-          key: gf11
+          key: gf12
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -91,11 +91,11 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ext/Qt
-          key: QtCache-${{ runner.os }}-6.2.3
+          key: QtCache-${{ runner.os }}-6.2.4
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: 6.2.3
+          version: 6.2.4
           dir: ${{ github.workspace }}/ext/
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 

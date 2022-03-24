@@ -12,7 +12,7 @@ if [ "$1" != "CI" ] && [ "$1" != "docker" ]; then
     # Install Qt
     pip3 install -U pip
     pip3 install aqtinstall
-    python3 -m aqt install-qt linux desktop 6.2.3
+    python3 -m aqt install-qt linux desktop 6.2.4
 
     # For VMware: sudo apt install libpocl2
 fi
