@@ -60,6 +60,19 @@ Item {
         root.trimEnd = 1.0;
     }
 
+    function toggleAxis(axis, solo) {
+        let v = (chart.getAxisVisible(axis) ? 1 : 0) + (chart.getAxisVisible(axis + 4) ? 2 : 0);
+        v = (v + 1) % 4;
+        chart.setAxisVisible(axis, v & 1);
+        chart.setAxisVisible(axis + 4, v & 2);
+        if (solo) {
+            for (let i = 0; i < 8; i++) {
+                if (i % 4 != axis)
+                    chart.setAxisVisible(i, false);
+            }
+        }
+    }
+
     Settings {
         property alias timelineChart: chart.viewMode;
     }
