@@ -16,7 +16,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="55"/>
       <source>Background mode</source>
-      <translation>後臺模式</translation>
+      <translation>背景模式</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="68"/>

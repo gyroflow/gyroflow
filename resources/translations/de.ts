@@ -16,7 +16,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="55"/>
       <source>Background mode</source>
-      <translation type="unfinished">Background mode</translation>
+      <translation>Hintergrund-Modus</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
@@ -140,7 +140,7 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="258"/>
       <source>Rendering %1...</source>
-      <translation type="unfinished">Rendering %1...</translation>
+      <translation>Verarbeitung %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="270"/>
@@ -284,7 +284,7 @@ Besteht das Problem weiterhin, bietet diese GPU leider keine Unterstützung für
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="219"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyse %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="232"/>
@@ -347,7 +347,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="217"/>
       <source>Output size preset</source>
-      <translation type="unfinished">Output size preset</translation>
+      <translation>Ausgabeprofil</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="251"/>
@@ -639,7 +639,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="101"/>
       <source> @ %1fps</source>
-      <translation type="unfinished"> @ %1fps</translation>
+      <translation> @ %1fps</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="102"/>
@@ -717,22 +717,22 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="189"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Gyro-Vorprägung</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="200"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="208"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="216"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="226"/>
@@ -794,17 +794,17 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Solid color</source>
-      <translation type="unfinished">Solid color</translation>
+      <translation>Vollfarbe</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Repeat edge pixels</source>
-      <translation type="unfinished">Repeat edge pixels</translation>
+      <translation>Rand-Pixel wiederholen</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Mirror edge pixels</source>
-      <translation type="unfinished">Mirror edge pixels</translation>
+      <translation>Rand-Pixel spiegeln</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="83"/>
@@ -1086,7 +1086,7 @@ Passe die Bewegungs-Energie an, bis dir die Werte zu sagen (empfohlen: 20 oder w
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Linsenkorrektur-Stärke</translation>
     </message>
   </context>
   <context>
@@ -1375,7 +1375,7 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate gyro bias here</source>
-      <translation type="unfinished">Estimate gyro bias here</translation>
+      <translation>Gyro-Vorprägung hier ermitteln</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="346"/>
@@ -1515,13 +1515,13 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="79"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
-      <translation type="unfinished">Image sequence has been detected.
-Please provide frame rate: </translation>
+      <translation>Eine Bildsequenz wurde erkannt.
+Bitte Bildrate in FPS angeben: </translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="85"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Abbrechen</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="270"/>
@@ -1541,7 +1541,7 @@ Please provide frame rate: </translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyse %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="396"/>

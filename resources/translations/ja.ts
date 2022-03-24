@@ -53,7 +53,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="162"/>
       <source>Experimental zero-copy GPU preview</source>
-      <translation>ゼロコピーGPUプレビュー [試験的]</translation>
+      <translation>ゼロコピーGPUプレビュー</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="163"/>

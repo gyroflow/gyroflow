@@ -16,7 +16,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="55"/>
       <source>Background mode</source>
-      <translation type="unfinished">Background mode</translation>
+      <translation>Režim Na pozadí</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
@@ -141,7 +141,7 @@ Malo by to zlepšiť plynulosť programu.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="258"/>
       <source>Rendering %1...</source>
-      <translation type="unfinished">Rendering %1...</translation>
+      <translation>Renderuje sa %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="270"/>
@@ -285,7 +285,7 @@ Ak problém pretrváva aj po aktualizácii ovládača, GPU pravdepodobne nepodpo
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="219"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyzujem %1…</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="232"/>
@@ -348,7 +348,7 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="217"/>
       <source>Output size preset</source>
-      <translation type="unfinished">Output size preset</translation>
+      <translation>Predvoľba veľkosti výstupu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="251"/>
@@ -640,7 +640,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="101"/>
       <source> @ %1fps</source>
-      <translation type="unfinished"> @ %1fps</translation>
+      <translation> @ %1fps</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="102"/>
@@ -718,22 +718,22 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="189"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Sklon gyro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="200"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="208"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="216"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="226"/>
@@ -795,17 +795,17 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Solid color</source>
-      <translation type="unfinished">Solid color</translation>
+      <translation>Plná farba</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Repeat edge pixels</source>
-      <translation type="unfinished">Repeat edge pixels</translation>
+      <translation>Opakuj pixely z okraja</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Mirror edge pixels</source>
-      <translation type="unfinished">Mirror edge pixels</translation>
+      <translation>Odzrkadliť pixely z okraja</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="83"/>
@@ -1087,7 +1087,7 @@ Uprav faktor rýchleho pohybu až kým nedosiahneš požadované hodnoty (odpor�
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Sila korekcie skreslenia šošovky</translation>
     </message>
   </context>
   <context>
@@ -1375,7 +1375,7 @@ Chceš pokračovať?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate gyro bias here</source>
-      <translation type="unfinished">Estimate gyro bias here</translation>
+      <translation>Odhadni naklon gyra tu</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="346"/>
@@ -1515,13 +1515,13 @@ Chceš pokračovať?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="79"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
-      <translation type="unfinished">Image sequence has been detected.
-Please provide frame rate: </translation>
+      <translation>Sekvencia obrazu bola detekovaná.
+Prosím nastav snímkovú frekvenciu:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="85"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Zrušiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="270"/>
@@ -1541,7 +1541,7 @@ Please provide frame rate: </translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyzujem %1…</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="396"/>
