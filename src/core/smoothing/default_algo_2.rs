@@ -215,6 +215,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
             max_velocity[0] *= self.smoothness;
         }
 
+        // Doing this to get similar max zoom as without second pass
         if self.second_pass {
             max_velocity[0] *= 0.5;
             if self.per_axis {
