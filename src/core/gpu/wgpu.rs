@@ -60,6 +60,9 @@ impl WgpuWrapper {
         }))?;
         let info = adapter.get_info();
         log::debug!("WGPU adapter: {:?}", &info);
+        if info.device_type == wgpu::DeviceType::Cpu {
+            return None;
+        }
 
         let name = info.name.clone();
 

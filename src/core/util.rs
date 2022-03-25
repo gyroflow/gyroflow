@@ -2,43 +2,11 @@
 
 use std::fs::File;
 use std::io::Result;
-use std::io::ErrorKind;
 
 pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64)> { // -> (width, height, fps)
     let mut stream = File::open(&filepath)?;
     let filesize = stream.metadata().unwrap().len() as usize;
-    let mp = telemetry_parser::util::parse_mp4(&mut stream, filesize)?;
-    if !mp.tracks.is_empty() {
-        if let Some(ref tkhd) = mp.tracks[0].tkhd {
-            let w = tkhd.width >> 16;
-            let h = tkhd.height >> 16;
-            let matrix = (
-                tkhd.matrix.a >> 16,
-                tkhd.matrix.b >> 16,
-                tkhd.matrix.c >> 16,
-                tkhd.matrix.d >> 16,
-            );
-            let _rotation = match matrix {
-                (0, 1, -1, 0) => 90,   // rotate 90 degrees
-                (-1, 0, 0, -1) => 180, // rotate 180 degrees
-                (0, -1, 1, 0) => 270,  // rotate 270 degrees
-                _ => 0,
-            };
-            let mut fps = 0.0;
-            if let Some(ref stts) = mp.tracks[0].stts {
-                if !stts.samples.is_empty() {
-                    let samples = stts.samples[0].sample_count;
-                    let timescale = mp.tracks[0].timescale.unwrap();
-                    let duration = mp.tracks[0].duration.unwrap();
-                    let duration_us = duration.0 as f64 * 1000_000.0 / timescale.0 as f64;
-                    let us_per_frame = duration_us / samples as f64;
-                    fps = 1000_000.0 / us_per_frame;
-                }
-            }
-            return Ok((w as usize, h as usize, fps));
-        }
-    }
-    Err(ErrorKind::Other.into())
+    telemetry_parser::util::get_video_metadata(&mut stream, filesize)
 }
 
 

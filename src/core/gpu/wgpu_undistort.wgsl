@@ -2,13 +2,13 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 struct Globals {
-    width: u32;
-    height: u32;
-    output_width: u32;
-    output_height: u32;
-    params_count: u32;
-    interpolation: u32;
-    background: array<f32, 4>;
+    width: u32,
+    height: u32,
+    output_width: u32,
+    output_height: u32,
+    params_count: u32,
+    interpolation: u32,
+    background: array<f32, 4>
 };
 
 @group(0) @binding(0) @stage(fragment) var<uniform> params: Globals;
