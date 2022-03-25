@@ -38,6 +38,7 @@ pub fn set_gpu_type_from_name(name: &str) {
     if gpu_type == GpuType::NVIDIA {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
     }
+    #[cfg(target_os = "windows")]
     if gpu_type == GpuType::AMD {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
     }
@@ -335,6 +336,12 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                         (Luma16, input_frame, output_frame, 3, [3], max_val),
                     );
                 },
+                Pixel::AYUV64LE => {
+                    create_planes_proc!(planes,
+                        // TODO: background color will be wrong here, add a special case for it
+                        (RGBA16, input_frame, output_frame, 0, [], 65535.0),
+                    );
+                },
                 Pixel::RGB24    => { create_planes_proc!(planes, (RGB8,   input_frame, output_frame, 0, [], 255.0), ); },
                 Pixel::RGBA     => { create_planes_proc!(planes, (RGBA8,  input_frame, output_frame, 0, [], 255.0), ); },
                 Pixel::RGB48BE  => { create_planes_proc!(planes, (RGB16,  input_frame, output_frame, 0, [], 65535.0), ); },
@@ -370,6 +377,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
             Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE |
             Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE |
+            Pixel::AYUV64LE | 
             Pixel::RGB24 | Pixel::RGBA | Pixel::RGB48BE | Pixel::RGBA64BE => {
                 undistort_frame(input_frame, output_frame)
             },
