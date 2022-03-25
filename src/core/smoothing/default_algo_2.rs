@@ -26,6 +26,7 @@ pub struct DefaultAlgo2 {
     pub smoothness_yaw: f64,
     pub smoothness_roll: f64,
     pub per_axis: bool,
+    pub second_pass: bool,
     pub max_smoothness: f64,
     pub horizonlock: horizon::HorizonLock
 }
@@ -37,6 +38,7 @@ impl Default for DefaultAlgo2 {
         smoothness_yaw: 0.5,
         smoothness_roll: 0.5,
         per_axis: false,
+        second_pass: true,
         max_smoothness: 1.0,
         horizonlock: Default::default()
     } }
@@ -52,6 +54,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
             "smoothness_yaw" => self.smoothness_yaw = val,
             "smoothness_roll" => self.smoothness_roll = val,
             "per_axis" => self.per_axis = val > 0.1,
+            "second_pass" => self.second_pass = val > 0.1,
             "max_smoothness" => self.max_smoothness = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
@@ -122,6 +125,13 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
                 }}"
             },
             {
+                "name": "second_pass",
+                "description": "Second smoothing pass",
+                "advanced": true,
+                "type": "CheckBox",
+                "default": self.second_pass
+            },
+            {
                 "name": "max_smoothness",
                 "description": "Max smoothness",
                 "advanced": true,
@@ -146,6 +156,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
         hasher.write_u64(self.smoothness_yaw.to_bits());
         hasher.write_u64(self.smoothness_roll.to_bits());
         hasher.write_u8(if self.per_axis { 1 } else { 0 });
+        hasher.write_u8(if self.second_pass { 1 } else { 0 });
         hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
@@ -202,6 +213,14 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
             max_velocity[2] *= self.smoothness_roll;
         } else {
             max_velocity[0] *= self.smoothness;
+        }
+
+        if self.second_pass {
+            max_velocity[0] *= 0.5;
+            if self.per_axis {
+                max_velocity[1] *= 0.5;
+                max_velocity[2] *= 0.5;
+            }
         }
 
         // Normalize velocity
@@ -261,6 +280,10 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
             }
             (*ts, q)
         }).collect();
+
+        if !self.second_pass {
+            return self.horizonlock.lock(&smoothed2);
+        }
 
         // Calculate distance
         let mut distance = BTreeMap::<i64, Vector3<f64>>::new();
