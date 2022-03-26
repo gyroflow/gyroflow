@@ -88,7 +88,7 @@ unsafe impl bytemuck::Zeroable for RGB16 { }
 unsafe impl bytemuck::Pod for RGB16 { }
 impl PixelType for RGB16 {
     const COUNT: usize = 3;
-    const SCALAR_BYTES: usize = 1;
+    const SCALAR_BYTES: usize = 2;
     type Scalar = u16;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
@@ -100,7 +100,7 @@ unsafe impl bytemuck::Zeroable for RGBA16 { }
 unsafe impl bytemuck::Pod for RGBA16 { }
 impl PixelType for RGBA16 {
     const COUNT: usize = 4;
-    const SCALAR_BYTES: usize = 1;
+    const SCALAR_BYTES: usize = 2;
     type Scalar = u16;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
@@ -112,7 +112,7 @@ unsafe impl bytemuck::Zeroable for AYUV16 { }
 unsafe impl bytemuck::Pod for AYUV16 { }
 impl PixelType for AYUV16 {
     const COUNT: usize = 4;
-    const SCALAR_BYTES: usize = 1;
+    const SCALAR_BYTES: usize = 2;
     type Scalar = u16;
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
