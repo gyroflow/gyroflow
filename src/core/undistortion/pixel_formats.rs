@@ -31,6 +31,7 @@ fn rgb_to_yuv(v: Vector4<f32>) -> Vector4<f32> {
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA8(u8, u8, u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGB16(u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA16(u16, u16, u16, u16);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct AYUV16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBAf(f32, f32, f32, f32);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV8(u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV16(u16, u16);
@@ -104,6 +105,18 @@ impl PixelType for RGBA16 {
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort4", "convert_ushort4_sat", "float4", "convert_float4") }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", 1.0)) }
+}
+unsafe impl bytemuck::Zeroable for AYUV16 { }
+unsafe impl bytemuck::Pod for AYUV16 { }
+impl PixelType for AYUV16 {
+    const COUNT: usize = 4;
+    const SCALAR_BYTES: usize = 1;
+    type Scalar = u16;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, v.3 as f32) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], max_val: f32) -> Vector4<f32> { let yuv = rgb_to_yuv(v); Vector4::new(yuv[ind[0]] * max_val, yuv[ind[1]] * max_val, yuv[ind[2]] * max_val, yuv[ind[3]] * max_val) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort4", "convert_ushort4_sat", "float4", "convert_float4") }
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", 1.0)) }
 }

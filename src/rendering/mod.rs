@@ -336,12 +336,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                         (Luma16, input_frame, output_frame, 3, [3], max_val),
                     );
                 },
-                Pixel::AYUV64LE => {
-                    create_planes_proc!(planes,
-                        // TODO: background color will be wrong here, add a special case for it
-                        (RGBA16, input_frame, output_frame, 0, [], 65535.0),
-                    );
-                },
+                Pixel::AYUV64LE => { create_planes_proc!(planes, (AYUV16, input_frame, output_frame, 0, [3,0,1,2], 65535.0), ); },
                 Pixel::RGB24    => { create_planes_proc!(planes, (RGB8,   input_frame, output_frame, 0, [], 255.0), ); },
                 Pixel::RGBA     => { create_planes_proc!(planes, (RGBA8,  input_frame, output_frame, 0, [], 255.0), ); },
                 Pixel::RGB48BE  => { create_planes_proc!(planes, (RGB16,  input_frame, output_frame, 0, [], 65535.0), ); },
