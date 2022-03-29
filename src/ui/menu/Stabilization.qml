@@ -183,7 +183,9 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
-            root.setFrameReadoutTime(frame_readout_time);
+            if (Math.abs(+frame_readout_time) > 0) {
+                root.setFrameReadoutTime(frame_readout_time);
+            }
         }
         function onRolling_shutter_estimated(rolling_shutter) {
             root.setFrameReadoutTime(rolling_shutter);
