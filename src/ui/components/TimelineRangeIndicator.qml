@@ -40,8 +40,8 @@ Rectangle {
         DragHandler {
             id: leftTrimDrag;
             target: null;
-            onActiveChanged: { if (!active) { root.changeTrimStart(Math.max(0.0, root.trimStart + root.trimStartAdjustment)); root.trimStartAdjustment = 0;} }
-            onCentroidChanged: if (active) { root.trimStartAdjustment = (leftTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange; }
+            onActiveChanged: if (!active) { root.changeTrimStart(Math.max(0.0, root.trimStart + root.trimStartAdjustment)); root.trimStartAdjustment = 0; }
+            onActiveTranslationChanged: root.trimStartAdjustment = (leftTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
         }
 
         Rectangle {
@@ -67,8 +67,8 @@ Rectangle {
         DragHandler {
             id: rightTrimDrag;
             target: null;
-            onActiveChanged: { if (!active) { root.changeTrimEnd(Math.min(1.0, root.trimEnd + root.trimEndAdjustment)); root.trimEndAdjustment = 0; } }
-            onCentroidChanged: if (active) { root.trimEndAdjustment = (rightTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange; }
+            onActiveChanged: if (!active) { root.changeTrimEnd(Math.min(1.0, root.trimEnd + root.trimEndAdjustment)); root.trimEndAdjustment = 0; }
+            onActiveTranslationChanged: root.trimEndAdjustment = (rightTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
         }
         Rectangle {
             color: parent.color;
