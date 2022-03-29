@@ -166,7 +166,7 @@ impl AutosyncProcess {
                     let processed_frames = estimator.processed_frames(current_range.0 as usize..current_range.1 as usize);
                     for x in processed_frames { frame_status.write().insert(x, true); }
 
-                    if total_detected_frames.load(SeqCst) <= total_read_frames.load(SeqCst) {
+                    if total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
                         if let Some(cb) = &progress_cb {
                             let l = frame_status.read();
                             let total = l.len();
