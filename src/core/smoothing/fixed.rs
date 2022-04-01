@@ -10,7 +10,6 @@ pub struct Fixed {
     pub roll: f64,
     pub pitch: f64,
     pub yaw: f64,
-    pub horizonlock: horizon::HorizonLock
 }
 
 impl SmoothingAlgorithm for Fixed {
@@ -23,10 +22,6 @@ impl SmoothingAlgorithm for Fixed {
             "yaw" => self.yaw = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
-    }
-
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
-        self.horizonlock.set_horizon(lock_percent, roll);
     }
 
     fn get_parameters_json(&self) -> serde_json::Value {
@@ -70,7 +65,6 @@ impl SmoothingAlgorithm for Fixed {
         hasher.write_u64(self.roll.to_bits());
         hasher.write_u64(self.pitch.to_bits());
         hasher.write_u64(self.yaw.to_bits());
-        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -92,8 +86,7 @@ impl SmoothingAlgorithm for Fixed {
         // using x as second rotation corresponds gives the usual pan/tilt combination
         let combined_rot = rot_z * rot_x * rot_y * correction;
 
-        // only one computation
-        let fixed_quat = self.horizonlock.lockquat(UnitQuaternion::from_rotation_matrix(&combined_rot));
+        let fixed_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
 
         quats.iter().map(|x| {
             (*x.0, fixed_quat)

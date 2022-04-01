@@ -17,7 +17,6 @@ pub struct VelocityDampenedAdvanced {
     pub time_constant: f64,
     pub time_constant2: f64,
     pub velocity_factor: f64,
-    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for VelocityDampenedAdvanced {
@@ -25,7 +24,6 @@ impl Default for VelocityDampenedAdvanced {
         time_constant: 0.6,
         time_constant2: 0.1,
         velocity_factor: 0.9,
-        horizonlock: Default::default()
     } }
 }
 
@@ -39,10 +37,6 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
             "velocity_factor" => self.velocity_factor = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
-    }
-
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
-        self.horizonlock.set_horizon(lock_percent, roll);
     }
 
     fn get_parameters_json(&self) -> serde_json::Value {
@@ -90,7 +84,6 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
         hasher.write_u64(self.time_constant.to_bits());
         hasher.write_u64(self.time_constant2.to_bits());
         hasher.write_u64(self.velocity_factor.to_bits());
-        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -150,13 +143,11 @@ impl SmoothingAlgorithm for VelocityDampenedAdvanced {
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
+        smoothed1.iter().rev().map(|(ts, x)| {
             let ratio = ratios[ts];
             let val = alpha * (1.0 - ratio) + high_alpha * ratio;
             q = q.slerp(x, val.min(1.0));
             (*ts, q)
-        }).collect();
-
-        self.horizonlock.lock(&smoothed2)
+        }).collect()
     }
 }

@@ -24,7 +24,6 @@ pub trait SmoothingAlgorithm: DynClone {
     fn get_parameters_json(&self) -> serde_json::Value;
     fn get_status_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64);
 
     fn get_checksum(&self) -> u64;
 
@@ -35,7 +34,9 @@ clone_trait_object!(SmoothingAlgorithm);
 pub struct Smoothing {
     algs: Vec<Box<dyn SmoothingAlgorithm>>,
     current_id: usize,
-    quats_checksum: u64
+    quats_checksum: u64,
+
+    pub horizon_lock: horizon::HorizonLock
 }
 unsafe impl Send for Smoothing { }
 unsafe impl Sync for Smoothing { }
@@ -51,8 +52,11 @@ impl Default for Smoothing {
                 Box::new(self::velocity_dampened_advanced::VelocityDampenedAdvanced::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
+
             quats_checksum: 0,
-            current_id: 1
+            current_id: 1,
+            
+            horizon_lock: horizon::HorizonLock::default(),
         }
     }
 }
@@ -71,6 +75,7 @@ impl Smoothing {
         hasher.write_u64(self.quats_checksum);
         hasher.write_usize(self.current_id);
         hasher.write_u64(self.algs[self.current_id].get_checksum());
+        hasher.write_u64(self.horizon_lock.get_checksum());
         hasher.finish()
     }
 

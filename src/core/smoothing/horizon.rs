@@ -47,7 +47,6 @@ pub struct HorizonLock {
     pub horizonroll: f64,
 }
 
-
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         lock_enabled: false,
@@ -73,13 +72,11 @@ impl HorizonLock {
         lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0-self.horizonlockpercent/100.0)
     }
 
-    pub fn lock(&mut self, quats: &TimeQuat) -> TimeQuat {
-        if !self.lock_enabled {
-            quats.clone()
-        } else {
-            quats.iter().map(|x| {
-                (*x.0,  lock_horizon_angle(*x.1, self.horizonroll * std::f64::consts::PI / 180.0).slerp(x.1, 1.0-self.horizonlockpercent/100.0))
-            }).collect()
+    pub fn lock(&self, quats: &mut TimeQuat) {
+        if self.lock_enabled {
+            for (_k, v) in quats.iter_mut() {
+                *v = lock_horizon_angle(*v, self.horizonroll * std::f64::consts::PI / 180.0).slerp(v, 1.0 - self.horizonlockpercent / 100.0);
+            }
         }
     }
 }

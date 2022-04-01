@@ -28,7 +28,6 @@ pub struct DefaultAlgo2 {
     pub per_axis: bool,
     pub second_pass: bool,
     pub max_smoothness: f64,
-    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for DefaultAlgo2 {
@@ -39,8 +38,7 @@ impl Default for DefaultAlgo2 {
         smoothness_roll: 0.5,
         per_axis: false,
         second_pass: true,
-        max_smoothness: 1.0,
-        horizonlock: Default::default()
+        max_smoothness: 1.0
     } }
 }
 
@@ -58,10 +56,6 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
             "max_smoothness" => self.max_smoothness = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
-    }
-
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
-        self.horizonlock.set_horizon(lock_percent, roll);
     }
 
     fn get_parameters_json(&self) -> serde_json::Value {
@@ -157,7 +151,6 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
         hasher.write_u64(self.smoothness_roll.to_bits());
         hasher.write_u8(if self.per_axis { 1 } else { 0 });
         hasher.write_u8(if self.second_pass { 1 } else { 0 });
-        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -283,7 +276,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
         }).collect();
 
         if !self.second_pass {
-            return self.horizonlock.lock(&smoothed2);
+            return smoothed2;
         }
 
         // Calculate distance
@@ -380,7 +373,7 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
+        smoothed1.iter().rev().map(|(ts, x)| {
             let vel_ratio = velocity[ts];
             let dist_ratio = distance[ts];
             if self.per_axis {
@@ -401,8 +394,6 @@ impl SmoothingAlgorithm for DefaultAlgo2 {
                 q = q.slerp(x, val.min(1.0));
             }
             (*ts, q)
-        }).collect();
-
-        self.horizonlock.lock(&smoothed2)
+        }).collect()
     }
 }

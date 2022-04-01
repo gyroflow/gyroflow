@@ -265,8 +265,9 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut gyro = self.gyro.write();
         let params = self.params.read();
         let mut smoothing = self.smoothing.write();
+        let horizon_lock = smoothing.horizon_lock.clone();
 
-        gyro.recompute_smoothness(smoothing.current().as_mut(), &params);
+        gyro.recompute_smoothness(smoothing.current().as_mut(), horizon_lock, &params);
     }
 
     pub fn recompute_undistortion(&self) {
@@ -307,8 +308,11 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothing_checksum.load(SeqCst) {
-                let mut smoothing = smoothing.write().current().clone();
-                params.gyro.recompute_smoothness(smoothing.as_mut(), &stabilization_params.read());
+                let (mut smoothing, horizon_lock) = {
+                    let mut lock = smoothing.write();
+                    (lock.current().clone(), lock.horizon_lock.clone())
+                };
+                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read());
 
                 if current_compute_id.load(SeqCst) != compute_id { return; }
 
@@ -600,7 +604,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_smoothing();
     }
     pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64) {
-        self.smoothing.write().current().as_mut().set_horizon_lock(lock_percent, roll);
+        self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll);
         self.invalidate_smoothing();
     }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {

@@ -22,7 +22,6 @@ pub struct DefaultAlgo {
     pub smoothness_roll: f64,
     pub per_axis: bool,
     pub max_smoothness: f64,
-    pub horizonlock: horizon::HorizonLock
 }
 
 impl Default for DefaultAlgo {
@@ -33,7 +32,6 @@ impl Default for DefaultAlgo {
         smoothness_roll: 0.5,
         per_axis: false,
         max_smoothness: 1.0,
-        horizonlock: Default::default()
     } }
 }
 
@@ -50,10 +48,6 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "max_smoothness" => self.max_smoothness = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
-    }
-
-    fn set_horizon_lock(&mut self, lock_percent: f64, roll: f64) {
-        self.horizonlock.set_horizon(lock_percent, roll);
     }
 
     fn get_parameters_json(&self) -> serde_json::Value {
@@ -141,7 +135,6 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.write_u64(self.smoothness_yaw.to_bits());
         hasher.write_u64(self.smoothness_roll.to_bits());
         hasher.write_u8(if self.per_axis { 1 } else { 0 });
-        hasher.write_u64(self.horizonlock.get_checksum());
         hasher.finish()
     }
 
@@ -233,7 +226,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
+        smoothed1.iter().rev().map(|(ts, x)| {
             let ratio = velocity[ts];
             if self.per_axis {
                 let pitch_factor = alpha * (1.0 - ratio[0]) + high_alpha * ratio[0];
@@ -253,8 +246,6 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q = q.slerp(x, val.min(1.0));
             }
             (*ts, q)
-        }).collect();
-
-        self.horizonlock.lock(&smoothed2)
+        }).collect()
     }
 }
