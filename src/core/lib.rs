@@ -806,6 +806,7 @@ impl<T: PixelType> StabilizationManager<T> {
                                     imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
                                     detected_source: Some("Gyroflow file".to_string()),
                                     quaternions: None,
+                                    gravity_vectors: None,
                                     raw_imu: Some(raw_imu),
                                     frame_readout_time: None,
                                     camera_identifier: None,

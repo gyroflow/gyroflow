@@ -18,6 +18,7 @@ use crate::StabilizationParams;
 pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
+pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 
 pub struct Quat64Serde(pub Quat64);
 impl From<Quat64> for Quat64Serde {
@@ -40,6 +41,7 @@ pub struct FileMetadata {
     pub imu_orientation: Option<String>,
     pub raw_imu:  Option<Vec<TimeIMU>>,
     pub quaternions:  Option<TimeQuat>,
+    pub gravity_vectors:  Option<TimeVec>,
     pub detected_source: Option<String>,
     pub frame_readout_time: Option<f64>,
     pub camera_identifier: Option<CameraIdentifier>
@@ -70,6 +72,8 @@ pub struct GyroSource {
 
     pub smoothed_quaternions: TimeQuat,
     pub org_smoothed_quaternions: TimeQuat,
+
+    pub gravity_vectors: Option<TimeVec>,
 
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
@@ -107,10 +111,13 @@ impl GyroSource {
 
         let mut imu_orientation = None;
         let mut quaternions = None;
+        let mut gravity_vectors: Option<TimeVec> = None;
 
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
             let mut quats = TimeQuat::new();
+            let mut grav = Vec::<Vector3<f64>>::new();
+            let mut grav_is_usable = false;
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
                     if let Some(map) = tag_map.get(&GroupId::Quaternion) {
@@ -120,6 +127,19 @@ impl GyroSource {
                                     v.v.w, 
                                     Vector3::new(v.v.x, v.v.y, v.v.z)
                                 )));
+                            }
+                        }
+                    }
+                    if let Some(map) = tag_map.get(&GroupId::GravityVector) {
+                        let scale = *(map.get_t(TagId::Scale) as Option<&i16>).unwrap_or(&32767) as f64;
+                        if scale > 0.0 {
+                            if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<telemetry_parser::tags_impl::Vector3<i16>>> {
+                                for v in arr {
+                                    if v.x != 0 || v.y != 0 || v.z != 0 {
+                                        grav_is_usable = true;
+                                    }
+                                    grav.push(Vector3::new(v.x as f64 / scale, v.y as f64 / scale, v.z as f64 / scale));
+                                }
                             }
                         }
                     }
@@ -133,7 +153,13 @@ impl GyroSource {
                     }
                 }
             }
+
+            if !grav_is_usable { grav.clear(); }
+
             if !quats.is_empty() {
+                if !grav.is_empty() && grav.len() == quats.len() {
+                    gravity_vectors = Some(quats.keys().copied().zip(grav.into_iter()).collect());
+                }
                 quaternions = Some(quats);
             }
         }
@@ -144,6 +170,7 @@ impl GyroSource {
             imu_orientation,
             detected_source: Some(detected_source),
             quaternions,
+            gravity_vectors,
             raw_imu,
             frame_readout_time: telemetry_parser::util::frame_readout_time(&input),
             camera_identifier
@@ -174,6 +201,8 @@ impl GyroSource {
         if !self.quaternions.is_empty() {
             self.integration_method = 0;
         }
+
+        self.gravity_vectors = telemetry.gravity_vectors.clone();
         
         if let Some(imu) = &telemetry.raw_imu {
             self.org_raw_imu = imu.clone();
@@ -205,7 +234,7 @@ impl GyroSource {
     pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams) {
         self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params);
 
-        horizon_lock.lock(&mut self.smoothed_quaternions);
+        horizon_lock.lock(&mut self.smoothed_quaternions, &self.gravity_vectors);
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
@@ -362,6 +391,7 @@ impl GyroSource {
             quaternions:          self.quaternions.clone(),
             smoothed_quaternions: self.smoothed_quaternions.clone(),            
             offsets:              self.offsets.clone(),
+            gravity_vectors:      self.gravity_vectors.clone(),
             ..Default::default()
         }
     }

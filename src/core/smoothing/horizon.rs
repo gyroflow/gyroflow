@@ -22,7 +22,7 @@ pub fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
     UnitQuaternion::from_rotation_matrix(&combined_rot)
 }
 
-pub fn lock_horizon_angle(q: UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
+pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference
     let axis = nalgebra::Vector3::<f64>::y_axis();
 
@@ -68,14 +68,19 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lockquat(&mut self, q: UnitQuaternion<f64>) -> UnitQuaternion<f64> {
-        lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0-self.horizonlockpercent/100.0)
+    pub fn lockquat(&self, q: &UnitQuaternion<f64>) -> UnitQuaternion<f64> {
+        lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0 - self.horizonlockpercent / 100.0)
     }
 
-    pub fn lock(&self, quats: &mut TimeQuat) {
+    pub fn lock(&self, quats: &mut TimeQuat, grav: &Option<crate::gyro_source::TimeVec>) {
         if self.lock_enabled {
+            if let Some(_grav) = grav {
+                // TODO: use gravity vectors
+                // dbg!(_grav);
+            }
+
             for (_k, v) in quats.iter_mut() {
-                *v = lock_horizon_angle(*v, self.horizonroll * std::f64::consts::PI / 180.0).slerp(v, 1.0 - self.horizonlockpercent / 100.0);
+                *v = self.lockquat(v);
             }
         }
     }
