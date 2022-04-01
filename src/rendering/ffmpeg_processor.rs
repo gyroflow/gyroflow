@@ -199,13 +199,12 @@ impl<'a> FfmpegProcessor<'a> {
                 let mut out_stream = octx.add_stream(codec)?;
                 self.video.encoder_codec = Some(codec);
 
-                self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
+                self.video.frame_rate = Some(stream.avg_frame_rate());
                 self.video.time_base = Some(stream.rate().invert());
 
                 out_stream.set_rate(stream.rate());
-                if let Some(fr) = self.video.frame_rate {
-                    out_stream.set_avg_frame_rate(fr);
-                }
+                out_stream.set_time_base(stream.time_base());
+                out_stream.set_avg_frame_rate(stream.avg_frame_rate());
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
