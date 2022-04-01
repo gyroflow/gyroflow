@@ -14,12 +14,12 @@ opencl = ["gyroflow-core/use-opencl"]
 gyroflow-core = { path = "src/core/", default-features = false }
 
 [dependencies]
-cstr = "0.2.9"
+cstr = "0.2.10"
 cpp = "0.5.6"
-serde_json = "1.0.78"
-bytemuck = "1.7.3"
+serde_json = "1.0.79"
+bytemuck = "1.9.0"
 nalgebra = "0.30"
-semver = "1.0.5"
+semver = "1.0.7"
 
 breakpad-sys = "0.1.1"
 
@@ -28,20 +28,19 @@ qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "5.0.2", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "5.0.3", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
 parking_lot = "0.12.0"
 
-winapi = "0.3.9"
 simplelog = "0.11.2"
-log = "0.4.14"
+log = "0.4.16"
 
 ureq = "2.4"
 whoami = "1.2.1"
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
-version = "0.32.0"
-features = [ "alloc", "Win32_System_Com", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation" ]
+version = "0.34.0"
+features = [ "alloc", "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation" ]
 
 [build-dependencies]
 cpp_build = "0.5.6"
