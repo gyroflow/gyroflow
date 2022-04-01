@@ -38,7 +38,7 @@ fn entry() {
     let ui_live_reload = false;
 
     #[cfg(target_os = "windows")]
-    unsafe { winapi::um::wincon::AttachConsole(winapi::um::wincon::ATTACH_PARENT_PROCESS); }
+    unsafe { windows::Win32::System::Console::AttachConsole(windows::Win32::System::Console::ATTACH_PARENT_PROCESS); }
 
     let _ = util::install_crash_handler();
     util::init_logging();
