@@ -189,6 +189,6 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v1.0.0-rc5" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
-        /usr/bin/codesign -vvv --deep --strict --options=runtime --timestamp --force --verify -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
+        /usr/bin/codesign -vvv --strict --options=runtime --timestamp --force --verify -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
     fi
 fi
