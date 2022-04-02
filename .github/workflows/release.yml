@@ -158,6 +158,13 @@ jobs:
           command: build
           args: --target ${{ matrix.targets.target }} --profile deploy
 
+      - name: Install Mac certificate
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        uses: apple-actions/import-codesign-certs@v1
+        with: 
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+
       - name: Build and deploy Mac
         if: ${{ matrix.targets.os == 'macos-latest' }}
         env:
@@ -165,9 +172,20 @@ jobs:
           QT_DIR: ${{ env.Qt6_DIR }}
           OPENCV_DIR: ${{ github.workspace }}/ext/vcpkg/installed/
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
+          SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
         run: |
           chmod +x ${{ github.workspace }}/_deployment/deploy-macos.sh
           ${{ github.workspace }}/_deployment/deploy-macos.sh deploy-universal
+
+      - name: "Notarize Release Build"
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        run: |
+          npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
+      - name: "Staple Release Build"
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
 
       - name: Copy dist Windows
         if: ${{ matrix.targets.os == 'windows-2022' }}
