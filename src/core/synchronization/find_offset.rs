@@ -26,7 +26,7 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
                 }).collect();
 
                 let max_angle = get_max_angle(&of_item);
-                if max_angle < 6.0 {
+                if max_angle < 3.0 {
                     ::log::info!("No movement detected, max gyro angle: {}. Skipping sync point.", max_angle);
                     continue;
                 }
