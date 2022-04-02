@@ -140,10 +140,10 @@ cp -f $QT_DIR/plugins/imageformats/libqsvg.dylib                                
 cp -f $QT_DIR/plugins/platforms/libqcocoa.dylib                                                   "$CARGO_TARGET/platforms/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
-    xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Contents/Info.plist
-    xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Contents/Resources/icon.icns
+    xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Info.plist
+    xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/icon.icns
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
-        /usr/bin/codesign -vvv --deep --strict --options=runtime --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Contents/MacOS/gyroflow
+        /usr/bin/codesign -vvv --deep --strict --options=runtime --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
     fi
 
     ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
