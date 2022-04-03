@@ -25,7 +25,7 @@ impl AudioTranscoder {
         let ctx = unsafe { codec::context::Context::wrap(ffi::avcodec_alloc_context3(codec.as_ptr()), None) };
         let mut encoder = ctx.encoder().audio()?;
 
-        let channel_layout = codec.channel_layouts().map_or(ChannelLayout::STEREO, |cls| cls.best(decoder.channel_layout().channels()));
+        let channel_layout = codec.channel_layouts().map_or(ChannelLayout::STEREO, |cls| cls.best(decoder.channels().into()));
 
         if global {
             encoder.set_flags(codec::flag::Flags::GLOBAL_HEADER);
@@ -46,7 +46,7 @@ impl AudioTranscoder {
 
         let mut in_channel_layout = decoder.channel_layout();
         if in_channel_layout.is_empty() {
-            in_channel_layout = ChannelLayout::STEREO;
+            in_channel_layout = ChannelLayout::default(decoder.channels().into());
         }
         let resampler = AudioResampler::new(
             (decoder.format(), in_channel_layout, decoder.rate()),
