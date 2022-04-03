@@ -88,7 +88,9 @@ impl LensProfile {
 
     #[cfg(feature = "opencv")]
     pub fn set_from_calibrator(&mut self, cal: &LensCalibrator) {
-        self.input_horizontal_stretch = 1.0;
+        if self.input_horizontal_stretch <= 0.01 {
+            self.input_horizontal_stretch = 1.0;
+        }
         self.use_opencv_fisheye = true;
         self.calib_dimension = Dimensions { w: cal.width, h: cal.height };
         self.orig_dimension  = Dimensions { w: cal.width, h: cal.height };

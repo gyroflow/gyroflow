@@ -162,6 +162,7 @@ impl<T: PixelType> Undistortion<T> {
         let lens_correction_amount = undistortion_params[1][0];
         let background_mode = undistortion_params[1][1];
         let fov = undistortion_params[1][2];
+        let input_horizontal_stretch = undistortion_params[1][3];
         let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
         let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
@@ -219,6 +220,10 @@ impl<T: PixelType> Undistortion<T> {
                         }
 
                         let mut pt = distort_point((posx, posy), f, c, k, 0.0);
+                        if input_horizontal_stretch > 0.001 {
+                            pt.0 /= input_horizontal_stretch;
+                        }
+
                         let width_f = width as f32;
                         let height_f = height as f32;
                         if edge_repeat {

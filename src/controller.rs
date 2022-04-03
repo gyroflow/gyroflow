@@ -105,6 +105,8 @@ pub struct Controller {
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
 
+    input_horizontal_stretch: qt_property!(f64; WRITE set_input_horizontal_stretch),
+
     background_mode: qt_property!(i32; WRITE set_background_mode),
 
     lens_loaded: qt_property!(bool; NOTIFY lens_changed),
@@ -748,6 +750,7 @@ impl Controller {
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount, v: f64; recompute);
+    wrap_simple_method!(set_input_horizontal_stretch, v: f64; recompute);
     wrap_simple_method!(set_background_mode, v: i32; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
@@ -823,9 +826,11 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
 
-            let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio) = {
+            let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio, input_horizontal_stretch) = {
                 let params = stab.params.read();
-                (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start)
+                let lens = stab.lens.read();
+                let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
+                (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start, input_horizontal_stretch)
             };
 
             let is_forced = custom_timestamp_ms > -0.5;
@@ -887,7 +892,7 @@ impl Controller {
                             }
 
                             if (frame % every_nth_frame as i32) == 0 {
-                                let mut width = input_frame.width();
+                                let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = input_frame.height();
                                 let mut pt_scale = 1.0;
                                 if height > 2160 {

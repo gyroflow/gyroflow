@@ -167,6 +167,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let lens_correction_amount = undistortion_params[9];
     let background_mode = undistortion_params[10];
     let fov = undistortion_params[11];
+    let input_horizontal_stretch = undistortion_params[12];
     let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
     let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
@@ -192,6 +193,9 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let idx: u32 = min((sy + 2u), (params_count - 1u)) * 9u;
  
     var uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
+    if (input_horizontal_stretch > 0.001) {
+        uv.x /= input_horizontal_stretch;
+    }
 
     if (uv.x > -99998.0) {
         let width_f = f32(width);

@@ -32,6 +32,7 @@ pub struct ComputeParams {
     pub trim_start: f64,
     pub trim_end: f64,
     pub scaled_fps: f64,
+    pub input_horizontal_stretch: f64,
     pub adaptive_zoom_window: f64,
     pub framebuffer_inverted: bool,
 
@@ -52,8 +53,10 @@ impl ComputeParams {
         } else {
             (params.size.0.max(1) as f64, params.size.1.max(1) as f64)
         };
+
+        let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
         
-        let lens_ratiox = params.video_size.0 as f64 / calib_width;
+        let lens_ratiox = (params.video_size.0 as f64 / calib_width) * input_horizontal_stretch;
         let lens_ratioy = params.video_size.1 as f64 / calib_height;
         camera_matrix[(0, 0)] *= lens_ratiox;
         camera_matrix[(1, 1)] *= lens_ratioy;
@@ -85,6 +88,7 @@ impl ComputeParams {
             frame_readout_time: params.frame_readout_time,
             trim_start: params.trim_start,
             trim_end: params.trim_end,
+            input_horizontal_stretch,
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
 

@@ -117,6 +117,7 @@ void main() {
     float lens_correction_amount = get_param(1, 0);
     float background_mode = get_param(1, 1);
     float fov = get_param(1, 2);
+    float input_horizontal_stretch = get_param(1, 3);
     bool edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
     bool edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
@@ -142,6 +143,9 @@ void main() {
     float idx = min(sy + 2.0, uniforms.params_count - 1.0);
 
     vec2 uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
+    if (input_horizontal_stretch > 0.001) {
+        uv.x /= input_horizontal_stretch;
+    }
 
     if (uv.x > -99998.0) {
         if (edge_repeat) {

@@ -341,6 +341,21 @@ MenuItem {
             }
         }
         Label {
+            position: Label.Top;
+            text: qsTr("Input horizontal stretch");
+            SliderWithField {
+                from: 0.1;
+                to: 2;
+                value: 1.0;
+                defaultValue: 1.0;
+                width: parent.width;
+                onValueChanged: {
+                    controller.input_horizontal_stretch = value;
+                    calib.calibrationInfo.input_horizontal_stretch = value;
+                }
+            }
+        }
+        Label {
             position: Label.Left;
             text: qsTr("Iterations");
 

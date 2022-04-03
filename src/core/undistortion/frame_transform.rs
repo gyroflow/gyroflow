@@ -119,7 +119,8 @@ impl FrameTransform {
             params.lens_correction_amount as f32,
             params.background_mode as i32 as f32, 
             fov as f32, 
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0 // unused
+            params.input_horizontal_stretch as f32,
+            0.0, 0.0, 0.0, 0.0, 0.0 // unused
         ]);
 
         Self {

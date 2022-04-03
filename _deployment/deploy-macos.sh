@@ -146,6 +146,9 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns/.empty
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/.empty
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
+
+        # Certificate needs to be "Developer ID Application"
+
         OBJECTS=(
             "Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
             "Frameworks/mdk.framework/Versions/A/mdk"
@@ -190,10 +193,10 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
         )
         for i in "${OBJECTS[@]}"
         do
-            /usr/bin/codesign -vvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i
+            codesign -vvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i
         done
 
-        /usr/bin/codesign --strict --options=runtime --timestamp --force -vvvv -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+        codesign --strict --options=runtime --timestamp --force -vvvv -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
     
         codesign --deep --verify --verbose=4 $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
     fi
@@ -202,7 +205,7 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v1.0.0-rc5" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
-        /usr/bin/codesign --strict --options=runtime --timestamp --force --verbose=4 -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
+        codesign --strict --options=runtime --timestamp --force --verbose=4 -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
     fi
     codesign --deep --verify --verbose=4 "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
 fi

@@ -88,7 +88,9 @@ MenuItem {
                         window.motionData.setGyroLpf(obj.gyro_lpf);
                     }
 
-                    root.calibWidth  = obj.calib_dimension.w;
+                    const input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
+
+                    root.calibWidth  = obj.calib_dimension.w / input_horizontal_stretch;
                     root.calibHeight = obj.calib_dimension.h;
                     const coeffs = obj.fisheye_params.distortion_coeffs;
                     const mtrx = obj.fisheye_params.camera_matrix;
