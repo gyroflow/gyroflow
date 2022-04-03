@@ -143,17 +143,66 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Info.plist
     xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/icon.icns
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/.empty
+    rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns/.empty
+    rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/.empty
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
-        /usr/bin/codesign --deep --strict --options=runtime --timestamp --force --verify --verbose=4 -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+        OBJECTS=(
+            "Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
+            "Frameworks/mdk.framework/Versions/A/mdk"
+            "Frameworks/QtCore.framework/Versions/A/QtCore"
+            "Frameworks/QtDBus.framework/Versions/A/QtDBus"
+            "Frameworks/QtGui.framework/Versions/A/QtGui"
+            "Frameworks/QtLabsSettings.framework/Versions/A/QtLabsSettings"
+            "Frameworks/QtNetwork.framework/Versions/A/QtNetwork"
+            "Frameworks/QtOpenGL.framework/Versions/A/QtOpenGL"
+            "Frameworks/QtQml.framework/Versions/A/QtQml"
+            "Frameworks/QtQmlModels.framework/Versions/A/QtQmlModels"
+            "Frameworks/QtQmlWorkerScript.framework/Versions/A/QtQmlWorkerScript"
+            "Frameworks/QtQuick.framework/Versions/A/QtQuick"
+            "Frameworks/QtQuickControls2.framework/Versions/A/QtQuickControls2"
+            "Frameworks/QtQuickControls2Impl.framework/Versions/A/QtQuickControls2Impl"
+            "Frameworks/QtQuickDialogs2.framework/Versions/A/QtQuickDialogs2"
+            "Frameworks/QtQuickDialogs2QuickImpl.framework/Versions/A/QtQuickDialogs2QuickImpl"
+            "Frameworks/QtQuickDialogs2Utils.framework/Versions/A/QtQuickDialogs2Utils"
+            "Frameworks/QtQuickTemplates2.framework/Versions/A/QtQuickTemplates2"
+            "Frameworks/QtSvg.framework/Versions/A/QtSvg"
+            "Frameworks/QtWidgets.framework/Versions/A/QtWidgets"
+            "PlugIns/iconengines/libqsvgicon.dylib"
+            "PlugIns/imageformats/libqsvg.dylib"
+            "PlugIns/platforms/libqcocoa.dylib"
+            "Resources/qml/Qt/labs/settings/libqmlsettingsplugin.dylib"
+            "Resources/qml/QtQml/libqmlplugin.dylib"
+            "Resources/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib"
+            "Resources/qml/QtQuick/libqtquick2plugin.dylib"
+            "Resources/qml/QtQuick/Controls/libqtquickcontrols2plugin.dylib"
+            "Resources/qml/QtQuick/Controls/Basic/libqtquickcontrols2basicstyleplugin.dylib"
+            "Resources/qml/QtQuick/Controls/Basic/impl/libqtquickcontrols2basicstyleimplplugin.dylib"
+            "Resources/qml/QtQuick/Controls/impl/libqtquickcontrols2implplugin.dylib"
+            "Resources/qml/QtQuick/Controls/macOS/libqtquickcontrols2macosstyleplugin.dylib"
+            "Resources/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.dylib"
+            "Resources/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.dylib"
+            "Resources/qml/QtQuick/Dialogs/libqtquickdialogsplugin.dylib"
+            "Resources/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib"
+            "Resources/qml/QtQuick/Layouts/libqquicklayoutsplugin.dylib"
+            "Resources/qml/QtQuick/Templates/libqtquicktemplates2plugin.dylib"
+            "Resources/qml/QtQuick/Window/libquickwindowplugin.dylib"
+            "MacOS/gyroflow"
+        )
+        for i in "${OBJECTS[@]}"
+        do
+            /usr/bin/codesign -vvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i
+        done
 
-        otool -L $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/gyroflow
-        codesign --verify --verbose=4 $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+        /usr/bin/codesign --strict --options=runtime --timestamp --force -vvvv -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+    
+        codesign --deep --verify --verbose=4 $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
     fi
 
     ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
     hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v1.0.0-rc5" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
-        /usr/bin/codesign -vvv --strict --options=runtime --timestamp --force --verify -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
+        /usr/bin/codesign --strict --options=runtime --timestamp --force --verbose=4 -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
     fi
+    codesign --deep --verify --verbose=4 "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
 fi
