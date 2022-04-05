@@ -306,7 +306,13 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
 
     // TODO: into_par_iter?
     distorted.iter().enumerate().map(|(index, pi)| {
-        let pw = ((pi.0 - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
+        let mut x = pi.0;
+        if let Some(params) = params {
+            if params.input_horizontal_stretch > 0.001 {
+                x *= params.input_horizontal_stretch;
+            }
+        }
+        let pw = ((x - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
 
         let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
 
