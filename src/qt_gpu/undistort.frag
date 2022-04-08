@@ -20,13 +20,36 @@ layout(std140, binding = 2) uniform UniformBuffer {
     int _padding;
     int _padding2;
     int _padding3;
+    // We need to split it to vec4's because of padding to 4 floats in uniforms memory layout
+    vec4 undistortion_params1; // 4
+    vec4 undistortion_params2; // 8
+    vec4 undistortion_params3; // 12
+    vec4 undistortion_params4; // 16
+    vec4 undistortion_params5; // 20
+    vec4 undistortion_params6; // 24
+    vec4 undistortion_params7; // 28
     vec4 bg;
 } uniforms;
 
 layout(binding = 3) uniform sampler2D texParams;
 
 float get_param(float row, float idx) {
-    return texture(texParams, vec2(idx / 8.0, row / (float(uniforms.height + 2) - 3.0))).r;
+    int idx_int = int(idx);
+    if (row == 0) {
+             if (idx_int < 4) return uniforms.undistortion_params1[idx_int];     // 0-3
+        else if (idx_int < 8) return uniforms.undistortion_params2[idx_int - 4]; // 4-7
+        else if (idx_int < 9) return uniforms.undistortion_params3[0];           // 8
+    } else if (row == 1) {
+             if (idx_int < 3) return uniforms.undistortion_params3[idx_int + 1]; // 0-2
+        else if (idx_int < 7) return uniforms.undistortion_params4[idx_int - 3]; // 3-6
+        else if (idx_int < 9) return uniforms.undistortion_params5[idx_int - 7]; // 7-8
+    } else if (row == 2) {
+             if (idx_int < 2) return uniforms.undistortion_params5[idx_int + 2]; // 0-1
+        else if (idx_int < 6) return uniforms.undistortion_params6[idx_int - 2]; // 2-5
+        else if (idx_int < 9) return uniforms.undistortion_params7[idx_int - 6]; // 6-8
+    }
+
+    return texture(texParams, vec2(idx / 8.0, row / float(uniforms.params_count - 1))).r;
 }
 
 vec2 undistort_point(vec2 pos, vec2 f, vec2 c, vec4 k, float amount) {

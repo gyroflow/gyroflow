@@ -46,6 +46,7 @@ struct Uniforms {
     qint32 _padding;
     qint32 _padding2;
     qint32 _padding3;
+    float undistortion_params[28];
     float bg[4];
 };
 
@@ -77,7 +78,7 @@ public:
         m_texParams.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, (textureSize.height() + 2)), 1, QRhiTexture::UsedAsTransferSource));
         if (!m_texParams->create()) { qDebug() << "failed to create m_texParams"; return false; }
 
-        params_buffer.resize((textureSize.height() + 1) * 9);
+        params_buffer.resize((textureSize.height() + 2) * 9);
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
         if (!m_vertexBuffer->create()) { qDebug() << "failed to create m_vertexBuffer"; return false; }
@@ -156,6 +157,9 @@ public:
         uniforms.height = size.height();
         uniforms.output_width = m_outputSize.width();
         uniforms.output_height = m_outputSize.height();
+        // First 27 floats are required.
+        // Copy them to the uniform, because when fetching from the float32 texture (`texParams`), we don't want to rely on float index and texture sampler
+        memcpy(uniforms.undistortion_params, params_buffer.data(), 27 * sizeof(float));
         memcpy(uniforms.bg, bg, 4 * sizeof(float)); // RGBA
         u->updateDynamicBuffer(m_computeUniform.get(), 0, sizeof(Uniforms), (const char *)&uniforms);
 
