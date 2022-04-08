@@ -73,9 +73,8 @@ jobs:
       - uses: lukka/get-cmake@latest
       - uses: lukka/run-vcpkg@v10
         with:
-          appendedCacheKey: gf
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: 218ea21905bbad1f9648f18639563e5c80af1bc5
+          vcpkgGitCommitId: d72783cb3aeddfd667861caef1060e54ca6fa7a9
       
       # Download and install OpenCV
       - name: Install OpenCV and curl
