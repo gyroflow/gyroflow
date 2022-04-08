@@ -89,9 +89,10 @@ MenuItem {
                     }
 
                     const input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
+                    const input_vertical_stretch   = obj.input_vertical_stretch   > 0.01? obj.input_vertical_stretch   : 1.0;
 
                     root.calibWidth  = obj.calib_dimension.w / input_horizontal_stretch;
-                    root.calibHeight = obj.calib_dimension.h;
+                    root.calibHeight = obj.calib_dimension.h / input_vertical_stretch;
                     const coeffs = obj.fisheye_params.distortion_coeffs;
                     const mtrx = obj.fisheye_params.camera_matrix;
                     k1.setInitialValue(coeffs[0]);

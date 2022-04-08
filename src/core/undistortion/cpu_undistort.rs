@@ -163,6 +163,7 @@ impl<T: PixelType> Undistortion<T> {
         let background_mode = undistortion_params[1][1];
         let fov = undistortion_params[1][2];
         let input_horizontal_stretch = undistortion_params[1][3];
+        let input_vertical_stretch = undistortion_params[1][4];
         let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
         let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
@@ -220,9 +221,8 @@ impl<T: PixelType> Undistortion<T> {
                         }
 
                         let mut pt = distort_point((posx, posy), f, c, k, 0.0);
-                        if input_horizontal_stretch > 0.001 {
-                            pt.0 /= input_horizontal_stretch;
-                        }
+                        if input_horizontal_stretch > 0.001 { pt.0 /= input_horizontal_stretch; }
+                        if input_vertical_stretch   > 0.001 { pt.1 /= input_vertical_stretch; }
 
                         let width_f = width as f32;
                         let height_f = height as f32;
@@ -307,12 +307,12 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
     // TODO: into_par_iter?
     distorted.iter().enumerate().map(|(index, pi)| {
         let mut x = pi.0;
+        let mut y = pi.1;
         if let Some(params) = params {
-            if params.input_horizontal_stretch > 0.001 {
-                x *= params.input_horizontal_stretch;
-            }
+            if params.input_horizontal_stretch > 0.001 { x *= params.input_horizontal_stretch; }
+            if params.input_vertical_stretch   > 0.001 { y *= params.input_vertical_stretch; }
         }
-        let pw = ((x - c.0) / f.0, (pi.1 - c.1) / f.1); // world point
+        let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point
 
         let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
 

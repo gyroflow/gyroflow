@@ -356,6 +356,21 @@ MenuItem {
             }
         }
         Label {
+            position: Label.Top;
+            text: qsTr("Input vertical stretch");
+            SliderWithField {
+                from: 0.1;
+                to: 2;
+                value: 1.0;
+                defaultValue: 1.0;
+                width: parent.width;
+                onValueChanged: {
+                    controller.input_vertical_stretch = value;
+                    calib.calibrationInfo.input_vertical_stretch = value;
+                }
+            }
+        }
+        Label {
             position: Label.Left;
             text: qsTr("Iterations");
 

@@ -143,6 +143,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     float background_mode = undistortion_params[10];
     float fov = undistortion_params[11];
     float input_horizontal_stretch = undistortion_params[12];
+    float input_vertical_stretch = undistortion_params[13];
     bool edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
     bool edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
 
@@ -186,9 +187,8 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                 return;
             }
             float2 uv = distort_point(pos, f, c, k);
-            if (input_horizontal_stretch > 0.001f) {
-                uv.x /= input_horizontal_stretch;
-            }
+            if (input_horizontal_stretch > 0.001f) { uv.x /= input_horizontal_stretch; }
+            if (input_vertical_stretch   > 0.001f) { uv.y /= input_vertical_stretch; }
 
             if (edge_repeat) {
                 uv = max((float2)(0, 0), min((float2)(width - 1, height - 1), uv));

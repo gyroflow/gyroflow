@@ -513,6 +513,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
 
     pub fn set_input_horizontal_stretch(&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
+    pub fn set_input_vertical_stretch  (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
 
     pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
