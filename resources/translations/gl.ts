@@ -16,7 +16,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="55"/>
       <source>Background mode</source>
-      <translation type="unfinished">Background mode</translation>
+      <translation>Tipo de fondo</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
@@ -140,7 +140,7 @@ Isto debería proporcionar un rendemento da IU moito mellor.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="258"/>
       <source>Rendering %1...</source>
-      <translation type="unfinished">Rendering %1...</translation>
+      <translation>Renderizado %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="270"/>
@@ -284,7 +284,7 @@ Se o problema aínda está presente despois da actualización do controlador, a 
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="219"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analizando %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="232"/>
@@ -347,7 +347,7 @@ Quere converter a un formato de píxeles compatible ou manter o orixinal e rende
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="217"/>
       <source>Output size preset</source>
-      <translation type="unfinished">Output size preset</translation>
+      <translation>Preset de tamaño de saída</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="251"/>
@@ -639,7 +639,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="101"/>
       <source> @ %1fps</source>
-      <translation type="unfinished"> @ %1fps</translation>
+      <translation> @ %1fps</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="102"/>
@@ -717,22 +717,22 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="189"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Desvío do xiroscopio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="200"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="208"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="216"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="226"/>
@@ -794,17 +794,17 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Solid color</source>
-      <translation type="unfinished">Solid color</translation>
+      <translation>Cor sólido</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Repeat edge pixels</source>
-      <translation type="unfinished">Repeat edge pixels</translation>
+      <translation>Repita píxeles do bordo</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="58"/>
       <source>Mirror edge pixels</source>
-      <translation type="unfinished">Mirror edge pixels</translation>
+      <translation>Píxeles da beira de espello</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="83"/>
@@ -1085,7 +1085,7 @@ Modifique o factor de velocidade ata obter os valores desexados (recomendado a m
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Intensidade de corrección da lente</translation>
     </message>
   </context>
   <context>
@@ -1374,7 +1374,7 @@ Está seguro de que quere continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate gyro bias here</source>
-      <translation type="unfinished">Estimate gyro bias here</translation>
+      <translation>Estimar o desvío do xiro aquí</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="346"/>
@@ -1514,13 +1514,13 @@ Está seguro de que quere continuar?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="79"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
-      <translation type="unfinished">Image sequence has been detected.
-Please provide frame rate: </translation>
+      <translation>Detectouse a secuencia de imaxes.
+Proporcione taxa de fotogramas: </translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="85"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Cancelar</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="270"/>
@@ -1540,7 +1540,7 @@ Please provide frame rate: </translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analizando %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="396"/>

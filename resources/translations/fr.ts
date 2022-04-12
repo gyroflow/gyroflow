@@ -16,7 +16,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="55"/>
       <source>Background mode</source>
-      <translation type="unfinished">Background mode</translation>
+      <translation>Mode en arrière plan</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
@@ -31,7 +31,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="95"/>
       <source>UI scaling</source>
-      <translation type="unfinished">UI scaling</translation>
+      <translation>Mise à l'échelle de l'interface :</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="109"/>
@@ -126,7 +126,7 @@ Cela devrait fournir de bien meilleures performances de l'interface utilisateur.
     <message>
       <location filename="../../src/ui/App.qml" line="157"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Choisir la destination</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="203"/>
