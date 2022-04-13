@@ -250,9 +250,9 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/g
 
 ### Notable contributors
 * [Maik Menz](https://github.com/mycosd/) - *Contributed to all areas of Gyroflow with fixes and improvements*
-* [Aphobius](https://github.com/Aphobius/) - *Author of velocity dampened smoothing algorithm*
-* [Marc Roeschlin](https://github.com/marcroe/) - *Author of adaptive zoom algorithm*
-* [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author the OpenFX plugin*
+* [Aphobius](https://github.com/Aphobius/) - *Author of the velocity dampened smoothing algorithm*
+* [Marc Roeschlin](https://github.com/marcroe/) - *Author of the adaptive zoom algorithm*
+* [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author of the OpenFX plugin*
 
 ## Acknowledgements
 
