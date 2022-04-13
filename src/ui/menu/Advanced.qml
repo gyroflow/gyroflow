@@ -130,6 +130,7 @@ MenuItem {
                 ["Russian (русский)",            "ru"],
                 ["Slovak (slovenský)",           "sk"],
                 ["Spanish (español)",            "es"],
+                ["Turkish (Türkçe)",             "tr"],
                 ["Ukrainian (Українська мова)",  "uk"]
             ];
             Component.onCompleted: {

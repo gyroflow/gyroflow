@@ -153,6 +153,7 @@ Currently *Gyroflow* is available in:
 * **Russian** (by Андрей Гурьянов, redstar01 and lukdut)
 * **Slovak** (by Radovan Leitman)
 * **Spanish** (by Pelado-Mat)
+* **Turkish** (by [Metin Oktay Yılmaz](https://github.com/mettinoktay))
 * **Ukrainian** (by Artem Alexandrov)
 
 Help us translate *Gyroflow* to your language! We use *crowdin* to manage translations and you can contribute there: https://crowdin.com/project/gyroflow
