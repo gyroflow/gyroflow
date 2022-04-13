@@ -249,8 +249,10 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/g
 * [Elvin Chen](https://github.com/ElvinC/) - *Author of the first version in Python, laid the groundwork to make all this possible*
 
 ### Notable contributors
+* [Maik Menz](https://github.com/mycosd/) - *Contributed to all areas of Gyroflow with fixes and improvements*
 * [Aphobius](https://github.com/Aphobius/) - *Author of velocity dampened smoothing algorithm*
 * [Marc Roeschlin](https://github.com/marcroe/) - *Author of adaptive zoom algorithm*
+* [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author the OpenFX plugin*
 
 ## Acknowledgements
 
