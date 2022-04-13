@@ -261,6 +261,7 @@ MenuItem {
     Label {
         position: Label.Left;
         text: qsTr("Bitrate");
+        visible: outCodec === "x264" || outCodec === "x265";
 
         NumberField {
             id: bitrate;
