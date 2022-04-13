@@ -20,7 +20,7 @@ Rectangle {
         font.pixelSize: 30 * dpiScale;
         anchors.centerIn: parent;
         leftPadding: 0;
-        scale: dropText.paintedWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.paintedWidth : 1.0;
+        scale: dropText.contentWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.contentWidth : 1.0;
     }
 
     DropTargetRect { }

@@ -276,15 +276,15 @@ Item {
         }
         Rectangle {
             id: dropRect;
-            border.width: 3 * dpiScale;
+            border.width: vid.loaded? 0 : (3 * dpiScale);
             border.color: style === "light"? Qt.darker(styleBackground, 1.3) : Qt.lighter(styleBackground, 2);
             anchors.fill: parent;
-            anchors.margins: 20 * dpiScale;
-            anchors.topMargin: 50 * dpiScale;
-            anchors.bottomMargin: 50 * dpiScale;
+            anchors.margins: vid.loaded? 0 : (20 * dpiScale);
+            anchors.topMargin: vid.loaded? 0 : (50 * dpiScale);
+            anchors.bottomMargin: vid.loaded? 0 : (50 * dpiScale);
             color: styleBackground;
             radius: 5 * dpiScale;
-            opacity: vid.loaded? 0 : da.containsDrag? 0.3 : 1.0;
+            opacity: da.containsDrag? (vid.loaded? 0.8 : 0.3) : vid.loaded? 0 : 1.0;
             Ease on opacity { duration: 300; }
             visible: opacity > 0;
             onVisibleChanged: if (!visible) dropText.loadingFile = "";
@@ -296,13 +296,17 @@ Item {
                 font.pixelSize: 30 * dpiScale;
                 anchors.centerIn: parent;
                 leftPadding: 0;
-                scale: dropText.paintedWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.paintedWidth : 1.0;
+                scale: dropText.contentWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.contentWidth : 1.0;
             }
             DropTargetRect {
-                visible: !dropText.loadingFile;
+                visible: !dropText.loadingFile && !vid.loaded;
                 anchors.fill: dropText;
                 anchors.margins: -30 * dpiScale;
                 scale: dropText.scale;
+            }
+            DropTargetRect {
+                visible: !dropText.loadingFile && vid.loaded;
+                anchors.margins: 5 * dpiScale;
             }
             MouseArea {
                 visible: !vid.loaded;
@@ -329,6 +333,7 @@ Item {
         }
         LoaderOverlay {
             id: videoLoader;
+            background: styleBackground;
             onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
             onCancel: controller.cancel_current_operation();
         }

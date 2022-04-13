@@ -18,6 +18,7 @@ Item {
     property int currentFrame: 0;
     property int totalFrames: 0;
     property string additional;
+    property alias background: overlay.color;
 
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
@@ -69,6 +70,7 @@ Item {
     signal cancel();
 
     Rectangle {
+        id: overlay;
         anchors.fill: parent;
         color: styleBackground2;
         opacity: 0.8;
