@@ -10,6 +10,9 @@ Rectangle {
 
     property real trimStartAdjustment: 0;
     property real trimEndAdjustment: 0;
+
+    property bool active: rightTrimDrag.active || leftTrimDrag.active;
+
     x: parent.width * mapToVisibleArea(Math.max(0.0, trimStart + trimStartAdjustment));
     width: Math.max(10, parent.width * mapToVisibleArea(Math.min(1.0, trimEnd + trimEndAdjustment)) - x);
     y: 35 * dpiScale;

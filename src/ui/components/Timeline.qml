@@ -201,7 +201,7 @@ Item {
             property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0});
             
             onMouseXChanged: {
-                if (pressed)  {
+                if (pressed) {
                     if (pressedButtons & Qt.MiddleButton) {
                         const dx = mouseX - panInit.x;
                         const stepsPerPixel = panInit.visibleAreaWidth / parent.width;
@@ -371,6 +371,22 @@ Item {
             TimelineRangeIndicator {
                 trimStart: root.trimStart;
                 trimEnd: root.trimEnd;
+
+                onActiveChanged: if (active) vid.setPlaybackRange(0, vid.duration);
+                onTrimStartAdjustmentChanged: {
+                    const dragPos = Math.max(0, trimStart + trimStartAdjustment);
+                    if (mapToVisibleArea(dragPos) < 0 && dragPos >= 0) {
+                        scrollbar.position = root.visibleAreaLeft = dragPos;
+                    }
+                    if (!vid.playing) root.setPosition(dragPos);
+                }
+                onTrimEndAdjustmentChanged: {
+                    const dragPos = Math.min(1, trimEnd + trimEndAdjustment);
+                    if (mapToVisibleArea(dragPos) > 1 && dragPos <= 1) {
+                        root.visibleAreaRight = dragPos;
+                    }
+                    if (!vid.playing) root.setPosition(dragPos);
+                }
                 visible: root.trimActive;
                 onChangeTrimStart: (val) => root.setTrim(val, root.trimEnd);
                 onChangeTrimEnd: (val) => root.setTrim(root.trimStart, val);
@@ -557,7 +573,7 @@ Item {
         ToolTip {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
                     .arg("<b>" + qsTr("Scroll") + "</b>")
-                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Control+Scroll") : qsTr("Alt+Scroll")) + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Control+Shift+Scroll") : qsTr("Alt+Scroll")) + "</b>")
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: ma.containsMouse;
             delay: 2000;

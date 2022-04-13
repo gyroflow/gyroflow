@@ -129,11 +129,11 @@ Item {
         if (/\d+\.(png|exr)$/i.test(urlStr)) {
             let firstNum = urlStr.match(/(\d+)\.(png|exr)$/i);
             if (firstNum[1]) {
-                let ext = firstNum[2];
+                const ext = firstNum[2];
                 firstNum = firstNum[1];
                 for (let i = +firstNum + 1; i < +firstNum + 5; ++i) { // At least 5 frames
                     const newNum = i.toString().padStart(firstNum.length, '0');
-                    let newPath = urlStr.replace(firstNum + "." + ext, newNum + "." + ext);
+                    const newPath = urlStr.replace(firstNum + "." + ext, newNum + "." + ext);
                     if (!controller.file_exists(newPath)) {
                         return false;
                     }
