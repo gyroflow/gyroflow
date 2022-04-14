@@ -151,7 +151,7 @@ Currently *Gyroflow* is available in:
 * **Portuguese Brazilian** (by KallelGaNewk)
 * **Portuguese** (by Ricardo Pimentel)
 * **Russian** (by Андрей Гурьянов, redstar01 and lukdut)
-* **Slovak** (by Radovan Leitman)
+* **Slovak** (by Radovan Leitman and Eduard Petrovsky)
 * **Spanish** (by Pelado-Mat)
 * **Turkish** (by [Metin Oktay Yılmaz](https://github.com/mettinoktay))
 * **Ukrainian** (by Artem Alexandrov)
