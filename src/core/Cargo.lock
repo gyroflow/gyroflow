@@ -1279,7 +1279,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.8.0"
-source = "git+https://github.com/gfx-rs/naga?rev=f90e563#f90e563c281cfc71c794e0426ebcced9e3999202"
+source = "git+https://github.com/gfx-rs/naga?rev=1720725#172072501490c877d1efddeb653e0a74107b900c"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -1919,9 +1919,9 @@ checksum = "60a357793950651c4ed0f3f52338f53b2f809f32d83a07f72909fa13e4c6c1e3"
 
 [[package]]
 name = "rayon"
-version = "1.5.1"
+version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c06aca804d41dbc8ba42dfd964f0d01334eceb64314b9ecf7c5fad5188a06d90"
+checksum = "fd249e82c21598a9a426a4e00dd7adc1d640b22445ec8545feef801d1a74c221"
 dependencies = [
  "autocfg",
  "crossbeam-deque 0.8.1",
@@ -1931,14 +1931,13 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.9.1"
+version = "1.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d78120e2c850279833f1dd3582f730c4ab53ed95aeaaaa862a2a5c71b1656d8e"
+checksum = "9f51245e1e62e1f1629cbfec37b5793bbabcaeb90f30e94d2ba03564687353e4"
 dependencies = [
  "crossbeam-channel 0.5.4",
  "crossbeam-deque 0.8.1",
  "crossbeam-utils 0.8.8",
- "lazy_static",
  "num_cpus",
 ]
 
@@ -2419,7 +2418,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#988990c24d0933c82cdd661708a3f5bcb4533ea3"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2439,7 +2438,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#988990c24d0933c82cdd661708a3f5bcb4533ea3"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2461,7 +2460,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#988990c24d0933c82cdd661708a3f5bcb4533ea3"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2498,7 +2497,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#988990c24d0933c82cdd661708a3f5bcb4533ea3"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
 dependencies = [
  "bitflags",
 ]

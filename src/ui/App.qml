@@ -140,7 +140,8 @@ Rectangle {
                         id: outputFile;
                         text: "";
                         anchors.verticalCenter: parent.verticalCenter;
-                        width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 30 * dpiScale;
+                        anchors.verticalCenterOffset: -2 * dpiScale;
+                        width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 75 * dpiScale;
 
                         LinkButton {
                             anchors.right: parent.right;
@@ -170,21 +171,18 @@ Rectangle {
                     id: renderBtn;
                     accent: true;
                     anchors.right: parent.right;
-                    anchors.rightMargin: 15 * dpiScale;
+                    anchors.rightMargin: 55 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
-                    text: qsTr("Export");
+                    text: isAddToQueue? qsTr("Add to render queue") : qsTr("Export");
                     icon.name: "video";
                     enabled: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     opacity: enabled? 1.0 : 0.6;
                     popup.width: width * 2;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
+                    property bool isAddToQueue: false;
 
-                    Component.onCompleted: {
-                        QT_TRANSLATE_NOOP("Popup", "Add to render queue");
-                    }
-
-                    model: [QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file"), ];
+                    model: [isAddToQueue? qsTr("Export") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
                     function renameOutput() {
                         const orgOutput = outputFile.text;
@@ -226,60 +224,62 @@ Rectangle {
                             ]);
                             return;
                         }
+                        const renderOptions = {
+                            codec:          exportSettings.outCodec,
+                            codec_options:  exportSettings.outCodecOptions,
+                            output_path:    outputFile.text,
+                            trim_start:     videoArea.trimStart,
+                            trim_end:       videoArea.trimEnd,
+                            output_width:   exportSettings.outWidth,
+                            output_height:  exportSettings.outHeight,
+                            bitrate:        exportSettings.outBitrate,
+                            use_gpu:        exportSettings.outGpu,
+                            audio:          exportSettings.outAudio,
+                            pixel_format:   ""
+                        };
 
-                        controller.render(
-                            exportSettings.outCodec, 
-                            exportSettings.outCodecOptions, 
-                            outputFile.text, 
-                            videoArea.trimStart, 
-                            videoArea.trimEnd, 
-                            exportSettings.outWidth, 
-                            exportSettings.outHeight, 
-                            exportSettings.outBitrate, 
-                            exportSettings.outGpu, 
-                            exportSettings.outAudio,
-                            exportSettings.overridePixelFormat
-                        );
+                        videoArea.vid.grabToImage(function(result) {
+                            const job_id = render_queue.add(controller, JSON.stringify(renderOptions), result.url);
+                            if (renderBtn.isAddToQueue) {
+                                // Add to queue
+                                videoArea.queue.shown = true;
+                            } else {
+                                // Export now
+                                render_queue.main_job_id = job_id;
+                                render_queue.render_job(job_id);
+                            }
+                        }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
                     }
                     onClicked: {
                         allowFile = false;
                         allowLens = false;
                         allowSync = false;
-                        exportSettings.overridePixelFormat = "";
                         window.videoArea.vid.pause();
                         render();
                     }
                     popup.onClicked: (index) => {
-                        controller.export_gyroflow(index == 1);
-                    }
-                    
-                    Connections {
-                        target: controller;
-                        function onRender_progress(progress, frame, total_frames, finished) {
-                            videoArea.videoLoader.active = !finished;
-                            videoArea.videoLoader.currentFrame = frame;
-                            videoArea.videoLoader.totalFrames = total_frames;
-                            videoArea.videoLoader.additional = "";
-                            videoArea.videoLoader.text = videoArea.videoLoader.active? qsTr("Rendering %1...") : "";
-                            videoArea.videoLoader.progress = videoArea.videoLoader.active? progress : -1;
-                            videoArea.videoLoader.cancelable = true;
-
-                            function getFolder(v) {
-                                let idx = v.lastIndexOf("/");
-                                if (idx == -1) idx = v.lastIndexOf("\\");
-                                if (idx == -1) return "";
-                                return v.substring(0, idx + 1);
-                            }
-
-                            if (total_frames > 0 && finished) {
-                                messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + outputFile.text + "</b>"), [
-                                    { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(outputFile.text) },
-                                    { text: qsTr("Open file location"), clicked: () => controller.open_file_externally(getFolder(outputFile.text)) },
-                                    { text: qsTr("Ok") }
-                                ]);
-                            }
+                        if (index == 0) { // Add to render queue or Export
+                            renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
+                            popup.close();
+                            renderBtn.clicked();
+                            return;
                         }
+                        controller.export_gyroflow(index == 2);
                     }
+                }
+                LinkButton {
+                    enabled: renderBtn.enabled;
+                    anchors.right: parent.right;
+                    anchors.rightMargin: 5 * dpiScale;
+                    leftPadding: 10 * dpiScale;
+                    rightPadding: 10 * dpiScale;
+                    icon.width: 25 * dpiScale;
+                    icon.height: 25 * dpiScale;
+                    // textColor: styleTextColor;
+                    anchors.verticalCenter: parent.verticalCenter;
+                    icon.name: "queue";
+                    tooltip: qsTr("Render queue");
+                    onClicked: videoArea.queue.shown = !videoArea.queue.shown;
                 }
             }
         }
@@ -367,8 +367,17 @@ Rectangle {
         if (text.includes("ffmpeg")) {
             if (text.includes("Permission denied")) return qsTr("Permission denied. Unable to create or write file.\nChange the output path or run the program as administrator.\nMake sure you have write permissions to the target directory and make sure target file is not used by any other application.");
             if (text.includes("required nvenc API version")) return qsTr("NVIDIA GPU driver is too old, GPU encoding will not work for this format.\nUpdate your NVIDIA drivers to the newest version: %1.\nIf the issue is still present after driver update, your GPU probably doesn't support GPU encoding with this format. Disable GPU encoding in this case.").arg("<a href=\"https://www.nvidia.com/download/index.aspx\">https://www.nvidia.com/download/index.aspx</a>");
+        
+            text = text.replace(/ @ [A-F0-9]{6,}\]/g, "]"); // Remove ffmpeg function addresses
+
+            // Remove duplicate lines
+            text = [...new Set(text.split(/\r\n|\n\r|\n|\r/g))].join("\n");
+        }
+        if (text.startsWith("convert_format:")) {
+            const format = text.split(":")[1].split(";")[0];
+            return qsTr("GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?").arg("<b>" + format + "</b>");
         }
 
-        return text;
+        return text.trim();
     }
 }

@@ -158,7 +158,7 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
@@ -294,6 +294,9 @@ impl<'a> FfmpegProcessor<'a> {
                         }
                         if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
                             break;
+                        }
+                        while pause_flag.load(Relaxed) {
+                            std::thread::sleep(std::time::Duration::from_millis(100));
                         }
                     },
                     Err(e) => {

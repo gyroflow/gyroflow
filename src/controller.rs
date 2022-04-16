@@ -129,9 +129,6 @@ pub struct Controller {
 
     chart_data_changed: qt_signal!(),
 
-    render: qt_method!(fn(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, pixel_format: String)),
-    render_progress: qt_signal!(progress: f64, current_frame: usize, total_frames: usize, finished: bool),
-
     cancel_current_operation: qt_method!(fn(&mut self)),
 
     sync_in_progress: qt_property!(bool; NOTIFY sync_in_progress_changed),
@@ -172,9 +169,8 @@ pub struct Controller {
 
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
-    convert_format: qt_signal!(format: QString, supported: QString),
 
-    video_path: String,
+    pub video_path: String,
 
     preview_resolution: i32,
 
@@ -627,71 +623,6 @@ impl Controller {
             this.compute_progress(id, 1.0);
         }));
         self.compute_progress(id, 0.0);
-    }
-
-    fn render(&self, codec: String, codec_options: String, output_path: String, trim_start: f64, trim_end: f64, output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, pixel_format: String) {
-        rendering::clear_log();
-
-        let rendered_frames = Arc::new(AtomicUsize::new(0));
-        let rendered_frames2 = rendered_frames.clone();
-        let progress = util::qt_queued_callback(self, move |this, params: (f64, usize, usize, bool)| {
-            rendered_frames2.store(params.1, SeqCst);
-            this.render_progress(params.0, params.1, params.2, params.3);
-        });
-
-        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
-            arg.push_str("\n\n");
-            arg.push_str(&rendering::get_log());
-            this.error(QString::from(msg), QString::from(arg), QString::default());
-            this.render_progress(1.0, 0, 0, true);
-        });
-
-        let convert_format = util::qt_queued_callback_mut(self, |this, (format, supported): (String, String)| {
-            this.convert_format(QString::from(format), QString::from(supported));
-            this.render_progress(1.0, 0, 0, true);
-        });
-        let trim_ratio = trim_end - trim_start;
-        let total_frame_count = self.stabilizer.params.read().frame_count;
-        let video_path = self.video_path.clone();
-
-        progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false));
-
-        self.cancel_flag.store(false, SeqCst);
-        let cancel_flag = self.cancel_flag.clone();
-
-        let stab = self.stabilizer.clone();
-        let rendered_frames2 = rendered_frames.clone();
-        core::run_threaded(move || {
-            let stab = Arc::new(stab.get_render_stabilizator((output_width, output_height)));
-
-            let mut i = 0;
-            loop {
-                let result = rendering::render(stab.clone(), progress.clone(), &video_path, &codec, &codec_options, &output_path, trim_start, trim_end, output_width, output_height, bitrate, use_gpu, audio, i, &pixel_format, cancel_flag.clone());
-                if let Err(e) = result {
-                    if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
-                        convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
-                        break;
-                    }
-                    if rendered_frames2.load(SeqCst) == 0 {
-                        if i >= 0 && i < 4 {
-                            // Try 4 times with different GPU decoders
-                            i += 1;
-                            continue;
-                        }
-                        if i >= 0 && i < 5 {
-                            // Try without GPU decoder
-                            i = -1;
-                            continue;
-                        }
-                    }
-                    err(("An error occured: %1".to_string(), e.to_string()));
-                    break;
-                } else {
-                    // Render ok
-                    break;
-                }
-            }
-        });
     }
 
     fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32) {

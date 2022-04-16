@@ -7,14 +7,15 @@ mod ffmpeg_video_converter;
 mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
+pub mod render_queue;
 
-pub use self::ffmpeg_processor::FfmpegProcessor;
-pub use self::ffmpeg_processor::FFmpegError;
-use crate::core::{StabilizationManager, undistortion::*};
+pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
+use render_queue::RenderOptions;
+use crate::core::{ StabilizationManager, undistortion::* };
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
 use std::ffi::c_void;
 use std::os::raw::c_char;
-use std::sync::{Arc, atomic::AtomicBool};
+use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -118,14 +119,13 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, codec: &str, codec_options: &str, output_path: &str, trim_start: f64, trim_end: f64, 
-                               output_width: usize, output_height: usize, bitrate: f64, use_gpu: bool, audio: bool, gpu_decoder_index: i32, pixel_format: &str, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
+pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
     let params = stab.params.read();
-    let trim_ratio = trim_end - trim_start;
+    let trim_ratio = render_options.trim_end - render_options.trim_start;
     let total_frame_count = params.frame_count;
     let _fps = params.fps;
     let fps_scale = params.fps_scale;
@@ -149,7 +149,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
-    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, use_gpu));
+    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu));
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
     proc.video.hw_device_type = encoder.2;
@@ -157,14 +157,14 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     proc.video.processing_order = order;
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
-    if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
-    if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
+    if render_options.trim_start > 0.0 { proc.start_ms = Some(render_options.trim_start * duration_ms); }
+    if render_options.trim_end   < 1.0 { proc.end_ms   = Some(render_options.trim_end   * duration_ms); }
 
     match proc.video_codec.as_deref() {
         Some("prores_ks") | Some("prores_videotoolbox") => {
             let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
             let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
-            if let Some(profile) = profiles.iter().position(|&x| x == codec_options) {
+            if let Some(profile) = profiles.iter().position(|&x| x == render_options.codec_options) {
                 proc.video.codec_options.set("profile", &format!("{}", profile));
                 if proc.video_codec.as_deref() == Some("prores_ks") {
                     proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
@@ -173,7 +173,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             proc.video.clone_frames = proc.video_codec.as_deref() == Some("prores_ks");
         }
         Some("png") => {
-            if codec_options.contains("16-bit") {
+            if render_options.codec_options.contains("16-bit") {
                 proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA64BE } else { Pixel::RGB48BE });
             } else {
                 proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA } else { Pixel::RGB24 });
@@ -211,11 +211,11 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
         _ => { }
     }
 
-    if !pixel_format.is_empty() {
+    if !render_options.pixel_format.is_empty() {
         use std::str::FromStr;
-        match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
+        match Pixel::from_str(&render_options.pixel_format.to_ascii_lowercase()) {
             Ok(px) => { proc.video.encoder_pixel_format = Some(px); },
-            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", pixel_format, e); }
+            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", render_options.pixel_format, e); }
         }
     }
 
@@ -224,7 +224,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
 
-    if !audio {
+    if !render_options.audio {
         proc.audio_codec = codec::Id::None;
     }
 
@@ -235,9 +235,6 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let progress2 = progress.clone();
     let mut process_frame = 0;
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
-        process_frame += 1;
-        // log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
-            
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }
@@ -383,10 +380,13 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
             }
         }
         
+        process_frame += 1;
+        // log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
+        
         Ok(())
     });
 
-    proc.render(&output_path, (output_width as u32, output_height as u32), if bitrate > 0.0 { Some(bitrate) } else { None }, cancel_flag)?;
+    proc.render(&render_options.output_path, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     progress((1.0, render_frame_count, render_frame_count, true));
 

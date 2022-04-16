@@ -4,6 +4,8 @@
 import QtQuick
 import QtQuick.Controls as QQC
 
+import "../Util.js" as Util;
+
 Item {
     id: root;
     property bool active: false;
@@ -33,34 +35,13 @@ Item {
             startTime = Date.now();
         }
     }
-    function timeToStr(v) {
-        const d = Math.floor((v %= 31536000) / 86400),
-              h = Math.floor((v %= 86400) / 3600),
-              m = Math.floor((v %= 3600) / 60),
-              s = Math.round(v % 60);
-
-        if (d || h || m || s) {
-            return (d? d + qsTr("d") + " " : "") +
-                   (h? h + qsTr("h") + " " : "") +
-                   (m? m + qsTr("m") + " " : "") +
-                    s + qsTr("s");
-        }
-        return qsTr("&lt; 1s");
-    }
     onProgressChanged: {
-        if (progress > 0 && progress <= 1.0 && startTime > 0) {
-            const elapsedMs = Date.now() - startTime;
-            const totalEstimatedMs = elapsedMs / progress;
-            const remainingMs = totalEstimatedMs - elapsedMs;
-            if (remainingMs > 5 || elapsedMs > 5) {
-                time.elapsed = timeToStr(elapsedMs / 1000);
-                time.remaining = timeToStr(remainingMs / 1000);
-            }
+        const times = Util.calculateTimesAndFps(progress, root.currentFrame, startTime);
+        if (times !== false) {
+            time.elapsed = times[0];
+            time.remaining = times[1];
+            if (times.length > 2) time.fps = times[2];
             ui_tools.set_progress(progress);
-
-            if (elapsedMs > 5 && root.currentFrame > 0) {
-                time.fps = root.currentFrame / (elapsedMs / 1000.0);
-            }
         } else {
             ui_tools.set_progress(-1.0);
             time.elapsed = "";

@@ -16,10 +16,13 @@ gyroflow-core = { path = "src/core/", default-features = false }
 [dependencies]
 cstr = "0.2.10"
 cpp = "0.5.6"
+serde = "1.0.136"
 serde_json = "1.0.79"
 bytemuck = "1.9.0"
 nalgebra = "0.30"
 semver = "1.0.7"
+fastrand = "1.7.0"
+itertools = "0.10.3"
 
 breakpad-sys = "0.1.1"
 

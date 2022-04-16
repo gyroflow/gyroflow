@@ -86,12 +86,16 @@ fn entry() {
     let ui_tools = RefCell::new(UITools::default());
     let ui_tools_pinned = unsafe { QObjectPinned::new(&ui_tools) };
 
+    let rq = RefCell::new(rendering::render_queue::RenderQueue::new());
+    let rqpinned = unsafe { QObjectPinned::new(&rq) };
+
     let mut engine = QmlEngine::new();
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(util::get_version()).into());
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
+    engine.set_object_property("render_queue".into(), rqpinned);
     ui_tools.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
     ui_tools.borrow().set_theme("dark".into());
 
@@ -102,7 +106,26 @@ fn entry() {
 
     // Load main UI
     if !ui_live_reload {
-        engine.load_file("qrc:/src/ui/main_window.qml".into());
+        use std::path::PathBuf;
+        // Try to load from disk first
+        let path = (|| -> Option<String> {
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            let path = PathBuf::from("../Resources/ui/main_window.qml");
+            #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+            let path = PathBuf::from("./ui/main_window.qml");
+            let final_path = std::env::current_exe().ok()?.parent()?.join(&path);
+            if final_path.exists() {
+                Some(String::from(final_path.to_str()?))
+            } else {
+                None
+            }
+        })();
+        if let Some(path) = path {
+            engine.load_file(path.into());
+        } else {
+            // Load from resources
+            engine.load_file("qrc:/src/ui/main_window.qml".into());
+        }
     } else {
         engine.load_file(format!("{}/src/ui/main_window.qml", env!("CARGO_MANIFEST_DIR")).into());
         let ui_path = QString::from(format!("{}/src/ui", env!("CARGO_MANIFEST_DIR")));

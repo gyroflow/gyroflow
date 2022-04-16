@@ -33,16 +33,18 @@ void init_live_reload(QQmlApplicationEngine *engine, const QString &path) {
                 auto itm = children.first();
                 if (itm->objectName() == "App") {
                     itm->setParentItem(nullptr);
+                    if (itm == previousItem) previousItem = nullptr;
                     delete itm;
                 }
             }
-            /*
+            
             if (previousItem) {
-                previousItem->setParentItem(nullptr);
-                delete previousItem;
+                auto toDelete = previousItem;
+                QTimer::singleShot(5000, [=] {
+                    toDelete->setParentItem(nullptr);
+                    delete toDelete;
+                });
             }
-            */
-
             engine->clearComponentCache();
 
             QQmlComponent component(engine, mainPath, wnd);

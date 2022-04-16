@@ -20,6 +20,7 @@ Item {
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
     property alias stabEnabledBtn: stabEnabledBtn;
+    property alias queue: queue;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -262,16 +263,22 @@ Item {
                     Rectangle { x: -1; y: safeAreaRect.y + safeAreaRect.height; width: parent.width + 2; height: parent.height - y; color: "#80000000"; } // Bottom
                     Rectangle { x: safeAreaRect.x + safeAreaRect.width; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Right
                 }
+            }
 
-                InfoMessage {
-                    type: InfoMessage.Warning;
-                    visible: !controller.lens_loaded && !isCalibrator;
-                    text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
-                }
+            InfoMessage {
+                width: vid.width;
+                type: InfoMessage.Warning;
+                visible: !controller.lens_loaded && !isCalibrator;
+                text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
             }
             MouseArea {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;
+            }
+            RenderQueue {
+                id: queue;
+                anchors.fill: parent;
+                anchors.margins: 10 * dpiScale;
             }
         }
         Rectangle {
@@ -335,7 +342,12 @@ Item {
             id: videoLoader;
             background: styleBackground;
             onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
-            onCancel: controller.cancel_current_operation();
+            onCancel: {
+                if (render_queue.main_job_id > 0) {
+                    render_queue.cancel_job(render_queue.main_job_id);
+                }
+                controller.cancel_current_operation();
+            }
         }
 
         Connections {
