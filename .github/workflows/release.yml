@@ -42,7 +42,7 @@ jobs:
             ext: ".exe",
             vcpkg: "x64-windows-release",
             vcpkg2: "x64-windows-release",
-            ffmpeg_url: "https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.0-windows-desktop-vs2022-gpl-lite.tar.xz/download",
+            ffmpeg_url: "https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.0-windows-desktop-vs2022-gpl-lite.7z/download",
             ffmpeg_name: "ffmpeg-5.0-windows-desktop-vs2022-gpl-lite"
           }
       ]
@@ -123,9 +123,8 @@ jobs:
         if: ${{ matrix.targets.os == 'windows-2022' }}
         run: |
           cd ${{ github.workspace }}/ext/
-          curl -L ${{ matrix.targets.ffmpeg_url }} -o ffmpeg.tar.xz
-          7z x ffmpeg.tar.xz
-          7z x ffmpeg.tar
+          curl -L ${{ matrix.targets.ffmpeg_url }} -o ffmpeg.7z
+          7z x ffmpeg.7z
 
       - name: Install dependencies Mac
         if: ${{ matrix.targets.os == 'macos-latest' }}
