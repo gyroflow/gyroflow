@@ -57,7 +57,7 @@ dependencies = [
 [[package]]
 name = "akaze"
 version = "0.7.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "bitarray",
  "cv-core",
@@ -680,7 +680,7 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cv-core"
 version = "0.15.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "derive_more",
  "nalgebra",
@@ -691,7 +691,7 @@ dependencies = [
 [[package]]
 name = "cv-pinhole"
 version = "0.6.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "cv-core",
  "derive_more",
@@ -754,7 +754,7 @@ checksum = "21e50f3adc76d6a43f5ed73b698a87d0760ca74617f60f7c3b879003536fdd28"
 [[package]]
 name = "eight-point"
 version = "0.8.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "arrayvec 0.7.2",
  "cv-core",
@@ -2094,7 +2094,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#01c346b13d0c203ad3770aad4fc0c6fdf7d85a77"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#a3f0d56edc938db3b0bbd2f8dee2e311ed8f414f"
 dependencies = [
  "cpp",
  "cpp_build",

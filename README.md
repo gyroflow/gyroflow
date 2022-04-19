@@ -57,6 +57,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Supports already stabilized GoPro videos (captured with Hypersmooth enabled) (Hero 8 and up)
 - Supports and renders 10-bit videos (and higher, up to 16-bit 4:4:4, direct YUV rendering with no data loss - no conversion to RGB)
 - Customizable lens correction strength
+- Render queue
 - Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
 - Visual display of smoothed quaternions
 - Real time offset adjustments
@@ -195,7 +196,7 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.3.0` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.3.0 win64_msvc2019_64 -m qtshadertools` or use the [official installer](https://www.qt.io/download-qt-installer)
-    - `FFmpeg 5.0`: download [ffmpeg 5.0 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.0-windows-desktop-clang-gpl-lite.tar.xz/download) and unzip it to `ext/ffmpeg-5.0-windows-desktop-clang-gpl-lite`
+    - `FFmpeg 5.0`: download [ffmpeg 5.0 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.0-windows-desktop-vs2022-gpl-lite.tar.xz/download) and unzip it to `ext/ffmpeg-5.0-windows-desktop-vs2022-gpl-lite`
     - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat -disableMetrics`
     - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
     - OpenCL: `.\vcpkg\vcpkg install "opencl:x64-windows-release"`

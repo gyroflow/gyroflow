@@ -57,7 +57,7 @@ dependencies = [
 [[package]]
 name = "akaze"
 version = "0.7.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "bitarray",
  "cv-core",
@@ -171,15 +171,15 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "backtrace"
-version = "0.3.64"
+version = "0.3.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e121dee8023ce33ab248d9ce1493df03c3b38a659b240096fcbd7048ff9c31f"
+checksum = "11a17d453482a265fd5f8479f2a3f405566e6ca627837aaddb85af8b1ab8ef61"
 dependencies = [
  "addr2line",
  "cc",
  "cfg-if 1.0.0",
  "libc",
- "miniz_oxide 0.4.4",
+ "miniz_oxide 0.5.1",
  "object",
  "rustc-demangle",
 ]
@@ -570,7 +570,7 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cv-core"
 version = "0.15.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "derive_more",
  "nalgebra",
@@ -581,7 +581,7 @@ dependencies = [
 [[package]]
 name = "cv-pinhole"
 version = "0.6.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "cv-core",
  "derive_more",
@@ -644,7 +644,7 @@ checksum = "21e50f3adc76d6a43f5ed73b698a87d0760ca74617f60f7c3b879003536fdd28"
 [[package]]
 name = "eight-point"
 version = "0.8.0"
-source = "git+https://github.com/rust-cv/cv.git#d8b2675418f5d9ef944d2fabc70f143422a21c4c"
+source = "git+https://github.com/rust-cv/cv.git#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "arrayvec 0.7.2",
  "cv-core",
@@ -1103,9 +1103,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.123"
+version = "0.2.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb691a747a7ab48abc15c5b42066eaafde10dc427e3b6ee2a1cf43db04c763bd"
+checksum = "21a41fed9d98f27ab1c6d161da622a4fa35e8a54a8adc24bbf3ddd0ef70b0e50"
 
 [[package]]
 name = "libloading"
@@ -1262,6 +1262,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "miniz_oxide"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
+dependencies = [
+ "adler",
+]
+
+[[package]]
 name = "mp4parse"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1279,7 +1288,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.8.0"
-source = "git+https://github.com/gfx-rs/naga?rev=1720725#172072501490c877d1efddeb653e0a74107b900c"
+source = "git+https://github.com/gfx-rs/naga?rev=85056524#850565243d1d0d03215f13246c94d63e1d4c51cd"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -1290,7 +1299,9 @@ dependencies = [
  "num-traits 0.2.14",
  "rustc-hash",
  "spirv",
+ "termcolor",
  "thiserror",
+ "unicode-xid",
 ]
 
 [[package]]
@@ -1536,9 +1547,9 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.27.1"
+version = "0.28.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67ac1d3f9a1d3616fd9a60c8d74296f22406a238b6a72f5cc1e6f314df4ffbf9"
+checksum = "40bec70ba014595f99f7aa110b84331ffe1ee9aece7fe6f387cc7e3ecda4d456"
 dependencies = [
  "memchr",
 ]
@@ -2418,7 +2429,7 @@ checksum = "d8b77fdfd5a253be4ab714e4ffa3c49caf146b4de743e97510c0656cf90f1e8e"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
+source = "git+https://github.com/gfx-rs/wgpu.git#0b61a191244da0f0d987d53614a6698097a7622f"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2438,7 +2449,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
+source = "git+https://github.com/gfx-rs/wgpu.git#0b61a191244da0f0d987d53614a6698097a7622f"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2460,7 +2471,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
+source = "git+https://github.com/gfx-rs/wgpu.git#0b61a191244da0f0d987d53614a6698097a7622f"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2497,7 +2508,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#cb7ad30d585ea68ae9a2652ad5251ef711cbbf94"
+source = "git+https://github.com/gfx-rs/wgpu.git#0b61a191244da0f0d987d53614a6698097a7622f"
 dependencies = [
  "bitflags",
 ]
