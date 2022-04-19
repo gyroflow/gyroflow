@@ -84,7 +84,7 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="67"/>
-      <location filename="../../src/ui/App.qml" line="162"/>
+      <location filename="../../src/ui/App.qml" line="163"/>
       <source>Video files</source>
       <translation>Αρχεία πολυμέσων</translation>
     </message>
@@ -94,71 +94,61 @@ This should provide much better UI performance.</source>
       <translation>Μονοπάτι εξόδου:</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="175"/>
+      <location filename="../../src/ui/App.qml" line="176"/>
+      <location filename="../../src/ui/App.qml" line="185"/>
       <source>Export</source>
       <translation>Εξαγωγή</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="222"/>
+      <location filename="../../src/ui/App.qml" line="176"/>
+      <source>Add to render queue</source>
+      <translation type="unfinished">Add to render queue</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="220"/>
       <source>Output file already exists, do you want to overwrite it?</source>
       <translation>Το αρχείο υπάρχει είδη στο μονοπάτι, Θέλετε να το αντικαταστήσετε;</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="208"/>
-      <location filename="../../src/ui/App.qml" line="216"/>
-      <location filename="../../src/ui/App.qml" line="223"/>
+      <location filename="../../src/ui/App.qml" line="206"/>
+      <location filename="../../src/ui/App.qml" line="214"/>
+      <location filename="../../src/ui/App.qml" line="221"/>
       <source>Yes</source>
       <translation>Ναι</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="224"/>
+      <location filename="../../src/ui/App.qml" line="222"/>
       <source>Rename</source>
       <translation>Μετονομασία</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="209"/>
-      <location filename="../../src/ui/App.qml" line="217"/>
-      <location filename="../../src/ui/App.qml" line="225"/>
+      <location filename="../../src/ui/App.qml" line="207"/>
+      <location filename="../../src/ui/App.qml" line="215"/>
+      <location filename="../../src/ui/App.qml" line="223"/>
       <source>No</source>
       <translation>Όχι</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="161"/>
+      <location filename="../../src/ui/App.qml" line="162"/>
       <source>Select file destination</source>
       <translation>Επιλέξτε το μονοπάτι του αρχείου</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="207"/>
+      <location filename="../../src/ui/App.qml" line="205"/>
       <source>Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</source>
       <translation>Το προφίλ φακού δεν έχει φορτωθεί, το αποτέλεσμά σας θα είναι εσφαλμένο. Είστε σίγουροι ότι θέλετε να αποτυπώσετε αυτό το αρχείο;</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="215"/>
+      <location filename="../../src/ui/App.qml" line="213"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
       <translation>Δεν υπάρχουν σημεία συγχρονισμού, το αποτέλεσμά σας θα είναι λανθασμένο. Είστε σίγουροι ότι θέλετε να αποτυπώσετε αυτό το αρχείο;</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="263"/>
-      <source>Rendering %1...</source>
-      <translation>Αποτύπωση %1…</translation>
+      <location filename="../../src/ui/App.qml" line="281"/>
+      <source>Render queue</source>
+      <translation type="unfinished">Render queue</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="275"/>
-      <source>Rendering completed. The file was written to: %1.</source>
-      <translation>Η αποτύπωση ολοκληρώθηκε. Το αρχείο γράφτηκε σε: %1.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="276"/>
-      <source>Open rendered file</source>
-      <translation>Άνοιγμα αρχείου αποτύπωσης</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="277"/>
-      <source>Open file location</source>
-      <translation>Άνοιγμα τοποθεσίας αρχείου</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="278"/>
       <location filename="../../src/ui/App.qml" line="339"/>
       <location filename="../../src/ui/App.qml" line="342"/>
       <source>Ok</source>
@@ -212,6 +202,13 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
       <translation>Ο οδηγός της NVIDIA κάρτα γραφικών είναι πολύ παλιός, η κωδικοποίηση της κάρτας γραφικών δεν θα λειτουργήσει για αυτή τη μορφή.
 Ενημερώστε τους οδηγούς NVIDIA στην νεότερη έκδοση: %1.
 Εάν το ζήτημα εξακολουθεί να υπάρχει μετά την ενημέρωση του οδηγού, η κάρτα γραφικών σας πιθανότατα δεν υποστηρίζει την κωδικοποίηση αυτής της μορφής. Απενεργοποίηστε την κωδικοποίηση με κάρτα γραφικών σε αυτήν την περίπτωση.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="378"/>
+      <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
+      <translation type="unfinished">GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</translation>
     </message>
   </context>
   <context>
@@ -308,99 +305,82 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
       <translation>Εξαγωγή ρυθμίσεων</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="73"/>
-      <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
-Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>Η επιτάχυνση κωδικοποίησης της κάρτας γραφικών σας δεν υποστηρίζει αυτή τη μορφή εικονοστοιχείων (%1).
-Θέλετε να μετατρέψετε σε διαφορετική μορφή εικονοστοιχείων ή να κρατήσετε την αρχική και να αποτυπώσετε με τον επεξεργαστή;</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Export.qml" line="64"/>
-      <source>Render using CPU</source>
-      <translation>Αποτύπωση με χρήση του επεξεργαστή</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Export.qml" line="71"/>
-      <source>Cancel</source>
-      <translation>Ακύρωση</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Export.qml" line="148"/>
+      <location filename="../../src/ui/menu/Export.qml" line="122"/>
       <source>Output size</source>
       <translation>Μέγεθος εξόδου</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="154"/>
+      <location filename="../../src/ui/menu/Export.qml" line="128"/>
       <source>Width</source>
       <translation>Πλάτος</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="191"/>
+      <location filename="../../src/ui/menu/Export.qml" line="165"/>
       <source>Height</source>
       <translation>Ύψος</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="186"/>
+      <location filename="../../src/ui/menu/Export.qml" line="160"/>
       <source>Lock aspect ratio</source>
       <translation>Κλείδωμα αναλογίας διαστάσεων</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="217"/>
+      <location filename="../../src/ui/menu/Export.qml" line="191"/>
       <source>Output size preset</source>
       <translation>Προεπιλογή μεγέθους εξόδου</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="251"/>
+      <location filename="../../src/ui/menu/Export.qml" line="225"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>Αυτή η ανάλυση δεν υποστηρίζεται από τον επιλεγμένο κωδικοποιητή.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="252"/>
+      <location filename="../../src/ui/menu/Export.qml" line="226"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>Η μέγιστη υποστηριζόμενη ανάλυση είναι %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="258"/>
+      <location filename="../../src/ui/menu/Export.qml" line="232"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>Η ανάλυση πρέπει να διαιρείται με 2.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="263"/>
+      <location filename="../../src/ui/menu/Export.qml" line="237"/>
       <source>Bitrate</source>
       <translation>Bitrate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="270"/>
+      <location filename="../../src/ui/menu/Export.qml" line="244"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="277"/>
+      <location filename="../../src/ui/menu/Export.qml" line="251"/>
       <source>Use GPU encoding</source>
       <translation>Χρήση αποκωδικοποίησης κάρτας γραφικών</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="281"/>
+      <location filename="../../src/ui/menu/Export.qml" line="255"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>Οι κωδικοποιητές της κάρτας γραφικών συνήθως παράγουν αποτέλεσμα χαμηλότερης ποιότητας από τους κωδικοποιητές λογισμικού, αλλά είναι σημαντικά γρηγορότερη.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="282"/>
+      <location filename="../../src/ui/menu/Export.qml" line="256"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>Απαιτούν υψηλότερο bitrate για να κάνουν την παραγωγή με την ίδια αντιληπτή ποιότητα, ή κάνουν έξοδο με χαμηλότερη ορατή ποιότητα στον ίδιο ρυθμό bitrate.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="283"/>
+      <location filename="../../src/ui/menu/Export.qml" line="257"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>Απενεργοποιήστε αυτή την επιλογή για την μέγιστη δυνατή ποιότητα.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="285"/>
+      <location filename="../../src/ui/menu/Export.qml" line="259"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>Η επιτάχυνση της κάρτας γραφικών δεν είναι διαθέσιμη για τη μορφή εικονοστοιχείων αυτού του πολυμέσου.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="289"/>
+      <location filename="../../src/ui/menu/Export.qml" line="263"/>
       <source>Export audio</source>
       <translation>Εξαγωγή ήχου</translation>
     </message>
@@ -622,42 +602,17 @@ Do you want to submit your profile?</source>
   <context>
     <name>LoaderOverlay</name>
     <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="43"/>
-      <source>d</source>
-      <translation>η</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="44"/>
-      <source>h</source>
-      <translation>ω</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="45"/>
-      <source>m</source>
-      <translation>λ</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="46"/>
-      <source>s</source>
-      <translation>δ</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="48"/>
-      <source>&amp;lt; 1s</source>
-      <translation>&amp;lt; 1 δευτερόλεπτο</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="103"/>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="84"/>
       <source> @ %1fps</source>
       <translation> @ %1fps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="104"/>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="85"/>
       <source>Elapsed: %1. Remaining: %2</source>
       <translation>Πέρασε: %1. Απομένουν: %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/LoaderOverlay.qml" line="115"/>
+      <location filename="../../src/ui/components/LoaderOverlay.qml" line="96"/>
       <source>Cancel</source>
       <translation>Ακύρωση</translation>
     </message>
@@ -781,17 +736,17 @@ Do you want to submit your profile?</source>
   <context>
     <name>Popup</name>
     <message>
-      <location filename="../../src/ui/App.qml" line="184"/>
+      <location filename="../../src/ui/App.qml" line="185"/>
       <source>Add to render queue</source>
       <translation>Προσθήκη στη λίστα αποτύπωσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="187"/>
+      <location filename="../../src/ui/App.qml" line="185"/>
       <source>Export .gyroflow file</source>
       <translation>Εξαγωγή αρχείου .gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="187"/>
+      <location filename="../../src/ui/App.qml" line="185"/>
       <source>Export .gyroflow file (including gyro data)</source>
       <translation>Εξαγωγή αρχείου .gyroflow (με δεδομένα γυροσκοπίου)</translation>
     </message>
@@ -895,44 +850,104 @@ Do you want to submit your profile?</source>
   <context>
     <name>RenderQueue</name>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="19"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="173"/>
       <source>Pause</source>
       <translation type="unfinished">Pause</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="20"/>
-      <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="42"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="40"/>
       <source>Render queue</source>
       <translation type="unfinished">Render queue</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="76"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="199"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="90"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="375"/>
+      <source> @ %1fps</source>
+      <translation type="unfinished"> @ %1fps</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="93"/>
       <source>Elapsed: %1</source>
       <translation type="unfinished">Elapsed: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="86"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="199"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="104"/>
       <source>Remaining: %1</source>
       <translation type="unfinished">Remaining: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="99"/>
-      <source>Render</source>
-      <translation type="unfinished">Render</translation>
+      <location filename="../../src/ui/RenderQueue.qml" line="118"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="137"/>
+      <source>Ok</source>
+      <translation type="unfinished">Ok</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="127"/>
+      <source>Rendering %1...</source>
+      <translation type="unfinished">Rendering %1...</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="134"/>
+      <source>Rendering completed. The file was written to: %1.</source>
+      <translation type="unfinished">Rendering completed. The file was written to: %1.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="412"/>
+      <source>Open rendered file</source>
+      <translation type="unfinished">Open rendered file</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="136"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="418"/>
+      <source>Open file location</source>
+      <translation type="unfinished">Open file location</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="152"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="277"/>
+      <source>Render using CPU</source>
+      <translation type="unfinished">Render using CPU</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="159"/>
+      <source>Cancel</source>
+      <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="161"/>
+      <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
+      <translation type="unfinished">GPU accelerated encoder doesn&apos;t support this pixel format (%1).
+Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="171"/>
+      <source>Start exporting</source>
+      <translation type="unfinished">Start exporting</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="172"/>
+      <source>Resume</source>
+      <translation type="unfinished">Resume</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="379"/>
+      <source>Elapsed: %1. Remaining: %2</source>
+      <translation type="unfinished">Elapsed: %1. Remaining: %2</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="422"/>
+      <source>Remove</source>
+      <translation type="unfinished">Remove</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="349"/>
       <source>Save to: %1</source>
       <translation type="unfinished">Save to: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="175"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="350"/>
       <source>Export settings: %1</source>
       <translation type="unfinished">Export settings: %1</translation>
     </message>
@@ -1533,117 +1548,145 @@ Are you sure you want to continue?</source>
     </message>
   </context>
   <context>
+    <name>Util</name>
+    <message>
+      <location filename="../../src/ui/Util.js" line="19"/>
+      <source>d</source>
+      <translation type="unfinished">d</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Util.js" line="20"/>
+      <source>h</source>
+      <translation type="unfinished">h</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Util.js" line="21"/>
+      <source>m</source>
+      <translation type="unfinished">m</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Util.js" line="22"/>
+      <source>s</source>
+      <translation type="unfinished">s</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/Util.js" line="24"/>
+      <source>&amp;lt; 1s</source>
+      <translation type="unfinished">&amp;lt; 1s</translation>
+    </message>
+  </context>
+  <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="109"/>
+      <location filename="../../src/ui/VideoArea.qml" line="110"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>Υπάρχει ένα αρχείο %1 που σχετίζεται με αυτό το βίντεο, θέλετε να το φορτώσετε;</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="110"/>
+      <location filename="../../src/ui/VideoArea.qml" line="111"/>
       <source>Yes</source>
       <translation>Ναι</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="113"/>
+      <location filename="../../src/ui/VideoArea.qml" line="114"/>
       <source>No</source>
       <translation>Όχι</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="196"/>
+      <location filename="../../src/ui/VideoArea.qml" line="197"/>
       <source>Zoom: %1</source>
       <translation>Μεγέθυνση: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="220"/>
+      <location filename="../../src/ui/VideoArea.qml" line="221"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Αποτυχία φόρτωσης του επιλεγμένου αρχείου, ενδέχεται να μην υποστηρίζεται ή να μην είναι έγκυρο.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="80"/>
-      <location filename="../../src/ui/VideoArea.qml" line="220"/>
+      <location filename="../../src/ui/VideoArea.qml" line="81"/>
+      <location filename="../../src/ui/VideoArea.qml" line="221"/>
       <source>Ok</source>
       <translation>Εντάξει</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="79"/>
+      <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation>Έχει ανιχνευθεί ακολουθία εικόνων.
 Παρακαλώ δώστε ρυθμό πλαισίου: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="85"/>
+      <location filename="../../src/ui/VideoArea.qml" line="86"/>
       <source>Cancel</source>
       <translation>Ακύρωση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="269"/>
+      <location filename="../../src/ui/VideoArea.qml" line="272"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Το προφίλ φακού δε έχει φορτωθεί, τα αποτελέσματα δε θα είναι ικανοποιητικά. Παρακαλώ φορτώστε ένα προφίλ φακού για την κάμερα σας.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="295"/>
+      <location filename="../../src/ui/VideoArea.qml" line="302"/>
       <source>Loading %1...</source>
       <translation>Φόρτωση %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="295"/>
+      <location filename="../../src/ui/VideoArea.qml" line="302"/>
       <source>Drop video file here</source>
       <translation>Σύρετε αρχεία πολυμέσων εδώ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="352"/>
+      <location filename="../../src/ui/VideoArea.qml" line="364"/>
       <source>Analyzing %1...</source>
       <translation>Ανάλυση %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="400"/>
+      <location filename="../../src/ui/VideoArea.qml" line="412"/>
       <source>Trim start</source>
       <translation>Περικοπή έναρξης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="401"/>
+      <location filename="../../src/ui/VideoArea.qml" line="413"/>
       <source>Previous frame</source>
       <translation>Προηγούμενο καρέ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="416"/>
       <source>Pause</source>
       <translation>Παύση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="404"/>
+      <location filename="../../src/ui/VideoArea.qml" line="416"/>
       <source>Play</source>
       <translation>Αναπαραγωγή</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="407"/>
+      <location filename="../../src/ui/VideoArea.qml" line="419"/>
       <source>Next frame</source>
       <translation>Επόμενο καρέ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="408"/>
+      <location filename="../../src/ui/VideoArea.qml" line="420"/>
       <source>Trim end</source>
       <translation>Περικοπή τέλους</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="435"/>
+      <location filename="../../src/ui/VideoArea.qml" line="447"/>
       <source>Toggle stabilization</source>
       <translation>Σταθερότητα εικόνας</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="441"/>
+      <location filename="../../src/ui/VideoArea.qml" line="453"/>
       <source>Mute</source>
       <translation>Σίγαση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="441"/>
+      <location filename="../../src/ui/VideoArea.qml" line="453"/>
       <source>Unmute</source>
       <translation>Αποσίγαση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="457"/>
+      <location filename="../../src/ui/VideoArea.qml" line="469"/>
       <source>Playback speed</source>
       <translation>Ταχύτητα αναπαραγωγής</translation>
     </message>
