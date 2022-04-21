@@ -9,6 +9,33 @@ pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64)> { // ->
     telemetry_parser::util::get_video_metadata(&mut stream, filesize)
 }
 
+pub fn compress_to_base91<T>(value: &T) -> Option<String>
+where T: serde::Serialize {
+    use std::io::Write;
+
+    let data = bincode::serialize(value).ok()?;
+    let mut e = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::best());
+    e.write_all(&data).ok()?;
+    let compressed = e.finish().ok()?;
+
+    String::from_utf8(base91::slice_encode(&compressed)).ok()
+}
+
+pub fn decompress_from_base91(base91: &str) -> Option<Vec<u8>> {
+    use std::io::Read;
+    if base91.is_empty() { return None; }
+
+    let compressed = base91::slice_decode(base91.as_bytes());
+    let mut e = flate2::read::ZlibDecoder::new(&compressed[..]);
+    
+    let mut decompressed = Vec::new();
+    e.read_to_end(&mut decompressed).ok()?;
+    Some(decompressed)
+}
+
+pub fn path_to_str(path: &std::path::Path) -> String {
+    path.to_string_lossy().replace("\\", "/")
+}
 
 /*
 pub fn rename_calib_videos() {

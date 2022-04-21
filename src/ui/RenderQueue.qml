@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Controls as QQC
 
 import "components/"
-import "menu/" as Menu
 import "Util.js" as Util;
 
 Item {
@@ -69,7 +68,7 @@ Item {
             property real progress: Math.max(0, Math.min(1, render_queue.current_frame / Math.max(1, render_queue.total_frames)));
             onProgressChanged: {
                 const times = Util.calculateTimesAndFps(progress, render_queue.current_frame, render_queue.start_timestamp, render_queue.end_timestamp);
-                if (times !== false) {
+                if (times !== false && progress < 1.0) {
                     totalTime.elapsed = times[0];
                     totalTime.remaining = times[1];
                     if (times.length > 2) totalTime.fps = times[2];
@@ -112,11 +111,17 @@ Item {
         }
         Connections {
             target: render_queue;
+            function onAdded(job_id) {
+                delete loader.pendingJobs[job_id];
+                loader.updateStatus();
+            }
             function onError(job_id, text, arg, callback) {
-                if (job_id == render_queue.main_job_id) {
+                if (job_id == render_queue.main_job_id || loader.pendingJobs[job_id]) {
                     text = getReadableError(qsTr(text).arg(arg));
                     messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
                 }
+                delete loader.pendingJobs[job_id];
+                loader.updateStatus();
             }
             function onRender_progress(job_id, progress, frame, total_frames, finished) {
                 if (job_id == render_queue.main_job_id) {
@@ -145,7 +150,7 @@ Item {
                         text: f,
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, f);
-                            render_queue.render_job(job_id);
+                            render_queue.render_job(job_id, false);
                         }
                     }));
                     buttons.push({
@@ -153,13 +158,15 @@ Item {
                         accent: true,
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, "cpu");
-                            render_queue.render_job(job_id);
+                            render_queue.render_job(job_id, false);
                         }
                     });
                     buttons.push({ text: qsTr("Cancel") });
 
                     messageBox(Modal.Question, qsTr("GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?").arg(format), buttons);
                 }
+                delete loader.pendingJobs[job_id];
+                loader.updateStatus();
             }
         }
 
@@ -222,6 +229,32 @@ Item {
                 }
             }
 
+            MouseArea {
+                anchors.fill: parent;
+                acceptedButtons: Qt.LeftButton | Qt.RightButton;
+                onPressAndHold: (mouse) => {
+                    if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                        contextMenu.popup()
+                    }
+                }
+                onClicked: (mouse) => { if (mouse.button === Qt.RightButton) contextMenu.popup(); }
+            }
+            Menu {
+                id: contextMenu;
+                font.pixelSize: 11.5 * dpiScale;
+                Action {
+                    icon.name: "play";
+                    text: qsTr("Render now");
+                    onTriggered: render_queue.render_job(job_id, true);
+                }
+                Action {
+                    icon.name: "spinner";
+                    text: qsTr("Reset status");
+                    enabled: isError || isFinished || isQuestion;
+                    onTriggered: render_queue.reset_job(job_id);
+                }
+            }
+
             Rectangle {
                 anchors.fill: parent;
                 color: styleBackground2
@@ -231,7 +264,7 @@ Item {
             Rectangle {
                 id: statusBg;
                 anchors.fill: parent;
-                color: "#30" + border.color.toString().substr(1);
+                color: "#30" + border.color.toString().substring(1);
                 radius: 5 * dpiScale;
                 opacity: shown? 0.8 : 0;
                 Ease on opacity { }
@@ -245,7 +278,7 @@ Item {
                 id: messageAreaComponent;
                 Item {
                     height: messageAreaCol.height + 20 * dpiScale;
-                    Hr { y: 2; color: "#ed7676"; opacity: 0.2; }
+                    Hr { y: 2; color: statusBg.border.color; opacity: 0.2; }
 
                     Column {
                         id: messageAreaCol;
@@ -335,6 +368,7 @@ Item {
                         border.width: 1 * dpiScale;
                         border.color: styleVideoBorderColor
                     }
+                    QQC.BusyIndicator { anchors.centerIn: parent; visible: !thumbnail_url; scale: 0.5; running: visible; }
                 }
 
                 Column {
@@ -441,5 +475,28 @@ Item {
         displaced: Transition {
             NumberAnimation { properties: "y"; duration: 700; easing.type: Easing.OutExpo; }
         }
+    }
+
+    DropTarget {
+        color: styleBackground2;
+        anchors.margins: 0 * dpiScale;
+        anchors.topMargin: lv.y;
+        extensions: fileDialog.extensions;
+        onLoadFiles: (urls) => {
+            const options = JSON.stringify(exportSettings.getExportOptions());
+
+            for (const url of urls) {
+                const job_id = render_queue.add_file(url, controller, options);
+                loader.pendingJobs[job_id] = true;
+            }
+            loader.updateStatus();
+        }
+    }
+
+    LoaderOverlay {
+        id: loader;
+        active: false;
+        property var pendingJobs: ({});
+        function updateStatus() { active = Object.keys(pendingJobs).length > 0; }
     }
 }

@@ -6,6 +6,7 @@ import MDKVideo
 
 import "components/"
 import "menu/" as Menu
+import "Util.js" as Util
 
 Item {
     id: root;
@@ -48,7 +49,7 @@ Item {
 
             if (obj && +obj.version > 0) {
                 const videofile = obj.videofile;
-                if (!vidInfo.filename) {
+                if (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile)) {
                     // If video not loaded, try to load the associated file
                     root.pendingGyroflow = url;
                     loadFile(controller.path_to_url(videofile));
@@ -57,6 +58,7 @@ Item {
                 window.motionData.loadGyroflow(obj);
                 window.stab.loadGyroflow(obj);
                 window.advanced.loadGyroflow(obj);
+                Qt.callLater(window.exportSettings.loadGyroflow, obj);
 
                 const info = obj.video_info || { };
                 if (info) {
@@ -172,6 +174,7 @@ Item {
         width: parent.width;
         height: parent.height - tlcol.height;
         Item {
+            id: vidParent;
             property real orgW: root.outWidth || vid.videoWidth;
             property real orgH: root.outHeight || vid.videoHeight;
             property real ratio: orgW / Math.max(1, orgH);
@@ -268,17 +271,12 @@ Item {
             InfoMessage {
                 width: vid.width;
                 type: InfoMessage.Warning;
-                visible: !controller.lens_loaded && !isCalibrator;
+                visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
                 text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
             }
             MouseArea {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;
-            }
-            RenderQueue {
-                id: queue;
-                anchors.fill: parent;
-                anchors.margins: 10 * dpiScale;
             }
         }
         Rectangle {
@@ -325,6 +323,7 @@ Item {
         DropArea {
             id: da;
             anchors.fill: dropRect;
+            enabled: !queue.shown;
 
             onEntered: (drag) => {
                 const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
@@ -342,12 +341,22 @@ Item {
             id: videoLoader;
             background: styleBackground;
             onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
+            canHide: render_queue.main_job_id > 0;
             onCancel: {
                 if (render_queue.main_job_id > 0) {
                     render_queue.cancel_job(render_queue.main_job_id);
                 }
                 controller.cancel_current_operation();
             }
+            onHide: {
+                render_queue.main_job_id = 0;
+                videoLoader.active = false;
+            }
+        }
+        RenderQueue {
+            id: queue;
+            anchors.fill: vid.loaded? vidParent : dropRect;
+            anchors.margins: 10 * dpiScale;
         }
 
         Connections {

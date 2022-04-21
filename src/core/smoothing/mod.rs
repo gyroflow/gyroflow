@@ -64,7 +64,10 @@ impl Smoothing {
         self.current_id = id.min(self.algs.len() - 1);
     }
 
-    pub fn current(&mut self) -> &mut Box<dyn SmoothingAlgorithm> {
+    pub fn current(&self) -> &Box<dyn SmoothingAlgorithm> {
+        &self.algs[self.current_id]
+    }
+    pub fn current_mut(&mut self) -> &mut Box<dyn SmoothingAlgorithm> {
         &mut self.algs[self.current_id]
     }
 

@@ -43,7 +43,7 @@ Item {
 
     function timeAtPosition(pos) {
         const time = Math.max(0, durationMs * pos);
-        return new Date(time).toISOString().substr(11, 8);
+        return new Date(time).toISOString().substring(11, 11+8);
     }
     
     function setTrim(start, end) {

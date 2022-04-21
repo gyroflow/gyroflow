@@ -110,6 +110,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "advanced": true,
                 "type": "CheckBox",
                 "default": self.per_axis,
+                "value": if self.per_axis { 1.0 } else { 0.0 },
                 "custom_qml": "Connections { function onCheckedChanged() {
                     const checked = root.getParamElement('per_axis').checked;
                     root.getParamElement('smoothness-label').visible = !checked;
@@ -123,7 +124,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "description": "Second smoothing pass",
                 "advanced": true,
                 "type": "CheckBox",
-                "default": self.second_pass
+                "default": self.second_pass,
+                "value": if self.second_pass { 1.0 } else { 0.0 },
             },
             {
                 "name": "max_smoothness",

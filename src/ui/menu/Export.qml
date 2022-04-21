@@ -19,6 +19,7 @@ MenuItem {
 
     property bool isOsx: Qt.platform.os == "osx";
 
+    // If changing, make sure it's in sync with render_queue.rs:get_output_path
     property var exportFormats: [
         { "name": "x264",          "max_size": [4096, 2160], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
         { "name": "x265",          "max_size": [8192, 4320], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
@@ -47,6 +48,22 @@ MenuItem {
     property string outCodecOptions: "";
 
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
+
+    function getExportOptions() {
+        return {
+            codec:          root.outCodec,
+            codec_options:  root.outCodecOptions,
+            output_path:    window.outputFile,
+            trim_start:     window.videoArea.trimStart,
+            trim_end:       window.videoArea.trimEnd,
+            output_width:   root.outWidth,
+            output_height:  root.outHeight,
+            bitrate:        root.outBitrate,
+            use_gpu:        root.outGpu,
+            audio:          root.outAudio,
+            pixel_format:   ""
+        };
+    }
 
     property bool disableUpdate: false;
     function notifySizeChanged() {
@@ -84,6 +101,34 @@ MenuItem {
         setDefaultSize(w, h);
         Qt.callLater(notifySizeChanged);
     }
+    function setComboValue(c, text) {
+        let i = 0;
+        for (const x of c.model) {
+            if (x == text) {
+                c.currentIndex = i;
+                break;
+            }
+            i++;
+        }
+    }
+    function loadGyroflow(obj) {
+        //return;
+        const output = obj.output || { };
+        if (output) {
+            if (output.output_path) window.outputFile = output.output_path;
+            
+            if (output.codec)         setComboValue(codec,        output.codec);
+            if (output.codec_options) setComboValue(codecOptions, output.codec_options);
+
+            if (output.output_width && output.output_height) {
+                setDefaultSize(output.output_width, output.output_height);
+                Qt.callLater(notifySizeChanged);
+            }
+            if (output.bitrate) root.outBitrate = output.bitrate;
+            if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
+            if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
+        }
+    }
 
     ComboBox {
         id: codec;
@@ -111,6 +156,7 @@ MenuItem {
         }
     }
     ComboBox {
+        id: codecOptions;
         model: exportFormats[codec.currentIndex].variants;
         width: parent.width;
         visible: model.length > 0;

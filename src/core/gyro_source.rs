@@ -20,22 +20,6 @@ pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 
-pub struct Quat64Serde(pub Quat64);
-impl From<Quat64> for Quat64Serde {
-    fn from(v: Quat64) -> Self { Self(v) }
-}
-use serde::ser::SerializeSeq;
-impl serde::Serialize for Quat64Serde {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where S: serde::Serializer {
-        let mut seq = serializer.serialize_seq(Some(4))?;
-        for e in self.0.as_vector() {
-            seq.serialize_element(e)?;
-        }
-        seq.end()
-    }
-}
-
 #[derive(Default)]
 pub struct FileMetadata {
     pub imu_orientation: Option<String>,

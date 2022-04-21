@@ -102,6 +102,8 @@ cpp! {{
     #endif
     #include <QDesktopServices>
     #include <QStandardPaths>
+    #include <QBuffer>
+    #include <QImage>
 }}
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
@@ -294,4 +296,18 @@ pub fn get_version() -> String {
     } else {
         ver.to_string()
     }
+}
+
+pub fn image_data_to_base64(w: u32, h: u32, s: u32, data: &[u8]) -> QString {
+    let ptr = data.as_ptr();
+    cpp!(unsafe [w as "uint32_t", h as "uint32_t", s as "uint32_t", ptr as "const uint8_t *"] -> QString as "QString" {
+        QImage img(ptr, w, h, s, QImage::Format_RGBA8888_Premultiplied);
+        QByteArray byteArray;
+        QBuffer buffer(&byteArray);
+        buffer.open(QIODevice::WriteOnly);
+        img.save(&buffer, "JPEG", 50);
+        QString b64("data:image/jpg;base64,");
+        b64.append(QString::fromLatin1(byteArray.toBase64().data()));
+        return b64;
+    })
 }

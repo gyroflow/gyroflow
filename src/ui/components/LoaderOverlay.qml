@@ -21,6 +21,7 @@ Item {
     property int totalFrames: 0;
     property string additional;
     property alias background: overlay.color;
+    property bool canHide: false;
 
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
@@ -49,6 +50,7 @@ Item {
     }
 
     signal cancel();
+    signal hide();
 
     Rectangle {
         id: overlay;
@@ -59,7 +61,7 @@ Item {
 
     anchors.fill: parent;
     QQC.ProgressBar { id: pb; anchors.centerIn: parent; value: parent.progress; visible: parent.progress != -1 && !root.canceled; }
-    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.active && (parent.progress == -1 || root.canceled); }
+    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.active && (parent.progress == -1 || root.canceled); running: visible; }
 
     Column {
         id: c;
@@ -90,12 +92,35 @@ Item {
             topPadding: 0;
             bottomPadding: 4 * dpiScale;
         }
-        LinkButton {
-            transparent: true;
-            visible: progress > -1 && cancelable;
-            text: qsTr("Cancel");
+        Row {
             anchors.horizontalCenter: parent.horizontalCenter;
-            onClicked: { root.canceled = true; root.cancel(); }
+            property real rlPadding: (hideBtn.visible? 5 : 15) * dpiScale;
+            LinkButton {
+                transparent: true;
+                visible: progress > -1 && cancelable;
+                text: qsTr("Cancel");
+                onClicked: { root.canceled = true; root.cancel(); }
+                rightPadding: parent.rlPadding;
+                leftPadding: parent.rlPadding;
+            }
+            Text {
+                text: "|";
+                color: styleTextColor;
+                font.pixelSize: 12 * dpiScale;
+                font.family: styleFont;
+                visible: hideBtn.visible;
+                verticalAlignment: Text.AlignVCenter;
+                height: parent.height;
+            }
+            LinkButton {
+                id: hideBtn;
+                rightPadding: parent.rlPadding
+                leftPadding: parent.rlPadding;
+                transparent: true;
+                visible: progress > -1 && canHide;
+                text: qsTr("Hide");
+                onClicked: root.hide();
+            }
         }
     }
 }

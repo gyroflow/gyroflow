@@ -1,13 +1,14 @@
 
 function getFolder(v) {
+    v = v.replace(/\\/g, "/");
     let idx = v.lastIndexOf("/");
-    if (idx == -1) idx = v.lastIndexOf("\\");
     if (idx == -1) return "";
     return v.substring(0, idx + 1);
 }
 function getFilename(v) {
+    v = v.replace(/\\/g, "/");
     let idx = v.lastIndexOf("/");
-    if (idx == -1) idx = v.lastIndexOf("\\");
+    if (idx == -1) return "";
     return v.substring(idx + 1);
 }
 function timeToStr(v) {

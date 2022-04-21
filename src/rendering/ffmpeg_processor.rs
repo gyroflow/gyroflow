@@ -95,6 +95,16 @@ impl From<ffmpeg_next::Error> for FFmpegError {
     fn from(err: ffmpeg_next::Error) -> FFmpegError { FFmpegError::InternalError(err) }
 }
 
+#[derive(Debug, Clone)]
+pub struct VideoInfo {
+    pub duration_ms: f64,
+    pub frame_count: usize,
+    pub fps: f64,
+    pub width: u32,
+    pub height: u32,
+    pub bitrate: f64, // in Mbps
+}
+
 impl<'a> FfmpegProcessor<'a> {
     pub fn from_file(path: &str, mut gpu_decoding: bool, gpu_decoder_index: usize) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
@@ -419,6 +429,30 @@ impl<'a> FfmpegProcessor<'a> {
 
     pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video_converter::Converter) -> Result<(), FFmpegError> + 'a {
         self.video.on_frame_callback = Some(Box::new(cb));
+    }
+
+    pub fn get_video_info(path: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
+        let context = format::input(&path)?;
+        if let Some(stream) = context.streams().best(media::Type::Video) {
+            let codec = codec::context::Context::from_parameters(stream.parameters())?;    
+            if let Ok(video) = codec.decoder().video() {
+                let mut bitrate = video.bit_rate();
+                if bitrate == 0 { bitrate = context.bit_rate() as usize; }
+
+                let mut frames = stream.frames() as usize;
+                if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
+
+                return Ok(VideoInfo {
+                    duration_ms: stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0,
+                    frame_count: frames,
+                    fps: f64::from(stream.rate()), // or avg_frame_rate?
+                    width: video.width(),
+                    height: video.height(),
+                    bitrate: bitrate as f64 / 1024.0 / 1024.0,
+                });
+            }
+        }
+        Err(ffmpeg_next::Error::StreamNotFound)
     }
 }
 

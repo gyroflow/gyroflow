@@ -13,6 +13,7 @@ Rectangle {
     Ease on opacity { duration: 300; }
 
     signal loadFile(string path); 
+    signal loadFiles(var urls); 
 
     BasicText {
         id: dropText;
@@ -32,6 +33,9 @@ Rectangle {
             const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
             drag.accepted = root.extensions.indexOf(ext) > -1;
         }
-        onDropped: (drop) => root.loadFile(drop.urls[0])
+        onDropped: (drop) => {
+            root.loadFiles(drop.urls);
+            root.loadFile(drop.urls[0])
+        }
     }
 }

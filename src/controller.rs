@@ -151,7 +151,7 @@ pub struct Controller {
     init_calibrator: qt_method!(fn(&mut self)),
 
     import_gyroflow: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
-    export_gyroflow: qt_method!(fn(&self, thin: bool)),
+    export_gyroflow: qt_method!(fn(&self, thin: bool, output_options: QString, override_location: QString)),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -170,7 +170,7 @@ pub struct Controller {
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
-    pub video_path: String,
+    request_location: qt_signal!(path: QString, thin: bool),
 
     preview_resolution: i32,
 
@@ -192,7 +192,7 @@ impl Controller {
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
         self.chart_data_changed();
-        self.video_path = util::url_to_path(url.clone());
+        *self.stabilizer.video_path.write() = util::url_to_path(url.clone());
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -267,7 +267,7 @@ impl Controller {
             self.cancel_flag.store(false, SeqCst);
             let cancel_flag = self.cancel_flag.clone();
             
-            let video_path = self.video_path.clone();
+            let video_path = self.stabilizer.video_path.read().clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
                 let mut fps_scale = None;
@@ -469,7 +469,7 @@ impl Controller {
 
             // fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
 
-            if !self.video_path.is_empty() {
+            if !self.stabilizer.video_path.read().is_empty() {
                 let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
                 let ratio = vid.videoHeight as f64 / h as f64;
                 let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
@@ -633,12 +633,20 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow(&self, thin: bool) {
-        let video_path = std::path::Path::new(&self.video_path);
-        let gf_path = video_path.with_extension("gyroflow");
-        match self.stabilizer.export_gyroflow(&self.video_path, &gf_path, thin) {
+    fn export_gyroflow(&self, thin: bool, output_options: QString, override_location: QString) {
+        let gf_path = if override_location.is_empty() {
+            let video_path = self.stabilizer.video_path.read().clone();
+            let video_path = std::path::Path::new(&video_path);
+            video_path.with_extension("gyroflow").to_string_lossy().into()
+        } else {
+            override_location.to_string()
+        };
+        match self.stabilizer.export_gyroflow(&gf_path, thin, output_options.to_string()) {
             Ok(_) => {
-                self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path.to_string_lossy())), QString::default());
+                self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
+            },
+            Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                self.request_location(QString::from(gf_path), thin);
             },
             Err(e) => {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
@@ -647,12 +655,13 @@ impl Controller {
     }
 
     fn import_gyroflow(&mut self, url: QUrl) -> QJsonObject {
-        match self.stabilizer.import_gyroflow(&util::url_to_path(url)) {
+        match self.stabilizer.import_gyroflow(&util::url_to_path(url), false) {
             Ok(thin_obj) => {
                 self.lens_loaded = true;
                 self.lens_changed();
                 let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
                 self.lens_profile_loaded(QString::from(lens_json));
+                self.request_recompute();
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
@@ -813,7 +822,7 @@ impl Controller {
             let total_read = Arc::new(AtomicUsize::new(0));
             let processed = Arc::new(AtomicUsize::new(0));
             
-            let video_path = self.video_path.clone();
+            let video_path = stab.video_path.read().clone();
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
                 match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0) {
