@@ -112,7 +112,6 @@ MenuItem {
         }
     }
     function loadGyroflow(obj) {
-        //return;
         const output = obj.output || { };
         if (output) {
             if (output.output_path) window.outputFile = output.output_path;

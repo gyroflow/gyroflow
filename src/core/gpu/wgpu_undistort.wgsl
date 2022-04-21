@@ -8,19 +8,22 @@ struct Globals {
     output_height: u32,
     params_count: u32,
     interpolation: u32,
-    background: array<f32, 4>
+    background0: f32,
+    background1: f32,
+    background2: f32,
+    background3: f32,
 };
 
-@group(0) @binding(0) @stage(fragment) var<uniform> params: Globals;
-@group(0) @binding(1) @stage(fragment) var<storage, read> undistortion_params: array<f32>;
-@group(0) @binding(2) @stage(fragment) var input: texture_2d<SCALAR>;
-@group(0) @binding(3) @stage(fragment) var<storage, read> coeffs: array<f32>;
+@group(0) @binding(0) @fragment var<uniform> params: Globals;
+@group(0) @binding(1) @fragment var<storage, read> undistortion_params: array<f32>;
+@group(0) @binding(2) @fragment var input_tex: texture_2d<SCALAR>;
+@group(0) @binding(3) @fragment var<storage, read> coeffs: array<f32>;
 
 let INTER_BITS: u32 = 5u;
 let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
 
 fn interpolate(sx: i32, sy: i32, sx0: i32, sy0: i32, width_u: i32, height_u: i32) -> vec4<SCALAR> {
-    let bg = vec4<f32>(params.background[0], params.background[1], params.background[2], params.background[3]);
+    let bg = vec4<f32>(params.background0, params.background1, params.background2, params.background3);
     var sum = vec4<f32>(0.0);
     
     let shift = (params.interpolation >> 2u) + 1u;
@@ -36,7 +39,7 @@ fn interpolate(sx: i32, sy: i32, sx0: i32, sy0: i32, width_u: i32, height_u: i32
             for (var xp: i32 = 0; xp < i32(params.interpolation); xp = xp + 1) {
                 var pixel: vec4<f32>;
                 if (sx + xp >= 0 && sx + xp < width_u) {
-                    pixel = vec4<f32>(textureLoad(input, vec2<i32>(sx + xp, sy + yp), 0));
+                    pixel = vec4<f32>(textureLoad(input_tex, vec2<i32>(sx + xp, sy + yp), 0));
                 } else {
                     pixel = bg;
                 }
@@ -133,7 +136,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
 }
 
 
-@stage(vertex)
+@vertex
 fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
     var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
         vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0),
@@ -145,7 +148,7 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 // Adapted from OpenCV: initUndistortRectifyMap + remap 
 // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
 // https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-@stage(fragment)
+@fragment
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
     let gx = i32(position.x);
     let gy = i32(position.y);
@@ -153,7 +156,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let width = params.width;
     let height = params.height;
     let params_count = params.params_count;
-    let bg = vec4<SCALAR>(SCALAR(params.background[0]), SCALAR(params.background[1]), SCALAR(params.background[2]), SCALAR(params.background[3]));
+    let bg = vec4<SCALAR>(SCALAR(params.background0), SCALAR(params.background1), SCALAR(params.background2), SCALAR(params.background3));
 
     var texPos = vec2<f32>(f32(gx), f32(gy));
 
