@@ -221,6 +221,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     //proc.video.codec_options.set("preset", "medium");
     proc.video.codec_options.set("allow_sw", "1");
+    proc.video.codec_options.set("realtime", "0");
 
     let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
 
