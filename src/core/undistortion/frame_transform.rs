@@ -2,12 +2,13 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use nalgebra::Matrix3;
-use super::ComputeParams;
+use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
-    pub params: Vec<[f32; 9]>,
+    pub matrices: Vec<[f32; 9]>,
+    pub kernel_params: super::KernelParams,
     pub fov: f64,
 }
 
@@ -71,7 +72,7 @@ impl FrameTransform {
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
 
-        let mut transform_params = (0..rows).into_par_iter().map(|y| {
+        let matrices = (0..rows).into_par_iter().map(|y| {
             let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {
@@ -102,30 +103,23 @@ impl FrameTransform {
             ]
         }).collect::<Vec<[f32; 9]>>();
 
-        // Prepend lens params at the beginning
-        transform_params.insert(0, [
-            scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32, // 1, 2 - f
-            scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32, // 3, 4 - c
-    
-            params.distortion_coeffs[0] as f32, // 5
-            params.distortion_coeffs[1] as f32, // 6
-            params.distortion_coeffs[2] as f32, // 7
-            params.distortion_coeffs[3] as f32, // 8
-            params.radial_distortion_limit as f32
-        ]);
-
-        // Add additional params after lens params
-        transform_params.insert(1, [
-            params.lens_correction_amount as f32,
-            params.background_mode as i32 as f32, 
-            fov as f32, 
-            params.input_horizontal_stretch as f32,
-            params.input_vertical_stretch as f32,
-            0.0, 0.0, 0.0, 0.0 // unused
-        ]);
+        let kernel_params = KernelParams {
+            matrix_count:  matrices.len() as i32,
+            f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
+            c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
+            k:             [params.distortion_coeffs[0] as f32, params.distortion_coeffs[1] as f32, params.distortion_coeffs[2] as f32, params.distortion_coeffs[3] as f32], 
+            fov:           fov as f32, 
+            r_limit:       params.radial_distortion_limit as f32,
+            lens_correction_amount:   params.lens_correction_amount as f32,
+            input_vertical_stretch:   params.input_vertical_stretch as f32,
+            input_horizontal_stretch: params.input_horizontal_stretch as f32,
+            background_mode:          params.background_mode as i32,
+            ..Default::default()
+        };
 
         Self {
-            params: transform_params,
+            matrices,
+            kernel_params,
             fov: ui_fov
         }
     }

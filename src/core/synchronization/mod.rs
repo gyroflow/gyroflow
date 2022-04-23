@@ -127,7 +127,7 @@ impl PoseEstimator {
             .collect()
     }
 
-    pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64, scaled_fps: f64) {
+    pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64, scaled_fps: f64, params: &ComputeParams) {
         let every_nth_frame = self.every_nth_frame.load(SeqCst);
         let mut frames_to_process = Vec::new();
         {
@@ -157,8 +157,8 @@ impl PoseEstimator {
 
                         let r = match (curr, next) {
                             #[cfg(feature = "use-opencv")]
-                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, camera_matrix, coeffs) }
-                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, camera_matrix, coeffs) }
+                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, camera_matrix, coeffs, params) }
+                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, camera_matrix, coeffs, params) }
                             _ => None
                         };
 

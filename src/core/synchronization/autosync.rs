@@ -88,6 +88,8 @@ impl AutosyncProcess {
         if !for_rs {
             comp_params.gyro.offsets.clear();
         }
+        // Make sure we apply full correction for autosync
+        comp_params.lens_correction_amount = 1.0;
 
         Ok(Self {
             frame_count,
@@ -145,6 +147,7 @@ impl AutosyncProcess {
         let duration_ms = self.duration_ms;
         let scaled_fps = self.scaled_fps;
         let org_fps = self.org_fps;
+        let compute_params = self.compute_params.clone();
         if let Some(scale) = self.fps_scale {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
         }
@@ -159,7 +162,7 @@ impl AutosyncProcess {
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame % 7 == 0 {
-                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps, scaled_fps);
+                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps, scaled_fps, &compute_params.read());
                         estimator.recalculate_gyro_data(frame_count, duration_ms, org_fps, false);
                     }
 
@@ -186,7 +189,7 @@ impl AutosyncProcess {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps, self.scaled_fps);
+        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.org_fps, true);
         self.estimator.optical_flow(1);
 

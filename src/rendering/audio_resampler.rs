@@ -43,7 +43,7 @@ impl AudioResampler {
         self.src_frame.set_pts(in_frame.pts());
 
         in_frame.set_channel_layout(self.resampler.input().channel_layout);
-        self.resampler.run(&in_frame, &mut self.src_frame)?;
+        self.resampler.run(in_frame, &mut self.src_frame)?;
 
         self.src_frame_offset = 0;
         Ok(())
@@ -63,15 +63,15 @@ impl AudioResampler {
             if self.resampler.output().format.is_planar() {
                 for c in 0..channels {
                     unsafe {
-                        let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[c].offset(dest_byte_offset as isize);
-                        let src_ptr = (*self.src_frame.as_ptr()).data[c].offset(src_byte_offset as isize);
+                        let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[c].add(dest_byte_offset);
+                        let src_ptr = (*self.src_frame.as_ptr()).data[c].add(src_byte_offset);
                         std::ptr::copy_nonoverlapping::<u8>(src_ptr, dst_ptr, copy_samples * bytes_per_sample);
                     }
                 }
             } else {
                 unsafe {
-                    let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[0].offset((dest_byte_offset * channels) as isize);
-                    let src_ptr = (*self.src_frame.as_ptr()).data[0].offset((src_byte_offset * channels) as isize);
+                    let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[0].add(dest_byte_offset * channels);
+                    let src_ptr = (*self.src_frame.as_ptr()).data[0].add(src_byte_offset * channels);
                     std::ptr::copy_nonoverlapping::<u8>(src_ptr, dst_ptr, copy_samples * bytes_per_sample * channels);
                 }
             }

@@ -246,7 +246,7 @@ impl RenderQueue {
     }
 
     pub fn start(&mut self) {
-        let paused = self.pause_flag.load(SeqCst) == true;
+        let paused = self.pause_flag.load(SeqCst);
 
         for (_id, job) in self.jobs.iter() {
             job.cancel_flag.store(false, SeqCst);
@@ -392,7 +392,7 @@ impl RenderQueue {
             let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported): (String, String)| {
                 use itertools::Itertools;
                 supported = supported
-                    .split(",")
+                    .split(',')
                     .filter(|v| !["CUDA", "D3D11", "BGRZ", "RGBZ", "BGRA", "UYVY422", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].contains(v))
                     .join(",");
 
@@ -420,7 +420,6 @@ impl RenderQueue {
             let cancel_flag = job.cancel_flag.clone();
             let pause_flag = self.pause_flag.clone();
 
-            let rendered_frames2 = rendered_frames.clone();
             core::run_threaded(move || {
                 let mut i = 0;
                 loop {
@@ -430,13 +429,13 @@ impl RenderQueue {
                             convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
                             break;
                         }
-                        if rendered_frames2.load(SeqCst) == 0 {
-                            if i >= 0 && i < 4 {
+                        if rendered_frames.load(SeqCst) == 0 {
+                            if (0..4).contains(&i) {
                                 // Try 4 times with different GPU decoders
                                 i += 1;
                                 continue;
                             }
-                            if i >= 0 && i < 5 {
+                            if (0..5).contains(&i) {
                                 // Try without GPU decoder
                                 i = -1;
                                 continue;
@@ -577,8 +576,7 @@ impl RenderQueue {
                                 }
                             },
                             Err(e) => {
-                                ::log::error!("Error loading {}: {:?}", path, e);
-                                return;
+                                err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
                             }
                         }
                     } else if let Ok(info) = rendering::FfmpegProcessor::get_video_info(&path) {

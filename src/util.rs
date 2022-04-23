@@ -29,7 +29,7 @@ pub fn serde_json_to_qt_object(v: &serde_json::Value) -> QJsonObject {
                 serde_json::Value::Bool(v) => { map.insert(k, QJsonValue::from(*v)); },
                 serde_json::Value::String(v) => { map.insert(k, QJsonValue::from(QString::from(v.clone()))); },
                 serde_json::Value::Array(v) => { map.insert(k, QJsonValue::from(serde_json_to_qt_array(&serde_json::Value::Array(v.to_vec())))); },
-                serde_json::Value::Object(_) => { map.insert(k, QJsonValue::from(serde_json_to_qt_object(&v))); },
+                serde_json::Value::Object(_) => { map.insert(k, QJsonValue::from(serde_json_to_qt_object(v))); },
                 serde_json::Value::Null => { /* ::log::warn!("null unimplemented");*/ }
             };
         }
@@ -166,7 +166,7 @@ pub fn init_logging() {
 
     #[cfg(not(target_os = "android"))]
     {
-        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or(PathBuf::from("./gyroflow.log"));
+        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or_else(|_| PathBuf::from("./gyroflow.log"));
         if let Ok(file_log) = std::fs::File::create(exe_loc) {
             let _ = CombinedLogger::init(vec![
                 TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
@@ -239,15 +239,13 @@ pub fn install_crash_handler() -> std::io::Result<()> {
     // Upload crash dumps
     crate::core::run_threaded(move || {
         if let Ok(files) = std::fs::read_dir(cur_dir) {
-            for path in files {
-                if let Ok(path) = path {
-                    let path = path.path();
-                    if path.to_string_lossy().ends_with(".dmp") {
-                        if let Ok(content) = std::fs::read(&path) {
-                            if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_dump").set("Content-Type", "application/octet-stream").send_bytes(&content).map(|x| x.into_string()) {
-                                ::log::debug!("Minidump uploaded: {}", body.as_str());
-                                let _ = std::fs::remove_file(path);
-                            }
+            for path in files.flatten() {
+                let path = path.path();
+                if path.to_string_lossy().ends_with(".dmp") {
+                    if let Ok(content) = std::fs::read(&path) {
+                        if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_dump").set("Content-Type", "application/octet-stream").send_bytes(&content).map(|x| x.into_string()) {
+                            ::log::debug!("Minidump uploaded: {}", body.as_str());
+                            let _ = std::fs::remove_file(path);
                         }
                     }
                 }

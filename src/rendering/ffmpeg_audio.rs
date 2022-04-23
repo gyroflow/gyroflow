@@ -83,7 +83,7 @@ impl AudioTranscoder {
 
                     self.resampler.new_frame(&mut frame)?;
                     while let Some(out_frame) = self.resampler.run() {
-                        self.encoder.send_frame(&out_frame)?;
+                        self.encoder.send_frame(out_frame)?;
                         self.receive_and_process_encoded_packets(octx, ost_time_base)?;
                     }
                 }
@@ -107,7 +107,7 @@ impl AudioTranscoder {
         self.receive_and_process_decoded_frames(octx, ost_time_base, start_ms)?;
 
         if let Some(out_frame) = self.resampler.flush() {
-            self.encoder.send_frame(&out_frame)?;
+            self.encoder.send_frame(out_frame)?;
         }
 
         self.encoder.send_eof()?;

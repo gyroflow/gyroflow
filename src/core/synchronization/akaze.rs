@@ -10,6 +10,7 @@ use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
 use std::{vec::Vec, collections::BTreeMap};
+use crate::undistortion::ComputeParams;
 
 use space::{Knn, LinearKnn};
 
@@ -74,14 +75,14 @@ impl ItemAkaze {
         }
     }
 
-    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>) -> Option<Rotation3<f64>> {        
+    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {        
         let a1 = &self.features;
         let a2 = &next.features;
 
         let pts1 = a1.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
         let pts2 = a2.0.iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect::<Vec<(f64, f64)>>();
-        let pts1 = crate::undistortion::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, None);
-        let pts2 = crate::undistortion::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, None);
+        let pts1 = crate::undistortion::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+        let pts2 = crate::undistortion::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
 
         let intrinsics = cv_pinhole::CameraIntrinsics::identity();
         let matches: Vec<Match> = Self::match_descriptors(&a1.1, &a2.1).into_iter()

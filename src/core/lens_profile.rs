@@ -65,7 +65,9 @@ pub struct LensProfile {
     pub optimal_fov: Option<f64>,
 
     #[serde(skip)]
-    pub is_copy: bool
+    pub is_copy: bool,
+
+    pub distortion_model_id: i32
 }
 
 impl LensProfile {

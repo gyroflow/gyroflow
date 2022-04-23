@@ -36,20 +36,6 @@ static float quadVertexData[16] = { // Y up, CCW
 };
 static quint16 quadIndexData[6] = { 0, 1, 2, 0, 2, 3 };
 
-
-struct Uniforms {
-    qint32 params_count;
-    qint32 width;
-    qint32 height;
-    qint32 output_width;
-    qint32 output_height;
-    qint32 _padding;
-    qint32 _padding2;
-    qint32 _padding3;
-    float undistortion_params[28];
-    float bg[4];
-};
-
 // ubufAlignment
 // static inline uint aligned(uint v, uint byteAlign) { return (v + byteAlign - 1) & ~(byteAlign - 1); }
 
@@ -57,7 +43,7 @@ class QtRHIUndistort {
 public:
     QtRHIUndistort(MDKPlayerWrapper *playerWrapper): m_player(playerWrapper) { }
 
-    bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/, QSize outputSize) {
+    bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/, QSize outputSize, const QString &shaderPath, int kernelParmsSize) {
         if (!item) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -72,13 +58,14 @@ public:
         m_workaroundTexture.reset(rhi->newTexture(QRhiTexture::RGBA8, QSize(16, 16), 1, QRhiTexture::UsedAsTransferSource));
         if (!m_workaroundTexture->create()) { qDebug() << "failed to create m_workaroundTexture"; return false; }
 
-        m_computeUniform.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(Uniforms)));
-        if (!m_computeUniform->create()) { qDebug() << "failed to create m_computeUniform"; return false; }
+        m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
+        if (!m_kernelParams->create()) { qDebug() << "failed to create m_kernelParams"; return false; }
 
-        m_texParams.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, (textureSize.height() + 2)), 1, QRhiTexture::UsedAsTransferSource));
-        if (!m_texParams->create()) { qDebug() << "failed to create m_texParams"; return false; }
+        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::UsedAsTransferSource));
+        if (!m_texMatrices->create()) { qDebug() << "failed to create m_texMatrices"; return false; }
 
-        params_buffer.resize((textureSize.height() + 2) * 9);
+        matrices.resize(textureSize.height() * 9);
+        kernel_params.resize(kernelParmsSize);
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
         if (!m_vertexBuffer->create()) { qDebug() << "failed to create m_vertexBuffer"; return false; }
@@ -96,22 +83,22 @@ public:
         m_drawingSampler.reset(rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
         if (!m_drawingSampler->create()) { qDebug() << "failed to create m_drawingSampler"; return false; }
 
-        m_paramsSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
-        if (!m_paramsSampler->create()) { qDebug() << "failed to create m_paramsSampler"; return false; }
+        m_matricesSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
+        if (!m_matricesSampler->create()) { qDebug() << "failed to create m_matricesSampler"; return false; }
 
         m_srb.reset(rhi->newShaderResourceBindings());
         m_srb->setBindings({
             QRhiShaderResourceBinding::uniformBuffer (0, QRhiShaderResourceBinding::FragmentStage | QRhiShaderResourceBinding::VertexStage, m_drawingUniform.get()),
             QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_texIn.get(), m_drawingSampler.get()),
-            QRhiShaderResourceBinding::uniformBuffer (2, QRhiShaderResourceBinding::FragmentStage, m_computeUniform.get()),
-            QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texParams.get(), m_paramsSampler.get()),
+            QRhiShaderResourceBinding::uniformBuffer (2, QRhiShaderResourceBinding::FragmentStage, m_kernelParams.get()),
+            QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texMatrices.get(), m_matricesSampler.get()),
         });
         if (!m_srb->create()) { qDebug() << "failed to create m_srb"; return false; }
 
         m_pipeline.reset(rhi->newGraphicsPipeline());
         m_pipeline->setShaderStages({
             { QRhiShaderStage::Vertex,   getShader(QLatin1String(":/src/qt_gpu/compiled/texture.vert.qsb")) },
-            { QRhiShaderStage::Fragment, getShader(QLatin1String(":/src/qt_gpu/compiled/undistort.frag.qsb")) }
+            { QRhiShaderStage::Fragment, getShader(shaderPath) }
         });
         QRhiVertexInputLayout inputLayout;
         inputLayout.setBindings({ { 4 * sizeof(float) } });
@@ -127,7 +114,7 @@ public:
         return true;
     }
 
-    bool render(MDKPlayer *item, double /*timestamp*/, int /*frame_no*/, float */*params_padded*/, int params_count, float bg[4], bool /*doRender*/, float */*features_pixels*/, int /*fpx_count*/, float */*optflow_pixels*/, int /*of_count*/) {
+    bool render(MDKPlayer *item) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -151,21 +138,11 @@ public:
 
         u->copyTexture(m_texIn.get(), item->rhiTexture(), {});
 
-        Uniforms uniforms;
-        uniforms.params_count = params_count;
-        uniforms.width = size.width();
-        uniforms.height = size.height();
-        uniforms.output_width = m_outputSize.width();
-        uniforms.output_height = m_outputSize.height();
-        // First 27 floats are required.
-        // Copy them to the uniform, because when fetching from the float32 texture (`texParams`), we don't want to rely on float index and texture sampler
-        memcpy(uniforms.undistortion_params, params_buffer.data(), 27 * sizeof(float));
-        memcpy(uniforms.bg, bg, 4 * sizeof(float)); // RGBA
-        u->updateDynamicBuffer(m_computeUniform.get(), 0, sizeof(Uniforms), (const char *)&uniforms);
+        u->updateDynamicBuffer(m_kernelParams.get(), 0, kernel_params.size(), kernel_params.data());
 
-        QRhiTextureSubresourceUploadDescription desc1(params_buffer.data(), params_buffer.size() * sizeof(float));
+        QRhiTextureSubresourceUploadDescription desc1(matrices.data(), matrices.size() * sizeof(float));
 
-        u->uploadTexture(m_texParams.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc1) }));
+        u->uploadTexture(m_texMatrices.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc1) }));
 
         QMatrix4x4 mvp = item->textureMatrix();
         mvp.scale(2.0f);
@@ -186,7 +163,8 @@ public:
         return true;
     }
 
-    std::vector<float> params_buffer;
+    std::vector<unsigned char> kernel_params;
+    std::vector<float> matrices;
 
     QShader getShader(const QString &name) {
         QFile f(name);
@@ -197,8 +175,8 @@ public:
 
     QScopedPointer<QRhiTexture> m_texIn;
     QScopedPointer<QRhiTexture> m_workaroundTexture;
-    QScopedPointer<QRhiTexture> m_texParams;
-    QScopedPointer<QRhiBuffer> m_computeUniform;
+    QScopedPointer<QRhiTexture> m_texMatrices;
+    QScopedPointer<QRhiBuffer> m_kernelParams;
 
     QSize m_outputSize;
 
@@ -208,7 +186,7 @@ public:
     QScopedPointer<QRhiBuffer> m_indexBuffer;
     QScopedPointer<QRhiBuffer> m_drawingUniform;
     QScopedPointer<QRhiSampler> m_drawingSampler;
-    QScopedPointer<QRhiSampler> m_paramsSampler;
+    QScopedPointer<QRhiSampler> m_matricesSampler;
     QScopedPointer<QRhiShaderResourceBindings> m_srb;
     QScopedPointer<QRhiGraphicsPipeline> m_pipeline;
 

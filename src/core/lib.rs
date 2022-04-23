@@ -198,7 +198,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let os = ow * T::COUNT * T::SCALAR_BYTES;
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
-            self.undistortion.write().init_size(bg, (w, h), s, (ow, oh), os);
+            self.undistortion.write().init_size(bg, (w, h, s), (ow, oh, os));
             self.lens.write().optimal_fov = None;
             
             self.invalidate_smoothing();
@@ -393,15 +393,18 @@ impl<T: PixelType> StabilizationManager<T> {
         ret
     }
 
-    pub unsafe fn fill_undistortion_data(&self, timestamp_us: i64, out_ptr: *mut f32, out_size: usize) -> bool {
+    pub unsafe fn fill_undistortion_data(&self, timestamp_us: i64, mat_ptr: *mut f32, mat_size: usize, params_ptr: *mut u8, params_size: usize) -> bool {
         if self.params.read().stab_enabled {
             let mut undist = self.undistortion.write();
             if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
 
-                let params_count = itm.params.len() * 9;
-                if params_count <= out_size {
-                    let src_ptr = itm.params.as_ptr() as *const f32;
-                    std::ptr::copy_nonoverlapping(src_ptr, out_ptr, params_count);
+                let params_count = itm.matrices.len() * 9;
+                if params_count <= mat_size {
+                    let src_ptr = itm.matrices.as_ptr() as *const f32;
+                    std::ptr::copy_nonoverlapping(src_ptr, mat_ptr, params_count);
+
+                    let src_ptr2 = bytemuck::bytes_of(&itm.kernel_params).as_ptr();
+                    std::ptr::copy_nonoverlapping(src_ptr2, params_ptr, params_size);
 
                     drop(itm);
 
@@ -413,11 +416,15 @@ impl<T: PixelType> StabilizationManager<T> {
         false
     }
 
-    pub fn process_pixels(&self, mut timestamp_us: i64, width: usize, height: usize, stride: usize, out_width: usize, out_height: usize, out_stride: usize, pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
+    pub fn process_pixels(&self, mut timestamp_us: i64, size: (usize, usize, usize), output_size: (usize, usize, usize), pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
         let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator, fov) = {
             let params = self.params.read();
             (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator, params.fov)
         };
+
+        let (width, height, stride) = size;
+        let (out_width, out_height, out_stride) = output_size;
+
         if enabled && ow == out_width && oh == out_height {
             if let Some(scale) = fps_scale {
                 timestamp_us = (timestamp_us as f64 / scale).round() as i64;
@@ -455,15 +462,15 @@ impl<T: PixelType> StabilizationManager<T> {
                     if let Some(ref cal) = *lock {
                         let points = cal.all_matches.read();
                         if let Some(entry) = points.get(&(frame as i32)) {
-                            let (w, h, s) = (width as u32, height as u32, stride);
-                            calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w, h, s, pixels, (cal.columns, cal.rows), &entry.points, true);
+                            let (w, h, s) = size;
+                            calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true);
                         }
                     }
                 }
             }
             //////////////////////////// Draw detected features ////////////////////////////
             let mut undist = self.undistortion.write();
-            let ret = undist.process_pixels(timestamp_us, width, height, stride, out_width, out_height, out_stride, pixels, out_pixels);
+            let ret = undist.process_pixels(timestamp_us, size, output_size, pixels, out_pixels);
             if ret {
                 //////////////////////////// Draw zooming debug pixels ////////////////////////////
                 let p = self.params.read();

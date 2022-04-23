@@ -42,7 +42,6 @@ QQC.ComboBox {
     Ease on scale {  }
 
     contentItem: Text {
-        id: ti;
         text: qsTranslate("Popup", root.displayText);
         color: styleTextColor;
         font: root.font;

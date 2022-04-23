@@ -83,7 +83,12 @@ impl<'a> VideoTranscoder<'a> {
         let mut encoder = context.encoder().video()?;
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
         let pixel_format = format.unwrap_or_else(|| frame.format());
-        let color_range = frame.color_range();
+        let mut color_range = frame.color_range();
+
+        // Workaround for a bug in prores videotoolbox encoder
+        if pixel_format == format::Pixel::NV12 && codec_name == "prores_videotoolbox" {
+            color_range = util::color::Range::MPEG;
+        }
 
         log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
 
@@ -201,7 +206,7 @@ impl<'a> VideoTranscoder<'a> {
                                     let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                                     let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
                                     if picked != format::Pixel::None {
-                                        self.encoder_pixel_format = Some(format::Pixel::from(picked));
+                                        self.encoder_pixel_format = Some(picked);
                                     }
                                 }
                             }

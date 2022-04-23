@@ -11,6 +11,33 @@ enum {
 // #pragma OPENCL EXTENSION cl_khr_fp64:enable
 // #endif
 
+typedef struct {
+    int width;         // 4
+    int height;        // 8
+    int stride;        // 12
+    int output_width;  // 16
+    int output_height; // 4
+    int output_stride; // 8
+    int matrix_count;  // 12 - for rolling shutter correction. 1 = no correction, only main matrix
+    int interpolation; // 16
+    int background_mode;   // 4
+    int flags;             // 8
+    int bytes_per_pixel;   // 12
+    int pix_element_count; // 16
+    float4 background; // 16
+    float2 f;          // 8  - focal length in pixels
+    float2 c;          // 16 - lens center
+    float4 k;          // 16 - distortion coefficients
+    float fov;         // 4
+    float r_limit;     // 8
+    float lens_correction_amount;   // 12
+    float input_vertical_stretch;   // 16
+    float input_horizontal_stretch; // 4
+    float reserved1;                // 8
+    float reserved2;                // 12
+    float reserved3;                // 16
+} KernelParams;
+
 #if INTERPOLATION == 2 // Bilinear
 #define S_OFFSET 0.0f
 __constant float coeffs[64] = {
@@ -64,181 +91,137 @@ __constant float coeffs[256] = {
 };
 #endif
 
-float2 undistort_point(float2 pos, float2 f, float2 c, float4 k, float amount) {
-    pos = (pos - c) / f;
-
-    float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
-
-    bool converged = false;
-    float theta = theta_d;
-
-    float scale = 0.0f;
-
-    if (fabs(theta_d) > 1e-6f) {
-        for (int i = 0; i < 10; ++i) {
-            float theta2 = theta*theta;
-            float theta4 = theta2*theta2;
-            float theta6 = theta4*theta2;
-            float theta8 = theta6*theta2;
-            float k0_theta2 = k.x * theta2;
-            float k1_theta4 = k.y * theta4;
-            float k2_theta6 = k.z * theta6;
-            float k3_theta8 = k.w * theta8;
-            // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-            float theta_fix = (theta * (1.0f + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
-                              /
-                              (1.0f + 3.0f * k0_theta2 + 5.0f * k1_theta4 + 7.0f * k2_theta6 + 9.0f * k3_theta8);
-
-            theta -= theta_fix;
-            if (fabs(theta_fix) < 1e-6f) {
-                converged = true;
-                break;
-            }
-        }
-
-        scale = tan(theta) / theta_d;
-    } else {
-        converged = true;
-    }
-    bool theta_flipped = (theta_d < 0.0f && theta > 0.0f) || (theta_d > 0.0f && theta < 0.0f);
-
-    if (converged && !theta_flipped) {
-        // Apply only requested amount
-        scale = 1.0f + (scale - 1.0f) * (1.0f - amount);
-
-        return f * pos * scale + c;
-    }
-    return (float2)(0.0f, 0.0f);
+// From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
+DATA_TYPEF remap_colorrange(DATA_TYPEF px, bool isY) {
+    if (isY) { return 16.0f + (px * 0.85882352f); } // (235 - 16) / 255
+    else     { return 16.0f + (px * 0.87843137f); } // (240 - 16) / 255
 }
 
-float2 distort_point(float2 pos, float2 f, float2 c, float4 k) {
-    float r = length(pos);
+DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, DATA_TYPEF bg) {
+    bool fix_range = params->flags & 1;
 
-    float theta = atan(r);
-    float theta2 = theta*theta, 
-          theta4 = theta2*theta2, 
-          theta6 = theta4*theta2, 
-          theta8 = theta4*theta4;
+    uv -= S_OFFSET;
 
-    float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
+    const int shift = (INTERPOLATION >> 2) + 1;
+    
+    int sx0 = convert_int_sat_rtz(0.5f + uv.x * INTER_TAB_SIZE);
+    int sy0 = convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE);
 
-    float scale = r == 0? 1.0 : theta_d / r;
-    return f * pos * scale + c;
+    int sx = sx0 >> INTER_BITS;
+    int sy = sy0 >> INTER_BITS;
+
+    __constant float *coeffs_x = &coeffs[(sx0 & (INTER_TAB_SIZE - 1)) << shift];
+    __constant float *coeffs_y = &coeffs[(sy0 & (INTER_TAB_SIZE - 1)) << shift];
+
+    DATA_TYPEF sum = 0;
+    int src_index = sy * params->stride + sx * PIXEL_BYTES;
+
+    #pragma unroll
+    for (int yp = 0; yp < INTERPOLATION; ++yp) {
+        if (sy + yp >= 0 && sy + yp < params->height) {
+            DATA_TYPEF xsum = 0.0f;
+            #pragma unroll
+            for (int xp = 0; xp < INTERPOLATION; ++xp) {
+                if (sx + xp >= 0 && sx + xp < params->width) {
+                    DATA_TYPEF srcpx = DATA_CONVERTF(*(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp]);
+                    if (fix_range) {
+                        srcpx = remap_colorrange(srcpx, PIXEL_BYTES == 1);
+                    }
+                    xsum += srcpx * coeffs_x[xp];
+                } else {
+                    xsum += bg * coeffs_x[xp];
+                }
+            }
+            sum += xsum * coeffs_y[yp];
+        } else {
+            sum += bg * coeffs_y[yp];
+        }
+        src_index += params->stride;
+    }
+    return sum;
+}
+
+float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices) {
+    __global const float *matrix = &matrices[idx];
+    float _x = pos.y * matrix[1] + matrix[2] + (pos.x * matrix[0]);
+    float _y = pos.y * matrix[4] + matrix[5] + (pos.x * matrix[3]);
+    float _w = pos.y * matrix[7] + matrix[8] + (pos.x * matrix[6]);
+    if (_w > 0) {
+        float2 pos = (float2)(_x, _y) / _w;
+        float r = length(pos);
+        if (params->r_limit > 0.0f && r > params->r_limit) {
+            return (float2)(-99999.0f, -99999.0f);
+        }
+        return params->f * distort_point(pos, params->k) + params->c;
+    }
+    return (float2)(-99999.0f, -99999.0f);
 }
 
 // Adapted from OpenCV: initUndistortRectifyMap + remap 
-// https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
-// https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, ushort width, ushort height, ushort stride, ushort output_width, ushort output_height, ushort output_stride, __global const float *undistortion_params, ushort params_count, DATA_TYPEF bg) {
+// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
+// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
+__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices) {
     int x = get_global_id(0);
     int y = get_global_id(1);
 
-    if (!undistortion_params || params_count - 1 < 1) return;
+    __global KernelParams *params = (__global KernelParams *)params_buf;
 
-    float2 f = vload2(0, &undistortion_params[0]);
-    float2 c = vload2(0, &undistortion_params[2]);
-    float4 k = vload4(0, &undistortion_params[4]);
-    float r_limit = undistortion_params[8];
-    float lens_correction_amount = undistortion_params[9];
-    float background_mode = undistortion_params[10];
-    float fov = undistortion_params[11];
-    float input_horizontal_stretch = undistortion_params[12];
-    float input_vertical_stretch = undistortion_params[13];
-    bool edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
-    bool edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
+    DATA_TYPEF bg = *(DATA_TYPEF *)&params->background;
 
-    if (x >= 0 && y >= 0 && x < output_width && y < output_height) {
+    if (!matrices || params->width < 1) return;
+
+    if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
+        float2 out_pos = (float2)(x, y);
+
         ///////////////////////////////////////////////////////////////////
         // Calculate source `y` for rolling shutter
         int sy = y;
-        if (params_count > 3) {
-            __global const float *params = &undistortion_params[(2 + ((params_count - 2) / 2)) * 9]; // Use middle matrix
-            float _x = y * params[1] + params[2] + (x * params[0]);
-            float _y = y * params[4] + params[5] + (x * params[3]);
-            float _w = y * params[7] + params[8] + (x * params[6]);
-            if (_w > 0) {
-                float2 pos = (float2)(_x, _y) / _w;
-                float2 uv = distort_point(pos, f, c, k);
-                sy = min((int)height, max(0, (int)round(uv.y)));
+        if (params->matrix_count > 1) {
+            int idx = (params->matrix_count / 2) * 9; // Use middle matrix
+            float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
+            if (uv.x > -99998.0f) {
+                sy = min((int)params->height, max(0, (int)round(uv.y)));
             }
         }
         ///////////////////////////////////////////////////////////////////
 
-        float2 dst_point = (float2)(x, y);
-        if (lens_correction_amount < 1.0) {
-            // Add lens distortion back
-            float2 factor = (float2)max(1.0f - lens_correction_amount, 0.001f); // FIXME: this is close but wrong
-            float2 out_c = (float2)(output_width / 2.0, output_height / 2.0);
-            dst_point = undistort_point(dst_point, (f / fov) / factor, out_c, k, lens_correction_amount);
+        ///////////////////////////////////////////////////////////////////
+        // Add lens distortion back
+        if (params->lens_correction_amount < 1.0) {
+            float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
+            float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
+            float2 out_f = (params->f / params->fov) / factor;
+            out_pos = (out_pos - out_c) / out_f;
+            out_pos = undistort_point(out_pos, params->k, params->lens_correction_amount);
+            out_pos = out_f * out_pos + out_c;
         }
+        ///////////////////////////////////////////////////////////////////
 
-        __global const float *params = &undistortion_params[min((sy + 2), params_count - 1) * 9];
+        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * params->output_stride];
 
-        float _x = dst_point.y * params[1] + params[2] + (dst_point.x * params[0]);
-        float _y = dst_point.y * params[4] + params[5] + (dst_point.x * params[3]);
-        float _w = dst_point.y * params[7] + params[8] + (dst_point.x * params[6]);
+        int idx = min(sy, params->matrix_count - 1) * 9;
+        float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
+        if (uv.x > -99998.0f) {
+            if (params->input_horizontal_stretch > 0.001f) { uv.x /= params->input_horizontal_stretch; }
+            if (params->input_vertical_stretch   > 0.001f) { uv.y /= params->input_vertical_stretch; }
 
-        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * output_stride];
-        if (_w > 0) {
-            float2 pos = (float2)(_x, _y) / _w;
-
-            if (r_limit > 0.0 && length(pos) > r_limit) {
-                *out_pix = DATA_CONVERT(bg);
-                return;
-            }
-            float2 uv = distort_point(pos, f, c, k);
-            if (input_horizontal_stretch > 0.001f) { uv.x /= input_horizontal_stretch; }
-            if (input_vertical_stretch   > 0.001f) { uv.y /= input_vertical_stretch; }
-
-            if (edge_repeat) {
-                uv = max((float2)(0, 0), min((float2)(width - 1, height - 1), uv));
-            } else if (edge_mirror) {
-                int rx = round(uv.x);
-                int ry = round(uv.y);
-                int width3 = (width - 3);
-                int height3 = (height - 3);
-                if (rx > width3)  uv.x = width3  - (rx - width3);
-                if (rx < 3)       uv.x = 3 + width - (width3  + rx);
-                if (ry > height3) uv.y = height3 - (ry - height3);
-                if (ry < 3)       uv.y = 3 + height - (height3 + ry);
+            switch (params->background_mode) {
+                case 1: { // edge repeat
+                    uv = max((float2)(0, 0), min((float2)(params->width - 1, params->height - 1), uv));
+                } break;
+                case 2: { // edge mirror
+                    int rx = round(uv.x);
+                    int ry = round(uv.y);
+                    int width3 = (params->width - 3);
+                    int height3 = (params->height - 3);
+                    if (rx > width3)  uv.x = width3  - (rx - width3);
+                    if (rx < 3)       uv.x = 3 + params->width - (width3  + rx);
+                    if (ry > height3) uv.y = height3 - (ry - height3);
+                    if (ry < 3)       uv.y = 3 + params->height - (height3 + ry);
+                } break;
             }
 
-            uv -= S_OFFSET;
-
-            const int shift = (INTERPOLATION >> 2) + 1;
-            
-            int sx0 = convert_int_sat_rtz(0.5f + uv.x * INTER_TAB_SIZE);
-            int sy0 = convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE);
-
-            int sx = sx0 >> INTER_BITS;
-            int sy = sy0 >> INTER_BITS;
-
-            __constant float *coeffs_x = &coeffs[(sx0 & (INTER_TAB_SIZE - 1)) << shift];
-            __constant float *coeffs_y = &coeffs[(sy0 & (INTER_TAB_SIZE - 1)) << shift];
-
-            DATA_TYPEF sum = 0;
-            int src_index = sy * stride + sx * PIXEL_BYTES;
-
-            #pragma unroll
-            for (int yp = 0; yp < INTERPOLATION; ++yp) {
-                if (sy + yp >= 0 && sy + yp < height) {
-                    DATA_TYPEF xsum = 0.0f;
-                    #pragma unroll
-                    for (int xp = 0; xp < INTERPOLATION; ++xp) {
-                        if (sx + xp >= 0 && sx + xp < width) {
-                            xsum += DATA_CONVERTF(*(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp]) * coeffs_x[xp];
-                        } else {
-                            xsum += bg * coeffs_x[xp];
-                        }
-                    }
-                    sum += xsum * coeffs_y[yp];
-                } else {
-                    sum += bg * coeffs_y[yp];
-                }
-                src_index += stride;
-            }
-
-            *out_pix = DATA_CONVERT(sum);
+            *out_pix = DATA_CONVERT(sample_input_at(uv, srcptr, params, bg));
         } else {
             *out_pix = DATA_CONVERT(bg);
         }

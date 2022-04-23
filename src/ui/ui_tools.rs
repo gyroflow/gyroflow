@@ -118,7 +118,7 @@ impl UITools {
         if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
             let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; }) * dpi_scale;
-            engine.set_property("dpiScale".into(), QVariant::from(dpi).into());
+            engine.set_property("dpiScale".into(), QVariant::from(dpi));
         }
     }
 

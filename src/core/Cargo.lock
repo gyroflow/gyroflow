@@ -73,9 +73,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.56"
+version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4361135be9122e0870de935d7c439aef945b9f9ddd4199a553b5270b49c82a27"
+checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 
 [[package]]
 name = "approx"
@@ -918,6 +918,7 @@ dependencies = [
  "bincode",
  "biquad",
  "bitarray",
+ "bitflags",
  "bytemuck",
  "byteorder",
  "chrono",
@@ -2461,7 +2462,7 @@ checksum = "9c97e489d8f836838d497091de568cf16b117486d529ec5579233521065bd5e4"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5706263917a86ee6487bc3edc8be2e845c48e0c6"
+source = "git+https://github.com/gfx-rs/wgpu.git#c226a10329f8c3283b995cccda21f4881b1ce6b1"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2481,7 +2482,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5706263917a86ee6487bc3edc8be2e845c48e0c6"
+source = "git+https://github.com/gfx-rs/wgpu.git#c226a10329f8c3283b995cccda21f4881b1ce6b1"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2503,7 +2504,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5706263917a86ee6487bc3edc8be2e845c48e0c6"
+source = "git+https://github.com/gfx-rs/wgpu.git#c226a10329f8c3283b995cccda21f4881b1ce6b1"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2540,7 +2541,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#5706263917a86ee6487bc3edc8be2e845c48e0c6"
+source = "git+https://github.com/gfx-rs/wgpu.git#c226a10329f8c3283b995cccda21f4881b1ce6b1"
 dependencies = [
  "bitflags",
 ]

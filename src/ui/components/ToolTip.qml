@@ -22,7 +22,6 @@ QQC.ToolTip {
         NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; easing.type: Easing.OutExpo; duration: 500; }
     }
     contentItem: Text {
-        id: infotxt2;
         font.pixelSize: 12 * dpiScale;
         text: root.text;
         color: styleTextColor;

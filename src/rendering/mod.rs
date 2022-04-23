@@ -233,6 +233,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     let mut planes = Vec::<Box<dyn FnMut(i64, &mut Video, &mut Video, usize)>>::new();
 
+    let is_prores_videotoolbox = proc.video_codec.as_deref() == Some("prores_videotoolbox");
+
     let progress2 = progress.clone();
     let mut process_frame = 0;
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
@@ -257,15 +259,21 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                     };
                     let mut plane = Undistortion::<$t>::default();
                     plane.interpolation = Interpolation::Lanczos4;
-                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), (in_size.0, in_size.1), in_size.2, (out_size.0, out_size.1), out_size.2);
+
+                    // Workaround for a bug in prores videotoolbox encoder
+                    if $in_frame.format() == ffmpeg_next::format::Pixel::NV12 && is_prores_videotoolbox {
+                        plane.kernel_flags.set(KernelParamsFlags::FIX_COLOR_RANGE, true);
+                    }
+
+                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
                     plane.set_compute_params(ComputeParams::from_manager(&stab));
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
-                        let (w, h, s)    = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
-                        let (ow, oh, os) = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
+                        let size        = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
+                        let output_size = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
 
-                        plane.process_pixels(timestamp_us, w, h, s, ow, oh, os, buffer, out_buffer);
+                        plane.process_pixels(timestamp_us, size, output_size, buffer, out_buffer);
                     }));
                 })*
             };

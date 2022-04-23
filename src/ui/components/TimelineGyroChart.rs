@@ -326,7 +326,7 @@ impl TimelineGyroChart {
         self.update();
     }
 
-    fn normalize_height(data: &mut Vec<ChartData>, max: Option<f64>) -> Option<f64> {
+    fn normalize_height(data: &mut [ChartData], max: Option<f64>) -> Option<f64> {
         let max = max.unwrap_or_else(|| {
             let mut max = 0.0;
             for x in data.iter() {

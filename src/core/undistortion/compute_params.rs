@@ -3,6 +3,7 @@
 
 use super::StabilizationManager;
 use super::PixelType;
+use super::distortion_models::DistortionModel;
 use crate::GyroSource;
 use nalgebra::Matrix3;
 
@@ -37,7 +38,9 @@ pub struct ComputeParams {
     pub adaptive_zoom_window: f64,
     pub framebuffer_inverted: bool,
 
-    pub zooming_debug_points: bool
+    pub zooming_debug_points: bool,
+
+    pub distortion_model: DistortionModel
 }
 impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
@@ -64,6 +67,8 @@ impl ComputeParams {
         camera_matrix[(1, 1)] *= lens_ratioy;
         camera_matrix[(0, 2)] *= lens_ratiox;
         camera_matrix[(1, 2)] *= lens_ratioy;
+
+        let distortion_model = DistortionModel::from_id(lens.distortion_model_id);
 
         Self {
             gyro: mgr.gyro.read().clone_quaternions(),
@@ -94,6 +99,8 @@ impl ComputeParams {
             input_vertical_stretch,
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
+
+            distortion_model,
 
             zooming_debug_points: false
         }

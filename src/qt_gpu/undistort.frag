@@ -2,116 +2,46 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 // Adapted from OpenCV: initUndistortRectifyMap
-// https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
+// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 
-#version 420
+// #version 420
 
 layout(location = 0) in vec2 v_texcoord;
 layout(location = 0) out vec4 fragColor;
 
 layout(binding = 1) uniform sampler2D texIn;
 
-layout(std140, binding = 2) uniform UniformBuffer {
-    int params_count;
-    int width;
-    int height;
-    int output_width;
-    int output_height;
-    int _padding;
-    int _padding2;
-    int _padding3;
-    // We need to split it to vec4's because of padding to 4 floats in uniforms memory layout
-    vec4 undistortion_params1; // 4
-    vec4 undistortion_params2; // 8
-    vec4 undistortion_params3; // 12
-    vec4 undistortion_params4; // 16
-    vec4 undistortion_params5; // 20
-    vec4 undistortion_params6; // 24
-    vec4 undistortion_params7; // 28
-    vec4 bg;
-} uniforms;
+layout(std140, binding = 2) uniform KernelParams {
+    int width;             // 4
+    int height;            // 8
+    int stride;            // 12
+    int output_width;      // 16
+    int output_height;     // 4
+    int output_stride;     // 8
+    int matrix_count;      // 12 - for rolling shutter correction. 1 = no correction, only main matrix
+    int interpolation;     // 16
+    int background_mode;   // 4
+    int flags;             // 8
+    int bytes_per_pixel;   // 12
+    int pix_element_count; // 16
+    vec4 background;    // 16
+    vec2 f;             // 8  - focal length in pixels
+    vec2 c;             // 16 - lens center
+    vec4 k;             // 16 - distortion coefficients
+    float fov;          // 4
+    float r_limit;      // 8
+    float lens_correction_amount;   // 12
+    float input_vertical_stretch;   // 16
+    float input_horizontal_stretch; // 4
+    float reserved1;                // 8
+    float reserved2;                // 12
+    float reserved3;                // 16
+} params;
 
 layout(binding = 3) uniform sampler2D texParams;
 
 float get_param(float row, float idx) {
-    int idx_int = int(idx);
-    if (row == 0) {
-             if (idx_int < 4) return uniforms.undistortion_params1[idx_int];     // 0-3
-        else if (idx_int < 8) return uniforms.undistortion_params2[idx_int - 4]; // 4-7
-        else if (idx_int < 9) return uniforms.undistortion_params3[0];           // 8
-    } else if (row == 1) {
-             if (idx_int < 3) return uniforms.undistortion_params3[idx_int + 1]; // 0-2
-        else if (idx_int < 7) return uniforms.undistortion_params4[idx_int - 3]; // 3-6
-        else if (idx_int < 9) return uniforms.undistortion_params5[idx_int - 7]; // 7-8
-    } else if (row == 2) {
-             if (idx_int < 2) return uniforms.undistortion_params5[idx_int + 2]; // 0-1
-        else if (idx_int < 6) return uniforms.undistortion_params6[idx_int - 2]; // 2-5
-        else if (idx_int < 9) return uniforms.undistortion_params7[idx_int - 6]; // 6-8
-    }
-
-    return texture(texParams, vec2(idx / 8.0, row / float(uniforms.params_count - 1))).r;
-}
-
-vec2 undistort_point(vec2 pos, vec2 f, vec2 c, vec4 k, float amount) {
-    pos = (pos - c) / f;
-
-    float theta_d = min(max(length(pos), -1.5707963267948966), 1.5707963267948966); // PI/2
-
-    bool converged = false;
-    float theta = theta_d;
-
-    float scale = 0.0;
-
-    if (abs(theta_d) > 1e-6) {
-        for (int i = 0; i < 10; ++i) {
-            float theta2 = theta*theta;
-            float theta4 = theta2*theta2;
-            float theta6 = theta4*theta2;
-            float theta8 = theta6*theta2;
-            float k0_theta2 = k.x * theta2;
-            float k1_theta4 = k.y * theta4;
-            float k2_theta6 = k.z * theta6;
-            float k3_theta8 = k.w * theta8;
-            // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-            float theta_fix = (theta * (1.0 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
-                              /
-                              (1.0 + 3.0 * k0_theta2 + 5.0 * k1_theta4 + 7.0 * k2_theta6 + 9.0 * k3_theta8);
-
-            theta -= theta_fix;
-            if (abs(theta_fix) < 1e-6) {
-                converged = true;
-                break;
-            }
-        }
-
-        scale = tan(theta) / theta_d;
-    } else {
-        converged = true;
-    }
-    bool theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
-
-    if (converged && !theta_flipped) {
-        // Apply only requested amount
-        scale = 1.0 + (scale - 1.0) * (1.0 - amount);
-
-        return f * pos * scale + c;
-    }
-    return vec2(0.0, 0.0);
-}
-
-vec2 distort_point(vec2 pos, vec2 f, vec2 c, vec4 k) {
-    float r = length(pos);
-
-    float theta = atan(r);
-    float theta2 = theta*theta, 
-          theta4 = theta2*theta2, 
-          theta6 = theta4*theta2, 
-          theta8 = theta4*theta4;
-
-    float theta_d = theta * (1.0 + dot(k, vec4(theta2, theta4, theta6, theta8)));
-
-    float scale = r == 0? 1.0 : theta_d / r;
-    return f * pos * scale + c;
+    return texture(texParams, vec2(idx / 8.0, row / float(params.matrix_count - 1))).r;
 }
 
 vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_limit) {
@@ -125,65 +55,62 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_lim
         if (r_limit > 0.0 && r > r_limit) {
             return vec2(-99999.0, -99999.0);
         }
-        return distort_point(pos, f, c, k);
+        return f * distort_point(pos, k) + c;
     }
     return vec2(-99999.0, -99999.0);
 }
 
 void main() {
-    vec2 texPos = v_texcoord.xy * vec2(uniforms.output_width, uniforms.output_height);
+    vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
 
-    vec2 f = vec2(get_param(0, 0), get_param(0, 1));
-    vec2 c = vec2(get_param(0, 2), get_param(0, 3));
-    vec4 k = vec4(get_param(0, 4), get_param(0, 5), get_param(0, 6), get_param(0, 7));
-    float r_limit = get_param(0, 8);
-    float lens_correction_amount = get_param(1, 0);
-    float background_mode = get_param(1, 1);
-    float fov = get_param(1, 2);
-    float input_horizontal_stretch = get_param(1, 3);
-    float input_vertical_stretch = get_param(1, 4);
-    bool edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
-    bool edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
+    bool edge_repeat = params.background_mode == 1;
+    bool edge_mirror = params.background_mode == 2;
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     float sy = texPos.y;
-    if (uniforms.params_count > 3) {
-        float idx = 2.0 + ((uniforms.params_count - 2.0) / 2.0); // Use middle matrix
-        vec2 uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
+    if (params.matrix_count > 1) {
+        float idx = params.matrix_count / 2.0; // Use middle matrix
+        vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k, params.r_limit);
         if (uv.x > -99998.0) {
-            sy = min(uniforms.height, max(0, floor(0.5 + uv.y)));
+            sy = min(params.height, max(0, floor(0.5 + uv.y)));
         }
     }
     ///////////////////////////////////////////////////////////////////
 
-    if (lens_correction_amount < 1.0) {
-        // Add lens distortion back
-        float factor = max(1.0 - lens_correction_amount, 0.001); // FIXME: this is close but wrong
-        vec2 out_c = vec2(uniforms.output_width / 2.0, uniforms.output_height / 2.0);
-        texPos = undistort_point(texPos, (f / fov) / factor, out_c, k, lens_correction_amount);
+    ///////////////////////////////////////////////////////////////////
+    // Add lens distortion back
+    if (params.lens_correction_amount < 1.0) {
+        float factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
+        vec2 out_c = vec2(params.output_width / 2.0, params.output_height / 2.0);
+        vec2 out_f = (params.f / params.fov) / factor;
+        
+        texPos = (texPos - out_c) / out_f;
+        texPos = undistort_point(texPos, params.k, params.lens_correction_amount);
+        texPos = out_f * texPos + out_c;
     }
+    ///////////////////////////////////////////////////////////////////
 
-    float idx = min(sy + 2.0, uniforms.params_count - 1.0);
+    float idx = min(sy + 2.0, params.matrix_count - 1.0);
 
-    vec2 uv = rotate_and_distort(texPos, idx, f, c, k, r_limit);
-    if (input_horizontal_stretch > 0.001) { uv.x /= input_horizontal_stretch; }
-    if (input_vertical_stretch   > 0.001) { uv.y /= input_vertical_stretch; }
+    vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k, params.r_limit);
+    if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
+    if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
     if (uv.x > -99998.0) {
         if (edge_repeat) {
-            uv = max(vec2(0, 0), min(vec2(uniforms.width - 1, uniforms.height - 1), uv));
+            uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
         } else if (edge_mirror) {
-            float width3 = (uniforms.width - 2);
-            float height3 = (uniforms.height - 2);
+            float width3 = (params.width - 2);
+            float height3 = (params.height - 2);
             if (uv.x > width3)  uv.x = width3  - (uv.x - width3);
-            if (uv.x < 2)       uv.x = 2 + uniforms.width - (width3  + uv.x);
+            if (uv.x < 2)       uv.x = 2 + params.width - (width3  + uv.x);
             if (uv.y > height3) uv.y = height3 - (uv.y - height3);
-            if (uv.y < 2)       uv.y = 2 + uniforms.height - (height3 + uv.y);
+            if (uv.y < 2)       uv.y = 2 + params.height - (height3 + uv.y);
         } else if (false) {
             // margin with feather mode, looks good but not trivial to implement in OpenCL
-            float width3 = (uniforms.width - 2);
-            float height3 = (uniforms.height - 2);
+            float width3 = (params.width - 2);
+            float height3 = (params.height - 2);
 
             float margin = 100;
             float feather = 50;
@@ -194,18 +121,18 @@ void main() {
             if (uv.y > height3 - margin) { alpha = height3 - uv.y; pt2 = vec2(uv.x, uv.y - margin); }
             if (uv.y < margin)           { alpha = uv.y;           pt2 = vec2(uv.x, uv.y + margin); }
 
-            vec4 c1 = texture(texIn, vec2(uv.x / uniforms.width, uv.y / uniforms.height));
-            vec4 c2 = texture(texIn, vec2(pt2.x / uniforms.width, pt2.y / uniforms.height));
+            vec4 c1 = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
+            vec4 c2 = texture(texIn, vec2(pt2.x / params.width, pt2.y / params.height));
             alpha = feather > 0.0? max(0, min(1, alpha / feather)) : 1.0;
             fragColor = c1 * alpha + c2 * (1.0 - alpha);
             fragColor.a = 1.0;
             return;
         }
 
-        if ((uv.x >= 0 && uv.x < uniforms.width) && (uv.y >= 0 && uv.y < uniforms.height)) {
-            fragColor = texture(texIn, vec2(uv.x / uniforms.width, uv.y / uniforms.height));
+        if ((uv.x >= 0 && uv.x < params.width) && (uv.y >= 0 && uv.y < params.height)) {
+            fragColor = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
             return;
         }
     }
-    fragColor = uniforms.bg;
+    fragColor = params.background;
 }

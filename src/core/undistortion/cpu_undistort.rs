@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use super::{ PixelType, Undistortion, ComputeParams, FrameTransform };
+use super::{ PixelType, Undistortion, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 
@@ -52,231 +52,151 @@ pub const COEFFS: [f32; 64+128+256] = [
      0.998265, -0.027053,  0.009625, -0.002981
 ];
 
-fn undistort_point<T: num_traits::Float>(point: (T, T), k: &[T], amount: T) -> Option<(T, T)> {
-    let t_0 = T::from(0.0f32).unwrap();
-    let t_1 = T::from(1.0f32).unwrap();
-    let t_3 = T::from(3.0f32).unwrap();
-    let t_5 = T::from(5.0f32).unwrap();
-    let t_7 = T::from(7.0f32).unwrap();
-    let t_9 = T::from(9.0f32).unwrap();
-    let t_fpi = T::from(std::f64::consts::PI).unwrap();
-    let t_eps = T::from(1e-6f64).unwrap();
-    
-    let t_max_fix = T::from(0.9f32).unwrap();
-
-    let mut theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
-
-    // the current camera model is only valid up to 180 FOV
-    // for larger FOV the loop below does not converge
-    // clip values so we still get plausible results for super fisheye images > 180 grad
-    theta_d = theta_d.max(-t_fpi).min(t_fpi);
-
-    let mut converged = false;
-    let mut theta = theta_d;
-
-    let mut scale = t_0;
-
-    if theta_d.abs() > t_eps {
-        theta = t_0;
-
-        // compensate distortion iteratively
-        for _ in 0..10 {
-            let theta2 = theta*theta;
-            let theta4 = theta2*theta2;
-            let theta6 = theta4*theta2;
-            let theta8 = theta6*theta2;
-            let k0_theta2 = k[0] * theta2;
-            let k1_theta4 = k[1] * theta4;
-            let k2_theta6 = k[2] * theta6;
-            let k3_theta8 = k[3] * theta8;
-            // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-            let mut theta_fix = (theta * (t_1 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
-                            /
-                            (t_1 + t_3 * k0_theta2 + t_5 * k1_theta4 + t_7 * k2_theta6 + t_9 * k3_theta8);
-            
-            theta_fix = theta_fix.max(-t_max_fix).min(t_max_fix);
-
-            theta = theta - theta_fix;
-            if theta_fix.abs() < t_eps {
-                converged = true;
-                break;
-            }
-        }
-
-        scale = theta.tan() / theta_d;
-    } else {
-        converged = true;
-    }
-
-    // theta is monotonously increasing or decreasing depending on the sign of theta
-    // if theta has flipped, it might converge due to symmetry but on the opposite of the camera center
-    // so we can check whether theta has changed the sign during the optimization
-    let theta_flipped = (theta_d < t_0 && theta > t_0) || (theta_d > t_0 && theta < t_0);
-
-    if converged && !theta_flipped {
-        // Apply only requested amount
-        scale = t_1 + (scale - t_1) * (t_1 - amount);
-
-        return Some((point.0 * scale, point.1 * scale));
-    }
-    None
-}
-
-fn distort_point<T: num_traits::Float>(point: (T, T), f: (T, T), c: (T, T), k: &[T], amount: T) -> (T, T) {
-    let t_0 = T::from(0.0f32).unwrap();
-    let t_1 = T::from(1.0f32).unwrap();
-
-    let r = (point.0 * point.0 + point.1 * point.1).sqrt();
-
-    let theta = r.atan();
-    let theta2 = theta*theta;
-    let theta4 = theta2*theta2;
-    let theta6 = theta4*theta2;
-    let theta8 = theta4*theta4;
-
-    let theta_d = theta * (t_1 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
-
-    let mut scale = if r == t_0 { t_1 } else { theta_d / r };
-    scale = t_1 + (scale - t_1) * (t_1 - amount);
-
-    (
-        f.0 * point.0 * scale + c.0,
-        f.1 * point.1 * scale + c.1
-    )
-}
-
 impl<T: PixelType> Undistortion<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap 
-    // https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L454
-    // https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/opencl/remap.cl#L390
-    pub fn undistort_image_cpu<const I: i32>(pixels: &mut [u8], out_pixels: &mut [u8], width: usize, height: usize, stride: usize, output_width: usize, output_height: usize, output_stride: usize, undistortion_params: &[[f32; 9]], bg: Vector4<f32>) {
+    // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
+    // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
+    pub fn undistort_image_cpu<const I: i32>(pixels: &mut [u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, matrices: &[[f32; 9]]) {
+        // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
+        fn remap_colorrange(px: &mut Vector4<f32>, is_y: bool) {
+            if is_y { *px *= 0.85882352; } // (235 - 16) / 255
+            else    { *px *= 0.87843137; } // (240 - 16) / 255
+            px[0] += 16.0;
+            px[1] += 16.0;
+        }
+
+        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, r_limit: f32) -> Option<(f32, f32)> {
+            let matrices = matrices[idx];
+            let _x = pos.1 * matrices[1] + matrices[2] + (pos.0 * matrices[0]);
+            let _y = pos.1 * matrices[4] + matrices[5] + (pos.0 * matrices[3]);
+            let _w = pos.1 * matrices[7] + matrices[8] + (pos.0 * matrices[6]);
+            if _w > 0.0 {
+                let pos = (_x / _w, _y / _w);
+                if params.r_limit > 0.0 && (pos.0 * pos.0 + pos.1 * pos.1) > r_limit {
+                    return None;
+                }
+                let pt = distortion_model.distort_point(pos, &params.k, 0.0);
+                return Some(((pt.0 * params.f[0]) + params.c[0], (pt.1 * params.f[1]) + params.c[1]));
+            }
+            return None;
+        }
+
+        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), pixels: &[u8], params: &KernelParams, bg: &Vector4<f32>) -> Vector4<f32> {
+            let fix_range = (params.flags & 1) == 1;
+
+            const INTER_BITS: usize = 5;
+            const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
+            let shift: i32 = (I >> 2) + 1;
+            let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
+            let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
+        
+            let u = uv.0 - offset;
+            let v = uv.1 - offset;
+            
+            let sx0 = (u * INTER_TAB_SIZE as f32).round() as i32;
+            let sy0 = (v * INTER_TAB_SIZE as f32).round() as i32;
+        
+            let sx = sx0 >> INTER_BITS;
+            let sy = sy0 >> INTER_BITS;
+        
+            let coeffs_x = &COEFFS[ind + ((sx0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
+            let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
+            
+            let mut sum = Vector4::from_element(0.0);
+            let mut src_index = (sy * params.stride + sx * params.bytes_per_pixel) as isize;
+        
+            for yp in 0..I {
+                if sy + yp >= 0 && sy + yp < params.height {
+                    let mut xsum = Vector4::<f32>::from_element(0.0);
+                    for xp in 0..I {
+                        let pixel = if sx + xp >= 0 && sx + xp < params.width {
+                            let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]); 
+                            let mut src_px = PixelType::to_float(*px1);
+                            if fix_range {
+                                remap_colorrange(&mut src_px, params.bytes_per_pixel == 1)
+                            }
+                            src_px
+                        } else {
+                            *bg
+                        };
+                        xsum += pixel * coeffs_x[xp as usize];
+                    }
+        
+                    sum += xsum * coeffs_y[yp as usize];
+                } else {
+                    sum += bg * coeffs_y[yp as usize];
+                }
+                src_index += params.stride as isize;
+            }
+            sum
+        }
+        
+        let r_limit = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
+
+        let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]);
         let bg_t: T = PixelType::from_float(bg);
         
-        const INTER_BITS: usize = 5;
-        const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
+        let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
+        let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+        let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
 
-        let f = (undistortion_params[0][0], undistortion_params[0][1]);
-        let c = (undistortion_params[0][2], undistortion_params[0][3]);
-        let k = &undistortion_params[0][4..8];
-        let r_limit = undistortion_params[0][8];
-        let lens_correction_amount = undistortion_params[1][0];
-        let background_mode = undistortion_params[1][1];
-        let fov = undistortion_params[1][2];
-        let input_horizontal_stretch = undistortion_params[1][3];
-        let input_vertical_stretch = undistortion_params[1][4];
-        let edge_repeat = background_mode > 0.9 && background_mode < 1.1; // 1
-        let edge_mirror = background_mode > 1.9 && background_mode < 2.1; // 2
-
-        let factor = (1.0 - lens_correction_amount).max(0.001); // FIXME: this is close but wrong
-        let f2 = ((f.0 / fov / factor), (f.1 / fov / factor));
-        let out_c = (output_width as f32 / 2.0, output_height as f32 / 2.0);
-
-        let bytes_per_pixel = T::COUNT * T::SCALAR_BYTES;
-        let shift = (I >> 2) + 1;
-        let offset = [0.0, 1.0, 3.0][I as usize >> 2];
-        let ind = [0, 64, 64 + 128][I as usize >> 2];
-
-        out_pixels.par_chunks_mut(output_stride).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
-            row_bytes.chunks_mut(T::COUNT * T::SCALAR_BYTES).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
-                if y < output_height && x < output_width {
+        out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
+            row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
+                if y < params.output_height as usize && x < params.output_width as usize {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());
+
+                    let mut out_pos = (x as f32, y as f32);
+
                     ///////////////////////////////////////////////////////////////////
                     // Calculate source `y` for rolling shutter
                     let mut sy = y;
-                    if undistortion_params.len() > 3 {
-                        let undistortion_params = undistortion_params[2 + (undistortion_params.len() - 2) / 2]; // Use middle matrix
-                        let _x = y as f32 * undistortion_params[1] + undistortion_params[2] + (x as f32 * undistortion_params[0]);
-                        let _y = y as f32 * undistortion_params[4] + undistortion_params[5] + (x as f32 * undistortion_params[3]);
-                        let _w = y as f32 * undistortion_params[7] + undistortion_params[8] + (x as f32 * undistortion_params[6]);
-                        if _w > 0.0 {
-                            let posx = _x / _w;
-                            let posy = _y / _w;
-                            let pt = distort_point((posx, posy), f, c, k, 0.0);
-                            sy = (pt.1.round() as i32).min(height as i32).max(0) as usize;
+                    if params.matrix_count > 1 {
+                        let idx = params.matrix_count as usize / 2;
+                        if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {
+                            sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
                         }
                     }
                     ///////////////////////////////////////////////////////////////////
-                    let mut pt = (x as f32, y as f32);
-                    if lens_correction_amount < 1.0 {
-                        // Add lens distortion back         
-                        pt = ((pt.0 - out_c.0) / f2.0, (pt.1 - out_c.1) / f2.1);
-                        pt = undistort_point(pt, k, lens_correction_amount).unwrap_or_default();
-                        pt = ((pt.0 * f2.0) + out_c.0, (pt.1 * f2.1) + out_c.1);
-                    }
 
-                    let undistortion_params = &undistortion_params[(sy + 2).min(undistortion_params.len() - 1)];
-                    let _x = pt.1 * undistortion_params[1] + undistortion_params[2] + (pt.0 * undistortion_params[0]);
-                    let _y = pt.1 * undistortion_params[4] + undistortion_params[5] + (pt.0 * undistortion_params[3]);
-                    let _w = pt.1 * undistortion_params[7] + undistortion_params[8] + (pt.0 * undistortion_params[6]);
+                    ///////////////////////////////////////////////////////////////////
+                    // Add lens distortion back
+                    if params.lens_correction_amount < 1.0 {
+                        out_pos = ((out_pos.0 - out_c.0) / out_f.0, (out_pos.1 - out_c.1) / out_f.1);
+                        out_pos = distortion_model.undistort_point(out_pos, &params.k, params.lens_correction_amount).unwrap_or_default();
+                        out_pos = ((out_pos.0 * out_f.0) + out_c.0, (out_pos.1 * out_f.1) + out_c.1);
+                    }
+                    ///////////////////////////////////////////////////////////////////
                 
                     let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
-                    if _w > 0.0 {
-                        let posx = _x / _w;
-                        let posy = _y / _w;
+                    let idx = sy.min(params.matrix_count as usize - 1);
+                    if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {
+                        if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
+                        if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
 
-                        if r_limit > 0.0 && (posx*posx + posy*posy) > r_limit*r_limit {
-                            *pix_out = bg_t;
-                            return;
+                        let width_f = params.width as f32;
+                        let height_f = params.height as f32;
+                        match params.background_mode {
+                            1 => { // Edge repeat
+                                uv = (
+                                    uv.0.max(0.0).min(width_f  - 1.0),
+                                    uv.1.max(0.0).min(height_f - 1.0),
+                                );
+                            },
+                            2 => { // Edge mirror
+                                let rx = uv.0.round();
+                                let ry = uv.1.round();
+                                let width3 = width_f - 3.0;
+                                let height3 = height_f - 3.0;
+                                if rx > width3  { uv.0 = width3  - (rx - width3); }
+                                if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
+                                if ry > height3 { uv.1 = height3 - (ry - height3); }
+                                if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+                            },
+                            _ => { }
                         }
 
-                        let mut pt = distort_point((posx, posy), f, c, k, 0.0);
-                        if input_horizontal_stretch > 0.001 { pt.0 /= input_horizontal_stretch; }
-                        if input_vertical_stretch   > 0.001 { pt.1 /= input_vertical_stretch; }
-
-                        let width_f = width as f32;
-                        let height_f = height as f32;
-                        if edge_repeat {
-                            pt = (
-                                pt.0.max(0.0).min(width_f - 1.0),
-                                pt.1.max(0.0).min(height_f - 1.0),
-                            );
-                        } else if edge_mirror {
-                            let rx = pt.0.round();
-                            let ry = pt.1.round();
-                            let width3 = width_f - 3.0;
-                            let height3 = height_f - 3.0;
-                            if rx > width3  { pt.0 = width3  - (rx - width3); }
-                            if rx < 3.0     { pt.0 = 3.0 + width_f - (width3  + rx); }
-                            if ry > height3 { pt.1 = height3 - (ry - height3); }
-                            if ry < 3.0     { pt.1 = 3.0 + height_f - (height3 + ry); }
-                        }
-
-                        let u = pt.0 - offset;
-                        let v = pt.1 - offset;
-                
-                        let sx0 = (u * INTER_TAB_SIZE as f32).round() as i32;
-                        let sy0 = (v * INTER_TAB_SIZE as f32).round() as i32;
-
-                        let sx = sx0 >> INTER_BITS;
-                        let sy = sy0 >> INTER_BITS;
-
-                        let coeffs_x = &COEFFS[ind + ((sx0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
-                        let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
-                
-                        let mut sum = Vector4::from_element(0.0);
-                        let mut src_index = (sy * stride as i32 + sx * bytes_per_pixel as i32) as isize;
-
-                        for yp in 0..I {
-                            if sy + yp >= 0 && sy + yp < height as i32 {
-                                let mut xsum = Vector4::<f32>::from_element(0.0);
-                                for xp in 0..I {
-                                    let pixel = if sx + xp >= 0 && sx + xp < width as i32 {
-                                        let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (bytes_per_pixel * xp as usize)..src_index as usize + bytes_per_pixel * (xp as usize + 1)]); 
-                                        PixelType::to_float(*px1)
-                                    } else {
-                                        bg
-                                    };
-                                    xsum += pixel * coeffs_x[xp as usize];
-                                }
-
-                                sum += xsum * coeffs_y[yp as usize];
-                            } else {
-                                sum += bg * coeffs_y[yp as usize];
-                            }
-                            src_index += stride as isize;
-                        }
-                        *pix_out = PixelType::from_float(sum);
+                        *pix_out = PixelType::from_float(sample_input_at::<I, T>(uv, pixels, params, &bg));
                     } else {
                         *pix_out = bg_t;
                     }
@@ -290,11 +210,11 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), Some(params))
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params)
 }
 
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: Option<&ComputeParams>) -> Vec<(f64, f64)> {
+pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f64, f64)> {
     let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
     let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
     let k = distortion_coeffs;
@@ -308,25 +228,23 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
     distorted.iter().enumerate().map(|(index, pi)| {
         let mut x = pi.0;
         let mut y = pi.1;
-        if let Some(params) = params {
-            if params.input_horizontal_stretch > 0.001 { x *= params.input_horizontal_stretch; }
-            if params.input_vertical_stretch   > 0.001 { y *= params.input_vertical_stretch; }
-        }
+        if params.input_horizontal_stretch > 0.001 { x *= params.input_horizontal_stretch; }
+        if params.input_vertical_stretch   > 0.001 { y *= params.input_vertical_stretch; }
+
         let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point
 
         let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
 
-        if let Some(mut pt) = undistort_point(pw, k, 0.0) {
+        if let Some(mut pt) = params.distortion_model.undistort_point(pw, k, 0.0) {
             // reproject
             let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
-            if let Some(params) = params {
-                if params.lens_correction_amount < 1.0 {
-                    let out_c = c; // (params.output_width as f64 / 2.0, params.output_height as f64 / 2.0);
-                    pt = ((pt.0 - out_c.0) / f.0, (pt.1 - out_c.1) / f.1);
-                    pt = distort_point(pt, f, out_c, k, params.lens_correction_amount);
-                }
+            if params.lens_correction_amount < 1.0 {
+                let out_c = c; // (params.output_width as f64 / 2.0, params.output_height as f64 / 2.0);
+                pt = ((pt.0 - out_c.0) / f.0, (pt.1 - out_c.1) / f.1);
+                pt = params.distortion_model.distort_point(pt, k, params.lens_correction_amount);
+                pt = ((pt.0 * f.0) + out_c.0, (pt.1 * f.1) + out_c.1);
             }
             pt
         } else {

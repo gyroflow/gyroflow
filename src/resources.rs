@@ -99,7 +99,7 @@ qrc!(pub rsrc,
         "resources/icons/svg/folder.svg",
         "resources/icons/svg/close.svg",
 
-        "src/qt_gpu/compiled/undistort.frag.qsb",
+        "src/qt_gpu/compiled/undistort_opencv_fisheye.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",
 
         "resources/translations/da.qm",

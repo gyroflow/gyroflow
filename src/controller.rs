@@ -232,8 +232,7 @@ impl Controller {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                     let new_ts = ((x.0 - x.1) * 1000.0) as i64;
                     // Remove existing offsets within 100ms range
-                    let remove_keys = gyro.offsets.range(new_ts-100000..new_ts+100000).map(|(k, _)| *k).collect::<Vec<i64>>();
-                    remove_keys.into_iter().for_each(|k| { gyro.offsets.remove(&k); });
+                    gyro.offsets.retain(|k, _| !(new_ts-100000..new_ts+100000).contains(k));
                     gyro.set_offset(new_ts, x.1);
                 }
                 this.stabilizer.invalidate_zooming();
@@ -418,7 +417,7 @@ impl Controller {
 
                     let gyro = stab.gyro.read();
                     let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                    let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or("XYZ".into());
+                    let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or_else(|| "XYZ".into());
                     let has_gyro = !gyro.quaternions.is_empty();
                     let has_quats = !gyro.org_quaternions.is_empty();
                     drop(gyro);
@@ -433,7 +432,7 @@ impl Controller {
                     if is_main_video && !id_str.is_empty() {
                         let db = stab.lens_profile_db.read();
                         if db.contains_id(&id_str) {
-                            load_lens(id_str.clone());
+                            load_lens(id_str);
                         }
                     }
                     reload_lens(());
@@ -564,7 +563,7 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, width as usize, height as usize, stride as usize, ow, oh, os, pixels, &mut out_pixels);
+                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, (width as usize, height as usize, stride as usize), (ow, oh, os), pixels, &mut out_pixels);
                 
                 // println!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {
@@ -950,9 +949,9 @@ impl Controller {
     }
 
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
-        let mut info_json = info.to_json().to_string();
+        let info_json = info.to_json().to_string();
  
-        if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&mut info_json) {
+        if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
             #[cfg(feature = "opencv")]
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                 profile.set_from_calibrator(cal);
