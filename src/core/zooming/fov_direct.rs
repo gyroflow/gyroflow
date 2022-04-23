@@ -1,5 +1,5 @@
 use super::*;
-use crate::undistortion::undistort_points_with_rolling_shutter;
+use crate::stabilization::undistort_points_with_rolling_shutter;
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };

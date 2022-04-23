@@ -4,7 +4,7 @@
 use qml_video_rs::video_player::MDKPlayerWrapper;
 use std::sync::Arc;
 use crate::core::StabilizationManager;
-use crate::core::undistortion::{ KernelParams, RGBA8, distortion_models::DistortionModel };
+use crate::core::stabilization::{ KernelParams, RGBA8, distortion_models::DistortionModel };
 use cpp::*;
 use qmetaobject::{ QSize, QString };
 

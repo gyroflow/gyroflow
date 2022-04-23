@@ -4,7 +4,7 @@
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use std::collections::BTreeMap;
 use crate::filtering::Lowpass;
-use crate::undistortion::ComputeParams;
+use crate::stabilization::ComputeParams;
 
 use crate::gyro_source::TimeIMU;
 

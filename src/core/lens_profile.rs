@@ -336,7 +336,7 @@ impl LensProfile {
 
     pub fn calculate_optimal_fov(&self, output_size: (usize, usize)) -> f64 {
         if output_size.0 <= 0 || output_size.1 <= 0 { return 1.0; }
-        let mut params = crate::undistortion::ComputeParams::default();
+        let mut params = crate::stabilization::ComputeParams::default();
         params.frame_count = 1;
         params.fov_scale = 1.0;
         params.adaptive_zoom_window = -1.0; // Static crop

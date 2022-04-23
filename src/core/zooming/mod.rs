@@ -11,7 +11,7 @@ use std::hash::Hasher;
 use enterpolation::Merge;
 use std::collections::BTreeMap;
 
-use crate::undistortion::{ ComputeParams };
+use crate::stabilization::{ ComputeParams };
 
 #[derive(PartialEq, Clone)]
 pub enum Mode {

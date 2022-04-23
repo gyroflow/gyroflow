@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use gyroflow_core::undistortion;
+use gyroflow_core::stabilization;
 use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
@@ -176,7 +176,7 @@ pub struct Controller {
 
     cancel_flag: Arc<AtomicBool>,
 
-    pub stabilizer: Arc<StabilizationManager<undistortion::RGBA8>>,
+    pub stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>,
 }
 
 impl Controller {

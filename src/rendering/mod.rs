@@ -11,7 +11,7 @@ pub mod render_queue;
 
 pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
 use render_queue::RenderOptions;
-use crate::core::{ StabilizationManager, undistortion::* };
+use crate::core::{ StabilizationManager, stabilization::* };
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
 use std::ffi::c_void;
 use std::os::raw::c_char;
@@ -257,7 +257,7 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                         params.video_output_size = params.output_size;
                         params.background
                     };
-                    let mut plane = Undistortion::<$t>::default();
+                    let mut plane = Stabilization::<$t>::default();
                     plane.interpolation = Interpolation::Lanczos4;
 
                     // Workaround for a bug in prores videotoolbox encoder
@@ -464,7 +464,7 @@ pub fn clear_log() { FFMPEG_LOG.write().clear() }
 pub fn test() {
     log::debug!("FfmpegProcessor::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
-    let stab = StabilizationManager::<crate::core::undistortion::RGBA8>::default();
+    let stab = StabilizationManager::<crate::core::stabilization::RGBA8>::default();
     let duration_ms = 15015.0;
     let frame_count = 900;
     let fps = 60000.0/1001.0;

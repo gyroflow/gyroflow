@@ -6,7 +6,7 @@ use wgpu::Adapter;
 use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
 use parking_lot::RwLock;
-use crate::undistortion::KernelParams;
+use crate::stabilization::KernelParams;
 
 pub struct WgpuWrapper  {
     device: wgpu::Device,
@@ -94,7 +94,7 @@ impl WgpuWrapper {
             let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: staging_size as u64, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_matrices  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
-            let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::undistortion::COEFFS), usage: wgpu::BufferUsages::STORAGE });
+            let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
 
             let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
                 label: None,
@@ -175,7 +175,7 @@ impl WgpuWrapper {
         }
     }
 
-    pub fn undistort_image(&mut self, pixels: &mut [u8], output_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) {
+    pub fn undistort_image(&mut self, pixels: &mut [u8], output_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) {
         let matrices = bytemuck::cast_slice(&itm.matrices);
 
         if self.in_size != pixels.len() as u64         { log::error!("Buffer size mismatch! {} vs {}", self.in_size, pixels.len()); return; }

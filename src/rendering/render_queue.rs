@@ -4,7 +4,7 @@
 use qmetaobject::*;
 
 use crate::{ core, rendering, util, controller::Controller };
-use crate::core::{ undistortion, StabilizationManager };
+use crate::core::{ stabilization, StabilizationManager };
 use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -39,7 +39,7 @@ struct Job {
     input_file: String,
     render_options: RenderOptions,
     cancel_flag: Arc<AtomicBool>,
-    stab: Arc<StabilizationManager<undistortion::RGBA8>>
+    stab: Arc<StabilizationManager<stabilization::RGBA8>>
 }
 
 #[derive(Default, Clone, serde::Deserialize)]
@@ -176,7 +176,7 @@ impl RenderQueue {
         job_id
     }
 
-    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<undistortion::RGBA8>>, render_options: RenderOptions, thumbnail_url: QString) {
+    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, thumbnail_url: QString) {
         let stab = Arc::new(stab.get_render_stabilizer((render_options.output_width, render_options.output_height)));
         let params = stab.params.read();
         let trim_ratio = render_options.trim_end - render_options.trim_start;

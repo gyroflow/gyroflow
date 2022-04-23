@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 
 use crate::gyro_source::{Quat64, TimeQuat};
-use crate::undistortion::ComputeParams;
+use crate::stabilization::ComputeParams;
 
 #[cfg(feature = "use-opencv")]
 use self::opencv::ItemOpenCV;

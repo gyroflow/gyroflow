@@ -70,7 +70,7 @@ unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
 
 #[derive(Default)]
-pub struct Undistortion<T: PixelType> {
+pub struct Stabilization<T: PixelType> {
     stab_data: BTreeMap<i64, FrameTransform>,
 
     size:        (usize, usize, usize), // width, height, stride
@@ -93,7 +93,7 @@ pub struct Undistortion<T: PixelType> {
     _d: std::marker::PhantomData<T>
 }
 
-impl<T: PixelType> Undistortion<T> {
+impl<T: PixelType> Stabilization<T> {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
@@ -227,5 +227,5 @@ impl<T: PixelType> Undistortion<T> {
     }
 }
 
-unsafe impl<T: PixelType> Send for Undistortion<T> { }
-unsafe impl<T: PixelType> Sync for Undistortion<T> { }
+unsafe impl<T: PixelType> Send for Stabilization<T> { }
+unsafe impl<T: PixelType> Sync for Stabilization<T> { }

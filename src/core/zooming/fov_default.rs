@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Marc Roeschlin
 
 use super::*;
-use crate::undistortion::undistort_points_with_rolling_shutter;
+use crate::stabilization::undistort_points_with_rolling_shutter;
 use enterpolation::{ Curve, bspline::BSpline };
 use std::collections::BTreeMap;
 use parking_lot::RwLock;

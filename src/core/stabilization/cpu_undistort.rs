@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use super::{ PixelType, Undistortion, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
+use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 
@@ -52,7 +52,7 @@ pub const COEFFS: [f32; 64+128+256] = [
      0.998265, -0.027053,  0.009625, -0.002981
 ];
 
-impl<T: PixelType> Undistortion<T> {
+impl<T: PixelType> Stabilization<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap 
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498

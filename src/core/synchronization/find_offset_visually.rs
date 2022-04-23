@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
-use crate::{ undistortion, undistortion::ComputeParams };
+use crate::{ stabilization, stabilization::ComputeParams };
 use super::PoseEstimator;
 
 pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
@@ -42,8 +42,8 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_of
                 let timestamp_ms  = *frame as f64 * 1000.0 / fps;
                 let timestamp_ms2 = (*frame + next_frame_no) as f64 * 1000.0 / fps;
 
-                let undistorted_points1 = undistortion::undistort_points_with_rolling_shutter(&pts.0, timestamp_ms - offs, params_ref);
-                let undistorted_points2 = undistortion::undistort_points_with_rolling_shutter(&pts.1, timestamp_ms2 - offs, params_ref);
+                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts.0, timestamp_ms - offs, params_ref);
+                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts.1, timestamp_ms2 - offs, params_ref);
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {

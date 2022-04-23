@@ -9,7 +9,7 @@ pub mod lens_profile_database;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
-pub mod undistortion;
+pub mod stabilization;
 pub mod camera_identifier;
 
 pub mod zooming;
@@ -30,10 +30,10 @@ use stabilization_params::StabilizationParams;
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
 use smoothing::Smoothing;
-use undistortion::Undistortion;
+use stabilization::Stabilization;
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
-pub use undistortion::PixelType;
+pub use stabilization::PixelType;
 
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
@@ -50,7 +50,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub lens: Arc<RwLock<LensProfile>>,
     pub smoothing: Arc<RwLock<Smoothing>>,
 
-    pub undistortion: Arc<RwLock<Undistortion<T>>>,
+    pub stabilization: Arc<RwLock<Stabilization<T>>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
     #[cfg(feature = "opencv")]
@@ -76,7 +76,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
 
             params: Arc::new(RwLock::new(StabilizationParams::default())),
             
-            undistortion: Arc::new(RwLock::new(Undistortion::<T>::default())),
+            stabilization: Arc::new(RwLock::new(Stabilization::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
             
@@ -198,7 +198,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let os = ow * T::COUNT * T::SCALAR_BYTES;
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
-            self.undistortion.write().init_size(bg, (w, h, s), (ow, oh, os));
+            self.stabilization.write().init_size(bg, (w, h, s), (ow, oh, os));
             self.lens.write().optimal_fov = None;
             
             self.invalidate_smoothing();
@@ -255,7 +255,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
     pub fn recompute_adaptive_zoom(&self) {
-        let params = undistortion::ComputeParams::from_manager(self);
+        let params = stabilization::ComputeParams::from_manager(self);
         let lens_fov_adjustment = params.lens_fov_adjustment;
         let mut zoom = zooming::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
@@ -275,8 +275,8 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_undistortion(&self) {
-        let params = undistortion::ComputeParams::from_manager(self);
-        self.undistortion.write().set_compute_params(params);
+        let params = stabilization::ComputeParams::from_manager(self);
+        self.stabilization.write().set_compute_params(params);
     }
 
     pub fn recompute_blocking(&self) {
@@ -292,7 +292,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_threaded<F: Fn(u64) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
-        let mut params = undistortion::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self);
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
@@ -305,7 +305,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let smoothing_checksum = self.smoothing_checksum.clone();
         let zooming_checksum = self.zooming_checksum.clone();
 
-        let undistortion = self.undistortion.clone();
+        let stabilization = self.stabilization.clone();
         THREAD_POOL.spawn(move || {
             // std::thread::sleep(std::time::Duration::from_millis(20));
             if current_compute_id.load(SeqCst) != compute_id { return; }
@@ -344,7 +344,7 @@ impl<T: PixelType> StabilizationManager<T> {
             
             if current_compute_id.load(SeqCst) != compute_id { return; }
 
-            undistortion.write().set_compute_params(params);
+            stabilization.write().set_compute_params(params);
 
             smoothing_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
             zooming_checksum.store(zooming::get_checksum(&zoom), SeqCst);
@@ -395,7 +395,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub unsafe fn fill_undistortion_data(&self, timestamp_us: i64, mat_ptr: *mut f32, mat_size: usize, params_ptr: *mut u8, params_size: usize) -> bool {
         if self.params.read().stab_enabled {
-            let mut undist = self.undistortion.write();
+            let mut undist = self.stabilization.write();
             if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
 
                 let params_count = itm.matrices.len() * 9;
@@ -469,7 +469,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
             }
             //////////////////////////// Draw detected features ////////////////////////////
-            let mut undist = self.undistortion.write();
+            let mut undist = self.stabilization.write();
             let ret = undist.process_pixels(timestamp_us, size, output_size, pixels, out_pixels);
             if ret {
                 //////////////////////////// Draw zooming debug pixels ////////////////////////////
@@ -602,7 +602,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_background_color(&self, bg: Vector4<f32>) {
         self.params.write().background = bg;
-        self.undistortion.write().set_background(bg);
+        self.stabilization.write().set_background(bg);
     }
 
     pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
@@ -675,7 +675,7 @@ impl<T: PixelType> StabilizationManager<T> {
             self.gyro.write().init_from_params(&params);
         }
 
-        self.undistortion.write().set_compute_params(undistortion::ComputeParams::from_manager(self));
+        self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self));
 
         self.invalidate_smoothing();
     }

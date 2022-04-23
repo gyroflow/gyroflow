@@ -3,7 +3,7 @@
 
 use ocl::*;
 use parking_lot::RwLock;
-use crate::undistortion::KernelParams;
+use crate::stabilization::KernelParams;
 
 pub struct OclWrapper {
     kernel: Kernel,
@@ -145,7 +145,7 @@ impl OclWrapper {
         }
     }
     
-    pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::undistortion::FrameTransform) -> ocl::Result<()> {
+    pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 
         if self.src.len() != pixels.len()           { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
