@@ -38,8 +38,8 @@ let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
 
 // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
 fn remap_colorrange(px: vec4<f32>, isY: bool) -> vec4<f32> {
-    if (isY) { return 16.0 + (px * 0.85882352); } // (235 - 16) / 255
-    else     { return 16.0 + (px * 0.87843137); } // (240 - 16) / 255
+    if (isY) { return (16.0 / bg_scaler) + (px * 0.85882352); } // (235 - 16) / 255
+    else     { return (16.0 / bg_scaler) + (px * 0.87843137); } // (240 - 16) / 255
 }
 
 fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
