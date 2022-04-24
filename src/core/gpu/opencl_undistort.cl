@@ -166,7 +166,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
     __global KernelParams *params = (__global KernelParams *)params_buf;
 
-    DATA_TYPEF bg = *(DATA_TYPEF *)&params->background;
+    DATA_TYPEF bg = *(__global DATA_TYPEF *)&params->background;
 
     if (!matrices || params->width < 1) return;
 
