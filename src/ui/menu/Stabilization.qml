@@ -25,8 +25,8 @@ MenuItem {
 
     function loadGyroflow(obj) {
         const stab = obj.stabilization || { };
-        if (stab) {
-            fov.value = +stab.fov;
+        if (stab && Object.keys(stab).length > 0) {
+            if (stab.hasOwnProperty("fov")) fov.value = +stab.fov;
             const methodIndex = smoothingAlgorithms.indexOf(stab.method);
             if (methodIndex > -1) {
                 smoothingMethod.currentIndex = methodIndex;
@@ -148,11 +148,8 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "Default"),
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened"),
-        QT_TRANSLATE_NOOP("Popup", "Velocity dampened per axis"),
         QT_TRANSLATE_NOOP("Popup", "Velocity dampened (advanced)"),
-        // QT_TRANSLATE_NOOP("Popup", "Velocity dampened 2"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
-        // QT_TRANSLATE_NOOP("Popup", "Lock horizon"),
 
         QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
@@ -167,9 +164,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
-        // QT_TRANSLATE_NOOP("Stabilization", "Pitch velocity dampening");
-        // QT_TRANSLATE_NOOP("Stabilization", "Yaw velocity dampening");
-        // QT_TRANSLATE_NOOP("Stabilization", "Roll velocity dampening");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
         QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify velocity factor until you get the desired values (recommended less than 20).");
         QT_TRANSLATE_NOOP("Stabilization", "Modify dampening settings until you get the desired values (recommended around 6 on all axes).");
@@ -384,6 +378,7 @@ MenuItem {
 
     ComboBox {
         id: croppingMode;
+        currentIndex: 1;
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
         model: [QT_TRANSLATE_NOOP("Popup", "No zooming"), QT_TRANSLATE_NOOP("Popup", "Dynamic zooming"), QT_TRANSLATE_NOOP("Popup", "Static zoom")];

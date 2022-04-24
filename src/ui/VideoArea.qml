@@ -49,7 +49,7 @@ Item {
 
             if (obj && +obj.version > 0) {
                 const videofile = obj.videofile;
-                if (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile)) {
+                if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
                     // If video not loaded, try to load the associated file
                     root.pendingGyroflow = url;
                     loadFile(controller.path_to_url(videofile));

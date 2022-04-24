@@ -38,7 +38,7 @@ MenuItem {
 
     function loadGyroflow(obj) {
         const gyro = obj.gyro_source || { };
-        if (gyro) {
+        if (gyro && Object.keys(gyro).length > 0) {
             if (gyro.filepath && (gyro.filepath != obj.videofile) && controller.file_exists(gyro.filepath)) {
                 loadFile(controller.path_to_url(gyro.filepath));
                 root.pendingOffsets = obj.offsets; // because loading gyro data will clear offsets
