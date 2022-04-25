@@ -131,6 +131,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
     let fps_scale = params.fps_scale;
     let has_alpha = params.background[3] < 255.0;
 
+    let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
+
     let duration_ms = params.duration_ms;
 
     let render_duration = params.duration_ms * trim_ratio;
