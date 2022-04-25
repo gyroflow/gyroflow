@@ -46,7 +46,7 @@ pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationMana
             });
             return rhiUndistortion->init(mdkplayer->mdkplayer, texSize, itemSize, outputSize, shaderPath, params_size);
         };
-        auto renderCb = [mdkplayer, stab](double timestamp, int32_t frame, bool doRender) -> bool {
+        auto renderCb = [mdkplayer, stab](double timestamp, int32_t frame, bool /*doRender*/) -> bool {
             if (!rhiUndistortion) return false;
 
             uint32_t matrix_count = rust!(Rust_Controller_RenderRHIParams [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> u32 as "uint32_t" {

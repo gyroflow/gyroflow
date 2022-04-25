@@ -522,9 +522,10 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
-
-    pub fn set_input_horizontal_stretch(&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
-    pub fn set_input_vertical_stretch  (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
+    pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
+    pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
+    pub fn set_input_horizontal_stretch (&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
+    pub fn set_input_vertical_stretch   (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
 
     pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
@@ -650,13 +651,13 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn clear(&self) {
-        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode) = {
+        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, background_margin, background_margin_feather) = {
             let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted, params.lens_correction_amount, params.background_mode)
+            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted, params.lens_correction_amount, params.background_mode, params.background_margin, params.background_margin_feather)
         };
 
         *self.params.write() = StabilizationParams {
-            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, ..Default::default()
+            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, background_margin, background_margin_feather, ..Default::default()
         };
         if !self.gyro.read().prevent_next_load {
             *self.gyro.write() = GyroSource::new();
@@ -719,6 +720,8 @@ impl<T: PixelType> StabilizationManager<T> {
 
             "background_color": params.background.as_slice(),
             "background_mode":  params.background_mode as i32,
+            "background_margin":          params.background_margin,
+            "background_margin_feather":  params.background_margin_feather,
     
             "video_info": {
                 "width":       params.video_size.0,
@@ -795,7 +798,9 @@ impl<T: PixelType> StabilizationManager<T> {
             let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
 
             let video_path = get_new_path(&org_video_path);
-            obj["videofile"] = serde_json::Value::String(util::path_to_str(&video_path));
+            if let Some(videofile) = obj.get_mut("videofile") {
+                *videofile = serde_json::Value::String(util::path_to_str(&video_path));
+            }
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();

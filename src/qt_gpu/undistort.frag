@@ -33,8 +33,8 @@ layout(std140, binding = 2) uniform KernelParams {
     float lens_correction_amount;   // 12
     float input_vertical_stretch;   // 16
     float input_horizontal_stretch; // 4
-    float reserved1;                // 8
-    float reserved2;                // 12
+    float background_margin;        // 8
+    float background_margin_feather;// 12
     float reserved3;                // 16
 } params;
 
@@ -62,9 +62,6 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_lim
 
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
-
-    bool edge_repeat = params.background_mode == 1;
-    bool edge_mirror = params.background_mode == 2;
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
@@ -98,34 +95,36 @@ void main() {
     if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
     if (uv.x > -99998.0) {
-        if (edge_repeat) {
+        if (params.background_mode == 1) { // edge repeat
             uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
-        } else if (edge_mirror) {
+        } else if (params.background_mode == 2) { // edge mirror
             float width3 = (params.width - 2);
             float height3 = (params.height - 2);
             if (uv.x > width3)  uv.x = width3  - (uv.x - width3);
             if (uv.x < 2)       uv.x = 2 + params.width - (width3  + uv.x);
             if (uv.y > height3) uv.y = height3 - (uv.y - height3);
             if (uv.y < 2)       uv.y = 2 + params.height - (height3 + uv.y);
-        } else if (false) {
-            // margin with feather mode, looks good but not trivial to implement in OpenCL
-            float width3 = (params.width - 2);
-            float height3 = (params.height - 2);
+        } else if (params.background_mode == 3) { // margin with feather
+            float widthf  = (params.width  - 1);
+            float heightf = (params.height - 1);
 
-            float margin = 100;
-            float feather = 50;
+            float feather = max(0.0001, params.background_margin_feather * heightf);
             vec2 pt2 = uv;
             float alpha = 1.0;
-            if (uv.x > width3 - margin)  { alpha = width3 - uv.x;  pt2 = vec2(uv.x - margin, uv.y); }
-            if (uv.x < margin)           { alpha = uv.x;           pt2 = vec2(uv.x + margin, uv.y); }
-            if (uv.y > height3 - margin) { alpha = height3 - uv.y; pt2 = vec2(uv.x, uv.y - margin); }
-            if (uv.y < margin)           { alpha = uv.y;           pt2 = vec2(uv.x, uv.y + margin); }
+            if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                alpha = max(0.0, min(1.0, min(min(widthf - uv.x, heightf - uv.y), min(uv.x, uv.y)) / feather));
+                pt2 /= vec2(widthf, heightf);
+                pt2 = ((pt2 - 0.5) * (1.0 - params.background_margin)) + 0.5;
+                pt2 *= vec2(widthf, heightf);
+            }
 
             vec4 c1 = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
             vec4 c2 = texture(texIn, vec2(pt2.x / params.width, pt2.y / params.height));
-            alpha = feather > 0.0? max(0, min(1, alpha / feather)) : 1.0;
             fragColor = c1 * alpha + c2 * (1.0 - alpha);
             fragColor.a = 1.0;
+            if (!((pt2.x >= 0 && pt2.x < params.width) && (pt2.y >= 0 && pt2.y < params.height))) {
+                fragColor = params.background / 255.0;
+            }
             return;
         }
 
@@ -134,5 +133,5 @@ void main() {
             return;
         }
     }
-    fragColor = params.background;
+    fragColor = params.background / 255.0;
 }

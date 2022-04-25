@@ -23,8 +23,8 @@ struct KernelParams {
     lens_correction_amount:   f32, // 12
     input_vertical_stretch:   f32, // 16
     input_horizontal_stretch: f32, // 4
-    reserved1:                f32, // 8
-    reserved2:                f32, // 12
+    background_margin:        f32, // 8
+    background_margin_feather:f32, // 12
     reserved3:                f32, // 16
 }
 
@@ -123,9 +123,6 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
     var out_pos = position.xy;
 
-    let edge_repeat = params.background_mode == 1;
-    let edge_mirror = params.background_mode == 2;
-
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = u32(position.y);
@@ -159,9 +156,9 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
         let width_f = f32(params.width);
         let height_f = f32(params.height);
-        if (edge_repeat) {
+        if (params.background_mode == 1) { // edge repeat
             uv = max(vec2<f32>(0.0, 0.0), min(vec2<f32>(width_f - 1.0, height_f - 1.0), uv));
-        } else if (edge_mirror) {
+        } else if (params.background_mode == 2) { // edge mirror
             let rx = round(uv.x);
             let ry = round(uv.y);
             let width3 = (width_f - 3.0);
@@ -170,6 +167,23 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
             if (rx < 3.0)     { uv.x = 3.0 + width_f - (width3 + rx); }
             if (ry > height3) { uv.y = height3 - (ry - height3); }
             if (ry < 3.0)     { uv.y = 3.0 + height_f - (height3 + ry); }
+        } else if (params.background_mode == 3) { // margin with feather
+            let widthf  = (width_f - 1.0);
+            let heightf = (height_f - 1.0);
+
+            let feather = max(0.0001, params.background_margin_feather * heightf);
+            var pt2 = uv;
+            var alpha = 1.0;
+            if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                alpha = max(0.0, min(1.0, min(min(widthf - uv.x, heightf - uv.y), min(uv.x, uv.y)) / feather));
+                pt2 /= vec2<f32>(width_f, height_f);
+                pt2 = ((pt2 - 0.5) * (1.0 - params.background_margin)) + 0.5;
+                pt2 *= vec2<f32>(width_f, height_f);
+            }
+
+            let c1 = sample_input_at(uv);
+            let c2 = sample_input_at(pt2);
+            return vec4<SCALAR>(c1 * alpha + c2 * (1.0 - alpha));
         }
 
         return vec4<SCALAR>(sample_input_at(uv));

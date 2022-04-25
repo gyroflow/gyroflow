@@ -109,6 +109,8 @@ pub struct Controller {
     input_vertical_stretch: qt_property!(f64; WRITE set_input_vertical_stretch),
 
     background_mode: qt_property!(i32; WRITE set_background_mode),
+    background_margin: qt_property!(f64; WRITE set_background_margin),
+    background_margin_feather: qt_property!(f64; WRITE set_background_margin_feather),
 
     lens_loaded: qt_property!(bool; NOTIFY lens_changed),
     set_lens_param: qt_method!(fn(&self, param: QString, value: f64)),
@@ -693,6 +695,8 @@ impl Controller {
     wrap_simple_method!(set_input_horizontal_stretch, v: f64; recompute);
     wrap_simple_method!(set_input_vertical_stretch, v: f64; recompute);
     wrap_simple_method!(set_background_mode, v: i32; recompute);
+    wrap_simple_method!(set_background_margin, v: f64; recompute);
+    wrap_simple_method!(set_background_margin_feather, v: f64; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);

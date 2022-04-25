@@ -62,8 +62,8 @@ pub struct KernelParams {
     pub lens_correction_amount:   f32, // 12
     pub input_vertical_stretch:   f32, // 16
     pub input_horizontal_stretch: f32, // 4
-    pub reserved1:                f32, // 8
-    pub reserved2:                f32, // 12
+    pub background_margin:        f32, // 8
+    pub background_margin_feather:f32, // 12
     pub reserved3:                f32, // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}

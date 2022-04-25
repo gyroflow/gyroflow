@@ -8,6 +8,7 @@ pub enum BackgroundMode {
     SolidColor = 0,
     RepeatPixels = 1,
     MirrorPixels = 2,
+    MarginWithFeather = 3,
 }
 impl Default for BackgroundMode {
     fn default() -> Self { Self::SolidColor }
@@ -17,6 +18,7 @@ impl From<i32> for BackgroundMode {
         match v {
             1 => Self::RepeatPixels,
             2 => Self::MirrorPixels,
+            3 => Self::MarginWithFeather,
             _ => Self::SolidColor
         }
     }
@@ -48,6 +50,8 @@ pub struct StabilizationParams {
 
     pub lens_correction_amount: f64,
     pub background_mode: BackgroundMode,
+    pub background_margin: f64,
+    pub background_margin_feather: f64,
 
     pub framebuffer_inverted: bool,
     pub is_calibrator: bool,
@@ -79,6 +83,8 @@ impl Default for StabilizationParams {
 
             lens_correction_amount: 1.0,
             background_mode: BackgroundMode::SolidColor,
+            background_margin: 0.0,
+            background_margin_feather: 0.0,
             
             framebuffer_inverted: false,
             is_calibrator: false,

@@ -20,11 +20,15 @@ MenuItem {
         property alias safeAreaGuide: safeAreaGuide.checked;
         property alias gpudecode: gpudecode.checked;
         property alias backgroundMode: backgroundMode.currentIndex;
+        property alias marginPixels: marginPixels.value;
+        property alias featherPixels: featherPixels.value;
         property string lang: ui_tools.get_default_language();
     }
 
     function loadGyroflow(obj) {
         if (obj.background_mode) backgroundMode.currentIndex = obj.background_mode;
+        if (obj.background_margin) marginPixels.value = obj.background_margin;
+        if (obj.background_margin_feather) featherPixels.value = obj.background_margin_feather;
         if (obj.background_color) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
     }
     Label {
@@ -55,11 +59,43 @@ MenuItem {
         text: qsTr("Background mode");
         ComboBox {
             id: backgroundMode;
-            model: [QT_TRANSLATE_NOOP("Popup", "Solid color"), QT_TRANSLATE_NOOP("Popup", "Repeat edge pixels"), QT_TRANSLATE_NOOP("Popup", "Mirror edge pixels")];
+            model: [QT_TRANSLATE_NOOP("Popup", "Solid color"), QT_TRANSLATE_NOOP("Popup", "Repeat edge pixels"), QT_TRANSLATE_NOOP("Popup", "Mirror edge pixels"), QT_TRANSLATE_NOOP("Popup", "Margin with feather")];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             currentIndex: 0;
             onCurrentIndexChanged: controller.background_mode = currentIndex;
+        }
+    }
+    Column {
+        width: parent.width;
+        visible: backgroundMode.currentIndex == 3;
+        Label {
+            text: qsTr("Margin");
+            SliderWithField {
+                id: marginPixels;
+                value: 20;
+                defaultValue: 20;
+                from: 0;
+                to: 50;
+                unit: "%";
+                precision: 0;
+                width: parent.width;
+                onValueChanged: controller.background_margin = value / 100;
+            }
+        }
+        Label {
+            text: qsTr("Feather");
+            SliderWithField {
+                id: featherPixels;
+                value: 5;
+                defaultValue: 5;
+                from: 0;
+                to: 50;
+                unit: "%";
+                precision: 0;
+                width: parent.width;
+                onValueChanged: controller.background_margin_feather = value / 100;
+            }
         }
     }
     Label {

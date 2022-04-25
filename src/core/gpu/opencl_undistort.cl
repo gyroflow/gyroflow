@@ -30,12 +30,12 @@ typedef struct {
     float4 k;          // 16 - distortion coefficients
     float fov;         // 4
     float r_limit;     // 8
-    float lens_correction_amount;   // 12
-    float input_vertical_stretch;   // 16
-    float input_horizontal_stretch; // 4
-    float reserved1;                // 8
-    float reserved2;                // 12
-    float reserved3;                // 16
+    float lens_correction_amount;    // 12
+    float input_vertical_stretch;    // 16
+    float input_horizontal_stretch;  // 4
+    float background_margin;         // 8
+    float background_margin_feather; // 12
+    float reserved3;                 // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -218,6 +218,25 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                     if (rx < 3)       uv.x = 3 + params->width - (width3  + rx);
                     if (ry > height3) uv.y = height3 - (ry - height3);
                     if (ry < 3)       uv.y = 3 + params->height - (height3 + ry);
+                } break;
+                case 3: { // margin with feather
+                    float widthf  = (params->width  - 1);
+                    float heightf = (params->height - 1);
+
+                    float feather = max(0.0001f, params->background_margin_feather * heightf);
+                    float2 pt2 = uv;
+                    float alpha = 1.0f;
+                    if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                        alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
+                        pt2 /= (float2)(widthf, heightf);
+                        pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
+                        pt2 *= (float2)(widthf, heightf);
+                    }
+
+                    DATA_TYPEF c1 = sample_input_at(uv,  srcptr, params, bg);
+                    DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, bg);
+                    *out_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
+                    return;
                 } break;
             }
 

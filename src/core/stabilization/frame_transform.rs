@@ -114,6 +114,8 @@ impl FrameTransform {
             input_vertical_stretch:   params.input_vertical_stretch as f32,
             input_horizontal_stretch: params.input_horizontal_stretch as f32,
             background_mode:          params.background_mode as i32,
+            background_margin:        params.background_margin as f32,
+            background_margin_feather:params.background_margin_feather as f32,
             ..Default::default()
         };
 

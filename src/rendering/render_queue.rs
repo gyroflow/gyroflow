@@ -496,9 +496,11 @@ impl RenderQueue {
                     params: Arc::new(RwLock::new(core::stabilization_params::StabilizationParams {
                         fov:                    params.fov,
                         background:             params.background,
-                        background_mode:        params.background_mode,
                         adaptive_zoom_window:   params.adaptive_zoom_window,
                         lens_correction_amount: params.lens_correction_amount,
+                        background_mode:           params.background_mode,
+                        background_margin:         params.background_margin,
+                        background_margin_feather: params.background_margin_feather,
                         ..Default::default()
                     })),
                     video_path: Arc::new(RwLock::new(path.clone())),
