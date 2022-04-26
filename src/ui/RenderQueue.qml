@@ -111,11 +111,11 @@ Item {
         }
         Connections {
             target: render_queue;
-            function onAdded(job_id) {
+            function onAdded(job_id: real) {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onError(job_id, text, arg, callback) {
+            function onError(job_id: real, text: string, arg: string, callback: string) {
                 if (job_id == render_queue.main_job_id || loader.pendingJobs[job_id]) {
                     text = getReadableError(qsTr(text).arg(arg));
                     messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
@@ -123,7 +123,7 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onRender_progress(job_id, progress, frame, total_frames, finished) {
+            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool) {
                 if (job_id == render_queue.main_job_id) {
                     window.videoArea.videoLoader.active = !finished;
                     window.videoArea.videoLoader.currentFrame = frame;
@@ -144,7 +144,7 @@ Item {
                     }
                 }
             }
-            function onConvert_format(job_id, format, supported) {
+            function onConvert_format(job_id: real, format: string, supported: string) {
                 if (job_id == render_queue.main_job_id) {
                     let buttons = supported.split(",").map(f => ({
                         text: f,

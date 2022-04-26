@@ -81,7 +81,7 @@ impl AutosyncProcess {
             mtrx / img_ratio,
             stab.lens.read().get_distortion_coeffs()
         );
-        estimator.every_nth_frame.store(every_nth_frame as usize, SeqCst);
+        estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
         
         let mut comp_params = ComputeParams::from_manager(stab);
         comp_params.gyro.raw_imu = stab.gyro.read().raw_imu.clone();

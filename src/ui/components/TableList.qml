@@ -17,11 +17,11 @@ Row {
 
     signal commitAll();
 
-    function updateEntry(key, value) {
+    function updateEntry(key: string, value: string) {
         model[key] = value;
         modelChanged();
     }
-    function updateEntryWithTrigger(key, value) {
+    function updateEntryWithTrigger(key: string, value: string) {
         updateEntry(key, value);
 
         const desc = tl.editableFields[key];

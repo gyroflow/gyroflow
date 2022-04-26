@@ -79,7 +79,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             shutter.value = Math.abs(frame_readout_time);
             shutterCb.checked = Math.abs(frame_readout_time) > 0;
             bottomToTop.checked = frame_readout_time < 0;
@@ -100,7 +100,7 @@ MenuItem {
             calib.updateTable();
             sizeTimer.start();
         }
-        function onRolling_shutter_estimated(rolling_shutter) {
+        function onRolling_shutter_estimated(rolling_shutter: real) {
             shutter.value = Math.abs(rolling_shutter);
             shutterCb.checked = Math.abs(rolling_shutter) > 0;
             bottomToTop.checked = rolling_shutter < 0;

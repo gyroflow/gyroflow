@@ -1262,6 +1262,7 @@ version = "1.0.0-rc5"
 dependencies = [
  "breakpad-sys",
  "bytemuck",
+ "cc",
  "cpp",
  "cpp_build",
  "cstr",
@@ -1283,6 +1284,7 @@ dependencies = [
  "serde_json",
  "simplelog",
  "ureq",
+ "walkdir",
  "whoami",
  "windows",
  "winres",

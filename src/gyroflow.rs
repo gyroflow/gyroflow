@@ -13,7 +13,9 @@ pub use gyroflow_core as core;
 pub mod util;
 pub mod controller;
 pub mod rendering;
-pub mod resources;
+mod resources;
+#[cfg(not(compiled_qml))]
+mod resources_qml;
 pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; } }
 pub mod qt_gpu { pub mod qrhi_undistort; }
 
@@ -44,6 +46,9 @@ fn entry() {
     util::init_logging();
 
     crate::resources::rsrc();
+    #[cfg(not(compiled_qml))]
+    crate::resources_qml::rsrc_qml();
+    
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
 

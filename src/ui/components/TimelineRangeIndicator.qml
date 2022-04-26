@@ -22,8 +22,8 @@ Rectangle {
     border.color: styleAccentColor;
     radius: 3 * dpiScale;
     clip: true;
-    function mapToVisibleArea(v) { return parent.parent.parent.mapToVisibleArea(v); }
-    function mapFromVisibleArea(v) { return parent.parent.parent.mapFromVisibleArea(v); }
+    function mapToVisibleArea(v: real): real { return parent.parent.parent.mapToVisibleArea(v); }
+    function mapFromVisibleArea(v: real): real { return parent.parent.parent.mapFromVisibleArea(v); }
     property real visibleRange: (parent.parent.parent.visibleAreaRight - parent.parent.parent.visibleAreaLeft);
 
     signal changeTrimStart(real val);

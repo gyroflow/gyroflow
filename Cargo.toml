@@ -50,6 +50,8 @@ features = [ "alloc", "Win32_System_Com", "Win32_System_Console", "Win32_System_
 [build-dependencies]
 cpp_build = "0.5.6"
 winres = "0.1.12"
+walkdir = "2.3.2"
+cc = "1.0"
 
 [[bin]]
 name = "gyroflow"

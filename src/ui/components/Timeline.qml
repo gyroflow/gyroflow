@@ -28,28 +28,28 @@ Item {
     property real value: 0;
     readonly property real position: vid.currentFrame / (vid.frameCount - 1);
 
-    function mapToVisibleArea(pos) { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
-    function mapFromVisibleArea(pos) { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
+    function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
+    function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
 
     function redrawChart() { chart.update(); }
-    function getChart() { return chart; }
+    function getChart(): TimelineGyroChart { return chart; }
 
-    function setPosition(pos) {
+    function setPosition(pos: real) {
         vid.currentFrame = frameAtPosition(pos);
     }
-    function frameAtPosition(pos) {
+    function frameAtPosition(pos: real): int {
         return Math.floor(pos * (vid.frameCount - 1));
     }
 
-    function timeAtPosition(pos) {
+    function timeAtPosition(pos: real): string {
         const time = Math.max(0, durationMs * pos);
         return new Date(time).toISOString().substring(11, 11+8);
     }
     
-    function setTrim(start, end) {
-        if (start >= end)
+    function setTrim(start: real, end: real) {
+        if (start >= end) {
             resetTrim();
-        else {
+        } else {
             trimStart = start;
             trimEnd   = end;
         }
@@ -60,7 +60,7 @@ Item {
         root.trimEnd = 1.0;
     }
 
-    function toggleAxis(axis, solo) {
+    function toggleAxis(axis: int, solo: bool) {
         let v = (chart.getAxisVisible(axis) ? 1 : 0) + (chart.getAxisVisible(axis + 4) ? 2 : 0);
         v = (v + 1) % 4;
         chart.setAxisVisible(axis, v & 1);

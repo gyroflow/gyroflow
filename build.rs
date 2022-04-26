@@ -1,10 +1,68 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+use std::process::Command;
+use std::path::Path;
+use std::env;
+use walkdir::WalkDir;
+use cc;
+
+fn compile_qml(qt_include_path: &str) {
+    let mut config = cc::Build::new();
+    config.include(&qt_include_path);
+    config.include(&format!("{}/QtCore", qt_include_path));
+    for f in std::env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
+        config.flag(f);
+    }
+
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir);
+    let main_dir = env::var_os("CARGO_MANIFEST_DIR").unwrap();
+
+    let mut files = Vec::new();
+    let mut qrc = "<RCC>\n<qresource prefix=\"/\">\n".to_string();
+    WalkDir::new("src/ui/").into_iter().flatten().for_each(|entry| {
+        let f_name = entry.path().to_string_lossy().replace('\\', "/");
+        if f_name.ends_with(".qml") || f_name.ends_with(".js") {
+            qrc.push_str(&format!("<file>{}</file>\n", f_name));
+
+            let cpp_name = f_name.replace("/", "_").replace(".qml", ".cpp").replace(".js", ".cpp");
+            let cpp_path = out_dir.join(cpp_name).to_string_lossy().to_string();
+
+            config.file(&cpp_path);
+            files.push((f_name, cpp_path));
+        }
+    });
+        
+    qrc.push_str("</qresource>\n</RCC>");
+    let qrc_path = Path::new(&main_dir).join("ui.qrc").to_string_lossy().to_string();
+    std::fs::write(&qrc_path, qrc).unwrap();
+
+    for (qml, cpp) in &files {
+        assert!(Command::new("qmlcachegen").args(&["--resource", &qrc_path, "-o", &cpp, &qml]).status().unwrap().success());
+    }
+
+    let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();
+    assert!(Command::new("qmlcachegen").args(&["--resource-file-mapping", &qrc_path, "-o", &loader_path, "ui.qrc"]).status().unwrap().success());
+
+    config.file(&loader_path);
+
+    std::fs::remove_file(&qrc_path).unwrap();
+
+    config.compile("qmlcache");
+}
+
 fn main() {
     let qt_include_path = std::env::var("DEP_QT_INCLUDE_PATH").unwrap();
     let qt_library_path = std::env::var("DEP_QT_LIBRARY_PATH").unwrap();
     let qt_version      = std::env::var("DEP_QT_VERSION").unwrap();
+
+    if let Ok(out_dir) = env::var("OUT_DIR") {
+        if out_dir.contains("\\target\\deploy\\") || out_dir.contains("/target/deploy/") {
+            compile_qml(&qt_include_path);
+            println!("cargo:rustc-cfg=compiled_qml")
+        }
+    }
 
     let mut config = cpp_build::Config::new();
 

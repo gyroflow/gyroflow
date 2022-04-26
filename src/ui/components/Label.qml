@@ -27,20 +27,20 @@ Grid {
             anchors.fill: t;
             acceptedButtons: Qt.LeftButton;
 
-            onDoubleClicked: (mouse) => {
-                function traverseChildren(node) {
-                    for (let i = node.children.length; i > 0; --i) {
-                        const child = node.children[i - 1];
-                        if (child) {
-                            if (child.toString().startsWith("NumberField")) {
-                                child.reset();
-                            } else {
-                                traverseChildren(child);
-                            }
+            function traverseChildren(node: QtObject) {
+                for (let i = node.children.length; i > 0; --i) {
+                    const child = node.children[i - 1];
+                    if (child) {
+                        if (child.toString().startsWith("NumberField")) {
+                            child.reset();
+                        } else {
+                            traverseChildren(child);
                         }
                     }
-                    return null;
                 }
+                return null;
+            }
+            onDoubleClicked: (mouse) => {
                 traverseChildren(inner);
             }
         }

@@ -296,8 +296,8 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function messageBox(type, text, buttons, parent, textFormat) {
-        if (textFormat === undefined ) textFormat = Text.AutoText; // default
+    function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int): Modal {
+        if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
         const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, text: text, iconType: type});
         el.onClicked.connect((index) => {
             if (buttons[index].clicked)
@@ -320,22 +320,22 @@ Rectangle {
 
     Connections {
         target: controller;
-        function onError(text, arg, callback) {
+        function onError(text: string, arg: string, callback: string) {
             text = getReadableError(qsTr(text).arg(arg));
             messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
-        function onMessage(text, arg, callback) {
+        function onMessage(text: string, arg: string, callback: string) {
             messageBox(Modal.Info, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
-        function onUpdates_available(version, changelog) {
+        function onUpdates_available(version: string, changelog: string) {
             const heading = "<p align=\"center\">" + qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + "</p>\n\n";
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
-        function onRequest_location(path, thin) {
+        function onRequest_location(path: string, thin: bool) {
             gfFileDialog.thin = thin;
             gfFileDialog.currentFolder = controller.path_to_url(path);
             gfFileDialog.open();
@@ -362,7 +362,7 @@ Rectangle {
         }
     }
 
-    function getReadableError(text) {
+    function getReadableError(text: string): string {
         if (text.includes("ffmpeg")) {
             if (text.includes("Permission denied")) return qsTr("Permission denied. Unable to create or write file.\nChange the output path or run the program as administrator.\nMake sure you have write permissions to the target directory and make sure target file is not used by any other application.");
             if (text.includes("required nvenc API version")) return qsTr("NVIDIA GPU driver is too old, GPU encoding will not work for this format.\nUpdate your NVIDIA drivers to the newest version: %1.\nIf the issue is still present after driver update, your GPU probably doesn't support GPU encoding with this format. Disable GPU encoding in this case.").arg("<a href=\"https://www.nvidia.com/download/index.aspx\">https://www.nvidia.com/download/index.aspx</a>");

@@ -8,7 +8,7 @@ Canvas {
     property color borderColor: style === "light"? Qt.darker(styleBackground, 1.3) : Qt.lighter(styleBackground, 2);
     anchors.fill: parent;
     contextType: "2d";
-    function roundRect(ctx, x, y, width, height, r) {
+    function roundRect(ctx, x: real, y: real, width: real, height: real, r: real) {
         ctx.beginPath();
         ctx.moveTo(x + r, y);
         ctx.lineTo(x + width - r, y);

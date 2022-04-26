@@ -36,7 +36,7 @@ Window {
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
 
-    function getApp() {
+    function getApp(): App {
         for (let i = 0; i < contentItem.children.length; ++i) {
             const x = contentItem.children[i];
             if (x.objectName == "App") return x;

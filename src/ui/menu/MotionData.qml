@@ -28,7 +28,7 @@ MenuItem {
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
         onAccepted: loadFile(selectedFile);
     }
-    function loadFile(url) {
+    function loadFile(url: url) {
         root.pendingOffsets = { };
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
@@ -60,14 +60,14 @@ MenuItem {
             }
         }
     }
-    function setGyroLpf(v) {
+    function setGyroLpf(v: real) {
         lpf.value = v;
         lpfcb.checked = +v > 0;
     }
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
@@ -94,7 +94,7 @@ MenuItem {
                 }
             }
         }
-        function onBias_estimated(biasX, biasY, biasZ) {
+        function onBias_estimated(biasX: real, biasY: real, biasZ: real) {
             gyrobias.checked = true;
             bx.value = biasX;
             by.value = biasY;

@@ -35,7 +35,7 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    function loadFile(url) {
+    function loadFile(url: url) {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -127,7 +127,7 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
-    function detectImageSequence(url) {
+    function detectImageSequence(url: url): bool {
         const urlStr = controller.url_to_path(url);
         if (/\d+\.(png|exr)$/i.test(urlStr)) {
             let firstNum = urlStr.match(/(\d+)\.(png|exr)$/i);
@@ -149,7 +149,7 @@ Item {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
@@ -361,11 +361,11 @@ Item {
 
         Connections {
             target: controller;
-            function onCompute_progress(id, progress) {
+            function onCompute_progress(id: real, progress: real) {
                 videoLoader.active = progress < 1;
                 videoLoader.cancelable = false;
             }
-            function onSync_progress(progress, ready, total) {
+            function onSync_progress(progress: real, ready: int, total: int) {
                 videoLoader.active = progress < 1;
                 videoLoader.currentFrame = ready;
                 videoLoader.totalFrames = total;

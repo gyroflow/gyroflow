@@ -74,15 +74,15 @@ MenuItem {
 
         Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
     }
-    function updateEntry(key, value) {
+    function updateEntry(key: string, value: string) {
         if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
     }
-    function updateEntryWithTrigger(key, value) {
+    function updateEntryWithTrigger(key: string, value: string) {
         list.updateEntryWithTrigger(key, value);
     }
 
-    function getDuration(md) {
+    function getDuration(md): string {
         const s = +md["stream.video[0].duration"] / 1000;
         if (s > 60) {
             return Math.floor(s / 60) + " m " + Math.floor(s % 60) + " s";
@@ -91,13 +91,13 @@ MenuItem {
         }
         return "";
     }
-    function getCodec(md) {
+    function getCodec(md): string {
         const c = md["stream.video[0].codec.name"] || "";
         const bitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024).toFixed(2) + " Mbps") : "";
 
         return c.toUpperCase() + (c? " " : "") + bitrate;
     }
-    function getPixelFormat(md) {
+    function getPixelFormat(md): string {
         let pt = md["stream.video[0].codec.format_name"] || "";
         let bits = "8 bit";
         if (pt.indexOf("p10le") > -1) { bits = "10 bit"; pt = pt.replace("p10le", ""); } // TODO detect more formats
@@ -106,7 +106,7 @@ MenuItem {
 
         return pt.toUpperCase() + (pt? " " : "") + bits;
     }
-    function getAudio(md) {
+    function getAudio(md): string {
         const format = md["stream.audio[0].codec.name"]? (md["stream.audio[0].codec.name"].replace("_", " ").replace("pcm", "PCM").replace("aac", "AAC")) : "";
         const rate = md["stream.audio[0].codec.sample_rate"]? (md["stream.audio[0].codec.sample_rate"] + " Hz") : "";
 

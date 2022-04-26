@@ -69,7 +69,7 @@ MenuItem {
     function notifySizeChanged() {
         controller.set_output_size(outWidth, outHeight);
     }
-    function ensureAspectRatio(byWidth) {
+    function ensureAspectRatio(byWidth: bool) {
         if (lockAspectRatio.checked && aspectRatio > 0) {
             if (byWidth) {
                 outHeight = Math.round(outWidth / aspectRatio);
@@ -78,7 +78,7 @@ MenuItem {
             }
         }
     }
-    function setDefaultSize(w, h) {
+    function setDefaultSize(w: real, h: real) {
         aspectRatio   = w / h;
         defaultWidth  = w;
         defaultHeight = h;
@@ -88,7 +88,7 @@ MenuItem {
         outHeight     = h;
         disableUpdate = false;
     }
-    function videoInfoLoaded(w, h, br) {
+    function videoInfoLoaded(w: real, h: real, br: real) {
         setDefaultSize(w, h);
         Qt.callLater(notifySizeChanged);
 
@@ -97,11 +97,11 @@ MenuItem {
 
         codec.updateGpuStatus();
     }
-    function lensProfileLoaded(w, h) {
+    function lensProfileLoaded(w: real, h: real) {
         setDefaultSize(w, h);
         Qt.callLater(notifySizeChanged);
     }
-    function setComboValue(c, text) {
+    function setComboValue(c: QtObject, text: string) {
         let i = 0;
         for (const x of c.model) {
             if (x == text) {
@@ -134,7 +134,7 @@ MenuItem {
         model: exportFormats.map(x => x.name);
         width: parent.width;
         currentIndex: 1;
-        function updateExtension(ext) {
+        function updateExtension(ext: string) {
             window.outputFile = window.outputFile.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext);
         }
         function updateGpuStatus() {
@@ -240,7 +240,7 @@ MenuItem {
                 id: sizeMenu;
                 font.pixelSize: 11.5 * dpiScale;
 
-                function setSize(w, h) {
+                function setSize(w: real, h: real) {
                     disableUpdate = true;
                     aspectRatio = w / h;
                     outWidth = w;

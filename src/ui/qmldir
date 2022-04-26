@@ -1,0 +1,7 @@
+App 1.0 App.qml
+CalibrationTarget 1.0 CalibrationTarget.qml
+Calibrator 1.0 Calibrator.qml
+RenderQueue 1.0 RenderQueue.qml
+Shortcuts 1.0 Shortcuts.qml
+VideoArea 1.0 VideoArea.qml
+Util 1.0 Util.js

@@ -67,39 +67,39 @@ MenuItem {
         }
     }
 
-    function setFrameReadoutTime(v) {
+    function setFrameReadoutTime(v: real) {
         shutter.value = Math.abs(v);
         shutterCb.checked = Math.abs(v) > 0;
         bottomToTop.checked = v < 0;
     }
 
-    function setSmoothingParam(name, value) {
+    function setSmoothingParam(name: string, value: real) {
         settings.setValue("smoothing-" + smoothingMethod.currentIndex + "-" + name, value);
         controller.set_smoothing_param(name, value);
     }
-    function getSmoothingParam(name, defaultValue) {
+    function getSmoothingParam(name: string, defaultValue: real): real {
         return settings.value("smoothing-" + smoothingMethod.currentIndex + "-" + name, defaultValue);
     }
-    function getParamElement(name) {
-        function traverseChildren(node) {
-            for (let i = node.children.length; i > 0; --i) {
-                const child = node.children[i - 1];
-                if (child) {
-                    if (child.objectName == ("param-" + name)) {
-                        return child;
-                    }
-                    const found = traverseChildren(child);
-                    if (found !== null) return found;
+    function traverseChildren(node: QtObject, name: string): QtObject {
+        for (let i = node.children.length; i > 0; --i) {
+            const child = node.children[i - 1];
+            if (child) {
+                if (child.objectName == name) {
+                    return child;
                 }
+                const found = traverseChildren(child, name);
+                if (found !== null) return found;
             }
-            return null;
         }
-        return traverseChildren(smoothingOptions);
+        return null;
+    }
+    function getParamElement(name: string): QtObject {
+        return traverseChildren(smoothingOptions, "param-" + name);
     }
 
     Connections {
         target: controller;
-        function onCompute_progress(id, progress) {
+        function onCompute_progress(id: real, progress: real) {
             if (progress >= 1) {
                 const min_fov = controller.get_min_fov();
                 const max_angles = controller.get_smoothing_max_angles();
@@ -176,12 +176,12 @@ MenuItem {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             if (Math.abs(+frame_readout_time) > 0) {
                 root.setFrameReadoutTime(frame_readout_time);
             }
         }
-        function onRolling_shutter_estimated(rolling_shutter) {
+        function onRolling_shutter_estimated(rolling_shutter: real) {
             root.setFrameReadoutTime(rolling_shutter);
         }
     }

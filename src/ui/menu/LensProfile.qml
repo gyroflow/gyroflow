@@ -27,7 +27,7 @@ MenuItem {
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         onAccepted: loadFile(fileDialog.selectedFile);
     }
-    function loadFile(url) {
+    function loadFile(url: url) {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -64,7 +64,7 @@ MenuItem {
         function onLens_profiles_updated() {
             profilesUpdateTimer.start();
         }
-        function onLens_profile_loaded(json_str) {
+        function onLens_profile_loaded(json_str: string) {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
@@ -193,7 +193,7 @@ MenuItem {
             onValueChanged: {
                 if (!preventChange2) controller.set_lens_param(param, value);
             }
-            function setInitialValue(v) {
+            function setInitialValue(v: real) {
                 preventChange2 = true;
                 value = v;
                 preventChange2 = false;

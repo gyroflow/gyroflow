@@ -36,13 +36,13 @@ Window {
         });
     }
 
-    function messageBox(type, text, buttons, parent) {
-        window.messageBox(type, text, buttons, parent || calibrator_window.contentItem);
+    function messageBox(type: int, text: string, buttons: list, parent: QtObject): Modal {
+        return window.messageBox(type, text, buttons, parent || calibrator_window.contentItem);
     }
     
     Connections {
         target: controller;
-        function onError(text, arg, callback) {
+        function onError(text: string, arg: string, callback: string) {
             messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onRequest_recompute() {
@@ -54,7 +54,7 @@ Window {
         batch.queue = [...fileDialog.selectedFiles];
         batch.start();
     }
-    function loadFile(file) {
+    function loadFile(file: url) {
         lensCalib.rms = 0;
         controller.reset_player(videoArea.vid);
         Qt.callLater(() => {
@@ -97,7 +97,7 @@ Window {
         property var queue: [];
         property bool active: false;
         property url currentFile;
-        function runIn(ms, cb) {
+        function runIn(ms: int, cb) {
             batchTimer.cb = cb;
             batchTimer.interval = ms;
             batchTimer.start();
@@ -113,14 +113,14 @@ Window {
         }
         Connections {
             target: controller;
-            function onTelemetry_loaded(is_main_video, filename, camera, imu_orientation, contains_gyro, contains_quats, frame_readout_time, camera_id_json) {
+            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
                 calibrator_window.anyFileLoaded = true;
                 if (!batch.active) return;
                 batch.runIn(2000, function() {
                     lensCalib.autoCalibBtn.clicked();
                 })
             }
-            function onCalib_progress(progress, rms, ready, total, good) {
+            function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
                 if (!batch.active) return;
                 if (ready > 0 && rms > 0) {
                     batch.runIn(2000, function() {
@@ -215,7 +215,7 @@ Window {
 
     Connections {
         target: controller;
-        function onCalib_progress(progress, rms, ready, total, good) {
+        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
             lensCalib.rms = rms;
             videoArea.videoLoader.active = progress < 1 || rms == 0;
             videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
