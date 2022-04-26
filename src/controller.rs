@@ -168,6 +168,8 @@ pub struct Controller {
 
     url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
     path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
+    
+    image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
 
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
@@ -1053,4 +1055,5 @@ impl Controller {
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
     fn url_to_path(&self, url: QUrl) -> QString { QString::from(util::url_to_path(url)) }
     fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
+    fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
 }

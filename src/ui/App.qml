@@ -226,7 +226,7 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
-                            const job_id = render_queue.add(controller, JSON.stringify(exportSettings.getExportOptions()), result.url);
+                            const job_id = render_queue.add(controller, JSON.stringify(exportSettings.getExportOptions()), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
                                 videoArea.queue.shown = true;

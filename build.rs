@@ -7,10 +7,13 @@ use std::env;
 use walkdir::WalkDir;
 use cc;
 
-fn compile_qml(qt_include_path: &str) {
+fn compile_qml(qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
     config.include(&qt_include_path);
     config.include(&format!("{}/QtCore", qt_include_path));
+    if cfg!(target_os = "macos") {
+        config.include(format!("{}/QtCore.framework/Headers/", qt_library_path));
+    }
     for f in std::env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
     }
@@ -33,17 +36,24 @@ fn compile_qml(qt_include_path: &str) {
             files.push((f_name, cpp_path));
         }
     });
-        
+
+    let qt_path = std::path::Path::new(qt_library_path).parent().unwrap();
+    let compiler_path = if qt_path.join("libexec/qmlcachegen").exists() {
+        qt_path.join("libexec/qmlcachegen").to_string_lossy().to_string()
+    } else {
+        "qmlcachegen".to_string()
+    };
+    
     qrc.push_str("</qresource>\n</RCC>");
     let qrc_path = Path::new(&main_dir).join("ui.qrc").to_string_lossy().to_string();
     std::fs::write(&qrc_path, qrc).unwrap();
 
     for (qml, cpp) in &files {
-        assert!(Command::new("qmlcachegen").args(&["--resource", &qrc_path, "-o", &cpp, &qml]).status().unwrap().success());
+        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", &cpp, &qml]).status().unwrap().success());
     }
 
     let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();
-    assert!(Command::new("qmlcachegen").args(&["--resource-file-mapping", &qrc_path, "-o", &loader_path, "ui.qrc"]).status().unwrap().success());
+    assert!(Command::new(&compiler_path).args(&["--resource-file-mapping", &qrc_path, "-o", &loader_path, "ui.qrc"]).status().unwrap().success());
 
     config.file(&loader_path);
 
@@ -59,7 +69,7 @@ fn main() {
 
     if let Ok(out_dir) = env::var("OUT_DIR") {
         if out_dir.contains("\\target\\deploy\\") || out_dir.contains("/target/deploy/") {
-            compile_qml(&qt_include_path);
+            compile_qml(&qt_include_path, &qt_library_path);
             println!("cargo:rustc-cfg=compiled_qml")
         }
     }

@@ -309,3 +309,15 @@ pub fn image_data_to_base64(w: u32, h: u32, s: u32, data: &[u8]) -> QString {
         return b64;
     })
 }
+
+pub fn image_to_b64(img: QImage) -> QString {
+    cpp!(unsafe [img as "QImage"] -> QString as "QString" {
+        QByteArray byteArray;
+        QBuffer buffer(&byteArray);
+        buffer.open(QIODevice::WriteOnly);
+        img.save(&buffer, "JPEG", 50);
+        QString b64("data:image/jpg;base64,");
+        b64.append(QString::fromLatin1(byteArray.toBase64().data()));
+        return b64;
+    })
+}

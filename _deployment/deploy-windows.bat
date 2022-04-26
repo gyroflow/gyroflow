@@ -11,6 +11,7 @@ set TARGET=%PROJECT_DIR%\_deployment\_binaries\win64
 xcopy /Y "%QT_DIR%\plugins\platforms\qwindows.dll"                                                 "%TARGET%\platforms\"
 xcopy /Y "%QT_DIR%\plugins\iconengines\qsvgicon.dll"                                               "%TARGET%\iconengines\"
 xcopy /Y "%QT_DIR%\plugins\imageformats\qsvg.dll"                                                  "%TARGET%\imageformats\"
+xcopy /Y "%QT_DIR%\plugins\imageformats\qjpeg.dll"                                                 "%TARGET%\imageformats\"
 xcopy /Y "%QT_DIR%\bin\Qt6Core.dll"                                                                "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6Gui.dll"                                                                 "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6LabsSettings.dll"                                                        "%TARGET%\"

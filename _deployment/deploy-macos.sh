@@ -137,6 +137,7 @@ mkdir -p "$CARGO_TARGET/imageformats/"
 mkdir -p "$CARGO_TARGET/platforms/"
 cp -f $QT_DIR/plugins/iconengines/libqsvgicon.dylib                                               "$CARGO_TARGET/iconengines/"
 cp -f $QT_DIR/plugins/imageformats/libqsvg.dylib                                                  "$CARGO_TARGET/imageformats/"
+cp -f $QT_DIR/plugins/imageformats/libqjpeg.dylib                                                 "$CARGO_TARGET/imageformats/"
 cp -f $QT_DIR/plugins/platforms/libqcocoa.dylib                                                   "$CARGO_TARGET/platforms/"
 
 if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
@@ -172,6 +173,7 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
             "Frameworks/QtWidgets.framework/Versions/A/QtWidgets"
             "PlugIns/iconengines/libqsvgicon.dylib"
             "PlugIns/imageformats/libqsvg.dylib"
+            "PlugIns/imageformats/libqjpeg.dylib"
             "PlugIns/platforms/libqcocoa.dylib"
             "Resources/qml/Qt/labs/settings/libqmlsettingsplugin.dylib"
             "Resources/qml/QtQml/libqmlplugin.dylib"
