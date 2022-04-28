@@ -13,13 +13,13 @@ use opencv::{
 };
 
 use rand::prelude::IteratorRandom;
-use std::{ffi::c_void, collections::BTreeSet};
+use std::{ ffi::c_void, collections::{ BTreeSet, BTreeMap, HashSet } };
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
 use std::sync::Arc;
 use nalgebra::{ Matrix3, Vector4 };
-use std::collections::{BTreeMap, HashSet};
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use crate::stabilization::distortion_models::GoProSuperview;
 
 pub mod drawing;
 
@@ -52,6 +52,8 @@ pub struct LensCalibrator {
     pub r_limit: f64,
 
     pub forced_frames: HashSet<i32>,
+
+    pub is_superview: bool,
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
     pub image_points: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
@@ -103,6 +105,8 @@ impl LensCalibrator {
         let all_matches = self.all_matches.clone();
         let is_forced = self.forced_frames.contains(&frame);
 
+        let is_superview = self.is_superview;
+
         if let Some(detected) = all_matches.read().get(&frame) {
             if detected.avg_sharpness < max_sharpness {
                 img_points.write().insert(frame, detected.clone());
@@ -142,7 +146,11 @@ impl LensCalibrator {
                             let sharpness = opencv::calib3d::estimate_chessboard_sharpness(&inp, grid_size, &corners, 0.8, false, &mut Mat::default()).unwrap_or_default();
                             let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
                             let mut points = Vec::with_capacity(corners.rows() as usize);
-                            for (_pos, pt) in corners.iter::<Point2f>()? {
+                            for (_pos, mut pt) in corners.iter::<Point2f>()? {
+                                if is_superview {
+                                    let pt2 = GoProSuperview::from_superview_calib((pt.x / width as f32, pt.y / height as f32));
+                                    pt = Point2f::new(pt2.0 * width as f32, pt2.1 * height as f32);
+                                }
                                 points.push((pt.x * pt_scale, pt.y * pt_scale));
                             }
                             log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
@@ -172,7 +180,11 @@ impl LensCalibrator {
         let find_min = |a: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
 
         let image_points = self.image_points.read().clone();
-        let size = Size::new(self.width as i32, self.height as i32);
+        let mut width = self.width as i32;
+        if self.is_superview {
+            width = (width as f32 / GoProSuperview::ASPECT_SCALE).round() as i32;
+        }
+        let size = Size::new(width, self.height as i32);
         let objp = self.objp.clone();
         let max_images = self.max_images;
         let forced_frames = self.forced_frames.clone();

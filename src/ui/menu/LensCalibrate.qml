@@ -95,6 +95,10 @@ MenuItem {
                     if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
                     if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
+
+                    if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") {
+                        controller.is_superview = true;
+                    }
                 }
             }
             calib.updateTable();

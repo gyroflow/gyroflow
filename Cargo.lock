@@ -1970,9 +1970,9 @@ dependencies = [
 
 [[package]]
 name = "num-iter"
-version = "0.1.42"
+version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2021c8337a54d21aca0d59a92577a029af9431cb59b909b03252b9c164fad59"
+checksum = "7d03e6c028c5dc5cac6e2dec0efda81fc887605bb3d884578bb6d6bf7514e252"
 dependencies = [
  "autocfg",
  "num-integer",
@@ -2244,9 +2244,9 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "pin-project-lite"
-version = "0.2.8"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e280fbe77cc62c91527259e9442153f4688736748d24660126286329742b4c6c"
+checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "pin-utils"
@@ -2938,8 +2938,8 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "telemetry-parser"
-version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#cf4d1498e03b2d36470f08844e6f0972c2b0c9fd"
+version = "0.1.9"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#b95d9204f7e5bf77ac751893cba88f31a5fa75f7"
 dependencies = [
  "argh",
  "byteorder",
@@ -3066,9 +3066,9 @@ checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a01404663e3db436ed2746d9fefef640d868edae3cceb81c3b8d5732fda678f"
+checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
 name = "unicode-normalization"
@@ -3280,7 +3280,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3300,7 +3300,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -3322,7 +3322,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -3359,7 +3359,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "bitflags",
 ]

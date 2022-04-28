@@ -4,6 +4,7 @@
 use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
+use super::distortion_models::GoProSuperview;
 
 pub const COEFFS: [f32; 64+128+256] = [
     // Bilinear
@@ -75,8 +76,18 @@ impl<T: PixelType> Stabilization<T> {
                 if params.r_limit > 0.0 && (pos.0 * pos.0 + pos.1 * pos.1) > r_limit {
                     return None;
                 }
-                let pt = distortion_model.distort_point(pos, &params.k, 0.0);
-                return Some(((pt.0 * params.f[0]) + params.c[0], (pt.1 * params.f[1]) + params.c[1]));
+                let mut uv = distortion_model.distort_point(pos, &params.k, 0.0);
+                uv = ((uv.0 * params.f[0]) + params.c[0], (uv.1 * params.f[1]) + params.c[1]);
+
+                if (params.flags & 2) == 2 { // GoPro Superview
+                    uv = GoProSuperview::to_superview((uv.0 / params.width as f32 - 0.5, uv.1 / params.height as f32 - 0.5));
+                    uv = ((uv.0 + 0.5) * params.width as f32, (uv.1 + 0.5) * params.height as f32);
+                }
+
+                if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
+                if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
+
+                return Some(uv);
             }
             return None;
         }
@@ -138,6 +149,7 @@ impl<T: PixelType> Stabilization<T> {
         
         let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
         let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+        let out_c2 = (params.output_width as f64, params.output_height as f64);
         let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
 
         out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
@@ -161,6 +173,15 @@ impl<T: PixelType> Stabilization<T> {
                     ///////////////////////////////////////////////////////////////////
                     // Add lens distortion back
                     if params.lens_correction_amount < 1.0 {
+                        if (params.flags & 2) == 2 { // Re-add GoPro Superview
+                            let mut pt2 = GoProSuperview::from_superview((out_pos.0 as f64 / out_c2.0 - 0.5, out_pos.1 as f64 / out_c2.1 - 0.5));
+                            pt2 = ((pt2.0 + 0.5) * out_c2.0, (pt2.1 + 0.5) * out_c2.1);
+                            out_pos = (
+                                pt2.0 as f32 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
+                                pt2.1 as f32 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount)
+                            );
+                        }
+
                         out_pos = ((out_pos.0 - out_c.0) / out_f.0, (out_pos.1 - out_c.1) / out_f.1);
                         out_pos = distortion_model.undistort_point(out_pos, &params.k, params.lens_correction_amount).unwrap_or_default();
                         out_pos = ((out_pos.0 * out_f.0) + out_c.0, (out_pos.1 * out_f.1) + out_c.1);
@@ -171,9 +192,6 @@ impl<T: PixelType> Stabilization<T> {
 
                     let idx = sy.min(params.matrix_count as usize - 1);
                     if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {
-                        if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
-                        if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
-
                         let width_f = params.width as f32;
                         let height_f = params.height as f32;
                         match params.background_mode {
@@ -231,6 +249,12 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
         if params.input_horizontal_stretch > 0.001 { x *= params.input_horizontal_stretch; }
         if params.input_vertical_stretch   > 0.001 { y *= params.input_vertical_stretch; }
 
+        if params.is_superview {
+            let pt2 = GoProSuperview::from_superview((x / params.width as f64 - 0.5, y / params.height as f64 - 0.5));
+            x = (pt2.0 + 0.5) * params.width as f64;
+            y = (pt2.1 + 0.5) * params.height as f64;
+        }
+
         let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point
 
         let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
@@ -245,6 +269,14 @@ pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, d
                 pt = ((pt.0 - out_c.0) / f.0, (pt.1 - out_c.1) / f.1);
                 pt = params.distortion_model.distort_point(pt, k, params.lens_correction_amount);
                 pt = ((pt.0 * f.0) + out_c.0, (pt.1 * f.1) + out_c.1);
+
+                if params.is_superview {
+                    // TODO: This calculation is wrong but it somewhat works
+                    let size = (params.width as f64, params.height as f64);
+                    pt = (pt.0 / size.0 - 0.5, pt.1 / size.1 - 0.5);
+                    pt.0 *= 1.0 + (0.15 * (1.0 - params.lens_correction_amount));
+                    pt = ((pt.0 + 0.5) * size.0, (pt.1 + 0.5) * size.1);
+                }
             }
             pt
         } else {

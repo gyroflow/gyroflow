@@ -152,7 +152,18 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         if (params->r_limit > 0.0f && r > params->r_limit) {
             return (float2)(-99999.0f, -99999.0f);
         }
-        return params->f * distort_point(pos, params->k) + params->c;
+        float2 uv = params->f * distort_point(pos, params->k) + params->c;
+
+        if (params->flags & 2) { // GoPro Superview
+            float2 size = (float2)(params->width, params->height);
+            uv = to_superview((uv / size) - 0.5f);
+            uv = (uv + 0.5f) * size;
+        }
+
+        if (params->input_horizontal_stretch > 0.001f) { uv.x /= params->input_horizontal_stretch; }
+        if (params->input_vertical_stretch   > 0.001f) { uv.y /= params->input_vertical_stretch; }
+
+        return uv;
     }
     return (float2)(-99999.0f, -99999.0f);
 }
@@ -191,6 +202,14 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
             float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
             float2 out_f = (params->f / params->fov) / factor;
+
+            if (params->flags & 2) { // Re-add GoPro Superview
+                float2 out_c2 = out_c * 2.0f;
+                float2 pt2 = from_superview((out_pos / out_c2) - 0.5f);
+                pt2 = (pt2 + 0.5f) * out_c2;
+                out_pos = pt2 * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
+            }
+
             out_pos = (out_pos - out_c) / out_f;
             out_pos = undistort_point(out_pos, params->k, params->lens_correction_amount);
             out_pos = out_f * out_pos + out_c;
@@ -202,9 +221,6 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         int idx = min(sy, params->matrix_count - 1) * 9;
         float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
         if (uv.x > -99998.0f) {
-            if (params->input_horizontal_stretch > 0.001f) { uv.x /= params->input_horizontal_stretch; }
-            if (params->input_vertical_stretch   > 0.001f) { uv.y /= params->input_vertical_stretch; }
-
             switch (params->background_mode) {
                 case 1: { // edge repeat
                     uv = max((float2)(0, 0), min((float2)(params->width - 1, params->height - 1), uv));

@@ -58,6 +58,8 @@ pub struct LensProfile {
 
     pub compatible_settings: Vec<serde_json::Value>,
 
+    pub is_superview: bool,
+
     #[serde(skip)]
     pub filename: String,
 
@@ -98,6 +100,7 @@ impl LensProfile {
         self.calib_dimension = Dimensions { w: cal.width, h: cal.height };
         self.orig_dimension  = Dimensions { w: cal.width, h: cal.height };
         self.num_images = cal.used_points.len();
+        self.is_superview = cal.is_superview;
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,

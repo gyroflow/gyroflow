@@ -2,6 +2,8 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 mod opencv_fisheye;
+mod gopro_superview;
+pub use gopro_superview::GoProSuperview;
 
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {

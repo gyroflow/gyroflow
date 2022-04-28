@@ -100,7 +100,18 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
         if (params.r_limit > 0.0 && r > params.r_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
-        return f * distort_point(pos, k) + c;
+        var uv = f * distort_point(pos, k) + c;
+
+        if (bool(params.flags & 2)) { // GoPro Superview
+            let size = vec2<f32>(params.width, params.height);
+            uv = to_superview((uv / size) - 0.5);
+            uv = (uv + 0.5) * size;
+        }
+        
+        if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
+        if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
+
+        return uv 
     }
     return vec2<f32>(-99999.0, -99999.0);
 }
@@ -141,6 +152,14 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
         let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
         let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
         let out_f = (params.f / params.fov) / factor;
+        
+        if (bool(params.flags & 2)) { // Re-add GoPro Superview
+            let out_c2 = out_c * 2.0;
+            var pt2 = from_superview((out_pos / out_c2) - 0.5);
+            pt2 = (pt2 + 0.5) * out_c2;
+            out_pos = pt2 * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+        }
+
         out_pos = (out_pos - out_c) / out_f;
         out_pos = undistort_point(out_pos, params.k, params.lens_correction_amount);
         out_pos = out_f * out_pos + out_c;
@@ -151,9 +170,6 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
  
     var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k);
     if (uv.x > -99998.0) {
-        if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
-        if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
-
         let width_f = f32(params.width);
         let height_f = f32(params.height);
         if (params.background_mode == 1) { // edge repeat

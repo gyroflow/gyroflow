@@ -4,6 +4,7 @@
 use ocl::*;
 use parking_lot::RwLock;
 use crate::stabilization::KernelParams;
+use crate::stabilization::distortion_models::GoProSuperview;
 
 pub struct OclWrapper {
     kernel: Kernel,
@@ -95,6 +96,7 @@ impl OclWrapper {
             let queue = Queue::new(&ctx.context, ctx.device, None)?;
 
             let mut kernel = include_str!("opencl_undistort.cl").to_string();
+            kernel.insert_str(0, GoProSuperview::opencl_functions());
             kernel.insert_str(0, lens_model_funcs);
 
             let program = Program::builder()

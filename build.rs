@@ -7,7 +7,7 @@ use std::env;
 use walkdir::WalkDir;
 use cc;
 
-fn compile_qml(qt_include_path: &str, qt_library_path: &str) {
+fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
     config.include(&qt_include_path);
     config.include(&format!("{}/QtCore", qt_include_path));
@@ -18,13 +18,15 @@ fn compile_qml(qt_include_path: &str, qt_library_path: &str) {
         config.flag(f);
     }
 
-    let out_dir = env::var_os("OUT_DIR").unwrap();
+    println!("cargo:rerun-if-changed={}", dir);
+
+    let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
-    let main_dir = env::var_os("CARGO_MANIFEST_DIR").unwrap();
+    let main_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     let mut files = Vec::new();
     let mut qrc = "<RCC>\n<qresource prefix=\"/\">\n".to_string();
-    WalkDir::new("src/ui/").into_iter().flatten().for_each(|entry| {
+    WalkDir::new(dir).into_iter().flatten().for_each(|entry| {
         let f_name = entry.path().to_string_lossy().replace('\\', "/");
         if f_name.ends_with(".qml") || f_name.ends_with(".js") {
             qrc.push_str(&format!("<file>{}</file>\n", f_name));
@@ -32,7 +34,7 @@ fn compile_qml(qt_include_path: &str, qt_library_path: &str) {
             let cpp_name = f_name.replace("/", "_").replace(".qml", ".cpp").replace(".js", ".cpp");
             let cpp_path = out_dir.join(cpp_name).to_string_lossy().to_string();
 
-            config.file(&cpp_path);
+            config.file(&cpp_path); 
             files.push((f_name, cpp_path));
         }
     });
@@ -63,20 +65,20 @@ fn compile_qml(qt_include_path: &str, qt_library_path: &str) {
 }
 
 fn main() {
-    let qt_include_path = std::env::var("DEP_QT_INCLUDE_PATH").unwrap();
-    let qt_library_path = std::env::var("DEP_QT_LIBRARY_PATH").unwrap();
-    let qt_version      = std::env::var("DEP_QT_VERSION").unwrap();
+    let qt_include_path = env::var("DEP_QT_INCLUDE_PATH").unwrap();
+    let qt_library_path = env::var("DEP_QT_LIBRARY_PATH").unwrap();
+    let qt_version      = env::var("DEP_QT_VERSION").unwrap();
 
     if let Ok(out_dir) = env::var("OUT_DIR") {
         if out_dir.contains("\\target\\deploy\\") || out_dir.contains("/target/deploy/") {
-            compile_qml(&qt_include_path, &qt_library_path);
-            println!("cargo:rustc-cfg=compiled_qml")
+            compile_qml("src/ui/", &qt_include_path, &qt_library_path);
+            println!("cargo:rustc-cfg=compiled_qml");
         }
     }
 
     let mut config = cpp_build::Config::new();
 
-    for f in std::env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
+    for f in env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
     }
     

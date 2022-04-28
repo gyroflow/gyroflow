@@ -1487,9 +1487,9 @@ dependencies = [
 
 [[package]]
 name = "num-iter"
-version = "0.1.42"
+version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2021c8337a54d21aca0d59a92577a029af9431cb59b909b03252b9c164fad59"
+checksum = "7d03e6c028c5dc5cac6e2dec0efda81fc887605bb3d884578bb6d6bf7514e252"
 dependencies = [
  "autocfg",
  "num-integer",
@@ -2246,8 +2246,8 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "telemetry-parser"
-version = "0.1.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#cf4d1498e03b2d36470f08844e6f0972c2b0c9fd"
+version = "0.1.9"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#b95d9204f7e5bf77ac751893cba88f31a5fa75f7"
 dependencies = [
  "argh",
  "byteorder",
@@ -2462,7 +2462,7 @@ checksum = "9c97e489d8f836838d497091de568cf16b117486d529ec5579233521065bd5e4"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2482,7 +2482,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2504,7 +2504,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2541,7 +2541,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#e54a36ee78693aca0120458bcc2c03262a715f1e"
+source = "git+https://github.com/gfx-rs/wgpu.git#ebca3298f01ea72f80aeac4ab1be889469f9c699"
 dependencies = [
  "bitflags",
 ]

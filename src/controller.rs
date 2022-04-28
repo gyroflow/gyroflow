@@ -161,6 +161,8 @@ pub struct Controller {
     set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
     set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
 
+    is_superview: qt_property!(bool; WRITE set_is_superview),
+
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
     open_file_externally: qt_method!(fn(&self, path: QString)),
@@ -687,6 +689,7 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
+    wrap_simple_method!(set_is_superview,           v: bool);
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);

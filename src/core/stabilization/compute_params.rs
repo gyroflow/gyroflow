@@ -38,6 +38,7 @@ pub struct ComputeParams {
     pub input_horizontal_stretch: f64,
     pub input_vertical_stretch: f64,
     pub adaptive_zoom_window: f64,
+    pub is_superview: bool,
     pub framebuffer_inverted: bool,
 
     pub zooming_debug_points: bool,
@@ -103,6 +104,7 @@ impl ComputeParams {
             input_vertical_stretch,
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
+            is_superview: lens.is_superview,
 
             distortion_model,
 

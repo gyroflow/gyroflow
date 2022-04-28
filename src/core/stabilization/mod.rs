@@ -32,7 +32,8 @@ impl Default for Interpolation {
 bitflags::bitflags! {
     #[derive(Default)]
     pub struct KernelParamsFlags: i32 {
-        const FIX_COLOR_RANGE = 1;
+        const FIX_COLOR_RANGE    = 1;
+        const IS_GOPRO_SUPERVIEW = 2;
     }
 }
 
@@ -97,6 +98,7 @@ impl<T: PixelType> Stabilization<T> {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
+        self.kernel_flags.set(KernelParamsFlags::IS_GOPRO_SUPERVIEW, self.compute_params.is_superview);
     }
 
     fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64) {

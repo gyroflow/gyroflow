@@ -534,6 +534,14 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); }
     pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
 
+    pub fn set_is_superview(&self, v: bool) {
+        self.lens.write().is_superview = v;
+        if let Some(ref mut calib) = *self.lens_calibrator.write() {
+            calib.is_superview = v;
+        }
+        self.invalidate_zooming();
+    }
+    
     pub fn remove_offset(&self, timestamp_us: i64) {
         self.gyro.write().remove_offset(timestamp_us);
         self.invalidate_zooming();

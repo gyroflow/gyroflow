@@ -7,6 +7,7 @@ use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
 use parking_lot::RwLock;
 use crate::stabilization::KernelParams;
+use crate::stabilization::distortion_models::GoProSuperview;
 
 pub struct WgpuWrapper  {
     device: wgpu::Device,
@@ -75,6 +76,7 @@ impl WgpuWrapper {
             }, None)).ok()?;
 
             let mut shader_str = include_str!("wgpu_undistort.wgsl").to_string();
+            shader_str.insert_str(0, GoProSuperview::wgsl_functions());
             shader_str.insert_str(0, lens_model_funcs);
             shader_str = shader_str.replace("SCALAR", wgpu_format.1);
             shader_str = shader_str.replace("bg_scaler", &format!("{:.6}", wgpu_format.2));
