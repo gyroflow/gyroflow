@@ -70,11 +70,9 @@ fn main() {
     let qt_version      = env::var("DEP_QT_VERSION").unwrap();
 
     if let Ok(out_dir) = env::var("OUT_DIR") {
-        if out_dir.contains("target\\deploy") || out_dir.contains("target/deploy") {
+        if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") {
             compile_qml("src/ui/", &qt_include_path, &qt_library_path);
             println!("cargo:rustc-cfg=compiled_qml");
-        } else {
-            panic!("out_dir: {}", out_dir);
         }
     }
 

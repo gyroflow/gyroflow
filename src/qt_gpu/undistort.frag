@@ -41,7 +41,7 @@ layout(std140, binding = 2) uniform KernelParams {
 layout(binding = 3) uniform sampler2D texParams;
 
 float get_param(float row, float idx) {
-    return texture(texParams, vec2(idx / 8.0, row / float(params.matrix_count - 1))).r;
+    return texture(texParams, vec2(idx / 8.0, row / float(params.height - 1))).r;
 }
 
 vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_limit) {

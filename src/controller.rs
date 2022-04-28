@@ -696,11 +696,11 @@ impl Controller {
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
 
-    wrap_simple_method!(set_lens_correction_amount, v: f64; recompute);
-    wrap_simple_method!(set_input_horizontal_stretch, v: f64; recompute);
-    wrap_simple_method!(set_input_vertical_stretch, v: f64; recompute);
-    wrap_simple_method!(set_background_mode, v: i32; recompute);
-    wrap_simple_method!(set_background_margin, v: f64; recompute);
+    wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute);
+    wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
+    wrap_simple_method!(set_input_vertical_stretch,    v: f64; recompute);
+    wrap_simple_method!(set_background_mode,           v: i32; recompute);
+    wrap_simple_method!(set_background_margin,         v: f64; recompute);
     wrap_simple_method!(set_background_margin_feather, v: f64; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
