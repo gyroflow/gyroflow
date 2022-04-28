@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-// https://github.com/gyroflow/gyroflow/issues/43
+// See https://github.com/gyroflow/gyroflow/issues/43 for research details
 
 #[derive(Default, Clone)]
 pub struct GoProSuperview { }
 
 impl GoProSuperview {
     pub const ASPECT_SCALE: f32 = 1.33333333;
-    pub const HORIZONTAL_SCALE: f32 = 1.46;
     
     /// `pt` range: [-0.5, 0.5]
     pub fn from_superview(mut pt: (f64, f64)) -> (f64, f64) {
@@ -26,17 +25,6 @@ impl GoProSuperview {
         pt.0 = (1.11111 - 0.5 * (4.93827 - 8.88889 * pt.0.abs()).sqrt()) * ( pt.0 / pt.0.abs().max(0.000001));
 
         pt
-    }
-
-    /// `pt` range: [-1.0, 1.0]
-    pub fn transform_point_from_superview(pt: &mut (f64, f64)) {
-        //pt.0 /= GoProSuperview::HORIZONTAL_SCALE as f64;
-        pt.0 /= 2.0; pt.1 /= 2.0;
-
-        let pt2 = Self::from_superview(*pt);
-
-        pt.0 = pt2.0 * 2.0;// * GoProSuperview::HORIZONTAL_SCALE as f64;
-        pt.1 = pt2.1 * 2.0;
     }
 
     /// `pt` range: [0, 1]
