@@ -223,7 +223,7 @@ impl PoseEstimator {
     }
 
     pub fn optical_flow(&self, num_frames: usize) {
-        let mut to_items= BTreeMap::<usize, EstimatorItem>::new();
+        let mut to_items = BTreeMap::<usize, EstimatorItem>::new();
         if let Some(l) = self.sync_results.try_read() {
             l.iter().for_each(|(&i, fr)| {to_items.insert(i, fr.item.clone());} );
         }
