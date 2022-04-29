@@ -457,6 +457,7 @@ impl RenderQueue {
         
         let ext = match codec {
             "ProRes"        => ".mov",
+            "DNxHD"         => ".mov",
             "EXR Sequence"  => "_%05d.exr",
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"

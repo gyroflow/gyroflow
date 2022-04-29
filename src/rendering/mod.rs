@@ -94,6 +94,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("prores_videotoolbox", true),
                 ("prores_ks", false)
             ],
+            "DNxHD"  => vec![("dnxhd", false)],
             _        => vec![]
         }
     } else {
@@ -101,6 +102,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "x264"   => vec![("libx264", false)],
             "x265"   => vec![("libx265", false)],
             "ProRes" => vec![("prores_ks", false)],
+            "DNxHD"  => vec![("dnxhd", false)],
             _        => vec![]
         }
     };
@@ -173,6 +175,15 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 }
             }
             proc.video.clone_frames = proc.video_codec.as_deref() == Some("prores_ks");
+        }
+        Some("dnxhd") => {
+            let profiles = ["DNxHD", "DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"];
+            let pix_fmts = [Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P10LE, Pixel::YUV444P10LE];
+            if let Some(profile) = profiles.iter().position(|&x| x == render_options.codec_options) {
+                proc.video.codec_options.set("profile", &format!("{}", profile));
+                proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+            }
+            proc.video.clone_frames = true;
         }
         Some("png") => {
             if render_options.codec_options.contains("16-bit") {
