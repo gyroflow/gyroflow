@@ -173,7 +173,7 @@ Rectangle {
                     anchors.right: parent.right;
                     anchors.rightMargin: 55 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
-                    text: isAddToQueue? qsTr("Add to render queue") : qsTr("Export");
+                    text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
                     icon.name: "video";
                     enabled: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     opacity: enabled? 1.0 : 0.6;
@@ -182,7 +182,7 @@ Rectangle {
                     fadeWhenDisabled: false;
                     property bool isAddToQueue: false;
 
-                    model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
+                    model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
                     function renameOutput() {
                         const orgOutput = outputFile.text;
@@ -251,7 +251,7 @@ Rectangle {
                             renderBtn.clicked();
                             return;
                         }
-                        controller.export_gyroflow(index == 2, JSON.stringify(exportSettings.getExportOptions()), "");
+                        controller.export_gyroflow_file(index == 2, JSON.stringify(exportSettings.getExportOptions()), "", false);
                     }
                 }
                 LinkButton {
@@ -322,10 +322,10 @@ Rectangle {
         target: controller;
         function onError(text: string, arg: string, callback: string) {
             text = getReadableError(qsTr(text).arg(arg));
-            messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+            messageBox(Modal.Error, text, [ { text: qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onMessage(text: string, arg: string, callback: string) {
-            messageBox(Modal.Info, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+            messageBox(Modal.Info, qsTr(text).arg(arg), [ { text: qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
@@ -340,6 +340,28 @@ Rectangle {
             gfFileDialog.currentFolder = controller.path_to_url(path);
             gfFileDialog.open();
         }
+        function onGyroflow_exists(path: string, thin: bool) {
+            messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
+                { text: qsTr("Overwrite"), "accent": true, clicked: () => {
+                    controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), path, true);
+                } },
+                { text: qsTr("Rename"), clicked: () => {
+                    let output = path;
+                    let i = 1;
+                    while (controller.file_exists(output)) {
+                        output = path.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
+                        if (i > 1000) break;
+                    }
+                    controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), output, true);
+                } },
+                { text: qsTr("Choose a different location"), clicked: () => {
+                    gfFileDialog.thin = thin;
+                    gfFileDialog.currentFolder = controller.path_to_url(path);
+                    gfFileDialog.open();
+                } },
+                { text: qsTr("Cancel") }
+            ], undefined, Text.MarkdownText);
+        }
     }
     FileDialog {
         id: gfFileDialog;
@@ -347,7 +369,7 @@ Rectangle {
         title: qsTr("Select file destination");
         nameFilters: ["*.gyroflow"];
         property bool thin: true;
-        onAccepted: controller.export_gyroflow(thin, JSON.stringify(exportSettings.getExportOptions()), controller.url_to_path(selectedFile));
+        onAccepted: controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), controller.url_to_path(selectedFile), true);
     }
 
     Component.onCompleted: {

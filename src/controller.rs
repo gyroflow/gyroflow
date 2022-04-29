@@ -152,8 +152,9 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    import_gyroflow: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
-    export_gyroflow: qt_method!(fn(&self, thin: bool, output_options: QString, override_location: QString)),
+    import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
+    import_gyroflow_data: qt_method!(fn(&mut self, data: QString) -> QJsonObject),
+    export_gyroflow_file: qt_method!(fn(&self, thin: bool, output_options: QJsonObject, override_location: QString, overwrite: bool)),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -176,6 +177,7 @@ pub struct Controller {
     message: qt_signal!(text: QString, arg: QString, callback: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
+    gyroflow_exists: qt_signal!(path: QString, thin: bool),
     request_location: qt_signal!(path: QString, thin: bool),
 
     preview_resolution: i32,
@@ -638,7 +640,7 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow(&self, thin: bool, output_options: QString, override_location: QString) {
+    fn export_gyroflow_file(&self, thin: bool, output_options: QJsonObject, override_location: QString, overwrite: bool) {
         let gf_path = if override_location.is_empty() {
             let video_path = self.stabilizer.video_path.read().clone();
             let video_path = std::path::Path::new(&video_path);
@@ -646,21 +648,32 @@ impl Controller {
         } else {
             override_location.to_string()
         };
-        match self.stabilizer.export_gyroflow(&gf_path, thin, output_options.to_string()) {
-            Ok(_) => {
-                self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
-            },
-            Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
-                self.request_location(QString::from(gf_path), thin);
-            },
-            Err(e) => {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+
+        if !overwrite && std::path::Path::new(&gf_path).exists() {
+            self.gyroflow_exists(QString::from(gf_path), thin);
+        } else {
+            match self.stabilizer.export_gyroflow_file(&gf_path, thin, output_options.to_json().to_string()) {
+                Ok(_) => {
+                    self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
+                },
+                Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                    self.request_location(QString::from(gf_path), thin);
+                },
+                Err(e) => {
+                    self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                }
             }
         }
     }
 
-    fn import_gyroflow(&mut self, url: QUrl) -> QJsonObject {
-        match self.stabilizer.import_gyroflow(&util::url_to_path(url), false) {
+    fn import_gyroflow_file(&mut self, url: QUrl) -> QJsonObject {
+        self.import_gyroflow_internal(self.stabilizer.import_gyroflow_file(&util::url_to_path(url), false))
+    }
+    fn import_gyroflow_data(&mut self, data: QString) -> QJsonObject {
+        self.import_gyroflow_internal(self.stabilizer.import_gyroflow_data(data.to_string().as_bytes(), false, None))
+    }
+    fn import_gyroflow_internal(&mut self, result: std::io::Result<serde_json::Value>) -> QJsonObject {
+        match result {
             Ok(thin_obj) => {
                 self.lens_loaded = true;
                 self.lens_changed();

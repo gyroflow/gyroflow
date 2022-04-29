@@ -245,7 +245,20 @@ Item {
                 Action {
                     icon.name: "play";
                     text: qsTr("Render now");
+                    enabled: !isFinished;
                     onTriggered: render_queue.render_job(job_id, true);
+                }
+                Action {
+                    icon.name: "pencil";
+                    text: qsTr("Edit");
+                    onTriggered:{
+                        const data = render_queue.get_gyroflow_data(job_id);
+                        if (data) {
+                            window.videoArea.loadGyroflowData(JSON.parse(data));
+                        }
+                        render_queue.editing_job_id = job_id;
+                        root.shown = false;
+                    }
                 }
                 Action {
                     icon.name: "spinner";

@@ -312,7 +312,8 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
                 Pixel::P210LE | Pixel::P216LE |
                 Pixel::P410LE | Pixel::P416LE => {
                     let max_val = match input_frame.format() {
-                        Pixel::P010LE | Pixel::P210LE | Pixel::P410LE => 1023.0,
+                        // I'm not sure if this is correct but it appears that P010LE uses 16-bit values, even though it's 10-bit
+                        //Pixel::P010LE | Pixel::P210LE | Pixel::P410LE => 1023.0,
                         _ => 65535.0
                     };
                     create_planes_proc!(planes,

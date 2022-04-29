@@ -42,7 +42,7 @@ struct Job {
     stab: Arc<StabilizationManager<stabilization::RGBA8>>
 }
 
-#[derive(Default, Clone, serde::Deserialize)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct RenderOptions {
     pub codec: String,
@@ -61,6 +61,7 @@ impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
         let codec_info = match self.codec.as_ref() {
             "x264" | "x265" => format!("{} {:.0} Mbps", self.codec, self.bitrate),
+            "DNxHD" => self.codec_options.clone(),
             "ProRes" => format!("{} {}", self.codec, self.codec_options),
             _ => self.codec.clone()
         };
@@ -86,6 +87,7 @@ pub struct RenderQueue {
     render_job: qt_method!(fn(&self, job_id: u32, single: bool)),
     cancel_job: qt_method!(fn(&self, job_id: u32)),
     reset_job: qt_method!(fn(&self, job_id: u32)),
+    get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
     add_file: qt_method!(fn(&mut self, url: QUrl, controller: QJSValue, options_json: String) -> u32),
 
@@ -94,6 +96,7 @@ pub struct RenderQueue {
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
 
     main_job_id: qt_property!(u32),
+    editing_job_id: qt_property!(u32; NOTIFY queue_changed),
 
     start_timestamp: qt_property!(u64; NOTIFY progress_changed),
     end_timestamp: qt_property!(u64; NOTIFY progress_changed),
@@ -165,7 +168,11 @@ impl RenderQueue {
     }
 
     pub fn add(&mut self, controller: QJSValue, options_json: String, thumbnail_url: QString) -> u32 {
-        let job_id = fastrand::u32(..);
+        let job_id = if self.editing_job_id > 0 {
+            self.editing_job_id
+        } else {
+            fastrand::u32(..) + 1
+        };
 
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
@@ -182,7 +189,21 @@ impl RenderQueue {
         let trim_ratio = render_options.trim_end - render_options.trim_start;
         let video_path = stab.video_path.read().clone();
 
-        {
+        let editing = self.jobs.contains_key(&job_id);
+
+        if editing {
+            update_model!(self, job_id, itm {
+                itm.output_path = QString::from(render_options.output_path.as_str());
+                itm.export_settings = QString::from(render_options.settings_string(params.fps));
+                itm.thumbnail_url = thumbnail_url;
+                itm.current_frame = 0;
+                itm.total_frames = (params.frame_count as f64 * trim_ratio).ceil() as u64;
+                itm.start_timestamp = 0;
+                itm.end_timestamp = 0;
+                itm.error_string = QString::default();
+                itm.status = JobStatus::Queued;
+            });
+        } else {
             let mut q = self.queue.borrow_mut();
             q.push(RenderQueueItem {
                 job_id,
@@ -225,6 +246,9 @@ impl RenderQueue {
         if let Some(job) = self.jobs.get(&job_id) {
             job.cancel_flag.store(true, SeqCst);
             self.queue.borrow_mut().remove(job.queue_index);
+            if self.editing_job_id == job_id {
+                self.editing_job_id = 0;
+            }
             self.queue_changed();
         }
         self.jobs.remove(&job_id);
@@ -319,8 +343,18 @@ impl RenderQueue {
         }
         update_model!(self, job_id, itm {
             itm.error_string = QString::default();
+            itm.current_frame = 0;
             itm.status = JobStatus::Queued;
         });
+    }
+
+    pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
+        if let Some(job) = self.jobs.get(&job_id) {
+            if let Ok(data) = job.stab.export_gyroflow_data(true, serde_json::to_string(&job.render_options).unwrap_or_default()) {
+                return QString::from(data);
+            }
+        }
+        QString::default()
     }
 
     pub fn render_job(&self, job_id: u32, single: bool) {
@@ -560,7 +594,7 @@ impl RenderQueue {
                     };
 
                     if path.ends_with(".gyroflow") {
-                        match stab.import_gyroflow(&path, true) {
+                        match stab.import_gyroflow_file(&path, true) {
                             Ok(obj) => {
                                 if let Some(out) = obj.get("output") {
                                     if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
@@ -623,7 +657,7 @@ impl RenderQueue {
                                 render_options.output_height = output_dim.h;
                             }
 
-                            // stab.export_gyroflow(format!("{}.gyroflow", path), false);
+                            // stab.export_gyroflow_file(format!("{}.gyroflow", path), false);
 
                             loaded(render_options);
 

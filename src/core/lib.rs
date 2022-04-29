@@ -689,9 +689,13 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_smoothing();
     }
 
-    pub fn export_gyroflow(&self, filepath: impl AsRef<std::path::Path>, thin: bool, output_options: String) -> std::io::Result<()> {
-        use std::io::{ BufWriter, Write };
+    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, output_options: String) -> std::io::Result<()> {
+        let data = self.export_gyroflow_data(thin, output_options)?;
+        std::fs::write(filepath, data)?;
 
+        Ok(())
+    }
+    pub fn export_gyroflow_data(&self, thin: bool, output_options: String) -> std::io::Result<String> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -777,20 +781,19 @@ impl<T: PixelType> StabilizationManager<T> {
             // "frame_orientation": {}, // timestamp, original frame quaternion
             // "stab_transform":    {} // timestamp, final quaternion
         });
-        
-        let file = std::fs::File::create(filepath)?;
-        let mut writer = BufWriter::new(file);
-        serde_json::to_writer_pretty(&mut writer, &obj)?;
-        writer.flush()?;
 
-        Ok(())
+        Ok(serde_json::to_string_pretty(&obj)?)
     }
-    pub fn import_gyroflow(&self, path: &str, blocking: bool) -> std::io::Result<serde_json::Value> {
+    pub fn import_gyroflow_file(&self, path: &str, blocking: bool) -> std::io::Result<serde_json::Value> {
+        let data = std::fs::read(path)?;
+        self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()))
+    }
+    pub fn import_gyroflow_data(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>) -> std::io::Result<serde_json::Value> {
         let get_new_path = |file_path: &str| -> PathBuf {
             let mut file_path = std::path::Path::new(file_path).to_path_buf();
-            if !file_path.exists() {
+            if path.is_some() && !file_path.exists() {
                 if let Some(filename) = file_path.file_name() {
-                    let new_path = std::path::Path::new(path).with_file_name(filename);
+                    let new_path = path.as_ref().unwrap().with_file_name(filename);
                     if new_path.exists() {
                         file_path = new_path;
                     }
@@ -799,7 +802,6 @@ impl<T: PixelType> StabilizationManager<T> {
             file_path
         };
 
-        let data = std::fs::read(path)?;
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
