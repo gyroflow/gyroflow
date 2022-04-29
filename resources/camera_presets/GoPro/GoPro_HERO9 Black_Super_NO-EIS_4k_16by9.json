@@ -1,0 +1,92 @@
+{
+  "name": "GoPro_HERO9 Black_Super_NO-EIS_4k_16by9_3840x2160-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO9 Black",
+  "lens_model": "Super",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 33,
+  "fps": 29.97003,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.7282398322392503,
+    "camera_matrix": [
+      [
+        1323.2487973131952,
+        0.0,
+        1459.7248605082834
+      ],
+      [
+        0.0,
+        1327.1713108554418,
+        1094.8637024694733
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.016868930674287182,
+      0.1864442404268205,
+      -0.13335466118129663,
+      0.03198985786290309
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero9black-super-3840x2160@29970-no-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": [
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@23976-no-eis", "fps": 23.976 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@25000-no-eis", "fps": 25.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@29970-no-eis", "fps": 29.97 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@50000-no-eis", "fps": 50.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@59940-no-eis", "fps": 59.94 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@100000-no-eis", "fps": 100.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero9black-super-1920x1080@119880-no-eis", "fps": 119.88 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero9black-super-2704x1520@23976-no-eis", "fps": 23.976 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero9black-super-2704x1520@25000-no-eis", "fps": 25.0 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero9black-super-2704x1520@29970-no-eis", "fps": 29.97 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero9black-super-2704x1520@50000-no-eis", "fps": 50.0 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero9black-super-2704x1520@59940-no-eis", "fps": 59.94 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero9black-super-3840x2160@23976-no-eis", "fps": 23.976 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero9black-super-3840x2160@25000-no-eis", "fps": 25.0 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero9black-super-5120x2880@23976-no-eis", "fps": 23.976 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero9black-super-5120x2880@25000-no-eis", "fps": 25.0 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero9black-super-5120x2880@29970-no-eis", "fps": 29.97 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero9black-super-5120x2880@50000-no-eis", "fps": 50.0 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero9black-super-5120x2880@59940-no-eis", "fps": 59.94 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero9black-super-5312x2988@23976-no-eis", "fps": 23.976 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero9black-super-5312x2988@25000-no-eis", "fps": 25.0 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero9black-super-5312x2988@29970-no-eis", "fps": 29.97 }
+  ],
+  "is_superview": true,
+  "distortion_model_id": 0
+}

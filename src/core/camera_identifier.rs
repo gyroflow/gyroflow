@@ -71,6 +71,11 @@ impl CameraIdentifier {
                                         _ => id.lens_info = v.into()
                                     };
                                 }
+                                if let Some(v) = map.get_t(TagId::Unknown(0x5a464f56/*ZFOV*/)) as Option<&f32> {
+                                    if id.lens_info == "Linear" && *v < 80.0 {
+                                        id.lens_info = "Narrow".into();
+                                    }
+                                }
                                 if let Some(v) = map.get_t(TagId::Unknown(0x50524a54/*PRJT*/)) as Option<&String> {
                                     if v.as_str() == "GPMW" {
                                         id.lens_info = "Max Wide".into();

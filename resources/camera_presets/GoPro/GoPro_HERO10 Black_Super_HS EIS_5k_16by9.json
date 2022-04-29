@@ -1,0 +1,100 @@
+{
+  "name": "GoPro_HERO10 Black_Super_HS EIS_5k_16by9_5312x2988-29.97fps",
+  "note": "HS EIS",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO10 Black",
+  "lens_model": "Super",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 30,
+  "fps": 29.97003,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.1437346556346513,
+    "camera_matrix": [
+      [
+        1988.056873288227,
+        0.0,
+        2049.045653623447
+      ],
+      [
+        0.0,
+        1992.6857100952777,
+        1485.084055477165
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.030576430295878657,
+      0.2354852822844826,
+      -0.1625915041802617,
+      0.025462668188492472
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero10black-super-5312x2988@29970-hseis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": [
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@23976-hseis", "fps": 23.976 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@25000-hseis", "fps": 25.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@29970-hseis", "fps": 29.97 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@50000-hseis", "fps": 50.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@59940-hseis", "fps": 59.94 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@100000-hseis", "fps": 100.0 }, 
+    { "width": 1920, "height": 1080, "identifier": "gopro-hero10black-super-1920x1080@119880-hseis", "fps": 119.88 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@23976-hseis", "fps": 23.976 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@25000-hseis", "fps": 25.0 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@29970-hseis", "fps": 29.97 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@50000-hseis", "fps": 50.0 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@59940-hseis", "fps": 59.94 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@100000-hseis", "fps": 100.0 }, 
+    { "width": 2704, "height": 1520, "identifier": "gopro-hero10black-super-2704x1520@119880-hseis", "fps": 119.88 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@23976-hseis", "fps": 23.976 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@25000-hseis", "fps": 25.0 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@29970-hseis", "fps": 29.97 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@50000-hseis", "fps": 50.0 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@59940-hseis", "fps": 59.94 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@100000-hseis", "fps": 100.0 }, 
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero10black-super-3840x2160@119880-hseis", "fps": 119.88 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero10black-super-5120x2880@23976-hseis", "fps": 23.976 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero10black-super-5120x2880@25000-hseis", "fps": 25.0 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero10black-super-5120x2880@29970-hseis", "fps": 29.97 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero10black-super-5120x2880@50000-hseis", "fps": 50.0 }, 
+    { "width": 5120, "height": 2880, "identifier": "gopro-hero10black-super-5120x2880@59940-hseis", "fps": 59.94 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero10black-super-5312x2988@23976-hseis", "fps": 23.976 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero10black-super-5312x2988@25000-hseis", "fps": 25.0 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero10black-super-5312x2988@50000-hseis", "fps": 50.0 }, 
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero10black-super-5312x2988@59940-hseis", "fps": 59.94 }
+  ],
+  "is_superview": true,
+  "distortion_model_id": 0
+}
