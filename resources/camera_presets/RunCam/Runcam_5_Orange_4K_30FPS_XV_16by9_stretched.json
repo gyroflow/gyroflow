@@ -5,33 +5,34 @@
     "camera_brand": "Runcam",
     "camera_model": "5 Orange",
     "lens_model": "",
-    "camera_setting": "4K 30FPS XV",
+    "camera_setting": "4K 30FPS XV Vertical",
     "calibrator_version": "0.3.0-beta/dev",
     "date": "2021-07-15",
     "official": true,
     "calib_dimension": {
-        "w": 2880,
-        "h": 2160
+        "w": 3840,
+        "h": 2880
     },
     "orig_dimension": {
         "w": 3840,
         "h": 2160
     },
-    "input_horizontal_stretch": 0.75,
+    "input_horizontal_stretch": 1.0,
+    "input_vertical_stretch": 1.3333333333333333,
     "num_images": 39,
     "use_opencv_fisheye": true,
     "fisheye_params": {
         "RMS_error": 0.6469335387018417,
         "camera_matrix": [
             [
-                1503.6509757882493,
+                2004.8679676,
                 0.0,
-                1440.0
+                1920.0
             ],
             [
                 0.0,
-                1504.4333376346274,
-                1080.0
+                2005.911116,
+                1440.0
             ],
             [
                 0.0,

@@ -646,9 +646,16 @@ impl RenderQueue {
                             if !id_str.is_empty() {
                                 let db = stab.lens_profile_db.read();
                                 if db.contains_id(&id_str) {
-                                    if let Err(e) = stab.load_lens_profile(&id_str) {
-                                        err(("An error occured: %1".to_string(), e.to_string()));
-                                        return;
+                                    match stab.load_lens_profile(&id_str) {
+                                        Ok(_) => {
+                                            if let Some(fr) = stab.lens.read().frame_readout_time {
+                                                stab.params.write().frame_readout_time = fr;
+                                            }
+                                        }
+                                        Err(e) => {
+                                            err(("An error occured: %1".to_string(), e.to_string()));
+                                            return;
+                                        }
                                     }
                                 }
                             }

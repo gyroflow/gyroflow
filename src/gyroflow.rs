@@ -52,8 +52,10 @@ fn entry() {
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
 
-    // rendering::set_gpu_type_from_name("nvidia");
+    // let _time = std::time::Instant::now();
+    // rendering::set_gpu_type_from_name("Apple M1");
     // rendering::test();
+    // println!("Done in {:.3}ms", _time.elapsed().as_micros() as f64 / 1000.0);
     // return;
 
     let icons_path = if ui_live_reload {

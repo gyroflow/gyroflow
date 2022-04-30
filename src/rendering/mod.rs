@@ -20,7 +20,7 @@ use parking_lot::RwLock;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
-    NVIDIA, AMD, Intel, Unknown
+    NVIDIA, AMD, Intel, AppleM1, Unknown
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
@@ -31,6 +31,7 @@ pub fn set_gpu_type_from_name(name: &str) {
          if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::NVIDIA; }
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::AMD; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
+    else if name.contains("Apple M1") { *GPU_TYPE.write() = GpuType::AppleM1; }
     else {
         log::warn!("Unknown GPU {}", name);
     }
@@ -43,8 +44,8 @@ pub fn set_gpu_type_from_name(name: &str) {
     if gpu_type == GpuType::AMD {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
     }
-    // #[cfg(any(target_os = "macos", target_os = "ios"))]
-    // ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
 
     dbg!(gpu_type);
 }
@@ -482,9 +483,10 @@ pub fn test() {
     let duration_ms = 15015.0;
     let frame_count = 900;
     let fps = 60000.0/1001.0;
-    let video_size = (3840, 2160);
+    //let video_size = (3840, 2160);
+    let video_size = (5120, 3840);
 
-    let vid = "E:/clips/GoPro/h9-test3.mp4";
+    let vid = "/Users/eddy/Downloads/colors-GX029349.MP4";
 
     stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size).unwrap();
     {
@@ -494,16 +496,17 @@ pub fn test() {
         gyro.integration_method = 1;
         gyro.integrate();
     }
-    stab.load_lens_profile("E:/clips/GoPro/GoPro_Hero_7_Black_4K_60_wide_16by9_1_120.json").unwrap();
+    // stab.load_lens_profile("E:/clips/GoPro/GoPro_Hero_7_Black_4K_60_wide_16by9_1_120.json").unwrap();
     stab.set_size(video_size.0, video_size.1);
-    //stab.set_smoo
+    stab.set_smoothing_method(0);
     //stab.smoothing_id = 1;
     //stab.smoothing_algs[1].as_mut().set_parameter("time_constant", 0.4);
     {
         let mut params = stab.params.write();
-        params.frame_readout_time = 8.9;
+        // params.frame_readout_time = 8.9;
         params.fov = 1.0;
-        params.background = nalgebra::Vector4::new(0.0, 0.0, 0.0, 0.0);
+        params.background = nalgebra::Vector4::new(0.0, 0.0, 0.0, 255.0);
+        params.lens_correction_amount = 0.0;
     }
     stab.recompute_blocking();
 
@@ -513,18 +516,21 @@ pub fn test() {
             // ::log::debug!("frame {}/{}", params.1, params.2);
         },
         vid.into(),
-        "x265".into(),
-        "",
-        &format!("{}_stab.mp4", vid),
-        0.0,
-        0.1,
-        video_size.0,
-        video_size.1,
-        100.0,
-        true, 
-        true,
-        0,
-        "",
+        &RenderOptions {
+            codec: "ProRes".into(),
+            codec_options: "Standard".into(),
+            output_path: format!("{}_stab.mov", vid),
+            trim_start: 0.0,
+            trim_end: 0.02,
+            output_width: video_size.0,
+            output_height: video_size.1,
+            bitrate: 100.0,
+            use_gpu: true, 
+            audio: true,
+            pixel_format: "".into(),
+        },
+        -1,
+        Arc::new(AtomicBool::new(false)),
         Arc::new(AtomicBool::new(false))
     ).unwrap();
 }
