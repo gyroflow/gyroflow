@@ -95,8 +95,8 @@ impl LensCalibrator {
     pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pt_scale: f32, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
     where F: Fn((usize, usize, usize, f64)) + Send + Sync + Clone + 'static {
 
-        self.width = (width as f32 * pt_scale) as usize;
-        self.height = (height as f32 * pt_scale) as usize;
+        self.width = (width as f32 * pt_scale).round() as usize;
+        self.height = (height as f32 * pt_scale).round() as usize;
         let grid_size = Size::new(self.columns as i32, self.rows as i32);
         let max_sharpness = self.max_sharpness;
 

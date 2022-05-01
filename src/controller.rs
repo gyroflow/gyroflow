@@ -158,6 +158,7 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
+    rate_profile: qt_method!(fn(&self, name: QString, is_good: bool)),
 
     set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
     set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
@@ -1060,6 +1061,14 @@ impl Controller {
                     }
                     Some(())
                 }());
+            }
+        });
+    }
+    
+    fn rate_profile(&self, name: QString, is_good: bool) {
+        core::run_threaded(move || {
+            if let Ok(Ok(body)) = ureq::post(&format!("https://api.gyroflow.xyz/rate?good={}", is_good)).set("Content-Type", "application/json; charset=utf-8").send_string(&name.to_string()).map(|x| x.into_string()) {
+                ::log::debug!("Lens profile rated: {}", body.as_str());
             }
         });
     }

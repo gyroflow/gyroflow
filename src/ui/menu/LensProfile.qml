@@ -18,6 +18,8 @@ MenuItem {
     property int videoHeight: 0;
 
     property var lensProfilesList: [];
+    property var distortionCoeffs: [];
+    property string profileName;
 
     FileDialog {
         id: fileDialog;
@@ -77,6 +79,9 @@ MenuItem {
                         "Calibrated by":   obj.calibrated_by
                     };
                     officialInfo.show = !obj.official;
+                    officialInfo.canRate = true;
+                    officialInfo.thankYou = false;
+                    root.profileName = obj.name;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -94,6 +99,7 @@ MenuItem {
                     root.calibWidth  = obj.calib_dimension.w / input_horizontal_stretch;
                     root.calibHeight = obj.calib_dimension.h / input_vertical_stretch;
                     const coeffs = obj.fisheye_params.distortion_coeffs;
+                    root.distortionCoeffs = coeffs;
                     const mtrx = obj.fisheye_params.camera_matrix;
                     k1.setInitialValue(coeffs[0]);
                     k2.setInitialValue(coeffs[1]);
@@ -150,7 +156,33 @@ MenuItem {
         id: officialInfo;
         type: InfoMessage.Warning;
         show: false;
-        text: qsTr("This lens profile is unofficial, we can't guarantee it's correctness. Use at your own risk."); 
+        property bool canRate: true;
+        property bool thankYou: false;
+        text: qsTr("This lens profile is unofficial, we can't guarantee it's correctness. Use at your own risk.") + (canRate? "<br>" +
+              qsTr("Rate this profile: [Good] | [Bad]")
+              .replace(/\[(.*?)\]/, "<a href=\"#good\">$1</a>")
+              .replace(/\[(.*?)\]/, "<a href=\"#bad\">$1</a>") : (thankYou? "<br>" + qsTr("Thank you for rating this profile.") : ""));
+    
+        MouseArea {
+            anchors.fill: parent;
+            cursorShape: parent.t.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
+            acceptedButtons: Qt.NoButton;
+        }
+        Connections {
+            target: officialInfo.t;
+            function onLinkActivated(link: url) {
+                const str = root.profileName + "|" + root.distortionCoeffs.join("|");
+                controller.rate_profile(str, link === "#good");
+                officialInfo.thankYou = true;
+                officialInfo.canRate = false;
+                tyTimer.start();
+            }
+        }
+        Timer {
+            id: tyTimer;
+            interval: 5000;
+            onTriggered: officialInfo.thankYou = false;
+        }
     }
 
     InfoMessageSmall {

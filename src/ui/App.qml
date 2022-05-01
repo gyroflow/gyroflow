@@ -217,7 +217,7 @@ Rectangle {
                             return;
                         }
                         if (controller.file_exists(outputFile.text) && !allowFile) {
-                            messageBox(Modal.NoIcon, qsTr("Output file already exists, do you want to overwrite it?"), [
+                            messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
                                 { text: qsTr("Rename"), clicked: renameOutput },
                                 { text: qsTr("No"), accent: true },
