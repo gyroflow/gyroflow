@@ -217,8 +217,7 @@ impl GyroSource {
 
     pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams) {
         self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params);
-
-        horizon_lock.lock(&mut self.smoothed_quaternions, &self.gravity_vectors);
+        horizon_lock.lock(&mut self.smoothed_quaternions, &mut self.quaternions, &self.gravity_vectors, self.integration_method);
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
@@ -376,6 +375,7 @@ impl GyroSource {
             smoothed_quaternions: self.smoothed_quaternions.clone(),            
             offsets:              self.offsets.clone(),
             gravity_vectors:      self.gravity_vectors.clone(),
+            integration_method:   self.integration_method,
             ..Default::default()
         }
     }
