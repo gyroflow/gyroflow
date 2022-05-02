@@ -72,14 +72,33 @@ impl HorizonLock {
         lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0 - self.horizonlockpercent / 100.0)
     }
 
-    pub fn lock(&self, quats: &mut TimeQuat, grav: &Option<crate::gyro_source::TimeVec>) {
+    pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &mut TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, int_method: usize) {
         if self.lock_enabled {
-            if let Some(_grav) = grav {
-                // TODO: use gravity vectors
-                // dbg!(_grav);
+            if int_method == 0 {
+                // Only with "None" integration method
+                if let Some(gvec) = grav {
+                    let z_axis = nalgebra::Vector3::<f64>::z_axis();
+                    let y_axis = nalgebra::Vector3::<f64>::y_axis();
+                    //let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
+
+                    for (k, smoothed_ori) in smoothed_quats.iter_mut() {
+                        let gv = gvec.get(k).unwrap_or(&y_axis);
+                        let ori = quats.get(k).unwrap_or(&smoothed_ori).to_rotation_matrix();
+
+                        // Correct for angle difference between original and smoothed orientation
+                        let correction = ori.inverse() * smoothed_ori.to_rotation_matrix();
+                        let angle_corr = (-correction[(0,1)]).simd_atan2(correction[(0,0)]);
+
+                        //let gv_corrected = corr.inverse() * correction * corr * gv; // Alternative matrix approach
+                        //let locked_ori =  smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, gv_corrected[0].simd_atan2(gv_corrected[1]) + self.horizonroll * std::f64::consts::PI / 180.0);
+                        let locked_ori =  smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, -angle_corr + gv[0].simd_atan2(gv[1]) + self.horizonroll * std::f64::consts::PI / 180.0);
+                        *smoothed_ori = UnitQuaternion::from_rotation_matrix(&locked_ori).slerp(&smoothed_ori, 1.0 - self.horizonlockpercent / 100.0);
+                    }
+                    return;
+                }
             }
 
-            for (_k, v) in quats.iter_mut() {
+            for (_k, v) in smoothed_quats.iter_mut() {
                 *v = self.lockquat(v);
             }
         }
