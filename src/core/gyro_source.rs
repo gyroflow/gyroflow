@@ -101,6 +101,7 @@ impl GyroSource {
         if let Some(ref samples) = input.samples {
             let mut quats = TimeQuat::new();
             let mut grav = Vec::<Vector3<f64>>::new();
+            let mut iori = Vec::<Quat64>::new();
             let mut grav_is_usable = false;
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
@@ -135,6 +136,19 @@ impl GyroSource {
                         io = input.normalize_imu_orientation(io);
                         imu_orientation = Some(io);
                     }
+                    if let Some(map) = tag_map.get(&GroupId::ImageOrientation) {
+                        let scale = *(map.get_t(TagId::Scale) as Option<&i16>).unwrap_or(&32767) as f64;
+                        if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<telemetry_parser::tags_impl::Quaternion<i16>>> {
+                            for v in arr.iter() {
+                                iori.push(Quat64::from_quaternion(nalgebra::Quaternion::<f64>::from_vector(Vector4::new(
+                                    v.x as f64 / scale,
+                                    v.y as f64 / scale,
+                                    v.z as f64 / scale,
+                                    v.w as f64 / scale)
+                                )));
+                            }
+                        }
+                    }
                 }
             }
 
@@ -142,6 +156,13 @@ impl GyroSource {
 
             if !quats.is_empty() {
                 if !grav.is_empty() && grav.len() == quats.len() {
+
+                    if grav.len() == iori.len() {
+                        for (g, q) in grav.iter_mut().zip(iori.iter()) {
+                            *g = (*q) * (*g);
+                        }
+                    }
+
                     gravity_vectors = Some(quats.keys().copied().zip(grav.into_iter()).collect());
                 }
                 quaternions = Some(quats);
