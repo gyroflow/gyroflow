@@ -98,7 +98,12 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_format(pixel_format);
         encoder.set_frame_rate(frame_rate);
         encoder.set_time_base(time_base);
-        encoder.set_bit_rate(bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate()));
+        let bitrate = bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate());
+        encoder.set_bit_rate(bitrate);
+        encoder.set_max_bit_rate(bitrate);
+        unsafe {
+            (*encoder.as_mut_ptr()).rc_min_rate = bitrate as i64;
+        }
         encoder.set_color_range(color_range);
         encoder.set_colorspace(frame.color_space());
         let gop: f64 = frame_rate.unwrap_or(Rational::new(30, 1)).into();
