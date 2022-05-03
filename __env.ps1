@@ -7,7 +7,7 @@ $Env:Path += ";$Env:FFMPEG_DIR\bin"
 
 # OpenCV
 $Env:OPENCV_LINK_LIBS = "opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs,opencv_objdetect"
-$Env:OPENCV_LINK_LIBS += ",opencv_dnn,opencv_ml,opencv_highgui" # needed for debug build
+$Env:OPENCV_LINK_LIBS += ",opencv_dnn,opencv_ml,opencv_highgui,opencv_videoio" # needed for debug build
 $Env:OPENCV_LINK_PATHS = "$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\lib"
 $Env:OPENCV_INCLUDE_PATHS = "$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\include"
 $Env:Path = ";$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\bin;$Env:Path"

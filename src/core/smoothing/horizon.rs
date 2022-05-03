@@ -72,7 +72,7 @@ impl HorizonLock {
         lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0 - self.horizonlockpercent / 100.0)
     }
 
-    pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &mut TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, int_method: usize) {
+    pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, int_method: usize) {
         if self.lock_enabled {
             if int_method == 0 {
                 // Only with "None" integration method
