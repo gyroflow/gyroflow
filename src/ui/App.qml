@@ -401,4 +401,12 @@ Rectangle {
 
         return text.trim();
     }
+
+    function reportProgress(progress: real, type: string) {
+        if (videoArea.videoLoader.active) {
+            if (type === "loader") ui_tools.set_progress(progress);
+            return;
+        }
+        ui_tools.set_progress(progress);
+    }
 }

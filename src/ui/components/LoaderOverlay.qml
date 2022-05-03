@@ -42,9 +42,9 @@ Item {
             time.elapsed = times[0];
             time.remaining = times[1];
             if (times.length > 2) time.fps = times[2];
-            ui_tools.set_progress(progress);
+            window.reportProgress(progress, "loader");
         } else {
-            ui_tools.set_progress(-1.0);
+            window.reportProgress(-1, "loader");
             time.elapsed = "";
         }
     }

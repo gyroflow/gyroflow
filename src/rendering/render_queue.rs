@@ -84,7 +84,7 @@ pub struct RenderQueue {
     pause: qt_method!(fn(&mut self)),
     stop: qt_method!(fn(&mut self)),
 
-    render_job: qt_method!(fn(&self, job_id: u32, single: bool)),
+    render_job: qt_method!(fn(&mut self, job_id: u32, single: bool)),
     cancel_job: qt_method!(fn(&self, job_id: u32)),
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
@@ -347,6 +347,18 @@ impl RenderQueue {
             itm.status = JobStatus::Queued;
         });
     }
+    pub fn update_status(&mut self) {
+        for v in self.queue.borrow().iter() {
+            if v.total_frames > 0 && v.status == JobStatus::Rendering {
+                self.status = QString::from("active");
+                self.status_changed();
+                return;
+            }
+        }
+
+        self.status = QString::from("stopped");
+        self.status_changed();
+    }
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
@@ -357,7 +369,7 @@ impl RenderQueue {
         QString::default()
     }
 
-    pub fn render_job(&self, job_id: u32, single: bool) {
+    pub fn render_job(&mut self, job_id: u32, single: bool) {
         if let Some(job) = self.jobs.get(&job_id) {
             {
                 let mut q = self.queue.borrow_mut();
@@ -372,6 +384,12 @@ impl RenderQueue {
                     //q.data_changed(job.queue_index);
                     q.change_line(job.queue_index, itm);
                 }
+            }
+
+            if self.start_timestamp == 0 {
+                self.start_timestamp = Self::current_timestamp();
+                self.status = QString::from("active");
+                self.status_changed();
             }
 
             let stab = job.stab.clone();
@@ -399,9 +417,13 @@ impl RenderQueue {
                 this.render_progress(job_id, progress, current_frame, total_frames, finished);
                 this.progress_changed();
 
-                if finished && !single {
-                    // Start the next one
-                    this.start();
+                if finished {
+                    if !single {
+                        // Start the next one
+                        this.start();
+                    } else {
+                        this.update_status();
+                    }
                 }
             });
 
@@ -421,6 +443,7 @@ impl RenderQueue {
                     // Start the next one
                     this.start();
                 }
+                this.update_status();
             });
 
             let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported): (String, String)| {
@@ -442,6 +465,7 @@ impl RenderQueue {
                     // Start the next one
                     this.start();
                 }
+                this.update_status();
             });
             let trim_ratio = job.render_options.trim_end - job.render_options.trim_start;
             let total_frame_count = stab.params.read().frame_count;

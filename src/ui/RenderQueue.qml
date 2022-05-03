@@ -72,9 +72,9 @@ Item {
                     totalTime.elapsed = times[0];
                     totalTime.remaining = times[1];
                     if (times.length > 2) totalTime.fps = times[2];
-                    ui_tools.set_progress(progress);
+                    window.reportProgress(progress, "queue");
                 } else {
-                    ui_tools.set_progress(-1);
+                    window.reportProgress(-1, "queue");
                     totalTime.remaining = "---";
                 }
             }
