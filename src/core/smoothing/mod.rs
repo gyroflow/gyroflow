@@ -59,6 +59,30 @@ impl Default for Smoothing {
     }
 }
 
+impl Clone for Smoothing {
+    fn clone(&self) -> Self {
+        let mut ret = Self::default();
+        ret.current_id = self.current_id;
+        ret.horizon_lock = self.horizon_lock.clone();
+
+        let parameters = self.current().get_parameters_json();
+        if let serde_json::Value::Array(ref arr) = parameters {
+            for v in arr {
+                if let serde_json::Value::Object(ref obj) = v {
+                    (|| -> Option<()> {
+                        let name = obj.get("name").and_then(|x| x.as_str())?;
+                        let value = obj.get("value").and_then(|x| x.as_f64())?;
+                        ret.current_mut().set_parameter(name, value);
+                        Some(())
+                    })();
+                }
+            }
+        }
+
+        ret
+    }
+}
+
 impl Smoothing {
     pub fn set_current(&mut self, id: usize) {
         self.current_id = id.min(self.algs.len() - 1);

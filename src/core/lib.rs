@@ -646,7 +646,9 @@ impl<T: PixelType> StabilizationManager<T> {
             params: Arc::new(RwLock::new(self.params.read().clone())),
             gyro:   Arc::new(RwLock::new(self.gyro.read().clone())),
             lens:   Arc::new(RwLock::new(self.lens.read().clone())),
+            smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
             video_path: Arc::new(RwLock::new(self.video_path.read().clone())),
+            lens_profile_db: self.lens_profile_db.clone(),
             ..Default::default()
         };
         stab.params.write().framebuffer_inverted = false;

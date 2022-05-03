@@ -643,7 +643,7 @@ impl RenderQueue {
                     } else if let Ok(info) = rendering::FfmpegProcessor::get_video_info(&path) {
                         ::log::info!("Loaded {:?}", &info);
 
-                        render_options.bitrate = info.bitrate;
+                        render_options.bitrate = render_options.bitrate.max(info.bitrate);
                         render_options.output_width = info.width as usize;
                         render_options.output_height = info.height as usize;
                         render_options.output_path = Self::get_output_path(&path, &render_options.codec);
@@ -688,7 +688,7 @@ impl RenderQueue {
                                 render_options.output_height = output_dim.h;
                             }
 
-                            // stab.export_gyroflow_file(format!("{}.gyroflow", path), false);
+                            // dbg!(stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
                             loaded(render_options);
 
