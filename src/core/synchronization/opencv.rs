@@ -4,6 +4,7 @@
 use nalgebra::{ Rotation3, Matrix3, Vector4 };
 use std::collections::BTreeMap;
 use std::ffi::c_void;
+use std::sync::Arc;
 use opencv::core::{ Mat, Size, Point2f, TermCriteria, CV_8UC1 };
 use opencv::prelude::MatTraitConst;
 
@@ -15,7 +16,7 @@ use crate::stabilization::ComputeParams;
 #[derive(Default, Clone)]
 pub struct ItemOpenCV {
     features: Mat,
-    img_bytes: Vec<u8>,
+    img: Arc<image::GrayImage>,
     size: (i32, i32),
     optical_flow: BTreeMap<usize, Option<(Vec<Point2f>, Vec<Point2f>)>>
 }
@@ -23,10 +24,9 @@ unsafe impl Send for ItemOpenCV { }
 unsafe impl Sync for ItemOpenCV { }
 
 impl ItemOpenCV {
-    pub fn detect_features(_frame: usize, img: image::GrayImage) -> Self {
+    pub fn detect_features(_frame: usize, img: Arc<image::GrayImage>) -> Self {
         let (w, h) = (img.width() as i32, img.height() as i32);
-        let mut bytes = img.into_raw();
-        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, bytes.as_mut_ptr() as *mut c_void, w as usize) };
+        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, w as usize) };
         
         // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
         
@@ -45,7 +45,7 @@ impl ItemOpenCV {
         Self {
             features: pts,
             size: (w, h),
-            img_bytes: bytes,
+            img,
             optical_flow: BTreeMap::new()
         }
     }
@@ -69,7 +69,7 @@ impl ItemOpenCV {
         }
     }
     
-    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    pub fn estimate_pose(&self, next: &Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
@@ -128,13 +128,13 @@ impl ItemOpenCV {
         }
     }
 
-    pub fn get_matched_features(&mut self, next: &mut Self) -> Option<(Vec<Point2f>, Vec<Point2f>)> {
+    pub fn get_matched_features(&self, next: &Self) -> Option<(Vec<Point2f>, Vec<Point2f>)> {
         let (w, h) = self.size;
-        if self.img_bytes.is_empty() || next.img_bytes.is_empty() || w <= 0 || h <= 0 { return None; }
+        if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
 
         let result = || -> Result<(Vec<Point2f>, Vec<Point2f>), opencv::Error> {
-            let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }?;
-            let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }?;
+            let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
+            let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
             
             let a1_pts = &self.features;
             //let a2_pts = a2.features;
@@ -175,6 +175,9 @@ impl ItemOpenCV {
             let pts = self.get_matched_features(to);
             self.optical_flow.insert(frame_offset, pts);
         }
+    }
+    pub fn cleanup(&mut self) {
+        self.img = Arc::new(image::GrayImage::default());
     }
 
     pub fn get_optical_flow_lines(&self, frame_offset: usize, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {

@@ -6,10 +6,10 @@ use arrsac::Arrsac;
 use bitarray::{ BitArray, Hamming };
 //use image::EncodableLayout;
 use nalgebra::{ Rotation3, Matrix3, Vector4 };
-use cv_core::{CameraModel, FeatureMatch, Pose, sample_consensus::Consensus};
+use cv_core::{ CameraModel, FeatureMatch, Pose, sample_consensus::Consensus };
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
-use std::{vec::Vec, collections::BTreeMap};
+use std::{ vec::Vec, collections::BTreeMap, sync::Arc };
 use crate::stabilization::ComputeParams;
 
 use space::{Knn, LinearKnn};
@@ -33,10 +33,10 @@ pub struct ItemAkaze {
 // TODO: add caching checkbox to the UI
 
 impl ItemAkaze {
-    pub fn detect_features(_frame: usize, img: image::GrayImage) -> Self {
+    pub fn detect_features(_frame: usize, img: Arc<image::GrayImage>) -> Self {
         let mut akz = Akaze::new(0.0007);
         akz.maximum_features = 500;
-        let features = akz.extract(&image::DynamicImage::ImageLuma8(img));
+        let features = akz.extract(&image::DynamicImage::ImageLuma8(Arc::try_unwrap(img).unwrap()));
 
         /*let mut hasher = crc32fast::Hasher::new();
         hasher.update(img.as_bytes());
@@ -75,7 +75,7 @@ impl ItemAkaze {
         }
     }
 
-    pub fn estimate_pose(&mut self, next: &mut Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {        
+    pub fn estimate_pose(&self, next: &Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let a1 = &self.features;
         let a2 = &next.features;
 
@@ -151,6 +151,7 @@ impl ItemAkaze {
             None
         }
     }
+    pub fn cleanup(&mut self) { }
 }
 
 /*#[derive(serde::Serialize, serde::Deserialize)]

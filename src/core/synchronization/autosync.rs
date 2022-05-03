@@ -31,6 +31,8 @@ pub struct AutosyncProcess {
     compute_params: Arc<RwLock<ComputeParams>>,
     progress_cb: Option<Arc<Box<dyn Fn(usize, usize) + Send + Sync + 'static>>>,
     finished_cb: Option<Arc<Box<dyn Fn(Vec<(f64, f64, f64)>) + Send + Sync + 'static>>>,
+
+    thread_pool: rayon::ThreadPool,
 }
 
 impl AutosyncProcess {
@@ -110,6 +112,7 @@ impl AutosyncProcess {
             compute_params: Arc::new(RwLock::new(comp_params)),
             finished_cb: None,
             progress_cb: None,
+            thread_pool: rayon::ThreadPoolBuilder::new().build().unwrap()
         })
     }
 
@@ -135,7 +138,7 @@ impl AutosyncProcess {
     pub fn feed_frame(&self, mut timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         self.total_read_frames.fetch_add(1, SeqCst);
 
-        let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels);
+        let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
     
         let method = self.method;
         let estimator = self.estimator.clone();
@@ -152,7 +155,7 @@ impl AutosyncProcess {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
         }
         if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)).copied() {
-            crate::THREAD_POOL.spawn(move || {
+            self.thread_pool.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     total_detected_frames.fetch_add(1, SeqCst);
                     return;
@@ -192,6 +195,7 @@ impl AutosyncProcess {
         self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.org_fps, true);
         self.estimator.optical_flow(2);
+        self.estimator.cleanup();
 
         if let Some(cb) = &self.finished_cb {
             if self.for_rs {

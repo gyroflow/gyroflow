@@ -99,7 +99,7 @@ impl PoseEstimator {
             });
         }
     }
-    pub fn detect_features(&self, frame: usize, timestamp_us: i64, method: u32, img: image::GrayImage) {
+    pub fn detect_features(&self, frame: usize, timestamp_us: i64, method: u32, img: Arc<image::GrayImage>) {
         let frame_size = (img.width(), img.height());
         let item = match method {
             0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
@@ -141,7 +141,7 @@ impl PoseEstimator {
                 }
             }
         }
-
+        
         let results = self.sync_results.clone();
         frames_to_process.par_iter().for_each(move |frame| {
             let l = results.read();
@@ -157,8 +157,8 @@ impl PoseEstimator {
 
                         let r = match (curr, next) {
                             #[cfg(feature = "use-opencv")]
-                            (EstimatorItem::OpenCV(mut curr), EstimatorItem::OpenCV(mut next)) => { curr.estimate_pose(&mut next, camera_matrix, coeffs, params) }
-                            (EstimatorItem::Akaze (mut curr),  EstimatorItem::Akaze (mut next))  => { curr.estimate_pose(&mut next, camera_matrix, coeffs, params) }
+                            (EstimatorItem::OpenCV(curr), EstimatorItem::OpenCV(next)) => { curr.estimate_pose(&next, camera_matrix, coeffs, params) }
+                            (EstimatorItem::Akaze (curr),  EstimatorItem::Akaze (next))  => { curr.estimate_pose(&next, camera_matrix, coeffs, params) }
                             _ => None
                         };
 
@@ -225,7 +225,7 @@ impl PoseEstimator {
     pub fn optical_flow(&self, num_frames: usize) {
         let mut to_items = BTreeMap::<usize, EstimatorItem>::new();
         if let Some(l) = self.sync_results.try_read() {
-            l.iter().for_each(|(&i, fr)| {to_items.insert(i, fr.item.clone());} );
+            l.iter().for_each(|(&i, fr)| { to_items.insert(i, fr.item.clone()); } );
         }
 
         if let Some(mut l) = self.sync_results.try_write() {
@@ -241,6 +241,16 @@ impl PoseEstimator {
                      }
                 }
             });
+        }
+    }
+    pub fn cleanup(&self) {
+        let mut l = self.sync_results.write();
+        for (_, i) in l.iter_mut(){
+            match &mut i.item {
+                #[cfg(feature = "use-opencv")]
+                EstimatorItem::OpenCV(x) => { x.cleanup(); }
+                EstimatorItem::Akaze (x) => { x.cleanup(); }
+            };
         }
     }
 

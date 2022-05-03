@@ -300,8 +300,8 @@ impl Controller {
 
                             if sync.is_frame_wanted(frame, timestamp_us) {
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                    Ok(mut small_frame) => {
-                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data_mut(0));
+                                    Ok(small_frame) => {
+                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
             
                                         sync.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone());
                                     },
