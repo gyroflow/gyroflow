@@ -29,7 +29,8 @@ impl GyroIntegrator for MadgwickIntegrator {
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
                 let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
-                let a = v.accl.unwrap_or([0.000001, 0.0, 0.0]);
+                let mut a = v.accl.unwrap_or_default();
+                if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
                 let accl = Vector3::new(-a[1], a[0], a[2]);
 
                 *ahrs.sample_period_mut() = (v.timestamp_ms - prev_time) / 1000.0;
@@ -72,7 +73,8 @@ impl GyroIntegrator for MahonyIntegrator {
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
                 let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
-                let a = v.accl.unwrap_or([0.000001, 0.0, 0.0]);
+                let mut a = v.accl.unwrap_or_default();
+                if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
                 let accl = Vector3::new(-a[1], a[0], a[2]);
 
                 *ahrs.sample_period_mut() = (v.timestamp_ms - prev_time) / 1000.0;
@@ -176,8 +178,9 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
-                let a = v.accl.unwrap_or([0.000001, 0.0, 0.0]);
-
+                let mut a = v.accl.unwrap_or_default();
+                if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
+ 
                 if let Some(acc) = Vector3::new(-a[1], a[0], a[2]).try_normalize(0.0) {
                     if let Some(m) = v.magn.as_ref() {
                         if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
