@@ -55,7 +55,8 @@ pub struct RenderOptions {
     pub bitrate: f64,
     pub use_gpu: bool,
     pub audio: bool,
-    pub pixel_format: String
+    pub pixel_format: String,
+    pub override_fps: f64
 }
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
@@ -601,7 +602,7 @@ impl RenderQueue {
                     let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                         let mut thumb = None;
                         {
-                            let mut proc = rendering::FfmpegProcessor::from_file(video_path, false, 0)?;
+                            let mut proc = rendering::FfmpegProcessor::from_file(video_path, false, 0, None)?;
                             proc.on_frame(|_timestamp_us, input_frame, _output_frame, converter| {
                                 let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
     

@@ -47,6 +47,7 @@ MenuItem {
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
+    property real overrideFps: 0;
 
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
@@ -62,7 +63,8 @@ MenuItem {
             bitrate:        root.outBitrate,
             use_gpu:        root.outGpu,
             audio:          root.outAudio,
-            pixel_format:   ""
+            pixel_format:   "",
+            override_fps:   root.overrideFps
         };
     }
 
@@ -127,6 +129,7 @@ MenuItem {
             if (output.bitrate) root.outBitrate = output.bitrate;
             if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
             if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
+            if (output.hasOwnProperty("override_fps")) root.overrideFps = +output.override_fps || 0;
         }
     }
 

@@ -72,6 +72,8 @@ Item {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
 
+        window.exportSettings.overrideFps = 0;
+
         if (url.toString().endsWith(".gyroflow")) {
             return loadGyroflowData(controller.import_gyroflow_file(url));
         }
@@ -83,6 +85,7 @@ Item {
                 { text: qsTr("Ok"), accent: true, clicked: function() {
                     const fps = dlg.mainColumn.children[1].value;
                     loadFile(newUrl);
+                    window.exportSettings.overrideFps = fps;
                     vid.setFrameRate(fps);
                 } },
                 { text: qsTr("Cancel") },

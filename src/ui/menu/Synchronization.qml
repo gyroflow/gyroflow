@@ -51,7 +51,7 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false);
+            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, window.exportSettings.overrideFps);
         }
         onClicked: {
             if (!controller.lens_loaded) {

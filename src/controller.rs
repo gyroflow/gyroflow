@@ -51,9 +51,9 @@ pub struct Controller {
 
     sync_method: qt_property!(u32; WRITE set_sync_method),
     offset_method: qt_property!(u32),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
-    estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32)),
+    estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
@@ -209,7 +209,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64) {
         rendering::clear_log();
 
         let method = self.sync_method;
@@ -281,8 +281,16 @@ impl Controller {
                 let mut fps_scale = None;
 
                 let gpu_decoding = *rendering::GPU_DECODING.read();
+
+                let mut decoder_options = None;
+                if override_fps > 0.0 {
+                    let fps = rendering::fps_to_rational(override_fps);
+                    let mut dict = ffmpeg_next::Dictionary::new();
+                    dict.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                    decoder_options = Some(dict);
+                }
                 
-                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0) {
+                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
                     Ok(mut proc) => {
                         if fps > 0.0 && proc.decoder_fps > 0.0 && (fps - proc.decoder_fps).abs() > 0.1 {
                             ::log::debug!("Rescaling timestamp from {fps}fps to {}fps", proc.decoder_fps);
@@ -633,8 +641,8 @@ impl Controller {
         self.compute_progress(id, 0.0);
     }
 
-    fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32) {
-        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, 11.0, sync_duration_ms, every_nth_frame, true);
+    fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64) {
+        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, 11.0, sync_duration_ms, every_nth_frame, true, override_fps);
     }
     
     fn cancel_current_operation(&mut self) {
@@ -847,7 +855,7 @@ impl Controller {
             let video_path = stab.video_path.read().clone();
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0) {
+                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, None) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);

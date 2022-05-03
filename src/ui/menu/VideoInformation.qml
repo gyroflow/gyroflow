@@ -103,6 +103,8 @@ MenuItem {
         if (pt.indexOf("p10le") > -1) { bits = "10 bit"; pt = pt.replace("p10le", ""); } // TODO detect more formats
         if (pt.indexOf("p12le") > -1) { bits = "12 bit"; pt = pt.replace("p12le", ""); }
         if (pt.indexOf("p16le") > -1) { bits = "16 bit"; pt = pt.replace("p16le", ""); }
+        if (pt.indexOf("f32le") > -1) { bits = "32 bit float"; pt = pt.replace("f32le", ""); }
+        if (pt.indexOf("f16le") > -1) { bits = "16 bit float"; pt = pt.replace("f16le", ""); }
 
         return pt.toUpperCase() + (pt? " " : "") + bits;
     }

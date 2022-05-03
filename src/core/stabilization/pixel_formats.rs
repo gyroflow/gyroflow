@@ -69,7 +69,7 @@ impl PixelType for RGB8 {
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0 as f32, v.1 as f32, v.2 as f32, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
-    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar3", "convert_uchar3_sat", "float4", "convert_float4") }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar3", "convert_uchar3_sat", "float4", "convert_float4") } // FIXME: uchar3 can't be converted to float4
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { None }
 }
 unsafe impl bytemuck::Zeroable for RGBA8 { }

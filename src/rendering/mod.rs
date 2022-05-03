@@ -150,8 +150,14 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     drop(params);
 
+    let mut decoder_options = ffmpeg_next::Dictionary::new();
+    if render_options.override_fps > 0.0 {
+        let fps = fps_to_rational(render_options.override_fps);
+        decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+
     let gpu_decoding = *GPU_DECODING.read();
-    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize)?;
+    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu));
@@ -424,6 +430,14 @@ pub fn init() -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn fps_to_rational(fps: f64) -> ffmpeg_next::Rational {
+    if fps.fract() > 0.1 {
+        return ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001);
+    } else {
+        return ffmpeg_next::Rational::new(fps.round() as i32, 1);
+    }
 }
 
 lazy_static::lazy_static! {

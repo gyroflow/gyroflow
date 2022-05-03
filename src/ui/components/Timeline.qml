@@ -297,7 +297,7 @@ Item {
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false);
+                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, window.exportSettings.overrideFps);
                 }
             }
             Action {
@@ -331,7 +331,7 @@ Item {
                                       "Are you sure you want to continue?");
                     messageBox(Modal.Warning, text, [
                         { text: qsTr("Yes"), clicked: function() {
-                             controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame);
+                             controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.exportSettings.overrideFps);
                         }},
                         { text: qsTr("No"), accent: true },
                     ]);

@@ -106,11 +106,11 @@ pub struct VideoInfo {
 }
 
 impl<'a> FfmpegProcessor<'a> {
-    pub fn from_file(path: &str, mut gpu_decoding: bool, gpu_decoder_index: usize) -> Result<Self, FFmpegError> {
+    pub fn from_file(path: &str, mut gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
         ffmpeg_next::init()?;
         let _ = crate::rendering::init();
 
-        let mut input_context = format::input(&path)?;
+        let mut input_context = decoder_options.map_or_else(|| format::input(&path), |dict| format::input_with_dictionary(&path, dict))?;
 
         // format::context::input::dump(&input_context, 0, Some(path));
 
