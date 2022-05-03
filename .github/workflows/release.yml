@@ -58,7 +58,7 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
         with:
-          key: gf18
+          key: gf19
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -74,7 +74,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: d72783cb3aeddfd667861caef1060e54ca6fa7a9
+          vcpkgGitCommitId: b98afc9f1192becb2f447cee485ce36ba111f9f6
       
       # Download and install OpenCV
       - name: Install OpenCV and curl
