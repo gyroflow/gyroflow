@@ -217,7 +217,8 @@ Item {
             property real progress: current_frame / total_frames;
             property bool isFinished: current_frame >= total_frames && total_frames > 0;
             property bool isError: error_string.length > 0 && !isQuestion;
-            property bool isQuestion: error_string.startsWith("convert_format:");
+            property bool isQuestion: error_string.startsWith("convert_format:") || error_string.startsWith("file_exists:");
+            property bool isInProgress: !isFinished && !isError && !isQuestion && current_frame > 0 && total_frames > 0;
             onProgressChanged: {
                 const times = Util.calculateTimesAndFps(progress, current_frame, start_timestamp);
                 if (times !== false) {
@@ -245,12 +246,13 @@ Item {
                 Action {
                     icon.name: "play";
                     text: qsTr("Render now");
-                    enabled: !isFinished;
+                    enabled: !isFinished && !isInProgress;
                     onTriggered: render_queue.render_job(job_id, true);
                 }
                 Action {
                     icon.name: "pencil";
                     text: qsTr("Edit");
+                    enabled: !isInProgress;
                     onTriggered:{
                         const data = render_queue.get_gyroflow_data(job_id);
                         if (data) {
@@ -261,9 +263,9 @@ Item {
                     }
                 }
                 Action {
-                    icon.name: "spinner";
-                    text: qsTr("Reset status");
-                    enabled: isError || isFinished || isQuestion;
+                    icon.name: isInProgress? "close" : "spinner";
+                    text: isInProgress? qsTr("Stop") : qsTr("Reset status");
+                    enabled: isError || isFinished || isQuestion || isInProgress;
                     onTriggered: render_queue.reset_job(job_id);
                 }
             }
@@ -324,6 +326,14 @@ Item {
                                         accent: true,
                                         clicked: () => { render_queue.set_pixel_format(job_id, "cpu"); }
                                     });
+                                    btns.model = buttons;
+                                } else if (errorString.startsWith("file_exists:")) {
+                                    const path = errorString.substring(12);
+                                    const buttons = [
+                                        { text: qsTr("Yes"),    clicked: () => { render_queue.reset_job(job_id); }, accent: true },
+                                        { text: qsTr("Rename"), clicked: () => { render_queue.set_job_output_path(job_id, window.renameOutput(path)); } },
+                                        { text: qsTr("No"),     clicked: () => { render_queue.set_error_string(job_id, qsTr("Output file already exists.")); btns.model = []; } },
+                                    ];
                                     btns.model = buttons;
                                 }
                             }

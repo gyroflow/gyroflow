@@ -184,18 +184,6 @@ Rectangle {
 
                     model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
-                    function renameOutput() {
-                        const orgOutput = outputFile.text;
-                        let output = orgOutput;
-                        let i = 1;
-                        while (controller.file_exists(output)) {
-                            output = orgOutput.replace(/_stabilized(_\d+)?\.([a-z0-9]+)$/i, "_stabilized_" + i++ + ".$2");
-                            if (i > 1000) break;
-                        }
-
-                        outputFile.text = output;
-                        render();
-                    }
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
@@ -219,7 +207,7 @@ Rectangle {
                         if (controller.file_exists(outputFile.text) && !allowFile) {
                             messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
-                                { text: qsTr("Rename"), clicked: renameOutput },
+                                { text: qsTr("Rename"), clicked: () => { outputFile.text = window.renameOutput(outputFile.text); render(); } },
                                 { text: qsTr("No"), accent: true },
                             ]);
                             return;
@@ -398,10 +386,24 @@ Rectangle {
             const format = text.split(":")[1].split(";")[0];
             return qsTr("GPU accelerated encoder doesn't support this pixel format (%1).\nDo you want to convert to a different supported pixel format or keep the original one and render on the CPU?").arg("<b>" + format + "</b>");
         }
+        if (text.startsWith("file_exists:")) {
+            return qsTr("Output file already exists, do you want to overwrite it?");
+        }
 
         return text.trim();
     }
 
+    function renameOutput(orgOutput: string) {
+        let output = orgOutput;
+        let i = 1;
+        while (controller.file_exists(output)) {
+            output = orgOutput.replace(/_stabilized(_\d+)?\.([a-z0-9]+)$/i, "_stabilized_" + i++ + ".$2");
+            if (i > 1000) break;
+        }
+
+        return output;
+    }
+    
     function reportProgress(progress: real, type: string) {
         if (videoArea.videoLoader.active) {
             if (type === "loader") ui_tools.set_progress(progress);

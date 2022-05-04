@@ -93,8 +93,10 @@ pub struct RenderQueue {
     add_file: qt_method!(fn(&mut self, url: QUrl, controller: QJSValue, options_json: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
+    set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
+    set_error_string: qt_method!(fn(&mut self, job_id: u32, err: QString)),
 
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
@@ -166,6 +168,27 @@ impl RenderQueue {
         if self.status.to_string() != "active" {
             self.start();
         }
+    }
+
+    pub fn set_job_output_path(&mut self, job_id: u32, new_path: String) {
+        if let Some(job) = self.jobs.get_mut(&job_id) {
+            job.render_options.output_path = new_path.clone();
+        }
+        update_model!(self, job_id, itm {
+            itm.output_path = QString::from(new_path);
+            itm.error_string = QString::default();
+            itm.status = JobStatus::Queued;
+        });
+        if self.status.to_string() != "active" {
+            self.start();
+        }
+    }
+
+    pub fn set_error_string(&mut self, job_id: u32, err: QString) {
+        update_model!(self, job_id, itm {
+            itm.error_string = err;
+            itm.status = JobStatus::Error;
+        });
     }
 
     pub fn add(&mut self, controller: QJSValue, options_json: String, thumbnail_url: QString) -> u32 {
@@ -340,7 +363,7 @@ impl RenderQueue {
     }
     pub fn reset_job(&self, job_id: u32) {
         if let Some(job) = self.jobs.get(&job_id) {
-            job.cancel_flag.store(false, SeqCst);
+            job.cancel_flag.store(true, SeqCst);
         }
         update_model!(self, job_id, itm {
             itm.error_string = QString::default();
@@ -386,6 +409,7 @@ impl RenderQueue {
                     q.change_line(job.queue_index, itm);
                 }
             }
+            job.cancel_flag.store(false, SeqCst);
 
             if self.start_timestamp == 0 {
                 self.start_timestamp = Self::current_timestamp();
@@ -592,7 +616,15 @@ impl RenderQueue {
 
                 let stab2 = stab.clone();
                 let loaded = util::qt_queued_callback_mut(self, move |this, render_options: RenderOptions| {
+                    let out_path = render_options.output_path.clone();
                     this.add_internal(job_id, stab2.clone(), render_options, QString::default());
+
+                    if std::path::Path::new(&out_path).exists() {
+                        update_model!(this, job_id, itm {
+                            itm.error_string = QString::from(format!("file_exists:{}", out_path));
+                            itm.status = JobStatus::Error;
+                        });
+                    }
                 });
                 let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
                     update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
@@ -692,7 +724,7 @@ impl RenderQueue {
                             // dbg!(stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
                             loaded(render_options);
-
+    
                             if let Err(e) = fetch_thumb(&path, ratio) {
                                 err(("An error occured: %1".to_string(), e.to_string()));
                             }
