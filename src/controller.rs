@@ -61,7 +61,7 @@ pub struct Controller {
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
-    lens_profile_loaded: qt_signal!(lens_json: QString),
+    lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
@@ -412,8 +412,9 @@ impl Controller {
             });
             let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
                 if this.lens_loaded {
-                    let json = this.stabilizer.lens.read().get_json().unwrap_or_default();
-                    this.lens_profile_loaded(QString::from(json));
+                    let lens = this.stabilizer.lens.read();
+                    let json = lens.get_json().unwrap_or_default();
+                    this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()));
                 }
             });
             
@@ -466,15 +467,16 @@ impl Controller {
         self.load_lens_profile(util::url_to_path(url))
     }
     fn load_lens_profile(&mut self, path: String) {
-        let json = {
+        let (json, filepath) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&path) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
-            self.stabilizer.lens.read().get_json().unwrap_or_default()
+            let lens = self.stabilizer.lens.read();
+            (lens.get_json().unwrap_or_default(), lens.filename.clone())
         };
         self.lens_loaded = true;
         self.lens_changed();
-        self.lens_profile_loaded(QString::from(json));
+        self.lens_profile_loaded(QString::from(json), QString::from(filepath));
         self.request_recompute();
     }
     
@@ -687,7 +689,7 @@ impl Controller {
                 self.lens_loaded = true;
                 self.lens_changed();
                 let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
-                self.lens_profile_loaded(QString::from(lens_json));
+                self.lens_profile_loaded(QString::from(lens_json), QString::default());
                 self.request_recompute();
                 util::serde_json_to_qt_object(&thin_obj)
             },
@@ -1024,6 +1026,8 @@ impl Controller {
     fn get_profiles(&self) -> QVariantList {
         let mut db = self.stabilizer.lens_profile_db.write();
         db.load_all();
+        // db.list_all_metadata();
+        // db.process_adjusted_metadata();
         db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect()
     }
 

@@ -329,12 +329,11 @@ Item {
                                     btns.model = buttons;
                                 } else if (errorString.startsWith("file_exists:")) {
                                     const path = errorString.substring(12);
-                                    const buttons = [
+                                    btns.model = [
                                         { text: qsTr("Yes"),    clicked: () => { render_queue.reset_job(job_id); }, accent: true },
                                         { text: qsTr("Rename"), clicked: () => { render_queue.set_job_output_path(job_id, window.renameOutput(path)); } },
                                         { text: qsTr("No"),     clicked: () => { render_queue.set_error_string(job_id, qsTr("Output file already exists.")); btns.model = []; } },
                                     ];
-                                    btns.model = buttons;
                                 }
                             }
                             Repeater {

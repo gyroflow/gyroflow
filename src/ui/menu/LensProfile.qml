@@ -66,7 +66,7 @@ MenuItem {
         function onLens_profiles_updated() {
             profilesUpdateTimer.start();
         }
-        function onLens_profile_loaded(json_str: string) {
+        function onLens_profile_loaded(json_str: string, filepath: string) {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
@@ -81,7 +81,7 @@ MenuItem {
                     officialInfo.show = !obj.official;
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
-                    root.profileName = obj.name;
+                    root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
