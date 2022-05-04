@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T4_18-55_DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "csabeevs",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "18-55",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 8.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9851133548156994,
+    "camera_matrix": [
+      [
+        3200.254635261199,
+        0.0,
+        2039.9904146473873
+      ],
+      [
+        0.0,
+        3203.4534842681087,
+        1027.2791641769904
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2395418377038147,
+      0.7715405711916269,
+      -2.295486651163233,
+      3.0061978693258222
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

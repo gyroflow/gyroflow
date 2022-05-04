@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO4 Black___2.7k_16by9_2704x1520-29.97fps",
+  "note": "",
+  "calibrated_by": "AsA",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Black",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 9.03981320707899,
+    "camera_matrix": [
+      [
+        1115.0425651983114,
+        0.0,
+        1405.3282666550351
+      ],
+      [
+        0.0,
+        983.0428419708676,
+        778.8326439220815
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.047975732241712955,
+      0.4061098626794225,
+      -0.5682435746176622,
+      0.27701877373558054
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

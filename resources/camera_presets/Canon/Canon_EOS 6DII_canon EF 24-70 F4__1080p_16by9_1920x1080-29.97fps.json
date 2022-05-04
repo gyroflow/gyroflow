@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 6DII_canon EF 24-70 F4__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "ldh",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6DII",
+  "lens_model": "canon EF 24-70 F4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2285510713381735,
+    "camera_matrix": [
+      [
+        1280.5358803594709,
+        0.0,
+        951.2029219555346
+      ],
+      [
+        0.0,
+        1280.842145288375,
+        528.9580156559357
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1969471386327848,
+      0.16726352871504457,
+      0.1154063754128682,
+      -0.19269902796019076
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

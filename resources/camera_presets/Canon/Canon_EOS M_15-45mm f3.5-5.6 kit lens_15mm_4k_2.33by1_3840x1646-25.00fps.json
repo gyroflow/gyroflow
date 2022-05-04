@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_15-45mm f3.5-5.6 kit lens_15mm_4k_2.33by1_3840x1646-25.00fps",
+  "note": "2.5k 2:1 upscaled to 4k",
+  "calibrated_by": "Oleksandr Müller",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "15-45mm f3.5-5.6 kit lens",
+  "camera_setting": "15mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 1646
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 1646
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 1646
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5914074378602804,
+    "camera_matrix": [
+      [
+        4949.29038396125,
+        0.0,
+        1773.155567419929
+      ],
+      [
+        0.0,
+        4963.262715689259,
+        827.0760839203228
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21356962904374577,
+      -0.08544900442958492,
+      1.5732567398567536,
+      -4.114898812215724
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-22",
+  "compatible_settings": []
+}

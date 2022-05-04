@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7C_SEL20F18G__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "横山正洋",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "SEL20F18G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8393567880337348,
+    "camera_matrix": [
+      [
+        3389.95477246425,
+        0.0,
+        1909.56467452116
+      ],
+      [
+        0.0,
+        3387.6847504995503,
+        1054.2111708751124
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29009259485138955,
+      -0.2793731776531545,
+      2.767771157082998,
+      -5.165560480441392
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-c6d1ea32-3840x2160@29970",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

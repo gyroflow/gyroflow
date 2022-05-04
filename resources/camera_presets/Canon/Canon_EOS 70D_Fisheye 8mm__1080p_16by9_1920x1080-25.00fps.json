@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 70D_Fisheye 8mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "devamorph",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 70D",
+  "lens_model": "Fisheye 8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 28,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9110271079387928,
+    "camera_matrix": [
+      [
+        733.9980527675402,
+        0.0,
+        960.1845104179012
+      ],
+      [
+        0.0,
+        733.6863392599943,
+        533.4903222314744
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0510226232246308,
+      -0.03171453176629479,
+      0.04933249317484179,
+      -0.01938106493428423
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-18",
+  "compatible_settings": []
+}

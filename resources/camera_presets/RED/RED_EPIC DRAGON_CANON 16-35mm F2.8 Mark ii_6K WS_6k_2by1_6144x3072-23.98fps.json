@@ -1,0 +1,66 @@
+{
+  "name": "RED_EPIC DRAGON_CANON 16-35mm F2.8 Mark ii_6K WS_6k_2by1_6144x3072-23.98fps",
+  "note": "",
+  "calibrated_by": "Brent Barrie",
+  "camera_brand": "RED",
+  "camera_model": "EPIC DRAGON",
+  "lens_model": "CANON 16-35mm F2.8 Mark ii",
+  "camera_setting": "6K WS",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3072
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7133841042786291,
+    "camera_matrix": [
+      [
+        6879.715296692259,
+        0.0,
+        3026.5754873086403
+      ],
+      [
+        0.0,
+        6875.677888152993,
+        1575.3052283969816
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3423814847781907,
+      0.08767347237781216,
+      1.81542225625806,
+      -3.0959224742965983
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

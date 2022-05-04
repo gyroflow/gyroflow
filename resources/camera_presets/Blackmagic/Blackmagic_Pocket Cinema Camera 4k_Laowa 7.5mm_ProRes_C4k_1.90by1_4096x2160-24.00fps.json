@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 7.5mm_ProRes_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Brandan FPV",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4765894636657026,
+    "camera_matrix": [
+      [
+        1700.3618877046283,
+        0.0,
+        2048.6666921331307
+      ],
+      [
+        0.0,
+        1700.1313286627424,
+        1073.4523686847754
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3370638570627291,
+      0.09666923375334248,
+      0.0008568856894481702,
+      0.0769903893978655
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-02",
+  "compatible_settings": []
+}

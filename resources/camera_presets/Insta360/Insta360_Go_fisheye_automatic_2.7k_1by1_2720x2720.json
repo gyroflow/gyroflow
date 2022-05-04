@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_Go_fisheye_automatic_2.7k_1by1_2720x2720-0.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "KM|fpv",
+  "camera_brand": "Insta360",
+  "camera_model": "Go",
+  "lens_model": "fisheye",
+  "camera_setting": "automatic",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 7,
+  "fps": 0.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5770996171309509,
+    "camera_matrix": [
+      [
+        913.358841558472,
+        0.0,
+        1373.8968530903817
+      ],
+      [
+        0.0,
+        913.7194825766626,
+        1374.575601551039
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1042927853882998,
+      -0.015868939992893998,
+      -0.02112269656644433,
+      0.012858013536752705
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

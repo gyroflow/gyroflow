@@ -1,0 +1,65 @@
+{
+  "name": "Panasonic_BGH1_Laowa 7.5mm__C4k_1.90by1_4096x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Paul Nurkkala",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 0.0,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2946349734255671,
+    "camera_matrix": [
+      [
+        1689.2415581447606,
+        0.0,
+        2067.1845888992107
+      ],
+      [
+        0.0,
+        1668.7306558833477,
+        1061.136906867952
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3439689037294129,
+      0.04074770858475339,
+      0.08645134110401709,
+      0.018861065708355
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc0",
+  "date": "2022-01-26",
+  "compatible_settings": []
+}

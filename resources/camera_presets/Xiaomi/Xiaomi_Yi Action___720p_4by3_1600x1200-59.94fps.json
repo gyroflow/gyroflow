@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi Action___720p_4by3_1600x1200-59.94fps",
+  "note": "",
+  "calibrated_by": "lataliana",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi Action",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "orig_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "output_dimension": {
+    "w": 1600,
+    "h": 900
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2885788860563036,
+    "camera_matrix": [
+      [
+        693.1320027094646,
+        0.0,
+        771.5089006721178
+      ],
+      [
+        0.0,
+        692.2537358945419,
+        596.3889247094079
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09822674640253432,
+      -0.027610656648767464,
+      0.026176636855170743,
+      -0.014028294130788975
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_LAOWA_F6.2_C4k_1.90by1_4096x2160-60.00fps",
+  "note": "",
+  "calibrated_by": "Duncan",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "LAOWA",
+  "camera_setting": "F6.2",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 19,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9286086681037922,
+    "camera_matrix": [
+      [
+        2167.6703538792726,
+        0.0,
+        2077.8237279799523
+      ],
+      [
+        0.0,
+        2166.7928788746667,
+        1092.145351171547
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34819574070038734,
+      0.12071899831294446,
+      0.12534063161435682,
+      -0.12788986276422848
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-03",
+  "compatible_settings": []
+}

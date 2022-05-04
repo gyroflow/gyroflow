@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_laowa 9mm f2.8_DCI_C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "SongSul",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "laowa 9mm f2.8",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 6.751235290102089,
+    "camera_matrix": [
+      [
+        1897.6995089864663,
+        0.0,
+        2062.3759833889653
+      ],
+      [
+        0.0,
+        1902.2603311732296,
+        1100.6550424603336
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4514802273207314,
+      -0.5876872106176837,
+      1.815244878085508,
+      -1.6419296484004209
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-19",
+  "compatible_settings": []
+}

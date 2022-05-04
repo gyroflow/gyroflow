@@ -1,0 +1,46 @@
+{
+  "name": "RunCam_2 4k_Wide__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "objptr",
+  "camera_brand": "RunCam",
+  "camera_model": "2 4k",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-09",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 25,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8595892149665263,
+    "camera_matrix": [
+      [
+        1679.7684306748604,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1681.7991929609243,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05031283571432788,
+      0.018868079912422876,
+      -0.02162185013008668,
+      0.011657837272827768
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

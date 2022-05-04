@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 9mm_DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "alexandre auclair",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.14509216040823772,
+    "camera_matrix": [
+      [
+        1853.9226755445648,
+        0.0,
+        2025.3513442920776
+      ],
+      [
+        0.0,
+        1854.838602560136,
+        1104.6678386265437
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34860547470922865,
+      0.1076316465223819,
+      -0.003313332351119686,
+      0.09750848322846584
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

@@ -1,0 +1,46 @@
+{
+  "name": "GoPro_HERO3 Silver_Wide__1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "puck",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO3 Silver",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-22",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 15,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.747529198141491,
+    "camera_matrix": [
+      [
+        825.9165812303512,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        831.6135886961487,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.020744943881060483,
+      0.055889662462334865,
+      0.03193472481330311,
+      -0.022656603455732217
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

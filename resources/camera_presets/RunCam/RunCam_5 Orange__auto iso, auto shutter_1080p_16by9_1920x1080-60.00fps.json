@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange__auto iso, auto shutter_1080p_16by9_1920x1080-60.00fps",
+  "note": "auto iso, auto shutter",
+  "calibrated_by": "michael michaud",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4466623818957219,
+    "camera_matrix": [
+      [
+        887.9677348637565,
+        0.0,
+        984.3796763541662
+      ],
+      [
+        0.0,
+        664.1546974522611,
+        521.6993049029059
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.056544820996063595,
+      0.028722876631591607,
+      -0.06301717929184163,
+      0.025735051881778437
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH1_LAOWA 7.5 C-Dreamer_422 10-I_2.7k_4by3_3328x2496-25.00fps",
+  "note": "",
+  "calibrated_by": "MENGA FPV Martin BOCHATAY",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "LAOWA 7.5 C-Dreamer",
+  "camera_setting": "422 10-I",
+  "calib_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "orig_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "output_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6986346023953345,
+    "camera_matrix": [
+      [
+        1510.4194388260255,
+        0.0,
+        1652.383808081587
+      ],
+      [
+        0.0,
+        1510.5471966790662,
+        1219.4646209104408
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.328836285933623,
+      0.10603052623154484,
+      -0.05429273018814809,
+      0.10362637756423138
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

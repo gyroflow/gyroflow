@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Mi 10_Main Camera_8K_6k_16by9_7680x4320-29.92fps",
+  "note": "",
+  "calibrated_by": "LegoRJ35",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10",
+  "lens_model": "Main Camera",
+  "camera_setting": "8K",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.915262,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.6438987219767105,
+    "camera_matrix": [
+      [
+        5650.054752497847,
+        0.0,
+        3817.9159897370096
+      ],
+      [
+        0.0,
+        5644.581348468796,
+        2188.875538828488
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5923915856269512,
+      -1.9468506735125837,
+      7.804807093950404,
+      -10.01139835720995
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-17",
+  "compatible_settings": []
+}

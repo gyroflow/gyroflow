@@ -1,0 +1,51 @@
+{
+  "name": "Hawkeye_Firefly X Lite_Wide_50 fps_2.5k_16by9_2560x1440-0.00fps",
+  "note": "",
+  "calibrated_by": "Soukron",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "Wide",
+  "camera_setting": "50 fps",
+  "calibrator_version": "0.3.0-beta/dev",
+  "date": "2021-08-18",
+  "official": true,
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 19,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7716322941169201,
+    "camera_matrix": [
+      [
+        1659.6051209101186,
+        0.0,
+        1280.0
+      ],
+      [
+        0.0,
+        1661.6735210206514,
+        720.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.016317628844791328,
+      0.05790705794184552,
+      -0.15567501811495787,
+      0.13431450363568642
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

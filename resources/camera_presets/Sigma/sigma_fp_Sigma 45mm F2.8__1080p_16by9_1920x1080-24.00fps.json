@@ -1,0 +1,66 @@
+{
+  "name": "sigma_fp_Sigma 45mm F2.8__1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "David Clark",
+  "camera_brand": "sigma",
+  "camera_model": "fp",
+  "lens_model": "Sigma 45mm F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36917658402870773,
+    "camera_matrix": [
+      [
+        2514.0605190379383,
+        0.0,
+        977.9524232926168
+      ],
+      [
+        0.0,
+        2511.988407929982,
+        531.3995228387129
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4023524468869171,
+      -1.0820211809980382,
+      13.425574207304091,
+      -52.770941094308306
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": []
+}

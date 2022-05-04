@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_Box 2_Wide__1080p_4by3_1920x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "PASQUALE ERCOLINO",
+  "camera_brand": "Foxeer",
+  "camera_model": "Box 2",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.935795,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5867318015878984,
+    "camera_matrix": [
+      [
+        866.1987202967773,
+        0.0,
+        955.4616512917574
+      ],
+      [
+        0.0,
+        865.6929705303075,
+        686.0051924927369
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08970552208266079,
+      -0.06399282195290068,
+      0.07494998081896219,
+      -0.029018018307555255
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

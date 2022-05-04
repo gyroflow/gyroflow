@@ -1,0 +1,46 @@
+{
+  "name": "Xiaomi_Yi 4K_Wide__2.7k_4by3_2704x2032-0.00fps",
+  "note": "",
+  "calibrated_by": "Fabian",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi 4K",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-02-18",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "num_images": 24,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.787246320832309,
+    "camera_matrix": [
+      [
+        1166.1712852414762,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1168.1750288899875,
+        1016.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08812822481911832,
+      0.008906708304049188,
+      -0.018279006974026964,
+      0.004193220696905302
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

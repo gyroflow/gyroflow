@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Panasonic Lumix 7/14mm F4_ProRes 422 lens at 7mm_4k_1.90by1_3840x2024-23.98fps",
+  "note": "Lens in 7mm f4",
+  "calibrated_by": "@andres.umpierrez",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Panasonic Lumix 7/14mm F4",
+  "camera_setting": "ProRes 422 lens at 7mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2024
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2024
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 4,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6057300212014509,
+    "camera_matrix": [
+      [
+        1449.613767990953,
+        0.0,
+        1947.9567079969431
+      ],
+      [
+        0.0,
+        1446.880506235152,
+        999.8116192858964
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2665876871437439,
+      0.031372871291183914,
+      0.20495141697389516,
+      -0.17432196928347068
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-20",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "sony_SO-02K___1080p_16by9_1920x1080-29.99fps",
+  "note": "",
+  "calibrated_by": "takeru takeuchi",
+  "camera_brand": "sony",
+  "camera_model": "SO-02K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.990688,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4391912740190657,
+    "camera_matrix": [
+      [
+        1292.056896609472,
+        0.0,
+        960.7517998820008
+      ],
+      [
+        0.0,
+        1290.6574911669973,
+        529.3351470996256
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6460111237157574,
+      -0.6269869156269525,
+      0.5551788628519874,
+      -0.5649513333868563
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-26",
+  "compatible_settings": []
+}

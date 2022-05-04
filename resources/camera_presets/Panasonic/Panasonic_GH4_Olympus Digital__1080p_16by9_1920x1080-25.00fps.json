@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Olympus Digital__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Conrad Gueli",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Olympus Digital",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6962427478385915,
+    "camera_matrix": [
+      [
+        1392.1949712264372,
+        0.0,
+        958.9837847688387
+      ],
+      [
+        0.0,
+        1388.258926938566,
+        519.8925382984605
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34933795290215985,
+      -0.3024857452511473,
+      1.8608036427605736,
+      -2.905867530499297
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_16mm Meike__4k_16by9_3840x2160-100.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "16mm Meike",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.2,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 100.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8357649832597835,
+    "camera_matrix": [
+      [
+        3491.489677240412,
+        0.0,
+        1931.8596994582429
+      ],
+      [
+        0.0,
+        3496.021213026097,
+        1116.5960173350468
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23025592757412772,
+      0.11694129053881842,
+      0.31092055593234924,
+      -1.2563075049956676
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

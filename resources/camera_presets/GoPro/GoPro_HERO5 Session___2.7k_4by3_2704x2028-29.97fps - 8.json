@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session___2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "putuindi",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 25.79,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7323245393721323,
+    "camera_matrix": [
+      [
+        1170.5421816413957,
+        0.0,
+        1357.2178440955306
+      ],
+      [
+        0.0,
+        1172.055706872556,
+        1019.834165153366
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13250043005698012,
+      -0.0652048635669761,
+      0.021271344663078603,
+      -0.0006117180053271544
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

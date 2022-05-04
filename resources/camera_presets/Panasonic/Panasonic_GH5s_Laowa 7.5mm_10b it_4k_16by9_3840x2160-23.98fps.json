@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5s_Laowa 7.5mm_10b it_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Ben Toogood",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5s",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "10b it",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.618243699841337,
+    "camera_matrix": [
+      [
+        1646.317162676332,
+        0.0,
+        1909.0815500463768
+      ],
+      [
+        0.0,
+        1649.358988777341,
+        1052.5737442849234
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32577345950974973,
+      0.06665740651374939,
+      0.06794276523695732,
+      -0.026636639904236217
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

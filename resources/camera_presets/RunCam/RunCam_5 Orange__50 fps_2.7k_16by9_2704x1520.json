@@ -1,0 +1,50 @@
+{
+  "name": "RunCam_5 Orange__50 fps_2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "Anonymousss",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "50 fps",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-12-01",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.187762420566136,
+    "camera_matrix": [
+      [
+        1483.281270286907,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1494.8976340387433,
+        760.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05274911722375541,
+      0.045141115360026386,
+      -0.07497207356942863,
+      0.03472203842897036
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

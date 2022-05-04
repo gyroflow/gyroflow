@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BS1H_16-35_6K 10L_5k_3by2_5952x3968-23.98fps",
+  "note": "",
+  "calibrated_by": "ShootGuru",
+  "camera_brand": "Panasonic",
+  "camera_model": "BS1H",
+  "lens_model": "16-35",
+  "camera_setting": "6K 10L",
+  "calib_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "orig_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "output_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7656592814335362,
+    "camera_matrix": [
+      [
+        2806.2647582673467,
+        0.0,
+        2981.5505042496093
+      ],
+      [
+        0.0,
+        2806.6584816605287,
+        1973.4994080830224
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2837172807720557,
+      0.30009876528996987,
+      -0.5430350626053915,
+      0.75912810417143
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-25",
+  "compatible_settings": []
+}

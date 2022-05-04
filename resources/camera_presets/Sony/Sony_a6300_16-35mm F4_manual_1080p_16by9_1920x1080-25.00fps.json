@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_16-35mm F4_manual_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "holibert martinez suarez",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "16-35mm F4",
+  "camera_setting": "manual",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3263828466240968,
+    "camera_matrix": [
+      [
+        1266.758860111702,
+        0.0,
+        969.7848259963232
+      ],
+      [
+        0.0,
+        1268.786554178871,
+        526.204857259676
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2464977120133851,
+      0.4020064962543421,
+      -2.048203634616219,
+      5.918928019753946
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-13",
+  "compatible_settings": []
+}

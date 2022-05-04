@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_Irix 15mm EF__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "B3",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Irix 15mm EF",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.30442559607267966,
+    "camera_matrix": [
+      [
+        846.4659374879743,
+        0.0,
+        974.195888187424
+      ],
+      [
+        0.0,
+        846.5810436893802,
+        537.2980092576782
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2893399285387402,
+      0.29529409752014857,
+      -0.31410898311167407,
+      0.2342444512877749
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

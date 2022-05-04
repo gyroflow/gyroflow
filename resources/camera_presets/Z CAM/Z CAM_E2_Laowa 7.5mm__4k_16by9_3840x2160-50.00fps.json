@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2_Laowa 7.5mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Ka kei Leung",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.26553428671385454,
+    "camera_matrix": [
+      [
+        1686.560108526013,
+        0.0,
+        1908.1511517721235
+      ],
+      [
+        0.0,
+        1686.546313312396,
+        1056.9026714310585
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34617842571027935,
+      0.026444365260369133,
+      0.19014003073591884,
+      -0.10197968783382046
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-03",
+  "compatible_settings": []
+}

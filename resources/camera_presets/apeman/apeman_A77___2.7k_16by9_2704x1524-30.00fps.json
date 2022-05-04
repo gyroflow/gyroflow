@@ -1,0 +1,66 @@
+{
+  "name": "apeman_A77___2.7k_16by9_2704x1524-30.00fps",
+  "note": "",
+  "calibrated_by": "Giovanni Riccio",
+  "camera_brand": "apeman",
+  "camera_model": "A77",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4966085280481376,
+    "camera_matrix": [
+      [
+        1580.1347192250666,
+        0.0,
+        1432.1458772180126
+      ],
+      [
+        0.0,
+        1577.343750257994,
+        763.479411318294
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03972075925477921,
+      -0.010612567997727008,
+      0.05937818007944879,
+      -0.05742811506629743
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-14",
+  "compatible_settings": []
+}

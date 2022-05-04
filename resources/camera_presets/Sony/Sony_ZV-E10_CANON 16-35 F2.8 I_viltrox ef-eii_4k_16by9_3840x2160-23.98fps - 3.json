@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_CANON 16-35 F2.8 I_viltrox ef-eii_4k_16by9_3840x2160-23.98fps",
+  "note": "viltrox ef-eii",
+  "calibrated_by": "連志剛",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "CANON 16-35 F2.8 I",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 41.71,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.803109578723924,
+    "camera_matrix": [
+      [
+        4053.854948852946,
+        0.0,
+        1900.1861654495656
+      ],
+      [
+        0.0,
+        4048.418378654334,
+        1133.3165738104958
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16400597215569748,
+      1.2464838395640163,
+      -5.647156291675589,
+      15.31710577884558
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-51bf4121-3840x2160@23976",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

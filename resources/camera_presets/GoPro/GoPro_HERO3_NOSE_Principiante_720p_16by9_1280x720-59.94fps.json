@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO3_NOSE_Principiante_720p_16by9_1280x720-59.94fps",
+  "note": "Principiante",
+  "calibrated_by": "Martin Miguel",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO3",
+  "lens_model": "NOSE",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.940067,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6832328924830388,
+    "camera_matrix": [
+      [
+        616.4000467256803,
+        0.0,
+        669.7050325639142
+      ],
+      [
+        0.0,
+        613.6801178854877,
+        354.0182846721047
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.005898806255046761,
+      -0.003581702358796485,
+      0.0023138302839446267,
+      0.0017919722898424753
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-22",
+  "compatible_settings": []
+}

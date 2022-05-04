@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M50_Canon 50mm f1.8__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "CurrySausage",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M50",
+  "lens_model": "Canon 50mm f1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7585063133823965,
+    "camera_matrix": [
+      [
+        3263.8487459688936,
+        0.0,
+        967.1790797139008
+      ],
+      [
+        0.0,
+        3264.604581886628,
+        529.3155715453937
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19402621308668577,
+      -7.540449602132336,
+      132.72714121079392,
+      -709.064712905533
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

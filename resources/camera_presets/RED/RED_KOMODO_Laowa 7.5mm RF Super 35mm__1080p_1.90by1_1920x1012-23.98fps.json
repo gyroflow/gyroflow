@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_Laowa 7.5mm RF Super 35mm__1080p_1.90by1_1920x1012-23.98fps",
+  "note": "",
+  "calibrated_by": "Holler Film LLC",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 7.5mm RF Super 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3028845105970485,
+    "camera_matrix": [
+      [
+        544.5639607201418,
+        0.0,
+        965.0593585995476
+      ],
+      [
+        0.0,
+        544.9865285182268,
+        508.7024154399301
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3477667858211738,
+      0.09203379520591884,
+      0.08141896605884001,
+      0.01603619103600332
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-22",
+  "compatible_settings": []
+}

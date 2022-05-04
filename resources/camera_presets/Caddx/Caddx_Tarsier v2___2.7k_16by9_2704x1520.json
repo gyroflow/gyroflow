@@ -1,0 +1,46 @@
+{
+  "name": "Caddx_Tarsier v2___2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "Andrea",
+  "camera_brand": "Caddx",
+  "camera_model": "Tarsier v2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-08",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.0812598754212375,
+    "camera_matrix": [
+      [
+        1555.1970090660536,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1171.6930860421164,
+        760.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.38149318794700166,
+      -0.2951482340509342,
+      1.130996651143816,
+      -0.8723588595291758
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

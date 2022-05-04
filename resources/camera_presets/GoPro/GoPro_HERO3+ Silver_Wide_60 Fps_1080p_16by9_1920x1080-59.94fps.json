@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO3+ Silver_Wide_60 Fps_1080p_16by9_1920x1080-59.94fps",
+  "note": "60 Fps",
+  "calibrated_by": "Matmd97",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO3+ Silver",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.47731782974086223,
+    "camera_matrix": [
+      [
+        843.4260342093361,
+        0.0,
+        971.3704489364652
+      ],
+      [
+        0.0,
+        844.047251153348,
+        556.6320677885889
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05386102717414228,
+      0.01646731690077271,
+      0.0009763307058028556,
+      -0.006147669864783484
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

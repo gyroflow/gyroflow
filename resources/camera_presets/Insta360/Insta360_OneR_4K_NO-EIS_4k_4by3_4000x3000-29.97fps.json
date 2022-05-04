@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_4K_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "maki",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "4K",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7323242476774915,
+    "camera_matrix": [
+      [
+        1951.6093706426357,
+        0.0,
+        2012.708340416212
+      ],
+      [
+        0.0,
+        1952.0611398696017,
+        1528.3987110228486
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0014888643491359588,
+      0.011688273025881546,
+      -0.027141462444512803,
+      0.016320098780414766
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide96-4000x3000@29970-no-eis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

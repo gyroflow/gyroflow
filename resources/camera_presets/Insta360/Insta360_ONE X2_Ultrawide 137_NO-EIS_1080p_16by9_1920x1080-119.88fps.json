@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_ONE X2_Ultrawide 137_NO-EIS_1080p_16by9_1920x1080-119.88fps",
+  "note": "NO-EIS",
+  "calibrated_by": "alex leipold",
+  "camera_brand": "Insta360",
+  "camera_model": "ONE X2",
+  "lens_model": "Ultrawide 137",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.19288846645884525,
+    "camera_matrix": [
+      [
+        716.4417550849471,
+        0.0,
+        947.2607514085825
+      ],
+      [
+        0.0,
+        715.8418854473312,
+        539.8007902853636
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04331679077518329,
+      -0.013165909060276265,
+      0.010618814066223782,
+      -0.005825144725912869
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-onex2-ultrawide137-1920x1080@119880-no-eis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

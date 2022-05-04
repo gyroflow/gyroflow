@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2_Laowa 7.5mm_f5.5_2.7k_4by3_3696x2772-59.94fps",
+  "note": "14_5ms rolling shutter",
+  "calibrated_by": "Eric",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "f5.5",
+  "calib_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "orig_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "output_dimension": {
+    "w": 3696,
+    "h": 2078
+  },
+  "frame_readout_time": 14.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 30,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7735157064283024,
+    "camera_matrix": [
+      [
+        1690.0206054768228,
+        0.0,
+        1833.856646775074
+      ],
+      [
+        0.0,
+        1688.8009544399488,
+        1363.440200168102
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.338943492071423,
+      0.06216236312588736,
+      0.04790719155274945,
+      0.0460307145259865
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-26",
+  "compatible_settings": []
+}

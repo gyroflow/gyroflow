@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 12_Wide_Apple iPhone 12 wide (default) camera_1080p_16by9_1920x1080-59.94fps",
+  "note": "Apple iPhone 12 wide (default) camera",
+  "calibrated_by": "Hugo Lonski",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 12",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.941193,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3912060736798287,
+    "camera_matrix": [
+      [
+        1655.023234725246,
+        0.0,
+        962.590810939376
+      ],
+      [
+        0.0,
+        1653.4292379507106,
+        536.8463696822449
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5405788518506685,
+      -0.8417842484140102,
+      2.1383233454442467,
+      -0.8505776993542371
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-18",
+  "compatible_settings": []
+}

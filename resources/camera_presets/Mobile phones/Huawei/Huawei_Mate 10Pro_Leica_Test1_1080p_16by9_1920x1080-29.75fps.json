@@ -1,0 +1,66 @@
+{
+  "name": "Huawei_Mate 10Pro_Leica_Test1_1080p_16by9_1920x1080-29.75fps",
+  "note": "Test1",
+  "calibrated_by": "FiredFPV",
+  "camera_brand": "Huawei",
+  "camera_model": "Mate 10Pro",
+  "lens_model": "Leica",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.752066,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5337392372895938,
+    "camera_matrix": [
+      [
+        2028.5622051286643,
+        0.0,
+        954.0448494832186
+      ],
+      [
+        0.0,
+        2027.00396337121,
+        538.7703168010045
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6073512574790862,
+      -1.7093416024844958,
+      1.440914930014327,
+      13.848879410919409
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

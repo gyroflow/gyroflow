@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 11 Pro___4k_16by9_3840x2160-59.54fps",
+  "note": "",
+  "calibrated_by": "Stefan Bechtel",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 11 Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 41,
+  "fps": 59.536789,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9948469004364,
+    "camera_matrix": [
+      [
+        3231.142561773184,
+        0.0,
+        1907.6292928237883
+      ],
+      [
+        0.0,
+        3231.180860982712,
+        1065.2416841666584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5415576379516132,
+      0.21155084263016477,
+      -8.617806290826028,
+      25.52584653811002
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-28",
+  "compatible_settings": []
+}

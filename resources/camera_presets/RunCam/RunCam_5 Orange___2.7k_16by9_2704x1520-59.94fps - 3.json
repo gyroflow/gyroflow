@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange___2.7k_16by9_2704x1520-59.94fps",
+  "note": "",
+  "calibrated_by": "Shuhai",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.0672357844975697,
+    "camera_matrix": [
+      [
+        1925.7247279189776,
+        0.0,
+        1381.182815401365
+      ],
+      [
+        0.0,
+        1939.211886162302,
+        720.5054965090062
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.14030799102291097,
+      0.0434506993342751,
+      -0.05919627058268111,
+      0.050437706146242565
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-01",
+  "compatible_settings": []
+}

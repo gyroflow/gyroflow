@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 13 Pro_3x_Filmatic_1080p_16by9_1920x1080-29.98fps",
+  "note": "",
+  "calibrated_by": "blink1n",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 13 Pro",
+  "lens_model": "3x",
+  "camera_setting": "Filmatic",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.980486,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2681837353503792,
+    "camera_matrix": [
+      [
+        5331.733987637143,
+        0.0,
+        955.938079236652
+      ],
+      [
+        0.0,
+        5335.807357460034,
+        507.25454535646134
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.7948855900948812,
+      56.78744312810845,
+      -696.5744164674309,
+      -1159.1553029487927
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

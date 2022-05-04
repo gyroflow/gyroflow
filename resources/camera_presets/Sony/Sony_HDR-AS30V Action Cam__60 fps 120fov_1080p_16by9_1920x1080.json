@@ -1,0 +1,46 @@
+{
+  "name": "Sony_HDR-AS30V Action Cam__60 fps 120fov_1080p_16by9_1920x1080-0.00fps",
+  "note": "1920x1080 (16:9), 60 fps, 120 fov",
+  "calibrated_by": "kafie1980",
+  "camera_brand": "Sony",
+  "camera_model": "HDR-AS30V Action Cam",
+  "lens_model": "",
+  "camera_setting": "60 fps 120fov",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-04-11",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 20,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.37668516509719535,
+    "camera_matrix": [
+      [
+        1091.568273418866,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        1090.887590445928,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.001337188117229898,
+      0.017362411065214196,
+      -0.1859627482958708,
+      0.3319347841757849
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

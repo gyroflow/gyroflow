@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_HDZero Nano_Stock_Stock_720p_16by9_1280x720-59.94fps",
+  "note": "",
+  "calibrated_by": "dudu du76",
+  "camera_brand": "RunCam",
+  "camera_model": "HDZero Nano",
+  "lens_model": "Stock",
+  "camera_setting": "Stock",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6581413854070717,
+    "camera_matrix": [
+      [
+        634.1159878830376,
+        0.0,
+        640.2970834467097
+      ],
+      [
+        0.0,
+        619.5077540266692,
+        365.90682738985174
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0626307400419735,
+      -0.02664453852037359,
+      0.021619383354189725,
+      -0.005574838320097032
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

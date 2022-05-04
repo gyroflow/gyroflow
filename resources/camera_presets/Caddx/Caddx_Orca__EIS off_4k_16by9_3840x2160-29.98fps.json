@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Orca__EIS off_4k_16by9_3840x2160-29.98fps",
+  "note": "",
+  "calibrated_by": "Stanisław Bąk",
+  "camera_brand": "Caddx",
+  "camera_model": "Orca",
+  "lens_model": "",
+  "camera_setting": "EIS off",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.977148,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6723124717199501,
+    "camera_matrix": [
+      [
+        1879.5146322666656,
+        0.0,
+        1958.7571329603215
+      ],
+      [
+        0.0,
+        1865.629737523833,
+        1005.3944530978404
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02584167728971983,
+      -0.01834168595546584,
+      0.01069550490288368,
+      -0.00334581979046889
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-10",
+  "compatible_settings": []
+}

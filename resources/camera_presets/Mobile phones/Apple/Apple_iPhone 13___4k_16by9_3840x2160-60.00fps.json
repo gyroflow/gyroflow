@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 13___4k_16by9_3840x2160-60.00fps",
+  "note": "",
+  "calibrated_by": "L in",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 13",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4786820690543462,
+    "camera_matrix": [
+      [
+        3224.860175775071,
+        0.0,
+        1929.0787150428505
+      ],
+      [
+        0.0,
+        3224.6496079368826,
+        1082.3172161503203
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6108163919154167,
+      -2.2603935633824257,
+      9.546181377741233,
+      -13.010189157957033
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-04-05",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_251.4+TPK-16Z_anamorphic mode_2.7k_4by3_3328x2496-29.97fps",
+  "note": "",
+  "calibrated_by": "yi Peter",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "251.4+TPK-16Z",
+  "camera_setting": "anamorphic mode",
+  "calib_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "orig_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "output_dimension": {
+    "w": 3328,
+    "h": 1872
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.3921946008481756,
+    "camera_matrix": [
+      [
+        2730.0051802329126,
+        0.0,
+        1652.043247245645
+      ],
+      [
+        0.0,
+        4950.870075899119,
+        1243.568543327327
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.4563478779578503,
+      9.886146470091726,
+      -126.51013930700638,
+      505.9796446900378
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

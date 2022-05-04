@@ -1,0 +1,51 @@
+{
+  "name": "GoPro_Session 5_Wide_30 fps_2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "Anton",
+  "camera_brand": "GoPro",
+  "camera_model": "Session 5",
+  "lens_model": "Wide",
+  "camera_setting": "30 fps",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-03",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 9,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5015577644748316,
+    "camera_matrix": [
+      [
+        1203.4137060797057,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1202.7312389529873,
+        760.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1164342481522829,
+      -0.03711112688530367,
+      -0.004922784098246667,
+      0.006948529337510437
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "AXNEN_A10_F2.5, f2.68 mm_Sensor: Sony IMX386 12MP 1/2.3 \",_2.7k_16by9_2704x1520-60.00fps",
+  "note": "Sensor: Sony IMX386 12MP 1/2.3 \",",
+  "calibrated_by": "Daniel Chang",
+  "camera_brand": "AXNEN",
+  "camera_model": "A10",
+  "lens_model": "F2.5, f2.68 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.3474401778063545,
+    "camera_matrix": [
+      [
+        1253.1526519176225,
+        0.0,
+        1366.1826578207629
+      ],
+      [
+        0.0,
+        1268.355354172268,
+        719.0192769510745
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.132102587323238,
+      0.1280008094262486,
+      -0.381338999460382,
+      0.3709872459145909
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO3 Black___1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Mohd Naim Mat Ariff",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO3 Black",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.42243301872352845,
+    "camera_matrix": [
+      [
+        870.4147541111195,
+        0.0,
+        969.6230640220094
+      ],
+      [
+        0.0,
+        887.3653483220319,
+        518.4885150994905
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03218535063959764,
+      0.10420049532773788,
+      -0.011362401869314212,
+      -0.037353054022199246
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-18",
+  "compatible_settings": []
+}

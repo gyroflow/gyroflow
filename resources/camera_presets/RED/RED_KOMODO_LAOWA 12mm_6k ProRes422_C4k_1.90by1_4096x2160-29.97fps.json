@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_LAOWA 12mm_6k ProRes422_C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Spencer Whiting",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "LAOWA 12mm",
+  "camera_setting": "6k ProRes422",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.237185405034876,
+    "camera_matrix": [
+      [
+        1906.5757779762357,
+        0.0,
+        2094.510220491444
+      ],
+      [
+        0.0,
+        1907.166009589932,
+        1040.8678251623655
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3214129373169912,
+      0.16224427883153017,
+      0.034681514120744744,
+      0.008976512388732722
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

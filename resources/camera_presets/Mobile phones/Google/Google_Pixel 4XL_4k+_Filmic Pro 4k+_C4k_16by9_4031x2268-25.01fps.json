@@ -1,0 +1,66 @@
+{
+  "name": "Google_Pixel 4XL_4k+_Filmic Pro 4k+_C4k_16by9_4031x2268-25.01fps",
+  "note": "Filmic Pro 4k+",
+  "calibrated_by": "Юрий Перцюх",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 4XL",
+  "lens_model": "4k+",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4031,
+    "h": 2268
+  },
+  "orig_dimension": {
+    "w": 4031,
+    "h": 2268
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.007307,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.969608087621344,
+    "camera_matrix": [
+      [
+        3933.4550118551424,
+        0.0,
+        2016.02802003458
+      ],
+      [
+        0.0,
+        3938.203624476272,
+        1079.7350172935594
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4014011169572429,
+      0.7977858799978901,
+      -7.169654462034401,
+      16.862445060990265
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

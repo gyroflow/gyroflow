@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_D3400_Tamron__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "nicola fanari",
+  "camera_brand": "Nikon",
+  "camera_model": "D3400",
+  "lens_model": "Tamron",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1372320308700125,
+    "camera_matrix": [
+      [
+        2964.7081756583234,
+        0.0,
+        926.9337065503752
+      ],
+      [
+        0.0,
+        2973.0981284669183,
+        580.809732723014
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.015370233184181256,
+      17.18807526088801,
+      -813.9241040706636,
+      11944.839034459916
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

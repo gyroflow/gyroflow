@@ -1,0 +1,46 @@
+{
+  "name": "Panasonic_GX85_Laowa 7.5mm__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Peter Vieth",
+  "camera_brand": "Panasonic",
+  "camera_model": "GX85",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-04-25",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5586682547805085,
+    "camera_matrix": [
+      [
+        1874.9024039733524,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1874.9905533561157,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31760261164866166,
+      0.23377877851473872,
+      -0.742044930465063,
+      1.2401843324564354
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

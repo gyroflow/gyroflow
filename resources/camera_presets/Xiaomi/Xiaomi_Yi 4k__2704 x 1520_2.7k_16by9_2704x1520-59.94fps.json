@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi 4k__2704 x 1520_2.7k_16by9_2704x1520-59.94fps",
+  "note": "2704 x 1520",
+  "calibrated_by": "Francesco Meraviglia",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi 4k",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1742328433185667,
+    "camera_matrix": [
+      [
+        1212.7458957195945,
+        0.0,
+        1373.6584236431252
+      ],
+      [
+        0.0,
+        1210.6814088919914,
+        700.4472082365768
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08516719116273455,
+      0.04566937836323659,
+      -0.07609521935260287,
+      0.03063680858241638
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-01",
+  "compatible_settings": []
+}

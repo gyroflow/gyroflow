@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_Viltrox 13mm f1.4_(no crop)_4k_16by9_3840x2160-25.00fps",
+  "note": "(no crop)",
+  "calibrated_by": "Oskar Lohse",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Viltrox 13mm f1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4259037393869798,
+    "camera_matrix": [
+      [
+        2186.9783392217237,
+        0.0,
+        1941.9194786914484
+      ],
+      [
+        0.0,
+        2184.478795632597,
+        1047.4836825553566
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29471604141564745,
+      0.06207317040790349,
+      0.2895629829695638,
+      -0.1336361615348781
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-18",
+  "compatible_settings": []
+}

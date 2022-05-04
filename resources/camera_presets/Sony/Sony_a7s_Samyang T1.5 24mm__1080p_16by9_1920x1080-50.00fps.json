@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7s_Samyang T1.5 24mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "DnS",
+  "camera_brand": "Sony",
+  "camera_model": "a7s",
+  "lens_model": "Samyang T1.5 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27971660099841855,
+    "camera_matrix": [
+      [
+        1403.3689428716564,
+        0.0,
+        934.1862797202853
+      ],
+      [
+        0.0,
+        1404.896456498454,
+        531.3838675163511
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2178982135200972,
+      0.4851560818560436,
+      -1.6444681345962424,
+      2.691573256190163
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-20",
+  "compatible_settings": []
+}

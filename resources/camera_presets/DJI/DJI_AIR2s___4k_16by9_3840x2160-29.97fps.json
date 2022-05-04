@@ -1,0 +1,66 @@
+{
+  "name": "DJI_AIR2s___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "郑洲",
+  "camera_brand": "DJI",
+  "camera_model": "AIR2s",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.880923170486308,
+    "camera_matrix": [
+      [
+        2458.6893100225057,
+        0.0,
+        1826.5101899102056
+      ],
+      [
+        0.0,
+        2455.9734459785004,
+        1175.9800624902286
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26782514719968964,
+      0.4204287822635652,
+      -1.7082551233991,
+      2.744783964857839
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-03-22",
+  "compatible_settings": []
+}

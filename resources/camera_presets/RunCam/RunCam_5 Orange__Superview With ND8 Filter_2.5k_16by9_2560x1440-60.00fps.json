@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange__Superview With ND8 Filter_2.5k_16by9_2560x1440-60.00fps",
+  "note": "Superview With ND8 Filter",
+  "calibrated_by": "Corentin Faure",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 20,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 5.223424355142822,
+    "camera_matrix": [
+      [
+        2183.3010743492855,
+        0.0,
+        -197.99792157164825
+      ],
+      [
+        0.0,
+        1788.1996875283153,
+        606.5828600023432
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.40616216105660136,
+      -1.6077689214070094,
+      1.992630936690797,
+      -0.7472557408099931
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

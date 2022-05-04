@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange_4k XV_XV_4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Zachary Wilmes",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "4k XV",
+  "camera_setting": "XV",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7979748519878294,
+    "camera_matrix": [
+      [
+        1986.859234701885,
+        0.0,
+        1981.459297985464
+      ],
+      [
+        0.0,
+        1490.808285892382,
+        1100.2581703948954
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04500581331187773,
+      0.020993159574430497,
+      -0.04912046822966312,
+      0.026126524447739444
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

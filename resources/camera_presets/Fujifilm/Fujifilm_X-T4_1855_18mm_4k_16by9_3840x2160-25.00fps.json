@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T4_1855_18mm_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Eren Alp Yakar",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "1855",
+  "camera_setting": "18mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7980365636704324,
+    "camera_matrix": [
+      [
+        3058.1274019205316,
+        0.0,
+        1906.7857200777944
+      ],
+      [
+        0.0,
+        3054.229357808207,
+        1084.632487154125
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2707495909520833,
+      0.498618704924091,
+      -1.5177444551581245,
+      2.4577586723602285
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

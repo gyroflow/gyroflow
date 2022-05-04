@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_SIGMA ART 18-35MM 1.8_XAVC, 35mm, Uncropped_1080p_16by9_1920x1080-59.94fps",
+  "note": "XAVC, 35mm, Uncropped",
+  "calibrated_by": "Jake P",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "SIGMA ART 18-35MM 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.34336205173336626,
+    "camera_matrix": [
+      [
+        1807.026981885364,
+        0.0,
+        945.089318867433
+      ],
+      [
+        0.0,
+        1805.721599507796,
+        537.8982646055133
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4044352809703751,
+      0.22624613166343713,
+      3.012851564277157,
+      -6.535834183315855
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-04",
+  "compatible_settings": []
+}

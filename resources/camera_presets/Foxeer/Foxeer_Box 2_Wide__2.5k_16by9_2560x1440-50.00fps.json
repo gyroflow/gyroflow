@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_Box 2_Wide__2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "Fabio",
+  "camera_brand": "Foxeer",
+  "camera_model": "Box 2",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 6.424463190184049,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.542096877212592,
+    "camera_matrix": [
+      [
+        1320.6611443780844,
+        0.0,
+        1292.1562228444511
+      ],
+      [
+        0.0,
+        1402.9809192622213,
+        738.8601838068157
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06727639108202244,
+      -0.014916396887378305,
+      0.026583593034223182,
+      -0.014451236367120514
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-14",
+  "compatible_settings": []
+}

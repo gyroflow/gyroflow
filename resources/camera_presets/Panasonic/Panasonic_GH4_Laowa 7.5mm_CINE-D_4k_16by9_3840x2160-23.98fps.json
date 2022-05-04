@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Laowa 7.5mm_CINE-D_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Ian Tunney",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "CINE-D",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2420419181324025,
+    "camera_matrix": [
+      [
+        2126.734882261115,
+        0.0,
+        1905.2902729066857
+      ],
+      [
+        0.0,
+        2124.653248040373,
+        1041.8457306145335
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33777299693428203,
+      0.037371828646809185,
+      0.1430940124597811,
+      -0.06591735709965685
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-10",
+  "compatible_settings": []
+}

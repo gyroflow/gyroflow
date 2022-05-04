@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action_stock_hakuna matata_4k_4by3_4000x3000-29.97fps",
+  "note": "hakuna matata",
+  "calibrated_by": "Przemysław Kuciński",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "stock",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.869432274020046,
+    "camera_matrix": [
+      [
+        1582.4057431592644,
+        0.0,
+        1965.6166295298735
+      ],
+      [
+        0.0,
+        1585.5646473402903,
+        1501.9008288623995
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2292668288100755,
+      0.03215424061028257,
+      -0.03944209986863285,
+      -0.020758138867115025
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-06",
+  "compatible_settings": []
+}

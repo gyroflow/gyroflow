@@ -1,0 +1,51 @@
+{
+  "name": "GoPro_Session 5_Wide__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Hybsrt",
+  "camera_brand": "GoPro",
+  "camera_model": "Session 5",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-10-01",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 48,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.6530639428810103,
+    "camera_matrix": [
+      [
+        1701.3045978668224,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1701.7579672741638,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1234669960634084,
+      -0.04049754116742709,
+      -0.0015207876116907545,
+      0.006694449783312994
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

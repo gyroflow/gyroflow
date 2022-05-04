@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Note 10 Lite_1x__1080p_16by9_1920x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "Hija",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 10 Lite",
+  "lens_model": "1x",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 50,
+  "fps": 60.019001,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6194833368069039,
+    "camera_matrix": [
+      [
+        1512.69506168416,
+        0.0,
+        975.3816283368096
+      ],
+      [
+        0.0,
+        1513.702411636849,
+        546.2186565382272
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5122848358213056,
+      -0.2861838424945292,
+      -0.2639220171123243,
+      1.3828563506654197
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-28",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_35mm sigma__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Rene Weinitschke",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "35mm sigma",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.84784970717267,
+    "camera_matrix": [
+      [
+        4410.409387264741,
+        0.0,
+        1906.4111607531224
+      ],
+      [
+        0.0,
+        4402.69423586894,
+        1089.7645416874732
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2400686954639822,
+      0.7003342889625669,
+      -6.511311683558647,
+      26.365862378329656
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-11",
+  "compatible_settings": []
+}

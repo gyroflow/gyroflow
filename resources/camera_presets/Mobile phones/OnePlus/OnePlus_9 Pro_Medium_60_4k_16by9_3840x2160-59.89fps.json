@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_9 Pro_Medium_60_4k_16by9_3840x2160-59.89fps",
+  "note": "",
+  "calibrated_by": "Joseph Hancuff",
+  "camera_brand": "OnePlus",
+  "camera_model": "9 Pro",
+  "lens_model": "Medium",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 52,
+  "fps": 59.890057,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.7503720479256133,
+    "camera_matrix": [
+      [
+        3444.964733788058,
+        0.0,
+        1931.5107587662296
+      ],
+      [
+        0.0,
+        3445.8001926148886,
+        1086.9192920563016
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3721558091112955,
+      -0.13379531917279577,
+      1.0053006268244764,
+      -1.732960901027226
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

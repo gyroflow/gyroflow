@@ -1,0 +1,50 @@
+{
+  "name": "Mobius_Maxi 4K_Lens B_60 fps_1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "Mobius-Cam.com",
+  "camera_brand": "Mobius",
+  "camera_model": "Maxi 4K",
+  "lens_model": "Lens B",
+  "camera_setting": "60 fps",
+  "calibrator_version": "0.3.0-beta/dev-23072021",
+  "date": "2021-08-16",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 41,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.4025649924569263,
+    "camera_matrix": [
+      [
+        844.1001139984198,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        844.7865318450325,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.07200327298196987,
+      -0.09644755975330371,
+      0.193146568611536,
+      -0.10537850279046504
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,51 @@
+{
+  "name": "GoPro_Hero4 Black___2.7k_4by3_2704x2028-0.00fps",
+  "note": "",
+  "calibrated_by": "WizzX",
+  "camera_brand": "GoPro",
+  "camera_model": "Hero4 Black",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-09",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 15,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6362536254030913,
+    "camera_matrix": [
+      [
+        1186.8661524741312,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1189.8759571468495,
+        1014.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05155579750460571,
+      0.01690292621987095,
+      -0.00908808841903254,
+      0.001180359379242206
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

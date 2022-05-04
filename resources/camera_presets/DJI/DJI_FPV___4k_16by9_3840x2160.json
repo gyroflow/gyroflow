@@ -1,0 +1,46 @@
+{
+  "name": "DJI_FPV___4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Anonymous",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-27",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 9,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7944339279936354,
+    "camera_matrix": [
+      [
+        1719.6683672096165,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1722.101387297503,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10140109104353276,
+      -0.06655487175817297,
+      0.12638456257815223,
+      -0.09111534371253464
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

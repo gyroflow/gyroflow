@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6500_16 mm 1.4 sigma__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Max",
+  "camera_brand": "Sony",
+  "camera_model": "a6500",
+  "lens_model": "16 mm 1.4 sigma",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5672836607720682,
+    "camera_matrix": [
+      [
+        2902.2650242663717,
+        0.0,
+        1819.074886310795
+      ],
+      [
+        0.0,
+        2899.601710479558,
+        1073.9298629276127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21516774762190263,
+      0.34370585342109855,
+      -0.9211325373637246,
+      1.398051840499168
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

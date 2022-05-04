@@ -1,0 +1,46 @@
+{
+  "name": "Sigma_fp_Laowa 11mm FF 4.5 __4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "WhitePhoenixFilms",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Laowa 11mm FF 4.5 ",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-11",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 18,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7006092066650459,
+    "camera_matrix": [
+      [
+        1233.6472059763275,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1235.9623021755012,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33526109513981406,
+      0.08486480578529537,
+      0.023296327314800053,
+      0.06867048846982736
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_Max_Wide_NO-EIS_1080p_16by9_1920x1080-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Stefano",
+  "camera_brand": "GoPro",
+  "camera_model": "Max",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4316386443051832,
+    "camera_matrix": [
+      [
+        850.5966998827918,
+        0.0,
+        958.2468976744664
+      ],
+      [
+        0.0,
+        849.9554542383712,
+        533.8980604339662
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03687336247432018,
+      0.14184689605221804,
+      -0.22600379782261135,
+      0.12351274084701758
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-max-wide-1920x1080@50000-no-eis",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

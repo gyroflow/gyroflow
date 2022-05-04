@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_Digisight V3_Standard_Stock_720p_16by9_1280x720-59.94fps",
+  "note": "Bugged firmware (blue/green tint) camera version",
+  "calibrated_by": "dudu du76",
+  "camera_brand": "Foxeer",
+  "camera_model": "Digisight V3",
+  "lens_model": "Standard",
+  "camera_setting": "Stock",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5302104688263478,
+    "camera_matrix": [
+      [
+        586.5320206443644,
+        0.0,
+        646.2700394166411
+      ],
+      [
+        0.0,
+        572.6477343003103,
+        380.20873130044254
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03200464801638114,
+      0.004297801458581037,
+      -0.016065543578926093,
+      0.007767929180826383
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

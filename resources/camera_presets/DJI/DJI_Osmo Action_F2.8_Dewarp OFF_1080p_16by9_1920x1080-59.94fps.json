@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action_F2.8_Dewarp OFF_1080p_16by9_1920x1080-59.94fps",
+  "note": "Dewarp OFF",
+  "calibrated_by": "Deepak M",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.43057679920921826,
+    "camera_matrix": [
+      [
+        865.0092802242557,
+        0.0,
+        986.8176282464124
+      ],
+      [
+        0.0,
+        864.605727702915,
+        555.4807920358957
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23087161165509584,
+      0.3777212682194538,
+      -0.2233483235844675,
+      0.198895223444572
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-23",
+  "compatible_settings": []
+}

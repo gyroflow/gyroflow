@@ -1,0 +1,50 @@
+{
+  "name": "Caddx_Polar_starlight__720p_16by9_1280x720-0.00fps",
+  "note": "",
+  "calibrated_by": "trotter",
+  "camera_brand": "Caddx",
+  "camera_model": "Polar",
+  "lens_model": "starlight",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-29",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 9,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.19284669483017575,
+    "camera_matrix": [
+      [
+        591.6770314180231,
+        0.0,
+        640.0
+      ],
+      [
+        0.0,
+        591.4246667254348,
+        360.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02564734333264882,
+      -0.006792970974271776,
+      -0.0016193092985461422,
+      0.00015334063511259995
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

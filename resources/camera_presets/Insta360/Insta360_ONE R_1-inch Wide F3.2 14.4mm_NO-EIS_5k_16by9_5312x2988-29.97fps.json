@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_ONE R_1-inch Wide F3.2 14.4mm_NO-EIS_5k_16by9_5312x2988-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "George Marshall",
+  "camera_brand": "Insta360",
+  "camera_model": "ONE R",
+  "lens_model": "1-inch Wide F3.2 14.4mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.378441975165205,
+    "camera_matrix": [
+      [
+        2205.437777636217,
+        0.0,
+        2749.8232275076193
+      ],
+      [
+        0.0,
+        2204.180856195559,
+        1567.7503586584646
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.07391553765593643,
+      -0.033415292042406515,
+      0.036749857403262025,
+      -0.012264295345917548
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-04",
+  "compatible_settings": []
+}

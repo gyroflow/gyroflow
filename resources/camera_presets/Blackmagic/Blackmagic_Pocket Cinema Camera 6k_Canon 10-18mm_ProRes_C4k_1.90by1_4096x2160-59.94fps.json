@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Canon 10-18mm_ProRes_C4k_1.90by1_4096x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Marcel Schlupf",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Canon 10-18mm",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.32863503310648545,
+    "camera_matrix": [
+      [
+        1928.355390585206,
+        0.0,
+        2130.9899883366816
+      ],
+      [
+        0.0,
+        1931.2251572935909,
+        1008.1678276297428
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32476779339606693,
+      0.14000488121885504,
+      0.004885965339772744,
+      -0.013201135729087977
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

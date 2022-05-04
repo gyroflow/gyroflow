@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7_tamton 28-75mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "sj",
+  "camera_brand": "Sony",
+  "camera_model": "a7",
+  "lens_model": "tamton 28-75mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6722827238955196,
+    "camera_matrix": [
+      [
+        2381.409646266292,
+        0.0,
+        994.094712569266
+      ],
+      [
+        0.0,
+        2365.5818125735905,
+        757.6801814209757
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30431115106121487,
+      0.5230804633690153,
+      -3.915024018476053,
+      14.284811952634898
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

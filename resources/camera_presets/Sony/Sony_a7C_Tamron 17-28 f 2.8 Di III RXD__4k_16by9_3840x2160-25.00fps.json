@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7C_Tamron 17-28 f 2.8 Di III RXD__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Madcow9510",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Tamron 17-28 f 2.8 Di III RXD",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.618065912887444,
+    "camera_matrix": [
+      [
+        1872.050967890806,
+        0.0,
+        1904.3906629817884
+      ],
+      [
+        0.0,
+        1870.7931281852464,
+        1087.8187792178785
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31435699227902164,
+      0.16922685622692338,
+      0.03869881657919529,
+      0.04151156555247697
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-61ac47bd-3840x2160@25000",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_sigma 17-50 + VILTROX_17mm_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Mikołaj Zeman",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "sigma 17-50 + VILTROX",
+  "camera_setting": "17mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7331562997612341,
+    "camera_matrix": [
+      [
+        2648.535117437126,
+        0.0,
+        2051.077498123402
+      ],
+      [
+        0.0,
+        2648.3570988667184,
+        1104.5203533446684
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17044414098347585,
+      0.31496995249418375,
+      -0.540488589932061,
+      0.9645870670415408
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

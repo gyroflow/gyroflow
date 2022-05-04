@@ -1,0 +1,46 @@
+{
+  "name": "RunCam_Hybrid 2_2.1 mm_normal_1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "Alchemy",
+  "camera_brand": "RunCam",
+  "camera_model": "Hybrid 2",
+  "lens_model": "2.1 mm",
+  "camera_setting": "normal",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-04-19",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 23,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2940500729774753,
+    "camera_matrix": [
+      [
+        988.9269429100264,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        989.6767127942204,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03443762881160204,
+      -0.005243822800525522,
+      -0.017901317294921015,
+      0.02175158745681675
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

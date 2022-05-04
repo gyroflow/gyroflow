@@ -1,0 +1,66 @@
+{
+  "name": "AKASO_V50x_Caddx LS108__1080p_16by9_1920x1080-90.11fps",
+  "note": "",
+  "calibrated_by": "Dicky Soeliantoro",
+  "camera_brand": "AKASO",
+  "camera_model": "V50x",
+  "lens_model": "Caddx LS108",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 90.107231,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.440926624271927,
+    "camera_matrix": [
+      [
+        1343.220713555737,
+        0.0,
+        1003.9837481566708
+      ],
+      [
+        0.0,
+        1345.8434284600626,
+        537.1749729788883
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.08852005354985965,
+      0.026576072930129917,
+      -0.04261921307278385,
+      0.025682499131094483
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-29",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Galaxy S22 Ultra - Main (108 MP)_1X_F1.8_4k_16by9_3840x2160-60.02fps",
+  "note": "F1.8",
+  "calibrated_by": "dhaneshje",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S22 Ultra - Main (108 MP)",
+  "lens_model": "1X",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.016647,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8596430769282543,
+    "camera_matrix": [
+      [
+        3200.9009128756243,
+        0.0,
+        1914.318623246977
+      ],
+      [
+        0.0,
+        3227.698159631989,
+        1115.5662265288215
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3010286534435366,
+      0.8084794316472628,
+      -3.8232738519180742,
+      7.632680778468805
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-19",
+  "compatible_settings": []
+}

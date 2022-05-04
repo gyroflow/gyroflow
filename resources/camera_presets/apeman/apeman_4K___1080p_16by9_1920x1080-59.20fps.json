@@ -1,0 +1,66 @@
+{
+  "name": "apeman_4K___1080p_16by9_1920x1080-59.20fps",
+  "note": "",
+  "calibrated_by": "Tim",
+  "camera_brand": "apeman",
+  "camera_model": "4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.20079,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8614041376752435,
+    "camera_matrix": [
+      [
+        1449.9876237980643,
+        0.0,
+        946.5707766780135
+      ],
+      [
+        0.0,
+        1450.538783743668,
+        508.5780672953799
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.01841401644670876,
+      -0.03893688142845646,
+      -0.1896503744444358,
+      0.4166171409841436
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-29",
+  "compatible_settings": []
+}

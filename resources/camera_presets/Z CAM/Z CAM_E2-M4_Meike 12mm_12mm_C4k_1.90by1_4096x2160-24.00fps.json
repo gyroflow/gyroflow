@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Meike 12mm_12mm_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "N/A",
+  "calibrated_by": "paul rascagneres",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Meike 12mm",
+  "camera_setting": "12mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1109356525655787,
+    "camera_matrix": [
+      [
+        2594.710768780884,
+        0.0,
+        2018.9709411234196
+      ],
+      [
+        0.0,
+        2599.031863932847,
+        1081.8414245102272
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1486707235264619,
+      0.470505966674619,
+      -0.55833569518378,
+      0.4572476148724377
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-06",
+  "compatible_settings": []
+}

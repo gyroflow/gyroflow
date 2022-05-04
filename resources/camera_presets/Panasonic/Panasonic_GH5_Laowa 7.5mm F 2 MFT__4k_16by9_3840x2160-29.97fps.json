@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_Laowa 7.5mm F 2 MFT__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Chrigu.videography",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Laowa 7.5mm F 2 MFT",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": -15.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7385057107520309,
+    "camera_matrix": [
+      [
+        1739.2912478854296,
+        0.0,
+        1904.2188966665935
+      ],
+      [
+        0.0,
+        1738.660598347887,
+        1080.978585869641
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33185482815291273,
+      0.10053309684647124,
+      -0.029513667360913484,
+      0.09601779851646104
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-23",
+  "compatible_settings": []
+}

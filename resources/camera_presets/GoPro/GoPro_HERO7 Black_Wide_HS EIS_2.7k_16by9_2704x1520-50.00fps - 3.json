@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO7 Black_Wide_HS EIS_2.7k_16by9_2704x1520-50.00fps",
+  "note": "HS EIS",
+  "calibrated_by": "Jaco Dielemans",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO7 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5244231045353515,
+    "camera_matrix": [
+      [
+        1291.4111579277212,
+        0.0,
+        1347.904450241328
+      ],
+      [
+        0.0,
+        1304.8219032072227,
+        771.2799468284902
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05892159205463243,
+      0.09748116528949304,
+      -0.09058571555533644,
+      0.02205257220171068
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero7black-wide-2704x1520@50000-hseis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

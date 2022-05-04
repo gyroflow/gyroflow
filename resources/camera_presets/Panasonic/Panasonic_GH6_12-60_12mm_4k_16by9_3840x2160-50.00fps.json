@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH6_12-60_12mm_4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Max Kruse",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH6",
+  "lens_model": "12-60",
+  "camera_setting": "12mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4361873179715979,
+    "camera_matrix": [
+      [
+        2819.444094567614,
+        0.0,
+        1988.5287608675765
+      ],
+      [
+        0.0,
+        2756.0803258911874,
+        1053.104010623605
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2855161113890564,
+      0.08508332715578601,
+      -0.06203489824741552,
+      0.36858446287052743
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Mobius_Maxi 4K___4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Alexander",
+  "camera_brand": "Mobius",
+  "camera_model": "Maxi 4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5038968497704269,
+    "camera_matrix": [
+      [
+        1693.7519316285438,
+        0.0,
+        1855.222110231432
+      ],
+      [
+        0.0,
+        1692.590918194767,
+        1066.0102521290803
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05460527616183784,
+      -0.0021162060814677018,
+      0.015913248134213014,
+      -0.009220076791432809
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-25",
+  "compatible_settings": [],
+  "distortion_model_id": 0
+}

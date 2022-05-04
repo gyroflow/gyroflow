@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7_7Artians__720p_4by3_1440x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Roberto De Domenico",
+  "camera_brand": "Sony",
+  "camera_model": "a7",
+  "lens_model": "7Artians",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4030276584445481,
+    "camera_matrix": [
+      [
+        503.9428943345446,
+        0.0,
+        721.6250977009047
+      ],
+      [
+        0.0,
+        657.2979104586391,
+        535.0261740176023
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03466009707409101,
+      -0.009693956361803872,
+      -0.0002713847423265653,
+      0.003624727075321994
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

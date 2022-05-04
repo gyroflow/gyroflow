@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX0_24__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Laivn",
+  "camera_brand": "Sony",
+  "camera_model": "RX0",
+  "lens_model": "24",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5196912095016709,
+    "camera_matrix": [
+      [
+        1266.2803692386087,
+        0.0,
+        934.5597625981062
+      ],
+      [
+        0.0,
+        1267.728097469878,
+        558.0084898405868
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.334369449906519,
+      0.3809254698852888,
+      -1.043042724377963,
+      1.2374094928764532
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-07",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "mario ferrillo",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "frame_readout_time": 16.183832410441987,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 7.077147276895059,
+    "camera_matrix": [
+      [
+        1389.922306884845,
+        0.0,
+        1415.3129183262863
+      ],
+      [
+        0.0,
+        1387.8223354797958,
+        1348.1690022534206
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.022862188635565727,
+      0.0271201401640091,
+      -0.14699851248960338,
+      0.1017000218315366
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-wide-2688x2688@29970-no-eis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

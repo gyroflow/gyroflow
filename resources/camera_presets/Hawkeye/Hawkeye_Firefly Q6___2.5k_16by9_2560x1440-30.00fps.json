@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly Q6___2.5k_16by9_2560x1440-30.00fps",
+  "note": "",
+  "calibrated_by": "jcdub",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Q6",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5536764703601408,
+    "camera_matrix": [
+      [
+        1580.0720687066637,
+        0.0,
+        1247.4883456358289
+      ],
+      [
+        0.0,
+        1575.3499545348775,
+        713.3609663127536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1019019059543627,
+      0.0043578573440313136,
+      0.030410831521931695,
+      -0.04406501330333265
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

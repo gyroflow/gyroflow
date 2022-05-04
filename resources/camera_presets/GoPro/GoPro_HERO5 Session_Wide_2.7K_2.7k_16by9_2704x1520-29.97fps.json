@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session_Wide_2.7K_2.7k_16by9_2704x1520-29.97fps",
+  "note": "2.7K",
+  "calibrated_by": "crade",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.493571110074669,
+    "camera_matrix": [
+      [
+        1201.5916732243102,
+        0.0,
+        1353.9064843424374
+      ],
+      [
+        0.0,
+        1201.6785259398116,
+        764.3040266482195
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.11745936124308563,
+      -0.04556119185619223,
+      0.008790681154825468,
+      0.0008052312992828167
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-11",
+  "compatible_settings": []
+}

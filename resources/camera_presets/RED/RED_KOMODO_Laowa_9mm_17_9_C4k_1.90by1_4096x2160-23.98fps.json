@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_Laowa_9mm_17:9_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Byungwoo Jeon",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa_9mm",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7500967432135701,
+    "camera_matrix": [
+      [
+        1398.8287617985786,
+        0.0,
+        2049.902485223906
+      ],
+      [
+        0.0,
+        1398.0818649329572,
+        1083.524638308364
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3472241152536149,
+      0.09582600798149007,
+      0.0502714661482091,
+      0.05028865993174055
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS C70_Sigma 18-35mm f1.8_18mm_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Atle Dahl",
+  "camera_brand": "Canon",
+  "camera_model": "EOS C70",
+  "lens_model": "Sigma 18-35mm f1.8",
+  "camera_setting": "18mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2012253876858343,
+    "camera_matrix": [
+      [
+        3203.475388468063,
+        0.0,
+        2035.0675595547257
+      ],
+      [
+        0.0,
+        3202.9997379322012,
+        1106.9796353755637
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20451546232619244,
+      0.34396982202788867,
+      -0.6841248961282744,
+      1.1919943460444766
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

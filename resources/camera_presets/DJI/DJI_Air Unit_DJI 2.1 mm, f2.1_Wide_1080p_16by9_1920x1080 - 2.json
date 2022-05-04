@@ -1,0 +1,46 @@
+{
+  "name": "DJI_Air Unit_DJI 2.1 mm, f/2.1_Wide_1080p_16by9_1920x1080-0.00fps",
+  "note": "Crop 1120x630 with 2x scale for calm flying",
+  "calibrated_by": "G42L",
+  "camera_brand": "DJI",
+  "camera_model": "Air Unit",
+  "lens_model": "DJI 2.1 mm, f/2.1",
+  "camera_setting": "Wide",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-17",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 33,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.19947531691795703,
+    "camera_matrix": [
+      [
+        876.3815120162385,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        876.6299291511693,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.022720184113116316,
+      0.02418359717145186,
+      -0.04905559099281671,
+      0.05073274293101314
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_10-24 f4_17:9_C4k_1.90by1_4096x2160-29.97fps",
+  "note": "10mm 15eq",
+  "calibrated_by": "Elis Taflaj",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "10-24 f4",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.451059989548656,
+    "camera_matrix": [
+      [
+        1766.9992692849323,
+        0.0,
+        2050.265503366713
+      ],
+      [
+        0.0,
+        1768.0533843744618,
+        1056.8488073574426
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3104409752803824,
+      0.24034002610548413,
+      -0.2340691005038278,
+      0.2572516138466862
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

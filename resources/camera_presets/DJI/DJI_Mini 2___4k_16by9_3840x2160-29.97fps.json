@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Mini 2___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Steve",
+  "camera_brand": "DJI",
+  "camera_model": "Mini 2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1689879624389772,
+    "camera_matrix": [
+      [
+        3135.254837601668,
+        0.0,
+        1915.171289155768
+      ],
+      [
+        0.0,
+        3061.4699793979307,
+        1001.3381899313454
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.37241977823269856,
+      0.0457136782493937,
+      -0.44515083015697926,
+      1.9535273256491896
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

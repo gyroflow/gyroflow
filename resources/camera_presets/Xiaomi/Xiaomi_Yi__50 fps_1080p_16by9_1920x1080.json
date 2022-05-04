@@ -1,0 +1,46 @@
+{
+  "name": "Xiaomi_Yi__50 fps_1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "akbarfoto",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "",
+  "camera_setting": "50 fps",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-05-09",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 12,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7913779163199851,
+    "camera_matrix": [
+      [
+        827.7535745002571,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        835.1388539812514,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10067299066164356,
+      -0.01222257308643941,
+      -0.0017140506645683346,
+      -0.0003989808675334436
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

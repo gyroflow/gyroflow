@@ -1,0 +1,66 @@
+{
+  "name": "RED_DRAGON X_CANON 24-105_24mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "24mm",
+  "calibrated_by": "vincent reynaud",
+  "camera_brand": "RED",
+  "camera_model": "DRAGON X",
+  "lens_model": "CANON 24-105",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3283960735531682,
+    "camera_matrix": [
+      [
+        1908.9260093365308,
+        0.0,
+        956.9711094241328
+      ],
+      [
+        0.0,
+        1908.258445583671,
+        548.1832940409072
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2010892123050474,
+      0.4547460890510407,
+      -1.1076222261014537,
+      0.6707508715569799
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

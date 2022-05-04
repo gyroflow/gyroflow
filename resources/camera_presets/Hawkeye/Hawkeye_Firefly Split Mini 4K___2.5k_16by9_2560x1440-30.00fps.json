@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly Split Mini 4K___2.5k_16by9_2560x1440-30.00fps",
+  "note": "",
+  "calibrated_by": "Kostya",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Split Mini 4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1584744189877876,
+    "camera_matrix": [
+      [
+        1228.2802861562336,
+        0.0,
+        1304.565570940447
+      ],
+      [
+        0.0,
+        1228.0509557557805,
+        656.8919192831893
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.027804796391549612,
+      -0.016975365805903926,
+      0.029112587417733937,
+      -0.01591210871166829
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

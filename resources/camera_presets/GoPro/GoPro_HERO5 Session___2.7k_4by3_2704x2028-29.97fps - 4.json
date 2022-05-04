@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session___2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "Manel Correia",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8665135075835284,
+    "camera_matrix": [
+      [
+        1145.9659263817268,
+        0.0,
+        1348.963720139599
+      ],
+      [
+        0.0,
+        1147.00095573779,
+        1013.2537863638836
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12771383672764527,
+      -0.04654322919794184,
+      0.007471415966691784,
+      0.0018179840047221432
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

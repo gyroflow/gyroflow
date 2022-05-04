@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R5_16mm rf 2.8__8k_1.90by1_8192x4320-29.97fps",
+  "note": "",
+  "calibrated_by": "Steppen Wolf",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "16mm rf 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.082226176106394,
+    "camera_matrix": [
+      [
+        4049.29049992439,
+        0.0,
+        4129.245256347625
+      ],
+      [
+        0.0,
+        4050.2198496666847,
+        2191.24311925431
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3685265143233564,
+      -0.12110897309949424,
+      0.647307542632381,
+      -0.41522022231575995
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-06",
+  "compatible_settings": []
+}

@@ -1,0 +1,51 @@
+{
+  "name": "Caddx_Orca 4K__60 fps_2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "WizzX",
+  "camera_brand": "Caddx",
+  "camera_model": "Orca 4K",
+  "lens_model": "",
+  "camera_setting": "60 fps",
+  "calibrator_version": "0.3.0-beta/dev",
+  "date": "2021-08-06",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 20,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6854127274855615,
+    "camera_matrix": [
+      [
+        1491.9962244340263,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1119.0065297171725,
+        760.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03497961130645103,
+      0.006993294174103943,
+      -0.017983616699791396,
+      0.0077829042576809246
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Wide 98_NO-EIS_2.7k_16by9_3072x1728-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Марина",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Wide 98",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "orig_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "output_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9562543060725364,
+    "camera_matrix": [
+      [
+        1268.8431446774848,
+        0.0,
+        1575.5458279879515
+      ],
+      [
+        0.0,
+        1269.4355218693374,
+        889.3655561808837
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04454261477329987,
+      0.049087753289168985,
+      -0.07428850030867332,
+      0.048582632880989705
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-wide98-3072x1728@25000-no-eis",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

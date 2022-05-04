@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_SJ 7 STAR_Wide_V1_2.5k_16by9_2560x1440-59.94fps",
+  "note": "V1",
+  "calibrated_by": "VeeoN",
+  "camera_brand": "SJCAM",
+  "camera_model": "SJ 7 STAR",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4972373679092728,
+    "camera_matrix": [
+      [
+        1353.7771815829635,
+        0.0,
+        1345.518918007112
+      ],
+      [
+        0.0,
+        1352.4121932479857,
+        752.218825875919
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03624409365805722,
+      0.0014898517593953053,
+      -0.014063730351764218,
+      0.008666600417622142
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-09",
+  "compatible_settings": []
+}

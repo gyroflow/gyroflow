@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7rIII_90macro__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "袁文彬",
+  "camera_brand": "Sony",
+  "camera_model": "a7rIII",
+  "lens_model": "90macro",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4364247872664706,
+    "camera_matrix": [
+      [
+        -41830.81010716525,
+        -0.0,
+        1005.5921378524176
+      ],
+      [
+        0.0,
+        -81532.41633962783,
+        572.2433400657536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -8.05877911193765,
+      143513.40112085995,
+      -424371675.4137918,
+      450116941486.07855
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

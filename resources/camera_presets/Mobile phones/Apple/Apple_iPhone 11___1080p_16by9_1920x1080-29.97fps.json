@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 11___1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Ollie Wells",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 11",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.974489,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4017746106223493,
+    "camera_matrix": [
+      [
+        1666.2566896189542,
+        0.0,
+        962.7263247755852
+      ],
+      [
+        0.0,
+        1665.9344843922345,
+        529.8884899816788
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5683926763432838,
+      -0.6508666998327042,
+      -2.0879489326827327,
+      9.668467933996135
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-20",
+  "compatible_settings": []
+}

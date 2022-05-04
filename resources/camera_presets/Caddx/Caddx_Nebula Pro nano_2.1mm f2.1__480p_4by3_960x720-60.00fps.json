@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Nebula Pro nano_2.1mm f/2.1__480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Michael Grippentrog",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro nano",
+  "lens_model": "2.1mm f/2.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.21775498134553692,
+    "camera_matrix": [
+      [
+        490.4148360892653,
+        0.0,
+        445.0911333156559
+      ],
+      [
+        0.0,
+        490.07310903244456,
+        384.69898437868494
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.014624362689065676,
+      -0.07018314875833442,
+      0.04596894735911632,
+      -0.012882555875306128
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Dr Baron Guzman",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4847274047281876,
+    "camera_matrix": [
+      [
+        879.3844367353277,
+        0.0,
+        965.8716814119856
+      ],
+      [
+        0.0,
+        886.2241666134545,
+        531.1128074356817
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05741262471224622,
+      -0.0004570089793005307,
+      0.01972093510520049,
+      -0.01442435988751452
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX0II_b3b1bf80_with 0.6x zomei lens_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Dronotron",
+  "camera_brand": "Sony",
+  "camera_model": "RX0II",
+  "lens_model": "b3b1bf80",
+  "camera_setting": "with 0.6x zomei lens",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7620873584477039,
+    "camera_matrix": [
+      [
+        1854.2109442305,
+        0.0,
+        1927.34382761993
+      ],
+      [
+        0.0,
+        1853.3805708231755,
+        1079.159840975257
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1491622132393844,
+      0.4580189180011035,
+      -0.7104443362145123,
+      0.4629227962276983
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-dsc-rx0m2-b3b1bf80-3840x2160@29970",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

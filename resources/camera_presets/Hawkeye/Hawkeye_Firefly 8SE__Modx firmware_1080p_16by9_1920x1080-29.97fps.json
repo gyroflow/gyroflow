@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly 8SE__Modx firmware_1080p_16by9_1920x1080-29.97fps",
+  "note": "Modx firmware",
+  "calibrated_by": "Shauny D",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly 8SE",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3574890509019622,
+    "camera_matrix": [
+      [
+        990.073240968615,
+        0.0,
+        942.7124935531584
+      ],
+      [
+        0.0,
+        990.0642461061606,
+        518.7461658445025
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.040289668540093714,
+      0.007971125587797943,
+      -0.012423529220197935,
+      0.004254162694118103
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": []
+}

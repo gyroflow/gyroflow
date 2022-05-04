@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_viltrox 24__C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "edward",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "viltrox 24",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.9783066303883174,
+    "camera_matrix": [
+      [
+        5110.197683736092,
+        0.0,
+        2399.8272941160108
+      ],
+      [
+        0.0,
+        5112.109946850979,
+        1258.4887974131127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12372265153253716,
+      2.118374052752085,
+      -15.304672584053256,
+      42.51172219408901
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-10",
+  "compatible_settings": []
+}

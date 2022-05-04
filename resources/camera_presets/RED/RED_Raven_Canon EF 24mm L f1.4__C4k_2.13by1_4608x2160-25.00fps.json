@@ -1,0 +1,66 @@
+{
+  "name": "RED_Raven_Canon EF 24mm L f1.4__C4k_2.13by1_4608x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "re4mat0r",
+  "camera_brand": "RED",
+  "camera_model": "Raven",
+  "lens_model": "Canon EF 24mm L f1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6929376348662938,
+    "camera_matrix": [
+      [
+        4784.7243440095235,
+        0.0,
+        2319.2865307186235
+      ],
+      [
+        0.0,
+        4786.0773994974015,
+        1048.994851385051
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25933854304657683,
+      0.07026878292650177,
+      0.791988797362835,
+      -1.5042588959246586
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Galaxy A71_Main Cam 26mm_F1.8 Auto_1080p_16by9_1920x1080-29.87fps",
+  "note": "",
+  "calibrated_by": "Kenneth Wong",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy A71",
+  "lens_model": "Main Cam 26mm",
+  "camera_setting": "F1.8 Auto",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.871559,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.916057945898726,
+    "camera_matrix": [
+      [
+        1398.3564294208677,
+        0.0,
+        976.7524268738968
+      ],
+      [
+        0.0,
+        1397.5028902315364,
+        542.1226961291875
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5599599087496736,
+      -0.7424977735640341,
+      1.634182354633254,
+      -0.8435558661452816
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-07",
+  "compatible_settings": []
+}

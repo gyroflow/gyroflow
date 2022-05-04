@@ -1,0 +1,66 @@
+{
+  "name": "HDZero_HDZero_Nano_Default_Default_720p_16by9_1280x720-59.96fps",
+  "note": "",
+  "calibrated_by": "Sören",
+  "camera_brand": "HDZero",
+  "camera_model": "HDZero_Nano",
+  "lens_model": "Default",
+  "camera_setting": "Default",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.960026,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4352663571185702,
+    "camera_matrix": [
+      [
+        641.5932271638189,
+        0.0,
+        654.7766768654603
+      ],
+      [
+        0.0,
+        639.0543644101313,
+        340.2374010541116
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.08064194959378296,
+      0.012929333157900836,
+      -0.00907905779789974,
+      0.0007302175403954537
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-06",
+  "compatible_settings": []
+}

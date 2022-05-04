@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO7 Black_Linear_HS EIS_2.7k_16by9_2704x1520-59.94fps",
+  "note": "HS EIS",
+  "calibrated_by": "ANDRE ROCHA",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO7 Black",
+  "lens_model": "Linear",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6236484030792112,
+    "camera_matrix": [
+      [
+        1416.7055965921616,
+        0.0,
+        1354.023530594451
+      ],
+      [
+        0.0,
+        1431.0389324496482,
+        761.3773630147277
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3238863627971746,
+      0.17208731634584984,
+      -0.0017325927016856517,
+      0.07105095985624459
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero7black-linear-2704x1520@59940-hseis",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-04",
+  "compatible_settings": []
+}

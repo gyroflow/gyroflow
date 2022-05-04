@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_NIKKOR 28mm f2.8 AiS_Open Gate_6k_3by2_6063x4040-24.00fps",
+  "note": "",
+  "calibrated_by": "Lucas Weakley",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "NIKKOR 28mm f2.8 AiS",
+  "camera_setting": "Open Gate",
+  "calib_dimension": {
+    "w": 6063,
+    "h": 4040
+  },
+  "orig_dimension": {
+    "w": 6063,
+    "h": 4040
+  },
+  "output_dimension": {
+    "w": 6064,
+    "h": 4040
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8921359961505062,
+    "camera_matrix": [
+      [
+        4954.431432570888,
+        0.0,
+        3070.65930185196
+      ],
+      [
+        0.0,
+        4953.893983232047,
+        1991.418283508628
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22840516547150408,
+      0.31697647285750014,
+      -0.17987538162873076,
+      0.3658332282737267
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

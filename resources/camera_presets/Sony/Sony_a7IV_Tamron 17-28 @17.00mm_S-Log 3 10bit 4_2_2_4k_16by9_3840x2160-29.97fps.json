@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7IV_Tamron 17-28 @17.00mm_S-Log 3 10bit 4:2:2_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Wendelin Gauger",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Tamron 17-28 @17.00mm",
+  "camera_setting": "S-Log 3 10bit 4:2:2",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 26.640079866959443,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2884574617912602,
+    "camera_matrix": [
+      [
+        1909.5139318919532,
+        0.0,
+        1920.0325676718617
+      ],
+      [
+        0.0,
+        1909.045170746285,
+        1080.8921479314663
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21418936006825903,
+      0.19854338078564737,
+      -0.1147242684573644,
+      0.24297236732267863
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-17.00mm-3840x2160@29970",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

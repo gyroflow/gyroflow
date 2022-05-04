@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Olympus 12mm  12-40 Pro__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Brian Cortinovis",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Olympus 12mm  12-40 Pro",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2136813591444542,
+    "camera_matrix": [
+      [
+        2702.855129866456,
+        0.0,
+        1926.1667528636117
+      ],
+      [
+        0.0,
+        2702.572331971661,
+        1047.5599541870895
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08917427200701426,
+      0.29841667640431846,
+      -0.6769826695806409,
+      0.7961981498507573
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

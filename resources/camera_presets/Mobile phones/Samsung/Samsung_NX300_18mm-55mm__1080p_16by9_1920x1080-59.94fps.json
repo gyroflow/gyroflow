@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_NX300_18mm-55mm__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Noah Schmeissner",
+  "camera_brand": "Samsung",
+  "camera_model": "NX300",
+  "lens_model": "18mm-55mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6097503354825293,
+    "camera_matrix": [
+      [
+        1546.1303011663,
+        0.0,
+        955.4608188187424
+      ],
+      [
+        0.0,
+        1554.023668361427,
+        543.047404174022
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06950896155146037,
+      1.0372374267380984,
+      -3.3018210679931186,
+      4.523818177254568
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

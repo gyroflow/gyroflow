@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_D5300_Nikkor 18-55 AFP__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Ollie Wells",
+  "camera_brand": "Nikon",
+  "camera_model": "D5300",
+  "lens_model": "Nikkor 18-55 AFP",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3516716306586332,
+    "camera_matrix": [
+      [
+        1469.9473276171375,
+        0.0,
+        967.9469982282412
+      ],
+      [
+        0.0,
+        1481.0574800037623,
+        530.4071355097911
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20301864740756104,
+      0.48567520691810856,
+      -2.6002596396381716,
+      4.473882792265444
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX10IV___1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "yu luo",
+  "camera_brand": "Sony",
+  "camera_model": "RX10IV",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2875430951859939,
+    "camera_matrix": [
+      [
+        9964.011891131127,
+        0.0,
+        2631.981373433738
+      ],
+      [
+        0.0,
+        9920.824545787162,
+        1128.8620803669032
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.7303346653498002,
+      30.759651917353768,
+      -534.617468365688,
+      3584.4794675548965
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

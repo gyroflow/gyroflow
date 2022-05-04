@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO4 Black___2.7k_16by9_2704x1520-59.94fps",
+  "note": "",
+  "calibrated_by": "Mike Petrichenko",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Black",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4382235872502534,
+    "camera_matrix": [
+      [
+        1382.252765689242,
+        0.0,
+        1299.8666014928017
+      ],
+      [
+        0.0,
+        1379.955399237652,
+        720.4811986402855
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.023536333727867596,
+      0.047224894652082176,
+      -0.05929423211406002,
+      0.051566875833358984
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-30",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_Mix V2_Runcam RC25G__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "shellixyz",
+  "camera_brand": "Foxeer",
+  "camera_model": "Mix V2",
+  "lens_model": "Runcam RC25G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 19,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5361853861966827,
+    "camera_matrix": [
+      [
+        857.8042582605229,
+        0.0,
+        921.6918376438612
+      ],
+      [
+        0.0,
+        858.3382177629403,
+        499.2259334442731
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02282443185742312,
+      0.010587672089729834,
+      -0.019937181603685745,
+      0.009787018370887333
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

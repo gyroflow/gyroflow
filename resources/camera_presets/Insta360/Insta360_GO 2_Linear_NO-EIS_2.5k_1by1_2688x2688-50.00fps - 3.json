@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Linear_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Andrea Zega",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Linear",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.936955582904316,
+    "camera_matrix": [
+      [
+        1321.4991488405108,
+        0.0,
+        1355.1890092327412
+      ],
+      [
+        0.0,
+        1322.412145772214,
+        1327.783684988035
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04430124021899414,
+      -0.016628012434047965,
+      -0.01194539425911046,
+      0.01054864052356903
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

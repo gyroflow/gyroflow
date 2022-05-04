@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO7 Silver_Wide_EIS-Y_1080p_16by9_1920x1080-59.99fps",
+  "note": "EIS-Y",
+  "calibrated_by": "夜凛",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO7 Silver",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.991169,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.09135889100322,
+    "camera_matrix": [
+      [
+        924.7718853998414,
+        0.0,
+        950.5197446186628
+      ],
+      [
+        0.0,
+        934.1292813031648,
+        544.3816001671557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13955037193958778,
+      -0.08128060164723301,
+      0.0321580394018003,
+      0.01047774146203048
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero7silver-wide-1920x1080@59991-eis-y",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

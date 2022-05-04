@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi Note 7__Xiaomi Phone_1080p_16by9_1920x1080-29.70fps",
+  "note": "Xiaomi Phone",
+  "calibrated_by": "Logicenios",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 7",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.701567,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.47126622116868766,
+    "camera_matrix": [
+      [
+        1798.2247186196214,
+        0.0,
+        981.8283697259396
+      ],
+      [
+        0.0,
+        1801.715677254303,
+        506.3606628812568
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2680587145865672,
+      1.0006427434163745,
+      -4.5304989651335035,
+      8.914447491608353
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

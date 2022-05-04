@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Leica F3.2 14.4mm_Superview_4k_16by9_3840x2160-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "dongdong",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Leica F3.2 14.4mm",
+  "camera_setting": "Superview",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 40,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8018298648653974,
+    "camera_matrix": [
+      [
+        2185.17219376901,
+        0.0,
+        1996.28010485068
+      ],
+      [
+        0.0,
+        2184.6939204723903,
+        1166.620866986306
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.074990203336436,
+      -0.10245508468941052,
+      0.2529704720134864,
+      -0.2244935267602295
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

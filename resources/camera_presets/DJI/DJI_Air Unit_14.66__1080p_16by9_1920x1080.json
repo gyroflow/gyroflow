@@ -1,0 +1,46 @@
+{
+  "name": "DJI_Air Unit_14.66__1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "Fersy",
+  "camera_brand": "DJI",
+  "camera_model": "Air Unit",
+  "lens_model": "14.66",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-05-06",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.39287466811828664,
+    "camera_matrix": [
+      [
+        876.5812744394104,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        876.937041551656,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0287264292408442,
+      -0.013659544498641716,
+      0.025975729213398073,
+      -0.011732720449738176
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "DJI_FPV_Normal_EIS_4k_16by9_3840x2160-50.00fps",
+  "note": "EIS",
+  "calibrated_by": "Francesco",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "Normal",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.374093744643186,
+    "camera_matrix": [
+      [
+        2177.5695934177843,
+        0.0,
+        1919.3276351903055
+      ],
+      [
+        0.0,
+        2176.854916159299,
+        1077.0586269396938
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3386848187521176,
+      0.1965406948508507,
+      -0.05286652037950745,
+      0.09008746618951652
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

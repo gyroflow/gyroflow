@@ -1,0 +1,66 @@
+{
+  "name": "RED_Raven_Super-Multi-Coated Takumar 35mm f2__C4k_2.13by1_4608x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "John",
+  "camera_brand": "RED",
+  "camera_model": "Raven",
+  "lens_model": "Super-Multi-Coated Takumar 35mm f2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.43422914086441,
+    "camera_matrix": [
+      [
+        6355.3294918473175,
+        0.0,
+        2279.62184012466
+      ],
+      [
+        0.0,
+        6359.983754723604,
+        932.654122710964
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35405651287838624,
+      -2.598982901929056,
+      31.01278038158869,
+      -129.15419161359858
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_14mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Jordan",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2697888075115304,
+    "camera_matrix": [
+      [
+        3276.87639765962,
+        0.0,
+        1932.509811738887
+      ],
+      [
+        0.0,
+        3269.972707791009,
+        1040.4022557107237
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28638412531365626,
+      0.05932511490237653,
+      0.9756635739971006,
+      -2.389132358011759
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-02",
+  "compatible_settings": []
+}

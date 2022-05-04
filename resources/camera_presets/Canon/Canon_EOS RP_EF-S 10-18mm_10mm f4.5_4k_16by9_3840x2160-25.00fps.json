@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS RP_EF-S 10-18mm_10mm f4.5_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Przemysław Kuciński",
+  "camera_brand": "Canon",
+  "camera_model": "EOS RP",
+  "lens_model": "EF-S 10-18mm",
+  "camera_setting": "10mm f4.5",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8223270827101867,
+    "camera_matrix": [
+      [
+        1923.6231280450093,
+        0.0,
+        1915.9021826694172
+      ],
+      [
+        0.0,
+        1924.739871561941,
+        1035.2913847332147
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33538930556551766,
+      0.09759769514538558,
+      0.08087993331647378,
+      -0.05586908185216537
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-28",
+  "compatible_settings": []
+}

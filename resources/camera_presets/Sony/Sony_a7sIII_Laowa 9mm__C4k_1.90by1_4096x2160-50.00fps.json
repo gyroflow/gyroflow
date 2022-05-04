@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7sIII_Laowa 9mm__C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Sky Monkey Aus",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 38,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0013142683879437,
+    "camera_matrix": [
+      [
+        2015.6907088240796,
+        0.0,
+        2067.8298445682312
+      ],
+      [
+        0.0,
+        2015.46295162648,
+        1100.4520845583074
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33916503005450943,
+      0.1296980235061214,
+      -0.01242181416279588,
+      0.07906776413225114
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

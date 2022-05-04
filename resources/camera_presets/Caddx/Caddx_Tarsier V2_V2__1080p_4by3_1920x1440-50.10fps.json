@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Tarsier V2_V2__1080p_4by3_1920x1440-50.10fps",
+  "note": "",
+  "calibrated_by": "christos !",
+  "camera_brand": "Caddx",
+  "camera_model": "Tarsier V2",
+  "lens_model": "V2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.104385,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.58316827273029,
+    "camera_matrix": [
+      [
+        1613.0685955507838,
+        0.0,
+        852.0888947777867
+      ],
+      [
+        0.0,
+        1605.2153043253247,
+        495.4912193225584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08933128896818572,
+      0.5390393357897469,
+      -1.6368474054523234,
+      1.66600185345802
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-03",
+  "compatible_settings": []
+}

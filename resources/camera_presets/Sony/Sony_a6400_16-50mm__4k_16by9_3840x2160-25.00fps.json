@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_16-50mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Georges Fursin",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "16-50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.3180674527964653,
+    "camera_matrix": [
+      [
+        2847.078731695881,
+        0.0,
+        1892.7157287320688
+      ],
+      [
+        0.0,
+        2854.7455765828818,
+        1105.2512693508745
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2961287123355557,
+      0.136797119168505,
+      -0.7865544461965709,
+      2.4625670670896485
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R5_14-35MM__C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "lll",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "14-35MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 9.879630888721866,
+    "camera_matrix": [
+      [
+        3212.2684880398,
+        0.0,
+        2103.5400668284133
+      ],
+      [
+        0.0,
+        3227.082365020332,
+        970.5211557794134
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32388282208603614,
+      6.101800371907655,
+      -38.65615496344825,
+      70.61387591168204
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

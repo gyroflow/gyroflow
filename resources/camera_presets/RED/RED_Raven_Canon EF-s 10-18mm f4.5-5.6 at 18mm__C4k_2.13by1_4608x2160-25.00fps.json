@@ -1,0 +1,66 @@
+{
+  "name": "RED_Raven_Canon EF-s 10-18mm f4.5-5.6 at 18mm__C4k_2.13by1_4608x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "re4mat0r",
+  "camera_brand": "RED",
+  "camera_model": "Raven",
+  "lens_model": "Canon EF-s 10-18mm f4.5-5.6 at 18mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.756841765654495,
+    "camera_matrix": [
+      [
+        3474.468050933501,
+        0.0,
+        2315.315030471759
+      ],
+      [
+        0.0,
+        3474.882043409659,
+        1067.5158023816978
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3281523352524077,
+      0.33438101240896123,
+      -0.792970196958684,
+      1.1796895793749682
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

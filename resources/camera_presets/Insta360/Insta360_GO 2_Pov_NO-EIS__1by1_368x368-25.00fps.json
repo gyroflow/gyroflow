@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Pov_NO-EIS__1by1_368x368-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "yannl",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Pov",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 368,
+    "h": 368
+  },
+  "orig_dimension": {
+    "w": 368,
+    "h": 368
+  },
+  "output_dimension": {
+    "w": 368,
+    "h": 368
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 7,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.254865834889988,
+    "camera_matrix": [
+      [
+        176.1316587073347,
+        0.0,
+        185.288355851349
+      ],
+      [
+        0.0,
+        174.7993924266301,
+        184.05812406908672
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.19946663432793535,
+      0.581370065861434,
+      -0.6937387881697185,
+      0.247547784635087
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-pov-368x368@25000-no-eis",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-05",
+  "compatible_settings": []
+}

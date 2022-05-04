@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH1_Olympus 9-18 @9mm__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Csajtai Kristóf",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Olympus 9-18 @9mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6631588423017286,
+    "camera_matrix": [
+      [
+        1866.8116897771072,
+        0.0,
+        1917.0899109871496
+      ],
+      [
+        0.0,
+        1867.803390544052,
+        1074.6549623422195
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32549934144243553,
+      0.0903324860502298,
+      0.06856333532597443,
+      -0.02368012218812711
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

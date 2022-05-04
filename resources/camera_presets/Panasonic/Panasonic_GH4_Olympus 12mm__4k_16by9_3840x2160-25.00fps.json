@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Olympus 12mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "PeliFly",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Olympus 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6843817424188721,
+    "camera_matrix": [
+      [
+        3325.982840836489,
+        0.0,
+        1940.3502587460357
+      ],
+      [
+        0.0,
+        3328.506098477082,
+        1097.0075563703765
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3148004722574602,
+      0.1240742492874815,
+      -0.16189009178856878,
+      0.5935078834398397
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-23",
+  "compatible_settings": []
+}

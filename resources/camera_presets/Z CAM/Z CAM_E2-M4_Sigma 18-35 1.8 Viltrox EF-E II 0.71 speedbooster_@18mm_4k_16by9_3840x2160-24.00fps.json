@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Sigma 18-35 1.8 Viltrox EF-E II 0.71 speedbooster_@18mm_4k_16by9_3840x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "V V",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Sigma 18-35 1.8 Viltrox EF-E II 0.71 speedbooster",
+  "camera_setting": "@18mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4061577435549386,
+    "camera_matrix": [
+      [
+        2871.8495254610193,
+        0.0,
+        1951.183054374148
+      ],
+      [
+        0.0,
+        2872.698334052011,
+        1092.973351040942
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21054039500498428,
+      0.02040076236484452,
+      0.6614682325860349,
+      -1.0532900130922005
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO4 Silver___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Filippo Cerchi",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Silver",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.39958287443460616,
+    "camera_matrix": [
+      [
+        1108.3699848237134,
+        0.0,
+        956.07000253285
+      ],
+      [
+        0.0,
+        1117.1930052259104,
+        536.7853503612153
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.055504991038670785,
+      0.02192041207653846,
+      -0.03441756825555229,
+      0.022916348703184097
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-26",
+  "compatible_settings": []
+}

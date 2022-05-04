@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2c_8mm__2k_16by9_2336x1344-59.94fps",
+  "note": "",
+  "calibrated_by": "wanghai",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2c",
+  "lens_model": "8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2336,
+    "h": 1344
+  },
+  "orig_dimension": {
+    "w": 2336,
+    "h": 1344
+  },
+  "output_dimension": {
+    "w": 2336,
+    "h": 1344
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2445060872329684,
+    "camera_matrix": [
+      [
+        1205.6540557912017,
+        0.0,
+        1181.972666969495
+      ],
+      [
+        0.0,
+        1205.5745344902875,
+        656.3779324129447
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27203633623591167,
+      0.12866954768028213,
+      0.11259469856899249,
+      -0.06348601843907421
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-04",
+  "compatible_settings": []
+}

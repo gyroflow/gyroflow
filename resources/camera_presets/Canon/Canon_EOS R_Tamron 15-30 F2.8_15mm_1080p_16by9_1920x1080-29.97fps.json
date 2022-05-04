@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R_Tamron 15-30 F/2.8_15mm_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "FPVNative",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R",
+  "lens_model": "Tamron 15-30 F/2.8",
+  "camera_setting": "15mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.18467350771040764,
+    "camera_matrix": [
+      [
+        811.8224345004382,
+        0.0,
+        955.6051769267752
+      ],
+      [
+        0.0,
+        811.7087726728016,
+        534.9533245663691
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30687944700451053,
+      0.20115625218240832,
+      -0.10845796217473916,
+      0.07448911586425841
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-14",
+  "compatible_settings": []
+}

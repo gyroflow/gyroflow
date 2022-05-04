@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi Note 8 Pro___1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Proto Type",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 8 Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.000141,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0213533355741593,
+    "camera_matrix": [
+      [
+        1886.7818409489064,
+        0.0,
+        968.8018728234136
+      ],
+      [
+        0.0,
+        1894.2466604628764,
+        542.1145462879017
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4903508853109048,
+      -1.4197332706330297,
+      8.830765662391604,
+      -17.194320486204496
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-18",
+  "compatible_settings": []
+}

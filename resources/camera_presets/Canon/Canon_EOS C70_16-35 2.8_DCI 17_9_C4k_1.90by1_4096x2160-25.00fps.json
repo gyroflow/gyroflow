@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS C70_16-35 2.8_DCI 17:9_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "Speedbooster",
+  "calibrated_by": "Jonas Be",
+  "camera_brand": "Canon",
+  "camera_model": "EOS C70",
+  "lens_model": "16-35 2.8",
+  "camera_setting": "DCI 17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 15.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.3216062482664723,
+    "camera_matrix": [
+      [
+        1804.239234183494,
+        0.0,
+        2036.9539828314523
+      ],
+      [
+        0.0,
+        1803.479968361186,
+        1060.457072139975
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2506402420586541,
+      0.28669505090686453,
+      -0.40259351088772216,
+      0.31412970597631257
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

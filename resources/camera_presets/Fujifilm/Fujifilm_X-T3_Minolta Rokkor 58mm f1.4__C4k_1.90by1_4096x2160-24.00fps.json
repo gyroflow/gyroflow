@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_Minolta Rokkor 58mm f/1.4__C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Isaac Arias",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Minolta Rokkor 58mm f/1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5865945901344961,
+    "camera_matrix": [
+      [
+        11026.1821626892,
+        0.0,
+        1994.4906386716011
+      ],
+      [
+        0.0,
+        11012.605387571512,
+        978.854535610348
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26866501863122966,
+      0.10557187847520316,
+      -324.36222590723895,
+      12975.799022787622
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

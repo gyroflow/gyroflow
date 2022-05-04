@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_Irix 15mm Firefly_f8 180°_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "B3",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Irix 15mm Firefly",
+  "camera_setting": "f8 180°",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6192552778819084,
+    "camera_matrix": [
+      [
+        850.1225275866693,
+        0.0,
+        970.3759028763304
+      ],
+      [
+        0.0,
+        849.0672977090314,
+        538.3862298619235
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27477532224204965,
+      0.34318641216498436,
+      -0.3523726339409633,
+      0.21033774179141013
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-10",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_Split 2___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "79183",
+  "camera_brand": "RunCam",
+  "camera_model": "Split 2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4597119795260211,
+    "camera_matrix": [
+      [
+        829.0277340561216,
+        0.0,
+        958.5862062817296
+      ],
+      [
+        0.0,
+        829.1289561522345,
+        480.9021944558707
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.015357132297681497,
+      -0.00115511239621562,
+      -0.007054433176055624,
+      0.0014035480286390897
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

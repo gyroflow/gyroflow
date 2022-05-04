@@ -1,0 +1,66 @@
+{
+  "name": "Kinefinity_MAVO LF_Samyang 24mm t1.5__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Sound Scavenger",
+  "camera_brand": "Kinefinity",
+  "camera_model": "MAVO LF",
+  "lens_model": "Samyang 24mm t1.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.4152130653943638,
+    "camera_matrix": [
+      [
+        2913.17999578692,
+        0.0,
+        1925.4314148582944
+      ],
+      [
+        0.0,
+        2914.672248660808,
+        1116.866681010914
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2517820317795835,
+      -0.055395758403502256,
+      1.1432287816818247,
+      -1.756916311436444
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

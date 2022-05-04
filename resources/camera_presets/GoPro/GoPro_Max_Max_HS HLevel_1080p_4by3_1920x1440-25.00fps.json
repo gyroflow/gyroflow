@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_Max_Max_HS HLevel_1080p_4by3_1920x1440-25.00fps",
+  "note": "HS HLevel",
+  "calibrated_by": "小林雄侍",
+  "camera_brand": "GoPro",
+  "camera_model": "Max",
+  "lens_model": "Max",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5383440170078861,
+    "camera_matrix": [
+      [
+        617.4233082499596,
+        0.0,
+        971.2833638632196
+      ],
+      [
+        0.0,
+        617.356748448611,
+        718.9773789490765
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1757713143552504,
+      -0.12899681702817767,
+      0.09633636159284996,
+      -0.023876359972026036
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-max-max-1920x1440@25000-hshlevel",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

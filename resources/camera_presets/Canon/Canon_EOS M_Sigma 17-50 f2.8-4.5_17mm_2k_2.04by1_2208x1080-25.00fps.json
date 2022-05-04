@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_Sigma 17-50 f2.8-4.5_17mm_2k_2.04by1_2208x1080-25.00fps",
+  "note": "2.5k frtp 2:1",
+  "calibrated_by": "Oleksandr Müller",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Sigma 17-50 f2.8-4.5",
+  "camera_setting": "17mm",
+  "calib_dimension": {
+    "w": 2208,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2208,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2208,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3944260463061491,
+    "camera_matrix": [
+      [
+        5200.757716165427,
+        0.0,
+        1049.8452707348813
+      ],
+      [
+        0.0,
+        5217.173425188811,
+        722.3748096799134
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.42081298921734567,
+      1.9723973998653928,
+      -56.25809498804176,
+      519.8338863104672
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-27",
+  "compatible_settings": []
+}

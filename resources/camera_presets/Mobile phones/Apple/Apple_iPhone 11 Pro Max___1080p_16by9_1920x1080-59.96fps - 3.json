@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 11 Pro Max___1080p_16by9_1920x1080-59.96fps",
+  "note": "",
+  "calibrated_by": "Jian Wang",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 11 Pro Max",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 59.960186,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.18559191136208333,
+    "camera_matrix": [
+      [
+        1476.9172779710634,
+        0.0,
+        945.90729258496
+      ],
+      [
+        0.0,
+        1477.534484596231,
+        521.1618175669099
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4711957873416473,
+      0.6006439467852348,
+      -7.207685478214421,
+      17.34995421147821
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

@@ -1,0 +1,51 @@
+{
+  "name": "RunCam_Split HD_MJ__1080p_4by3_1920x1440-0.00fps",
+  "note": "",
+  "calibrated_by": "Anonymous",
+  "camera_brand": "RunCam",
+  "camera_model": "Split HD",
+  "lens_model": "MJ",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-10",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.520704853021607,
+    "camera_matrix": [
+      [
+        811.4276327081599,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        812.7240938126519,
+        720.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13618386870646057,
+      0.05913100041909645,
+      -0.11630674103849184,
+      0.05196818426103514
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

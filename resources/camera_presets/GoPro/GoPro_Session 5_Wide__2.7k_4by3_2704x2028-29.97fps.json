@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_Session 5_Wide__2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "putu indi",
+  "camera_brand": "GoPro",
+  "camera_model": "Session 5",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8618476765535908,
+    "camera_matrix": [
+      [
+        1156.9174035794251,
+        0.0,
+        1355.1712735579251
+      ],
+      [
+        0.0,
+        1161.8776982979298,
+        1016.45844498823
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13367849091958486,
+      -0.06280580759689484,
+      0.02082993283733607,
+      -0.0002137419582995772
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-03",
+  "compatible_settings": []
+}

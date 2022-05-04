@@ -1,0 +1,66 @@
+{
+  "name": "AKASO_Keychain___2.7k_16by9_2704x1520-30.00fps",
+  "note": "",
+  "calibrated_by": "cotegua",
+  "camera_brand": "AKASO",
+  "camera_model": "Keychain",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6453909056312502,
+    "camera_matrix": [
+      [
+        1398.2709575978697,
+        0.0,
+        1343.8193045835262
+      ],
+      [
+        0.0,
+        1396.432304539161,
+        757.4489895952588
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2807060608283677,
+      -0.1418548383642945,
+      1.2750903969930047,
+      -1.1056392710203369
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

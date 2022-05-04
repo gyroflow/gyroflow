@@ -1,0 +1,51 @@
+{
+  "name": "Eken_H9R_170FOV_60 fps_1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "RotorOxio",
+  "camera_brand": "Eken",
+  "camera_model": "H9R",
+  "lens_model": "170FOV",
+  "camera_setting": "60 fps",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-13",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 50,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4162285281641963,
+    "camera_matrix": [
+      [
+        1106.508185502863,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        1106.7285479448076,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.09798151807184446,
+      -0.0378662150614064,
+      0.07106042303191375,
+      -0.03932803224512414
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

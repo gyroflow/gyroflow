@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Wide_EIS_1080p_16by9_1920x1080-50.00fps",
+  "note": "EIS",
+  "calibrated_by": "Jesus Redondo Cascales",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5012539324815336,
+    "camera_matrix": [
+      [
+        940.252235624176,
+        0.0,
+        959.5453253929072
+      ],
+      [
+        0.0,
+        932.9306961039372,
+        536.3071929569167
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15706965327039324,
+      -0.2685378493837092,
+      0.4234019244547887,
+      -0.2150610598227235
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-wide-1920x1080@50000-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-03",
+  "compatible_settings": []
+}

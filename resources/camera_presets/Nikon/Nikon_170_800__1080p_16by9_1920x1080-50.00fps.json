@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_170_800__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "1",
+  "camera_brand": "Nikon",
+  "camera_model": "170",
+  "lens_model": "800",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2814923727444035,
+    "camera_matrix": [
+      [
+        795.8583771734421,
+        0.0,
+        956.2790906923065
+      ],
+      [
+        0.0,
+        795.192852792408,
+        523.2635499245292
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0007732483347549326,
+      -0.01945574406798496,
+      0.02636956263092283,
+      -0.010545818284418768
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

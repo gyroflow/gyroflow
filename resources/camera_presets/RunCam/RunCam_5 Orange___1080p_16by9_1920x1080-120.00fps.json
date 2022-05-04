@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange___1080p_16by9_1920x1080-120.00fps",
+  "note": "",
+  "calibrated_by": "Ondrej Slachta",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 49,
+  "fps": 120.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36027238208866696,
+    "camera_matrix": [
+      [
+        1050.7544384563143,
+        0.0,
+        923.678551516254
+      ],
+      [
+        0.0,
+        1049.5890126951074,
+        555.5418432923253
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.042979823920878235,
+      0.010343527483917116,
+      -0.02617657395869108,
+      0.01380964004083611
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

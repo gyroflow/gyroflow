@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7rIII_腾龙28-75__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "袁文彬",
+  "camera_brand": "Sony",
+  "camera_model": "a7rIII",
+  "lens_model": "腾龙28-75",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.44780323223493224,
+    "camera_matrix": [
+      [
+        1555.7821044278835,
+        0.0,
+        965.042828684869
+      ],
+      [
+        0.0,
+        1558.0183524768483,
+        559.3663324297464
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34247451005240165,
+      -0.4110021947572117,
+      4.1923523963478,
+      -8.840360939555499
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

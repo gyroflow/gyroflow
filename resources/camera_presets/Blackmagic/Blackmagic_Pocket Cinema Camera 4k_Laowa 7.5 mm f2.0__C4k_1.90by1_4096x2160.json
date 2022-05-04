@@ -1,0 +1,51 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 7.5 mm f2.0__C4k_1.90by1_4096x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Sofian Chiaravalloti",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 7.5 mm f2.0",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-02",
+  "official": true,
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5201701787523997,
+    "camera_matrix": [
+      [
+        1667.5582688473503,
+        0.0,
+        2048.0
+      ],
+      [
+        0.0,
+        1668.0718422318123,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33436137223660595,
+      0.050155131103458976,
+      0.16287776275583593,
+      -0.07298724078754058
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

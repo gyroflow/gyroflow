@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 7 Plus_HDR_High Efficiency_1080p_16by9_1920x1080-30.00fps",
+  "note": "High Efficiency",
+  "calibrated_by": "La rry",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 7 Plus",
+  "lens_model": "HDR",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.000574,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3267660214913831,
+    "camera_matrix": [
+      [
+        1784.4593154649006,
+        0.0,
+        947.5881519734968
+      ],
+      [
+        0.0,
+        1784.2860314695686,
+        520.8455876371626
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5992490713660215,
+      -1.2996438399124708,
+      0.8410191408861938,
+      8.065951315242105
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

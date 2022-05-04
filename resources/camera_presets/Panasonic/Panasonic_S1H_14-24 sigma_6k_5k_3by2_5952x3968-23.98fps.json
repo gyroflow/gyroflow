@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_S1H_14-24 sigma_6k_5k_3by2_5952x3968-23.98fps",
+  "note": "",
+  "calibrated_by": "Jake Quilter",
+  "camera_brand": "Panasonic",
+  "camera_model": "S1H",
+  "lens_model": "14-24 sigma",
+  "camera_setting": "6k",
+  "calib_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "orig_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "output_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 21,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 4.615880167929559,
+    "camera_matrix": [
+      [
+        2913.3926730532808,
+        0.0,
+        2915.041349808338
+      ],
+      [
+        0.0,
+        2910.025448621455,
+        1974.7199639213663
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.586788855350432,
+      -0.41338202370178256,
+      1.4891858114175085,
+      -0.8427858154355182
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-03",
+  "compatible_settings": []
+}

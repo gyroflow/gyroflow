@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 9mm F2.8_ProRes LT_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Ivan Getz Papa",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 9mm F2.8",
+  "camera_setting": "ProRes LT",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6534787302830588,
+    "camera_matrix": [
+      [
+        1982.2667035235293,
+        0.0,
+        2052.588743299298
+      ],
+      [
+        0.0,
+        1983.330741254151,
+        1059.7024817846225
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32474121943827694,
+      0.2258264102401508,
+      -0.23534738894331805,
+      0.29175885555595693
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-13",
+  "compatible_settings": []
+}

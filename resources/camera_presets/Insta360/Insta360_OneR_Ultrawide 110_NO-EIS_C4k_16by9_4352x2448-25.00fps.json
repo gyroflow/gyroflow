@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 110_NO-EIS_C4k_16by9_4352x2448-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "MacPro",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 110",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4352,
+    "h": 2448
+  },
+  "orig_dimension": {
+    "w": 4352,
+    "h": 2448
+  },
+  "output_dimension": {
+    "w": 4352,
+    "h": 2448
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.827785262148055,
+    "camera_matrix": [
+      [
+        1821.632163692739,
+        0.0,
+        2214.697258303024
+      ],
+      [
+        0.0,
+        1820.937660389428,
+        1269.620354307667
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.060402876499373655,
+      -0.01920960033532313,
+      0.02655277930159574,
+      -0.012444957126790616
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide110-4352x2448@25000-no-eis",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-07",
+  "compatible_settings": []
+}

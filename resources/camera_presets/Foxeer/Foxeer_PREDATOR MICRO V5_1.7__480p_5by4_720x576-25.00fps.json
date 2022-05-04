@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_PREDATOR MICRO V5_1.7__480p_5by4_720x576-25.00fps",
+  "note": "",
+  "calibrated_by": "Fanch",
+  "camera_brand": "Foxeer",
+  "camera_model": "PREDATOR MICRO V5",
+  "lens_model": "1.7",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 720,
+    "h": 576
+  },
+  "orig_dimension": {
+    "w": 720,
+    "h": 576
+  },
+  "output_dimension": {
+    "w": 720,
+    "h": 576
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4196683148727072,
+    "camera_matrix": [
+      [
+        314.04796055842814,
+        0.0,
+        369.4949451295558
+      ],
+      [
+        0.0,
+        353.72294948829125,
+        309.80658080614256
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09620726716548926,
+      0.15411014441058818,
+      -0.4250660921909354,
+      0.3088790052217846
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

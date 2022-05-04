@@ -1,0 +1,66 @@
+{
+  "name": "Sony_HDR-AS50___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Admin",
+  "camera_brand": "Sony",
+  "camera_model": "HDR-AS50",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0145456303294835,
+    "camera_matrix": [
+      [
+        1374.597429554687,
+        0.0,
+        991.9760368776692
+      ],
+      [
+        0.0,
+        1376.2860666206188,
+        545.1257211971832
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.003743798339106716,
+      -0.2565152186826033,
+      0.6669189750818446,
+      -0.5934102588886286
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-19",
+  "compatible_settings": []
+}

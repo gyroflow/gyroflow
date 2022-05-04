@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Turtle_Caddx LS106_FOV High_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Xan86",
+  "camera_brand": "Caddx",
+  "camera_model": "Turtle",
+  "lens_model": "Caddx LS106",
+  "camera_setting": "FOV High",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 20,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4609422208401201,
+    "camera_matrix": [
+      [
+        1024.3399288691642,
+        0.0,
+        985.3442539997257
+      ],
+      [
+        0.0,
+        1024.0169495129226,
+        552.1172007086305
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.09074236783172934,
+      0.022272276467762992,
+      -0.0192857482182864,
+      0.005575696831419912
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-07",
+  "compatible_settings": []
+}

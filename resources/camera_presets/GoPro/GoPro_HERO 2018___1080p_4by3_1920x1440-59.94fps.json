@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO 2018___1080p_4by3_1920x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "NJB",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO 2018",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36046343044064927,
+    "camera_matrix": [
+      [
+        838.8375312083259,
+        0.0,
+        970.039698120086
+      ],
+      [
+        0.0,
+        839.3403463280088,
+        707.4337504958083
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04856921316554052,
+      0.01880262556299999,
+      -0.004006892571065506,
+      -0.0029466514990889453
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-29",
+  "compatible_settings": []
+}

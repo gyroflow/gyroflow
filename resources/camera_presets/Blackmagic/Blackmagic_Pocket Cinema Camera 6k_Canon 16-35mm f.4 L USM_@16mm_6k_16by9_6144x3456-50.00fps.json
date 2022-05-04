@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Canon 16-35mm f.4 L USM_@16mm_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "PC_03_Alex",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Canon 16-35mm f.4 L USM",
+  "camera_setting": "@16mm",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8095399350072096,
+    "camera_matrix": [
+      [
+        4779.601383480893,
+        0.0,
+        3606.0074721237543
+      ],
+      [
+        0.0,
+        4834.60564579077,
+        1778.8619298289846
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26088600772915127,
+      1.236625072755202,
+      -10.282024850783232,
+      30.010799361893376
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

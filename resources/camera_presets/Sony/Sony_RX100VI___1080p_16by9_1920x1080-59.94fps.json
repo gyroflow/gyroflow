@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX100VI___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Michel Bagard",
+  "camera_brand": "Sony",
+  "camera_model": "RX100VI",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4997479027539361,
+    "camera_matrix": [
+      [
+        917.9621533398772,
+        0.0,
+        970.5509783825964
+      ],
+      [
+        0.0,
+        914.5847188875504,
+        582.9285252418406
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3345792452445335,
+      0.11690460524020184,
+      0.07055246116523124,
+      0.013033661291347988
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-06",
+  "compatible_settings": []
+}

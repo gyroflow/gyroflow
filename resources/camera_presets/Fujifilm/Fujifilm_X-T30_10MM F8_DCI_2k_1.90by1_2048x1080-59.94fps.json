@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T30_10MM F8_DCI_2k_1.90by1_2048x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "VENBS",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T30",
+  "lens_model": "10MM F8",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 17,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5049595964626947,
+    "camera_matrix": [
+      [
+        1063.6335358042174,
+        0.0,
+        1026.808251511124
+      ],
+      [
+        0.0,
+        1064.6416930743435,
+        536.5416472482138
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06471361789523265,
+      0.021972689106758824,
+      -0.08192307051323343,
+      0.057844790043323456
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

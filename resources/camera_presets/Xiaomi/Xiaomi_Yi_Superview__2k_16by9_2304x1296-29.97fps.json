@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi_Superview__2k_16by9_2304x1296-29.97fps",
+  "note": "",
+  "calibrated_by": "MechAsh",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "Superview",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.5840517400930656,
+    "camera_matrix": [
+      [
+        1142.6169518358013,
+        0.0,
+        1162.8883981050717
+      ],
+      [
+        0.0,
+        1141.5555470688373,
+        679.5038871314948
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14442285067090593,
+      0.06746922618916555,
+      -0.25110685801338994,
+      0.2164143172494
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-07",
+  "compatible_settings": []
+}

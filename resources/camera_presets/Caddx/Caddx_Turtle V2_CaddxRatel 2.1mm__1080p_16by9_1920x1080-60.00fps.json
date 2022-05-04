@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Turtle V2_CaddxRatel 2.1mm__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Sven",
+  "camera_brand": "Caddx",
+  "camera_model": "Turtle V2",
+  "lens_model": "CaddxRatel 2.1mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4116787828798597,
+    "camera_matrix": [
+      [
+        975.8155885479003,
+        0.0,
+        947.7254372004523
+      ],
+      [
+        0.0,
+        975.6252357859051,
+        525.8725684992584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0688219007602467,
+      0.016102964800123402,
+      -0.054696171285946886,
+      0.04456110309818333
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

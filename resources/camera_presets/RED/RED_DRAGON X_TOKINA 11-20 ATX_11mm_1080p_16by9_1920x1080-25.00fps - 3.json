@@ -1,0 +1,66 @@
+{
+  "name": "RED_DRAGON X_TOKINA 11-20 ATX_11mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "11mm",
+  "calibrated_by": "vincent reynaud",
+  "camera_brand": "RED",
+  "camera_model": "DRAGON X",
+  "lens_model": "TOKINA 11-20 ATX",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 20,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3750696046815057,
+    "camera_matrix": [
+      [
+        909.363956384969,
+        0.0,
+        953.282875084744
+      ],
+      [
+        0.0,
+        908.940673685628,
+        546.511701208607
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3052251547013649,
+      0.15556218562028637,
+      -0.1366297607350158,
+      0.08993731884594125
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

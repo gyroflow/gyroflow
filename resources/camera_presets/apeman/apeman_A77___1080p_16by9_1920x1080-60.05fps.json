@@ -1,0 +1,66 @@
+{
+  "name": "apeman_A77___1080p_16by9_1920x1080-60.05fps",
+  "note": "",
+  "calibrated_by": "Henrique Almeida",
+  "camera_brand": "apeman",
+  "camera_model": "A77",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 97,
+  "fps": 60.045998,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5684995517134481,
+    "camera_matrix": [
+      [
+        1135.5029544625118,
+        0.0,
+        958.4052606550058
+      ],
+      [
+        0.0,
+        1134.4614249455458,
+        565.6186655679929
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.006865949705118557,
+      0.06868346236980168,
+      -0.20179768060681905,
+      0.17677894875012157
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

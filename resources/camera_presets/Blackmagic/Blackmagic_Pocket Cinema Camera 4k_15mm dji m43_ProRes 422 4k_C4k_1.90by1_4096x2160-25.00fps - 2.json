@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_15mm dji m4/3_ProRes 422 4k_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Niki tanera",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "15mm dji m4/3",
+  "camera_setting": "ProRes 422 4k",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4050228682941306,
+    "camera_matrix": [
+      [
+        3137.246441000294,
+        0.0,
+        2070.4738953397605
+      ],
+      [
+        0.0,
+        3139.30544614528,
+        1091.9583639802531
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12936366163388285,
+      -0.08532208540043415,
+      0.4361058736809684,
+      -0.3132861750437645
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-04",
+  "compatible_settings": []
+}

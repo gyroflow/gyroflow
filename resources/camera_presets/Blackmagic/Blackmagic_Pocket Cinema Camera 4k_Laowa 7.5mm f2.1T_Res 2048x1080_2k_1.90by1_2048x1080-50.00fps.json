@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 7.5mm f/2.1T_Res 2048x1080_2k_1.90by1_2048x1080-50.00fps",
+  "note": "Res 2048x1080",
+  "calibrated_by": "Ruben Van der Meeren",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 7.5mm f/2.1T",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 60,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2565452013459887,
+    "camera_matrix": [
+      [
+        833.4931519339854,
+        0.0,
+        1028.4814648053352
+      ],
+      [
+        0.0,
+        833.6493151260808,
+        537.2404409489042
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33641463327677795,
+      0.09459386281941072,
+      -0.009205604822209524,
+      0.08624098908511804
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

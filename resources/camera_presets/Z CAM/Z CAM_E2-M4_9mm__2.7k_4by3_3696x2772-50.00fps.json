@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_9mm__2.7k_4by3_3696x2772-50.00fps",
+  "note": "",
+  "calibrated_by": "Mark Heinrich",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "9mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "orig_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "output_dimension": {
+    "w": 3696,
+    "h": 2078
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.40917486740894593,
+    "camera_matrix": [
+      [
+        1996.3214518004536,
+        0.0,
+        1872.8088491087333
+      ],
+      [
+        0.0,
+        1995.73354683129,
+        1384.166312491857
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2983644898506573,
+      0.5713385657566493,
+      -1.7396186775498996,
+      2.3610387833341777
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

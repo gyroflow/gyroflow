@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Orca 4k_Orca 4k_EIS OFF LDC OFF_2.7k_16by9_2704x1520-60.05fps",
+  "note": "EIS OFF LDC OFF",
+  "calibrated_by": "Robson Langona",
+  "camera_brand": "Caddx",
+  "camera_model": "Orca 4k",
+  "lens_model": "Orca 4k",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.05267,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5696325425506332,
+    "camera_matrix": [
+      [
+        1484.8467128849006,
+        0.0,
+        1384.3858476267285
+      ],
+      [
+        0.0,
+        1112.4257289479349,
+        736.5802539934391
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02447444444902505,
+      0.011986728604703916,
+      -0.09757912646957244,
+      0.09776004783546802
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

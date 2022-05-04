@@ -1,0 +1,47 @@
+{
+  "name": "Panasonic_BGH1_Laowa__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "trotter",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Laowa",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-04-16",
+  "official": false,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 8,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5456266279059148,
+    "camera_matrix": [
+      [
+        1614.733944120476,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1618.568357624563,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34326472068299335,
+      0.0119564903049774,
+      0.3295762041789016,
+      -0.2854187395581136
+    ],
+    "radial_distortion_limit": 0.0
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 110_NO-EIS_5k_16by9_5312x2988-24.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Brezel",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 110",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7200714328176162,
+    "camera_matrix": [
+      [
+        2237.7910234071405,
+        0.0,
+        2716.649313206806
+      ],
+      [
+        0.0,
+        2236.1465735496618,
+        1556.5273110152868
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05252585885818097,
+      -0.006346094834647113,
+      0.0034863700551307085,
+      0.0009908138084388743
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide110-5312x2988@24000-no-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-16",
+  "compatible_settings": []
+}

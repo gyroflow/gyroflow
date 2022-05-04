@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_tamron 17-28_17mm_1080p_16by9_1920x1080-119.88fps",
+  "note": "17mm",
+  "calibrated_by": "lee eunsang",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "tamron 17-28",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5090755219909533,
+    "camera_matrix": [
+      [
+        943.1913938078249,
+        0.0,
+        959.362354632482
+      ],
+      [
+        0.0,
+        943.432381219022,
+        546.9702034999475
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32982122641409567,
+      0.0649357271229273,
+      0.21604455278757825,
+      -0.06822099332095256
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-25",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Micro Cinema Camera_Laowa 7.5mm T 2.1__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "riccardo lucidi",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Micro Cinema Camera",
+  "lens_model": "Laowa 7.5mm T 2.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.384874066657338,
+    "camera_matrix": [
+      [
+        1194.308253654363,
+        0.0,
+        961.9565398385035
+      ],
+      [
+        0.0,
+        1193.0030843919228,
+        584.2193231526451
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33091967181498305,
+      0.26315462856838456,
+      -0.7964134308700876,
+      1.195641069400663
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

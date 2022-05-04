@@ -1,0 +1,66 @@
+{
+  "name": "Vivo_iQOO Z1___720p_16by9_1280x720-30.44fps",
+  "note": "",
+  "calibrated_by": "tonylinux",
+  "camera_brand": "Vivo",
+  "camera_model": "iQOO Z1",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.43659,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.38529864428797533,
+    "camera_matrix": [
+      [
+        988.0798709297038,
+        0.0,
+        643.0182218844527
+      ],
+      [
+        0.0,
+        1012.1708042240653,
+        349.6576282035178
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4200994035115118,
+      0.922865728190076,
+      -5.9168501264703695,
+      10.281255519183793
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

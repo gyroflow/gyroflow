@@ -1,0 +1,66 @@
+{
+  "name": "ARRI_Alexa Mini_Zeiss Master PRIME T2.0__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Sound Scavenger",
+  "camera_brand": "ARRI",
+  "camera_model": "Alexa Mini",
+  "lens_model": "Zeiss Master PRIME T2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.824254961502681,
+    "camera_matrix": [
+      [
+        3558.5739671415645,
+        0.0,
+        1917.5364353694604
+      ],
+      [
+        0.0,
+        3556.9923002214286,
+        1077.8194870889924
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19944673154987172,
+      0.30945412527893124,
+      -0.3487138077165718,
+      0.9000570962493
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M50_Tamaron 17-50 f2.8 LD SP IF__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Tilak",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M50",
+  "lens_model": "Tamaron 17-50 f2.8 LD SP IF",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3805360398560844,
+    "camera_matrix": [
+      [
+        1461.194032151034,
+        0.0,
+        966.5282471556516
+      ],
+      [
+        0.0,
+        1462.329751370402,
+        515.61793190551
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19485603451736716,
+      -0.013920392971620423,
+      0.8340076030180383,
+      -1.1658825694628323
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-20",
+  "compatible_settings": []
+}

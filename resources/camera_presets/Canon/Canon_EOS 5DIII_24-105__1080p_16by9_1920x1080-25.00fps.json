@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 5DIII_24-105__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Administrator",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 5DIII",
+  "lens_model": "24-105",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5541089992994803,
+    "camera_matrix": [
+      [
+        1484.5647402095549,
+        0.0,
+        970.267631748098
+      ],
+      [
+        0.0,
+        1477.637926549647,
+        557.7666831130567
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17152779334876406,
+      0.6248857821763565,
+      -1.9060926868928891,
+      3.071977962647687
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

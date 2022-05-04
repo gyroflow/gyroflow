@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Linear_EIS_720p_9by16_1440x2560-50.00fps",
+  "note": "EIS",
+  "calibrated_by": "Nana Ntim",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Linear",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2202158274038764,
+    "camera_matrix": [
+      [
+        1077.9186384790924,
+        0.0,
+        718.7643813092037
+      ],
+      [
+        0.0,
+        1085.0254210219566,
+        1280.891436374946
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3729305221040204,
+      0.032913191833467866,
+      0.19609504658659527,
+      -0.02455356007455289
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-linear-1440x2560@50000-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-23",
+  "compatible_settings": []
+}

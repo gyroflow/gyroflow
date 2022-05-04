@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session_Wide_2.7k_2.7k_4by3_2704x2028-29.97fps",
+  "note": "2.7k",
+  "calibrated_by": "Fabio Lattisi",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3562612126511424,
+    "camera_matrix": [
+      [
+        1154.3795776503391,
+        0.0,
+        1356.6898260834005
+      ],
+      [
+        0.0,
+        1155.7264972388975,
+        1014.9744246534392
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1289761206543573,
+      -0.07588020083642501,
+      0.046227789218642554,
+      -0.015395988796853648
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

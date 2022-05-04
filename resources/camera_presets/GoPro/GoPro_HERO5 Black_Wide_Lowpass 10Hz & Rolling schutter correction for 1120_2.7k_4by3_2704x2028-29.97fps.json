@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Black_Wide_Lowpass 10Hz & Rolling schutter correction for 1/120_2.7k_4by3_2704x2028-29.97fps",
+  "note": "Lowpass 10Hz & Rolling schutter correction for 1/120",
+  "calibrated_by": "Micha",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 8.34,
+  "gyro_lpf": 10.0,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5145060959130852,
+    "camera_matrix": [
+      [
+        1184.955919984551,
+        0.0,
+        1357.4656627472912
+      ],
+      [
+        0.0,
+        1187.2758485453137,
+        1004.3729118546538
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05412228201923696,
+      0.019986374006558495,
+      -0.010997052697197453,
+      0.0022794202119431036
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RED_Raven_Rokinon 10mm T3.1__C4k_2.13by1_4608x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "re4mat0r",
+  "camera_brand": "RED",
+  "camera_model": "Raven",
+  "lens_model": "Rokinon 10mm T3.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 16,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.7426801434776236,
+    "camera_matrix": [
+      [
+        2074.733041813733,
+        0.0,
+        2298.620844853877
+      ],
+      [
+        0.0,
+        2074.0669644448653,
+        1075.4262653198928
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24854009186766063,
+      0.3309576736550658,
+      -0.4902829121225928,
+      0.4089582007035297
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

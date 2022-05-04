@@ -1,0 +1,51 @@
+{
+  "name": "Z CAM_E2-M4_Olympus 9-18_C_C4k_1.90by1_4096x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Csajtai Kristof",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Olympus 9-18",
+  "camera_setting": "C",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-10-29",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 45,
+  "use_opencv_fisheye": true,
+  "official": true,
+  "fisheye_params": {
+    "RMS_error": 0.7417197975827522,
+    "camera_matrix": [
+      [
+        1966.9292794009748,
+        0.0,
+        2048.0
+      ],
+      [
+        0.0,
+        1967.166573261641,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3215982794700728,
+      0.08332729175239084,
+      -0.07383788745403176,
+      -0.012739355778346005
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

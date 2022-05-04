@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO4 Session_Wide_30fps_1080p_4by3_1920x1440-29.97fps",
+  "note": "30fps",
+  "calibrated_by": "Graham Parkinson",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Session",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.3107362729896477,
+    "camera_matrix": [
+      [
+        927.7494686436664,
+        0.0,
+        972.7419225852454
+      ],
+      [
+        0.0,
+        925.0732407826168,
+        720.9826489942086
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.07367214890769301,
+      -0.1135368784482668,
+      0.08219094257194473,
+      -0.02280318595505989
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-19",
+  "compatible_settings": []
+}

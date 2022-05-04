@@ -1,0 +1,66 @@
+{
+  "name": "ARRI_Alexa Mini_ARRI CarlZeiss Ultra PRIME 24mm t1.9_Prores422HQ-S35_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Sound Scavenger",
+  "camera_brand": "ARRI",
+  "camera_model": "Alexa Mini",
+  "lens_model": "ARRI CarlZeiss Ultra PRIME 24mm t1.9",
+  "camera_setting": "Prores422HQ-S35",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8264187929063717,
+    "camera_matrix": [
+      [
+        3555.0125392910936,
+        0.0,
+        1914.6873924565464
+      ],
+      [
+        0.0,
+        3554.0170863426056,
+        1077.8821036710458
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20403822673585148,
+      0.23505236001487104,
+      0.13624260844629957,
+      -0.1063733903317214
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-13",
+  "compatible_settings": []
+}

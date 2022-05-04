@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_G85_12mm f/3.5__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Josh",
+  "camera_brand": "Panasonic",
+  "camera_model": "G85",
+  "lens_model": "12mm f/3.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4356044283620239,
+    "camera_matrix": [
+      [
+        1366.414958265955,
+        0.0,
+        967.1675435683431
+      ],
+      [
+        0.0,
+        1363.5301796850977,
+        556.9167541334343
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2688778426286489,
+      0.3353316406936168,
+      -0.7906973719281959,
+      1.068999685052266
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

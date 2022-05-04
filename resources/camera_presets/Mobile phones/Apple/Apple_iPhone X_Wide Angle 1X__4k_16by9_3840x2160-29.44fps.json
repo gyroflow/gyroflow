@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone X_Wide Angle 1X__4k_16by9_3840x2160-29.44fps",
+  "note": "",
+  "calibrated_by": "Francesco Grauso",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone X",
+  "lens_model": "Wide Angle 1X",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 2,
+  "fps": 29.437357,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5537927414824444,
+    "camera_matrix": [
+      [
+        3004.782731348831,
+        0.0,
+        1954.2707436880755
+      ],
+      [
+        0.0,
+        2999.6679457366304,
+        1007.2427274920218
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6458759304964358,
+      -2.1309596372588553,
+      6.145252954091458,
+      -4.254268823889414
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-17",
+  "compatible_settings": []
+}

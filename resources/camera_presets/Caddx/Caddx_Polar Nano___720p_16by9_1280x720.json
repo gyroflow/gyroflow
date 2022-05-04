@@ -1,0 +1,51 @@
+{
+  "name": "Caddx_Polar Nano___720p_16by9_1280x720-0.00fps",
+  "note": "",
+  "calibrated_by": "jesuslg123",
+  "camera_brand": "Caddx",
+  "camera_model": "Polar Nano",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2022-01-05",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 18,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2770206767759136,
+    "camera_matrix": [
+      [
+        578.541168406805,
+        0.0,
+        640.0
+      ],
+      [
+        0.0,
+        577.735377934379,
+        360.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.010676665723531736,
+      -0.06403221206529124,
+      0.03793970757104014,
+      -0.009933056803489436
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

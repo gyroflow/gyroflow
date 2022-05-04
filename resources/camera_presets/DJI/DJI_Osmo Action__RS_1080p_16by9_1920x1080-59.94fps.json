@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action__RS_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Project ARK",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "",
+  "camera_setting": "RS",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.521495884772792,
+    "camera_matrix": [
+      [
+        1083.083090210086,
+        0.0,
+        973.5631021940698
+      ],
+      [
+        0.0,
+        1084.2184209081447,
+        548.9058845137763
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2538818512854659,
+      0.17342664730482082,
+      0.26998688910015606,
+      -0.24976354789991195
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-06",
+  "compatible_settings": []
+}

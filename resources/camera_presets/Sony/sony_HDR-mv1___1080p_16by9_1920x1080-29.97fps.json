@@ -1,0 +1,66 @@
+{
+  "name": "sony_HDR-mv1___1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Bartosz Ostrowski",
+  "camera_brand": "sony",
+  "camera_model": "HDR-mv1",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.639681152571301,
+    "camera_matrix": [
+      [
+        839.8039852625285,
+        0.0,
+        964.3825330088864
+      ],
+      [
+        0.0,
+        835.4391948397514,
+        558.509555182764
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29745818075396024,
+      0.12419478841007492,
+      -0.11378563451201604,
+      0.0601066078293707
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

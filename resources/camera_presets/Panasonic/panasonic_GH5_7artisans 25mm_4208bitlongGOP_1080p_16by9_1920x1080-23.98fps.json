@@ -1,0 +1,66 @@
+{
+  "name": "panasonic_GH5_7artisans 25mm_420/8bit/longGOP_1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Aaron Leslie",
+  "camera_brand": "panasonic",
+  "camera_model": "GH5",
+  "lens_model": "7artisans 25mm",
+  "camera_setting": "420/8bit/longGOP",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3533580877553364,
+    "camera_matrix": [
+      [
+        -2936.2683747844885,
+        -0.0,
+        935.001504900652
+      ],
+      [
+        0.0,
+        -2931.9620977242157,
+        519.3107758080025
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.240386157857941,
+      -1.1260441252698832,
+      -4.471282898742311,
+      166.0197491805162
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-07",
+  "compatible_settings": []
+}

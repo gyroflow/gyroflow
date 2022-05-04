@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_SplitCam4K___2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Rikka Takanashi",
+  "camera_brand": "Hawkeye",
+  "camera_model": "SplitCam4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 78,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5116698456904801,
+    "camera_matrix": [
+      [
+        1313.6080415037186,
+        0.0,
+        1382.9410483304332
+      ],
+      [
+        0.0,
+        1312.8190242035057,
+        822.961777813184
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03650422552130053,
+      0.03721412372078818,
+      -0.05131580922356553,
+      0.022201787641222555
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

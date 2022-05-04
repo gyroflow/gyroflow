@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Black_Wide__2.7k_16by9_2704x1520-29.97fps",
+  "note": "",
+  "calibrated_by": "Tisfey",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.28335297854546687,
+    "camera_matrix": [
+      [
+        1222.623057806395,
+        0.0,
+        1361.076751430849
+      ],
+      [
+        0.0,
+        1221.348785380341,
+        759.7405436813941
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06888297253767807,
+      -0.0269565641280764,
+      0.035766854871886786,
+      -0.014366548612145856
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-28",
+  "compatible_settings": []
+}

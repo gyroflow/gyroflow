@@ -1,0 +1,46 @@
+{
+  "name": "RunCam_Hybrid 2__60 fps_2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "Alexander van Saase",
+  "camera_brand": "RunCam",
+  "camera_model": "Hybrid 2",
+  "lens_model": "",
+  "camera_setting": "60 fps",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-09",
+  "official": true,
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "num_images": 35,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3199463575517799,
+    "camera_matrix": [
+      [
+        1404.8929361460885,
+        0.0,
+        1352.0
+      ],
+      [
+        0.0,
+        1415.688207156804,
+        760.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04228297837885388,
+      -0.0009802300150477644,
+      -0.0051901727361128025,
+      0.000524867311219459
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

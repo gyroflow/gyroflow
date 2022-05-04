@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Black (FW-hacked Hero 2018)_Wide__2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "Sidux",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Black (FW-hacked Hero 2018)",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3979760756552791,
+    "camera_matrix": [
+      [
+        1188.007809246158,
+        0.0,
+        1328.4506644352953
+      ],
+      [
+        0.0,
+        1189.8932422703415,
+        1006.4676555772786
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.055933700048658115,
+      -0.007135884091202705,
+      0.03090930814958344,
+      -0.01810787094658434
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_Z6_Irix 15mm f2.4__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "PATZ",
+  "camera_brand": "Nikon",
+  "camera_model": "Z6",
+  "lens_model": "Irix 15mm f2.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.337577479359542,
+    "camera_matrix": [
+      [
+        1696.5394207877143,
+        0.0,
+        1894.241954419444
+      ],
+      [
+        0.0,
+        1694.9858324181791,
+        1084.769716888792
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28134766295708946,
+      0.2786533115663667,
+      -0.2277859292923008,
+      0.15425195925533383
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

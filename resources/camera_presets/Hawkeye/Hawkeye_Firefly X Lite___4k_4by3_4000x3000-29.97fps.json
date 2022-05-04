@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly X Lite___4k_4by3_4000x3000-29.97fps",
+  "note": "",
+  "calibrated_by": "Vladimir Sobolev",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5682221120697488,
+    "camera_matrix": [
+      [
+        1960.3486648439784,
+        0.0,
+        1923.8895200730376
+      ],
+      [
+        0.0,
+        1959.7271988836,
+        1511.8062648634916
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.021109751138676473,
+      0.0010735379007382887,
+      -0.007620819010913071,
+      0.0019318918920442608
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

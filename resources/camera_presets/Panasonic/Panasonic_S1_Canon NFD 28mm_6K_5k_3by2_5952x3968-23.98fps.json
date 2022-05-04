@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_S1_Canon NFD 28mm_6K_5k_3by2_5952x3968-23.98fps",
+  "note": "",
+  "calibrated_by": "@_ldro",
+  "camera_brand": "Panasonic",
+  "camera_model": "S1",
+  "lens_model": "Canon NFD 28mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "orig_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "output_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.305028318228198,
+    "camera_matrix": [
+      [
+        4985.141612386395,
+        0.0,
+        2999.3363350953823
+      ],
+      [
+        0.0,
+        4984.377196508218,
+        1975.4477329521465
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24360692194769243,
+      0.1733690248370628,
+      0.08104140718537224,
+      -0.1025905851823172
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action___1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "aurel ndoci",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4181313172688698,
+    "camera_matrix": [
+      [
+        864.1788071209749,
+        0.0,
+        947.7048202777968
+      ],
+      [
+        0.0,
+        863.8455797660513,
+        522.5578055381394
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20081756130778416,
+      0.05384427039407604,
+      -0.13369412355542104,
+      0.03630325375553761
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

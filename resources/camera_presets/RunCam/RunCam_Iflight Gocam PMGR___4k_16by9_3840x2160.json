@@ -1,0 +1,46 @@
+{
+  "name": "RunCam_Iflight Gocam PMGR___4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Elvin",
+  "camera_brand": "RunCam",
+  "camera_model": "Iflight Gocam PMGR",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta/dev",
+  "date": "2021-07-05",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 23,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0383395520548049,
+    "camera_matrix": [
+      [
+        1763.8186765307903,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1764.980516707156,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.01982340571138965,
+      0.12744913844351966,
+      -0.15441160164969775,
+      0.07432577930089722
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

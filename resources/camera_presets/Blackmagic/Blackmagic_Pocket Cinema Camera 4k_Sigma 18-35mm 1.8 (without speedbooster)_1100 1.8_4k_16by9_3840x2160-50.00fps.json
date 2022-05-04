@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Sigma 18-35mm 1.8 (without speedbooster)_1/100 1.8_4k_16by9_3840x2160-50.00fps",
+  "note": "@18mm (=36mm)",
+  "calibrated_by": "Marco Milling",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Sigma 18-35mm 1.8 (without speedbooster)",
+  "camera_setting": "1/100 1.8",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2658264711486706,
+    "camera_matrix": [
+      [
+        4062.166339697031,
+        0.0,
+        1916.1891996873285
+      ],
+      [
+        0.0,
+        4060.4018330466206,
+        1065.708659936683
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2713812760979951,
+      -0.7576295966684782,
+      8.927969892301837,
+      -28.61154946335292
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

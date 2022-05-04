@@ -1,0 +1,66 @@
+{
+  "name": "Crosstour_CT7000___2.5k_16by9_2688x1520-30.04fps",
+  "note": "",
+  "calibrated_by": "Osman",
+  "camera_brand": "Crosstour",
+  "camera_model": "CT7000",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 30.043371,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.32053948071688415,
+    "camera_matrix": [
+      [
+        1588.4207801031084,
+        0.0,
+        1377.5757842268742
+      ],
+      [
+        0.0,
+        1585.4626043052965,
+        752.7179726861483
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.009113140820501813,
+      0.01378496731832464,
+      -0.02835659071588521,
+      0.01832860718099184
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-21",
+  "compatible_settings": []
+}

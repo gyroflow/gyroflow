@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Sigma EX DC HSM 10-20 f/3.5_@10mm_C4k_1.90by1_4096x2160-60.00fps",
+  "note": "",
+  "calibrated_by": "Thomas Boland",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Sigma EX DC HSM 10-20 f/3.5",
+  "camera_setting": "@10mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 16.2,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 19,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8298792051206026,
+    "camera_matrix": [
+      [
+        1570.0485467230767,
+        0.0,
+        2002.2126689060517
+      ],
+      [
+        0.0,
+        1567.170155048074,
+        1114.0145330125515
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2533346161631858,
+      0.2578000604213863,
+      -0.22649860533413563,
+      0.17837262751914096
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

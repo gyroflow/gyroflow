@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Mi 9 Pro__16BY9_4k_16by9_3840x2160-60.03fps",
+  "note": "16BY9",
+  "calibrated_by": "WYY",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 9 Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.032547,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4977623958084645,
+    "camera_matrix": [
+      [
+        3001.4654189894904,
+        0.0,
+        1931.9110863456292
+      ],
+      [
+        0.0,
+        3000.3342246605093,
+        1078.5300997517384
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5333738242706347,
+      -0.8900607319070714,
+      1.3549695435562703,
+      1.0434122103954406
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

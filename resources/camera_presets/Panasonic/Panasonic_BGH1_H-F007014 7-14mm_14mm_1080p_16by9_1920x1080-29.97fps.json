@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH1_H-F007014 7-14mm_14mm_1080p_16by9_1920x1080-29.97fps",
+  "note": "14mm",
+  "calibrated_by": "David Manouchehri",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "H-F007014 7-14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.32007467357473296,
+    "camera_matrix": [
+      [
+        1469.6200049317408,
+        0.0,
+        971.1126415618818
+      ],
+      [
+        0.0,
+        1469.8185952539584,
+        535.7471252581009
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3291232448658537,
+      0.35541550314026416,
+      -0.921424313745199,
+      1.639968891103632
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-27",
+  "compatible_settings": []
+}

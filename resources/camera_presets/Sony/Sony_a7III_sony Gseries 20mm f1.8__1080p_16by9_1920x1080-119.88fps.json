@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_sony Gseries 20mm f1.8__1080p_16by9_1920x1080-119.88fps",
+  "note": "",
+  "calibrated_by": "luca favre",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "sony Gseries 20mm f1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.31965965776569605,
+    "camera_matrix": [
+      [
+        1065.1643515774438,
+        0.0,
+        961.7717771552484
+      ],
+      [
+        0.0,
+        1065.4305829805571,
+        533.5583071151227
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26740778953731814,
+      0.196110521465389,
+      -0.09236597799491925,
+      0.255926369826971
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-09",
+  "compatible_settings": []
+}

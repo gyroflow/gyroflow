@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7II_Batis 85__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Francesco",
+  "camera_brand": "Sony",
+  "camera_model": "a7II",
+  "lens_model": "Batis 85",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.269051359027841,
+    "camera_matrix": [
+      [
+        3845.354559900971,
+        0.0,
+        922.8550767618436
+      ],
+      [
+        0.0,
+        3807.306870195948,
+        528.4709379879359
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8241908247746791,
+      -1.5135316495798767,
+      78.58282506437602,
+      -896.8947484598666
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-05",
+  "compatible_settings": []
+}

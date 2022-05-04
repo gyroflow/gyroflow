@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneRS_4K Boost Lens (Ultrawide 104)_EIS_4k_16by9_3840x2160-29.97fps",
+  "note": "EIS",
+  "calibrated_by": "RRec Studio",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "4K Boost Lens (Ultrawide 104)",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8036786041884878,
+    "camera_matrix": [
+      [
+        1857.3461747505696,
+        0.0,
+        1907.5519180300137
+      ],
+      [
+        0.0,
+        1857.7055472582165,
+        1064.9073955872614
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10114616145378472,
+      -0.056190936264331935,
+      0.11791968930040946,
+      -0.06661018728057909
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-ultrawide104-3840x2160@29970-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-27",
+  "compatible_settings": []
+}

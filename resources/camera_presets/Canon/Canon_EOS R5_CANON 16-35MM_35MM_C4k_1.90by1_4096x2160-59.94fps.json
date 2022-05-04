@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R5_CANON 16-35MM_35MM_C4k_1.90by1_4096x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "吴明康",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "CANON 16-35MM",
+  "camera_setting": "35MM",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6234809917324777,
+    "camera_matrix": [
+      [
+        3775.678620555168,
+        0.0,
+        2055.5035720445862
+      ],
+      [
+        0.0,
+        3774.7774195438537,
+        1027.127476469952
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3203180030300391,
+      0.312672271579664,
+      0.28567588842862707,
+      -0.4038613322211145
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_MIPI___720p_16by9_1280x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Dodfpv",
+  "camera_brand": "RunCam",
+  "camera_model": "MIPI",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.23957548689887917,
+    "camera_matrix": [
+      [
+        634.1665263818795,
+        0.0,
+        653.7012177967136
+      ],
+      [
+        0.0,
+        634.5227354126032,
+        339.02099297836554
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0704504197107874,
+      -0.022844424841663172,
+      0.03326234565484444,
+      0.0056586462060909445
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

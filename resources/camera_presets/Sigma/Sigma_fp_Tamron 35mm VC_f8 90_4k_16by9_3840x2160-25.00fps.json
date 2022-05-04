@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_Tamron 35mm VC_f8 90°_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "B3",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Tamron 35mm VC",
+  "camera_setting": "f8 90°",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.032536293748801,
+    "camera_matrix": [
+      [
+        3902.705835561888,
+        0.0,
+        1942.7059828643944
+      ],
+      [
+        0.0,
+        3901.722712338172,
+        1073.6224983946422
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.260315365146934,
+      0.5701954753624778,
+      -2.864684426804741,
+      6.696182918283603
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-10",
+  "compatible_settings": []
+}

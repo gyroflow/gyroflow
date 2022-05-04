@@ -1,0 +1,46 @@
+{
+  "name": "Xiaomi_Yi___720p_4by3_1600x1200-0.00fps",
+  "note": "",
+  "calibrated_by": "AkbarFoto",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-05-10",
+  "official": true,
+  "calib_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27207237477571655,
+    "camera_matrix": [
+      [
+        692.018831676407,
+        0.0,
+        800.0
+      ],
+      [
+        0.0,
+        691.8921653111651,
+        600.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09012538769412858,
+      0.0013974793631449404,
+      -0.010491737803817135,
+      0.0012403034498755887
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

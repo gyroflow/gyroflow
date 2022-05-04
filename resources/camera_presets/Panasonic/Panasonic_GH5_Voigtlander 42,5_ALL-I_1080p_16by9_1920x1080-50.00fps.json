@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_Voigtlander 42,5_ALL-I_1080p_16by9_1920x1080-50.00fps",
+  "note": "1080p 50ims",
+  "calibrated_by": "pyxeos",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Voigtlander 42,5",
+  "camera_setting": "ALL-I",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 1.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.416116667462284,
+    "camera_matrix": [
+      [
+        2053.5138525163766,
+        0.0,
+        971.5960437127547
+      ],
+      [
+        0.0,
+        2048.7776917443625,
+        528.6073071790081
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2449564297900919,
+      0.1973153176148492,
+      2.018331859990292,
+      -11.90706421044836
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

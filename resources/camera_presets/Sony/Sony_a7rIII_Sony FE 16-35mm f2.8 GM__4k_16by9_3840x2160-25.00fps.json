@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7rIII_Sony FE 16-35mm f2.8 GM__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "David Rautenbach",
+  "camera_brand": "Sony",
+  "camera_model": "a7rIII",
+  "lens_model": "Sony FE 16-35mm f2.8 GM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.32912740928027,
+    "camera_matrix": [
+      [
+        5418.106699866177,
+        0.0,
+        1886.8386509488337
+      ],
+      [
+        0.0,
+        5411.8319796044425,
+        1121.1504589330953
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15762127930505698,
+      2.0841981837890953,
+      19.77143210279605,
+      -227.42756966487315
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

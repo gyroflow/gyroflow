@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T2_7 artisans 25mm 1.8__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "DaveDialect",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T2",
+  "lens_model": "7 artisans 25mm 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 4,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4808983934418995,
+    "camera_matrix": [
+      [
+        2170.894644735686,
+        0.0,
+        950.54836710366
+      ],
+      [
+        0.0,
+        2171.8548570344997,
+        500.9790911712725
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1999502764400156,
+      -0.941579728935192,
+      14.334404056985576,
+      -74.81984985721915
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-02",
+  "compatible_settings": []
+}

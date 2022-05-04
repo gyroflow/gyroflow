@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 9mm__4k_16by9_3840x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Álvaro González Lasseube",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.8570649649425817,
+    "camera_matrix": [
+      [
+        1977.0087424847943,
+        0.0,
+        1925.5936231042383
+      ],
+      [
+        0.0,
+        1949.298716180832,
+        1040.0380704592596
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30515870494942854,
+      0.22790243107945932,
+      -0.25841002222794174,
+      0.30603793463277484
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

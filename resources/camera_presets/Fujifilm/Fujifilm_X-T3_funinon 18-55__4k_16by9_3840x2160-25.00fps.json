@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_funinon 18-55__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "FlyWhoop Workstation",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "funinon 18-55",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7212083692700489,
+    "camera_matrix": [
+      [
+        2883.553435811378,
+        0.0,
+        1946.955335433055
+      ],
+      [
+        0.0,
+        2885.2393601267186,
+        1061.0689182056906
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24286889317588276,
+      0.5323749364237248,
+      -1.380051935476866,
+      1.8872833721592264
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-20",
+  "compatible_settings": []
+}

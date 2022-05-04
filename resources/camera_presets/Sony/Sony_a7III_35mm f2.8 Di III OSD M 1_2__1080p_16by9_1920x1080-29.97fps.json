@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_35mm f/2.8 Di III OSD M 1:2__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Will",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "35mm f/2.8 Di III OSD M 1:2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2324893953497499,
+    "camera_matrix": [
+      [
+        1859.3095309462255,
+        0.0,
+        969.188133086841
+      ],
+      [
+        0.0,
+        1857.758709689045,
+        527.7652447145846
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2513587026635846,
+      0.5648221369955071,
+      -2.765641038098945,
+      5.795013699435966
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-27",
+  "compatible_settings": []
+}

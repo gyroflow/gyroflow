@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_Samyang 21mm f1.4__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Leon",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "Samyang 21mm f1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 30.36966081959484,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.908327857587644,
+    "camera_matrix": [
+      [
+        4310.306561787722,
+        0.0,
+        1982.3726128029596
+      ],
+      [
+        0.0,
+        4192.464395164864,
+        1061.7026094741625
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1923683025880731,
+      1.2261650066010874,
+      -6.935566331905144,
+      18.54493894760604
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-02",
+  "compatible_settings": []
+}

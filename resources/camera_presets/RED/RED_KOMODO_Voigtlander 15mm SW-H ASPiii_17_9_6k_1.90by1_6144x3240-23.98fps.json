@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_Voigtlander 15mm SW-H ASPiii_17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "Global Shutter",
+  "calibrated_by": "Aether Films",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Voigtlander 15mm SW-H ASPiii",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7160492279643856,
+    "camera_matrix": [
+      [
+        3551.010036836704,
+        0.0,
+        3031.969380856502
+      ],
+      [
+        0.0,
+        3551.1501351221104,
+        1634.2537231336355
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3234783079034174,
+      0.08767896051182136,
+      0.01396389585536421,
+      0.19396795617883936
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

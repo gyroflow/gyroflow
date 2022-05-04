@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a1_Batis 40.00mm__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "maki",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "Batis 40.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5790691203672236,
+    "camera_matrix": [
+      [
+        6626.67451351646,
+        0.0,
+        1903.6772826029128
+      ],
+      [
+        0.0,
+        6626.06552862516,
+        1069.3254215266977
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2860663994346732,
+      0.520286357222725,
+      0.7700166131420642,
+      -21.537567824077954
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-1-40.00mm-3840x2160@59940",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-14",
+  "compatible_settings": []
+}

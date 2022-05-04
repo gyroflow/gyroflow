@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action_STOCK_Rocksteady off_4k_16by9_3840x2160-59.94fps",
+  "note": "Rocksteady off",
+  "calibrated_by": "CinexFPV",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "STOCK",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 20,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4926275987634619,
+    "camera_matrix": [
+      [
+        1736.2394820989678,
+        0.0,
+        1914.887411270461
+      ],
+      [
+        0.0,
+        1734.8585521500656,
+        1066.890443338864
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20670549121828577,
+      0.04011177215346045,
+      -0.12691337937279304,
+      0.038241480904215135
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-S6_Laowa 10mm f2__5k_4by3_5552x4164-29.97fps",
+  "note": "",
+  "calibrated_by": "Lance Lao",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Laowa 10mm f2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5552,
+    "h": 4164
+  },
+  "orig_dimension": {
+    "w": 5552,
+    "h": 4164
+  },
+  "output_dimension": {
+    "w": 5552,
+    "h": 3122
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7365223767887216,
+    "camera_matrix": [
+      [
+        2608.3274876892237,
+        0.0,
+        2799.0639299338345
+      ],
+      [
+        0.0,
+        2606.7544396465637,
+        2074.623293819792
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3651617099367879,
+      0.056516294909610305,
+      0.15944345339535757,
+      -0.004799971528907224
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

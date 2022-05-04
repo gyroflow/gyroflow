@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session_Wide_EIS-On_1080p_4by3_1920x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "a2c",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Wide",
+  "camera_setting": "EIS-On",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5261165355172247,
+    "camera_matrix": [
+      [
+        928.7890761667952,
+        0.0,
+        957.7175188747326
+      ],
+      [
+        0.0,
+        927.2797580999768,
+        724.6076406998059
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13619485288272096,
+      -0.12504558205715868,
+      0.11623379541899144,
+      -0.05150502237942909
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7sIII_Zeiss @16mm 16.00mm-35__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Peter Michael",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Zeiss @16mm 16.00mm-35",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.43051787154040055,
+    "camera_matrix": [
+      [
+        1805.275111244654,
+        0.0,
+        1922.329889434244
+      ],
+      [
+        0.0,
+        1804.3105068290092,
+        1078.4071400159096
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22802039930551857,
+      0.2418132626014139,
+      -0.13590548167776878,
+      0.17691642698217577
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-11",
+  "compatible_settings": []
+}

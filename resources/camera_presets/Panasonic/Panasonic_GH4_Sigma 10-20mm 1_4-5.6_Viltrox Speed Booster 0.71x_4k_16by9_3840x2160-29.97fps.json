@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Sigma 10-20mm 1:4-5.6_Viltrox Speed Booster 0.71x_4k_16by9_3840x2160-29.97fps",
+  "note": "Viltrox Speed Booster 0.71x",
+  "calibrated_by": "RadavFPV",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Sigma 10-20mm 1:4-5.6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6217343858814769,
+    "camera_matrix": [
+      [
+        1985.137053316885,
+        0.0,
+        1855.1617209403912
+      ],
+      [
+        0.0,
+        1983.838465273393,
+        1070.2252062159512
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2605502409636095,
+      0.32336066996933105,
+      -0.15819512859293883,
+      0.047611187104045744
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-17",
+  "compatible_settings": []
+}

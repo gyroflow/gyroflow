@@ -1,0 +1,62 @@
+{
+  "name": "DJI_Action 2___C4k_4by3_4096x3072-59.94fps",
+  "note": "",
+  "calibrated_by": "B-nutzer",
+  "camera_brand": "DJI",
+  "camera_model": "Action 2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 59.94,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5219153780694874,
+    "camera_matrix": [
+      [
+        1171.1585506794938,
+        0.0,
+        2051.133559999734
+      ],
+      [
+        0.0,
+        1170.9519887617892,
+        1522.336575721495
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.416033908765952,
+      -0.11589103841070694,
+      0.09591524090675016,
+      -0.038131809112390266
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": []
+  },
+  "identifier": "",
+  "calibrator_version": "0.4.0",
+  "date": "2022-01-03"
+}

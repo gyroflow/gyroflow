@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS RP_RF 16mm 2.8__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Przemysław Kuciński",
+  "camera_brand": "Canon",
+  "camera_model": "EOS RP",
+  "lens_model": "RF 16mm 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3895585021409464,
+    "camera_matrix": [
+      [
+        903.0515880939628,
+        0.0,
+        954.7395519588116
+      ],
+      [
+        0.0,
+        902.7891742748748,
+        538.4911878932987
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3598857680057835,
+      -0.02518763186608229,
+      0.4056222718601655,
+      -0.21556358806805745
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-27",
+  "compatible_settings": []
+}

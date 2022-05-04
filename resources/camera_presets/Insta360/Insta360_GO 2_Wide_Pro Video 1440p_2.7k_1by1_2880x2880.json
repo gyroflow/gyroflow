@@ -1,0 +1,46 @@
+{
+  "name": "Insta360_GO 2_Wide_Pro Video 1440p_2.7k_1by1_2880x2880-0.00fps",
+  "note": "Pro Video enabled",
+  "calibrated_by": "KonradIT",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Wide",
+  "camera_setting": "Pro Video 1440p",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-10",
+  "official": true,
+  "calib_dimension": {
+    "w": 2880,
+    "h": 2880
+  },
+  "num_images": 45,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5196054582089392,
+    "camera_matrix": [
+      [
+        1322.0517823343905,
+        0.0,
+        1440.0
+      ],
+      [
+        0.0,
+        1321.4289664135683,
+        1440.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.031894763747395895,
+      -0.0922337536981906,
+      0.2044857658323481,
+      -0.18697176327704057
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

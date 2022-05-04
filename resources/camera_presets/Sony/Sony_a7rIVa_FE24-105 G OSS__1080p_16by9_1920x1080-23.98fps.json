@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7rIVa_FE24-105 G OSS__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "王佳晖",
+  "camera_brand": "Sony",
+  "camera_model": "a7rIVa",
+  "lens_model": "FE24-105 G OSS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.585010135592884,
+    "camera_matrix": [
+      [
+        1364.0242380565246,
+        0.0,
+        960.3396523435214
+      ],
+      [
+        0.0,
+        1361.9831617622613,
+        564.7207076200112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3758355861426336,
+      0.8425497055907112,
+      -2.4520504306957753,
+      3.3206077795704965
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

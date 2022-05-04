@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS C200_CinemaLens 14mm__C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Sebastian Schieren",
+  "camera_brand": "Canon",
+  "camera_model": "EOS C200",
+  "lens_model": "CinemaLens 14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 24,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7941972209213701,
+    "camera_matrix": [
+      [
+        2228.739207600154,
+        0.0,
+        2039.9808648759351
+      ],
+      [
+        0.0,
+        2229.2236835148806,
+        1076.688576854464
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29875577947793086,
+      0.1507912360162287,
+      0.017583008791563236,
+      0.0011921616127984068
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-23",
+  "compatible_settings": []
+}

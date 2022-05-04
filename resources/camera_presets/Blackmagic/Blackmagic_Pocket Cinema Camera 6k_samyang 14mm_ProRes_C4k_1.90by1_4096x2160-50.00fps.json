@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_samyang 14mm_ProRes_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "50p",
+  "calibrated_by": "Camille Audibert",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "samyang 14mm",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 9,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8838608930867144,
+    "camera_matrix": [
+      [
+        2703.0111342503274,
+        0.0,
+        2128.1447378599905
+      ],
+      [
+        0.0,
+        2681.684202588262,
+        1086.6750344402258
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1956776964490594,
+      0.06969710157968544,
+      0.19022805780272545,
+      -0.1840311337123479
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-26",
+  "compatible_settings": []
+}

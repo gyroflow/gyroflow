@@ -1,0 +1,66 @@
+{
+  "name": "RED_V-Raptor_12mm__8k_1.90by1_8192x4320-23.98fps",
+  "note": "",
+  "calibrated_by": "Flow Motion Aerials",
+  "camera_brand": "RED",
+  "camera_model": "V-Raptor",
+  "lens_model": "12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 21,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 4.459371503509718,
+    "camera_matrix": [
+      [
+        2584.2713441518445,
+        0.0,
+        4091.424103551793
+      ],
+      [
+        0.0,
+        2583.263483789884,
+        2172.4078166698446
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31301974575270536,
+      0.20816383092668028,
+      -0.0979806535089192,
+      0.10826591161453718
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

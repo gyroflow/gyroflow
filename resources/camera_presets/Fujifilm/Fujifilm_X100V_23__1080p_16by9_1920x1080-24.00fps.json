@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X100V_23__1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Justice",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X100V",
+  "lens_model": "23",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3632852950927354,
+    "camera_matrix": [
+      [
+        1964.1418177797584,
+        0.0,
+        952.269402437437
+      ],
+      [
+        0.0,
+        1964.7258455852989,
+        535.3802280048949
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26723841763894135,
+      0.52250385830697,
+      -2.225596384084399,
+      6.843027144785001
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

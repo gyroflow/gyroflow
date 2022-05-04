@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 2000D_Default_Video_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "BenoVidla",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 2000D",
+  "lens_model": "Default",
+  "camera_setting": "Video",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4679523549741544,
+    "camera_matrix": [
+      [
+        1564.358640811054,
+        0.0,
+        953.3083726008404
+      ],
+      [
+        0.0,
+        1564.9723828492376,
+        541.9841692559336
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17574261775473468,
+      -0.286320826551512,
+      2.6506927486369576,
+      -4.906128662706446
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

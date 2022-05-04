@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E1_Olympus 14-42mm 1:3.5-5.6 EZ__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Wang, Dino",
+  "camera_brand": "Z CAM",
+  "camera_model": "E1",
+  "lens_model": "Olympus 14-42mm 1:3.5-5.6 EZ",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.6954973119804353,
+    "camera_matrix": [
+      [
+        3823.0730963540022,
+        0.0,
+        1970.8911010522572
+      ],
+      [
+        0.0,
+        3828.151947688907,
+        1092.1656059929278
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12592590919040367,
+      -0.33166298364033797,
+      2.6989258877817823,
+      -5.465265792334655
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

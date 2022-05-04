@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly X Lite_Ultra Wide__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "XRISTOS malitoudis",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3291429285795226,
+    "camera_matrix": [
+      [
+        951.9892529239723,
+        0.0,
+        945.1673074911612
+      ],
+      [
+        0.0,
+        721.6348019502179,
+        501.4272686887005
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.005699382699330823,
+      -0.08435556515288857,
+      0.135352753438178,
+      -0.07810400681630139
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

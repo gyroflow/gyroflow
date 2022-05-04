@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M6II_32MM__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "唐浩钏",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M6II",
+  "lens_model": "32MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3990105115772544,
+    "camera_matrix": [
+      [
+        2962.884485417624,
+        0.0,
+        965.9515757261596
+      ],
+      [
+        0.0,
+        2976.832680376974,
+        546.0795131246043
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34631118600307303,
+      -2.6881845598077145,
+      38.41729845469806,
+      -185.04204835877704
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-28",
+  "compatible_settings": []
+}

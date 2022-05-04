@@ -1,0 +1,50 @@
+{
+  "name": "Caddx_Polar___720p_16by9_1280x720-0.00fps",
+  "note": "",
+  "calibrated_by": "_tomstoms_",
+  "camera_brand": "Caddx",
+  "camera_model": "Polar",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-11-19",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 20,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2139524886351671,
+    "camera_matrix": [
+      [
+        586.9004910359282,
+        0.0,
+        640.0
+      ],
+      [
+        0.0,
+        586.7961810020709,
+        360.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02813892360233421,
+      -0.007652863259087972,
+      0.0044309566533658525,
+      -0.0023676518822343465
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

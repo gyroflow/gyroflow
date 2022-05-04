@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_Tamron28-75/2.8Di III_28mm_1080p_16by9_1920x1080-59.94fps",
+  "note": "28mm",
+  "calibrated_by": "坂本孝一郎",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Tamron28-75/2.8Di III",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4171213143854074,
+    "camera_matrix": [
+      [
+        1556.830376707799,
+        0.0,
+        962.4526693456788
+      ],
+      [
+        0.0,
+        1539.1674818177478,
+        545.5752905442592
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2230757381308266,
+      0.025472964023950277,
+      0.9531516357456894,
+      -1.497875910172448
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Sony_a7rII_Laowa 9mm f4.5_24 fps_4k_16by9_3840x2160-0.00fps",
+  "note": "Test Calibration-1",
+  "calibrated_by": "WPF",
+  "camera_brand": "Sony",
+  "camera_model": "a7rII",
+  "lens_model": "Laowa 9mm f4.5",
+  "camera_setting": "24 fps",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-04",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 9,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.814202794209221,
+    "camera_matrix": [
+      [
+        1512.42809671726,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1511.0967194150016,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2925032279743776,
+      0.12208083479511037,
+      0.11020599708293433,
+      -0.0449827421626115
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

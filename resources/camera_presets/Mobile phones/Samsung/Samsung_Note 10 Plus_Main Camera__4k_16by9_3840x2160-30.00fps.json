@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Note 10 Plus_Main Camera__4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Jackmin",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 10 Plus",
+  "lens_model": "Main Camera",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.004351,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.3201769690622291,
+    "camera_matrix": [
+      [
+        3504.1825295428275,
+        0.0,
+        1852.0869499432708
+      ],
+      [
+        0.0,
+        3507.8441153084727,
+        1024.852553061271
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7163462327758393,
+      -2.0593081574976253,
+      5.5025656922278205,
+      -4.978297491177472
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-03",
+  "compatible_settings": []
+}

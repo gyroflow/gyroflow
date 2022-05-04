@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Galaxy S10e___1080p_16by9_1920x1080-29.88fps",
+  "note": "",
+  "calibrated_by": "Stephen Pilcher",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S10e",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.877237,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.591103955752785,
+    "camera_matrix": [
+      [
+        1921.2731897863173,
+        0.0,
+        950.5387144806896
+      ],
+      [
+        0.0,
+        1920.9530125583733,
+        554.0246708020312
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7669540795007853,
+      -2.326538086435448,
+      0.6057635941484453,
+      19.20502088615307
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-27",
+  "compatible_settings": []
+}

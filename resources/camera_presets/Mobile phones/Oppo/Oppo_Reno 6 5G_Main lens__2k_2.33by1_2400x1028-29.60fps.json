@@ -1,0 +1,66 @@
+{
+  "name": "Oppo_Reno 6 5G_Main lens__2k_2.33by1_2400x1028-29.60fps",
+  "note": "",
+  "calibrated_by": "Principale",
+  "camera_brand": "Oppo",
+  "camera_model": "Reno 6 5G",
+  "lens_model": "Main lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2400,
+    "h": 1028
+  },
+  "orig_dimension": {
+    "w": 2400,
+    "h": 1028
+  },
+  "output_dimension": {
+    "w": 2400,
+    "h": 1028
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.600746,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.41112822025789425,
+    "camera_matrix": [
+      [
+        1786.4005561699958,
+        0.0,
+        1223.8861835093355
+      ],
+      [
+        0.0,
+        1785.422691318715,
+        507.1066008849379
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28026990667018004,
+      0.9141741181326248,
+      -2.012170506913621,
+      1.037215700366842
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_Samyang 12mm f/2.0_12mm_4k_16by9_3840x2160-23.98fps",
+  "note": "12mm",
+  "calibrated_by": "Carlo Emmanuel Zambrano Boldo",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "Samyang 12mm f/2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6566648439094197,
+    "camera_matrix": [
+      [
+        2073.2551590516177,
+        0.0,
+        1902.4816606036063
+      ],
+      [
+        0.0,
+        2075.8817478414976,
+        1080.0230952734628
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30731814071601604,
+      0.0620125772506624,
+      0.13013316033631922,
+      -0.03161880855225421
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-28",
+  "compatible_settings": []
+}

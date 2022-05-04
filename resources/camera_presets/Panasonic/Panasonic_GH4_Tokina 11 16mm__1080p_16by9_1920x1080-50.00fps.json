@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Tokina 11 16mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "deus max",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Tokina 11 16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6373819361415208,
+    "camera_matrix": [
+      [
+        1230.6143022541733,
+        0.0,
+        951.674732535418
+      ],
+      [
+        0.0,
+        1313.8413198752128,
+        541.949276275058
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3762549258561258,
+      -0.2594844855495394,
+      1.3061301743492468,
+      -1.6037985565710384
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

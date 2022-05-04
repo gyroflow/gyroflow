@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_Sony 18-135mm__1080p_16by9_1920x1080-119.88fps",
+  "note": "",
+  "calibrated_by": "levi dixon",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Sony 18-135mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5846296867716871,
+    "camera_matrix": [
+      [
+        1679.4309265256486,
+        0.0,
+        959.0419802182298
+      ],
+      [
+        0.0,
+        1679.1632440934764,
+        551.8343249252515
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3342229159123865,
+      -0.07326653783399883,
+      1.4369478710125572,
+      -2.4797071989849147
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-26",
+  "compatible_settings": []
+}

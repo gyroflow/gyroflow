@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 7 Plus_28mm F/1.8__1080p_16by9_1920x1080-59.96fps",
+  "note": "",
+  "calibrated_by": "pixxelpusher",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 7 Plus",
+  "lens_model": "28mm F/1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.963158,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4023141515921131,
+    "camera_matrix": [
+      [
+        1858.065610952844,
+        0.0,
+        951.4488647028512
+      ],
+      [
+        0.0,
+        1857.6701435121852,
+        528.2136345428269
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.659202172044246,
+      -2.3057295192948795,
+      9.063983943724104,
+      -15.14443631608273
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

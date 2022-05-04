@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_Canon 24-105 F4 L_24mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "Viltrox EF-M2 adaptor",
+  "calibrated_by": "Graeme Stonebank",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Canon 24-105 F4 L",
+  "camera_setting": "24mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3408940976807027,
+    "camera_matrix": [
+      [
+        1956.2557984919777,
+        0.0,
+        959.8462781877918
+      ],
+      [
+        0.0,
+        1955.2966457061495,
+        545.3844088099427
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.139050168898361,
+      0.4828683140541411,
+      -1.750821322345867,
+      3.600155633402105
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-03",
+  "compatible_settings": []
+}

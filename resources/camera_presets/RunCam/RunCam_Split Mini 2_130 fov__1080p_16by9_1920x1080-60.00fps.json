@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_Split Mini 2_130 fov__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "putimir",
+  "camera_brand": "RunCam",
+  "camera_model": "Split Mini 2",
+  "lens_model": "130 fov",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3207174564030443,
+    "camera_matrix": [
+      [
+        823.039495746112,
+        0.0,
+        957.4385671976306
+      ],
+      [
+        0.0,
+        822.8009052483718,
+        496.3134885043078
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.01792101190639718,
+      -0.007049520420897377,
+      0.007734838511920608,
+      -0.0068988201602722945
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

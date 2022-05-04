@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7II_Sony FE 1.8/50__720p_4by3_1440x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Jase",
+  "camera_brand": "Sony",
+  "camera_model": "a7II",
+  "lens_model": "Sony FE 1.8/50",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9230936421432684,
+    "camera_matrix": [
+      [
+        -2256.405477448208,
+        -0.0,
+        720.0456426001912
+      ],
+      [
+        0.0,
+        -3009.2627848050315,
+        568.8186769808581
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5207632791642769,
+      -11.740960978113923,
+      227.87396535699608,
+      -1563.443211873565
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

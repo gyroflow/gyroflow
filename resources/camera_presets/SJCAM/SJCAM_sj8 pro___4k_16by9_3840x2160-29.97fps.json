@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_sj8 pro___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "thepaulius ltu",
+  "camera_brand": "SJCAM",
+  "camera_model": "sj8 pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5698901805435492,
+    "camera_matrix": [
+      [
+        2392.848067431774,
+        0.0,
+        1953.3670093747112
+      ],
+      [
+        0.0,
+        2390.520371163122,
+        1089.1686873733877
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03657292668281324,
+      0.16325051731476775,
+      -0.6410213763808948,
+      0.7930536822028303
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_Samyang 12mm 2.0__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "diego aguilar",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Samyang 12mm 2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3394743335146705,
+    "camera_matrix": [
+      [
+        1030.6579925420392,
+        0.0,
+        963.3238614168056
+      ],
+      [
+        0.0,
+        1030.3462530677098,
+        547.7024703808877
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33291257684515235,
+      -0.1142041421162775,
+      0.9865697379196664,
+      -1.240087558441573
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

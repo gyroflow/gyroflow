@@ -1,0 +1,50 @@
+{
+  "name": "Xiaomi_Mi 10 Wide Camera_Wide lens_This is only for the wind Camera_4k_16by9_3840x2160-0.00fps",
+  "note": "This is only for the wind Camera",
+  "calibrated_by": "LegoRJ35",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10 Wide Camera",
+  "lens_model": "Wide lens",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2022-01-01",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 4,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.104179172386087,
+    "camera_matrix": [
+      [
+        1736.263796615276,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1735.890886983565,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28901212102633944,
+      0.4027282536756182,
+      -0.3040104907533797,
+      -0.07605016265113099
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

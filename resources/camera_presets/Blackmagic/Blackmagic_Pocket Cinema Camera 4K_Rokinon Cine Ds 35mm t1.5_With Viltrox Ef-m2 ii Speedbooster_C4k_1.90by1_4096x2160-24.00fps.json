@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_Rokinon Cine Ds 35mm t/1.5_With Viltrox Ef-m2 ii Speedbooster_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "With Viltrox Ef-m2 ii Speedbooster",
+  "calibrated_by": "Thomas Boland",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "Rokinon Cine Ds 35mm t/1.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.704237203553881,
+    "camera_matrix": [
+      [
+        5840.896362333446,
+        0.0,
+        2002.729584044875
+      ],
+      [
+        0.0,
+        5846.621424579704,
+        1122.1671426524958
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12905696439060926,
+      1.333488145687346,
+      -15.0483639492346,
+      71.36144104790034
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

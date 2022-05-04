@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Rokinon Cine 35mm_ProRes HQ_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Andres Umpierrez",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Rokinon Cine 35mm",
+  "camera_setting": "ProRes HQ",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 3,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7702828294551138,
+    "camera_matrix": [
+      [
+        8786.428034337116,
+        0.0,
+        2173.716055752611
+      ],
+      [
+        0.0,
+        8776.555480908004,
+        1019.7124996882548
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.202800171825518,
+      2.4703151283637506,
+      -69.79753017986462,
+      629.8896750901247
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

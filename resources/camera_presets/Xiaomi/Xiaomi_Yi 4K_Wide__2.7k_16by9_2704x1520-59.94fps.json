@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi 4K_Wide__2.7k_16by9_2704x1520-59.94fps",
+  "note": "",
+  "calibrated_by": "Live is FPV",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi 4K",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5637416045177834,
+    "camera_matrix": [
+      [
+        1210.208507364094,
+        0.0,
+        1372.4215961602029
+      ],
+      [
+        0.0,
+        1207.321314803954,
+        760.5630699214826
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08301684681731952,
+      0.048869053378225745,
+      -0.08411294034831053,
+      0.029442940007185187
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

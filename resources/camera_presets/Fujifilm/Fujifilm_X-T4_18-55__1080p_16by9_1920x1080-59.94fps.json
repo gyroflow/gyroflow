@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T4_18-55__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "wanghai",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "18-55",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.21645300758050265,
+    "camera_matrix": [
+      [
+        1499.5346718339197,
+        0.0,
+        956.3070825998218
+      ],
+      [
+        0.0,
+        1498.5454333895757,
+        537.4389729149644
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2130240489579968,
+      0.9005654733634563,
+      -2.7877319037032393,
+      3.7844941543541455
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

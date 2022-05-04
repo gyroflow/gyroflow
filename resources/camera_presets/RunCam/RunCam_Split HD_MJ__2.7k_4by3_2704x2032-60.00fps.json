@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_Split HD_MJ__2.7k_4by3_2704x2032-60.00fps",
+  "note": "",
+  "calibrated_by": "Morgan",
+  "camera_brand": "RunCam",
+  "camera_model": "Split HD",
+  "lens_model": "MJ",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 11,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.022124298495357,
+    "camera_matrix": [
+      [
+        1151.3791867865946,
+        0.0,
+        1298.7781411884391
+      ],
+      [
+        0.0,
+        1153.8206499022413,
+        1036.3294670214775
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13482737627389849,
+      0.07190591194004499,
+      -0.11933863370985466,
+      0.04562356765949816
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-01",
+  "compatible_settings": []
+}

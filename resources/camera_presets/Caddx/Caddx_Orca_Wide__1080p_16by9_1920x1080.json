@@ -1,0 +1,46 @@
+{
+  "name": "Caddx_Orca_Wide__1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "Anonymous",
+  "camera_brand": "Caddx",
+  "camera_model": "Orca",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-04-03",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 15,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.32922261475141124,
+    "camera_matrix": [
+      [
+        947.0296570639866,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        947.2623575364304,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03313853985755125,
+      -0.0008845155361756942,
+      0.0016604346088183544,
+      -0.002998504382257261
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

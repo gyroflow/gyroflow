@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_Hero3___2.7k_1.88by1_2704x1440-23.98fps",
+  "note": "",
+  "calibrated_by": "Владислав Киселёв",
+  "camera_brand": "GoPro",
+  "camera_model": "Hero3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.861049895935029,
+    "camera_matrix": [
+      [
+        1131.3620072930366,
+        0.0,
+        1279.0132113977384
+      ],
+      [
+        0.0,
+        1132.9552652969692,
+        705.8371739204537
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.008390717691043034,
+      0.12446624217624122,
+      -0.1038081129191855,
+      0.04722115495627953
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-01",
+  "compatible_settings": []
+}

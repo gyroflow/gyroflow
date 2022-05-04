@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange_NO FILTER_P60 non-stabilized_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "e",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "NO FILTER",
+  "camera_setting": "P60 non-stabilized",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3036607384288364,
+    "camera_matrix": [
+      [
+        1055.5609646066098,
+        0.0,
+        1007.810631782518
+      ],
+      [
+        0.0,
+        1058.206756617315,
+        502.1260225728692
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03943810960550504,
+      -0.014624312672935118,
+      0.010110351145660878,
+      -0.00013719941757814587
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-22",
+  "compatible_settings": []
+}

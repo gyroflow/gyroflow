@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-S6_TTArtisan 7.5mm_6K_5k_16by9_5760x3240-47.95fps",
+  "note": "",
+  "calibrated_by": "niks",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "TTArtisan 7.5mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": 27.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 47.952049,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6290016093984546,
+    "camera_matrix": [
+      [
+        2588.835215679755,
+        0.0,
+        2871.5894187753106
+      ],
+      [
+        0.0,
+        2587.6523705798595,
+        1605.2029023813243
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0007626717306943857,
+      -0.013709259571581794,
+      0.018648519089549207,
+      -0.011227873355300972
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

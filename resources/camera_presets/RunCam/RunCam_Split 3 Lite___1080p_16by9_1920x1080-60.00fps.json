@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_Split 3 Lite___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Claudio Timotius(ATID)",
+  "camera_brand": "RunCam",
+  "camera_model": "Split 3 Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.41490483877720297,
+    "camera_matrix": [
+      [
+        802.2135271049599,
+        0.0,
+        941.3921890051084
+      ],
+      [
+        0.0,
+        805.564692220112,
+        530.7007841168798
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04160727890151156,
+      0.05061142624878145,
+      -0.013506174751508436,
+      -0.003169125278054904
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-23",
+  "compatible_settings": []
+}

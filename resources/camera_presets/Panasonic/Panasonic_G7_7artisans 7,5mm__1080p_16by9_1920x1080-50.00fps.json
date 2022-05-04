@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_G7_7artisans 7,5mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "TanguyFPV",
+  "camera_brand": "Panasonic",
+  "camera_model": "G7",
+  "lens_model": "7artisans 7,5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6801978438828726,
+    "camera_matrix": [
+      [
+        913.2084088102678,
+        0.0,
+        958.4181213515084
+      ],
+      [
+        0.0,
+        912.2385215189976,
+        533.5077658733737
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.031009030382782635,
+      0.053486293595523225,
+      -0.05298984306298028,
+      0.02039434196071324
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-14",
+  "compatible_settings": []
+}

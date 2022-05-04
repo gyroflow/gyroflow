@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Wide 98_NO-EIS_5k_16by9_5312x2988-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "GANSOR-PC",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Wide 98",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1512010083109834,
+    "camera_matrix": [
+      [
+        2210.283478384999,
+        0.0,
+        2716.152510685687
+      ],
+      [
+        0.0,
+        2210.0257346850894,
+        1541.6004091922978
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05331100735512888,
+      0.021057365347431585,
+      -0.04431394311928764,
+      0.0294817044324212
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-wide98-5312x2988@29970-no-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-09",
+  "compatible_settings": []
+}

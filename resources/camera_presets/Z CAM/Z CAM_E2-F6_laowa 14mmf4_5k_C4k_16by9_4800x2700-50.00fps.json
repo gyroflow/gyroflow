@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_laowa 14mmf4_5k_C4k_16by9_4800x2700-50.00fps",
+  "note": "",
+  "calibrated_by": "老文",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "laowa 14mmf4",
+  "camera_setting": "5k",
+  "calib_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5481740081362863,
+    "camera_matrix": [
+      [
+        2295.3713033024355,
+        0.0,
+        2358.883841685498
+      ],
+      [
+        0.0,
+        2295.317582243556,
+        1305.2233590988153
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32655982218099544,
+      0.13165801020515672,
+      0.03717321328008141,
+      0.03424228444538044
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

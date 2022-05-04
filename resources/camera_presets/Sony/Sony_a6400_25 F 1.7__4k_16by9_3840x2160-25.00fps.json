@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_卫斯理25 F 1.7__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "LAOMAJUHAOQI",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "卫斯理25 F 1.7",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.892266221265375,
+    "camera_matrix": [
+      [
+        4380.811266951106,
+        0.0,
+        1919.6236057020735
+      ],
+      [
+        0.0,
+        4381.395038406445,
+        1076.4889679927944
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18452178260185945,
+      1.234067999535348,
+      -9.978438292260488,
+      37.41608981510166
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-28",
+  "compatible_settings": []
+}

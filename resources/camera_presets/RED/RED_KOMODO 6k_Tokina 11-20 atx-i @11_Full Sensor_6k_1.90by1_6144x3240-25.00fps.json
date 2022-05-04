@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO 6k_Tokina 11-20 atx-i @11_Full Sensor_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Florian Koch",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6k",
+  "lens_model": "Tokina 11-20 atx-i @11",
+  "camera_setting": "Full Sensor",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4652156592506503,
+    "camera_matrix": [
+      [
+        2569.5902393716874,
+        0.0,
+        3061.5130751199295
+      ],
+      [
+        0.0,
+        2569.8494263093185,
+        1626.8147405652487
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33823956641793645,
+      0.06031703979956438,
+      -0.024795799469837856,
+      0.03378315765732521
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-05",
+  "compatible_settings": []
+}

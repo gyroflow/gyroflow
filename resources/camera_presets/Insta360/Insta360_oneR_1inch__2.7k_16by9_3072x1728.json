@@ -1,0 +1,51 @@
+{
+  "name": "Insta360_oneR_1inch__2.7k_16by9_3072x1728-0.00fps",
+  "note": "",
+  "calibrated_by": "Dronotron",
+  "camera_brand": "Insta360",
+  "camera_model": "oneR",
+  "lens_model": "1inch",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-10-28",
+  "official": true,
+  "calib_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "orig_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 11,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.48225869736507265,
+    "camera_matrix": [
+      [
+        1302.6787182629153,
+        0.0,
+        1536.0
+      ],
+      [
+        0.0,
+        1302.396783799285,
+        864.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04774116682154847,
+      -0.00463083740829996,
+      0.0040870363097360715,
+      -0.00035267566520924966
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

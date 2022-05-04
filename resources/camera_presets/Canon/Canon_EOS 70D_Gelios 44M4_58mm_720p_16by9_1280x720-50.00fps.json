@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 70D_Gelios 44M4_58mm_720p_16by9_1280x720-50.00fps",
+  "note": "58mm",
+  "calibrated_by": "devamorph",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 70D",
+  "lens_model": "Gelios 44M4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 42,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7014716010556149,
+    "camera_matrix": [
+      [
+        3483.3799042537225,
+        0.0,
+        647.1279844865402
+      ],
+      [
+        0.0,
+        3483.6986487951785,
+        345.1404776826201
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1903867331874955,
+      26.699600744305904,
+      -1247.7246753239274,
+      19985.807743245
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-19",
+  "compatible_settings": []
+}

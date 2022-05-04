@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Orca 4K_M12 7G__4k_16by9_3840x2160-24.98fps",
+  "note": "",
+  "calibrated_by": "Maciej Grzeszczak",
+  "camera_brand": "Caddx",
+  "camera_model": "Orca 4K",
+  "lens_model": "M12 7G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.978392,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6729162456025558,
+    "camera_matrix": [
+      [
+        1812.2043661812309,
+        0.0,
+        1947.516424355128
+      ],
+      [
+        0.0,
+        1808.6232841823833,
+        1019.7956909388392
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.005993080522646025,
+      0.016029030047257847,
+      -0.04589833865434766,
+      0.02512250608586212
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-09",
+  "compatible_settings": []
+}

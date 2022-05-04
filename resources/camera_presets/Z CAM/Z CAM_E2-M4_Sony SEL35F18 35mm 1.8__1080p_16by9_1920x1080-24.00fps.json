@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Sony SEL35F18 35mm 1.8__1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "V V",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Sony SEL35F18 35mm 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.33447458506238925,
+    "camera_matrix": [
+      [
+        3892.1523060447535,
+        0.0,
+        958.8597696605352
+      ],
+      [
+        0.0,
+        3891.65169527577,
+        515.5250804521055
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6116796283714735,
+      -9.841008748698854,
+      249.44328480659507,
+      -2595.9812662826303
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Xiaomi_Yi Action_120__720p_4by3_1600x1200-0.00fps",
+  "note": "",
+  "calibrated_by": "Aloysius Puspandono",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi Action",
+  "lens_model": "120",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-12",
+  "official": true,
+  "calib_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "num_images": 25,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1282800787331511,
+    "camera_matrix": [
+      [
+        690.1608208181242,
+        0.0,
+        800.0
+      ],
+      [
+        0.0,
+        690.2596728967751,
+        600.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09280937859556283,
+      0.007650566380684668,
+      -0.03153341730035468,
+      0.014543569200985065
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

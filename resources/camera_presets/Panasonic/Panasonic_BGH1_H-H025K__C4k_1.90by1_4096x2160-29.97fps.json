@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH1_H-H025K__C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "David Manouchehri",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "H-H025K",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5237186520519235,
+    "camera_matrix": [
+      [
+        5647.679695459623,
+        0.0,
+        2168.4737627226336
+      ],
+      [
+        0.0,
+        5646.9528064926235,
+        1062.1691474094478
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2475829284429752,
+      2.332482107229514,
+      -123.78870833303864,
+      1219.6903964511846
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

@@ -1,0 +1,51 @@
+{
+  "name": "Insta360_SMO 4K___4k_4by3_4000x3000-0.00fps",
+  "note": "",
+  "calibrated_by": "Anonymous",
+  "camera_brand": "Insta360",
+  "camera_model": "SMO 4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-09-17",
+  "official": true,
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 31,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.465571653808031,
+    "camera_matrix": [
+      [
+        1935.1411770329191,
+        0.0,
+        2000.0
+      ],
+      [
+        0.0,
+        1935.6414346930276,
+        1500.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0005472043771624934,
+      0.0007751439182960538,
+      0.001049930496425751,
+      -0.0030050370918298193
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

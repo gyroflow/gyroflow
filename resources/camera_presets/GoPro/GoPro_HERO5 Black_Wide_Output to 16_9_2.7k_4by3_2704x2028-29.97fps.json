@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Black_Wide_Output to 16:9_2.7k_4by3_2704x2028-29.97fps",
+  "note": "Output to 16:9",
+  "calibrated_by": "Henning Schulze Eißing",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4832648014016879,
+    "camera_matrix": [
+      [
+        1187.455810532374,
+        0.0,
+        1364.5454577163357
+      ],
+      [
+        0.0,
+        1189.6793112487812,
+        1011.3072940731672
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04816531500685182,
+      0.027950799382793667,
+      -0.026381853413287543,
+      0.009689546613674035
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

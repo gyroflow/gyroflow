@@ -1,0 +1,66 @@
+{
+  "name": "Matecam_4K___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Ezio Costantino",
+  "camera_brand": "Matecam",
+  "camera_model": "4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5778861950264851,
+    "camera_matrix": [
+      [
+        1288.4060032427444,
+        0.0,
+        968.3548036099148
+      ],
+      [
+        0.0,
+        1293.0809118304237,
+        626.7012244859435
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22374789268440387,
+      -0.3653070184885065,
+      -0.2264840118534234,
+      1.6688173932979045
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_Tamron17-70 2.8 35mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Administrator",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Tamron17-70 2.8 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.48582108417432257,
+    "camera_matrix": [
+      [
+        2808.2666945569867,
+        0.0,
+        966.417549991547
+      ],
+      [
+        0.0,
+        2809.3752216771927,
+        538.6678634615182
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5213434803527947,
+      -2.5902762610220287,
+      85.94379618990382,
+      -781.5135619661896
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-19",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Linear 64_EIS_2.7k_16by9_2752x1530-50.00fps",
+  "note": "EIS",
+  "calibrated_by": "Darren Varney",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Linear 64",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2752,
+    "h": 1530
+  },
+  "orig_dimension": {
+    "w": 2752,
+    "h": 1530
+  },
+  "output_dimension": {
+    "w": 2752,
+    "h": 1530
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4513871997057484,
+    "camera_matrix": [
+      [
+        1755.4539435969089,
+        0.0,
+        1362.5548485692393
+      ],
+      [
+        0.0,
+        1754.038463085851,
+        762.0721040875434
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3258797705591678,
+      0.16775920896500365,
+      -0.06580564746152574,
+      0.32000130261031356
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-linear64-2752x1530@50000-eis",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-18",
+  "compatible_settings": []
+}

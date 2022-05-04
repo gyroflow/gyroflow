@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_D3100_NIKKOR 18mm__720p_16by9_1280x720-25.00fps",
+  "note": "",
+  "calibrated_by": "julien Rives",
+  "camera_brand": "Nikon",
+  "camera_model": "D3100",
+  "lens_model": "NIKKOR 18mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4903537729939011,
+    "camera_matrix": [
+      [
+        990.6700379349088,
+        0.0,
+        648.8565088510727
+      ],
+      [
+        0.0,
+        989.844359685332,
+        371.00025571733704
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17262426343573253,
+      0.053654780691244255,
+      0.4616750208075486,
+      -0.4741332732124512
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-23",
+  "compatible_settings": []
+}

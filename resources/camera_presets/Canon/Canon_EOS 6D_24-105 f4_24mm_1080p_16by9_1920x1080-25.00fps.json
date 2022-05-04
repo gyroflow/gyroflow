@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 6D_24-105 f/4_24mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "24mm",
+  "calibrated_by": "Niccolò Beretti",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6D",
+  "lens_model": "24-105 f/4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5424478543797836,
+    "camera_matrix": [
+      [
+        1270.3492676471883,
+        0.0,
+        959.6856636178582
+      ],
+      [
+        0.0,
+        1270.810360819998,
+        551.6700510002933
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1771919422116921,
+      0.16823194137641587,
+      -0.18915967111281337,
+      0.26137541437445705
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": []
+}

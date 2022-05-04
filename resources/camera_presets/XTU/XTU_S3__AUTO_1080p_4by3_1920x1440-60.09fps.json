@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S3__AUTO_1080p_4by3_1920x1440-60.09fps",
+  "note": "1920x1440",
+  "calibrated_by": "Igor Rand",
+  "camera_brand": "XTU",
+  "camera_model": "S3",
+  "lens_model": "",
+  "camera_setting": "AUTO",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.090168,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.7091132565094052,
+    "camera_matrix": [
+      [
+        1286.0846941255622,
+        0.0,
+        961.4861950836848
+      ],
+      [
+        0.0,
+        1276.9598466826071,
+        665.614272638975
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.49172502383454647,
+      0.3456841294727334,
+      0.10946786109947632,
+      -0.042220303666815395
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

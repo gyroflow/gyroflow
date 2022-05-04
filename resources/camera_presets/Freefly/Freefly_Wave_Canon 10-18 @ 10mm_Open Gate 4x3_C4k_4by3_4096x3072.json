@@ -1,0 +1,46 @@
+{
+  "name": "Freefly_Wave_Canon 10-18 @ 10mm_Open Gate 4x3_C4k_4by3_4096x3072-0.00fps",
+  "note": "",
+  "calibrated_by": "Flow Motion Aerials",
+  "camera_brand": "Freefly",
+  "camera_model": "Wave",
+  "lens_model": "Canon 10-18 @ 10mm",
+  "camera_setting": "Open Gate 4x3",
+  "calibrator_version": "0.2.2-alpha",
+  "date": "2021-05-09",
+  "official": true,
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "num_images": 25,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.42691876666908696,
+    "camera_matrix": [
+      [
+        1875.5074746198,
+        0.0,
+        2048.0
+      ],
+      [
+        0.0,
+        1875.5697919390848,
+        1536.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32680155141135553,
+      0.13040311946982702,
+      -0.010012640890541083,
+      0.0080121841605632
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,51 @@
+{
+  "name": "RunCam_Split HD__60 fps_2.7k_4by3_2720x2040-0.00fps",
+  "note": "",
+  "calibrated_by": "Elvin",
+  "camera_brand": "RunCam",
+  "camera_model": "Split HD",
+  "lens_model": "",
+  "camera_setting": "60 fps",
+  "calibrator_version": "0.3.0-beta-dev",
+  "date": "2021-11-14",
+  "official": true,
+  "calib_dimension": {
+    "w": 2720,
+    "h": 2040
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 2040
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 33,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.7399471642143232,
+    "camera_matrix": [
+      [
+        1152.0453651546122,
+        0.0,
+        1360.0
+      ],
+      [
+        0.0,
+        1154.9066947731926,
+        1020.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1337385467529183,
+      0.08676793606327092,
+      -0.16379375468329577,
+      0.07100956056195049
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

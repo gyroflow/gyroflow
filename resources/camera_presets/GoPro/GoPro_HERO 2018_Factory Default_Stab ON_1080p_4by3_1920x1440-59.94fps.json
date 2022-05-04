@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO 2018_Factory Default_Stab ON_1080p_4by3_1920x1440-59.94fps",
+  "note": "1440x1920",
+  "calibrated_by": "Ethan M",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO 2018",
+  "lens_model": "Factory Default",
+  "camera_setting": "Stab ON",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6403066968374795,
+    "camera_matrix": [
+      [
+        951.1423704465224,
+        0.0,
+        983.5378180315404
+      ],
+      [
+        0.0,
+        951.1708417009798,
+        718.1854217451838
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0350078823370189,
+      0.04198849959123068,
+      -0.036812031744655915,
+      0.01201222857756712
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-12",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T/X-S_Carl Zeiss Jena 50mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "David Hoult",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T/X-S",
+  "lens_model": "Carl Zeiss Jena 50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6192395226363465,
+    "camera_matrix": [
+      [
+        8902.889452157182,
+        0.0,
+        1860.7957132991753
+      ],
+      [
+        0.0,
+        8905.19274514963,
+        1019.3566458001404
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29309338118364786,
+      5.4224231851359885,
+      -112.96870596907874,
+      2.6975913814642256
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

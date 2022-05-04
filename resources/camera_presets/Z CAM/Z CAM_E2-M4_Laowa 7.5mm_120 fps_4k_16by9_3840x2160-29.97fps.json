@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5mm_120 fps_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Martin Novak",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "120 fps",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.381465331145875,
+    "camera_matrix": [
+      [
+        1670.5621799218009,
+        0.0,
+        1920.6704537412431
+      ],
+      [
+        0.0,
+        1669.3271438396455,
+        1070.8348963531275
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3226488385630648,
+      0.1196590100000821,
+      -0.052169014784618224,
+      0.10413090921963032
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-09",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_LAOWA 11mm_OPEN GATE ProRes_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "17x9",
+  "calibrated_by": "Cai Mckeever-Willis",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "LAOWA 11mm",
+  "camera_setting": "OPEN GATE ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.482702246312562,
+    "camera_matrix": [
+      [
+        1728.8094370722013,
+        0.0,
+        2043.4887153475488
+      ],
+      [
+        0.0,
+        1728.267836098517,
+        1083.2310283758572
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3317863511706184,
+      0.11898889554063909,
+      -0.00996927245200621,
+      0.07502310627142839
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-27",
+  "compatible_settings": []
+}

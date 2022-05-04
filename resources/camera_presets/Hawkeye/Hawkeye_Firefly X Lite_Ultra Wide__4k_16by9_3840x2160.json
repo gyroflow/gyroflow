@@ -1,0 +1,46 @@
+{
+  "name": "Hawkeye_Firefly X Lite_Ultra Wide__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "deadmoo",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-23",
+  "official": true,
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "num_images": 16,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.37617120895551,
+    "camera_matrix": [
+      [
+        1899.5441875505344,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1425.3289503090905,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04048086944649209,
+      0.024162499785652793,
+      -0.009614423183174504,
+      -0.009665050311279663
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

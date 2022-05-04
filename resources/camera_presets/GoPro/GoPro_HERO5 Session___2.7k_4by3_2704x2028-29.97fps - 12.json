@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session___2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "Nathan Maxwell",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5800430308581789,
+    "camera_matrix": [
+      [
+        1052.0259463354837,
+        0.0,
+        1352.390857134708
+      ],
+      [
+        0.0,
+        1053.7408263076982,
+        1018.2605448554986
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14816886682642502,
+      0.009609539420320832,
+      -0.05394745262204983,
+      0.028208533180288264
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-25",
+  "compatible_settings": []
+}

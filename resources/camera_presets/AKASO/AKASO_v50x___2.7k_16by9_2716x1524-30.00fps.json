@@ -1,0 +1,66 @@
+{
+  "name": "AKASO_v50x___2.7k_16by9_2716x1524-30.00fps",
+  "note": "",
+  "calibrated_by": "Robert Niewiarowski",
+  "camera_brand": "AKASO",
+  "camera_model": "v50x",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2716,
+    "h": 1524
+  },
+  "orig_dimension": {
+    "w": 2716,
+    "h": 1524
+  },
+  "output_dimension": {
+    "w": 2716,
+    "h": 1524
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 29.999979,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.920755232738085,
+    "camera_matrix": [
+      [
+        1521.8556549213351,
+        0.0,
+        1398.7223429856729
+      ],
+      [
+        0.0,
+        1517.3353528760497,
+        629.1053659679567
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13409177590858662,
+      -0.33639498801548057,
+      0.3274956873988361,
+      -0.1478470585818954
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_Sigma Art 24mm 1.4__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Adrian Zalewski",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Sigma Art 24mm 1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.527512894643806,
+    "camera_matrix": [
+      [
+        1474.603253051917,
+        0.0,
+        944.6952884224588
+      ],
+      [
+        0.0,
+        1472.2282064504732,
+        514.7514503026997
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.39186355698312936,
+      0.8025877600476291,
+      -1.6796142143510735,
+      0.29454261709170365
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

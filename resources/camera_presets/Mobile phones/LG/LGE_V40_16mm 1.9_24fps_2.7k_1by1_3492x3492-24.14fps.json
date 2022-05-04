@@ -1,0 +1,66 @@
+{
+  "name": "LGE_V40_16mm 1.9_24fps_2.7k_1by1_3492x3492-24.14fps",
+  "note": "24fps",
+  "calibrated_by": "Redson ",
+  "camera_brand": "LGE",
+  "camera_model": "V40",
+  "lens_model": "16mm 1.9",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3492,
+    "h": 3492
+  },
+  "orig_dimension": {
+    "w": 3492,
+    "h": 3492
+  },
+  "output_dimension": {
+    "w": 3492,
+    "h": 3492
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.14163,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.225677205653955,
+    "camera_matrix": [
+      [
+        2157.8300471158173,
+        0.0,
+        1776.7885190228997
+      ],
+      [
+        0.0,
+        2158.7424951817125,
+        1752.255270789907
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30400831420347857,
+      0.13016289794264294,
+      0.14400958296296165,
+      -0.13394006131270156
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

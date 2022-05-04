@@ -1,0 +1,66 @@
+{
+  "name": "AKASO_V50x__170 FOV_2k_16by9_2048x1152-60.04fps",
+  "note": "170 FOV",
+  "calibrated_by": "Christophe",
+  "camera_brand": "AKASO",
+  "camera_model": "V50x",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1152
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1152
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1152
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.04282,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4742863179204159,
+    "camera_matrix": [
+      [
+        1158.6939257800568,
+        0.0,
+        1005.06191523381
+      ],
+      [
+        0.0,
+        1158.4426029690244,
+        599.6616154555065
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04999836093842215,
+      0.02632662578887518,
+      -0.03404830579292076,
+      0.012742464811836812
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-30",
+  "compatible_settings": []
+}

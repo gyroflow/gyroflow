@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_laowa 6mm t2.0__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "laowen",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "laowa 6mm t2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7096859414043428,
+    "camera_matrix": [
+      [
+        1351.1755575278169,
+        0.0,
+        1900.9566243837428
+      ],
+      [
+        0.0,
+        1350.5029406195324,
+        1053.2906435872926
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3174337661079589,
+      0.2040184099610391,
+      -0.09477343144173078,
+      0.09939069862387888
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-27",
+  "compatible_settings": []
+}

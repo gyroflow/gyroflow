@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_Laowa_12mm_4k_16by9_3840x2160-25.00fps",
+  "note": "12mm",
+  "calibrated_by": "Guillaume",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Laowa",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7530818368179617,
+    "camera_matrix": [
+      [
+        1373.060209431026,
+        0.0,
+        1895.7291516863288
+      ],
+      [
+        0.0,
+        1373.4706430252495,
+        1062.525657199329
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2784435216869319,
+      0.3129071683487226,
+      -0.21377888949532753,
+      0.1611055004619681
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

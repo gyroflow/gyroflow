@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi Action__50mbps_2k_16by9_2304x1296-25.00fps",
+  "note": "",
+  "calibrated_by": "Giovanni",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi Action",
+  "lens_model": "",
+  "camera_setting": "50mbps",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5429318356425641,
+    "camera_matrix": [
+      [
+        993.0464872707772,
+        0.0,
+        1118.6455377360878
+      ],
+      [
+        0.0,
+        994.204673728962,
+        690.8929071377054
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10083034657372818,
+      -0.01623860116844371,
+      0.004605705431945422,
+      -0.002807065540783897
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-22",
+  "compatible_settings": []
+}

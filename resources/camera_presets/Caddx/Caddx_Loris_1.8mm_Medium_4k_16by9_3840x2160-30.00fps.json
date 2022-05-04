@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Loris_1.8mm_Medium_4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "anton",
+  "camera_brand": "Caddx",
+  "camera_model": "Loris",
+  "lens_model": "1.8mm",
+  "camera_setting": "Medium",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.41602176645852174,
+    "camera_matrix": [
+      [
+        2044.9998706846857,
+        0.0,
+        1888.6433088868505
+      ],
+      [
+        0.0,
+        2041.956455914796,
+        1179.5220592908995
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07322080117016905,
+      -0.00917205074738736,
+      0.02641015011995005,
+      -0.018246151943609103
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

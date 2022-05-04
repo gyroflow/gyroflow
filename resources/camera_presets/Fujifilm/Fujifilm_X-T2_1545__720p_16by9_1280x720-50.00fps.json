@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T2_1545__720p_16by9_1280x720-50.00fps",
+  "note": "",
+  "calibrated_by": "Lang",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T2",
+  "lens_model": "1545",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.329686579751076,
+    "camera_matrix": [
+      [
+        838.0995810665546,
+        0.0,
+        644.7996503530322
+      ],
+      [
+        0.0,
+        838.6590212698748,
+        360.958575904782
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14035465639138417,
+      3.0913571358671272,
+      -16.185136323992012,
+      28.43525056097383
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-04",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO Session___1080p_4by3_1920x1440-29.97fps",
+  "note": "",
+  "calibrated_by": "Caspian",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO Session",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5515056139163205,
+    "camera_matrix": [
+      [
+        826.676824990103,
+        0.0,
+        954.2780619630338
+      ],
+      [
+        0.0,
+        825.0823104734205,
+        715.4528024936648
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.11660987762367636,
+      -0.033096568600212636,
+      -0.005570868280258682,
+      0.006310787961441034
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

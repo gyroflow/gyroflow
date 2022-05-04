@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange___2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Giada",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 6.529206326589592,
+    "camera_matrix": [
+      [
+        106238.96294955592,
+        0.0,
+        1510.173026571564
+      ],
+      [
+        0.0,
+        80907.44297329808,
+        892.3359408376941
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      89.91131046451227,
+      376361.3344687464,
+      -425158756.03862625,
+      15738502037.735
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

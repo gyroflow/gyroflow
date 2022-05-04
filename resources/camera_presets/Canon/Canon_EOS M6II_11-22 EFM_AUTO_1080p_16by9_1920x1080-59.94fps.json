@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M6II_11-22 EFM_AUTO_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "唐浩钏",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M6II",
+  "lens_model": "11-22 EFM",
+  "camera_setting": "AUTO",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4241806984702359,
+    "camera_matrix": [
+      [
+        1085.279359331539,
+        0.0,
+        961.0238857075572
+      ],
+      [
+        0.0,
+        1090.4528277540194,
+        544.5592099292969
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2511521658554106,
+      0.1682410898620452,
+      0.08353157722382343,
+      -0.12220858597354034
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-23",
+  "compatible_settings": []
+}

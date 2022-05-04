@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_Hybrid 2_16:9__2.7k_16by9_2704x1520-50.00fps",
+  "note": "",
+  "calibrated_by": "Pierce Schmeichel",
+  "camera_brand": "RunCam",
+  "camera_model": "Hybrid 2",
+  "lens_model": "16:9",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.313814423503115,
+    "camera_matrix": [
+      [
+        1388.7302259050464,
+        0.0,
+        1334.9255775001984
+      ],
+      [
+        0.0,
+        1399.2815396288345,
+        804.288083169057
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.014379108652580129,
+      -0.063185023601891,
+      0.0964797015862634,
+      -0.0645733154213554
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-28",
+  "compatible_settings": []
+}

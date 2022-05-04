@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_16 105 F4_16mm  25_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Joker",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "16 105 F4",
+  "camera_setting": "16mm  25",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8964536275979299,
+    "camera_matrix": [
+      [
+        3107.470702088912,
+        0.0,
+        1945.7058387415957
+      ],
+      [
+        0.0,
+        3111.948222586495,
+        1079.8614869917003
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3767938234464784,
+      -0.2696933141814313,
+      1.4436225529284838,
+      -2.2046906059523166
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

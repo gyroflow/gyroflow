@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH1_Lumix 12-35@12mm__C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Nurk",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Lumix 12-35@12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 24,
+  "fps": 23.976025,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8258730713583675,
+    "camera_matrix": [
+      [
+        2706.07177445941,
+        0.0,
+        2044.8559833104428
+      ],
+      [
+        0.0,
+        2675.084046611877,
+        1064.9209950188315
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3146187615167826,
+      0.11716238421061692,
+      -0.0021011055539956985,
+      0.18001908119978227
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Nebula Pro___480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Akos Pajdusak",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.20389197101759565,
+    "camera_matrix": [
+      [
+        446.461705677542,
+        0.0,
+        509.15330213834704
+      ],
+      [
+        0.0,
+        445.6678634609859,
+        344.5550535284149
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.02014718295109985,
+      0.01290488183761824,
+      -0.008716601290043613,
+      0.0016157983383750158
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-11",
+  "compatible_settings": []
+}

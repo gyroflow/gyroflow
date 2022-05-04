@@ -1,0 +1,66 @@
+{
+  "name": "Vivo_X70 Pro Plus_Ultra Wide__4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "Liam",
+  "camera_brand": "Vivo",
+  "camera_model": "X70 Pro Plus",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.012499,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0804482470312131,
+    "camera_matrix": [
+      [
+        1587.2250469872306,
+        0.0,
+        1909.4236530750231
+      ],
+      [
+        0.0,
+        1586.1030531248862,
+        1067.285069020662
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2006769826486762,
+      0.6318807676088924,
+      -0.6485424340395608,
+      0.3629036377753145
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

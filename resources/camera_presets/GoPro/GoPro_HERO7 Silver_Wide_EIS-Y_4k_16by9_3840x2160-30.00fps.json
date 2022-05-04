@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO7 Silver_Wide_EIS-Y_4k_16by9_3840x2160-30.00fps",
+  "note": "EIS-Y",
+  "calibrated_by": "La rry",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO7 Silver",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.995497,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6048656537453425,
+    "camera_matrix": [
+      [
+        1909.327059003268,
+        0.0,
+        1911.771239163915
+      ],
+      [
+        0.0,
+        1908.1376038450655,
+        1107.027252326744
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13479250606321072,
+      -0.05566328934673677,
+      -0.00038901217663715206,
+      0.014262229183894883
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero7silver-wide-3840x2160@29995-eis-y",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

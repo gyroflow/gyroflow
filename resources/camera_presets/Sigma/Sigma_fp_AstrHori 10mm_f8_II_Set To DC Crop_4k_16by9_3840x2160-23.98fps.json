@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_AstrHori 10mm_f8_II_Set To DC Crop_4k_16by9_3840x2160-23.98fps",
+  "note": "Set To DC Crop",
+  "calibrated_by": "Edward Robison",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "AstrHori 10mm_f8_II",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6112461688959808,
+    "camera_matrix": [
+      [
+        2064.840679480526,
+        0.0,
+        1949.1994155058792
+      ],
+      [
+        0.0,
+        2064.473754491013,
+        1073.6733809667878
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06887417152143946,
+      -0.0010477218137302875,
+      0.009670310924105112,
+      -0.03282361332767816
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-16",
+  "compatible_settings": []
+}

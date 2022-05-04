@@ -1,0 +1,46 @@
+{
+  "name": "Freefly_Wave_Laowa 9mm_Vertical_C4k_4by3_4096x3072-0.00fps",
+  "note": "",
+  "calibrated_by": "Flow Motion Aerials",
+  "camera_brand": "Freefly",
+  "camera_model": "Wave",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "Vertical",
+  "calibrator_version": "0.2.2-alpha",
+  "date": "2021-05-11",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "num_images": 27,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3230959909806678,
+    "camera_matrix": [
+      [
+        1688.8568693296827,
+        0.0,
+        2048.0
+      ],
+      [
+        0.0,
+        1688.7994067580262,
+        1536.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33848306310266124,
+      0.12260362409966775,
+      -0.02185355987952781,
+      0.10207145314684936
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

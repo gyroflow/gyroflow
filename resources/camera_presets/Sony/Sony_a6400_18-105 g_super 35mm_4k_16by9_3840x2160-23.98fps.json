@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_18-105 g_super 35mm_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "김석원",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "18-105 g",
+  "camera_setting": "super 35mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8262114734408641,
+    "camera_matrix": [
+      [
+        3056.8440831341377,
+        0.0,
+        1953.5599757845127
+      ],
+      [
+        0.0,
+        3058.5728225760654,
+        1058.4617265102029
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3443293724667475,
+      -0.270278368006739,
+      2.1232825158316135,
+      -3.797211590211796
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-17",
+  "compatible_settings": []
+}

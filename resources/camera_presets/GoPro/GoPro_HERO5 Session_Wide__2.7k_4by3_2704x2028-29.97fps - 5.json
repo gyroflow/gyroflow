@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session_Wide__2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "Cosmin",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8709851346834581,
+    "camera_matrix": [
+      [
+        1308.3846320609225,
+        0.0,
+        1346.8253785752247
+      ],
+      [
+        0.0,
+        1311.2602985602855,
+        1024.0265947659368
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1245921366293324,
+      -0.058936393532586735,
+      0.02172791893487312,
+      -0.007511808782735558
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_DJI Camera_Standard Vista Camera_Low Latency, 50mBit/s_480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Lethal_Paw",
+  "camera_brand": "Caddx",
+  "camera_model": "DJI Camera",
+  "lens_model": "Standard Vista Camera",
+  "camera_setting": "Low Latency, 50mBit/s",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.30463312470842907,
+    "camera_matrix": [
+      [
+        447.30807249949333,
+        0.0,
+        468.80491784894366
+      ],
+      [
+        0.0,
+        447.12758186054344,
+        364.8312285800279
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.022576621969553404,
+      0.012757232868512613,
+      -0.007280325212393723,
+      0.0005665098739851054
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-15",
+  "compatible_settings": []
+}

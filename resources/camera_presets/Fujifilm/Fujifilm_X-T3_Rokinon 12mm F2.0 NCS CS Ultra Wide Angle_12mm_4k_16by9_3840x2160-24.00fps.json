@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_Rokinon 12mm F2.0 NCS CS Ultra Wide Angle_12mm_4k_16by9_3840x2160-24.00fps",
+  "note": "12mm",
+  "calibrated_by": "Seiishu Z.",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Rokinon 12mm F2.0 NCS CS Ultra Wide Angle",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.240258154351958,
+    "camera_matrix": [
+      [
+        2083.3618786256725,
+        0.0,
+        1925.1208088216017
+      ],
+      [
+        0.0,
+        2083.6264273486972,
+        1076.6496917208408
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32225317306201745,
+      0.00601972451140352,
+      0.22378578947322328,
+      -0.06247816306520735
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-04",
+  "compatible_settings": []
+}

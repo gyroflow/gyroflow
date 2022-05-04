@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Pov_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Jcofee",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Pov",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.009731400906975,
+    "camera_matrix": [
+      [
+        1296.184109126167,
+        0.0,
+        1353.0020961607197
+      ],
+      [
+        0.0,
+        1296.5432246104583,
+        1352.1668616621168
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.029508087790944475,
+      -0.022345888879976836,
+      0.010621677833793574,
+      -0.006543169932454319
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-pov-2688x2688@50000-no-eis",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-07",
+  "compatible_settings": []
+}

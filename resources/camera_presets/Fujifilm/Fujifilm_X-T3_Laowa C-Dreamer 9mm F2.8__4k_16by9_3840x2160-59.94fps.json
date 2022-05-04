@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_Laowa C-Dreamer 9mm F2.8__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "leo",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Laowa C-Dreamer 9mm F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7288401268071719,
+    "camera_matrix": [
+      [
+        1796.3888155135128,
+        0.0,
+        1875.9183761138609
+      ],
+      [
+        0.0,
+        1798.002771824761,
+        1080.9063528747602
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.342368011414542,
+      0.10495921523051724,
+      0.007429482875486506,
+      0.0835029369765258
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

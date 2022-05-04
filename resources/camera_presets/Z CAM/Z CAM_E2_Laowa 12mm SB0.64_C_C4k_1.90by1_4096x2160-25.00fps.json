@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2_Laowa 12mm SB0.64_C_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "25fps",
+  "calibrated_by": "John Koukouzis",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 12mm SB0.64",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8701816480596106,
+    "camera_matrix": [
+      [
+        1808.9088251252845,
+        0.0,
+        2067.3017588068137
+      ],
+      [
+        0.0,
+        1808.5651012276471,
+        1069.4568879784235
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3098501259778863,
+      0.21541821239531644,
+      -0.20414492554347716,
+      0.23622082339343137
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-11",
+  "compatible_settings": []
+}

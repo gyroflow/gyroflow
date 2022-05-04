@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R6_Tokina 16mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Nathan Birrien",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R6",
+  "lens_model": "Tokina 16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.3,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8962421455021008,
+    "camera_matrix": [
+      [
+        6503.924052208055,
+        0.0,
+        1900.0611593555168
+      ],
+      [
+        0.0,
+        6504.396608985428,
+        1085.5578569907298
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08822464396802045,
+      5.175317372501418,
+      -93.71189243895842,
+      516.7852983414504
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

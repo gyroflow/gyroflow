@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5_Leica 12-60_A10 S100_4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "ding vu hong",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Leica 12-60",
+  "camera_setting": "A10 S100",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.736031155636383,
+    "camera_matrix": [
+      [
+        4536.533285654241,
+        0.0,
+        1987.8258162881295
+      ],
+      [
+        0.0,
+        4522.924643955442,
+        1324.1788253873126
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1899896232899834,
+      0.23786193030022687,
+      -1.3041262150345367,
+      3.232031699044858
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-29",
+  "compatible_settings": []
+}

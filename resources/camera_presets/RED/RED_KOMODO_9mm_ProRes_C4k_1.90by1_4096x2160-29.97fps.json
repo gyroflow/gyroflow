@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_9mm_ProRes_C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Sebastian Schieren",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "9mm",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.544391025549676,
+    "camera_matrix": [
+      [
+        1421.3399568457503,
+        0.0,
+        2047.633197257944
+      ],
+      [
+        0.0,
+        1420.477060512411,
+        1078.922553067972
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32976246091282374,
+      0.14859824057361598,
+      -0.0769149181647841,
+      0.12555734422571155
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

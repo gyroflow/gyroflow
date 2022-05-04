@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T3_Carl Zeiss Jena Flektogon 4/20_h265_4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Florent CURK",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Carl Zeiss Jena Flektogon 4/20",
+  "camera_setting": "h265",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 14.1,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 6,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.723459657616473,
+    "camera_matrix": [
+      [
+        4150.011271342232,
+        0.0,
+        1910.678042030329
+      ],
+      [
+        0.0,
+        4149.547860138295,
+        1066.3579637592536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18095258786320165,
+      0.7730323387455006,
+      -2.360081225442468,
+      1.2137008676483303
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-04",
+  "compatible_settings": []
+}

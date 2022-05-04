@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_8 Pro___4k_16by9_3840x2160-58.51fps",
+  "note": "",
+  "calibrated_by": "Timm",
+  "camera_brand": "OnePlus",
+  "camera_model": "8 Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 58.508953,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7277463922356933,
+    "camera_matrix": [
+      [
+        3378.6513902399333,
+        0.0,
+        1903.8735234537976
+      ],
+      [
+        0.0,
+        3375.8999674620495,
+        1094.091252718603
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4050633358919311,
+      -0.32725333516493355,
+      -2.1443979907269175,
+      11.652023994499526
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

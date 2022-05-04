@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Canon EF L 16-35mm f2.8 II USM_At 16mm_6k_16by9_6144x3456-24.00fps",
+  "note": "At 16mm",
+  "calibrated_by": "Gabriel F.M",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Canon EF L 16-35mm f2.8 II USM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": 9.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.6838576561996494,
+    "camera_matrix": [
+      [
+        4487.253566296601,
+        0.0,
+        3114.115196857824
+      ],
+      [
+        0.0,
+        4372.027316597411,
+        1743.0281167659343
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21626551646368472,
+      0.2429395812323833,
+      0.2755787850787243,
+      -1.028468532231165
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-22",
+  "compatible_settings": []
+}

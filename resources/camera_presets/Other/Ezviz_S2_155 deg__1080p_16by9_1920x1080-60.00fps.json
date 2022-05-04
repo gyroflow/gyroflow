@@ -1,0 +1,66 @@
+{
+  "name": "Ezviz_S2_155 deg__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Jodi Sabar",
+  "camera_brand": "Ezviz",
+  "camera_model": "S2",
+  "lens_model": "155 deg",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4363606560833863,
+    "camera_matrix": [
+      [
+        1052.7615453169567,
+        0.0,
+        941.9451207228116
+      ],
+      [
+        0.0,
+        1052.7890912575683,
+        518.0140986529373
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1100044588450927,
+      0.020557879891772896,
+      -0.02771752242069385,
+      0.012442300025633403
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-04",
+  "compatible_settings": []
+}

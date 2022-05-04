@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_HDZero Micro V2___720p_16by9_1280x720-59.94fps",
+  "note": "",
+  "calibrated_by": "https://052.jp",
+  "camera_brand": "RunCam",
+  "camera_model": "HDZero Micro V2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5656485573431822,
+    "camera_matrix": [
+      [
+        671.7666847898338,
+        0.0,
+        691.3339698609277
+      ],
+      [
+        0.0,
+        653.4145027029952,
+        378.60319159723247
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07574276603352348,
+      -0.0021376223394701955,
+      -0.002938153547031858,
+      0.004936342211038855
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-20",
+  "compatible_settings": []
+}

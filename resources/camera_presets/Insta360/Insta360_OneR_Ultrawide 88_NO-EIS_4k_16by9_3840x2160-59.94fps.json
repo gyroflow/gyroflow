@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 88_NO-EIS_4k_16by9_3840x2160-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "maki",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 88",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4341206475133954,
+    "camera_matrix": [
+      [
+        1960.92626309446,
+        0.0,
+        1931.544930264657
+      ],
+      [
+        0.0,
+        1960.6312866638043,
+        1116.4365999981542
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0001866818242237177,
+      0.0000613528455753473,
+      -0.018595313109121228,
+      0.021378480037389926
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide88-3840x2160@59940-no-eis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

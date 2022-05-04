@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_tamron_6k_5k_16by9_5760x3240-24.00fps",
+  "note": "24mm",
+  "calibrated_by": "Jimi James",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "tamron",
+  "camera_setting": "6k",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.2227823193972425,
+    "camera_matrix": [
+      [
+        4053.9952890625186,
+        0.0,
+        2882.314734960476
+      ],
+      [
+        0.0,
+        4047.188770747297,
+        1523.7902856489086
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19061954838739104,
+      -0.0383652821466303,
+      0.7134079590417344,
+      -0.8379339502452802
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

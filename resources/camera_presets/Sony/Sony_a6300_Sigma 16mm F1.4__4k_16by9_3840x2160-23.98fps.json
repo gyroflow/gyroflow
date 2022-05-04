@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_Sigma 16mm F1.4__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Radek Rezny",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "Sigma 16mm F1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3629609012803085,
+    "camera_matrix": [
+      [
+        2662.863360306432,
+        0.0,
+        1918.94079596939
+      ],
+      [
+        0.0,
+        2670.295025242149,
+        1093.4429272576767
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.198219727766106,
+      0.2725371184746793,
+      -0.4131190911180959,
+      0.6320935986295186
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-04",
+  "compatible_settings": []
+}

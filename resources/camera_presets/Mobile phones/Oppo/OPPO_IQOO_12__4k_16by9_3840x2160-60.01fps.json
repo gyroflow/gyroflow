@@ -1,0 +1,66 @@
+{
+  "name": "OPPO_IQOO_12__4k_16by9_3840x2160-60.01fps",
+  "note": "",
+  "calibrated_by": "王辉",
+  "camera_brand": "OPPO",
+  "camera_model": "IQOO",
+  "lens_model": "12",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.00798,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5805981842379917,
+    "camera_matrix": [
+      [
+        1767.7791804479075,
+        0.0,
+        1921.994563176556
+      ],
+      [
+        0.0,
+        1767.539460966688,
+        1094.4694686517685
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18626802762396177,
+      -0.005672953211391756,
+      -0.13488402759544668,
+      0.06161394621538084
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

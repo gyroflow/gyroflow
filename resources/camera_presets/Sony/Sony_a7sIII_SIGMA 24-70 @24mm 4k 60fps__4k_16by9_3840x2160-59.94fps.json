@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7sIII_SIGMA 24-70 @24mm 4k 60fps__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Deeke",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "SIGMA 24-70 @24mm 4k 60fps",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.35970653325387386,
+    "camera_matrix": [
+      [
+        2645.1293357258755,
+        0.0,
+        1926.2751154045452
+      ],
+      [
+        0.0,
+        2643.7930748069134,
+        1060.2593189110228
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13166359516957307,
+      0.2573049515064509,
+      -0.4119119716768141,
+      0.8486203069033673
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

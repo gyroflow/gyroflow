@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "v8max",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.409874545694416,
+    "camera_matrix": [
+      [
+        1112.9976782389078,
+        0.0,
+        972.905199572368
+      ],
+      [
+        0.0,
+        1120.587703976007,
+        562.7381439650453
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1708260652970563,
+      0.24942564534852388,
+      -0.20454710309070984,
+      0.4518368271879204
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-13",
+  "compatible_settings": []
+}

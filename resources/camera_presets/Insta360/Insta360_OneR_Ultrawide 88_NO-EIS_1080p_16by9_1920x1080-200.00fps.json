@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 88_NO-EIS_1080p_16by9_1920x1080-200.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Jaydon",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 88",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 200.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.629050438712975,
+    "camera_matrix": [
+      [
+        1102.0993277751102,
+        0.0,
+        944.4232643285133
+      ],
+      [
+        0.0,
+        1099.3930669763206,
+        573.5888489085382
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04684587899314342,
+      0.053142170424701415,
+      -0.3842944973446712,
+      0.21735492145016824
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide88-1920x1080@200000-no-eis",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

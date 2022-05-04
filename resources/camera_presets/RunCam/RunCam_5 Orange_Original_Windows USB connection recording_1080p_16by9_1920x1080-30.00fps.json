@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange_Original_Windows USB connection recording_1080p_16by9_1920x1080-30.00fps",
+  "note": "Windows USB connection recording",
+  "calibrated_by": "Jirik",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "Original",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.999559,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.934589581673601,
+    "camera_matrix": [
+      [
+        956.1917556193893,
+        0.0,
+        959.5372077621416
+      ],
+      [
+        0.0,
+        956.5812284539004,
+        527.8527981500503
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2228705483329048,
+      0.2576350323915292,
+      -0.45934359658881274,
+      0.3643852634786577
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

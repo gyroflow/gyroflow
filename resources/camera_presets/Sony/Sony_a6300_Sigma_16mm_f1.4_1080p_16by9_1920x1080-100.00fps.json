@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_Sigma_16mm_f1.4_1080p_16by9_1920x1080-100.00fps",
+  "note": "",
+  "calibrated_by": "Vinay Dhiman",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "Sigma_16mm",
+  "camera_setting": "f1.4",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 100.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3783879082915249,
+    "camera_matrix": [
+      [
+        1546.933492739715,
+        0.0,
+        969.395768001952
+      ],
+      [
+        0.0,
+        1545.2479478956034,
+        550.0534809956292
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2146935671452973,
+      0.16174522289798765,
+      -0.39862484323225206,
+      1.0813755229943145
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_gw1_gw1__2.5k_4by3_2592x1944-30.03fps",
+  "note": "",
+  "calibrated_by": "Tulpar",
+  "camera_brand": "Samsung",
+  "camera_model": "gw1",
+  "lens_model": "gw1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2592,
+    "h": 1944
+  },
+  "orig_dimension": {
+    "w": 2592,
+    "h": 1944
+  },
+  "output_dimension": {
+    "w": 2592,
+    "h": 1458
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.030548,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0491575887222588,
+    "camera_matrix": [
+      [
+        1955.3213158932003,
+        0.0,
+        1287.5313121751742
+      ],
+      [
+        0.0,
+        1955.0688356926164,
+        964.4632794867324
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.36291559539459867,
+      0.3459008873637759,
+      -1.0403419732992718,
+      1.1591581140578868
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
+  "compatible_settings": []
+}

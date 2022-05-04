@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_SEL 70-200/f4.0 @200mm__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Fabian Mauracher",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "SEL 70-200/f4.0 @200mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.947399978745272,
+    "camera_matrix": [
+      [
+        52728.21597905898,
+        0.0,
+        1872.9240684044476
+      ],
+      [
+        0.0,
+        52476.38346278298,
+        2072.210759395672
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -1.9062616320186985,
+      -430.56582271713586,
+      555468.3493653,
+      -111815056.9929808
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-31",
+  "compatible_settings": []
+}

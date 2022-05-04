@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Sigma 8-16mm 4.5-5.6 w/ Viltrox EF-E II 0.71x speedbooster_Widest_2.7k_4by3_3696x2772-24.00fps",
+  "note": "",
+  "calibrated_by": "V V",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Sigma 8-16mm 4.5-5.6 w/ Viltrox EF-E II 0.71x speedbooster",
+  "camera_setting": "Widest",
+  "calib_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "orig_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "output_dimension": {
+    "w": 3696,
+    "h": 2078
+  },
+  "frame_readout_time": 8.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5049976217051021,
+    "camera_matrix": [
+      [
+        1265.05695338842,
+        0.0,
+        1887.295296794803
+      ],
+      [
+        0.0,
+        1263.824383326982,
+        1387.0484727509825
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3214403936649456,
+      0.29919244921500304,
+      -0.28559983536136413,
+      0.17326329233916912
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

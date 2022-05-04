@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "shengzai hou",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 2688
+  },
+  "frame_readout_time": 16.88,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 2,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6243724518106358,
+    "camera_matrix": [
+      [
+        1238.8986470775844,
+        0.0,
+        1354.0996229499965
+      ],
+      [
+        0.0,
+        1237.2551122788268,
+        1356.166084501417
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.003638095443510077,
+      0.003430230066378756,
+      -0.05826505236647886,
+      0.03592815319015987
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

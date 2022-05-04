@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Pocket_none_automatic_1080p_16by9_1920x1080-59.94fps",
+  "note": "automatic",
+  "calibrated_by": "cryandsmile",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Pocket",
+  "lens_model": "none",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2298331567939875,
+    "camera_matrix": [
+      [
+        1471.1471007228888,
+        0.0,
+        952.8766111959678
+      ],
+      [
+        0.0,
+        1471.3690057562949,
+        549.1716153947083
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3400205145623184,
+      1.6141025988657547,
+      -10.918752086650514,
+      23.787265402109263
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

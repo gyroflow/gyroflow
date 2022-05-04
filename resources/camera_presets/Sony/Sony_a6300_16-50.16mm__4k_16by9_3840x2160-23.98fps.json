@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_16-50.16mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "洪贵荣",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "16-50.16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 8,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.9806520582585176,
+    "camera_matrix": [
+      [
+        2636.574670539175,
+        0.0,
+        1796.559148419006
+      ],
+      [
+        0.0,
+        2550.8188591968906,
+        1097.147964883554
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4275623122303091,
+      -0.9459623252556808,
+      3.72443887427986,
+      -4.292518646361599
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-04",
+  "compatible_settings": []
+}

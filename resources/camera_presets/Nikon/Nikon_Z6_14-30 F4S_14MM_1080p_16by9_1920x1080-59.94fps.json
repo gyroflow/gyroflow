@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_Z6_14-30 F4S_14MM_1080p_16by9_1920x1080-59.94fps",
+  "note": "14MM",
+  "calibrated_by": "李贤锋",
+  "camera_brand": "Nikon",
+  "camera_model": "Z6",
+  "lens_model": "14-30 F4S",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1974915351168727,
+    "camera_matrix": [
+      [
+        778.0985920793748,
+        0.0,
+        963.6160993461776
+      ],
+      [
+        0.0,
+        779.365440879042,
+        539.7566446758246
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30797790012492926,
+      0.2720385788927174,
+      -0.3763609608622064,
+      0.5811396461715355
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-25",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_LR-RUNCAM43___2.7k_4by3_2704x2032-60.00fps",
+  "note": "",
+  "calibrated_by": "LR",
+  "camera_brand": "RunCam",
+  "camera_model": "LR-RUNCAM43",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6942019236775465,
+    "camera_matrix": [
+      [
+        1158.4368636911402,
+        0.0,
+        1349.4900125477725
+      ],
+      [
+        0.0,
+        1161.108349649972,
+        994.4555872073852
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13698937183252444,
+      0.13736950415089508,
+      -0.3353344001827949,
+      0.22873806906929825
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-01",
+  "compatible_settings": []
+}

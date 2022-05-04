@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Polar___720p_16by9_1280x720-60.00fps",
+  "note": "",
+  "calibrated_by": "jcdub",
+  "camera_brand": "Caddx",
+  "camera_model": "Polar",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.37610074848600233,
+    "camera_matrix": [
+      [
+        593.3100036372986,
+        0.0,
+        615.9182048471516
+      ],
+      [
+        0.0,
+        592.1517476936389,
+        356.5826175491358
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.038827543899287234,
+      -0.006627204511141185,
+      0.00981098091137102,
+      -0.0066432627177496215
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

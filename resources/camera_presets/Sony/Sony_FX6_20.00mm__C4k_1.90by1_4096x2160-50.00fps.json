@@ -1,0 +1,66 @@
+{
+  "name": "Sony_FX6_20.00mm__C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Benoit Finck",
+  "camera_brand": "Sony",
+  "camera_model": "FX6",
+  "lens_model": "20.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4902790333648753,
+    "camera_matrix": [
+      [
+        2351.453067532382,
+        0.0,
+        2061.890593548306
+      ],
+      [
+        0.0,
+        2351.0064595102735,
+        1088.7165457731876
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31982296743123106,
+      0.15414705236357815,
+      0.02721579748985199,
+      0.03036193546686354
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-20.00mm-4096x2160@50000",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-07",
+  "compatible_settings": []
+}

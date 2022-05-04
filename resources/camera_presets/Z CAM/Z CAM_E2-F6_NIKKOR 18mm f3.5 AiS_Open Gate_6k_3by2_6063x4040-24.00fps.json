@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_NIKKOR 18mm f3.5 AiS_Open Gate_6k_3by2_6063x4040-24.00fps",
+  "note": "",
+  "calibrated_by": "Lucas Weakley",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "NIKKOR 18mm f3.5 AiS",
+  "camera_setting": "Open Gate",
+  "calib_dimension": {
+    "w": 6063,
+    "h": 4040
+  },
+  "orig_dimension": {
+    "w": 6063,
+    "h": 4040
+  },
+  "output_dimension": {
+    "w": 6064,
+    "h": 4040
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6508272787825604,
+    "camera_matrix": [
+      [
+        3202.6986589887033,
+        0.0,
+        3047.9828333491255
+      ],
+      [
+        0.0,
+        3201.373346102857,
+        2003.472019306399
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25004977341601586,
+      0.11837438704678198,
+      0.10605406654337966,
+      0.06351584031683455
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

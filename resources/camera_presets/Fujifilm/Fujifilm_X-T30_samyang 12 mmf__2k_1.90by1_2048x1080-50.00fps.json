@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T30_samyang 12 mmf__2k_1.90by1_2048x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Cedric Raulet",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T30",
+  "lens_model": "samyang 12 mmf",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3987620418825762,
+    "camera_matrix": [
+      [
+        1116.551853390967,
+        0.0,
+        1032.378313422167
+      ],
+      [
+        0.0,
+        1115.4222341070315,
+        525.4162373307947
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3010593932789534,
+      0.32055976248616386,
+      -1.7360524662628771,
+      3.9254583574040383
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-03-06",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Tokina 11-20 F2.8_BRAW_6k_16by9_6144x3456-50.00fps",
+  "note": "11MM",
+  "calibrated_by": "Marcel Schlupf",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Tokina 11-20 F2.8",
+  "camera_setting": "BRAW",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 24,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.776708557195619,
+    "camera_matrix": [
+      [
+        2851.937487310319,
+        0.0,
+        3153.168729979875
+      ],
+      [
+        0.0,
+        2852.512478395058,
+        1730.2441207137313
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3321155534501484,
+      0.048559062288320874,
+      0.1062827993960272,
+      -0.04719174610998824
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-28",
+  "compatible_settings": []
+}

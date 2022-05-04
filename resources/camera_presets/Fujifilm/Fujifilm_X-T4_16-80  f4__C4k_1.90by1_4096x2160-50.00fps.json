@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T4_16-80 / f4__C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "lucas sergent",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "16-80 / f4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9431393637198447,
+    "camera_matrix": [
+      [
+        3692.564368645869,
+        0.0,
+        2065.5670848798472
+      ],
+      [
+        0.0,
+        3601.9747885790025,
+        1074.5633757666956
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3060937579967197,
+      0.7302541519034556,
+      -3.379386395651611,
+      6.770367974759214
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

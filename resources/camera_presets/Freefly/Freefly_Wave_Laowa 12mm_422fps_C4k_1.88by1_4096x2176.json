@@ -1,0 +1,61 @@
+{
+  "name": "Freefly_Wave_Laowa 12mm_422fps_C4k_1.88by1_4096x2176-0.00fps",
+  "note": "422fps",
+  "calibrated_by": "Eddy",
+  "camera_brand": "Freefly",
+  "camera_model": "Wave",
+  "lens_model": "Laowa 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2176
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2176
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2176
+  },
+  "frame_readout_time": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 0.0,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49332637718508926,
+    "camera_matrix": [
+      [
+        2325.1426245932676,
+        0.0,
+        2046.7878427134349
+      ],
+      [
+        0.0,
+        2298.858699849165,
+        1059.2333180760993
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3049484279191571,
+      0.20035454225653565,
+      -0.009679063332163515,
+      0.126582033370312
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": []
+  },
+  "identifier": "",
+  "calibrator_version": "0.4.0",
+  "date": "2022-01-03"
+}

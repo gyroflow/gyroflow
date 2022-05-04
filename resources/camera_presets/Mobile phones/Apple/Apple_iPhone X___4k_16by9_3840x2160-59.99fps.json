@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone X___4k_16by9_3840x2160-59.99fps",
+  "note": "",
+  "calibrated_by": "Vsevolod",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone X",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.993202,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8609037090071348,
+    "camera_matrix": [
+      [
+        3351.69681509813,
+        0.0,
+        1997.995577259813
+      ],
+      [
+        0.0,
+        3349.1462764835983,
+        958.3604776514404
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6434200108678718,
+      -1.8698519833374012,
+      3.8162177132619903,
+      1.296630498919505
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

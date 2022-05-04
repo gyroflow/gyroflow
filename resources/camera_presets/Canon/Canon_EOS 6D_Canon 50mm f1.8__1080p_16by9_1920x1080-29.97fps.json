@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 6D_Canon 50mm f1.8__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Julien Kauffmann",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6D",
+  "lens_model": "Canon 50mm f1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.53548522351195,
+    "camera_matrix": [
+      [
+        2991.1706294657474,
+        0.0,
+        949.14012566461
+      ],
+      [
+        0.0,
+        2982.623472076464,
+        556.6146120583088
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3186341115037019,
+      -4.266495086499916,
+      78.52305046024719,
+      -468.4941558112369
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

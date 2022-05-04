@@ -1,0 +1,66 @@
+{
+  "name": "OPPO_reno5_wide__1080p_16by9_1920x1080-30.36fps",
+  "note": "",
+  "calibrated_by": "クロコウ",
+  "camera_brand": "OPPO",
+  "camera_model": "reno5",
+  "lens_model": "wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.359571,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5780128937295651,
+    "camera_matrix": [
+      [
+        858.2192826664979,
+        0.0,
+        956.8384735179563
+      ],
+      [
+        0.0,
+        862.6752900989426,
+        546.8060312773431
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3314676631647685,
+      0.1268886268751623,
+      0.06961040772507959,
+      0.022101679427653603
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-11",
+  "compatible_settings": []
+}

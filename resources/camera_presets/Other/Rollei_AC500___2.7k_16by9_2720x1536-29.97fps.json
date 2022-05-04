@@ -1,0 +1,66 @@
+{
+  "name": "Rollei_AC500___2.7k_16by9_2720x1536-29.97fps",
+  "note": "",
+  "calibrated_by": "龚宇",
+  "camera_brand": "Rollei",
+  "camera_model": "AC500",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.969999,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5068661193768003,
+    "camera_matrix": [
+      [
+        1336.7742355063303,
+        0.0,
+        1383.9534351935683
+      ],
+      [
+        0.0,
+        1342.5487377072902,
+        746.2239210800698
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.011208237455293145,
+      -0.10114027392600644,
+      0.1383097945658063,
+      -0.06335491456076743
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-18",
+  "compatible_settings": []
+}

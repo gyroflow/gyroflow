@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Nebula Pro__Goggles_480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Greg Q",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro",
+  "lens_model": "",
+  "camera_setting": "Goggles",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.20649021294311673,
+    "camera_matrix": [
+      [
+        446.6518217891479,
+        0.0,
+        509.9854527244038
+      ],
+      [
+        0.0,
+        446.4359617630488,
+        353.3427635911407
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.024873846184786937,
+      0.008084184238425184,
+      -0.0034769440321281157,
+      0.0002552397912531312
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_Laowa 9mm_DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "alexandre auclair",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.24203456693934708,
+    "camera_matrix": [
+      [
+        1961.4359405034531,
+        0.0,
+        2063.5885285961726
+      ],
+      [
+        0.0,
+        1961.0763074193871,
+        1077.5573413787993
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35052145287836256,
+      0.094939242379254,
+      0.037160961449309915,
+      0.07031200103893868
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-24",
+  "compatible_settings": []
+}

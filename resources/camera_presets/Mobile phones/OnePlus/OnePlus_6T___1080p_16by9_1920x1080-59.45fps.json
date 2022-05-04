@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_6T___1080p_16by9_1920x1080-59.45fps",
+  "note": "",
+  "calibrated_by": "leo",
+  "camera_brand": "OnePlus",
+  "camera_model": "6T",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.445595,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4665364336490058,
+    "camera_matrix": [
+      [
+        1593.9586364628458,
+        0.0,
+        920.8294381890676
+      ],
+      [
+        0.0,
+        1595.0695975714668,
+        543.2555819786529
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5609795331501383,
+      -2.8067605005794256,
+      13.385413306696297,
+      -19.767000247084137
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

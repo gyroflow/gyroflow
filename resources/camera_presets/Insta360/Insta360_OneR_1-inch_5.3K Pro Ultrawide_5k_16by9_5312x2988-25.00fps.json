@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_1-inch_5.3K Pro Ultrawide_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "KwadLife",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "1-inch",
+  "camera_setting": "5.3K Pro Ultrawide",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7411790443110715,
+    "camera_matrix": [
+      [
+        2202.1531100599445,
+        0.0,
+        2646.356815778332
+      ],
+      [
+        0.0,
+        2203.31595610717,
+        1559.0907427561804
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05921748552201898,
+      -0.006149589959200663,
+      0.002496762777134664,
+      0.00016725418229581663
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide110-5312x2988@25000-no-eis",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

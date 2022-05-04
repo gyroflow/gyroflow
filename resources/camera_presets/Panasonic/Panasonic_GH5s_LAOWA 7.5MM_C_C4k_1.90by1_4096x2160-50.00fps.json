@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH5s_LAOWA 7.5MM_C_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "CHUNCHENG",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5s",
+  "lens_model": "LAOWA 7.5MM",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9082023305989072,
+    "camera_matrix": [
+      [
+        1658.0354189205227,
+        0.0,
+        2051.7445177417317
+      ],
+      [
+        0.0,
+        1657.1583657401734,
+        1079.414441256467
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32121612780558506,
+      0.1023421332685047,
+      0.002687743892556564,
+      0.05793852546902182
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-31",
+  "compatible_settings": []
+}

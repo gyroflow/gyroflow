@@ -1,0 +1,46 @@
+{
+  "name": "RunCam_IF Gocam___1080p_4by3_1920x1440-0.00fps",
+  "note": "",
+  "calibrated_by": "Elvin",
+  "camera_brand": "RunCam",
+  "camera_model": "IF Gocam",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta/dev",
+  "date": "2021-06-17",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "num_images": 42,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3382785782785803,
+    "camera_matrix": [
+      [
+        834.7499423296061,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        834.0008948835815,
+        720.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.030155123955112925,
+      0.0827730306901797,
+      -0.08671263270160201,
+      0.035020071918984035
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Panasonic_GH3_Venus Optics Laowa 7.5mm__1080p_16by9_1920x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "trotter",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH3",
+  "lens_model": "Venus Optics Laowa 7.5mm",
+  "camera_setting": "",
+  "calibrator_version": "0.2.0-aarrggh-prerelease-plz-dont-share",
+  "date": "2021-02-07",
+  "official": true,
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "num_images": 15,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36275638169571633,
+    "camera_matrix": [
+      [
+        875.073940900016,
+        0.0,
+        960.0
+      ],
+      [
+        0.0,
+        882.7626228129989,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3547032626585858,
+      -0.003714957701633895,
+      0.2588907813479326,
+      -0.16526007734366563
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

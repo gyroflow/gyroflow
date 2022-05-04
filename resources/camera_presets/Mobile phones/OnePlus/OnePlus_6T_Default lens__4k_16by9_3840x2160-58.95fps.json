@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_6T_Default lens__4k_16by9_3840x2160-58.95fps",
+  "note": "",
+  "calibrated_by": " 刘琢璞",
+  "camera_brand": "OnePlus",
+  "camera_model": "6T",
+  "lens_model": "Default lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 58.954029,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7145928618897249,
+    "camera_matrix": [
+      [
+        3041.0135723609446,
+        0.0,
+        1848.967528850161
+      ],
+      [
+        0.0,
+        3047.491539930155,
+        1089.6683883254382
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5507164494753902,
+      -2.3372638376728587,
+      9.961904923109824,
+      -12.788418978399411
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-24",
+  "compatible_settings": []
+}

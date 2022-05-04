@@ -1,0 +1,46 @@
+{
+  "name": "Hawkeye_Firefly 8S_Wide_30 fps_720p_16by9_1280x720-0.00fps",
+  "note": "",
+  "calibrated_by": "truog2003",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly 8S",
+  "lens_model": "Wide",
+  "camera_setting": "30 fps",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-08-28",
+  "official": true,
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "num_images": 10,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.13039440913402167,
+    "camera_matrix": [
+      [
+        577.9154252779942,
+        0.0,
+        640.0
+      ],
+      [
+        0.0,
+        577.4626037548595,
+        360.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.024842363393347697,
+      0.006257377547097875,
+      -0.0037898765821426086,
+      0.0006455592915864194
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

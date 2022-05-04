@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_sony 85mm 1.8_crop mode_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Adrian Zalewski",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "sony 85mm 1.8",
+  "camera_setting": "crop mode",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5622053772423536,
+    "camera_matrix": [
+      [
+        15094.533891726334,
+        0.0,
+        1987.642797553605
+      ],
+      [
+        0.0,
+        15109.73440555015,
+        1049.5427956698315
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10920321283975044,
+      112.61276047240544,
+      -11045.06996855624,
+      374165.18497543735
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-28",
+  "compatible_settings": []
+}

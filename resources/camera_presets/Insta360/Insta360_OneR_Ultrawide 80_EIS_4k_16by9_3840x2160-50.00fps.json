@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 80_EIS_4k_16by9_3840x2160-50.00fps",
+  "note": "EIS",
+  "calibrated_by": "Jörg Leonhardt",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 80",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.544977786210312,
+    "camera_matrix": [
+      [
+        2571.944509517092,
+        0.0,
+        1952.3451958399833
+      ],
+      [
+        0.0,
+        2571.6768760952573,
+        1079.52124533746
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.11248193415568784,
+      -0.21357428169218323,
+      0.7447015074267694,
+      -0.9051918003256187
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide80-3840x2160@50000-eis",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

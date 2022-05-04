@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_NIKKOR 85mm f2.0 Ai 2X Anamorphic_6:5_C4k_12by5_4848x2020-24.00fps",
+  "note": "Desqueezed Prior to GyroFlow",
+  "calibrated_by": "Lucas Weakley",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "NIKKOR 85mm f2.0 Ai 2X Anamorphic",
+  "camera_setting": "6:5",
+  "calib_dimension": {
+    "w": 4848,
+    "h": 2020
+  },
+  "orig_dimension": {
+    "w": 4848,
+    "h": 2020
+  },
+  "output_dimension": {
+    "w": 4848,
+    "h": 2020
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.3093017980525838,
+    "camera_matrix": [
+      [
+        27544.390472292453,
+        0.0,
+        2513.558624970661
+      ],
+      [
+        0.0,
+        26610.370722587217,
+        986.6056329609188
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -6.005338876982759,
+      985.3234647956176,
+      -231061.8444215998,
+      15147406.788267098
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-01",
+  "compatible_settings": []
+}

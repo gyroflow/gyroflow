@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly Split Mini 4K_Foxeer M12 1.7mm_Medium FOV 60 fps_2.7k_16by9_2704x1520-0.00fps",
+  "note": "",
+  "calibrated_by": "Leon",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Split Mini 4K",
+  "lens_model": "Foxeer M12 1.7mm",
+  "camera_setting": "Medium FOV 60 fps",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 0.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.973624403489457,
+    "camera_matrix": [
+      [
+        1270.4508189410826,
+        0.0,
+        1291.7117301188232
+      ],
+      [
+        0.0,
+        1277.4461576143574,
+        731.4664710223541
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.045772217182806274,
+      0.06332349680788532,
+      -0.06879028211297333,
+      0.026461859628977596
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-08",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GF15_H-PS14042__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Local",
+  "camera_brand": "Panasonic",
+  "camera_model": "GF15",
+  "lens_model": "H-PS14042",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49030210919637274,
+    "camera_matrix": [
+      [
+        1544.4918640658047,
+        0.0,
+        1004.8862866318118
+      ],
+      [
+        0.0,
+        1548.348087848996,
+        469.62168398478906
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30567188535064316,
+      -0.006109699066633919,
+      0.737364274060902,
+      -0.8607643061820228
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-24",
+  "compatible_settings": []
+}

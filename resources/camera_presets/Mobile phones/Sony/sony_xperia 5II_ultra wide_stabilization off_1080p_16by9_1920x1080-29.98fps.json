@@ -1,0 +1,66 @@
+{
+  "name": "sony_xperia 5II_ultra wide_stabilization off_1080p_16by9_1920x1080-29.98fps",
+  "note": "",
+  "calibrated_by": "Hajime T",
+  "camera_brand": "sony",
+  "camera_model": "xperia 5II",
+  "lens_model": "ultra wide",
+  "camera_setting": "stabilization off",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.976065,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.136984472812634,
+    "camera_matrix": [
+      [
+        945.0034259457028,
+        0.0,
+        965.8800125299708
+      ],
+      [
+        0.0,
+        945.5486537609142,
+        527.8429049014673
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26415738661037236,
+      -0.3140065592683694,
+      0.9042686006894876,
+      -0.7149817547399442
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-19",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo Action___4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "siddharth sud",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8854495678903915,
+    "camera_matrix": [
+      [
+        2185.6365248235493,
+        0.0,
+        1963.3645675040773
+      ],
+      [
+        0.0,
+        2190.2105886941013,
+        1128.709063018105
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2440725785640336,
+      0.2859426525755162,
+      -0.029541752576530713,
+      -0.002679512811683356
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-21",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RED_V_Raptor_Laowa 12mm_8K 100fps_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Daniel",
+  "camera_brand": "RED",
+  "camera_model": "V_Raptor",
+  "lens_model": "Laowa 12mm",
+  "camera_setting": "8K 100fps",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2996091742573576,
+    "camera_matrix": [
+      [
+        1284.895068521078,
+        0.0,
+        1929.4431625874183
+      ],
+      [
+        0.0,
+        1285.3696915181256,
+        1084.5728188229557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3093659993068939,
+      0.1973757969600664,
+      -0.05918424553589358,
+      0.0788413025861554
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-28",
+  "compatible_settings": []
+}

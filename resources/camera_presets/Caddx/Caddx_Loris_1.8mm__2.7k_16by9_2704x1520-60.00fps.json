@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Loris_1.8mm__2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "坂本孝一郎",
+  "camera_brand": "Caddx",
+  "camera_model": "Loris",
+  "lens_model": "1.8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5444895578622071,
+    "camera_matrix": [
+      [
+        1300.1325605379154,
+        0.0,
+        1349.6460713225244
+      ],
+      [
+        0.0,
+        1298.9946843427033,
+        820.2345315675192
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07423836598954038,
+      -0.006483782393786221,
+      0.007148808041830385,
+      -0.003495100510630322
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-12",
+  "compatible_settings": []
+}

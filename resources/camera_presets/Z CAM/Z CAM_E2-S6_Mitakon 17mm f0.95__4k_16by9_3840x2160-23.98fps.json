@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-S6_Mitakon 17mm f0.95__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "niks",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Mitakon 17mm f0.95",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 27.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.731628098287794,
+    "camera_matrix": [
+      [
+        3526.5534177036257,
+        0.0,
+        1908.5879646044536
+      ],
+      [
+        0.0,
+        3520.396521954766,
+        1047.9485800448035
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17385424088863236,
+      -0.6120205398035257,
+      7.314378509660837,
+      -13.712915452925277
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

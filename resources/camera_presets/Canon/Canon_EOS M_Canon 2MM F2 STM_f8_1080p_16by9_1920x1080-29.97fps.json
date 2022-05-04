@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_Canon 2MM F2 STM_f8_1080p_16by9_1920x1080-29.97fps",
+  "note": "Magic Lantern Use",
+  "calibrated_by": "MAD",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Canon 2MM F2 STM",
+  "camera_setting": "f8",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49274712723416697,
+    "camera_matrix": [
+      [
+        1919.3158829861268,
+        0.0,
+        949.8097758682314
+      ],
+      [
+        0.0,
+        1917.5545804453284,
+        581.4729352171755
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35221030814389187,
+      -0.013775213612374092,
+      0.4027955898874408,
+      0.6418143643844505
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-22",
+  "compatible_settings": []
+}

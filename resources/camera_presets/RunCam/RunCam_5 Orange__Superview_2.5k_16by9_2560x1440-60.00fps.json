@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_5 Orange__Superview_2.5k_16by9_2560x1440-60.00fps",
+  "note": "Superview",
+  "calibrated_by": "Corentin Faure",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 26,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 7.293039112706453,
+    "camera_matrix": [
+      [
+        864.3878040623481,
+        0.0,
+        1256.8070890338067
+      ],
+      [
+        0.0,
+        794.1447852428871,
+        772.8562170245617
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4624356154355188,
+      0.07340090673176443,
+      0.3176832083070807,
+      -0.04536647863967016
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

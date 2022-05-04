@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_Ultrawide 110_NO-EIS_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "alessandro morolla",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 110",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9333698428317568,
+    "camera_matrix": [
+      [
+        2206.400943403123,
+        0.0,
+        2711.325385065038
+      ],
+      [
+        0.0,
+        2204.737454414064,
+        1582.4837088227366
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06683172477558243,
+      -0.04233152303866551,
+      0.05527851787527295,
+      -0.02491604771310004
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-16",
+  "compatible_settings": []
+}

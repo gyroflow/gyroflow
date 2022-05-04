@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 77D_EFS-18-55mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Aladdin.fpv",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 77D",
+  "lens_model": "EFS-18-55mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4670772815724999,
+    "camera_matrix": [
+      [
+        1733.8609948456033,
+        0.0,
+        935.0827634260426
+      ],
+      [
+        0.0,
+        1720.8099088640477,
+        550.1671261784436
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2112861828788736,
+      -0.368417599179844,
+      3.346726044325807,
+      -4.548556045327974
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-21",
+  "compatible_settings": []
+}

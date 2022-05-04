@@ -1,0 +1,50 @@
+{
+  "name": "Canon_EOS R5_Laowa 14 mm F/4 FF RL Zero-D__4k_16by9_3840x2160-0.00fps",
+  "note": "",
+  "calibrated_by": "Chrigu.videography",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "Laowa 14 mm F/4 FF RL Zero-D",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2022-01-17",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 43,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.518067534056412,
+    "camera_matrix": [
+      [
+        1708.5713992047529,
+        0.0,
+        1920.0
+      ],
+      [
+        0.0,
+        1708.5692135031309,
+        1080.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.331279278284291,
+      0.20147174686889377,
+      -0.11293423483659792,
+      0.09364846879286594
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

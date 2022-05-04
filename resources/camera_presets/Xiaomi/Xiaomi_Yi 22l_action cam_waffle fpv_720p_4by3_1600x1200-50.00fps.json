@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi 22l_action cam_waffle fpv_720p_4by3_1600x1200-50.00fps",
+  "note": "",
+  "calibrated_by": "mario yosef",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi 22l",
+  "lens_model": "action cam",
+  "camera_setting": "waffle fpv",
+  "calib_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "orig_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "output_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4440593776035249,
+    "camera_matrix": [
+      [
+        702.608425017746,
+        0.0,
+        803.6816202781849
+      ],
+      [
+        0.0,
+        701.9426461720641,
+        625.9022099980267
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08651353976908815,
+      0.024388422650125655,
+      -0.049176388864297864,
+      0.02015084425956759
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-28",
+  "compatible_settings": []
+}

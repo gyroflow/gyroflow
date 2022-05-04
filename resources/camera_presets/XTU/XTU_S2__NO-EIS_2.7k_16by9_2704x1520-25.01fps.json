@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S2__NO-EIS_2.7k_16by9_2704x1520-25.01fps",
+  "note": "",
+  "calibrated_by": "lc",
+  "camera_brand": "XTU",
+  "camera_model": "S2",
+  "lens_model": "",
+  "camera_setting": "NO-EIS",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.010426,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7238472613367348,
+    "camera_matrix": [
+      [
+        1371.7315075850713,
+        0.0,
+        1370.8016764554325
+      ],
+      [
+        0.0,
+        1370.814178777903,
+        720.0118758081927
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.02609508770801824,
+      -0.003392591619672542,
+      -0.0035549921806153806,
+      0.0014868033127950814
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-11",
+  "compatible_settings": []
+}

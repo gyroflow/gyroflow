@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_S20 FE_STD_AUTO_1080p_16by9_1920x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "rozruba rozruba",
+  "camera_brand": "Samsung",
+  "camera_model": "S20 FE",
+  "lens_model": "STD",
+  "camera_setting": "AUTO",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.015343,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.26401848615941503,
+    "camera_matrix": [
+      [
+        1591.53108603408,
+        0.0,
+        970.0209059660148
+      ],
+      [
+        0.0,
+        1593.3075620535133,
+        532.9704459455922
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3150759897567637,
+      0.5463380938497928,
+      -1.2728984193893869,
+      1.4297448359233058
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-16",
+  "compatible_settings": []
+}

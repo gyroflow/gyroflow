@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_NX 500_16 mm 1:2.4 F2.4__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Addison",
+  "camera_brand": "Samsung",
+  "camera_model": "NX 500",
+  "lens_model": "16 mm 1:2.4 F2.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4871606274184124,
+    "camera_matrix": [
+      [
+        1332.8477379793137,
+        0.0,
+        974.8364622034068
+      ],
+      [
+        0.0,
+        1332.854146075012,
+        539.8975794335649
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3352387514079266,
+      0.26203435172714135,
+      -0.8513077714987948,
+      1.1711722913282865
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-26",
+  "compatible_settings": []
+}

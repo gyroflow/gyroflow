@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_Canon 16-35mm f4 L_16mm_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "PC_03_Alex",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Canon 16-35mm f4 L",
+  "camera_setting": "16mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 39.99,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9468249013726668,
+    "camera_matrix": [
+      [
+        1741.2454722189127,
+        0.0,
+        1967.3827048008911
+      ],
+      [
+        0.0,
+        1739.0461154165891,
+        1120.8443353013308
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30292750107030186,
+      0.04685495860853468,
+      0.09208307412976748,
+      0.012755923881781012
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-20",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_GH4_Laowa 9mm 2.8 Zero-D__1080p_1.90by1_1920x1012-23.88fps",
+  "note": "",
+  "calibrated_by": "Ansel Luchau",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH4",
+  "lens_model": "Laowa 9mm 2.8 Zero-D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1012
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.884245,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3650609018289519,
+    "camera_matrix": [
+      [
+        1135.7691829464793,
+        0.0,
+        956.3299635249834
+      ],
+      [
+        0.0,
+        1134.78778015469,
+        492.77224500843187
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3344826473404479,
+      0.2360159862088234,
+      -0.4428863421322866,
+      0.5514927112528591
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-27",
+  "compatible_settings": []
+}

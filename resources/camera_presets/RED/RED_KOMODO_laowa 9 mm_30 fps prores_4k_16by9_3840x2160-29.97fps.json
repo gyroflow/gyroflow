@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_laowa 9 mm_30 fps prores_4k_16by9_3840x2160-29.97fps",
+  "note": "30 fps prores",
+  "calibrated_by": "Nils & Pollo",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "laowa 9 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5635843536275646,
+    "camera_matrix": [
+      [
+        2105.0227298862164,
+        0.0,
+        1933.007882735341
+      ],
+      [
+        0.0,
+        2104.10793572046,
+        1074.6948671502678
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3288491796300002,
+      0.1583023118262125,
+      -0.11355493485757308,
+      0.18361370812563216
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Action 2___2.5k_16by9_2688x1512-29.97fps",
+  "note": "",
+  "calibrated_by": "matteo",
+  "camera_brand": "DJI",
+  "camera_model": "Action 2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6856964410496281,
+    "camera_matrix": [
+      [
+        1005.2104063717688,
+        0.0,
+        1344.702163737345
+      ],
+      [
+        0.0,
+        1003.0793204957668,
+        768.8355214527425
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32809174444696454,
+      0.1568790539164731,
+      0.03955689796553341,
+      0.038102170702881695
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-04-03",
+  "compatible_settings": []
+}

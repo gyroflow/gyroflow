@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_Oneplus 9 Pro_23mm Main Camera_Motion Cam RAW Full Sensor_2k_4by3_2000x1504-30.00fps",
+  "note": "",
+  "calibrated_by": "Florian Koch",
+  "camera_brand": "OnePlus",
+  "camera_model": "Oneplus 9 Pro",
+  "lens_model": "23mm Main Camera",
+  "camera_setting": "Motion Cam RAW Full Sensor",
+  "calib_dimension": {
+    "w": 2000,
+    "h": 1504
+  },
+  "orig_dimension": {
+    "w": 2000,
+    "h": 1504
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3008
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8109921571697088,
+    "camera_matrix": [
+      [
+        1411.501812469678,
+        0.0,
+        997.0715568565322
+      ],
+      [
+        0.0,
+        1410.3153470259788,
+        738.2047695753049
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3100444376958492,
+      0.2005851790411933,
+      1.0801749882632423,
+      -2.610050902879661
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-02",
+  "compatible_settings": []
+}

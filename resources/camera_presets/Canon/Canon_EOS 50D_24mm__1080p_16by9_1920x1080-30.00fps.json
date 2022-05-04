@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 50D_24mm__1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "DroneAerialShot",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 50D",
+  "lens_model": "24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5894965869777167,
+    "camera_matrix": [
+      [
+        2233.760338085877,
+        0.0,
+        963.8220505761004
+      ],
+      [
+        0.0,
+        2233.9896460415157,
+        538.4769966527535
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2706866549639512,
+      -1.0137933776599155,
+      10.36559112802036,
+      -31.52875718392844
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

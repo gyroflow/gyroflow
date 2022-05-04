@@ -1,0 +1,66 @@
+{
+  "name": "EKEN_H9___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "God",
+  "camera_brand": "EKEN",
+  "camera_model": "H9",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.9955136045041497,
+    "camera_matrix": [
+      [
+        1023.3400676218708,
+        0.0,
+        1091.6079409407937
+      ],
+      [
+        0.0,
+        1027.4440697875489,
+        532.1377729920865
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12885030742640832,
+      -0.2543726432465359,
+      0.17497576349682642,
+      0.10316142849737626
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc1",
+  "date": "2022-02-06",
+  "compatible_settings": []
+}

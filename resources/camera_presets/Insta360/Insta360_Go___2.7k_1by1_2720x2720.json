@@ -1,0 +1,46 @@
+{
+  "name": "Insta360_Go___2.7k_1by1_2720x2720-0.00fps",
+  "note": "",
+  "calibrated_by": "WizzXFPV",
+  "camera_brand": "Insta360",
+  "camera_model": "Go",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-07",
+  "official": true,
+  "calib_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "num_images": 15,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5608772649505656,
+    "camera_matrix": [
+      [
+        898.028734672711,
+        0.0,
+        1360.0
+      ],
+      [
+        0.0,
+        899.0702103510681,
+        1360.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0986916135519954,
+      0.0006971280320081906,
+      -0.037586634604174725,
+      0.011019890814234844
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

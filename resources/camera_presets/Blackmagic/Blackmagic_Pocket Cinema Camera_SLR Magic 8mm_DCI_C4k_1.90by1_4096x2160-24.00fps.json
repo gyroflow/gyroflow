@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera_SLR Magic 8mm_DCI_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Rick",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera",
+  "lens_model": "SLR Magic 8mm",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5529824134324595,
+    "camera_matrix": [
+      [
+        1912.44013188018,
+        0.0,
+        2001.917075079876
+      ],
+      [
+        0.0,
+        1911.1421552797024,
+        1053.191343628917
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2658846127378208,
+      0.19633619933628663,
+      -0.05817436275481649,
+      0.08936644274570629
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

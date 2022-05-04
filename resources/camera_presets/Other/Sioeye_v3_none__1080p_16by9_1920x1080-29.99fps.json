@@ -1,0 +1,66 @@
+{
+  "name": "Sioeye_v3_none_超广角_1080p_16by9_1920x1080-29.99fps",
+  "note": "none",
+  "calibrated_by": "MOUYYFPV",
+  "camera_brand": "Sioeye",
+  "camera_model": "v3",
+  "lens_model": "none",
+  "camera_setting": "超广角",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.98554,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6577297727778748,
+    "camera_matrix": [
+      [
+        934.441113986704,
+        0.0,
+        965.9283357547572
+      ],
+      [
+        0.0,
+        935.6777217533574,
+        563.3437045502558
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.007147971344031396,
+      -0.05927643517804352,
+      0.10481219080370031,
+      -0.06113930760595046
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-05",
+  "compatible_settings": []
+}

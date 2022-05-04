@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_samyang 45mm__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Samuel Straciak",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "samyang 45mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0739646162090666,
+    "camera_matrix": [
+      [
+        6197.2887423925895,
+        0.0,
+        1905.7880215687012
+      ],
+      [
+        0.0,
+        6182.280171720879,
+        1068.5760562461437
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.40240082671079713,
+      0.08411326359920311,
+      34.65217178691814,
+      -450.8957082086749
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

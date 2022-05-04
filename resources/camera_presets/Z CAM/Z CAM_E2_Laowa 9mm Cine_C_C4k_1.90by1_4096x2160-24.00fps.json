@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2_Laowa 9mm Cine_C_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "qoey",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 9mm Cine",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 3,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2748660167667651,
+    "camera_matrix": [
+      [
+        1943.8051801037784,
+        0.0,
+        2023.9461005779187
+      ],
+      [
+        0.0,
+        1934.489920298475,
+        1041.5284918944492
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3374750104840466,
+      0.1889701261654965,
+      -0.16072459000057962,
+      0.18777995573925593
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-13",
+  "compatible_settings": []
+}

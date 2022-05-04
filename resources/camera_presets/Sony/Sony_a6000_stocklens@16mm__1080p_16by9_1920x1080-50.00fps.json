@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6000_stocklens@16mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "s .",
+  "camera_brand": "Sony",
+  "camera_model": "a6000",
+  "lens_model": "stocklens@16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.35381686455354516,
+    "camera_matrix": [
+      [
+        1319.2926328466874,
+        0.0,
+        951.0841340812548
+      ],
+      [
+        0.0,
+        1313.0644983025772,
+        550.4101649657947
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2939639100610578,
+      0.11396598641265034,
+      0.09958290111855594,
+      0.03513369539775783
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-04",
+  "compatible_settings": []
+}

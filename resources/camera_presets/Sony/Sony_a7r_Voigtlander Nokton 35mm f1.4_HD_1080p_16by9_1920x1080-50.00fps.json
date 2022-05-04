@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7r_Voigtlander Nokton 35mm f1.4_HD_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Emi",
+  "camera_brand": "Sony",
+  "camera_model": "a7r",
+  "lens_model": "Voigtlander Nokton 35mm f1.4",
+  "camera_setting": "HD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5131977057232857,
+    "camera_matrix": [
+      [
+        2072.202694272139,
+        0.0,
+        977.3882625835045
+      ],
+      [
+        0.0,
+        2073.8790489280673,
+        553.2886640274031
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20705106922476776,
+      0.41391399378222615,
+      -2.7770936627995138,
+      5.661981314013087
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-03-18",
+  "compatible_settings": []
+}

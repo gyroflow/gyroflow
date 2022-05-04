@@ -1,0 +1,51 @@
+{
+  "name": "Caddx_Nebula Pro Micro___720p_4by3_1440x1080-0.00fps",
+  "note": "",
+  "calibrated_by": "IevgenSukhiy",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro Micro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calibrator_version": "0.3.0-beta",
+  "date": "2021-11-01",
+  "official": true,
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "input_horizontal_stretch": 1,
+  "num_images": 50,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.21144656299803768,
+    "camera_matrix": [
+      [
+        683.5074272370562,
+        0.0,
+        720.0
+      ],
+      [
+        0.0,
+        683.1159292478405,
+        540.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.019441112845720487,
+      0.01823144914523856,
+      -0.0182919879250586,
+      0.007615755996471329
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

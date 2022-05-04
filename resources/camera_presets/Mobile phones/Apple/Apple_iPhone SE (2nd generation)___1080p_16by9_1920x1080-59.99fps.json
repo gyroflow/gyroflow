@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone SE (2nd generation)___1080p_16by9_1920x1080-59.99fps",
+  "note": "",
+  "calibrated_by": "",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone SE (2nd generation)",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.994556,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8003486579239611,
+    "camera_matrix": [
+      [
+        1635.1006206124011,
+        0.0,
+        944.7846010321812
+      ],
+      [
+        0.0,
+        1709.045815954393,
+        722.9112685938475
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5046353842177722,
+      0.4304592731176664,
+      -2.3804024566699007,
+      -1.585813729387728
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-09",
+  "compatible_settings": []
+}

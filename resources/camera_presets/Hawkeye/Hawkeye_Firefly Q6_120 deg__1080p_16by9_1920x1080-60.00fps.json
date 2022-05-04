@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly Q6_120 deg__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Mariano Dupont",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Q6",
+  "lens_model": "120 deg",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 13,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4784014206246866,
+    "camera_matrix": [
+      [
+        1067.2454596322225,
+        0.0,
+        993.2540668786886
+      ],
+      [
+        0.0,
+        1078.2675454199305,
+        526.5226547518795
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03030487490366068,
+      -0.016935001145732268,
+      0.03864306246035998,
+      -0.033273797498171505
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-17",
+  "compatible_settings": []
+}

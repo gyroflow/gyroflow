@@ -1,0 +1,46 @@
+{
+  "name": "Thieye_t5_Stock__2.5k_16by9_2560x1440-0.00fps",
+  "note": "",
+  "calibrated_by": "HRS",
+  "camera_brand": "Thieye",
+  "camera_model": "t5",
+  "lens_model": "Stock",
+  "camera_setting": "",
+  "calibrator_version": "0.2.1-alpha",
+  "date": "2021-03-17",
+  "official": true,
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "num_images": 13,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4279234195879889,
+    "camera_matrix": [
+      [
+        1321.7723584024666,
+        0.0,
+        1280.0
+      ],
+      [
+        0.0,
+        1322.3176314656837,
+        720.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03351433181522646,
+      -0.013900947919972378,
+      0.01536866266812386,
+      -0.006976977039457656
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {}
+}

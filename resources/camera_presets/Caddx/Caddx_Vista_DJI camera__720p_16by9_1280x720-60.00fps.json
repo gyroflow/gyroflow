@@ -1,0 +1,66 @@
+{
+  "name": "Caddx_Vista_DJI camera__720p_16by9_1280x720-60.00fps",
+  "note": "",
+  "calibrated_by": "jcdub",
+  "camera_brand": "Caddx",
+  "camera_model": "Vista",
+  "lens_model": "DJI camera",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.25167818847457274,
+    "camera_matrix": [
+      [
+        579.9910041005511,
+        0.0,
+        649.3759366493331
+      ],
+      [
+        0.0,
+        579.3841231408758,
+        363.0354675946771
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.02423611261277688,
+      0.01463703184112814,
+      -0.015187068169597044,
+      0.005147856776822698
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-21",
+  "compatible_settings": []
+}

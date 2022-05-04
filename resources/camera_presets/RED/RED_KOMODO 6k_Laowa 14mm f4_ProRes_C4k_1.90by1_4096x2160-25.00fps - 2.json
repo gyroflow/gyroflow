@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO 6k_Laowa 14mm f4_ProRes_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "tofu10FPV",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6k",
+  "lens_model": "Laowa 14mm f4",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3573298721548478,
+    "camera_matrix": [
+      [
+        2214.191913391957,
+        0.0,
+        2053.564017765305
+      ],
+      [
+        0.0,
+        2214.963435455473,
+        1090.097486978918
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3346980953913764,
+      0.06417073744051516,
+      0.14500710806488976,
+      -0.07916453947593952
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

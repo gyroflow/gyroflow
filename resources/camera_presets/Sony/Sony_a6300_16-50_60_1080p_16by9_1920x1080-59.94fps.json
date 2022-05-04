@@ -1,0 +1,62 @@
+{
+  "name": "Sony_a6300_16-50_60_1080p_16by9_1920x1080-59.94fps",
+  "note": "16mm",
+  "calibrated_by": "Hugo Chiang",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "16-50",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.94,
+  "official": true,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3975875486668711,
+    "camera_matrix": [
+      [
+        1312.460493055533,
+        0.0,
+        961.8287573940896
+      ],
+      [
+        0.0,
+        1312.1323702996897,
+        533.102419386566
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34657287004707893,
+      -0.2452173718730918,
+      1.414088967125782,
+      -1.3625626065043135
+    ]
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": []
+  },
+  "identifier": "",
+  "calibrator_version": "0.4.0",
+  "date": "2022-01-04"
+}

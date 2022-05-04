@@ -1,0 +1,66 @@
+{
+  "name": "Apple_iPhone 13 Pro (v1.1)_Wide__4k_16by9_3840x2160-59.97fps",
+  "note": "",
+  "calibrated_by": "Booz_FPV",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 13 Pro (v1.1)",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.974369,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2847979538575385,
+    "camera_matrix": [
+      [
+        2776.244973024647,
+        0.0,
+        1927.0612032039649
+      ],
+      [
+        0.0,
+        2775.6596767995293,
+        1089.8897218606662
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.641188694477342,
+      -1.9088955905614655,
+      5.504464128136773,
+      -4.678569764541605
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-05",
+  "compatible_settings": []
+}

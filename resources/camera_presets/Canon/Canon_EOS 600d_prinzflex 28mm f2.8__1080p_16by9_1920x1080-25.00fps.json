@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 600d_prinzflex 28mm f2.8__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Giovanni Riccio",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 600d",
+  "lens_model": "prinzflex 28mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3912046396081544,
+    "camera_matrix": [
+      [
+        2587.352775468862,
+        0.0,
+        912.2012209325646
+      ],
+      [
+        0.0,
+        2585.706869713406,
+        500.2339696386728
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24275071923356023,
+      0.16156666518782495,
+      0.7027726130972037,
+      -1.795250275972992
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-08",
+  "compatible_settings": []
+}
