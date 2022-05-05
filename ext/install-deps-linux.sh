@@ -26,8 +26,6 @@ if [ "$1" != "CI" ] || [ "$1" == "docker" ]; then
 fi
 if [ "$1" == "docker" ]; then
     # Install AppImage builder
-    sudo ls -lrth /usr/bin/python*
-
     sudo apt-get install -y debian-keyring debian-archive-keyring
     sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
     sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
@@ -39,7 +37,7 @@ if [ "$1" == "docker" ]; then
     sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
     sudo pip3 install --upgrade pip
-    sudo pip3 install appimage-builder
+    sudo pip3 install appimage-builder==1.0.0a3
 fi
 
 # Download and extract ffmpeg
