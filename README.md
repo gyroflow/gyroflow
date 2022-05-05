@@ -55,7 +55,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Fully multi-threaded
 - Rolling shutter correction
 - Supports already stabilized GoPro videos (captured with Hypersmooth enabled) (Hero 8 and up)
-- Supports and renders 10-bit videos (and higher, up to 16-bit 4:4:4, direct YUV rendering with no data loss - no conversion to RGB)
+- Supports and renders 10-bit videos (up to 16-bit 4:4:4:4 for regular codecs and 32-bit float for OpenEXR - works directly on YUV data to keep maximum quality)
 - Customizable lens correction strength
 - Render queue
 - Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
