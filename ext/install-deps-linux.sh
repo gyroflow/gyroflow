@@ -37,7 +37,7 @@ if [ "$1" == "docker" ]; then
     sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
     sudo pip3 install --upgrade pip
-    sudo pip3 install appimage-builder==1.0.0a3
+    sudo pip3 install appimage-builder==0.9.2
 fi
 
 # Download and extract ffmpeg
