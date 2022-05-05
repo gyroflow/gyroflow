@@ -30,8 +30,8 @@ MenuItem {
     ];
 
     Settings {
+        id: settings;
         property alias defaultCodec: codec.currentIndex;
-        property alias exportGpu: gpu.checked;
         property alias exportAudio: audio.checked;
     }
 
@@ -147,7 +147,14 @@ MenuItem {
             if ((format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit"))) {
                 gpu.enabled2 = false;
             }
-            gpu.checked = gpu.enabled2;
+            const gpuChecked = +settings.value("exportGpu-" + exportFormats[currentIndex].name, -1);
+            if (gpuChecked == -1) {
+                gpu.preventSave = true;
+                gpu.checked = gpu.enabled2;
+                gpu.preventSave = false;
+            } else {
+                gpu.checked = gpuChecked == 1;
+            }
         }
         onCurrentIndexChanged: {
             const format = exportFormats[currentIndex];
@@ -254,7 +261,7 @@ MenuItem {
                 }
 
                 Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
-                Action { text: "6k (6016 × 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
+                Action { text: "6k (6016 x 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
                 Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize(3840, 2160) }
                 Action { text: "2k (2048 x 1080)";     onTriggered: sizeMenu.setSize(2048, 1080) }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
@@ -299,6 +306,11 @@ MenuItem {
         id: gpu;
         text: qsTr("Use GPU encoding");
         checked: true;
+        onCheckedChanged: {
+            if (!preventSave)
+                settings.setValue("exportGpu-" + exportFormats[codec.currentIndex].name, checked? 1 : 0);
+        }
+        property bool preventSave: false;
         property bool enabled2: true;
         enabled: enabled2;
         tooltip: enabled2? qsTr("GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.") + "\n" +

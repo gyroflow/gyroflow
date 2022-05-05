@@ -103,7 +103,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
         var uv = f * distort_point(pos, k) + c;
 
         if (bool(params.flags & 2)) { // GoPro Superview
-            let size = vec2<f32>(params.width, params.height);
+            let size = vec2<f32>(f32(params.width), f32(params.height));
             uv = to_superview((uv / size) - 0.5);
             uv = (uv + 0.5) * size;
         }
@@ -111,7 +111,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
         if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
-        return uv 
+        return uv;
     }
     return vec2<f32>(-99999.0, -99999.0);
 }
