@@ -65,6 +65,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Two offsets calculation methods
 - Modern responsive user interface with Dark and Light theme
 - Adaptive zoom (dynamic cropping)
+- Support for image sequences (PNG and OpenEXR)
 - Based on [telemetry-parser](https://github.com/AdrianEddy/telemetry-parser) - supports all gyro sources out of the box
 - Gyro low pass filter, arbitrary rotation (pitch, roll, yaw angles) and orientation
 - Multiple gyro integration methods for orientation determination
@@ -72,7 +73,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Cross-platform - currently works on Windows/Linux/Mac, with Android and iOS apps coming
 - Multiple UI languages
 - Supports variable and high frame rate videos, all calculations are done on timestamps
-- x264, x265, ProRes and PNG outputs, with x264 and x265 fully GPU accelerated
+- x264, x265, ProRes, DNxHD, PNG and OpenEXR outputs, with x264 and x265 fully GPU accelerated (ProRes also accelerated on Apple M1 Pro/Max/Ultra)
 - Automatic lens calibration process
 - Fully zero-copy GPU preview rendering (working but experimental)
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be used to create OpenFX and Adobe plugins (on the TODO list)
