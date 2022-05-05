@@ -1002,27 +1002,27 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="267"/>
       <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
+      <translation>停止</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="333"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>是</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="334"/>
       <source>Rename</source>
-      <translation type="unfinished">Rename</translation>
+      <translation>重命名</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>否</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>Output file already exists.</source>
-      <translation type="unfinished">Output file already exists.</translation>
+      <translation>匯出檔案已存在。</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="435"/>

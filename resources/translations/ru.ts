@@ -1002,27 +1002,27 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="267"/>
       <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
+      <translation>Остановить</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="333"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Да</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="334"/>
       <source>Rename</source>
-      <translation type="unfinished">Rename</translation>
+      <translation>Переименовать</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Нет</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>Output file already exists.</source>
-      <translation type="unfinished">Output file already exists.</translation>
+      <translation>Файл уже существует.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="435"/>
@@ -1644,22 +1644,22 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/Util.js" line="22"/>
       <source>d</source>
-      <translation type="unfinished">d</translation>
+      <translation>д</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="23"/>
       <source>h</source>
-      <translation type="unfinished">h</translation>
+      <translation>ч</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="24"/>
       <source>m</source>
-      <translation type="unfinished">m</translation>
+      <translation>м</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="25"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>с</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="27"/>

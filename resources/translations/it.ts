@@ -998,27 +998,27 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="267"/>
       <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
+      <translation>Stop</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="333"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Si</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="334"/>
       <source>Rename</source>
-      <translation type="unfinished">Rename</translation>
+      <translation>Rinomina</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>No</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="335"/>
       <source>Output file already exists.</source>
-      <translation type="unfinished">Output file already exists.</translation>
+      <translation>Il file esiste già.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="435"/>
