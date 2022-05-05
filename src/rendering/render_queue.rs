@@ -693,10 +693,6 @@ impl RenderQueue {
                                 err(("An error occured: %1".to_string(), e.to_string()));
                                 return;
                             }
-                            stab.set_size(video_size.0, video_size.1);
-                            stab.set_output_size(video_size.0, video_size.1);
-                            stab.recompute_blocking();
-        
                             let camera_id = stab.camera_id.read();
         
                             let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
@@ -721,7 +717,11 @@ impl RenderQueue {
                                 render_options.output_height = output_dim.h;
                             }
 
-                            // dbg!(stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
+                            stab.set_size(video_size.0, video_size.1);
+                            stab.set_output_size(render_options.output_width, render_options.output_height);
+                            stab.recompute_blocking();
+
+                            // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
                             loaded(render_options);
     
