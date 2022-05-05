@@ -1258,7 +1258,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.0.0-rc5"
+version = "1.0.0"
 dependencies = [
  "breakpad-sys",
  "bytemuck",
@@ -1292,7 +1292,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.0.0-rc5"
+version = "1.0.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -2035,9 +2035,9 @@ dependencies = [
 
 [[package]]
 name = "num_threads"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aba1801fb138d8e85e11d0fc70baf4fe1cdfffda7c6cd34a854905df588e5ed0"
+checksum = "2819ce041d2ee131036f4fc9d6ae7ae125a3a40e97ba64d04fe799ad9dabbb44"
 dependencies = [
  "libc",
 ]
@@ -2777,9 +2777,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.80"
+version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f972498cf015f7c0746cac89ebe1d6ef10c293b94175a243a2d9442c163d9944"
+checksum = "9b7ce2b32a1aed03c558dc61a5cd328f15aff2dbc17daad8fb8af04d2100e15c"
 dependencies = [
  "indexmap",
  "itoa 1.0.1",
@@ -3300,7 +3300,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#ee3d23d5467898d276b73491ac077e5241589b75"
+source = "git+https://github.com/gfx-rs/wgpu.git#af259aa12a6df033f8e23460215af5f1b64cf3a1"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3320,7 +3320,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#ee3d23d5467898d276b73491ac077e5241589b75"
+source = "git+https://github.com/gfx-rs/wgpu.git#af259aa12a6df033f8e23460215af5f1b64cf3a1"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -3342,7 +3342,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#ee3d23d5467898d276b73491ac077e5241589b75"
+source = "git+https://github.com/gfx-rs/wgpu.git#af259aa12a6df033f8e23460215af5f1b64cf3a1"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -3379,7 +3379,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#ee3d23d5467898d276b73491ac077e5241589b75"
+source = "git+https://github.com/gfx-rs/wgpu.git#af259aa12a6df033f8e23460215af5f1b64cf3a1"
 dependencies = [
  "bitflags",
 ]

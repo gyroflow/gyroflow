@@ -101,6 +101,7 @@ impl LensProfile {
         self.orig_dimension  = Dimensions { w: cal.width, h: cal.height };
         self.num_images = cal.used_points.len();
         self.is_superview = cal.is_superview;
+        self.optimal_fov = None;
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
@@ -201,7 +202,7 @@ impl LensProfile {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mat = self.get_camera_matrix_internal().unwrap();
 
-            if self.optimal_fov.is_none() {
+            if self.optimal_fov.is_none() && self.num_images > 3 {
                 self.optimal_fov = Some(self.calculate_optimal_fov(video_size));
             }
             
