@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2022 Maik <myco at gmx>
+
 use super::*;
 use crate::stabilization::undistort_points_with_rolling_shutter;
 use std::collections::BTreeMap;

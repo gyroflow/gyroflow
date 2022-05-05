@@ -79,7 +79,8 @@ pub struct Controller {
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
 
-    get_profiles: qt_method!(fn(&self) -> QVariantList),
+    load_profiles: qt_method!(fn(&self)),
+    all_profiles_loaded: qt_signal!(profiles: QVariantList),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(),
 
@@ -1023,12 +1024,19 @@ impl Controller {
         }
     }
 
-    fn get_profiles(&self) -> QVariantList {
-        let mut db = self.stabilizer.lens_profile_db.write();
-        db.load_all();
-        // db.list_all_metadata();
-        // db.process_adjusted_metadata();
-        db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect()
+    fn load_profiles(&self) {
+        let loaded = util::qt_queued_callback_mut(self, |this, all_names: QVariantList| {
+            this.all_profiles_loaded(all_names)
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        core::run_threaded(move || {
+            let mut db = db.write();
+            db.load_all();
+            // db.list_all_metadata();
+            // db.process_adjusted_metadata();
+            let all_names = db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect();
+            loaded(all_names);
+        });        
     }
 
     fn fetch_profiles_from_github(&self) {

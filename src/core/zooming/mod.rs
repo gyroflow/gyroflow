@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2022 Maik <myco at gmx>
+
 pub mod fov_default;
 pub mod fov_direct;
 pub mod fov_iterative;

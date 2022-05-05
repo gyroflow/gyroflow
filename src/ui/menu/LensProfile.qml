@@ -37,7 +37,7 @@ MenuItem {
     }
 
     function updateProfilesModel() {
-        lensProfilesList = controller.get_profiles();
+        controller.load_profiles();
 
         let list = [];
         for (const x of lensProfilesList) {
@@ -63,6 +63,9 @@ MenuItem {
     }
     Connections {
         target: controller;
+        function onAll_profiles_loaded(profiles) {
+            lensProfilesList = profiles;
+        }
         function onLens_profiles_updated() {
             profilesUpdateTimer.start();
         }

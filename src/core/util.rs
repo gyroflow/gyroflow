@@ -1,4 +1,5 @@
-
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use std::fs::File;
 use std::io::Result;

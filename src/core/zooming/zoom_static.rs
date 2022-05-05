@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2021 Marc Roeschlin, Adrian, Maik
+
 use super::*;
 use std::collections::BTreeMap;
 
