@@ -12,6 +12,7 @@ opencl = ["gyroflow-core/use-opencl"]
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 gyroflow-core = { path = "src/core/", default-features = false }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git" }
 
 [dependencies]
 cstr = "0.2.10"
@@ -25,8 +26,6 @@ fastrand = "1.7.0"
 itertools = "0.10.3"
 
 breakpad-sys = "0.1.1"
-
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git" }
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}

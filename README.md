@@ -232,7 +232,7 @@ The project also supports UI live reload, it's a super quick way of working with
 4. Add a Rust target: `rustup target add aarch64-linux-android`
 5. Update `Cargo.toml` to comment out `[[[bin]]` section and uncomment `[lib]` section
 6. Patch `C:\Users\you\.cargo\registry\src\github.com-1ecc6299db9ec823\opencv-0.61.3\build.rs`: Change `if cfg!(target_env = "msvc")` to `if std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc"`
-7. Update paths in `_deployment/build-android.ps1` and in `_deployment/android/android-deploy.json`
+7. Update paths in `_deployment/build-android.ps1`
 8. Run `.\_deployment\build-android.ps1` in Powershell
 
 ### Profiling on Windows

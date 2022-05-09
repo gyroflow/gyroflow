@@ -6,6 +6,9 @@ use std::collections::{ HashSet, HashMap };
 use crate::LensProfile;
 use std::path::PathBuf;
 
+#[cfg(target_os = "android")]
+static LENS_PROFILES_STATIC: include_dir::Dir = include_dir::include_dir!("$CARGO_MANIFEST_DIR/../../resources/camera_presets/");
+
 #[derive(Default)]
 pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
@@ -52,32 +55,45 @@ impl LensProfileDatabase {
 
         let _time = std::time::Instant::now();
         
+        let mut load = |data: &str, f_name: &str| {
+            match LensProfile::from_json(data) {
+                Ok(mut v) => {
+                    v.filename = f_name.to_string();
+                    for profile in v.get_all_matching_profiles() {
+                        let key = if !profile.identifier.is_empty() { 
+                            profile.identifier.clone()
+                        } else {
+                            f_name.to_string()
+                        };
+                        if self.map.contains_key(&key) {
+                            if !self.loaded {
+                                log::warn!("Lens profile already present: {}, filename: {} from {}", key, f_name, self.map.get(&key).unwrap().filename);
+                            }
+                        } else {
+                            self.map.insert(key, profile);
+                        }
+                    }
+                },
+                Err(e) => {
+                    log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
+                }
+            }
+        };
+
+        #[cfg(target_os = "android")]
+        for entry in LENS_PROFILES_STATIC.find("**/*.json").unwrap() {
+            if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
+                load(data, &entry.path().display().to_string());
+            }
+        }
+
+        #[cfg(not(target_os = "android"))]
         WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
                 if f_name.ends_with(".json") {
-                    let mut data = std::fs::read_to_string(&f_name).unwrap();
-                    match LensProfile::from_json(&mut data) {
-                        Ok(mut v) => {
-                            v.filename = f_name.clone();
-                            for profile in v.get_all_matching_profiles() {
-                                let key = if !profile.identifier.is_empty() { 
-                                    profile.identifier.clone()
-                                } else {
-                                    f_name.clone()
-                                };
-                                if self.map.contains_key(&key) {
-                                    if !self.loaded {
-                                        log::warn!("Lens profile already present: {}, filename: {} from {}", key, f_name, self.map.get(&key).unwrap().filename);
-                                    }
-                                } else {
-                                    self.map.insert(key, profile);
-                                }
-                            }
-                        },
-                        Err(e) => {
-                            log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
-                        }
+                    if let Ok(data) = std::fs::read_to_string(&f_name) {
+                        load(&data, &f_name);
                     }
                 }
             }
