@@ -98,6 +98,8 @@ pub struct RenderQueue {
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
     set_error_string: qt_method!(fn(&mut self, job_id: u32, err: QString)),
 
+    file_exists: qt_method!(fn(&self, path: QString) -> bool),
+
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
 
@@ -735,5 +737,16 @@ impl RenderQueue {
         }
 
         job_id
+    }
+
+    fn file_exists(&self, path: QString) -> bool {
+        let path = std::path::PathBuf::from(path.to_string());
+        for (_id, job) in self.jobs.iter() {
+            let job_path = std::path::Path::new(&job.render_options.output_path);
+            if job_path == path {
+                return true;
+            }
+        }
+        false
     }
 }
