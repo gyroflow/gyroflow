@@ -1,6 +1,6 @@
 {
-  "name": "apeman_A80__Codec video H.264 AVC MPEG-4 AVC\nSize: 1920x1080\nFPS: 60\nScan: progressive\nColor space: ITU-R BT.709\nPixel aspect ratio: 1\nPixel format: yuv420p_1080p_16by9_1920x1080-60.00fps",
-  "note": "Codec video H.264 AVC MPEG-4 AVC\nSize: 1920x1080\nFPS: 60\nScan: progressive\nColor space: ITU-R BT.709\nPixel aspect ratio: 1\nPixel format: yuv420p",
+  "name": "apeman_A80__CH.264 AVC MPEG-4 AVC, Scan: progressive_1080p_16by9_1920x1080-60.00fps",
+  "note": "H.264 AVC MPEG-4 AVC, Scan: progressive",
   "calibrated_by": "xyz",
   "camera_brand": "apeman",
   "camera_model": "A80",
