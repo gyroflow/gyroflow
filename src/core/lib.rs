@@ -536,6 +536,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_is_superview(&self, v: bool) {
         self.lens.write().is_superview = v;
+        #[cfg(feature = "opencv")]
         if let Some(ref mut calib) = *self.lens_calibrator.write() {
             calib.is_superview = v;
         }
