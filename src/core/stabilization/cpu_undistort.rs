@@ -211,6 +211,28 @@ impl<T: PixelType> Stabilization<T> {
                                 if ry > height3 { uv.1 = height3 - (ry - height3); }
                                 if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
                             },
+                            3 => { // Margin with feather
+                                let widthf  = width_f - 1.0;
+                                let heightf = height_f - 1.0;
+
+                                let feather = (params.background_margin_feather * heightf).max(0.0001);
+                                let mut pt2 = uv;
+                                let mut alpha = 1.0;
+                                if (uv.0 > widthf - feather) || (uv.0 < feather) || (uv.1 > heightf - feather) || (uv.1 < feather) {
+                                    alpha = ((widthf - uv.0).min(heightf - uv.1).min(uv.0).min(uv.1) / feather).min(1.0).max(0.0);
+                                    pt2 = (pt2.0 / width_f, pt2.1 / height_f);
+                                    pt2 = (
+                                        ((pt2.0 - 0.5) * (1.0 - params.background_margin)) + 0.5,
+                                        ((pt2.1 - 0.5) * (1.0 - params.background_margin)) + 0.5
+                                    );
+                                    pt2 = (pt2.0 * width_f, pt2.1 * height_f);
+                                }
+
+                                let c1 = sample_input_at::<I, T>(uv, pixels, params, &bg);
+                                let c2 = sample_input_at::<I, T>(pt2, pixels, params, &bg);
+                                *pix_out = PixelType::from_float(c1 * alpha + c2 * (1.0 - alpha));
+                                return;
+                            },
                             _ => { }
                         }
 
