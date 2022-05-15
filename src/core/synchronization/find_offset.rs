@@ -8,13 +8,13 @@ use crate::stabilization::ComputeParams;
 
 use crate::gyro_source::TimeIMU;
 
-pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
     let gyro = &params.gyro;
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
-        for (from_frame, to_frame) in ranges {
-            if *from_frame >= 0 && *to_frame < estimated_gyro.len() as i32 {
-                let mut of_item = estimated_gyro[*from_frame as usize..*to_frame as usize].to_vec();
+        for (from_ts, to_ts) in ranges {
+            let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).map(|v| v.1.clone()).collect();
+            if !of_item.is_empty() {
                 let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
                 let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
                     let ts = x.timestamp_ms + initial_offset;
@@ -63,8 +63,7 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimated_gyro: &[TimeIMU], initial_o
                     });
 
                 if let Some(lowest) = lowest {
-                    let middle_frame = from_frame + (to_frame - from_frame) / 2;
-                    let middle_timestamp = (middle_frame as f64 * 1000.0) / gyro.fps;
+                    let middle_timestamp = (*from_ts as f64 + (to_ts - from_ts) as f64 / 2.0) / 1000.0;
 
                     // Only accept offsets that are within 90% of search size range
                     if (lowest.0 - initial_offset).abs() < search_size * 0.9 {

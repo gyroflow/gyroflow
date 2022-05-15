@@ -353,31 +353,37 @@ impl<T: PixelType> StabilizationManager<T> {
         compute_id
     }
 
-    pub fn get_features_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+    pub fn get_features_pixels(&self, timestamp_us: i64) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
         let mut ret = None;
         if self.params.read().show_detected_features {
-            let (xs, ys) = self.pose_estimator.get_points_for_frame(&frame);
-            for i in 0..xs.len() {
-                if ret.is_none() {
-                    // Only allocate if we actually have any points
-                    ret = Some(Vec::with_capacity(2048));
-                }
-                for xstep in -1..=1i32 {
-                    for ystep in -1..=1i32 {
-                        ret.as_mut().unwrap().push((xs[i] as i32 + xstep, ys[i] as i32 + ystep, 1.0));
+            use crate::util::MapClosest;
+            use synchronization::EstimatorItemInterface;
+
+            if let Some(l) = self.pose_estimator.sync_results.try_read() {
+                if let Some(entry) = l.get_closest(&timestamp_us, 2000) { // closest within 2ms
+                    for pt in entry.item.get_features() {
+                        if ret.is_none() {
+                            // Only allocate if we actually have any points
+                            ret = Some(Vec::with_capacity(2048));
+                        }
+                        for xstep in -1..=1i32 {
+                            for ystep in -1..=1i32 {
+                                ret.as_mut().unwrap().push((pt.0 as i32 + xstep, pt.1 as i32 + ystep, 1.0));
+                            }
+                        }
                     }
                 }
             }
         }
         ret
     }
-    pub fn get_opticalflow_pixels(&self, frame: usize) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+    pub fn get_opticalflow_pixels(&self, timestamp_us: i64) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
         let mut ret = None;
         if self.params.read().show_optical_flow {
             for i in 0..3 {
                 let a = (3 - i) as f32 / 3.0;
-                if let Some(lines) = self.pose_estimator.get_of_lines_for_frame(&(frame + i), 1.0, 1) {
-                    lines.0.into_iter().zip(lines.1.into_iter()).for_each(|(p1, p2)| {
+                if let Some(lines) = self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1) {
+                    lines.0.1.into_iter().zip(lines.1.1.into_iter()).for_each(|(p1, p2)| {
                         if ret.is_none() {
                             // Only allocate if we actually have any points
                             ret = Some(Vec::with_capacity(2048));
@@ -433,7 +439,7 @@ impl<T: PixelType> StabilizationManager<T> {
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
             if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-                if let Some(pxs) = self.get_features_pixels(frame) {
+                if let Some(pxs) = self.get_features_pixels(timestamp_us) {
                     for (x, mut y, _) in pxs {
                         if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
@@ -444,7 +450,7 @@ impl<T: PixelType> StabilizationManager<T> {
                         }
                     }
                 }
-                if let Some(pxs) = self.get_opticalflow_pixels(frame) {
+                if let Some(pxs) = self.get_opticalflow_pixels(timestamp_us) {
                     for (x, mut y, a) in pxs {
                         if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
@@ -575,7 +581,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
-        self.pose_estimator.lowpass_filter(lpf, params.frame_count, params.duration_ms, params.fps);
+        self.pose_estimator.lowpass_filter(lpf, params.fps);
     }
     pub fn set_imu_bias(&self, bx: f64, by: f64, bz: f64) {
         self.gyro.write().set_bias(bx, by, bz);

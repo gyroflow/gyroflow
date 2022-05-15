@@ -435,9 +435,9 @@ pub fn init() -> Result<(), Error> {
 
 pub fn fps_to_rational(fps: f64) -> ffmpeg_next::Rational {
     if fps.fract() > 0.1 {
-        return ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001);
+        ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001)
     } else {
-        return ffmpeg_next::Rational::new(fps.round() as i32, 1);
+        ffmpeg_next::Rational::new(fps.round() as i32, 1)
     }
 }
 

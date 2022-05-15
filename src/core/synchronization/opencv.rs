@@ -2,11 +2,11 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use nalgebra::{ Rotation3, Matrix3, Vector4 };
-use std::collections::BTreeMap;
 use std::ffi::c_void;
 use std::sync::Arc;
 use opencv::core::{ Mat, Size, Point2f, TermCriteria, CV_8UC1 };
 use opencv::prelude::MatTraitConst;
+use super::{ EstimatorItem, EstimatorItemInterface, OpticalFlowPair };
 
 use crate::stabilization::ComputeParams;
 
@@ -15,16 +15,72 @@ use crate::stabilization::ComputeParams;
 
 #[derive(Default, Clone)]
 pub struct ItemOpenCV {
-    features: Mat,
+    features: Vec<(f64, f64)>,
     img: Arc<image::GrayImage>,
-    size: (i32, i32),
-    optical_flow: BTreeMap<usize, Option<(Vec<Point2f>, Vec<Point2f>)>>
+    size: (i32, i32)
 }
 unsafe impl Send for ItemOpenCV { }
 unsafe impl Sync for ItemOpenCV { }
 
+impl EstimatorItemInterface for ItemOpenCV {
+    fn get_features(&self) -> &Vec<(f64, f64)> {
+        &self.features
+    }
+    fn rescale(&mut self, ratio: f32) {
+        for (x, y) in self.features.iter_mut() {
+            *x *= ratio as f64;
+            *y *= ratio as f64;
+        }
+    }
+    
+    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
+        let (pts1, pts2) = self.get_matched_features(next)?;
+
+        let result = || -> Result<Rotation3<f64>, opencv::Error> {
+            let pts11 = crate::stabilization::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+            let pts22 = crate::stabilization::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+
+            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+
+            let a1_pts = Mat::from_slice(&pts1)?;
+            let a2_pts = Mat::from_slice(&pts2)?;
+
+            let identity = Mat::eye(3, 3, opencv::core::CV_64F)?;
+
+            let mut mask = Mat::default();
+            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 1000, &mut mask)?;
+        
+            let mut r1 = Mat::default();
+            let mut t = Mat::default();
+            
+            let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
+            if inliers < 20 {
+                return Err(opencv::Error::new(0, "Model not found".to_string()));
+            }
+            
+            cv_to_rot2(r1)
+        }();
+
+        match result {
+            Ok(res) => Some(res),
+            Err(e) => {
+                log::error!("OpenCV error: {:?}", e);
+                None
+            }
+        }
+    }
+    
+    fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair {
+        self.get_matched_features(to)
+    }
+    fn cleanup(&mut self) {
+        self.img = Arc::new(image::GrayImage::default());
+    }
+}
+
 impl ItemOpenCV {
-    pub fn detect_features(_frame: usize, img: Arc<image::GrayImage>) -> Self {
+    pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
         let (w, h) = (img.width() as i32, img.height() as i32);
         let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, w as usize) };
         
@@ -43,153 +99,58 @@ impl ItemOpenCV {
 
         //let pts = pts.get_mat(ACCESS_READ).unwrap().clone();
         Self {
-            features: pts,
+            features: (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x as f64, x.y as f64))}).collect(),
             size: (w, h),
-            img,
-            optical_flow: BTreeMap::new()
+            img
         }
     }
     
-    pub fn get_features_count(&self) -> usize {
-        self.features.rows() as usize
-    }
-    pub fn get_feature_at_index(&self, i: usize) -> (f32, f32) {
-        if let Ok(pt) = self.features.at::<Point2f>(i as i32) {
-            (pt.x, pt.y)
-        } else {
-            (0.0, 0.0)
-        }
-    }
-    pub fn rescale(&mut self, ratio: f32) {
-        use opencv::prelude::MatTrait;
-        for i in 0..self.features.rows() {
-            let mut pt = self.features.at_mut::<Point2f>(i).unwrap();
-            pt.x *= ratio;
-            pt.y *= ratio;
-        }
-    }
-    
-    pub fn estimate_pose(&self, next: &Self, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
-        let (pts1, pts2) = self.get_matched_features(next)?;
+    fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+        if let EstimatorItem::ItemOpenCV(next) = next {
+            let (w, h) = self.size;
+            if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
 
-        let result = || -> Result<Rotation3<f64>, opencv::Error> {
-            let pts11 = pts1.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
-            let pts22 = pts2.iter().map(|x| (x.x as f64, x.y as f64)).collect::<Vec<(f64, f64)>>();
-            let pts11 = crate::stabilization::undistort_points(&pts11, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
-            let pts22 = crate::stabilization::undistort_points(&pts22, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+            let result = || -> Result<(Vec<(f64, f64)>, Vec<(f64, f64)>), opencv::Error> {
+                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
+                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
+                
+                let pts1: Vec<Point2f> = self.features.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32)).collect();
 
-            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
-            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+                let a1_pts = Mat::from_slice(&pts1)?;
+                //let a2_pts = a2.features;
+                
+                let mut a2_pts = Mat::default();
+                let mut status = Mat::default();
+                let mut err = Mat::default();
 
-            let a1_pts = Mat::from_slice(&pts1)?;
-            let a2_pts = Mat::from_slice(&pts2)?;
-            
-            // let cam_matrix = Mat::from_slice_2d(&[
-            //     [camera_matrix[(0, 0)], 0.0, camera_matrix[(0, 2)]],
-            //     [0.0, camera_matrix[(1, 1)], camera_matrix[(1, 0)]],
-            //     [0.0, 0.0, 1.0]
-            // ])?;
-            let identity = Mat::from_slice_2d(&[
-                [1.0f64, 0.0f64, 0.0f64],
-                [0.0f64, 1.0f64, 0.0f64],
-                [0.0f64, 0.0f64, 1.0f64]
-            ])?;
+                opencv::video::calc_optical_flow_pyr_lk(&a1_img, &a2_img, &a1_pts, &mut a2_pts, &mut status, &mut err, Size::new(21, 21), 3, TermCriteria::new(3/*count+eps*/,30,0.01)?, 0, 1e-4)?;
 
-            // let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &cam_matrix, &Mat::default(), &scaled_k, &Mat::default(), opencv::calib3d::RANSAC, 0.999, 0.1, &mut Mat::default())?;
-            let mut mask = Mat::default();
-            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 1000, &mut mask)?;
-        
-            let mut r1 = Mat::default();
-            // let mut r2 = Mat::default();
-            let mut t = Mat::default();
-            
-            let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
-            if inliers < 20 {
-                return Err(opencv::Error::new(0, "Model not found".to_string()));
-            }
-            
-            cv_to_rot2(r1)
-            // opencv::calib3d::decompose_essential_mat(&e, &mut r1, &mut r2, &mut t)?;
-            // let r1 = cv_to_rot2(r1)?;
-            // let r2 = cv_to_rot2(r2)?;
-            // Ok(if r1.angle() < r2.angle() {
-            //     r1
-            // } else {
-            //     r2
-            // })
-        }();
-
-        match result {
-            Ok(res) => Some(res),
-            Err(e) => {
-                log::error!("OpenCV error: {:?}", e);
-                None
-            }
-        }
-    }
-
-    pub fn get_matched_features(&self, next: &Self) -> Option<(Vec<Point2f>, Vec<Point2f>)> {
-        let (w, h) = self.size;
-        if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
-
-        let result = || -> Result<(Vec<Point2f>, Vec<Point2f>), opencv::Error> {
-            let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-            let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-            
-            let a1_pts = &self.features;
-            //let a2_pts = a2.features;
-            
-            let mut a2_pts = Mat::default();
-            let mut status = Mat::default();
-            let mut err = Mat::default();
-
-            opencv::video::calc_optical_flow_pyr_lk(&a1_img, &a2_img, &a1_pts, &mut a2_pts, &mut status, &mut err, Size::new(21, 21), 3, TermCriteria::new(3/*count+eps*/,30,0.01)?, 0, 1e-4)?;
-
-            let mut pts1: Vec<Point2f> = Vec::new();
-            let mut pts2: Vec<Point2f> = Vec::new();
-            for i in 0..status.rows() {
-                if *status.at::<u8>(i)? == 1u8 {
-                    let pt1 = a1_pts.at::<Point2f>(i)?;
-                    let pt2 = a2_pts.at::<Point2f>(i)?;
-                    if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
-                    && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
-                        pts1.push(*pt1);
-                        pts2.push(*pt2);
+                let mut pts1 = Vec::with_capacity(status.rows() as usize);
+                let mut pts2 = Vec::with_capacity(status.rows() as usize);
+                for i in 0..status.rows() {
+                    if *status.at::<u8>(i)? == 1u8 {
+                        let pt1 = a1_pts.at::<Point2f>(i)?;
+                        let pt2 = a2_pts.at::<Point2f>(i)?;
+                        if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
+                        && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
+                            pts1.push((pt1.x as f64, pt1.y as f64));
+                            pts2.push((pt2.x as f64, pt2.y as f64));
+                        }
                     }
                 }
-            }
-            Ok((pts1, pts2))
-        }();
+                Ok((pts1, pts2))
+            }();
 
-        match result {
-            Ok(res) => Some(res),
-            Err(e) => {
-                log::error!("OpenCV error: {:?}", e);
-                None
+            match result {
+                Ok(res) => Some(res),
+                Err(e) => {
+                    log::error!("OpenCV error: {:?}", e);
+                    None
+                }
             }
+        } else {
+            None
         }
-    }
-
-    pub fn optical_flow_to_frame(&mut self, to: &mut Self, frame_offset: usize, force_update: bool) {
-        if force_update || !self.optical_flow.contains_key(&frame_offset) {
-            let pts = self.get_matched_features(to);
-            self.optical_flow.insert(frame_offset, pts);
-        }
-    }
-    pub fn cleanup(&mut self) {
-        self.img = Arc::new(image::GrayImage::default());
-    }
-
-    pub fn get_optical_flow_lines(&self, frame_offset: usize, scale: f64) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
-        if let Some(&opt_pts) = self.optical_flow.get(&frame_offset).as_ref() {
-            if let Some(pts) = opt_pts {
-                return Some((
-                    pts.0.iter().map(|x| (x.x as f64 * scale, x.y as f64 * scale )).collect::<Vec<(f64, f64)>>(),
-                    pts.1.iter().map(|x| (x.x as f64 * scale, x.y as f64 * scale )).collect::<Vec<(f64, f64)>>()
-                ))
-            }
-        }
-        None
     }
 }
 

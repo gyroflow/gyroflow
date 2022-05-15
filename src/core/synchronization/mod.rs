@@ -7,6 +7,7 @@ use std::sync::atomic::Ordering::SeqCst;
 use std::vec::Vec;
 use parking_lot::RwLock;
 use std::sync::Arc;
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 
@@ -26,31 +27,54 @@ mod find_offset;
 mod find_offset_visually;
 mod autosync;
 pub use autosync::AutosyncProcess;
-
-#[derive(Clone)]
-enum EstimatorItem {
-    #[cfg(feature = "use-opencv")]
-    OpenCV(ItemOpenCV),
-    Akaze(ItemAkaze)
-}
+use crate::util::MapClosest;
+use enum_dispatch::enum_dispatch;
 
 pub type GrayImage = image::GrayImage;
+pub type OpticalFlowPoints = Vec<(f64, f64)>; // timestamp_us, points
+pub type OpticalFlowPair = Option<(OpticalFlowPoints, OpticalFlowPoints)>;
+pub type OpticalFlowPairWithTs = Option<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>;
+
+#[enum_dispatch]
+#[derive(Clone)]
+pub enum EstimatorItem {
+    #[cfg(feature = "use-opencv")]
+    ItemOpenCV,
+    ItemAkaze
+}
+
+#[enum_dispatch(EstimatorItem)]
+pub trait EstimatorItemInterface {
+    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>>;
+    fn get_features(&self) -> &Vec<(f64, f64)>;
+
+    fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair;
+
+    fn rescale(&mut self, ratio: f32);
+    fn cleanup(&mut self);
+}
+
+#[derive(Clone)]
 pub struct FrameResult {
-    item: EstimatorItem,
+    pub item: EstimatorItem,
+    pub frame_no: usize,
     pub timestamp_us: i64,
+    pub gyro_timestamp_us: i64,
     pub frame_size: (u32, u32),
     pub rotation: Option<Rotation3<f64>>,
     pub quat: Option<Quat64>,
-    pub euler: Option<(f64, f64, f64)>
+    pub euler: Option<(f64, f64, f64)>,
+    
+    optical_flow: RefCell<BTreeMap<usize, OpticalFlowPairWithTs>>
 }
 unsafe impl Send for FrameResult {}
 unsafe impl Sync for FrameResult {}
 
 #[derive(Default)]
 pub struct PoseEstimator {
-    pub sync_results: Arc<RwLock<BTreeMap<usize, FrameResult>>>,
+    pub sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>,
     pub lens_params: Arc<RwLock<(Matrix3<f64>, Vector4<f64>)>>,
-    pub estimated_gyro: Arc<RwLock<Vec<TimeIMU>>>,
+    pub estimated_gyro: Arc<RwLock<BTreeMap<i64, TimeIMU>>>,
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
     pub lpf: std::sync::atomic::AtomicU32,
     pub every_nth_frame: std::sync::atomic::AtomicUsize
@@ -72,196 +96,156 @@ impl PoseEstimator {
         for (_k, v) in results.iter_mut() {
             let ratio = width as f32 / v.frame_size.0 as f32;
             v.frame_size = (width, height);
-            match v.item {
-                #[cfg(feature = "use-opencv")]
-                EstimatorItem::OpenCV(ref mut x) => { x.rescale(ratio); },
-                EstimatorItem::Akaze (ref mut x)  => { x.rescale(ratio); }
-            };
+            v.item.rescale(ratio);
         }
     }
 
-    pub fn insert_empty_result(&self, frame: usize, timestamp_us: i64, method: u32) {
-        let item = match method {
-            0 => EstimatorItem::Akaze(ItemAkaze::default()),
-            #[cfg(feature = "use-opencv")]
-            1 => EstimatorItem::OpenCV(ItemOpenCV::default()),
-            _ => panic!("Invalid method {}", method) // TODO change to Result<>
-        };
-        {
-            let mut l = self.sync_results.write();
-            l.entry(frame).or_insert(FrameResult {
-                item,
-                frame_size: (0, 0),
-                timestamp_us,
-                rotation: None,
-                quat: None,
-                euler: None
-            });
-        }
-    }
-    pub fn detect_features(&self, frame: usize, timestamp_us: i64, method: u32, img: Arc<image::GrayImage>) {
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: u32, img: Arc<image::GrayImage>) {
         let frame_size = (img.width(), img.height());
         let item = match method {
-            0 => EstimatorItem::Akaze(ItemAkaze::detect_features(frame, img)),
+            0 => ItemAkaze::detect_features(timestamp_us, img).into(),
             #[cfg(feature = "use-opencv")]
-            1 => EstimatorItem::OpenCV(ItemOpenCV::detect_features(frame, img)),
+            1 => ItemOpenCV::detect_features(timestamp_us, img).into(),
             _ => panic!("Invalid method {}", method) // TODO change to Result<>
         };
         {
             let mut l = self.sync_results.write();
-            l.entry(frame).or_insert(FrameResult {
+            l.entry(timestamp_us).or_insert(FrameResult {
                 item,
+                frame_no,
                 frame_size,
                 timestamp_us,
+                gyro_timestamp_us: 0,
                 rotation: None,
                 quat: None,
-                euler: None
+                euler: None,
+                optical_flow: Default::default()
             });
         }
     }
 
-    pub fn processed_frames(&self, range: Range<usize>) -> Vec<usize> {
+    pub fn processed_frames(&self, range: Range<i64>) -> Vec<i64> {
         self.sync_results.read()
             .iter()
             .filter_map(|x| if range.contains(x.0) && x.1.rotation.is_some() { Some(*x.0) } else { None })
             .collect()
     }
 
-    pub fn process_detected_frames(&self, frame_count: usize, duration_ms: f64, fps: f64, scaled_fps: f64, params: &ComputeParams) {
-        let every_nth_frame = self.every_nth_frame.load(SeqCst);
+    pub fn process_detected_frames(&self, fps: f64, scaled_fps: f64, params: &ComputeParams) {
+        let every_nth_frame = self.every_nth_frame.load(SeqCst) as f64;
         let mut frames_to_process = Vec::new();
         {
             let l = self.sync_results.read();
-            for frame in 0..frame_count {
-                if l.contains_key(&frame) && l.contains_key(&(frame + every_nth_frame)) {
-                    let curr_entry = l.get(&frame).unwrap();
-                    if curr_entry.rotation.is_none() {
-                        frames_to_process.push(frame);
+            for (k, v) in l.iter() {
+                if v.rotation.is_none() && v.frame_size.0 > 0 {
+                    if let Some((next_k, _)) = l.range(k..).find(|(_, next)| v.frame_no + 1 == next.frame_no && next.frame_size.0 > 0) {
+                        frames_to_process.push((*k, *next_k));
                     }
                 }
             }
         }
         
         let results = self.sync_results.clone();
-        frames_to_process.par_iter().for_each(move |frame| {
+        frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
             let l = results.read();
-            if let Some(curr) = l.get(frame) {
+            if let Some(curr) = l.get(ts) {
                 if curr.rotation.is_none() {
                     let curr = curr.item.clone();
-                    if let Some(next) = l.get(&(frame + every_nth_frame)) {
+                    if let Some(next) = l.get(next_ts) {
                         let next = next.item.clone();
                         let (camera_matrix, coeffs) = *self.lens_params.read();
 
                         // Unlock the mutex for estimate_pose
                         drop(l);
 
-                        let r = match (curr, next) {
-                            #[cfg(feature = "use-opencv")]
-                            (EstimatorItem::OpenCV(curr), EstimatorItem::OpenCV(next)) => { curr.estimate_pose(&next, camera_matrix, coeffs, params) }
-                            (EstimatorItem::Akaze (curr),  EstimatorItem::Akaze (next))  => { curr.estimate_pose(&next, camera_matrix, coeffs, params) }
-                            _ => None
-                        };
-
-                        if let Some(rot) = r {
+                        if let Some(rot) = curr.estimate_pose(&next, camera_matrix, coeffs, params) {
                             let mut l = results.write(); 
-                            if let Some(x) = l.get_mut(frame) {
+                            if let Some(x) = l.get_mut(ts) {
                                 x.rotation = Some(rot);
                                 x.quat = Some(Quat64::from(rot));
-                                let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame as f64);
+                                let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
                                 x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                             } else {
-                                log::warn!("Failed to get frame {}", frame);
+                                log::warn!("Failed to get ts {}", ts);
                             }
                         }
                     }
                 }
             }
         });
-        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
+        self.recalculate_gyro_data(fps, false);
     }
 
-    pub fn get_points_for_frame(&self, frame: &usize) -> (Vec<f32>, Vec<f32>) {
-        let mut xs = Vec::new();
-        let mut ys = Vec::new();
-        {
-            if let Some(l) = self.sync_results.try_read() {
-                if let Some(entry) = l.get(frame) {
-                    let count = match &entry.item {
-                        #[cfg(feature = "use-opencv")]
-                        EstimatorItem::OpenCV(x) => x.get_features_count(),
-                        EstimatorItem::Akaze(x) => x.get_features_count()
-                    };
-                    for i in 0..count {
-                        let pt = match &entry.item {
-                            #[cfg(feature = "use-opencv")]
-                            EstimatorItem::OpenCV(x) => x.get_feature_at_index(i),
-                            EstimatorItem::Akaze(x) => x.get_feature_at_index(i)
-                        };
-                        xs.push(pt.0);
-                        ys.push(pt.1);
+    pub fn filter_of_lines(lines: &OpticalFlowPairWithTs, scale: f64) -> OpticalFlowPairWithTs {
+        if let Some(lines) = lines {
+            let mut sum_angles = 0.0;
+            lines.0.1.iter().zip(lines.1.1.iter()).for_each(|(p1, p2)| {
+                sum_angles += (p2.1 - p1.1).atan2(p2.0 - p1.0)
+            });
+            let avg_angle = sum_angles / lines.0.1.len() as f64;
+
+            let (lines0, lines1) = lines.0.1.iter().zip(lines.1.1.iter()).filter_map(|(p1, p2)| {
+                let angle = (p2.1 - p1.1).atan2(p2.0 - p1.0);
+                let diff = (angle - avg_angle).abs();
+                if diff < 30.0 * (std::f64::consts::PI / 180.0) {  // 30 degrees
+                    Some(((p1.0 * scale, p1.1 * scale), (p2.0 * scale, p2.1 * scale)))
+                } else {
+                    None
+                }
+            }).unzip();
+
+            Some(((lines.0.0, lines0), (lines.1.0, lines1)))
+        } else {
+            None
+        }
+    }
+
+    pub fn cache_optical_flow(&self, num_frames: usize) {
+        if let Some(l) = self.sync_results.try_read() {
+            let keys: Vec<i64> = l.keys().copied().collect();
+            for (i, k) in keys.iter().enumerate() {
+                if let Some(from_fr) = l.get(k) {
+                    if from_fr.optical_flow.try_borrow().map(|of| !of.is_empty()).unwrap_or_default() {
+                        // We already have OF for this frame
+                        continue;
+                    }
+                    for d in 1..=num_frames {
+                        if let Some(to_key) = keys.get(i + d) {
+                            if let Some(to_item) = l.get(to_key) {
+                                if from_fr.frame_no + d == to_item.frame_no {
+                                    let of = from_fr.item.optical_flow_to(&to_item.item);
+                                    if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
+                                        from_of.insert(d, 
+                                            of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
+                                        );
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-        (xs, ys)
-    }
-
-    pub fn filter_of_lines(lines: Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)>) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
-        let lines = lines?;
-
-        let mut sum_angles = 0.0;
-        lines.0.iter().zip(lines.1.iter()).for_each(|(p1, p2)| {
-            sum_angles += (p2.1 - p1.1).atan2(p2.0 - p1.0)
-        });
-        let avg_angle = sum_angles / lines.0.len() as f64;
-
-        Some(lines.0.iter().zip(lines.1.iter()).filter(|(p1, p2)| {
-            let angle = (p2.1 - p1.1).atan2(p2.0 - p1.0);
-            let diff = (angle - avg_angle).abs();
-            diff < 30.0 * (std::f64::consts::PI / 180.0) // 30 degrees 
-        }).unzip())
-    }
-
-    pub fn optical_flow(&self, num_frames: usize) {
-        let mut to_items = BTreeMap::<usize, EstimatorItem>::new();
-        if let Some(l) = self.sync_results.try_read() {
-            l.iter().for_each(|(&i, fr)| { to_items.insert(i, fr.item.clone()); } );
-        }
-
-        if let Some(mut l) = self.sync_results.try_write() {
-            l.iter_mut().for_each(|(frame, from_fr)| {
-                for d in 1..=num_frames {
-                     if let Some(to_item) = to_items.get_mut(&(frame + d)) {
-                        match (&mut from_fr.item, to_item) {
-                            #[cfg(feature = "use-opencv")]
-                            (EstimatorItem::OpenCV(from), EstimatorItem::OpenCV(to)) => { from.optical_flow_to_frame(to, d, true); }
-                            (EstimatorItem::Akaze (from),  EstimatorItem::Akaze (to))  => { from.optical_flow_to_frame(to, d, true); }
-                            _ => ()
-                        };
-                     }
-                }
-            });
         }
     }
     pub fn cleanup(&self) {
         let mut l = self.sync_results.write();
         for (_, i) in l.iter_mut(){
-            match &mut i.item {
-                #[cfg(feature = "use-opencv")]
-                EstimatorItem::OpenCV(x) => { x.cleanup(); }
-                EstimatorItem::Akaze (x) => { x.cleanup(); }
-            };
+            i.item.cleanup();
         }
     }
 
-    pub fn get_of_lines_for_frame(&self, frame: &usize, scale: f64, num_frames: usize) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+    pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize) -> OpticalFlowPairWithTs {
         if let Some(l) = self.sync_results.try_read() {
-            if let Some(curr) = l.get(frame) {
-                return match &curr.item {
-                    #[cfg(feature = "use-opencv")]
-                    EstimatorItem::OpenCV(curr) => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
-                    EstimatorItem::Akaze (curr)  => { Self::filter_of_lines(curr.get_optical_flow_lines(num_frames, scale)) }
-                };
+            if let Some(first_ts) = l.get_closest(timestamp_us, 2000).map(|v| v.timestamp_us) {
+                let mut iter = l.range(first_ts..);
+                for _ in 0..next_no { iter.next(); }
+                if let Some((_, curr)) = iter.next() {
+                    if let Ok(of) = curr.optical_flow.try_borrow() {
+                        if let Some(opt_pts) = of.get(&num_frames) {
+                            return Self::filter_of_lines(opt_pts, scale);
+                        }
+                    }
+                }
             }
         }
         None
@@ -282,47 +266,23 @@ impl PoseEstimator {
         // TODO: maybe a better way than using stride as width?
         image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
     }
-    pub fn lowpass_filter(&self, freq: f64, frame_count: usize, duration_ms: f64, fps: f64) {
+    pub fn lowpass_filter(&self, freq: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
-        self.recalculate_gyro_data(frame_count, duration_ms, fps, false);
+        self.recalculate_gyro_data(fps, false);
     }
 
-    pub fn recalculate_gyro_data(&self, frame_count: usize, duration_ms: f64, fps: f64, final_pass: bool) {
-        let every_nth_frame = self.every_nth_frame.load(SeqCst);
-        let mut is_akaze = false;
-        for v in self.sync_results.read().values() {
-            if let EstimatorItem::Akaze(_) = v.item {
-                is_akaze = true;
-                break;
-            }
-        }
-
+    pub fn recalculate_gyro_data(&self, fps: f64, final_pass: bool) {
         let lpf = self.lpf.load(SeqCst) as f64 / 100.0;
         
-        let mut vec = Vec::new();
+        let mut gyro = BTreeMap::new();
         let mut quats = TimeQuat::new();
-        let mut update_eulers = BTreeMap::<usize, Option<(f64, f64, f64)>>::new();
+        let mut update_eulers = BTreeMap::<i64, Option<(f64, f64, f64)>>::new();
+        let mut update_timestamps = BTreeMap::<i64, i64>::new();
         {
             let sync_results = self.sync_results.read();
-            if !sync_results.is_empty() {
-                vec.resize(frame_count, TimeIMU::default());
-                for frame in 0..frame_count {
-                    // Analyzed motion in reality happened during the transition from this frame to the next frame
-                    // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
-                    // TODO: figure out if rolling shutter time can be used to make better calculation here
-                    // TODO: figure out why AKAZE and OpenCV have slight difference
-                    let next_frame = frame + every_nth_frame;
-                    let ts = sync_results.get(&frame).map(|x| x.timestamp_us as f64 / 1000.0).unwrap_or_else(|| crate::timestamp_at_frame(frame as i32, fps));
-                    let next_ts = sync_results.get(&next_frame).map(|x| x.timestamp_us as f64 / 1000.0).unwrap_or_else(|| crate::timestamp_at_frame(next_frame as i32, fps));
-                    if is_akaze {
-                        vec[frame].timestamp_ms = ts + (next_ts - ts) / 2.0;
-                    } else {
-                        vec[frame].timestamp_ms = ts + (next_ts - ts) / 2.5;
-                    }
-                }
-            }
 
-            for (k, v) in sync_results.iter() {
+            let mut iter = sync_results.iter().peekable();
+            while let Some((k, v)) = iter.next() {
                 let mut eul = v.euler;
 
                 // ----------- Interpolation -----------
@@ -351,21 +311,32 @@ impl PoseEstimator {
                 // ----------- Interpolation -----------
 
                 if let Some(e) = eul {
-                    let frame = *k;
-                    if frame < vec.len() {
-                        // Swap X and Y
-                        vec[frame].gyro = Some([
+                    // Analyzed motion in reality happened during the transition from this frame to the next frame
+                    // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
+                    // TODO: figure out if rolling shutter time can be used to make better calculation here
+                    let mut ts = *k as f64 / 1000.0;
+                    if let Some(next_ts) = iter.peek().map(|(&k, _)| k as f64 / 1000.0) {
+                        ts = ts + (next_ts - ts) / 2.0;
+                    }
+
+                    let ts_us = (ts * 1000.0).round() as i64;
+                    update_timestamps.insert(*k, ts_us);
+                    gyro.insert(ts_us, TimeIMU {
+                        timestamp_ms: ts,
+                        gyro: Some([
+                            // Swap X and Y
                             e.1 * 180.0 / std::f64::consts::PI,
                             e.0 * 180.0 / std::f64::consts::PI,
                             e.2 * 180.0 / std::f64::consts::PI
-                        ]);
-                        let quat = v.quat.unwrap_or_else(|| Quat64::identity());
-                        quats.insert((vec[frame].timestamp_ms * 1000.0) as i64, quat);
-                    }
+                        ]),
+                        accl: None,
+                        magn: None
+                    });
+                    let quat = v.quat.unwrap_or_else(|| Quat64::identity());
+                    quats.insert(ts_us, quat);
                 }
             }
         }
-
         {
             let mut sync_results = self.sync_results.write();
             for (k, e) in update_eulers {
@@ -373,39 +344,47 @@ impl PoseEstimator {
                     entry.euler = e;
                 }
             }
-        }
-
-        if lpf > 0.0 && frame_count > 0 && duration_ms > 0.0 {
-            let sample_rate = frame_count as f64 / (duration_ms / 1000.0);
-            if let Err(e) = crate::filtering::Lowpass::filter_gyro_forward_backward(lpf, sample_rate, &mut vec) {
-                log::error!("Filter error {:?}", e);
+            for (k, gyro_ts) in update_timestamps {
+                if let Some(entry) = sync_results.get_mut(&k) {
+                    entry.gyro_timestamp_us = gyro_ts;
+                }
             }
         }
 
-        *self.estimated_gyro.write() = vec;
+        if lpf > 0.0 && fps > 0.0 {
+            let mut vals = gyro.values().cloned().collect::<Vec<_>>();
+            if let Err(e) = crate::filtering::Lowpass::filter_gyro_forward_backward(lpf, fps, &mut vals) {
+                log::error!("Filter error {:?}", e);
+            }
+            for ((_k, v), vec) in gyro.iter_mut().zip(vals.into_iter()) {
+                *v = vec;
+            }
+        }
+
+        *self.estimated_gyro.write() = gyro;
         *self.estimated_quats.write() = quats;
     }
 
-    pub fn get_ranges(&self) -> Vec<(usize, usize)> {
+    pub fn get_ranges(&self) -> Vec<(i64, i64)> {
         let mut ranges = Vec::new();
-        let mut prev_frame = 0;
+        let mut prev_ts = 0;
         let mut curr_range_start = 0;
         for f in self.sync_results.read().keys() {
-            if f - prev_frame > 5 {
-                if curr_range_start != prev_frame {
-                    ranges.push((curr_range_start, prev_frame));
+            if f - prev_ts > 100000 { // 100ms
+                if curr_range_start != prev_ts {
+                    ranges.push((curr_range_start, prev_ts));
                 }
                 curr_range_start = *f;
             }
-            prev_frame = *f;
+            prev_ts = *f;
         }
-        if curr_range_start != prev_frame {
-            ranges.push((curr_range_start, prev_frame));
+        if curr_range_start != prev_ts {
+            ranges.push((curr_range_start, prev_ts));
         }
         ranges
     }
 
-    pub fn find_offsets(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         let gyro = self.estimated_gyro.read().clone();
         let ret = find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params);
         if initial_offset.abs() > 1.0 {
@@ -426,7 +405,7 @@ impl PoseEstimator {
         ret
     }
 
-    pub fn find_offsets_visually(&self, ranges: &[(i32, i32)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets_visually(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs)
     }
 }

@@ -169,14 +169,14 @@ impl TimelineGyroChart {
         }
     }
 
-    pub fn setSyncResults(&mut self, data: &[TimeIMU]) {
+    pub fn setSyncResults(&mut self, data: &BTreeMap<i64, TimeIMU>) {
         if self.viewMode == 0 {
             self.sync_results = Vec::with_capacity(data.len());
 
-            for x in data {
+            for (k, x) in data {
                 if let Some(g) = x.gyro.as_ref() {
                     self.sync_results.push(ChartData {
-                        timestamp_us: (x.timestamp_ms * 1000.0) as i64,
+                        timestamp_us: *k,
                         values: [g[0], g[1], g[2], 0.0]
                     });
                 }

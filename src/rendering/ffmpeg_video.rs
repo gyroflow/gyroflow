@@ -190,6 +190,10 @@ impl<'a> VideoTranscoder<'a> {
                             self.encoder_pixel_format = Some(format::Pixel::NV12);
                             self.processing_order = ProcessingOrder::PostConversion;
                         }
+
+                        if input_frame.format() == format::Pixel::RGB24 || input_frame.format() == format::Pixel::RGB48 {
+                            self.processing_order = ProcessingOrder::PostConversion;
+                        }
                         
                         if self.processing_order == ProcessingOrder::PreConversion && self.buffers.output_frame_pre.is_none()  {
                             let mut out_frame = frame::Video::new(input_frame.format(), size.0, size.1);

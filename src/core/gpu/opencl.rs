@@ -98,15 +98,15 @@ impl OclWrapper {
             let mut kernel = include_str!("opencl_undistort.cl").to_string();
             kernel.insert_str(0, GoProSuperview::opencl_functions());
             kernel.insert_str(0, lens_model_funcs);
+            kernel = kernel.replace("DATA_CONVERTF", ocl_names.3)
+                           .replace("DATA_TYPEF", ocl_names.2)
+                           .replace("DATA_CONVERT", ocl_names.1)
+                           .replace("DATA_TYPE", ocl_names.0)
+                           .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
+                           .replace("INTERPOLATION", &format!("{}", params.interpolation));
 
             let program = Program::builder()
                 .src(&kernel)
-                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPE"    .into(), val: ocl_names.0.into() })
-                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERT" .into(), val: ocl_names.1.into() })
-                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_TYPEF"   .into(), val: ocl_names.2.into() })
-                .bo(builders::BuildOpt::CmplrDefine { ident: "DATA_CONVERTF".into(), val: ocl_names.3.into() })
-                .bo(builders::BuildOpt::CmplrDefine { ident: "PIXEL_BYTES"  .into(), val: format!("{}", params.bytes_per_pixel) })
-                .bo(builders::BuildOpt::CmplrDefine { ident: "INTERPOLATION".into(), val: format!("{}", params.interpolation) })
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 

@@ -401,7 +401,7 @@ impl GyroSource {
         }
     }
 
-    pub fn find_bias(&mut self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
+    pub fn find_bias(&self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
         let ts_start = timestamp_start - self.offset_at_timestamp(timestamp_start);
         let ts_stop = timestamp_stop - self.offset_at_timestamp(timestamp_stop);
         let mut bias_vals = [0.0, 0.0, 0.0];

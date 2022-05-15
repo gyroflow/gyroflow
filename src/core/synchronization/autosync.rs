@@ -6,7 +6,6 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 use std::sync::Arc;
 use parking_lot::RwLock;
-use std::collections::HashMap;
 
 use crate::StabilizationManager;
 use crate::stabilization::ComputeParams;
@@ -17,15 +16,13 @@ pub struct AutosyncProcess {
     initial_offset: f64,
     sync_search_size: f64,
     frame_count: usize,
-    duration_ms: f64,
     scaled_fps: f64,
     org_fps: f64,
     fps_scale: Option<f64>,
     for_rs: bool, // for rolling shutter estimation
-    ranges_ms: Vec<(f64, f64)>,
-    frame_ranges: Vec<(i32, i32)>,
+    ranges_us: Vec<(i64, i64)>,
+    scaled_ranges_us: Vec<(i64, i64)>,
     estimator: Arc<PoseEstimator>,
-    frame_status: Arc<RwLock<HashMap<usize, bool>>>,
     total_read_frames: Arc<AtomicUsize>,
     total_detected_frames: Arc<AtomicUsize>,
     compute_params: Arc<RwLock<ComputeParams>>,
@@ -38,7 +35,6 @@ pub struct AutosyncProcess {
 impl AutosyncProcess {
     pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
         let params = stab.params.read();
-        let frame_count = params.frame_count;
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
         let size = params.size;
@@ -50,27 +46,24 @@ impl AutosyncProcess {
         if let Some(scale) = &fps_scale {
             sync_duration_ms *= scale;
         }
+        let frame_count = ((timestamps_fract.len() as f64 * (sync_duration_ms / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
 
         drop(params);
 
         if duration_ms < 10.0 || frame_count < 2 || sync_duration_ms < 10.0 || sync_search_size < 10.0 { return Err(()); }
 
-        let ranges_ms: Vec<(f64, f64)> = timestamps_fract.iter().map(|x| {
+        let ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
             let range = (
                 ((x * org_duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
                 ((x * org_duration_ms) + (sync_duration_ms / 2.0)).min(org_duration_ms)
             );
-            (range.0, range.1)
+            ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
-        let frame_ranges: Vec<(i32, i32)> = ranges_ms.iter().map(|(from, to)| (crate::frame_at_timestamp(*from, org_fps), crate::frame_at_timestamp(*to, org_fps))).collect();
-        let mut frame_status = HashMap::<usize, bool>::new();
-        for x in &frame_ranges {
-            for frame in x.0..x.1-1 {
-                frame_status.insert(frame as usize, false);
-            }
-        }
-        let frame_status = Arc::new(RwLock::new(frame_status));
+        let scaled_ranges_us = ranges_us.iter().map(|(f, t)| (
+            (*f as f64 / fps_scale.unwrap_or(1.0)) as i64, 
+            (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
+        ).collect();
 
         let estimator = stab.pose_estimator.clone();
          
@@ -95,19 +88,17 @@ impl AutosyncProcess {
 
         Ok(Self {
             frame_count,
-            duration_ms,
             org_fps,
             scaled_fps,
             for_rs,
             method,
-            ranges_ms,
-            frame_ranges,
-            frame_status,
+            ranges_us,
+            scaled_ranges_us,
             estimator,
             fps_scale,
             initial_offset,
             sync_search_size,
-            total_read_frames: Arc::new(AtomicUsize::new(0)),
+            total_read_frames: Arc::new(AtomicUsize::new(1)), // Start with 1 to keep the loader active until `finished_feeding_frames` overrides it with final value
             total_detected_frames: Arc::new(AtomicUsize::new(0)),
             compute_params: Arc::new(RwLock::new(comp_params)),
             finished_cb: None,
@@ -117,69 +108,44 @@ impl AutosyncProcess {
     }
 
     pub fn get_ranges(&self) -> Vec<(f64, f64)> {
-        self.ranges_ms.clone()
+        self.ranges_us.iter().map(|&v| (v.0 as f64 / 1000.0, v.1 as f64 / 1000.0)).collect()
     }
-    pub fn is_frame_wanted(&self, frame: i32, mut timestamp_us: i64) -> bool {
-        if let Some(_current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)) {
-            if let Some(scale) = self.fps_scale {
-                timestamp_us = (timestamp_us as f64 / scale).round() as i64;
-            }
-            if frame % self.estimator.every_nth_frame.load(SeqCst) as i32 != 0 {
-                // Don't analyze this frame
-                self.frame_status.write().insert(frame as usize, true);
-                self.estimator.insert_empty_result(frame as usize, timestamp_us, self.method);
-                return false;
-            }
-            return true;
-        }
-
-        false
-    }
-    pub fn feed_frame(&self, mut timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
-        self.total_read_frames.fetch_add(1, SeqCst);
-
+    
+    pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, width: u32, height: u32, stride: usize, pixels: &[u8], cancel_flag: Arc<AtomicBool>) {
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
     
         let method = self.method;
         let estimator = self.estimator.clone();
-        let frame_status = self.frame_status.clone();
         let total_detected_frames = self.total_detected_frames.clone();
         let total_read_frames = self.total_read_frames.clone();
         let progress_cb = self.progress_cb.clone();
         let frame_count = self.frame_count;
-        let duration_ms = self.duration_ms;
         let scaled_fps = self.scaled_fps;
         let org_fps = self.org_fps;
         let compute_params = self.compute_params.clone();
         if let Some(scale) = self.fps_scale {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
         }
-        if let Some(current_range) = self.frame_ranges.iter().find(|(from, to)| (*from..*to).contains(&frame)).copied() {
+
+        if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..*to).contains(&timestamp_us)).copied() {
+            self.total_read_frames.fetch_add(1, SeqCst);
+
             self.thread_pool.spawn(move || {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     total_detected_frames.fetch_add(1, SeqCst);
                     return;
                 }
                 if let Some(img) = img {
-                    estimator.detect_features(frame as usize, timestamp_us, method, img);
+                    estimator.detect_features(frame_no, timestamp_us, method, img);
                     total_detected_frames.fetch_add(1, SeqCst);
 
-                    if frame % 7 == 0 {
-                        estimator.process_detected_frames(frame_count as usize, duration_ms, org_fps, scaled_fps, &compute_params.read());
-                        estimator.recalculate_gyro_data(frame_count, duration_ms, org_fps, false);
+                    if frame_no % 7 == 0 {
+                        estimator.process_detected_frames(org_fps, scaled_fps, &compute_params.read());
+                        estimator.recalculate_gyro_data(org_fps, false);
                     }
 
-                    let processed_frames = estimator.processed_frames(current_range.0 as usize..current_range.1 as usize);
-                    for x in processed_frames { frame_status.write().insert(x, true); }
-
-                    if total_detected_frames.load(SeqCst) < total_read_frames.load(SeqCst) {
-                        if let Some(cb) = &progress_cb {
-                            let l = frame_status.read();
-                            let total = l.len();
-                            let ready = l.iter().filter(|e| *e.1).count();
-                            drop(l);
-                            cb(ready, total);
-                        }
+                    if let Some(cb) = &progress_cb {
+                        cb(total_detected_frames.load(SeqCst), total_read_frames.load(SeqCst).max(frame_count));
                     }
                 } else {
                     log::warn!("Failed to get image {:?}", img);
@@ -189,28 +155,29 @@ impl AutosyncProcess {
     }
 
     pub fn finished_feeding_frames(&self, method: u32) {
-        while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) {
+        while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) - 1 {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        self.estimator.process_detected_frames(self.frame_count as usize, self.duration_ms, self.org_fps, self.scaled_fps, &self.compute_params.read());
-        self.estimator.recalculate_gyro_data(self.frame_count as usize, self.duration_ms, self.org_fps, true);
-        self.estimator.optical_flow(2);
+
+        self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
+        self.estimator.recalculate_gyro_data(self.org_fps, true);
+        self.estimator.cache_optical_flow(2);
         self.estimator.cleanup();
 
         if let Some(cb) = &self.finished_cb {
             if self.for_rs {
-                cb(self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true));
+                cb(self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true));
             } else {
                 let offsets = match method {
-                    0 => self.estimator.find_offsets(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
-                    1 => self.estimator.find_offsets_visually(&self.frame_ranges, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
+                    0 => self.estimator.find_offsets(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
+                    1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
                     _ => { panic!("Unsupported offset method: {}", method); }
                 };
                 cb(offsets);
             }
         }
         if let Some(cb) = &self.progress_cb {
-            let len = self.frame_status.read().len();
+            let len = self.total_detected_frames.load(SeqCst);
             cb(len, len);
         }
     }

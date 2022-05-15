@@ -104,13 +104,13 @@ impl AudioResampler {
                 if self.resampler.output().format.is_planar() {
                     for c in 0..channels {
                         unsafe {
-                            let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[c].offset(dest_byte_offset as isize);
+                            let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[c].add(dest_byte_offset);
                             std::ptr::write_bytes::<u8>(dst_ptr, 0,missing_samples * bytes_per_sample);
                         }
                     }
                 } else {
                     unsafe {
-                        let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[0].offset((dest_byte_offset * channels) as isize);
+                        let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[0].add(dest_byte_offset * channels);
                         std::ptr::write_bytes::<u8>(dst_ptr, 0, missing_samples * bytes_per_sample * channels);
                     }
                 }

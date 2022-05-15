@@ -5,7 +5,6 @@ use std::process::Command;
 use std::path::Path;
 use std::env;
 use walkdir::WalkDir;
-use cc;
 
 fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
@@ -31,7 +30,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
         if f_name.ends_with(".qml") || f_name.ends_with(".js") {
             qrc.push_str(&format!("<file>{}</file>\n", f_name));
 
-            let cpp_name = f_name.replace("/", "_").replace(".qml", ".cpp").replace(".js", ".cpp");
+            let cpp_name = f_name.replace('/', "_").replace(".qml", ".cpp").replace(".js", ".cpp");
             let cpp_path = out_dir.join(cpp_name).to_string_lossy().to_string();
 
             config.file(&cpp_path); 
@@ -51,7 +50,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     std::fs::write(&qrc_path, qrc).unwrap();
 
     for (qml, cpp) in &files {
-        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", &cpp, &qml]).status().unwrap().success());
+        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success());
     }
 
     let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();

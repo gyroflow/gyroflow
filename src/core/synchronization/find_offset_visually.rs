@@ -5,7 +5,7 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ stabilization, stabilization::ComputeParams };
 use super::PoseEstimator;
 
-pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets(ranges: &[(i64, i64)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
@@ -13,18 +13,21 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_of
     let next_frame_no = 2;
     let fps = params.gyro.fps;
 
-    for (from_frame, to_frame) in ranges {
+    let keys: Vec<i64> = estimator.sync_results.read().keys().copied().collect();
+
+    for (from_ts, to_ts) in ranges {
         let mut matched_points = Vec::new();
-        for frame in (*from_frame..*to_frame).step_by(next_frame_no) {
-            let frame = frame as usize;
-            if let Some(lines) = estimator.get_of_lines_for_frame(&frame, 1.0, next_frame_no) {
-                if !lines.0.is_empty() && lines.0.len() == lines.1.len() {
-                    matched_points.push((frame, lines));
+        for ts in &keys {
+            if (*from_ts..*to_ts).contains(&ts) {
+                if let Some(lines) = estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no) {
+                    if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {
+                        matched_points.push(lines);
+                    } else {
+                        log::warn!("Invalid point pairs {} {}", lines.0.1.len(), lines.1.1.len());
+                    }
                 } else {
-                    log::warn!("Invalid point pairs {} {}", lines.0.len(), lines.1.len());
+                    log::warn!("No detected features for ts {}", ts);
                 }
-            } else {
-                log::warn!("No detected features for frame {}", frame);
             }
         }
 
@@ -38,19 +41,19 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_of
                 params_ref = _params2.as_ref().unwrap();
             }
 
-            for (frame, pts) in &matched_points {
-                let timestamp_ms  = *frame as f64 * 1000.0 / fps;
-                let timestamp_ms2 = (*frame + next_frame_no) as f64 * 1000.0 / fps;
+            for ((ts, pts1), (next_ts, pts2)) in &matched_points {
+                let timestamp_ms  = *ts as f64 / 1000.0;
+                let timestamp_ms2 = *next_ts as f64 / 1000.0;
 
-                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts.0, timestamp_ms - offs, params_ref);
-                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts.1, timestamp_ms2 - offs, params_ref);
+                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts1, timestamp_ms - offs, params_ref);
+                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts2, timestamp_ms2 - offs, params_ref);
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
                     if p1.0 > 0.0 && p1.0 < w as f64 && p1.1 > 0.0 && p1.1 < h as f64 &&
                        p2.0 > 0.0 && p2.0 < w as f64 && p2.1 > 0.0 && p2.1 < h as f64 {
                         let dist = ((p2.0 - p1.0) * (p2.0 - p1.0)) 
-                                     + ((p2.1 - p1.1) * (p2.1 - p1.1));
+                                      + ((p2.1 - p1.1) * (p2.1 - p1.1));
                         distances.push(dist as u64);
                     }
                 }
@@ -113,8 +116,7 @@ pub fn find_offsets(ranges: &[(i32, i32)], estimator: &PoseEstimator, initial_of
 
             log::debug!("lowest: {:?}", &lowest);
             if let Some(lowest) = lowest {
-                let middle_frame = from_frame + (to_frame - from_frame) / 2;
-                let middle_timestamp = (middle_frame as f64 * 1000.0) / fps;
+                let middle_timestamp = (*from_ts as f64 + (to_ts - from_ts) as f64 / 2.0) / 1000.0;
 
                 // Only accept offsets that are within 90% of search size range
                 if lowest.0.abs() < (search_size / 2.0) * 0.9 {

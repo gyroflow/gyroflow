@@ -210,18 +210,17 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, override_fps: f64) {
         rendering::clear_log();
+
+        if every_nth_frame <= 0 { every_nth_frame = 1; }
 
         let method = self.sync_method;
         let offset_method = self.offset_method;
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (fps, size) = {
-            let params = self.stabilizer.params.read(); 
-            (params.fps, params.size)
-        };
+        let size = self.stabilizer.params.read().size;
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
@@ -271,7 +270,7 @@ impl Controller {
                 set_offsets(offsets);
             });
 
-            let mut ranges = sync.get_ranges();
+            let ranges = sync.get_ranges();
 
             self.cancel_flag.store(false, SeqCst);
             let cancel_flag = self.cancel_flag.clone();
@@ -279,9 +278,10 @@ impl Controller {
             let video_path = self.stabilizer.video_path.read().clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
-                let mut fps_scale = None;
-
                 let gpu_decoding = *rendering::GPU_DECODING.read();
+
+                let mut frame_no = 0;
+                let mut abs_frame_no = 0;
 
                 let mut decoder_options = None;
                 if override_fps > 0.0 {
@@ -293,32 +293,23 @@ impl Controller {
                 
                 match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
                     Ok(mut proc) => {
-                        if fps > 0.0 && proc.decoder_fps > 0.0 && (fps - proc.decoder_fps).abs() > 0.1 {
-                            ::log::debug!("Rescaling timestamp from {fps}fps to {}fps", proc.decoder_fps);
-                            let scale = proc.decoder_fps / fps;
-                            ranges.iter_mut().for_each(|(f, t)| { *f /= scale; *t /= scale; });
-                            fps_scale = Some(scale);
-                        }
-                        proc.on_frame(|mut timestamp_us, input_frame, _output_frame, converter| {
-                            if let Some(scale) = fps_scale {
-                                timestamp_us = (timestamp_us as f64 * scale).round() as i64;
-                            }
-                            let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
-      
+                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
                             assert!(_output_frame.is_none());
 
-                            if sync.is_frame_wanted(frame, timestamp_us) {
+                            if abs_frame_no % every_nth_frame == 0 {
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
             
-                                        sync.feed_frame(timestamp_us, frame, width, height, stride, pixels, cancel_flag.clone());
+                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels, cancel_flag.clone());
                                     },
                                     Err(e) => {
                                         err(("An error occured: %1".to_string(), e.to_string()))
                                     }
                                 }
+                                frame_no += 1;
                             }
+                            abs_frame_no += 1;
                             Ok(())
                         });
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
@@ -351,7 +342,7 @@ impl Controller {
         }).collect();
 
         if !ranges_ms.is_empty() {
-            let bias = self.stabilizer.gyro.write().find_bias(ranges_ms[0].0, ranges_ms[0].1);
+            let bias = self.stabilizer.gyro.read().find_bias(ranges_ms[0].0, ranges_ms[0].1);
             self.bias_estimated(bias.0, bias.1, bias.2);
         }
     }
@@ -997,9 +988,9 @@ impl Controller {
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
         let path = util::url_to_path(url);
-        let mut info_json = info.to_json().to_string();
+        let info_json = info.to_json().to_string();
  
-        match core::lens_profile::LensProfile::from_json(&mut info_json) {
+        match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 #[cfg(feature = "opencv")]
                 if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {

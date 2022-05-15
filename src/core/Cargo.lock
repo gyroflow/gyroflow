@@ -687,6 +687,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "enum_dispatch"
+version = "0.3.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb359f1476bf611266ac1f5355bc14aeca37b299d0ebccc038ee7058891c9cb"
+dependencies = [
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "enum_primitive"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -929,6 +941,7 @@ dependencies = [
  "dyn-clone",
  "eight-point",
  "enterpolation",
+ "enum_dispatch",
  "fastrand",
  "flate2",
  "image",
@@ -1956,9 +1969,9 @@ checksum = "60a357793950651c4ed0f3f52338f53b2f809f32d83a07f72909fa13e4c6c1e3"
 
 [[package]]
 name = "rayon"
-version = "1.5.2"
+version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd249e82c21598a9a426a4e00dd7adc1d640b22445ec8545feef801d1a74c221"
+checksum = "bd99e5772ead8baa5215278c9b15bf92087709e9c1b2d1f97cdb5a183c933a7d"
 dependencies = [
  "autocfg",
  "crossbeam-deque 0.8.1",
@@ -1968,9 +1981,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.9.2"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f51245e1e62e1f1629cbfec37b5793bbabcaeb90f30e94d2ba03564687353e4"
+checksum = "258bcdb5ac6dad48491bb2992db6b7cf74878b0384908af124823d118c99683f"
 dependencies = [
  "crossbeam-channel 0.5.4",
  "crossbeam-deque 0.8.1",
@@ -2210,9 +2223,9 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "syn"
-version = "1.0.93"
+version = "1.0.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04066589568b72ec65f42d65a1a52436e954b168773148893c020269563decf2"
+checksum = "a07e33e919ebcd69113d5be0e4d70c5707004ff45188910106854f38b960df4a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2455,7 +2468,7 @@ checksum = "9c97e489d8f836838d497091de568cf16b117486d529ec5579233521065bd5e4"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#9be974aa6bff1170e95f6668fe79291a7d59e55c"
+source = "git+https://github.com/gfx-rs/wgpu.git#75b881e6365a6f69d48321c71a7623a4f92bf822"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2475,7 +2488,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#9be974aa6bff1170e95f6668fe79291a7d59e55c"
+source = "git+https://github.com/gfx-rs/wgpu.git#75b881e6365a6f69d48321c71a7623a4f92bf822"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -2497,7 +2510,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#9be974aa6bff1170e95f6668fe79291a7d59e55c"
+source = "git+https://github.com/gfx-rs/wgpu.git#75b881e6365a6f69d48321c71a7623a4f92bf822"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -2534,7 +2547,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#9be974aa6bff1170e95f6668fe79291a7d59e55c"
+source = "git+https://github.com/gfx-rs/wgpu.git#75b881e6365a6f69d48321c71a7623a4f92bf822"
 dependencies = [
  "bitflags",
 ]

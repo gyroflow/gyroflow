@@ -38,6 +38,34 @@ pub fn path_to_str(path: &std::path::Path) -> String {
     path.to_string_lossy().replace("\\", "/")
 }
 
+
+use std::collections::BTreeMap;
+pub trait MapClosest<V> {
+    fn get_closest(&self, key: &i64, max_diff: i64) -> Option<&V>;
+}
+impl<V> MapClosest<V> for BTreeMap<i64, V> {
+    fn get_closest(&self, key: &i64, max_diff: i64) -> Option<&V> {
+        if self.is_empty() { return None; };
+        if self.contains_key(key) { return self.get(key); };
+
+        let r1 = self.range(..key);
+        let mut r2 = self.range(key..);
+        
+        let f = r1.last();
+        let b = r2.next();
+        let bd = (key - b.map(|v| *v.0).unwrap_or(-99999)).abs();
+        let fd = (key - f.map(|v| *v.0).unwrap_or(-99999)).abs();
+
+        if b.is_some() && bd < max_diff && bd < fd {
+            Some(b.unwrap().1)
+        } else if f.is_some() && fd < max_diff && fd < bd {
+            Some(f.unwrap().1)
+        } else {
+            None
+        }
+    }
+}
+
 /*
 pub fn rename_calib_videos() {
     use telemetry_parser::Input;
