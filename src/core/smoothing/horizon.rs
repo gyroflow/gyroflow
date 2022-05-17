@@ -6,38 +6,24 @@ use nalgebra::*;
 use crate::gyro_source::TimeQuat;
 
 
-pub fn from_euler_yxz(x: f64, y: f64, z: f64) -> UnitQuaternion<f64> {
-
+pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
+    // z axis points in view direction, use as reference
+    
     let x_axis = nalgebra::Vector3::<f64>::x_axis();
     let y_axis = nalgebra::Vector3::<f64>::y_axis();
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
-    
-    let rot_x = Rotation3::from_axis_angle(&x_axis, x);
-    let rot_y = Rotation3::from_axis_angle(&y_axis, y + std::f64::consts::FRAC_PI_2);
-    let rot_z = Rotation3::from_axis_angle(&z_axis, z);
+  
+    let test_vec = q * nalgebra::Vector3::<f64>::z_axis();
+    let pitch    = (-test_vec.z).asin();
+    let yaw      = test_vec.y.simd_atan2(test_vec.x);
 
-    let correction = Rotation3::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2);
+    let rot_yaw   = UnitQuaternion::from_axis_angle(&y_axis, yaw);
+    let rot_pitch = UnitQuaternion::from_axis_angle(&x_axis, pitch);
+    let rot_roll  = UnitQuaternion::from_axis_angle(&z_axis, roll_correction);
 
-    let combined_rot = rot_z * rot_x * rot_y * correction;
-    UnitQuaternion::from_rotation_matrix(&combined_rot)
-}
-
-pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
-    // z axis points in view direction, use as reference
-    let axis = nalgebra::Vector3::<f64>::y_axis();
-
-    // let x_axis = nalgebra::Vector3::<f64>::x_axis();
-    let y_axis = nalgebra::Vector3::<f64>::y_axis();
-    let z_axis = nalgebra::Vector3::<f64>::z_axis();
-
-    let corrected_transform = q.to_rotation_matrix() * Rotation3::from_axis_angle(&y_axis, -std::f64::consts::FRAC_PI_2) * Rotation3::from_axis_angle(&z_axis, -std::f64::consts::FRAC_PI_2);
-    // since this coincides with roll axis, the roll is neglected when transformed back
-    let axis_transformed = corrected_transform * axis;
-
-    let pitch = (axis_transformed.z).asin();
-    let yaw = axis_transformed.y.simd_atan2(axis_transformed.x) - std::f64::consts::FRAC_PI_2;
-    
-    from_euler_yxz(pitch, roll_correction, yaw)
+    let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2) * UnitQuaternion::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2);
+     
+    initial_quat * rot_yaw * rot_pitch * rot_roll
 }
 
 #[derive(Clone)]
@@ -68,10 +54,6 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lockquat(&self, q: &UnitQuaternion<f64>) -> UnitQuaternion<f64> {
-        lock_horizon_angle(q, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&q, 1.0 - self.horizonlockpercent / 100.0)
-    }
-
     pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, int_method: usize) {
         if self.lock_enabled {
             if int_method == 0 {
@@ -81,9 +63,9 @@ impl HorizonLock {
                     let y_axis = nalgebra::Vector3::<f64>::y_axis();
                     //let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
 
-                    for (k, smoothed_ori) in smoothed_quats.iter_mut() {
-                        let gv = gvec.get(k).unwrap_or(&y_axis);
-                        let ori = quats.get(k).unwrap_or(&smoothed_ori).to_rotation_matrix();
+                    for (ts, smoothed_ori) in smoothed_quats.iter_mut() {
+                        let gv = gvec.get(ts).unwrap_or(&y_axis);
+                        let ori = quats.get(ts).unwrap_or(&smoothed_ori).to_rotation_matrix();
 
                         // Correct for angle difference between original and smoothed orientation
                         let correction = ori.inverse() * smoothed_ori.to_rotation_matrix();
@@ -98,8 +80,8 @@ impl HorizonLock {
                 }
             }
 
-            for (_k, v) in smoothed_quats.iter_mut() {
-                *v = self.lockquat(v);
+            for (_ts, smoothed_ori) in smoothed_quats.iter_mut() {
+                *smoothed_ori = lock_horizon_angle(smoothed_ori, self.horizonroll * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - self.horizonlockpercent / 100.0);
             }
         }
     }
