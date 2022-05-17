@@ -119,8 +119,10 @@ pub fn find_offsets(ranges: &[(i64, i64)], estimator: &PoseEstimator, initial_of
                 let middle_timestamp = (*from_ts as f64 + (to_ts - from_ts) as f64 / 2.0) / 1000.0;
 
                 // Only accept offsets that are within 90% of search size range
-                if lowest.0.abs() < (search_size / 2.0) * 0.9 {
+                if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
                     final_offsets.push((middle_timestamp, lowest.0, lowest.1));
+                } else {
+                    log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
                 }
             }
         }
