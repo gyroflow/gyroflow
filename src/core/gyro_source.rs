@@ -218,7 +218,13 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
-            0 => self.quaternions = self.org_quaternions.clone(),
+            0 => self.quaternions = if self.gravity_vectors.is_some() { 
+                    self.org_quaternions.clone()
+                } else {
+                    // TODO: check if we can do this if we've got gravity vectors too. This might need some 
+                    //       adjustments in the horizon lock calculation
+                    QuaternionConverter::convert(&self.org_quaternions, &self.raw_imu, self.duration_ms) 
+                },
             1 => self.quaternions = ComplementaryIntegrator::integrate(&self.raw_imu, self.duration_ms),
             2 => self.quaternions = MadgwickIntegrator::integrate(&self.raw_imu, self.duration_ms),
             3 => self.quaternions = MahonyIntegrator::integrate(&self.raw_imu, self.duration_ms),
