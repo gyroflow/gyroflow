@@ -11,10 +11,45 @@ pub trait GyroIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat;
 }
 
+pub struct QuaternionConverter { }
 pub struct MadgwickIntegrator { }
 pub struct GyroOnlyIntegrator { }
 pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
+
+
+
+
+impl QuaternionConverter {
+    pub fn convert(org_quaternions: &TimeQuat, imu_data: &[TimeIMU], _duration_ms: f64) -> TimeQuat {        
+        let x_axis = nalgebra::Vector3::<f64>::x_axis();
+        let y_axis = nalgebra::Vector3::<f64>::y_axis();
+        let z_axis = nalgebra::Vector3::<f64>::z_axis();
+
+        let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2) 
+                         * UnitQuaternion::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2);
+
+        let pitch_offset = if imu_data.is_empty() {
+                UnitQuaternion::identity()
+            } else {
+                let first_imu = imu_data.first().unwrap();
+                let a = first_imu.accl.unwrap_or_default();
+                let p = -a[2].atan2(a[0]);
+
+                UnitQuaternion::from_axis_angle(&x_axis, p)
+            };
+
+        let correction = initial_quat * pitch_offset;
+
+        org_quaternions.iter().map(|(&ts, &org_q)| {
+            (ts, correction * org_q)
+        }).collect()
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 impl GyroIntegrator for MadgwickIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
