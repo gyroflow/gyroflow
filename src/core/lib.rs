@@ -708,7 +708,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
-        let (smoothing_name, smoothing_params) = {
+        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll) = {
             let smoothing_lock = self.smoothing.read();
             let smoothing = smoothing_lock.current();
 
@@ -724,7 +724,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
             }
 
-            (smoothing.get_name(), parameters)
+            (smoothing.get_name(), parameters, smoothing_lock.horizon_lock.horizonlockpercent, smoothing_lock.horizon_lock.horizonroll)
         };
 
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
@@ -763,6 +763,8 @@ impl<T: PixelType> StabilizationManager<T> {
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
                 // "adaptive_zoom_fovs":     if !thin { util::compress_to_base91(&params.fovs) } else { None },
                 "lens_correction_amount": params.lens_correction_amount,
+                "horizon_lock_amount":    horizon_amount,
+                "horizon_lock_roll":      horizon_roll,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,
@@ -966,6 +968,10 @@ impl<T: PixelType> StabilizationManager<T> {
                         Some(())
                     })();
                 }
+
+                let horizon_amount= obj.get("horizon_lock_amount").and_then(|x| x.as_f64()).unwrap_or(0.0);
+                let horizon_roll  = obj.get("horizon_roll")       .and_then(|x| x.as_f64()).unwrap_or(0.0);
+                smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll);
 
                 obj.remove("adaptive_zoom_fovs");
             }

@@ -23,7 +23,7 @@
     <a href="https://github.com/gyroflow/gyroflow/releases">
       <img src="https://img.shields.io/github/downloads/gyroflow/gyroflow/total" alt="Downloads">
     </a>
-    <a href="https://github.com/gyroflow/gyroflow/">
+    <a href="https://github.com/gyroflow/gyroflow/graphs/contributors">
       <img src="https://img.shields.io/github/contributors/gyroflow/gyroflow?color=dark-green" alt="Contributors">
     </a>
     <a title="Crowdin" target="_blank" href="https://crowdin.com/project/gyroflow"><img src="https://badges.crowdin.net/gyroflow/localized.svg">

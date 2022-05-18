@@ -64,6 +64,11 @@ MenuItem {
             } else {
                 croppingMode.currentIndex = 0; // No cropping
             }
+
+            horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
+            horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
+            horizonRollSlider.value = horizonCb.checked? +stab.horizon_lock_roll : 0;
+            Qt.callLater(updateHorizonLock);
         }
     }
 
@@ -306,9 +311,7 @@ MenuItem {
         id: horizonCb;
         text: qsTr("Lock horizon");
 
-        cb.onCheckedChanged: {
-            updateHorizonLock();
-        }
+        cb.onCheckedChanged: Qt.callLater(updateHorizonLock);
 
         Label {
             text: qsTr("Lock amount", "Horizon locking amount");
@@ -322,7 +325,7 @@ MenuItem {
                 unit: qsTr("%");
                 precision: 0;
                 value: 100;
-                onValueChanged: updateHorizonLock();
+                onValueChanged: Qt.callLater(updateHorizonLock);
             }
         }
 
@@ -339,7 +342,7 @@ MenuItem {
                 defaultValue: 0;
                 unit: qsTr("°");
                 precision: 1;
-                onValueChanged: updateHorizonLock();
+                onValueChanged: Qt.callLater(updateHorizonLock);
             }
         }
 
