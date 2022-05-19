@@ -153,11 +153,11 @@ MenuItem {
 
             ComboBox {
                 id: syncMethod;
-                model: ["AKAZE", "OpenCV"];
+                model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 1;
-                onCurrentIndexChanged: controller.sync_method = currentIndex;
+                onCurrentIndexChanged: controller.set_sync_method(currentIndex);
             }
         }
         Label {

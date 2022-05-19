@@ -62,6 +62,8 @@ pub struct StabilizationParams {
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
 
+    pub sync_method: u32,
+
     pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>
 }
 impl Default for StabilizationParams {
@@ -98,6 +100,8 @@ impl Default for StabilizationParams {
         
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
     
+            sync_method: 1,
+
             fps: 0.0,
             fps_scale: None,
             frame_count: 0,
@@ -130,5 +134,22 @@ impl StabilizationParams {
             self.min_fov = 1.0;
         }
         self.fovs = fovs;
+    }
+
+    pub fn clear(&mut self) {
+        *self = StabilizationParams {
+            stab_enabled:              self.stab_enabled, 
+            show_detected_features:    self.show_detected_features, 
+            show_optical_flow:         self.show_optical_flow, 
+            background:                self.background, 
+            adaptive_zoom_window:      self.adaptive_zoom_window, 
+            framebuffer_inverted:      self.framebuffer_inverted, 
+            lens_correction_amount:    self.lens_correction_amount, 
+            background_mode:           self.background_mode, 
+            background_margin:         self.background_margin, 
+            background_margin_feather: self.background_margin_feather, 
+            sync_method:               self.sync_method,
+            ..Default::default()
+        };
     }
 }

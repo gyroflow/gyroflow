@@ -16,12 +16,16 @@ use crate::stabilization::ComputeParams;
 
 #[cfg(feature = "use-opencv")]
 use self::opencv::ItemOpenCV;
+#[cfg(feature = "use-opencv")]
+use self::opencv_dis::ItemOpenCVDis;
 use self::akaze::ItemAkaze;
 
 use super::gyro_source::TimeIMU;
 
 #[cfg(feature = "use-opencv")]
 mod opencv;
+#[cfg(feature = "use-opencv")]
+mod opencv_dis;
 mod akaze;
 mod find_offset;
 mod find_offset_visually;
@@ -38,9 +42,11 @@ pub type OpticalFlowPairWithTs = Option<((i64, OpticalFlowPoints), (i64, Optical
 #[enum_dispatch]
 #[derive(Clone)]
 pub enum EstimatorItem {
+    ItemAkaze,
     #[cfg(feature = "use-opencv")]
     ItemOpenCV,
-    ItemAkaze
+    #[cfg(feature = "use-opencv")]
+    ItemOpenCVDis,
 }
 
 #[enum_dispatch(EstimatorItem)]
@@ -106,6 +112,8 @@ impl PoseEstimator {
             0 => ItemAkaze::detect_features(timestamp_us, img).into(),
             #[cfg(feature = "use-opencv")]
             1 => ItemOpenCV::detect_features(timestamp_us, img).into(),
+            #[cfg(feature = "use-opencv")]
+            2 => ItemOpenCVDis::detect_features(timestamp_us, img).into(),
             _ => panic!("Invalid method {}", method) // TODO change to Result<>
         };
         {
@@ -316,7 +324,7 @@ impl PoseEstimator {
                     // TODO: figure out if rolling shutter time can be used to make better calculation here
                     let mut ts = *k as f64 / 1000.0;
                     if let Some(next_ts) = iter.peek().map(|(&k, _)| k as f64 / 1000.0) {
-                        ts = ts + (next_ts - ts) / 2.0;
+                        ts += (next_ts - ts) / 2.0;
                     }
 
                     let ts_us = (ts * 1000.0).round() as i64;

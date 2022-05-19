@@ -19,8 +19,6 @@ pub struct ItemOpenCV {
     img: Arc<image::GrayImage>,
     size: (i32, i32)
 }
-unsafe impl Send for ItemOpenCV { }
-unsafe impl Sync for ItemOpenCV { }
 
 impl EstimatorItemInterface for ItemOpenCV {
     fn get_features(&self) -> &Vec<(f64, f64)> {
@@ -155,7 +153,9 @@ impl ItemOpenCV {
 }
 
 pub fn init() -> Result<(), opencv::Error> {
-    /*let opencl_have = opencv::core::have_opencl()?;
+    /*use opencv::prelude::DeviceTraitConst;
+    use opencv::prelude::PlatformInfoTraitConst;
+    let opencl_have = opencv::core::have_opencl()?;
     if opencl_have {
         opencv::core::set_use_opencl(true)?;
         let mut platforms = opencv::types::VectorOfPlatformInfo::new();

@@ -49,7 +49,7 @@ pub struct Controller {
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
-    sync_method: qt_property!(u32; WRITE set_sync_method),
+    set_sync_method: qt_method!(fn(&self, v: u32)),
     offset_method: qt_property!(u32),
     start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
@@ -192,7 +192,6 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Self {
-            sync_method: 1,
             offset_method: 0,
             preview_resolution: 720,
             ..Default::default()
@@ -215,12 +214,14 @@ impl Controller {
 
         if every_nth_frame <= 0 { every_nth_frame = 1; }
 
-        let method = self.sync_method;
         let offset_method = self.offset_method;
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let size = self.stabilizer.params.read().size;
+        let (size, method) = {
+            let params = self.stabilizer.params.read();
+            (params.size, params.sync_method)
+        };
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
@@ -621,13 +622,6 @@ impl Controller {
         util::serde_json_to_qt_array(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
     }
 
-    fn set_sync_method(&mut self, v: u32) {
-        self.sync_method = v;
-
-        self.stabilizer.pose_estimator.clear();
-        self.chart_data_changed();
-    }
-
     fn recompute_threaded(&self) {
         let id = self.stabilizer.recompute_threaded(util::qt_queued_callback(self, |this, id: u64| {
             this.compute_progress(id, 1.0);
@@ -711,6 +705,7 @@ impl Controller {
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_sync_method,        v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);

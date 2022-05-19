@@ -129,52 +129,22 @@ impl<T: PixelType> StabilizationManager<T> {
             }
         }
 
-        /*if path.ends_with(".gyroflow") {
-            let data = std::fs::read_to_string(path)?;
-            let v: serde_json::Value = serde_json::from_str(&data)?;
-    
-            self.lens.write().load_from_json_value(&v["calibration_data"]);
+        let (fps, size) = {
+            let params = self.params.read();
+            (params.fps, params.video_size)
+        };
 
-            let to_f64_array = |x: &serde_json::Value| -> Option<Vec<f64>> { Some(x.as_array()?.iter().filter_map(|x| x.as_f64()).collect()) };
-
-            try_block!({
-                //let smoothed_quaternions = v["stab_transform"].as_array()?.iter().filter_map(to_f64_array)
-                //    .map(|x| ((x[0] * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3], Vector3::new(x[4], x[5], x[6])))))
-                //    .collect();
-        
-                let quaternions = v["frame_orientation"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| ((x[1] * 1000000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x[3-1], Vector3::new(x[4-1], x[5-1], x[6-1])))))
-                    .collect();
-        
-                let raw_imu = v["raw_imu"].as_array()?.iter().filter_map(to_f64_array)
-                    .map(|x| TimeIMU { timestamp_ms: 0.0/*TODO*/, gyro: Some([x[0], x[1], x[2]]), accl: Some([x[3], x[4], x[6]]), magn: None })
-                    .collect();
-
-                let md = crate::gyro_source::FileMetadata {
-                    imu_orientation: None, // TODO IMU orientation
-                    detected_source: Some("Gyroflow file".to_string()),
-                    quaternions: Some(quaternions),
-                    raw_imu: Some(raw_imu),
-                    frame_readout_time: None,
-                    camera_identifier: None,
-                };
-                self.gyro.write().load_from_telemetry(&md);
-                self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
-            });
-        } else {*/
-            let (fps, size) = {
-                let params = self.params.read();
-                (params.fps, params.video_size)
-            };
-
-            let md = GyroSource::parse_telemetry_file(path, size, fps)?;
-            self.gyro.write().load_from_telemetry(&md);
-            self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
-            self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
-            if let Some(id) = md.camera_identifier {
-                *self.camera_id.write() = Some(id);
-            }
-        // }
+        let mut md = GyroSource::parse_telemetry_file(path, size, fps)?;
+        if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
+            // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
+            md.frame_readout_time = None;
+        }
+        self.gyro.write().load_from_telemetry(&md);
+        self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        if let Some(id) = md.camera_identifier {
+            *self.camera_id.write() = Some(id);
+        }
         Ok(())
     }
 
@@ -379,8 +349,13 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn get_opticalflow_pixels(&self, timestamp_us: i64) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
         let mut ret = None;
-        if self.params.read().show_optical_flow {
-            for i in 0..3 {
+        let (show, method) = {
+            let params = self.params.read();
+            (params.show_optical_flow, params.sync_method)
+        };
+        if show {
+            let num = if method == 2 { 1 } else { 3 };
+            for i in 0..num {
                 let a = (3 - i) as f32 / 3.0;
                 if let Some(lines) = self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1) {
                     lines.0.1.into_iter().zip(lines.1.1.into_iter()).for_each(|(p1, p2)| {
@@ -520,6 +495,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.invalidate_smoothing(); }
     pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.invalidate_smoothing(); }
 
+    pub fn set_sync_method(&self, v: u32) { self.params.write().sync_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
@@ -668,14 +644,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn clear(&self) {
-        let (stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, background_margin, background_margin_feather) = {
-            let params = self.params.read();
-            (params.stab_enabled, params.show_detected_features, params.show_optical_flow, params.background, params.adaptive_zoom_window, params.framebuffer_inverted, params.lens_correction_amount, params.background_mode, params.background_margin, params.background_margin_feather)
-        };
-
-        *self.params.write() = StabilizationParams {
-            stab_enabled, show_detected_features, show_optical_flow, background, adaptive_zoom_window, framebuffer_inverted, lens_correction_amount, background_mode, background_margin, background_margin_feather, ..Default::default()
-        };
+        self.params.write().clear();
         if !self.gyro.read().prevent_next_load {
             *self.gyro.write() = GyroSource::new();
         }

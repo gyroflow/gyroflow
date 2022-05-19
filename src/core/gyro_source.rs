@@ -169,7 +169,7 @@ impl GyroSource {
             }
         }
 
-        let raw_imu = util::normalized_imu(&input, Some("XYZ".into())).ok();
+        let raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).ok();
 
         Ok(FileMetadata {
             imu_orientation,
@@ -177,7 +177,7 @@ impl GyroSource {
             quaternions,
             gravity_vectors,
             raw_imu,
-            frame_readout_time: telemetry_parser::util::frame_readout_time(&input),
+            frame_readout_time: input.frame_readout_time(),
             camera_identifier
         })
     }
