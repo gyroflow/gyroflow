@@ -404,8 +404,10 @@ impl Controller {
                 this.load_lens_profile(path);
             });
             let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
-                if this.lens_loaded {
-                    let lens = this.stabilizer.lens.read();
+                let lens = this.stabilizer.lens.read();
+                if this.lens_loaded || !lens.filename.is_empty() {
+                    this.lens_loaded = true;
+                    this.lens_changed();
                     let json = lens.get_json().unwrap_or_default();
                     this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()));
                 }

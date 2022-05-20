@@ -142,6 +142,12 @@ impl<T: PixelType> StabilizationManager<T> {
         self.gyro.write().load_from_telemetry(&md);
         self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
         self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+
+        if let Some(lens) = md.lens_profile {
+            let mut l = self.lens.write();
+            l.load_from_json_value(&lens);
+            l.filename = path.to_string();
+        }
         if let Some(id) = md.camera_identifier {
             *self.camera_id.write() = Some(id);
         }
@@ -873,6 +879,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             quaternions,
                             gravity_vectors,
                             raw_imu,
+                            lens_profile: None,
                             frame_readout_time: None,
                             camera_identifier: None,
                         };
