@@ -173,7 +173,27 @@ impl AutosyncProcess {
                     1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
                     _ => { panic!("Unsupported offset method: {}", method); }
                 };
-                cb(offsets);
+                if self.initial_offset.abs() > 1.0 {
+                    // Try also negative rough offset
+                    let offsets2 = match method {
+                        0 => self.estimator.find_offsets(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read()),
+                        1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
+                        _ => { panic!("Unsupported offset method: {}", method); }
+                    };
+                    if offsets2.len() > offsets.len() {
+                        cb(offsets2);
+                    } else if offsets2.len() == offsets.len() {
+                        let sum1: f64 = offsets.iter().map(|(_, _, cost)| *cost).sum();
+                        let sum2: f64 = offsets2.iter().map(|(_, _, cost)| *cost).sum();
+                        if sum1 < sum2 {
+                            cb(offsets);
+                        } else {
+                            cb(offsets2);
+                        }
+                    }
+                } else {
+                    cb(offsets);
+                }
             }
         }
         if let Some(cb) = &self.progress_cb {

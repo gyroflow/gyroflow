@@ -2626,9 +2626,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.5"
+version = "1.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a11647b6b25ff05a515cb92c365cec08801e83423a235b51e231e1808747286"
+checksum = "d83f127d94bdbcda4c8cc2e50f6f84f4b611f69c902699ca385a39c3a75f9ff1"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2643,9 +2643,9 @@ checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.25"
+version = "0.6.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
 
 [[package]]
 name = "remove_dir_all"
@@ -2991,13 +2991,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "tempdir"
-version = "0.3.7"
+name = "tempfile"
+version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15f2b5fb00ccdf689e0149d1b1b3c03fead81c2b37735d812fa8bddbbf41b6d8"
+checksum = "5cdb1ef4eaeeaddc8fbd371e5017057064af0911902ef36b39801f67cc6d79e4"
 dependencies = [
- "rand 0.4.6",
+ "cfg-if 1.0.0",
+ "fastrand",
+ "libc",
+ "redox_syscall",
  "remove_dir_all",
+ "winapi",
 ]
 
 [[package]]
@@ -3110,11 +3114,11 @@ checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
 
 [[package]]
 name = "uds_windows"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "486992108df0fe0160680af1941fe856c521be931d5a5ecccefe0de86dc47e4a"
+checksum = "ce65604324d3cce9b966701489fbd0cf318cb1f7bd9dd07ac9a4ee6fb791930d"
 dependencies = [
- "tempdir",
+ "tempfile",
  "winapi",
 ]
 
@@ -3340,7 +3344,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#8b2e6fe3a22837403fdaf5ecc5bf37d5297340cd"
+source = "git+https://github.com/gfx-rs/wgpu.git#84efe2b18b31de5cad1e554d1c8db5baf8beef59"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3360,7 +3364,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#8b2e6fe3a22837403fdaf5ecc5bf37d5297340cd"
+source = "git+https://github.com/gfx-rs/wgpu.git#84efe2b18b31de5cad1e554d1c8db5baf8beef59"
 dependencies = [
  "arrayvec 0.7.2",
  "bitflags",
@@ -3382,7 +3386,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#8b2e6fe3a22837403fdaf5ecc5bf37d5297340cd"
+source = "git+https://github.com/gfx-rs/wgpu.git#84efe2b18b31de5cad1e554d1c8db5baf8beef59"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -3419,7 +3423,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#8b2e6fe3a22837403fdaf5ecc5bf37d5297340cd"
+source = "git+https://github.com/gfx-rs/wgpu.git#84efe2b18b31de5cad1e554d1c8db5baf8beef59"
 dependencies = [
  "bitflags",
 ]
