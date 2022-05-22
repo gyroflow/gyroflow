@@ -50,7 +50,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     std::fs::write(&qrc_path, qrc).unwrap();
 
     for (qml, cpp) in &files {
-        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success());
+        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success()); 
     }
 
     let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();
@@ -60,7 +60,8 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
 
     std::fs::remove_file(&qrc_path).unwrap();
 
-    config.compile("qmlcache");
+    config.cargo_metadata(false).compile("qmlcache");
+    println!("cargo:rustc-link-lib=static:+whole-archive=qmlcache");
 }
 
 fn main() {
@@ -141,9 +142,12 @@ fn main() {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
             println!("cargo:rustc-link-search={}/lib/amd64", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
-            println!("cargo:rustc-link-lib=static=z");
-            // assumes that OpenCV has been downloaded using vcpgk and libraries are in static form (default triplets of vcpgk for linux provide static libs)
-            std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib=static={}", lib.trim()));
+            println!("cargo:rustc-link-lib=static:+whole-archive=z");
+            if std::env::var("OPENCV_LINK_PATHS").unwrap_or_default().contains("vcpkg") {
+                std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib=static={}", lib.trim()));
+            } else {
+                std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib={}", lib.trim()));
+            }
         },
         "windows" => {
             println!("cargo:rustc-link-search={}/lib/x64", std::env::var("FFMPEG_DIR").unwrap());
