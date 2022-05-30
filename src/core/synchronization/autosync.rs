@@ -150,7 +150,7 @@ impl AutosyncProcess {
 
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.org_fps, true);
-        self.estimator.cache_optical_flow(2);
+        self.estimator.cache_optical_flow(if method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 
         if let Some(cb) = &self.finished_cb {
