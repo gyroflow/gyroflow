@@ -188,6 +188,13 @@ Item {
             anchors.centerIn: parent;
             opacity: da.containsDrag? 0.5 : 1.0;
 
+            /*Image {
+                // Transparency grid
+                fillMode: Image.Tile;
+                anchors.fill: parent;
+                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><rect fill='%23fff' x='0' y='0' width='7' height='7'/><rect fill='%23aaa' x='7' y='0' width='7' height='7'/><rect fill='%23aaa' x='0' y='7' width='7' height='7'/><rect fill='%23fff' x='7' y='7' width='7' height='7'/></svg>"
+            }*/
+
             MDKVideo {
                 id: vid;
                 visible: opacity > 0;

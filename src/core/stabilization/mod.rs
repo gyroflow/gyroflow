@@ -17,7 +17,7 @@ pub mod distortion_models;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
-pub use cpu_undistort::{ undistort_points, undistort_points_with_rolling_shutter, COEFFS };
+pub use cpu_undistort::{ undistort_points, undistort_points_with_params, undistort_points_with_rolling_shutter, COEFFS };
 
 #[derive(Clone, Copy)]
 pub enum Interpolation {

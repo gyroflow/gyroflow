@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{ Rotation3, Matrix3, Vector4 };
+use nalgebra::Rotation3;
 use std::ops::Range;
 use std::sync::atomic::Ordering::SeqCst;
 use std::vec::Vec;
@@ -28,6 +28,8 @@ mod opencv;
 mod opencv_dis;
 mod akaze;
 mod find_offset;
+mod find_offset_rssync;
+// mod cpp_wrapper;
 mod find_offset_visually;
 mod autosync;
 pub use autosync::AutosyncProcess;
@@ -51,7 +53,7 @@ pub enum EstimatorItem {
 
 #[enum_dispatch(EstimatorItem)]
 pub trait EstimatorItemInterface {
-    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>>;
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>>;
     fn get_features(&self) -> &Vec<(f64, f64)>;
 
     fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair;
@@ -79,7 +81,6 @@ unsafe impl Sync for FrameResult {}
 #[derive(Default)]
 pub struct PoseEstimator {
     pub sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>,
-    pub lens_params: Arc<RwLock<(Matrix3<f64>, Vector4<f64>)>>,
     pub estimated_gyro: Arc<RwLock<BTreeMap<i64, TimeIMU>>>,
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
     pub lpf: std::sync::atomic::AtomicU32,
@@ -87,9 +88,6 @@ pub struct PoseEstimator {
 }
 
 impl PoseEstimator {
-    pub fn set_lens_params(&self, camera_matrix: Matrix3<f64>, coefficients: Vector4<f64>) {
-        *self.lens_params.write() = (camera_matrix, coefficients);
-    }
     pub fn clear(&self) {
         self.sync_results.write().clear();
         self.estimated_gyro.write().clear();
@@ -161,12 +159,11 @@ impl PoseEstimator {
                     let curr = curr.item.clone();
                     if let Some(next) = l.get(next_ts) {
                         let next = next.item.clone();
-                        let (camera_matrix, coeffs) = *self.lens_params.read();
 
                         // Unlock the mutex for estimate_pose
                         drop(l);
 
-                        if let Some(rot) = curr.estimate_pose(&next, camera_matrix, coeffs, params) {
+                        if let Some(rot) = curr.estimate_pose(&next, params) {
                             let mut l = results.write(); 
                             if let Some(x) = l.get_mut(ts) {
                                 x.rotation = Some(rot);
@@ -395,6 +392,26 @@ impl PoseEstimator {
     pub fn find_offsets(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         let gyro = self.estimated_gyro.read().clone();
         find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params)
+    }
+
+    pub fn find_offsets_rssync(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        let mut points = Vec::new();
+        for (from_ts, to_ts) in ranges {
+            let mut points_per_range = Vec::new();
+            {
+                let l = self.sync_results.read();
+                for (_ts, x) in l.range(from_ts..to_ts) {
+                    if let Ok(of) = x.optical_flow.try_borrow() {
+                        if let Some(Some(opt_pts)) = of.get(&1) {
+                            points_per_range.push(opt_pts.clone());
+                        }
+                    }
+                }
+            }
+            points.push(points_per_range);
+        }
+
+        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params)
     }
 
     pub fn find_offsets_visually(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>

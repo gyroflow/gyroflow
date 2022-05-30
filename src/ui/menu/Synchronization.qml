@@ -19,8 +19,8 @@ MenuItem {
         property alias maxSyncPoints: maxSyncPoints.value;
         property alias timePerSyncpoint: timePerSyncpoint.value;
         property alias sync_lpf: lpf.value;
-        property alias syncMethod: syncMethod.currentIndex;
-        property alias offsetMethod: offsetMethod.currentIndex;
+        // property alias syncMethod: syncMethod.currentIndex;
+        // property alias offsetMethod: offsetMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
         property alias showOF: showOF.checked;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
@@ -111,8 +111,8 @@ MenuItem {
             height: 25 * dpiScale;
             value: 3;
             from: 1;
-            to: 10;
-            onValueChanged: { if (value < 1) value = 1; if (value > 10) value = 10; }
+            to: 30;
+            onValueChanged: { if (value < 1) value = 1; if (value > 500) value = 500; }
         }
     }
 
@@ -138,9 +138,9 @@ MenuItem {
                 width: parent.width;
                 height: 25 * dpiScale;
                 value: 1.5;
-                precision: 1;
+                precision: 2;
                 unit: qsTr("s");
-                from: 1;
+                from: 0.01;
             }
         }
         InfoMessageSmall {
@@ -156,8 +156,9 @@ MenuItem {
                 model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                currentIndex: 1;
+                currentIndex: 2;
                 onCurrentIndexChanged: controller.set_sync_method(currentIndex);
+                Component.onCompleted: currentIndexChanged();
             }
         }
         Label {
@@ -165,13 +166,18 @@ MenuItem {
 
             ComboBox {
                 id: offsetMethod;
-                model: [QT_TRANSLATE_NOOP("Popup", "Using essential matrix"), QT_TRANSLATE_NOOP("Popup", "Using visual features")];
+                model: [QT_TRANSLATE_NOOP("Popup", "Using essential matrix"), QT_TRANSLATE_NOOP("Popup", "Using visual features"), QT_TRANSLATE_NOOP("Popup", "rs-sync")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
+                currentIndex: 2;
                 onCurrentIndexChanged: controller.offset_method = currentIndex;
-                tooltip: currentIndex == 0? 
-                    qsTr("Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.\nThen try to match these angles to gyroscope angles.")
-                  : qsTr("Undistort optical flow points using gyro and candidate offset.\nThen calculate lengths of the optical flow lines.\nResulting offset is the one where lines were the shortest, meaning the video was moving the least visually.");
+                Component.onCompleted: currentIndexChanged();
+                property var tooltips: ([
+                    qsTr("Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.\nThen try to match these angles to gyroscope angles."),
+                    qsTr("Undistort optical flow points using gyro and candidate offset.\nThen calculate lengths of the optical flow lines.\nResulting offset is the one where lines were the shortest, meaning the video was moving the least visually."),
+                    qsTr("Rolling shutter video to gyro synchronization algorithm.\nMake sure you have proper rolling shutter value set before syncing.")
+                ]);
+                tooltip: tooltips[currentIndex];
             }
         }
         CheckBoxWithContent {

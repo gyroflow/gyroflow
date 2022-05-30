@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{ Rotation3, Matrix3, Vector4 };
+use nalgebra::{ Rotation3, Matrix3 };
 use std::collections::BTreeMap;
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -26,12 +26,12 @@ impl EstimatorItemInterface for ItemOpenCVDis {
     fn get_features(&self) -> &Vec<(f64, f64)> { &self.features }
     fn rescale(&mut self, _ratio: f32) { }
     
-    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
-            let pts11 = crate::stabilization::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
-            let pts22 = crate::stabilization::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+            let pts11 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
+            let pts22 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
 
             let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
             let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
@@ -103,7 +103,7 @@ impl ItemOpenCVDis {
 
                 let mut points_a = Vec::new();
                 let mut points_b = Vec::new();
-                let step = w as usize / 25; // 25 points
+                let step = w as usize / 15; // 15 points
                 for i in (0..a1_img.cols()).step_by(step) {
                     for j in (0..a1_img.rows()).step_by(step) {
                         let pt = of.at_2d::<Vec2f>(j, i)?;

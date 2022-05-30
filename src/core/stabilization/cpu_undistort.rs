@@ -252,7 +252,12 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp
 
     undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params)
 }
-
+pub fn undistort_points_with_params(distorted: &[(f64, f64)], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f64, f64)> {
+    let img_dim_ratio = FrameTransform::get_ratio(params);
+    let scaled_k = params.camera_matrix * img_dim_ratio;
+    
+    undistort_points(distorted, scaled_k, &params.distortion_coeffs, rotation, p, rot_per_point, params)
+}
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
 pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f64, f64)> {
     let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);

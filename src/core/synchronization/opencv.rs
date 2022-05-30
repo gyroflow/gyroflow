@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{ Rotation3, Matrix3, Vector4 };
+use nalgebra::{ Rotation3, Matrix3 };
 use std::ffi::c_void;
 use std::sync::Arc;
 use opencv::core::{ Mat, Size, Point2f, TermCriteria, CV_8UC1 };
@@ -31,12 +31,12 @@ impl EstimatorItemInterface for ItemOpenCV {
         }
     }
     
-    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
-            let pts11 = crate::stabilization::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
-            let pts22 = crate::stabilization::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+            let pts11 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
+            let pts22 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
 
             let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
             let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
@@ -90,7 +90,7 @@ impl ItemOpenCV {
         //let mut pts = UMat::new(UMatUsageFlags::USAGE_DEFAULT);
 
         if let Err(e) = inp.and_then(|inp| {
-            opencv::imgproc::good_features_to_track(&inp, &mut pts, 500, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
+            opencv::imgproc::good_features_to_track(&inp, &mut pts, 200, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
         }) {
             log::error!("OpenCV error {:?}", e);
         }

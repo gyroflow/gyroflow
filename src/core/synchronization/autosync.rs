@@ -37,8 +37,6 @@ impl AutosyncProcess {
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
-        let size = params.size;
-        let video_size = params.video_size;
         let org_duration_ms = params.duration_ms;
         let fps_scale = params.fps_scale;
         let duration_ms = params.get_scaled_duration_ms();
@@ -66,16 +64,7 @@ impl AutosyncProcess {
         ).collect();
 
         let estimator = stab.pose_estimator.clone();
-         
-        let mut img_ratio = stab.lens.read().calib_dimension.w as f64 / size.0 as f64;
-        if img_ratio < 0.1 || !img_ratio.is_finite() {
-            img_ratio = 1.0;
-        }
-        let mtrx = stab.lens.write().get_camera_matrix(size, video_size);
-        estimator.set_lens_params(
-            mtrx / img_ratio,
-            stab.lens.read().get_distortion_coeffs()
-        );
+
         estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
         
         let mut comp_params = ComputeParams::from_manager(stab);
@@ -171,6 +160,7 @@ impl AutosyncProcess {
                 let offsets = match method {
                     0 => self.estimator.find_offsets(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                     1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
+                    2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                     _ => { panic!("Unsupported offset method: {}", method); }
                 };
                 if self.initial_offset.abs() > 1.0 {
@@ -178,6 +168,7 @@ impl AutosyncProcess {
                     let offsets2 = match method {
                         0 => self.estimator.find_offsets(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                         1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read(), false),
+                        2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                         _ => { panic!("Unsupported offset method: {}", method); }
                     };
                     if offsets2.len() > offsets.len() {

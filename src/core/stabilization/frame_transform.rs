@@ -33,7 +33,7 @@ impl FrameTransform {
         new_k[(1, 2)] = /*(params.video_height as f64 / 2.0 - focal_center.1) * img_dim_ratio / fov + */out_dim.1 / 2.0;
         new_k
     }
-    fn get_ratio(params: &ComputeParams) -> f64 {
+    pub fn get_ratio(params: &ComputeParams) -> f64 {
         params.width as f64 / params.video_width.max(1) as f64
     }
     fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool) -> f64 {

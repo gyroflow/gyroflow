@@ -13,6 +13,9 @@ path = "lib.rs"
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
 ahrs = { version = "0.5.0", features = ["field_access"] }
 
+#rs-sync = { path = "../../../rs-sync" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git" }
+
 mimalloc = { version = "0.1.29", default-features = false }
 nalgebra = { version = "0.30", features = ["serde-serialize"] }
 rayon = "1.5.1"
@@ -62,6 +65,10 @@ pollster = "0.2.5"
 log = "0.4.16"
 
 ocl = { version = "0.19.3", optional = true }
+
+#cpp = "0.5.6"
+#[build-dependencies]
+#cpp_build = "0.5.6"
 
 [features]
 default = ["use-opencl", "use-opencv"]

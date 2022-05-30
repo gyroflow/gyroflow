@@ -4,7 +4,7 @@
 use akaze::Akaze;
 use arrsac::Arrsac;
 use bitarray::{ BitArray, Hamming };
-use nalgebra::{ Rotation3, Matrix3, Vector4 };
+use nalgebra::{ Rotation3, Matrix3 };
 use cv_core::{ FeatureMatch, Pose, sample_consensus::Consensus };
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
@@ -42,15 +42,15 @@ impl EstimatorItemInterface for ItemAkaze {
         }
     }
 
-    fn estimate_pose(&self, next: &EstimatorItem, camera_matrix: Matrix3<f64>, coeffs: Vector4<f64>, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
         if let EstimatorItem::ItemAkaze(next) = next {
             use nalgebra::{ UnitVector3, Point2 };
 
             let pts1 = &self.features;
             let pts2 = &next.features;
 
-            let pts1 = crate::stabilization::undistort_points(&pts1, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
-            let pts2 = crate::stabilization::undistort_points(&pts2, camera_matrix, coeffs.as_slice(), Matrix3::identity(), None, None, params);
+            let pts1 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
+            let pts2 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
 
             let matches: Vec<Match> = Self::match_descriptors(&self.descriptors, &next.descriptors).into_iter()
                 .map(|(i1, i2)| {
@@ -112,7 +112,7 @@ impl ItemAkaze {
 
     pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
         let mut akz = Akaze::new(0.0007);
-        akz.maximum_features = 500;
+        akz.maximum_features = 200;
         let (points, descriptors) = akz.extract(&image::DynamicImage::ImageLuma8(Arc::try_unwrap(img).unwrap()));
 
         /*let mut hasher = crc32fast::Hasher::new();
