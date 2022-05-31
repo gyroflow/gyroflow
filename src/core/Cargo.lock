@@ -870,6 +870,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a471a38ef8ed83cd6e40aa59c1ffe17db6855c18e3604d9c4ed8c08ebc28678"
 
 [[package]]
+name = "futures-core"
+version = "0.3.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c09fd04b7e4073ac7156a9539b57a484a8ea920f79c7c675d05d289ab6110d3"
+
+[[package]]
+name = "futures-intrusive"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62007592ac46aa7c2b6416f7deb9a8a8f63a01e0f1d6e1787d5630170db2b63e"
+dependencies = [
+ "futures-core",
+ "lock_api",
+ "parking_lot 0.11.2",
+]
+
+[[package]]
 name = "fxhash"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -989,6 +1006,7 @@ dependencies = [
  "enum_dispatch",
  "fastrand",
  "flate2",
+ "futures-intrusive",
  "image",
  "include_dir",
  "itertools",
@@ -1001,7 +1019,7 @@ dependencies = [
  "num-traits 0.2.15",
  "ocl",
  "opencv",
- "parking_lot",
+ "parking_lot 0.12.1",
  "pollster",
  "rand 0.8.5",
  "rand_xoshiro",
@@ -1720,9 +1738,9 @@ checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "opencv"
-version = "0.63.2"
+version = "0.64.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ec68738131d57ddb4fd323aac673f60ff138199b491d955582a32d7687e5974"
+checksum = "9ac638ff95885865484481341c250c73c814a88f9293643dd7b7d444a33ed30a"
 dependencies = [
  "cc",
  "clang",
@@ -1741,9 +1759,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.41.0"
+version = "0.42.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c69003fad8fb8b35d4eaade050d54219546050df9a366484c9f46293164f5f1f"
+checksum = "c3744d501074d4b473cffb32c1642ec566e24054c543c79a7567f1ea0aa7d2eb"
 dependencies = [
  "clang",
  "clang-sys",
@@ -1756,12 +1774,37 @@ dependencies = [
 
 [[package]]
 name = "parking_lot"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
+dependencies = [
+ "instant",
+ "lock_api",
+ "parking_lot_core 0.8.5",
+]
+
+[[package]]
+name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
- "parking_lot_core",
+ "parking_lot_core 0.9.3",
+]
+
+[[package]]
+name = "parking_lot_core"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d76e8e1493bcac0d2766c42737f34458f1c8c50c0d23bcb24ea953affb273216"
+dependencies = [
+ "cfg-if 1.0.0",
+ "instant",
+ "libc",
+ "redox_syscall",
+ "smallvec",
+ "winapi",
 ]
 
 [[package]]
@@ -2109,7 +2152,7 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#a62be0891c00a8eb5cf9bd8f25d1f083e0c66534"
+source = "git+https://github.com/gyroflow/rs-sync.git#c3eeec1cbfc7bf045ba5fecd053fbf66def448c6"
 dependencies = [
  "argmin",
  "libm 0.2.2",
@@ -2661,7 +2704,7 @@ dependencies = [
  "js-sys",
  "log",
  "naga",
- "parking_lot",
+ "parking_lot 0.12.1",
  "raw-window-handle",
  "smallvec",
  "wasm-bindgen",
@@ -2686,7 +2729,7 @@ dependencies = [
  "fxhash",
  "log",
  "naga",
- "parking_lot",
+ "parking_lot 0.12.1",
  "profiling",
  "raw-window-handle",
  "smallvec",
@@ -2720,7 +2763,7 @@ dependencies = [
  "metal",
  "naga",
  "objc",
- "parking_lot",
+ "parking_lot 0.12.1",
  "profiling",
  "range-alloc",
  "raw-window-handle",
