@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Naked/Split___2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "VICTOR",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Naked/Split",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.757763833423737,
+    "camera_matrix": [
+      [
+        1086.0783428677412,
+        0.0,
+        1241.0307907059243
+      ],
+      [
+        0.0,
+        1084.5973654599634,
+        706.4988989846631
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13383733212031196,
+      0.05581088801126357,
+      -0.10495778560687732,
+      0.040763518649361855
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}
