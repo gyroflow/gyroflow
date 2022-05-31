@@ -244,11 +244,12 @@ impl WgpuWrapper {
         self.queue.submit(Some(encoder.finish()));
 
         let buffer_slice = self.staging_buffer.slice(..);
-        let buffer_future = buffer_slice.map_async(wgpu::MapMode::Read);
+        let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
+        buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
         self.device.poll(wgpu::Maintain::Wait);
 
-        if let Ok(()) = pollster::block_on(buffer_future) {
+        if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
             let data = buffer_slice.get_mapped_range();
             if self.padded_out_stride == itm.kernel_params.output_stride as u32 {
                 // Fast path

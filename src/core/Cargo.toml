@@ -61,6 +61,7 @@ opencv = { version = "0.63", features = ["clang-runtime"], optional = true }
 wgpu = { version = "*", git = "https://github.com/gfx-rs/wgpu.git" }
 bytemuck = "1.9.0"
 pollster = "0.2.5"
+futures-intrusive = "0.4.0"
 
 log = "0.4.16"
 
