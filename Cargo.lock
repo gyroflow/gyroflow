@@ -296,7 +296,7 @@ dependencies = [
  "cc",
  "cfg-if 1.0.0",
  "libc",
- "miniz_oxide 0.5.1",
+ "miniz_oxide 0.5.3",
  "object",
  "rustc-demangle",
 ]
@@ -1113,7 +1113,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f82b0f4c27ad9f8bfd1f3208d882da2b09c301bc1c828fd3a00d0216d2fbbff6"
 dependencies = [
  "crc32fast",
- "miniz_oxide 0.5.1",
+ "miniz_oxide 0.5.3",
 ]
 
 [[package]]
@@ -1332,7 +1332,7 @@ dependencies = [
  "log",
  "nalgebra",
  "ndk-sys",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "qmetaobject",
  "qml-video-rs",
  "qttypes",
@@ -1384,7 +1384,7 @@ dependencies = [
  "num-traits 0.2.15",
  "ocl",
  "opencv",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "pollster",
  "rand 0.8.5",
  "rand_xoshiro",
@@ -1816,9 +1816,9 @@ dependencies = [
 
 [[package]]
 name = "miniz_oxide"
-version = "0.5.1"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2b29bd4bc3f33391105ebee3589c19197c4271e3e5a9ec9bfe8127eeff8f082"
+checksum = "6f5c75688da582b8ffc1f1799e9db273f32133c49e048f614d22ec3256773ccc"
 dependencies = [
  "adler",
 ]
@@ -2260,9 +2260,9 @@ dependencies = [
 
 [[package]]
 name = "parking_lot"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f5ec2493a61ac0506c0f4199f99070cbe83857b0337006a30f3e6719b8ef58"
+checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
  "parking_lot_core 0.9.3",
@@ -2739,10 +2739,11 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#06f9ae08f364f0f438479d0181aeea5a27135753"
+source = "git+https://github.com/gyroflow/rs-sync.git#a62be0891c00a8eb5cf9bd8f25d1f083e0c66534"
 dependencies = [
  "argmin",
  "libm 0.2.2",
+ "log",
  "nalgebra",
  "rand 0.8.5",
  "rayon",
@@ -3497,13 +3498,13 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#fd954a2bd6e19e2954495e03ca171d4a1264a2d5"
+source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
  "log",
  "naga",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "raw-window-handle",
  "smallvec",
  "wasm-bindgen",
@@ -3517,7 +3518,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#fd954a2bd6e19e2954495e03ca171d4a1264a2d5"
+source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3528,7 +3529,7 @@ dependencies = [
  "fxhash",
  "log",
  "naga",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "profiling",
  "raw-window-handle",
  "smallvec",
@@ -3540,7 +3541,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#fd954a2bd6e19e2954495e03ca171d4a1264a2d5"
+source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -3562,7 +3563,7 @@ dependencies = [
  "metal",
  "naga",
  "objc",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "profiling",
  "range-alloc",
  "raw-window-handle",
@@ -3577,7 +3578,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#fd954a2bd6e19e2954495e03ca171d4a1264a2d5"
+source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
 dependencies = [
  "bitflags",
 ]

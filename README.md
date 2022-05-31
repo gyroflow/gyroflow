@@ -255,6 +255,7 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/g
 * [Aphobius](https://github.com/Aphobius/) - *Author of the velocity dampened smoothing algorithm*
 * [Marc Roeschlin](https://github.com/marcroe/) - *Author of the adaptive zoom algorithm*
 * [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author of the OpenFX plugin*
+* [Vladimir Pinchuk](https://github.com/VladimirP1/) - *Author of robust gyro-to-video synchronization algorithm*
 
 ## Acknowledgements
 
