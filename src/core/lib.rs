@@ -550,8 +550,8 @@ impl<T: PixelType> StabilizationManager<T> {
         self.gyro.write().clear_offsets();
         self.invalidate_zooming();
     }
-    pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
-        self.gyro.read().offset_at_timestamp(timestamp_us as f64 / 1000.0)
+    pub fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
+        self.gyro.read().offset_at_video_timestamp(timestamp_us as f64 / 1000.0)
     }
 
     pub fn set_imu_lpf(&self, lpf: f64) {

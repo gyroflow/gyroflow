@@ -214,7 +214,7 @@ impl TimelineGyroChart {
             if self.viewMode == 0 {
                 if let Some(g) = x.gyro.as_ref() {
                     self.gyro.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
                         values: [g[0], g[1], g[2], 0.0]
                     });
                 }
@@ -222,7 +222,7 @@ impl TimelineGyroChart {
             if self.viewMode == 1 {
                 if let Some(a) = x.accl.as_ref() {
                     self.accl.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
                         values: [a[0], a[1], a[2], 0.0]
                     });
                 }
@@ -230,7 +230,7 @@ impl TimelineGyroChart {
             if self.viewMode == 2 {
                 if let Some(m) = x.magn.as_ref() {
                     self.magn.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
                         values: [m[0], m[1], m[2], 0.0]
                     });
                 }
@@ -241,7 +241,7 @@ impl TimelineGyroChart {
             let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
                 for x in quats {
                     let mut ts = *x.0 as f64 / 1000.0;
-                    ts += gyro.offset_at_timestamp(ts);
+                    ts += gyro.offset_at_gyro_timestamp(ts);
 
                     let q = x.1.quaternion().as_vector();
 

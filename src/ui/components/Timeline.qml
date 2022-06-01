@@ -306,9 +306,9 @@ Item {
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
                     const pos = root.position * root.durationMs * 1000; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
-                    const offset = controller.offset_at_timestamp(pos);
+                    const offset = controller.offset_at_video_timestamp(pos);
                     const final_pos = Math.round(pos - offset * 1000);
-                    const final_offset = controller.offset_at_timestamp(final_pos)
+                    const final_offset = controller.offset_at_video_timestamp(final_pos)
                     controller.set_offset(final_pos, final_offset);
                     Qt.callLater(() => {
                         root.editingSyncPoint = true;

@@ -75,7 +75,7 @@ pub struct Controller {
     set_offset: qt_method!(fn(&self, timestamp_us: i64, offset_ms: f64)),
     remove_offset: qt_method!(fn(&self, timestamp_us: i64)),
     clear_offsets: qt_method!(fn(&self)),
-    offset_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
+    offset_at_video_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
 
@@ -732,8 +732,8 @@ impl Controller {
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
 
-    fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
-        self.stabilizer.offset_at_timestamp(timestamp_us)
+    fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
+        self.stabilizer.offset_at_video_timestamp(timestamp_us)
     }
     fn set_lens_param(&self, param: QString, value: f64) {
         self.stabilizer.set_lens_param(param.to_string().as_str(), value);

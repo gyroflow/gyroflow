@@ -375,7 +375,7 @@ impl GyroSource {
     fn quat_at_timestamp(&self, quats: &TimeQuat, mut timestamp_ms: f64) -> Quat64 {
         if quats.len() < 2 || self.duration_ms <= 0.0 { return Quat64::identity(); }
 
-        timestamp_ms -= self.offset_at_timestamp(timestamp_ms);
+        timestamp_ms -= self.offset_at_video_timestamp(timestamp_ms);
     
         if let Some(&first_ts) = quats.keys().next() {
             if let Some(&last_ts) = quats.keys().next_back() {
@@ -399,20 +399,20 @@ impl GyroSource {
     pub fn      org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.quaternions,          timestamp_ms) }
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
     
-    pub fn offset_at_timestamp(&self, timestamp_ms: f64) -> f64 {
-        match self.offsets_adjusted.len() {
+    fn offset_at_timestamp(&self, offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
+        match offsets.len() {
             0 => 0.0,
-            1 => *self.offsets_adjusted.values().next().unwrap(),
+            1 => *offsets.values().next().unwrap(),
             _ => {
-                if let Some(&first_ts) = self.offsets_adjusted.keys().next() {
-                    if let Some(&last_ts) = self.offsets_adjusted.keys().next_back() {
+                if let Some(&first_ts) = offsets.keys().next() {
+                    if let Some(&last_ts) = offsets.keys().next_back() {
                         let timestamp_us = (timestamp_ms * 1000.0) as i64; 
                         let lookup_ts = (timestamp_us).min(last_ts-1).max(first_ts+1);
-                        if let Some(offs1) = self.offsets_adjusted.range(..=lookup_ts).next_back() {
+                        if let Some(offs1) = offsets.range(..=lookup_ts).next_back() {
                             if *offs1.0 == lookup_ts {
                                 return *offs1.1;
                             }
-                            if let Some(offs2) = self.offsets_adjusted.range(lookup_ts..).next() {
+                            if let Some(offs2) = offsets.range(lookup_ts..).next() {
                                 let time_delta = (offs2.0 - offs1.0) as f64;
                                 let fract = (timestamp_us - offs1.0) as f64 / time_delta;
                                 return offs1.1 + (offs2.1 - offs1.1) * fract;
@@ -425,6 +425,8 @@ impl GyroSource {
             }
         }
     }
+    pub fn offset_at_video_timestamp(&self, timestamp_ms: f64) -> f64 { self.offset_at_timestamp(&self.offsets_adjusted, timestamp_ms) }
+    pub fn offset_at_gyro_timestamp (&self, timestamp_ms: f64) -> f64 { self.offset_at_timestamp(&self.offsets, timestamp_ms) }
 
     pub fn clone_quaternions(&self) -> Self {
         Self {
@@ -441,8 +443,8 @@ impl GyroSource {
     }
 
     pub fn find_bias(&self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
-        let ts_start = timestamp_start - self.offset_at_timestamp(timestamp_start);
-        let ts_stop = timestamp_stop - self.offset_at_timestamp(timestamp_stop);
+        let ts_start = timestamp_start - self.offset_at_video_timestamp(timestamp_start);
+        let ts_stop = timestamp_stop - self.offset_at_video_timestamp(timestamp_stop);
         let mut bias_vals = [0.0, 0.0, 0.0];
         let mut n = 0;
 
