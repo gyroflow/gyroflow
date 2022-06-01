@@ -145,8 +145,15 @@ impl<T: PixelType> StabilizationManager<T> {
 
         if let Some(lens) = md.lens_profile {
             let mut l = self.lens.write();
-            l.load_from_json_value(&lens);
-            l.filename = path.to_string();
+            if let Some(lens_str) = lens.as_str() {
+                let db = self.lens_profile_db.read();
+                if let Some(found) = db.find(lens_str) {
+                    *l = found.clone();
+                }
+            } else {
+                l.load_from_json_value(&lens);
+                l.filename = path.to_string();
+            }
         }
         if let Some(id) = md.camera_identifier {
             *self.camera_id.write() = Some(id);

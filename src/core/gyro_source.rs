@@ -121,6 +121,9 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&serde_json::Value> {
                             lens_profile = Some(v.clone());
                         }
+                        if let Some(v) = map.get_t(TagId::Name) as Option<&String> {
+                            lens_profile = Some(serde_json::Value::String(v.clone()));
+                        }
                     }
                     if let Some(map) = tag_map.get(&GroupId::GravityVector) {
                         let scale = *(map.get_t(TagId::Scale) as Option<&i16>).unwrap_or(&32767) as f64;

@@ -86,8 +86,7 @@ impl<'a> VideoTranscoder<'a> {
         let mut color_range = frame.color_range();
 
         // Workaround for a bug in prores videotoolbox encoder
-        #[cfg(any(target_os = "macos", target_os = "ios"))]
-        if pixel_format == format::Pixel::NV12 && (codec_name == "prores_videotoolbox" || codec_name == "dnxhd") {
+        if cfg!(any(target_os = "macos", target_os = "ios")) && pixel_format == format::Pixel::NV12 && (codec_name == "prores_videotoolbox" || codec_name == "dnxhd") {
             color_range = util::color::Range::MPEG;
         }
 

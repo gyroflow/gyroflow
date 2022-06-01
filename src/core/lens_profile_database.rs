@@ -133,6 +133,13 @@ impl LensProfileDatabase {
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)
     }
+    pub fn find(&self, filename_or_id: &str) -> Option<&LensProfile> {
+        if let Some(l) = self.map.get(filename_or_id) {
+            Some(l)
+        } else {
+            self.map.iter().find(|(_, v)| v.filename.contains(filename_or_id)).map(|(_, v)| v)
+        }
+    }
 
     // -------------------------------------------------------------------
     // ---------------------- Maintenance functions ----------------------
