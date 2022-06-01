@@ -64,7 +64,8 @@ pub struct GyroSource {
 
     pub smoothing_status: serde_json::Value,
     
-    pub offsets: BTreeMap<i64, f64>, // microseconds timestamp, offset in milliseconds
+    offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
+    offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
     pub file_path: String,
 
@@ -81,7 +82,7 @@ impl GyroSource {
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.fps = stabilization_params.get_scaled_fps();
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
-        self.offsets.clear();
+        self.clear_offsets();
     }
     pub fn parse_telemetry_file(path: &str, size: (usize, usize), fps: f64) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
@@ -202,6 +203,7 @@ impl GyroSource {
         self.smoothed_quaternions.clear();
         self.org_smoothed_quaternions.clear();
         self.offsets.clear();
+        self.offsets_adjusted.clear();
         self.raw_imu.clear();
         self.org_raw_imu.clear();
         self.imu_rotation = None;
@@ -242,15 +244,6 @@ impl GyroSource {
         }
     }
 
-    pub fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {
-        if offset_ms.is_finite() && !offset_ms.is_nan() {
-            match self.offsets.entry(timestamp_us) {
-                Entry::Occupied(o) => { *o.into_mut() = offset_ms; }
-                Entry::Vacant(v) => { v.insert(offset_ms); }
-            }
-        }
-    }
-
     pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams) {
         self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params);
         horizon_lock.lock(&mut self.smoothed_quaternions, &mut self.quaternions, &self.gravity_vectors, self.integration_method);
@@ -264,8 +257,38 @@ impl GyroSource {
         }
     }
 
+
+    pub fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {
+        if offset_ms.is_finite() && !offset_ms.is_nan() {
+            match self.offsets.entry(timestamp_us) {
+                Entry::Occupied(o) => { *o.into_mut() = offset_ms; }
+                Entry::Vacant(v) => { v.insert(offset_ms); }
+            }
+            self.adjust_offsets();
+        }
+    }
     pub fn remove_offset(&mut self, timestamp_us: i64) {
         self.offsets.remove(&timestamp_us);
+        self.adjust_offsets();
+    }
+    pub fn clear_offsets(&mut self) {
+        self.offsets.clear();
+        self.offsets_adjusted.clear();
+    }
+    pub fn get_offsets(&self) -> &BTreeMap<i64, f64> {
+        &self.offsets
+    }
+    pub fn set_offsets(&mut self, offsets: BTreeMap<i64, f64>) {
+        self.offsets = offsets;
+        self.adjust_offsets();
+    }
+    pub fn remove_offsets_near(&mut self, ts: i64, range_ms: f64) {
+        let range_us = (range_ms * 1000.0).round() as i64;
+        self.offsets.retain(|k, _| !(ts-range_us..ts+range_us).contains(k));
+        self.adjust_offsets();
+    }
+    fn adjust_offsets(&mut self) {
+        self.offsets_adjusted = self.offsets.iter().map(|(k, v)| (*k + (*v * 1000.0.round()) as i64, *v)).collect::<BTreeMap<i64, f64>>();
     }
 
     pub fn set_lowpass_filter(&mut self, freq: f64) {
@@ -377,19 +400,19 @@ impl GyroSource {
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
     
     pub fn offset_at_timestamp(&self, timestamp_ms: f64) -> f64 {
-        match self.offsets.len() {
+        match self.offsets_adjusted.len() {
             0 => 0.0,
-            1 => *self.offsets.values().next().unwrap(),
+            1 => *self.offsets_adjusted.values().next().unwrap(),
             _ => {
-                if let Some(&first_ts) = self.offsets.keys().next() {
-                    if let Some(&last_ts) = self.offsets.keys().next_back() {
+                if let Some(&first_ts) = self.offsets_adjusted.keys().next() {
+                    if let Some(&last_ts) = self.offsets_adjusted.keys().next_back() {
                         let timestamp_us = (timestamp_ms * 1000.0) as i64; 
                         let lookup_ts = (timestamp_us).min(last_ts-1).max(first_ts+1);
-                        if let Some(offs1) = self.offsets.range(..=lookup_ts).next_back() {
+                        if let Some(offs1) = self.offsets_adjusted.range(..=lookup_ts).next_back() {
                             if *offs1.0 == lookup_ts {
                                 return *offs1.1;
                             }
-                            if let Some(offs2) = self.offsets.range(lookup_ts..).next() {
+                            if let Some(offs2) = self.offsets_adjusted.range(lookup_ts..).next() {
                                 let time_delta = (offs2.0 - offs1.0) as f64;
                                 let fract = (timestamp_us - offs1.0) as f64 / time_delta;
                                 return offs1.1 + (offs2.1 - offs1.1) * fract;
@@ -410,6 +433,7 @@ impl GyroSource {
             quaternions:          self.quaternions.clone(),
             smoothed_quaternions: self.smoothed_quaternions.clone(),            
             offsets:              self.offsets.clone(),
+            offsets_adjusted:     self.offsets_adjusted.clone(),
             gravity_vectors:      self.gravity_vectors.clone(),
             integration_method:   self.integration_method,
             ..Default::default()

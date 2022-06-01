@@ -242,7 +242,7 @@ impl Controller {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                     let new_ts = ((x.0 - x.1) * 1000.0) as i64;
                     // Remove existing offsets within 100ms range
-                    gyro.offsets.retain(|k, _| !(new_ts-100000..new_ts+100000).contains(k));
+                    gyro.remove_offsets_near(new_ts, 100.0);
                     gyro.set_offset(new_ts, x.1);
                 }
                 this.stabilizer.invalidate_zooming();
@@ -360,7 +360,7 @@ impl Controller {
     }
 
     fn update_offset_model(&mut self) {
-        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().offsets.iter().map(|(k, v)| OffsetItem {
+        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().get_offsets().iter().map(|(k, v)| OffsetItem {
             timestamp_us: *k,
             offset_ms: *v
         }).collect());

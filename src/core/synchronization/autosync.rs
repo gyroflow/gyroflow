@@ -70,7 +70,7 @@ impl AutosyncProcess {
         let mut comp_params = ComputeParams::from_manager(stab);
         comp_params.gyro.raw_imu = stab.gyro.read().raw_imu.clone();
         if !for_rs {
-            comp_params.gyro.offsets.clear();
+            comp_params.gyro.clear_offsets();
         }
         // Make sure we apply full correction for autosync
         comp_params.lens_correction_amount = 1.0;

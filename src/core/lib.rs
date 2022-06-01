@@ -547,7 +547,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_zooming();
     }
     pub fn clear_offsets(&self) {
-        self.gyro.write().offsets.clear();
+        self.gyro.write().clear_offsets();
         self.invalidate_zooming();
     }
     pub fn offset_at_timestamp(&self, timestamp_us: i64) -> f64 {
@@ -766,7 +766,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "camera_matrix": {}, // frame, Matrix3
                 "euler_angles": {} // frame, rotation vector
             },*/
-            "offsets": gyro.offsets, // timestamp, offset value
+            "offsets": gyro.get_offsets(), // timestamp, offset value
 
             "trim_start": params.trim_start,
             "trim_end":   params.trim_end,
@@ -966,7 +966,7 @@ impl<T: PixelType> StabilizationManager<T> {
             }
 
             if let Some(serde_json::Value::Object(offsets)) = obj.get("offsets") {
-                self.gyro.write().offsets = offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect();
+                self.gyro.write().set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
             }
 
             *self.video_path.write() = util::path_to_str(&video_path);
