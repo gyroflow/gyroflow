@@ -179,7 +179,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
     DATA_TYPEF bg = *(__global DATA_TYPEF *)&params->background;
 
-    if (!matrices || params->width < 1) return;
+    if (matrices == 0 || params->width < 1) return;
 
     if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
         float2 out_pos = (float2)(x, y);
