@@ -9,7 +9,7 @@ use super::OpticalFlowPoints;
 use std::f64::consts::PI;
 
 // use super::cpp_wrapper;
-// const SAVE_DEBUG_DATA: bool = false;
+// const SAVE_DEBUG_DATA: bool = true;
 
 pub fn find_offsets(
     _ranges: &[(i64, i64)],
@@ -69,7 +69,7 @@ pub fn find_offsets(
 
     let mut sync = SyncProblem::new();
     sync.set_gyro_quaternions(&timestamps, &quats);
-    // sync.set_gyro_quaternions_fixed(&quats, sample_rate, first_ts as f64 / 1000_000.0);
+    //sync.set_gyro_quaternions_fixed(&quats, sample_rate, first_ts as f64 / 1000_000.0);
 
     for range in matched_points {
         if range.len() < 2 {
@@ -113,7 +113,7 @@ pub fn find_offsets(
 
             // if SAVE_DEBUG_DATA {
             //     ser.perframe.push(cpp_wrapper::PerFrame {
-            //         *a_t,
+            //         timestamp_us: *a_t,
             //         pointsa: points3d_a,
             //         pointsb: points3d_b,
             //         tsa: tss_a,
@@ -122,9 +122,9 @@ pub fn find_offsets(
             // }
         }
 
-        let presync_step = 2.0;
+        let presync_step = 3.0;
         let presync_radius = search_size;
-        let initial_delay = initial_offset;
+        let initial_delay = -initial_offset;
 
         // if SAVE_DEBUG_DATA {
         //     ser.frame_ro = frame_readout_time;
@@ -133,7 +133,7 @@ pub fn find_offsets(
         //     ser.presync_step = presync_step;
         //     ser.presync_radius = presync_radius;
         //     ser.initial_delay = initial_delay;
-        //     cpp_wrapper::save_data_to_file(&ser, &format!("D:/tests/data-{}.bin", from_ts));
+        //     cpp_wrapper::save_data_to_file(&ser, &format!("D:/test-{}.bin", from_ts));
         // }
 
         let mut delay = sync.pre_sync(initial_delay / 1000.0, from_ts, to_ts, presync_step / 1000.0, presync_radius / 1000.0);

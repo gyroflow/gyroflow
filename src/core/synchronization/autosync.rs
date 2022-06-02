@@ -14,6 +14,7 @@ use super::PoseEstimator;
 pub struct AutosyncProcess {
     method: u32,
     initial_offset: f64,
+    check_negative_initial_offset: bool,
     sync_search_size: f64,
     frame_count: usize,
     scaled_fps: f64,
@@ -33,7 +34,7 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
+    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool) -> Result<Self, ()> {
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
@@ -86,6 +87,7 @@ impl AutosyncProcess {
             estimator,
             fps_scale,
             initial_offset,
+            check_negative_initial_offset,
             sync_search_size,
             total_read_frames: Arc::new(AtomicUsize::new(1)), // Start with 1 to keep the loader active until `finished_feeding_frames` overrides it with final value
             total_detected_frames: Arc::new(AtomicUsize::new(0)),
@@ -163,7 +165,7 @@ impl AutosyncProcess {
                     2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read()),
                     _ => { panic!("Unsupported offset method: {}", method); }
                 };
-                if self.initial_offset.abs() > 1.0 {
+                if self.check_negative_initial_offset && self.initial_offset.abs() > 1.0 {
                     // Try also negative rough offset
                     let offsets2 = match method {
                         0 => self.estimator.find_offsets(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read()),

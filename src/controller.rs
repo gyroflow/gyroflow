@@ -51,7 +51,7 @@ pub struct Controller {
 
     set_sync_method: qt_method!(fn(&self, v: u32)),
     offset_method: qt_property!(u32),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
     estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
@@ -209,7 +209,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, override_fps: f64) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, override_fps: f64) {
         rendering::clear_log();
 
         if every_nth_frame <= 0 { every_nth_frame = 1; }
@@ -263,7 +263,7 @@ impl Controller {
         });
         self.sync_progress(0.0, 0, 0);
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
             sync.on_progress(move |ready, total| {
                 progress((ready, total));
             });
@@ -632,7 +632,7 @@ impl Controller {
     }
 
     fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64) {
-        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, 11.0, sync_duration_ms, every_nth_frame, true, override_fps);
+        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, false, 11.0, sync_duration_ms, every_nth_frame, true, override_fps);
     }
     
     fn cancel_current_operation(&mut self) {

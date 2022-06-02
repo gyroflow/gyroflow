@@ -19,6 +19,7 @@ MenuItem {
         property alias maxSyncPoints: maxSyncPoints.value;
         property alias timePerSyncpoint: timePerSyncpoint.value;
         property alias sync_lpf: lpf.value;
+        property alias checkNegativeInitialOffset: checkNegativeInitialOffset.checked;
         // property alias syncMethod: syncMethod.currentIndex;
         // property alias offsetMethod: offsetMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
@@ -29,6 +30,7 @@ MenuItem {
 
     property alias timePerSyncpoint: timePerSyncpoint.value;
     property alias initialOffset: initialOffset.value;
+    property alias checkNegativeInitialOffset: checkNegativeInitialOffset.checked;
     property alias syncSearchSize: syncSearchSize.value;
     property alias everyNthFrame: everyNthFrame.value;
 
@@ -51,7 +53,7 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, window.exportSettings.overrideFps);
+            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, window.sync.checkNegativeInitialOffset, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, window.exportSettings.overrideFps);
         }
         onClicked: {
             if (!controller.lens_loaded) {
@@ -80,11 +82,20 @@ MenuItem {
 
         NumberField {
             id: initialOffset;
-            width: parent.width;
+            width: parent.width - checkNegativeInitialOffset.width;
             height: 25 * dpiScale;
             defaultValue: 0;
             precision: 1;
             unit: qsTr("s");
+        }
+        CheckBox {
+            id: checkNegativeInitialOffset;
+            anchors.left: initialOffset.right;
+            anchors.leftMargin: 5 * dpiScale;
+            anchors.verticalCenter: parent.verticalCenter;
+            contentItem.visible: false;
+            scale: 0.7;
+            tooltip: qsTr("Analyze both positive and negative offset.\nThis doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.");
         }
     }
 

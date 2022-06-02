@@ -2751,7 +2751,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#e5d78013034aee05ad09313b8dfa51f9b5541ef0"
+source = "git+https://github.com/gyroflow/rs-sync.git#09391337fddaa688793895dfce46336d2f09fd75"
 dependencies = [
  "argmin",
  "libm 0.2.2",
@@ -3510,7 +3510,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
+source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3530,7 +3530,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
+source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3553,7 +3553,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
+source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
 dependencies = [
  "arrayvec 0.7.2",
  "ash",
@@ -3590,7 +3590,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#32af4f56079fd2203c46c9c452cfe33fd60a5721"
+source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
 dependencies = [
  "bitflags",
 ]
