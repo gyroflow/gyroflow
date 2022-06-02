@@ -138,13 +138,16 @@ pub fn find_offsets(
 
         let mut delay = sync.pre_sync(initial_delay / 1000.0, from_ts, to_ts, presync_step / 1000.0, presync_radius / 1000.0);
         for _ in 0..4 {
-            delay = sync.sync(delay.1, from_ts, to_ts);   
+            delay = sync.sync(delay.1, from_ts, to_ts, initial_delay / 1000.0, presync_radius / 1000.0);   
         }
+
         let offset = delay.1 * 1000.0;
-
-        let offset = -offset - (frame_readout_time * 1000.0 / 2.0);
-
-        offsets.push(((from_ts + to_ts) as f64 / 2.0 / 1000.0, offset, delay.0));
+        if (offset - initial_delay).abs() <= presync_radius {
+            let offset = -offset - (frame_readout_time * 1000.0 / 2.0);
+            offsets.push(((from_ts + to_ts) as f64 / 2.0 / 1000.0, offset, delay.0));
+        } else {
+            log::warn!("Sync point out of acceptable range {} < {}", presync_radius, (offset - initial_delay).abs());
+        }
     }
     offsets
 }
