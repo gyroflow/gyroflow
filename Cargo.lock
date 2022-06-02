@@ -2751,7 +2751,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#09391337fddaa688793895dfce46336d2f09fd75"
+source = "git+https://github.com/gyroflow/rs-sync.git#8e9509385ec48f5ada17894d34ddf241706221c6"
 dependencies = [
  "argmin",
  "libm 0.2.2",
