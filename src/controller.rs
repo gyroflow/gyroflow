@@ -141,6 +141,10 @@ pub struct Controller {
     calib_in_progress_changed: qt_signal!(),
     calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize),
 
+    loading_gyro_in_progress: qt_property!(bool; NOTIFY loading_gyro_in_progress_changed),
+    loading_gyro_in_progress_changed: qt_signal!(),
+    loading_gyro_progress: qt_signal!(progress: f64),
+
     calib_model: qt_property!(RefCell<SimpleListModel<CalibrationItem>>; NOTIFY calib_model_updated),
     calib_model_updated: qt_signal!(),
 
@@ -153,6 +157,7 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
+    get_thin_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString) -> QJsonObject),
     export_gyroflow_file: qt_method!(fn(&self, thin: bool, output_options: QJsonObject, override_location: QString, overwrite: bool)),
@@ -201,6 +206,7 @@ impl Controller {
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
         self.chart_data_changed();
+        self.update_offset_model();
         *self.stabilizer.video_path.write() = util::url_to_path(url.clone());
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
@@ -375,6 +381,8 @@ impl Controller {
         let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
+        self.loading_gyro_in_progress = true;
+        self.loading_gyro_in_progress_changed();
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -382,6 +390,8 @@ impl Controller {
             let fps = vid.frameRate;
             let frame_count = vid.frameCount as usize;
             let video_size = (vid.videoWidth as usize, vid.videoHeight as usize);
+            self.cancel_flag.store(false, SeqCst);
+            let cancel_flag = self.cancel_flag.clone();
 
             if is_main_video {
                 self.set_preview_resolution(self.preview_resolution, player);
@@ -391,9 +401,18 @@ impl Controller {
                 this.error(QString::from(msg), QString::from(arg), QString::default());
             });
 
+            let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+                this.loading_gyro_in_progress = progress < 1.0;
+                this.loading_gyro_progress(progress);
+                this.loading_gyro_in_progress_changed();
+            });
             let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64, QString)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
+
+                this.loading_gyro_in_progress = false;
+                this.loading_gyro_progress(1.0);
+                this.loading_gyro_in_progress_changed();
                 
                 this.request_recompute();
                 this.update_offset_model();
@@ -415,15 +434,26 @@ impl Controller {
             
             if duration_ms > 0.0 && fps > 0.0 {
                 core::run_threaded(move || {
+                    let last_progress = RefCell::new(std::time::Instant::now());
+                    let progress = |p| {
+                        let now = std::time::Instant::now();
+                        if (now - *last_progress.borrow()).as_millis() > 100 {
+                            progress(p);
+                            *last_progress.borrow_mut() = now;
+                        }
+                    };
+
                     if is_main_video {
                         if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
+                            let _ = stab.load_gyro_data(&s, progress, cancel_flag); // Ignore the error here, video file may not contain the telemetry and it's ok
+
                             if stab.set_output_size(video_size.0, video_size.1) {
                                 stab.recompute_undistortion();
                             }
                         }
-                    } else if let Err(e) = stab.load_gyro_data(&s) {
+                    } else if let Err(e) = stab.load_gyro_data(&s, progress, cancel_flag) {
                         err(("An error occured: %1".to_string(), e.to_string()));
                     }
                     stab.recompute_smoothness();
@@ -665,6 +695,18 @@ impl Controller {
         }
     }
 
+    fn get_thin_gyroflow_file(&mut self, url: QUrl) -> QJsonObject {
+        let tmp_stab = StabilizationManager::<stabilization::RGBA8>::default();
+        match tmp_stab.import_gyroflow_file(&util::url_to_path(url), false) {
+            Ok(thin_obj) => {
+                util::serde_json_to_qt_object(&thin_obj)
+            },
+            Err(e) => {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                QJsonObject::default()
+            }
+        }
+    }
     fn import_gyroflow_file(&mut self, url: QUrl) -> QJsonObject {
         self.import_gyroflow_internal(self.stabilizer.import_gyroflow_file(&util::url_to_path(url), false))
     }

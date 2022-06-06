@@ -504,6 +504,7 @@ pub fn test() {
     let vid = "/Users/eddy/Downloads/colors-GX029349.MP4";
 
     stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size).unwrap();
+    stab.load_gyro_data(vid, |_|(), Arc::new(AtomicBool::new(false)));
     {
         let mut gyro = stab.gyro.write();
 

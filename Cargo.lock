@@ -72,6 +72,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "android-properties"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc7eb209b1518d6bb87b283c20095f5228ecda460da70b44f0802523dea6da04"
+
+[[package]]
 name = "anyhow"
 version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -260,9 +266,9 @@ checksum = "30696a84d817107fc028e049980e09d5e140e8da8f1caeb17e8e950658a3cea9"
 
 [[package]]
 name = "async-trait"
-version = "0.1.53"
+version = "0.1.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed6aa3524a2dfcf9fe180c51eae2b58738348d819517ceadf95789c51fff7600"
+checksum = "96cf8829f67d2eab0b2dfa42c5d0ef737e0724e4a82b01b3e292456202b19716"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2209,9 +2215,9 @@ checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "opencv"
-version = "0.64.0"
+version = "0.64.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ac638ff95885865484481341c250c73c814a88f9293643dd7b7d444a33ed30a"
+checksum = "293c359c2c6c09252197ebbd6b674b2c72e9cb328e9c67c0d348472419a93407"
 dependencies = [
  "cc",
  "clang",
@@ -2230,9 +2236,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.42.0"
+version = "0.43.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3744d501074d4b473cffb32c1642ec566e24054c543c79a7567f1ea0aa7d2eb"
+checksum = "041d5ef7cd9b91e5a984942fafea0a318020a69737941ee4f9caac71b9a1f5a5"
 dependencies = [
  "clang",
  "clang-sys",
@@ -3083,9 +3089,9 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "syn"
-version = "1.0.95"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbaf6116ab8924f39d52792136fb74fd60a80194cf1b1c6ffa6453eef1c3f942"
+checksum = "0748dd251e24453cb8717f0354206b91557e4ec8703673a4b30208f2abaf1ebf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3119,7 +3125,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#dfff7f00bde239891f70d417862122ee07fc537c"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#1d4d51d5195e7b2960989c69096980b367e10860"
 dependencies = [
  "argh",
  "byteorder",
@@ -3510,7 +3516,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
+source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3530,7 +3536,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
+source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3553,8 +3559,9 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
+source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
 dependencies = [
+ "android-properties",
  "arrayvec 0.7.2",
  "ash",
  "bit-set",
@@ -3590,7 +3597,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#75db572bf7de57179a1c3b272e0f384f76d3e1a1"
+source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
 dependencies = [
  "bitflags",
 ]

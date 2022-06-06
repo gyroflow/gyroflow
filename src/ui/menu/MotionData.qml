@@ -10,6 +10,7 @@ MenuItem {
     id: root;
     text: qsTr("Motion data");
     icon: "chart";
+    loader: controller.loading_gyro_in_progress;
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property alias integrationMethod: integrator.currentIndex;
@@ -92,6 +93,7 @@ MenuItem {
                 for (const ts in root.pendingOffsets) {
                     controller.set_offset(ts, root.pendingOffsets[ts]);
                 }
+                root.pendingOffsets = {};
             }
         }
         function onBias_estimated(biasX: real, biasY: real, biasZ: real) {

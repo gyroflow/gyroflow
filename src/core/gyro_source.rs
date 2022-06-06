@@ -4,8 +4,9 @@
 use nalgebra::*;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
+use std::sync::{ Arc, atomic::AtomicBool };
 use std::fs::File;
-use telemetry_parser::{Input, util};
+use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
 
 use crate::camera_identifier::CameraIdentifier;
@@ -67,9 +68,7 @@ pub struct GyroSource {
     offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
-    pub file_path: String,
-
-    pub prevent_next_load: bool
+    pub file_path: String
 }
 
 impl GyroSource {
@@ -84,11 +83,11 @@ impl GyroSource {
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
         self.clear_offsets();
     }
-    pub fn parse_telemetry_file(path: &str, size: (usize, usize), fps: f64) -> Result<FileMetadata> {
+    pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
     
-        let input = Input::from_stream(&mut stream, filesize, &path)?;
+        let input = Input::from_stream(&mut stream, filesize, &path, progress_cb, cancel_flag)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
     

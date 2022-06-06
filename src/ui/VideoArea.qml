@@ -38,6 +38,21 @@ Item {
     function loadGyroflowData(obj) {
         root.pendingGyroflowData = null;
 
+        if (obj.toString().startsWith("file")) {
+            // obj is url
+            const obj2 = controller.get_thin_gyroflow_file(obj);
+            const videofile = obj2.videofile;
+            if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
+                // If video not loaded, try to load the associated file
+                root.pendingGyroflowData = obj;
+                loadFile(controller.path_to_url(videofile));
+                return;
+            }
+            obj = controller.import_gyroflow_file(obj);
+        } else {
+            obj = controller.import_gyroflow_data(JSON.stringify(obj));
+        }
+
         if (obj && +obj.version > 0) {
             const videofile = obj.videofile;
             if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
@@ -75,7 +90,7 @@ Item {
         window.exportSettings.overrideFps = 0;
 
         if (url.toString().endsWith(".gyroflow")) {
-            return loadGyroflowData(controller.import_gyroflow_file(url));
+            return loadGyroflowData(url);
         }
 
         root.loadedFileUrl = url;
@@ -380,6 +395,15 @@ Item {
                 videoLoader.totalFrames = total;
                 videoLoader.additional = "";
                 videoLoader.text = videoLoader.active? qsTr("Analyzing %1...") : "";
+                videoLoader.progress = videoLoader.active? progress : -1;
+                videoLoader.cancelable = true;
+            }
+            function onLoading_gyro_progress(progress: real) {
+                videoLoader.active = progress < 1;
+                videoLoader.currentFrame = 0;
+                videoLoader.totalFrames = 0;
+                videoLoader.additional = "";
+                videoLoader.text = videoLoader.active? qsTr("Loading gyro data %1...") : "";
                 videoLoader.progress = videoLoader.active? progress : -1;
                 videoLoader.cancelable = true;
             }

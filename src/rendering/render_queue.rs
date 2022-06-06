@@ -695,6 +695,7 @@ impl RenderQueue {
                                 err(("An error occured: %1".to_string(), e.to_string()));
                                 return;
                             }
+                            let _ = stab.load_gyro_data(&path, |_|(), Arc::new(AtomicBool::new(false)));
                             let camera_id = stab.camera_id.read();
         
                             let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();

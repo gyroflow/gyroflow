@@ -21,7 +21,7 @@ pub mod gpu;
 pub mod util;
 pub mod stabilization_params;
 
-use std::sync::{ Arc, atomic::{ AtomicU64, Ordering::SeqCst } };
+use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
 use std::path::PathBuf;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -101,7 +101,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
 }
 
 impl<T: PixelType> StabilizationManager<T> {
-    pub fn init_from_video_data(&self, path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) -> std::io::Result<()> {
+    pub fn init_from_video_data(&self, _path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) -> std::io::Result<()> {
         {
             let mut params = self.params.write();
             params.fps = fps;
@@ -111,22 +111,16 @@ impl<T: PixelType> StabilizationManager<T> {
         }
 
         self.pose_estimator.sync_results.write().clear();
-
-        let _ = self.load_gyro_data(path); // Ignore the error here, video file may not contain the telemetry and it's ok
         
         Ok(())
     }
 
-    pub fn load_gyro_data(&self, path: &str) -> std::io::Result<()> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<()> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
             gyro.file_path = path.to_string();
-            if gyro.prevent_next_load {
-                gyro.prevent_next_load = false;
-                return Ok(());
-            }
         }
 
         let (fps, size) = {
@@ -134,7 +128,7 @@ impl<T: PixelType> StabilizationManager<T> {
             (params.fps, params.video_size)
         };
 
-        let mut md = GyroSource::parse_telemetry_file(path, size, fps)?;
+        let mut md = GyroSource::parse_telemetry_file(path, size, fps, progress_cb, cancel_flag)?;
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
@@ -658,9 +652,14 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn clear(&self) {
         self.params.write().clear();
-        if !self.gyro.read().prevent_next_load {
-            *self.gyro.write() = GyroSource::new();
-        }
+        self.invalidate_ongoing_computations();
+        self.invalidate_smoothing();
+        self.invalidate_zooming();
+        self.video_path.write().clear();
+        *self.camera_id.write() = None;
+
+        *self.gyro.write() = GyroSource::new();
+        
         self.pose_estimator.clear();
     }
 
@@ -892,15 +891,14 @@ impl<T: PixelType> StabilizationManager<T> {
                         };
 
                         let mut gyro = self.gyro.write();
-                        gyro.prevent_next_load = true;
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path)) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), |_|(), Arc::new(AtomicBool::new(false))) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path)) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), |_|(), Arc::new(AtomicBool::new(false))) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }
