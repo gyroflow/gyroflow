@@ -396,6 +396,10 @@ MenuItem {
                 case 1: controller.adaptive_zoom = adaptiveZoom.value; break;
                 case 2: controller.adaptive_zoom = -1.0; break;
             }
+            if (currentIndex == 0) {
+                zoomingCenterX.value = 0;
+                zoomingCenterY.value = 0;
+            }
         }
     }
     Label {

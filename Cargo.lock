@@ -2513,7 +2513,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git#a130eb11ba980a5752100d07a1910abcff663a04"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git#3d6bb828aa18d4f8030d9ca60fc835809f293848"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3516,7 +3516,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3536,7 +3536,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3552,6 +3552,7 @@ dependencies = [
  "raw-window-handle",
  "smallvec",
  "thiserror",
+ "web-sys",
  "wgpu-hal",
  "wgpu-types",
 ]
@@ -3559,7 +3560,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
 dependencies = [
  "android-properties",
  "arrayvec 0.7.2",
@@ -3597,7 +3598,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
 dependencies = [
  "bitflags",
 ]

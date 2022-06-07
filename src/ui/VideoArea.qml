@@ -202,6 +202,7 @@ Item {
             height: (w / ratio) > h? h : (w / ratio);
             anchors.centerIn: parent;
             opacity: da.containsDrag? 0.5 : 1.0;
+            clip: !vid.stabEnabled;
 
             /*Image {
                 // Transparency grid
@@ -217,6 +218,19 @@ Item {
                 Ease on opacity { }
                 anchors.fill: parent;
                 property bool loaded: false;
+
+                property bool stabEnabled: true;
+                transform: [
+                    Scale { 
+                        origin.x: vid.width / 2; origin.y: vid.height / 2; 
+                        xScale: vid.stabEnabled? 1 : vid.videoWidth  / Math.max(1, root.outWidth); 
+                        yScale: vid.stabEnabled? 1 : vid.videoHeight / Math.max(1, root.outHeight);
+                    },
+                    Rotation {
+                        origin.x: vid.width / 2; origin.y: vid.height / 2;
+                        angle: vid.stabEnabled? 0 : -vidInfo.videoRotation;
+                    }
+                ]
 
                 function fovChanged() {
                     const fov = controller.get_current_fov();
@@ -485,7 +499,7 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     icon.name: "gyroflow";
-                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
+                    onCheckedChanged: { vid.stabEnabled = checked; controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
