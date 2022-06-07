@@ -184,7 +184,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         for (i, stream) in self.input_context.streams().enumerate() {
             let medium = stream.parameters().medium();
-            if medium != media::Type::Audio && medium != media::Type::Video {
+            if medium != media::Type::Audio && medium != media::Type::Video/* && medium != media::Type::Data*/ {
                 stream_mapping[i] = -1;
                 continue;
             }
@@ -229,6 +229,12 @@ impl<'a> FfmpegProcessor<'a> {
                     atranscoders.insert(i, AudioTranscoder::new(self.audio_codec, &stream, &mut octx, output_index as _)?);
                 }
                 output_index += 1;
+            } else if medium == media::Type::Data {
+                // Direct stream copy
+                // let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
+                // ost.set_parameters(stream.parameters());
+                // ost.set_avg_frame_rate(stream.avg_frame_rate());
+                // output_index += 1;
             }
         }
 
@@ -275,7 +281,7 @@ impl<'a> FfmpegProcessor<'a> {
             if ost_index < 0 {
                 continue;
             }
-            
+
             if ist_index == self.video.input_index {
                 {
                     let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
@@ -429,6 +435,9 @@ impl<'a> FfmpegProcessor<'a> {
 
     pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video_converter::Converter) -> Result<(), FFmpegError> + 'a {
         self.video.on_frame_callback = Some(Box::new(cb));
+    }
+    pub fn on_encoder_initialized<F>(&mut self, cb: F) where F: FnMut(&encoder::video::Video) -> Result<(), FFmpegError> + 'a {
+        self.video.on_encoder_initialized = Some(Box::new(cb));
     }
 
     pub fn get_video_info(path: &str) -> Result<VideoInfo, ffmpeg_next::Error> {

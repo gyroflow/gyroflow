@@ -37,6 +37,7 @@ pub struct VideoTranscoder<'a> {
     pub decoder: Option<decoder::Video>,
     pub encoder: Option<encoder::video::Video>,
     pub encoder_codec: Option<codec::codec::Codec>,
+    pub encoder_name: String,
     pub frame_rate: Option<Rational>,
     pub time_base: Option<Rational>,
 
@@ -59,6 +60,7 @@ pub struct VideoTranscoder<'a> {
     pub buffers: FrameBuffers,
 
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) -> Result<(), FFmpegError> + 'a>>,
+    pub on_encoder_initialized: Option<Box<dyn FnMut(&encoder::video::Video) -> Result<(), FFmpegError> + 'a>>,
 
     pub first_frame_ts: Option<i64>,
 
@@ -183,10 +185,12 @@ impl<'a> VideoTranscoder<'a> {
                     }
 
                     if !self.decode_only {
-                        let codec_name = self.encoder_codec.map(|x| x.name().to_string()).unwrap_or_default();
+                        if self.encoder_name.is_empty() {
+                            self.encoder_name = self.encoder_codec.map(|x| x.name().to_string()).unwrap_or_default();
+                        }
 
                         // Videotoolbox doesn't support YUV420P, Use NV12 instead
-                        if codec_name.contains("videotoolbox") && input_frame.format() == format::Pixel::YUV420P {
+                        if self.encoder_name.contains("videotoolbox") && input_frame.format() == format::Pixel::YUV420P {
                             self.encoder_pixel_format = Some(format::Pixel::NV12);
                             self.processing_order = ProcessingOrder::PostConversion;
                         }
@@ -307,13 +311,17 @@ impl<'a> VideoTranscoder<'a> {
                             // drop(stderr_buf);
                             // println!("output: {:?}", output);
                             
-                            self.encoder = Some(result?);  
+                            self.encoder = Some(result?);
                 
                             octx.write_header()?;
                             // format::context::output::dump(&octx, 0, Some(&output_path));
                     
                             for (ost_index, _) in octx.streams().enumerate() {
                                 ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
+                            }
+
+                            if let Some(ref mut cb) = self.on_encoder_initialized {
+                                cb(self.encoder.as_ref().unwrap())?;
                             }
                         }
                         let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;

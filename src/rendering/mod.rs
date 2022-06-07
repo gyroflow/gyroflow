@@ -122,8 +122,9 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError>
-    where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone
+pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
+    where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone,
+          F2: Fn(String) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
@@ -258,6 +259,12 @@ pub fn render<T: PixelType, F>(stab: Arc<StabilizationManager<T>>, progress: F, 
 
     let progress2 = progress.clone();
     let mut process_frame = 0;
+    
+    proc.on_encoder_initialized(|enc: &ffmpeg_next::encoder::video::Video| {
+        encoder_initialized(enc.codec().map(|x| x.name().to_string()).unwrap_or_default());
+        Ok(())
+    });
+
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;

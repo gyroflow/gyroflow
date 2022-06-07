@@ -168,6 +168,9 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
+            function onEncoder_initialized(job_id: real, encoder_name: string) {
+
+            }
         }
 
         Button {
@@ -216,9 +219,11 @@ Item {
             id: dlg;
             property real progress: current_frame / total_frames;
             property bool isFinished: current_frame >= total_frames && total_frames > 0;
-            property bool isError: error_string.length > 0 && !isQuestion;
+            property bool isError: error_string.length > 0 && !isQuestion && !isInfo;
+            property bool isInfo: error_string == "uses_cpu";
             property bool isQuestion: error_string.startsWith("convert_format:") || error_string.startsWith("file_exists:");
             property bool isInProgress: !isFinished && !isError && !isQuestion && current_frame > 0 && total_frames > 0;
+            property string errorString: error_string;
             onProgressChanged: {
                 const times = Util.calculateTimesAndFps(progress, current_frame, start_timestamp);
                 if (times !== false) {
@@ -227,6 +232,13 @@ Item {
                     if (times.length > 2) time.fps = times[2];
                 } else {
                     time.elapsed = "";
+                }
+            }
+            onErrorStringChanged: {
+                if (job_id == render_queue.main_job_id && error_string == "uses_cpu") {
+                    window.videoArea.videoLoader.infoMessage.type = InfoMessage.Warning;
+                    window.videoArea.videoLoader.infoMessage.text = window.getReadableError(error_string);
+                    window.videoArea.videoLoader.infoMessage.show = true;
                 }
             }
 
@@ -363,7 +375,7 @@ Item {
                 Ease on height { }
                 Loader {
                     id: messageArea;
-                    active: (isError || isQuestion) && !isFinished;
+                    active: (isError || isQuestion || isInfo) && !isFinished;
                     sourceComponent: messageAreaComponent;
                     width: parent.width;
                 }

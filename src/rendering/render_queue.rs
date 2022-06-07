@@ -114,6 +114,7 @@ pub struct RenderQueue {
     status_changed: qt_signal!(),
     
     render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool),
+    encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
     convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
     error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
@@ -453,6 +454,16 @@ impl RenderQueue {
                     }
                 }
             });
+            let encoder_initialized = util::qt_queued_callback_mut(self, move |this, encoder_name: String| {
+                if let Some(job) = this.jobs.get(&job_id) {
+                    if job.render_options.use_gpu && (encoder_name == "libx264" || encoder_name == "libx265" || encoder_name == "prores_ks") {
+                        update_model!(this, job_id, itm {
+                            itm.error_string = QString::from("uses_cpu");
+                        });
+                    }
+                }
+                this.encoder_initialized(job_id, encoder_name);
+            });
 
             let err = util::qt_queued_callback_mut(self, move |this, (msg, mut arg): (String, String)| {
                 arg.push_str("\n\n");
@@ -508,7 +519,7 @@ impl RenderQueue {
             core::run_threaded(move || {
                 let mut i = 0;
                 loop {
-                    let result = rendering::render(stab.clone(), progress.clone(), &video_path, &render_options, i, cancel_flag.clone(), pause_flag.clone());
+                    let result = rendering::render(stab.clone(), progress.clone(), &video_path, &render_options, i, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                     if let Err(e) = result {
                         if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
                             convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));

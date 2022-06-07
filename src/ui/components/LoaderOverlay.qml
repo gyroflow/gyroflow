@@ -22,6 +22,7 @@ Item {
     property string additional;
     property alias background: overlay.color;
     property bool canHide: false;
+    property alias infoMessage: infoMessage;
 
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
@@ -31,6 +32,8 @@ Item {
             progress = -1;
             root.text = "";
             startTime = 0;
+            infoMessage.text = "";
+            infoMessage.show = false;
         } else {
             canceled = false;
             startTime = Date.now();
@@ -121,6 +124,11 @@ Item {
                 text: qsTr("Hide");
                 onClicked: root.hide();
             }
+        }
+        InfoMessageSmall {
+            id: infoMessage;
+            anchors.horizontalCenter: parent.horizontalCenter;
+            shrinkToText: true;
         }
     }
 }

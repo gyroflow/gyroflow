@@ -389,6 +389,9 @@ Rectangle {
         if (text.startsWith("file_exists:")) {
             return qsTr("Output file already exists, do you want to overwrite it?");
         }
+        if (text.startsWith("uses_cpu")) {
+            return qsTr("GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.\nIf you have a modern device, latest GPU drivers and you think this shouldn't happen, report this on GitHub including gyroflow.log file.");
+        }
 
         return text.trim();
     }
