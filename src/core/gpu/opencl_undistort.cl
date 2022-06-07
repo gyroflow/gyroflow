@@ -35,7 +35,11 @@ typedef struct {
     float input_horizontal_stretch;  // 4
     float background_margin;         // 8
     float background_margin_feather; // 12
-    float reserved3;                 // 16
+    float reserved1;                 // 16
+    float reserved2;                 // 4
+    float reserved3;                 // 8
+    float2 translation2d;            // 16
+    float4 translation3d;            // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -143,9 +147,9 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
 
 float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices) {
     __global const float *matrix = &matrices[idx];
-    float _x = pos.y * matrix[1] + matrix[2] + (pos.x * matrix[0]);
-    float _y = pos.y * matrix[4] + matrix[5] + (pos.x * matrix[3]);
-    float _w = pos.y * matrix[7] + matrix[8] + (pos.x * matrix[6]);
+    float _x = (pos.x * matrix[0]) + (pos.y * matrix[1]) + matrix[2] + params->translation3d.x;
+    float _y = (pos.x * matrix[3]) + (pos.y * matrix[4]) + matrix[5] + params->translation3d.y;
+    float _w = (pos.x * matrix[6]) + (pos.y * matrix[7]) + matrix[8] + params->translation3d.z;
     if (_w > 0) {
         float2 pos = (float2)(_x, _y) / _w;
         float r = length(pos);
@@ -182,7 +186,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     if (matrices == 0 || params->width < 1) return;
 
     if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
-        float2 out_pos = (float2)(x, y);
+        float2 out_pos = (float2)(x, y) + params->translation2d;
 
         ///////////////////////////////////////////////////////////////////
         // Calculate source `y` for rolling shutter

@@ -507,7 +507,9 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
-    pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; }
+    pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; self.invalidate_zooming(); }
+    pub fn set_zooming_center_x      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.0 = v; self.invalidate_zooming(); }
+    pub fn set_zooming_center_y      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.1 = v; self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
@@ -742,6 +744,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "smoothing_params":       smoothing_params,
                 "frame_readout_time":     params.frame_readout_time,
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
+                "adaptive_zoom_center_offset": params.adaptive_zoom_center_offset,
                 // "adaptive_zoom_fovs":     if !thin { util::compress_to_base91(&params.fovs) } else { None },
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
@@ -927,6 +930,13 @@ impl<T: PixelType> StabilizationManager<T> {
                 params.frame_readout_time      = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()).unwrap_or_default();
                 params.adaptive_zoom_window    = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()).unwrap_or_default();
                 params.lens_correction_amount  = obj.get("lens_correction_amount").and_then(|x| x.as_f64()).unwrap_or(1.0);
+
+                if let Some(center_offs) = obj.get("adaptive_zoom_center_offset").and_then(|x| x.as_array()) {
+                    params.adaptive_zoom_center_offset = (
+                        center_offs.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
+                        center_offs.get(1).and_then(|x| x.as_f64()).unwrap_or_default()
+                    );
+                }
 
                 let method = obj.get("method").and_then(|x| x.as_str()).unwrap_or_default();
                 let method_idx = self.get_smoothing_algs()

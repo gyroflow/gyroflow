@@ -37,6 +37,7 @@ pub struct StabilizationParams {
 
     pub frame_readout_time: f64,
     pub adaptive_zoom_window: f64,
+    pub adaptive_zoom_center_offset: (f64, f64),
     pub fov: f64,
     pub fovs: Vec<f64>,
     pub min_fov: f64,
@@ -77,6 +78,7 @@ impl Default for StabilizationParams {
             show_optical_flow: true,
             frame_readout_time: 0.0, 
             adaptive_zoom_window: 0.0, 
+            adaptive_zoom_center_offset: (0.0, 0.0),
 
             size: (0, 0),
             output_size: (0, 0),

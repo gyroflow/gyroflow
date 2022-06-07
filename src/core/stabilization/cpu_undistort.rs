@@ -68,9 +68,9 @@ impl<T: PixelType> Stabilization<T> {
 
         fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, r_limit: f32) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
-            let _x = pos.1 * matrices[1] + matrices[2] + (pos.0 * matrices[0]);
-            let _y = pos.1 * matrices[4] + matrices[5] + (pos.0 * matrices[3]);
-            let _w = pos.1 * matrices[7] + matrices[8] + (pos.0 * matrices[6]);
+            let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
+            let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
+            let _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
             if _w > 0.0 {
                 let pos = (_x / _w, _y / _w);
                 if params.r_limit > 0.0 && (pos.0 * pos.0 + pos.1 * pos.1) > r_limit {
@@ -157,7 +157,7 @@ impl<T: PixelType> Stabilization<T> {
                 if y < params.output_height as usize && x < params.output_width as usize {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());
 
-                    let mut out_pos = (x as f32, y as f32);
+                    let mut out_pos = (x as f32 + params.translation2d[0], y as f32 + params.translation2d[1]);
 
                     ///////////////////////////////////////////////////////////////////
                     // Calculate source `y` for rolling shutter

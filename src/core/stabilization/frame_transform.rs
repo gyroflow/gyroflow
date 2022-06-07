@@ -116,6 +116,8 @@ impl FrameTransform {
             background_mode:          params.background_mode as i32,
             background_margin:        params.background_margin as f32,
             background_margin_feather:params.background_margin_feather as f32,
+            translation2d: [(params.adaptive_zoom_center_offset.0 * params.width as f64 / fov) as f32, (params.adaptive_zoom_center_offset.1 * params.height as f64 / fov) as f32],
+            translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             ..Default::default()
         };
 

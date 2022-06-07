@@ -102,7 +102,10 @@ pub struct Controller {
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
+
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
+    zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
+    zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
 
@@ -747,6 +750,8 @@ impl Controller {
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
+    wrap_simple_method!(set_zooming_center_x,   v: f64; recompute);
+    wrap_simple_method!(set_zooming_center_y,   v: f64; recompute);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_sync_method,        v: u32; recompute; chart_data_changed);

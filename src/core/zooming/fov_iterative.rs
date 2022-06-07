@@ -82,11 +82,15 @@ impl FovIterative {
         let ts_us = (ts * 1000.0).round() as i64;
 
         let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params);
+        for (x, y) in polygon.iter_mut() {
+            *x -= self.compute_params.adaptive_zoom_center_offset.0 * self.input_dim.0;
+            *y -= self.compute_params.adaptive_zoom_center_offset.1 * self.input_dim.1;
+        }
         if self.compute_params.zooming_debug_points {
             self.debug_points.write().insert(ts_us, polygon.iter().map(|(x, y)| (x / self.input_dim.0, y / self.input_dim.1)).collect());
         }
         
-        let initial: (f64,f64) = (1000000.0, 1000000.0*self.output_inv_aspect);
+        let initial = (1000000.0, 1000000.0 * self.output_inv_aspect);
         let mut nearest = (None, initial);
         
         for _ in 1..5 {
@@ -101,6 +105,10 @@ impl FovIterative {
 
                 let distorted = interpolate_points(&relevant, 30);
                 polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params);
+                for (x, y) in polygon.iter_mut() {
+                    *x -= self.compute_params.adaptive_zoom_center_offset.0 * self.input_dim.0;
+                    *y -= self.compute_params.adaptive_zoom_center_offset.1 * self.input_dim.1;
+                }
                 nearest = self.nearest_edge(&polygon, center, nearest.1);
             } else {
                 break;

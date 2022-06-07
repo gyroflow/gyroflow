@@ -64,6 +64,10 @@ MenuItem {
             } else {
                 croppingMode.currentIndex = 0; // No cropping
             }
+            if (stab.hasOwnProperty("adaptive_zoom_center_offset")) {
+                zoomingCenterX.value = stab.adaptive_zoom_center_offset[0] * 100;
+                zoomingCenterY.value = stab.adaptive_zoom_center_offset[1] * 100;
+            }
 
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
             horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
@@ -406,6 +410,44 @@ MenuItem {
             unit: qsTr("s");
             width: parent.width;
             onValueChanged: controller.adaptive_zoom = value;
+        }
+    }
+    
+    Label {
+        text: qsTr("Zooming center offset");
+        visible: croppingMode.currentIndex > 0;
+        Column {
+            width: parent.width;
+            Label {
+                text: qsTr("X");
+                position: Label.Left;
+                SliderWithField {
+                    id: zoomingCenterX;
+                    precision: 0;
+                    value: 0;
+                    defaultValue: 0;
+                    from: -100;
+                    to: 100;
+                    unit: qsTr("%");
+                    width: parent.width;
+                    onValueChanged: controller.zooming_center_x = value / 100;
+                }
+            }
+            Label {
+                text: qsTr("Y");
+                position: Label.Left;
+                SliderWithField {
+                    id: zoomingCenterY;
+                    precision: 0;
+                    value: 0;
+                    defaultValue: 0;
+                    from: -100;
+                    to: 100;
+                    unit: qsTr("%");
+                    width: parent.width;
+                    onValueChanged: controller.zooming_center_y = value / 100;
+                }
+            }
         }
     }
 

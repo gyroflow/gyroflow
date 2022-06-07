@@ -20,7 +20,7 @@ use parking_lot::RwLock;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
-    NVIDIA, AMD, Intel, AppleM1, Unknown
+    NVIDIA, AMD, Intel, AppleSilicon, Unknown
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
@@ -31,7 +31,7 @@ pub fn set_gpu_type_from_name(name: &str) {
          if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::NVIDIA; }
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::AMD; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
-    else if name.contains("Apple M1") { *GPU_TYPE.write() = GpuType::AppleM1; }
+    else if name.contains("Apple M") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
     else {
         log::warn!("Unknown GPU {}", name);
     }

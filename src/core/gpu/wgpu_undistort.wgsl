@@ -25,7 +25,11 @@ struct KernelParams {
     input_horizontal_stretch: f32, // 4
     background_margin:        f32, // 8
     background_margin_feather:f32, // 12
-    reserved3:                f32, // 16
+    reserved1:                f32, // 16
+    reserved2:                f32, // 4
+    reserved3:                f32, // 8
+    translation2d:      vec2<f32>, // 16
+    translation3d:      vec4<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -90,9 +94,9 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
 }
 
 fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: vec4<f32>) -> vec2<f32> {
-    let _x = (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + (pos.x * matrices[idx + 0u]);
-    let _y = (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + (pos.x * matrices[idx + 3u]);
-    let _w = (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + (pos.x * matrices[idx + 6u]);
+    let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
+    let _y = (pos.x * matrices[idx + 3u]) + (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + params.translation3d.y;
+    let _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
 
     if (_w > 0.0) {
         let pos = vec2<f32>(_x, _y) / _w;
@@ -132,7 +136,7 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
     let bg = vec4<SCALAR>(SCALAR(params.background[0] / bg_scaler), SCALAR(params.background[1] / bg_scaler), SCALAR(params.background[2] / bg_scaler), SCALAR(params.background[3] / bg_scaler));
 
-    var out_pos = position.xy;
+    var out_pos = position.xy + params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter

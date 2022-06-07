@@ -35,7 +35,11 @@ layout(std140, binding = 2) uniform KernelParams {
     float input_horizontal_stretch; // 4
     float background_margin;        // 8
     float background_margin_feather;// 12
-    float reserved3;                // 16
+    float reserved1;                // 16
+    float reserved2;                // 4
+    float reserved3;                // 8
+    vec2 translation2d;             // 16
+    vec4 translation3d;             // 16
 } params;
 
 layout(binding = 3) uniform sampler2D texParams;
@@ -45,9 +49,9 @@ float get_param(float row, float idx) {
 }
 
 vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_limit) {
-    float _x = (float(pos.y) * get_param(idx, 1)) + get_param(idx, 2) + (float(pos.x) * get_param(idx, 0));
-    float _y = (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + (float(pos.x) * get_param(idx, 3));
-    float _w = (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + (float(pos.x) * get_param(idx, 6));
+    float _x = (float(pos.x) * get_param(idx, 0)) + (float(pos.y) * get_param(idx, 1)) + get_param(idx, 2) + params.translation3d.x;
+    float _y = (float(pos.x) * get_param(idx, 3)) + (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + params.translation3d.y;
+    float _w = (float(pos.x) * get_param(idx, 6)) + (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + params.translation3d.z;
 
     if (_w > 0) {
         vec2 pos = vec2(_x, _y) / _w;
@@ -72,7 +76,7 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_lim
 }
 
 void main() {
-    vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
+    vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter

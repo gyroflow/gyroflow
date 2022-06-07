@@ -65,7 +65,11 @@ pub struct KernelParams {
     pub input_horizontal_stretch: f32, // 4
     pub background_margin:        f32, // 8
     pub background_margin_feather:f32, // 12
-    pub reserved3:                f32, // 16
+    pub reserved1:                f32, // 16
+    pub reserved2:                f32, // 4
+    pub reserved3:                f32, // 8
+    pub translation2d:         [f32; 2], // 16
+    pub translation3d:         [f32; 4], // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
