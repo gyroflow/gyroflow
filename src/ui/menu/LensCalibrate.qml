@@ -17,6 +17,7 @@ MenuItem {
     property alias rms: rms.value;
     property alias autoCalibBtn: autoCalibBtn;
     property alias uploadProfile: uploadProfile;
+    property alias noMarker: noMarker.checked;
     property var calibrationInfo: ({});
 
     property int videoWidth: 0;
@@ -165,7 +166,7 @@ MenuItem {
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
-            controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1);
+            controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1, noMarker.checked);
         }
     }
 
@@ -445,6 +446,13 @@ MenuItem {
                 to: 10;
                 onValueChanged: controller.set_lens_param("r_limit", rLimitCb.checked? value : 0);
             }
+        }
+        CheckBox {
+            id: noMarker;
+            text: qsTr("Plain chessboard pattern (previous version without dots in the middle)");
+            checked: false;
+            width: parent.width;
+            Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
         }
     }
 }

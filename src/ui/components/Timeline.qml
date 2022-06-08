@@ -287,7 +287,7 @@ Item {
                 text: qsTr("Add calibration point");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.add_calibration_point(pos * root.durationMs * 1000);
+                    controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);
                 }
             }
             QQC.MenuSeparator { id: msep; verticalPadding: 5 * dpiScale; }

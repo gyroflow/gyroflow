@@ -58,7 +58,7 @@ pub struct Controller {
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
 
-    start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64)),
+    start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
@@ -151,7 +151,7 @@ pub struct Controller {
     calib_model: qt_property!(RefCell<SimpleListModel<CalibrationItem>>; NOTIFY calib_model_updated),
     calib_model_updated: qt_signal!(),
 
-    add_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
+    add_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64, no_marker: bool)),
     remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
 
     get_current_fov: qt_method!(fn(&self) -> f64),
@@ -825,7 +825,7 @@ impl Controller {
         }
     }
 
-    fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64) {
+    fn start_autocalibrate(&mut self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool) {
         #[cfg(feature = "opencv")]
         {
             rendering::clear_log();
@@ -921,6 +921,7 @@ impl Controller {
                                         if is_forced {
                                             cal.forced_frames.insert(frame);
                                         }
+                                        cal.no_marker = no_marker;
                                         cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
@@ -980,10 +981,10 @@ impl Controller {
         }
     }
     
-    fn add_calibration_point(&mut self, timestamp_us: i64) {
+    fn add_calibration_point(&mut self, timestamp_us: i64, no_marker: bool) {
         dbg!(timestamp_us);
         
-        self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0);
+        self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0, no_marker);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
         #[cfg(feature = "opencv")]

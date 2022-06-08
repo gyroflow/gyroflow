@@ -9,7 +9,7 @@
 use opencv::{
     core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 }, 
     prelude::MatTraitConst, 
-    calib3d::{ CALIB_CB_ADAPTIVE_THRESH, CALIB_CB_FAST_CHECK, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
+    calib3d::{ CALIB_CB_MARKER, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
 use rand::prelude::IteratorRandom;
@@ -52,6 +52,8 @@ pub struct LensCalibrator {
     pub r_limit: f64,
 
     pub forced_frames: HashSet<i32>,
+
+    pub no_marker: bool,
 
     pub is_superview: bool,
 
@@ -106,6 +108,7 @@ impl LensCalibrator {
         let is_forced = self.forced_frames.contains(&frame);
 
         let is_superview = self.is_superview;
+        let no_marker = self.no_marker;
 
         if let Some(detected) = all_matches.read().get(&frame) {
             if detected.avg_sharpness < max_sharpness {
@@ -117,8 +120,6 @@ impl LensCalibrator {
 
         crate::run_threaded(move || {
             let _ = (|| -> Result<(), opencv::Error> {
-                let subpix_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 0.001)?;
-
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
                     return Ok(());
                 }
@@ -137,29 +138,29 @@ impl LensCalibrator {
 
                 let mut corners = Mat::default();
 
-                if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_FAST_CHECK)? {
-                    if opencv::calib3d::find_chessboard_corners(&inp, grid_size, &mut corners, CALIB_CB_ADAPTIVE_THRESH)? {
-                        
-                        opencv::imgproc::corner_sub_pix(&inp, &mut corners, Size::new(11, 11), Size::new(-1, -1), subpix_criteria)?;
+                let mut flags = CALIB_CB_MARKER;
+                if no_marker {
+                    flags = 0;
+                }
 
-                        if corners.rows() > 0 {
-                            let sharpness = opencv::calib3d::estimate_chessboard_sharpness(&inp, grid_size, &corners, 0.8, false, &mut Mat::default()).unwrap_or_default();
-                            let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
-                            let mut points = Vec::with_capacity(corners.rows() as usize);
-                            for (_pos, mut pt) in corners.iter::<Point2f>()? {
-                                if is_superview {
-                                    let pt2 = GoProSuperview::from_superview_calib((pt.x / width as f32, pt.y / height as f32));
-                                    pt = Point2f::new(pt2.0 * width as f32, pt2.1 * height as f32);
-                                }
-                                points.push((pt.x * pt_scale, pt.y * pt_scale));
+                if opencv::calib3d::find_chessboard_corners_sb(&inp, grid_size, &mut corners, flags)? {
+                    if corners.rows() > 0 {
+                        let sharpness = opencv::calib3d::estimate_chessboard_sharpness(&inp, grid_size, &corners, 0.8, false, &mut Mat::default()).unwrap_or_default();
+                        let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
+                        let mut points = Vec::with_capacity(corners.rows() as usize);
+                        for (_pos, mut pt) in corners.iter::<Point2f>()? {
+                            if is_superview {
+                                let pt2 = GoProSuperview::from_superview_calib((pt.x / width as f32, pt.y / height as f32));
+                                pt = Point2f::new(pt2.0 * width as f32, pt2.1 * height as f32);
                             }
-                            log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
-                            if avg_sharpness < max_sharpness || is_forced { 
-                                img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, frame, avg_sharpness, is_forced });
-                            }
-                            all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness, frame, is_forced });
-                            return Ok(());
+                            points.push((pt.x * pt_scale, pt.y * pt_scale));
                         }
+                        log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
+                        if avg_sharpness < max_sharpness || is_forced { 
+                            img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, frame, avg_sharpness, is_forced });
+                        }
+                        all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness, frame, is_forced });
+                        return Ok(());
                     }
                 }
                 Err(opencv::Error::new(0, "Chessboard not found".to_string()))
