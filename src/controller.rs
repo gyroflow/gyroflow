@@ -234,11 +234,11 @@ impl Controller {
 
         let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
-        let progress = util::qt_queued_callback_mut(self, |this, (ready, total): (usize, usize)| {
-            this.sync_in_progress = ready < total;
+        let progress = util::qt_queued_callback_mut(self, |this, (percent, ready, total): (f64, usize, usize)| {
+            this.sync_in_progress = ready < total || percent < 1.0;
             this.sync_in_progress_changed();
             this.chart_data_changed();
-            this.sync_progress(ready as f64 / total as f64, ready, total);
+            this.sync_progress(percent, ready, total);
         });
         let set_offsets = util::qt_queued_callback_mut(self, move |this, offsets: Vec<(f64, f64, f64)>| {
             if for_rs {
@@ -272,17 +272,17 @@ impl Controller {
         });
         self.sync_progress(0.0, 0, 0);
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs) {
-            sync.on_progress(move |ready, total| {
-                progress((ready, total));
+        self.cancel_flag.store(false, SeqCst);
+
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs, self.cancel_flag.clone()) {
+            sync.on_progress(move |percent, ready, total| {
+                progress((percent, ready, total));
             });
             sync.on_finished(move |offsets| {
                 set_offsets(offsets);
             });
 
             let ranges = sync.get_ranges();
-
-            self.cancel_flag.store(false, SeqCst);
             let cancel_flag = self.cancel_flag.clone();
             
             let video_path = self.stabilizer.video_path.read().clone();
@@ -311,7 +311,7 @@ impl Controller {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
             
-                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels, cancel_flag.clone());
+                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                     },
                                     Err(e) => {
                                         err(("An error occured: %1".to_string(), e.to_string()))

@@ -2,17 +2,22 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use std::collections::BTreeMap;
 use crate::filtering::Lowpass;
 use crate::stabilization::ComputeParams;
 
 use crate::gyro_source::TimeIMU;
 
-pub fn find_offsets(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
     let gyro = &params.gyro;
+    let ranges_len = ranges.len() as f64;
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
-        for (from_ts, to_ts) in ranges {
+        for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
+            if cancel_flag.load(Relaxed) { break; }
+            progress_cb(i as f64 / ranges_len);
+
             let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).map(|v| v.1.clone()).collect();
             if !of_item.is_empty() {
                 let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();

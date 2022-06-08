@@ -2158,7 +2158,7 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#8e9509385ec48f5ada17894d34ddf241706221c6"
+source = "git+https://github.com/gyroflow/rs-sync.git#681ed64fc6c8311bc60a33788165db853c7354e3"
 dependencies = [
  "argmin",
  "libm 0.2.2",
@@ -2704,7 +2704,7 @@ checksum = "9c97e489d8f836838d497091de568cf16b117486d529ec5579233521065bd5e4"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2724,7 +2724,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -2740,6 +2740,7 @@ dependencies = [
  "raw-window-handle",
  "smallvec",
  "thiserror",
+ "web-sys",
  "wgpu-hal",
  "wgpu-types",
 ]
@@ -2747,7 +2748,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "android-properties",
  "arrayvec 0.7.2",
@@ -2785,7 +2786,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#717bc401068d782a674b8b5c609158b32fa2cf35"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "bitflags",
 ]

@@ -364,7 +364,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let num = if method == 2 { 1 } else { 3 };
             for i in 0..num {
                 let a = (3 - i) as f32 / 3.0;
-                if let Some(lines) = self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1) {
+                if let Some(lines) = self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1, false) {
                     lines.0.1.into_iter().zip(lines.1.1.into_iter()).for_each(|(p1, p2)| {
                         if ret.is_none() {
                             // Only allocate if we actually have any points

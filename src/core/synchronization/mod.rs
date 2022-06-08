@@ -3,7 +3,7 @@
 
 use nalgebra::Rotation3;
 use std::ops::Range;
-use std::sync::atomic::Ordering::SeqCst;
+use std::sync::atomic::{ AtomicBool, Ordering::SeqCst };
 use std::vec::Vec;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 
-use crate::gyro_source::{Quat64, TimeQuat};
+use crate::gyro_source::{ Quat64, TimeQuat };
 use crate::stabilization::ComputeParams;
 
 #[cfg(feature = "use-opencv")]
@@ -206,24 +206,23 @@ impl PoseEstimator {
     }
 
     pub fn cache_optical_flow(&self, num_frames: usize) {
-        if let Some(l) = self.sync_results.try_read() {
-            let keys: Vec<i64> = l.keys().copied().collect();
-            for (i, k) in keys.iter().enumerate() {
-                if let Some(from_fr) = l.get(k) {
-                    if from_fr.optical_flow.try_borrow().map(|of| !of.is_empty()).unwrap_or_default() {
-                        // We already have OF for this frame
-                        continue;
-                    }
-                    for d in 1..=num_frames {
-                        if let Some(to_key) = keys.get(i + d) {
-                            if let Some(to_item) = l.get(to_key) {
-                                if from_fr.frame_no + d == to_item.frame_no {
-                                    let of = from_fr.item.optical_flow_to(&to_item.item);
-                                    if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
-                                        from_of.insert(d, 
-                                            of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
-                                        );
-                                    }
+        let l = self.sync_results.read();
+        let keys: Vec<i64> = l.keys().copied().collect();
+        for (i, k) in keys.iter().enumerate() {
+            if let Some(from_fr) = l.get(k) {
+                if from_fr.optical_flow.try_borrow().map(|of| !of.is_empty()).unwrap_or_default() {
+                    // We already have OF for this frame
+                    continue;
+                }
+                for d in 1..=num_frames {
+                    if let Some(to_key) = keys.get(i + d) {
+                        if let Some(to_item) = l.get(to_key) {
+                            if from_fr.frame_no + d == to_item.frame_no {
+                                let of = from_fr.item.optical_flow_to(&to_item.item);
+                                if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
+                                    from_of.insert(d, 
+                                        of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
+                                    );
                                 }
                             }
                         }
@@ -239,7 +238,7 @@ impl PoseEstimator {
         }
     }
 
-    pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize) -> OpticalFlowPairWithTs {
+    pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize, filter: bool) -> OpticalFlowPairWithTs {
         if let Some(l) = self.sync_results.try_read() {
             if let Some(first_ts) = l.get_closest(timestamp_us, 2000).map(|v| v.timestamp_us) {
                 let mut iter = l.range(first_ts..);
@@ -247,7 +246,11 @@ impl PoseEstimator {
                 if let Some((_, curr)) = iter.next() {
                     if let Ok(of) = curr.optical_flow.try_borrow() {
                         if let Some(opt_pts) = of.get(&num_frames) {
-                            return Self::filter_of_lines(opt_pts, scale);
+                            return if filter {
+                                Self::filter_of_lines(opt_pts, scale)
+                            } else {
+                                opt_pts.clone()
+                            }
                         }
                     }
                 }
@@ -389,12 +392,12 @@ impl PoseEstimator {
         ranges
     }
 
-    pub fn find_offsets(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         let gyro = self.estimated_gyro.read().clone();
-        find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params)
+        find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params, progress_cb, cancel_flag)
     }
 
-    pub fn find_offsets_rssync(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         let mut points = Vec::new();
         for (from_ts, to_ts) in ranges {
             let mut points_per_range = Vec::new();
@@ -411,10 +414,10 @@ impl PoseEstimator {
             points.push(points_per_range);
         }
 
-        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params)
+        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params, progress_cb, cancel_flag)
     }
 
-    pub fn find_offsets_visually(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs)
+    pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs, progress_cb, cancel_flag)
     }
 }

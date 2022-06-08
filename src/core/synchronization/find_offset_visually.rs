@@ -3,23 +3,28 @@
 
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ stabilization, stabilization::ComputeParams };
+use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use super::PoseEstimator;
 
-pub fn find_offsets(ranges: &[(i64, i64)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
 
     let next_frame_no = 2;
     let fps = params.gyro.fps;
+    let ranges_len = ranges.len() as f64;
 
     let keys: Vec<i64> = estimator.sync_results.read().keys().copied().collect();
 
-    for (from_ts, to_ts) in ranges {
+    for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
+        if cancel_flag.load(Relaxed) { break; }
+        progress_cb(i as f64 / ranges_len);
+
         let mut matched_points = Vec::new();
         for ts in &keys {
             if (*from_ts..*to_ts).contains(&ts) {
-                if let Some(lines) = estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no) {
+                if let Some(lines) = estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no, true) {
                     if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {
                         matched_points.push(lines);
                     } else {

@@ -2757,7 +2757,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git#8e9509385ec48f5ada17894d34ddf241706221c6"
+source = "git+https://github.com/gyroflow/rs-sync.git#681ed64fc6c8311bc60a33788165db853c7354e3"
 dependencies = [
  "argmin",
  "libm 0.2.2",
@@ -3516,7 +3516,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3536,7 +3536,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3560,7 +3560,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "android-properties",
  "arrayvec 0.7.2",
@@ -3598,7 +3598,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f0c7fe3a8eb0bc1caa9d02bed6edbb19db174378"
+source = "git+https://github.com/gfx-rs/wgpu.git#5e070783bc9ba22aca0e542b3a2151416e36b454"
 dependencies = [
  "bitflags",
 ]

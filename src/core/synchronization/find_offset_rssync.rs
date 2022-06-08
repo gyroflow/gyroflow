@@ -4,6 +4,7 @@
 use crate::stabilization::{ ComputeParams, undistort_points_with_params };
 use crate::gyro_source::Quat64;
 use nalgebra::{ Matrix3, Vector3 };
+use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst, Ordering::Relaxed } };
 use rs_sync::SyncProblem;
 use super::OpticalFlowPoints;
 use std::f64::consts::PI;
@@ -11,12 +12,14 @@ use std::f64::consts::PI;
 // use super::cpp_wrapper;
 // const SAVE_DEBUG_DATA: bool = true;
 
-pub fn find_offsets(
+pub fn find_offsets<F: Fn(f64) + Sync>(
     _ranges: &[(i64, i64)],
     matched_points: &Vec<Vec<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>>,
     initial_offset: f64,
     search_size: f64,
     params: &ComputeParams,
+    progress_cb: F,
+    cancel_flag: Arc<AtomicBool>
 ) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
 
     let mut offsets = Vec::new();
@@ -67,10 +70,18 @@ pub fn find_offsets(
     //     ser.timestamps = timestamps.clone();
     // }
 
+    let num_sync_points = matched_points.len() as f64;
+    let current_sync_point = AtomicUsize::new(0);
+
     let mut sync = SyncProblem::new();
     sync.set_gyro_quaternions(&timestamps, &quats);
     //sync.set_gyro_quaternions_fixed(&quats, sample_rate, first_ts as f64 / 1000_000.0);
 
+    sync.on_progress(|progress| -> bool {
+        progress_cb((current_sync_point.load(SeqCst) as f64 + progress) / num_sync_points);
+        !cancel_flag.load(Relaxed)
+    });
+    
     for range in matched_points {
         if range.len() < 2 {
             log::warn!("Not enough data for sync! range.len: {}", range.len());
@@ -136,18 +147,16 @@ pub fn find_offsets(
         //     cpp_wrapper::save_data_to_file(&ser, &format!("D:/test-{}.bin", from_ts));
         // }
 
-        let mut delay = sync.pre_sync(initial_delay / 1000.0, from_ts, to_ts, presync_step / 1000.0, presync_radius / 1000.0);
-        for _ in 0..4 {
-            delay = sync.sync(delay.1, from_ts, to_ts, initial_delay / 1000.0, presync_radius / 1000.0);   
+        if let Some(delay) = sync.full_sync(initial_delay / 1000.0, from_ts, to_ts, presync_step / 1000.0, presync_radius / 1000.0, 4) {
+            let offset = delay.1 * 1000.0;
+            if (offset - initial_delay).abs() <= presync_radius {
+                let offset = -offset - (frame_readout_time * 1000.0 / 2.0);
+                offsets.push(((from_ts + to_ts) as f64 / 2.0 / 1000.0, offset, delay.0));
+            } else {
+                log::warn!("Sync point out of acceptable range {} < {}", presync_radius, (offset - initial_delay).abs());
+            }
         }
-
-        let offset = delay.1 * 1000.0;
-        if (offset - initial_delay).abs() <= presync_radius {
-            let offset = -offset - (frame_readout_time * 1000.0 / 2.0);
-            offsets.push(((from_ts + to_ts) as f64 / 2.0 / 1000.0, offset, delay.0));
-        } else {
-            log::warn!("Sync point out of acceptable range {} < {}", presync_radius, (offset - initial_delay).abs());
-        }
+        current_sync_point.fetch_add(1, SeqCst);
     }
     offsets
 }
