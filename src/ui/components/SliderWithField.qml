@@ -52,7 +52,7 @@ Row {
                     mouse.accepted = false;
                 }
             }
-            
+
             onClicked: (mouse) => _onClicked(mouse);
             onPressed: (mouse) => _onClicked(mouse);
         }

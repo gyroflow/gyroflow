@@ -54,13 +54,13 @@ impl LensProfileDatabase {
         log::info!("Lens profiles directory: {:?}", Self::get_path());
 
         let _time = std::time::Instant::now();
-        
+
         let mut load = |data: &str, f_name: &str| {
             match LensProfile::from_json(data) {
                 Ok(mut v) => {
                     v.filename = f_name.to_string();
                     for profile in v.get_all_matching_profiles() {
-                        let key = if !profile.identifier.is_empty() { 
+                        let key = if !profile.identifier.is_empty() {
                             profile.identifier.clone()
                         } else {
                             f_name.to_string()
@@ -98,7 +98,7 @@ impl LensProfileDatabase {
                 }
             }
         });
-        
+
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
     }
@@ -227,7 +227,7 @@ impl LensProfileDatabase {
 
                 let parsed = LensProfile::from_json(&serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                 *prof.get_mut("name").unwrap() = serde_json::Value::String(parsed.get_name());
-                
+
                 let new_prof = serde_json::to_string_pretty(&prof).unwrap();
                 //dbg!(new_prof);
                 let new_filename = parsed.get_name().chars().filter(|c| c.is_ascii()).collect::<String>()
@@ -250,7 +250,7 @@ impl LensProfileDatabase {
                         i += 1;
                     }
                 }
-                
+
                 if std::fs::write(&new_path, new_prof).is_ok() {
                     if new_path != old_path {
                         if std::fs::remove_file(&old_path).is_err() {

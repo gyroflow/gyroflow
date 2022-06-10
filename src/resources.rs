@@ -4,7 +4,7 @@
 use qmetaobject::qrc;
 
 qrc!(pub rsrc,
-    "/" {        
+    "/" {
         "src/ui/components/qmldir",
         "src/ui/menu/qmldir",
         "src/ui/qmldir",

@@ -22,7 +22,7 @@ Window {
 
     property alias videoArea: videoArea;
     property alias lensCalib: lensCalib;
-    
+
     Material.theme: Material.Dark;
     Material.accent: Material.Blue;
 
@@ -39,7 +39,7 @@ Window {
     function messageBox(type: int, text: string, buttons: list, parent: QtObject): Modal {
         return window.messageBox(type, text, buttons, parent || calibrator_window.contentItem);
     }
-    
+
     Connections {
         target: controller;
         function onError(text: string, arg: string, callback: string) {
@@ -67,11 +67,11 @@ Window {
             });
         });
     }
-    
+
     FileDialog {
         id: fileDialog;
         property var extensions: [
-            "mp4", "mov", "mxf", "mkv", "webm", "insv", 
+            "mp4", "mov", "mxf", "mkv", "webm", "insv",
             "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV"
         ];
 
@@ -168,7 +168,7 @@ Window {
                 opened: false;
             }
             Hr {
-                
+
             }
             Menu.LensCalibrate {
                 id: lensCalib;
@@ -202,13 +202,13 @@ Window {
                     LinkButton {
                         anchors.horizontalCenter: parent.horizontalCenter;
                         text: qsTr("How to calibrate lens?");
-                        onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/guide/calibration/") 
+                        onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/guide/calibration/")
                     }
                 }
             }
         }
     }
-    
+
     Shortcuts {
         videoArea: videoArea;
     }

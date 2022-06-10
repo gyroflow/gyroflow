@@ -64,7 +64,7 @@ impl ComputeParams {
 
         let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
         let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
-        
+
         let lens_ratiox = (params.video_size.0 as f64 / calib_width) * input_horizontal_stretch;
         let lens_ratioy = (params.video_size.1 as f64 / calib_height) * input_vertical_stretch;
         camera_matrix[(0, 0)] *= lens_ratiox;

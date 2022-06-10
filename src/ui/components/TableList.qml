@@ -115,7 +115,7 @@ Row {
                 opacity: editLinkBtn.activeFocus ? 0.8 : 1;
                 height: newValue.visible? newValue.height + 5 * dpiScale : undefined;
                 leftPadding: newValue.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
-                
+
                 function _onClicked() {
                     if (newValue.visible) {
                         newValue.accepted();

@@ -17,7 +17,7 @@ Window {
     property real tileSize: Math.min(root.height / (rows + 2), root.width / (columns + 2));
 
     title: qsTr("Calibration target") + ` (${columns} x ${rows})`;
-    
+
     Component.onCompleted: ui_tools.set_icon(root);
 
     Column {
@@ -27,7 +27,7 @@ Window {
             Row {
                 property int colIndex: index;
                 Repeater {
-                    model: (root.columns + 1); 
+                    model: (root.columns + 1);
                     Rectangle {
                         width: root.tileSize;
                         height: width;
@@ -42,7 +42,7 @@ Window {
                             color: parent.color;
                             visible: parent.radius > 0;
                         }
-                        
+
                         Rectangle {
                             visible: ((colIndex == 4 || (colIndex == 3 && index == 7)) && (index == 7 || index == 8));
                             width: parent.width / 3;

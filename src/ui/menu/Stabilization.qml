@@ -152,7 +152,7 @@ MenuItem {
             }
         }
     }
-    
+
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Default"),
@@ -199,7 +199,7 @@ MenuItem {
     InfoMessageSmall {
         id: fovWarning;
         show: fov.value > 1.0 && croppingMode.currentIndex > 0;
-        text: qsTr("FOV is greater than 1.0, you may see black borders"); 
+        text: qsTr("FOV is greater than 1.0, you may see black borders");
     }
 
     Label {
@@ -244,8 +244,8 @@ MenuItem {
                     let str = "";
                     const add = x.custom_qml || "";
                     switch (x.type) {
-                        case 'Slider': 
-                        case 'SliderWithField': 
+                        case 'Slider':
+                        case 'SliderWithField':
                         case 'NumberField':
                             str = `Label {
                                 width: parent.width;
@@ -304,7 +304,7 @@ MenuItem {
         width: parent.width - x;
         visible: children.length > 0;
     }
-    
+
     Column {
         id: horizonLock;
         x: 5 * dpiScale;
@@ -381,7 +381,7 @@ MenuItem {
                 .arg("<b>" + maxYaw  .toFixed(1) + "°</b>")
                 .arg("<b>" + maxRoll .toFixed(1) + "°</b>")
               + "<br>"
-              + qsTr("Max zoom: %1").arg("<b>" + maxZoom.toFixed(1) + "%</b>"); 
+              + qsTr("Max zoom: %1").arg("<b>" + maxZoom.toFixed(1) + "%</b>");
     }
 
     ComboBox {
@@ -417,7 +417,7 @@ MenuItem {
             onValueChanged: controller.adaptive_zoom = value;
         }
     }
-    
+
     Label {
         text: qsTr("Zooming center offset");
         visible: croppingMode.currentIndex > 0;

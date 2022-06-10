@@ -44,7 +44,7 @@ TextField {
     onTextChanged: {
         const searchTerm = text.toLowerCase();
         const words = searchTerm.split(/[\s,;]+/).filter(s => s);
-        
+
         if (!words.length) {
             popup.close();
             return;
@@ -64,7 +64,7 @@ TextField {
                     break;
                 }
             }
-            
+
             if (add) {
                 m.push(x);
                 indexMapping.push(i);
@@ -74,7 +74,7 @@ TextField {
         }
 
         if (!m.length) popup.close();
-        
+
         popup.model = m;
         popup.indexMapping = indexMapping;
         popup.currentIndex = -1;

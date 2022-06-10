@@ -72,12 +72,12 @@ impl RenderOptions {
 }
 
 #[derive(Default, QObject)]
-pub struct RenderQueue { 
-    base: qt_base_class!(trait QObject),  
+pub struct RenderQueue {
+    base: qt_base_class!(trait QObject),
 
     queue: qt_property!(RefCell<SimpleListModel<RenderQueueItem>>; NOTIFY queue_changed),
     jobs: HashMap<u32, Job>,
-    
+
     add: qt_method!(fn(&mut self, controller: QJSValue, options_json: String, thumbnail_url: QString) -> u32),
     remove: qt_method!(fn(&mut self, job_id: u32)),
 
@@ -112,7 +112,7 @@ pub struct RenderQueue {
     progress_changed: qt_signal!(),
     queue_changed: qt_signal!(),
     status_changed: qt_signal!(),
-    
+
     render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool),
     encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
@@ -324,7 +324,7 @@ impl RenderQueue {
                 }
             }
         }
-        
+
         if !paused {
             let mut job_id = None;
             for v in self.queue.borrow().iter() {
@@ -550,7 +550,7 @@ impl RenderQueue {
 
     fn get_output_path(path: &str, codec: &str) -> String {
         let mut path = std::path::Path::new(path).with_extension("");
-        
+
         let ext = match codec {
             "ProRes"        => ".mov",
             "DNxHD"         => ".mov",
@@ -650,9 +650,9 @@ impl RenderQueue {
                             let mut proc = rendering::FfmpegProcessor::from_file(video_path, false, 0, None)?;
                             proc.on_frame(|_timestamp_us, input_frame, _output_frame, converter| {
                                 let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
-    
+
                                 thumb = Some(util::image_data_to_base64(sf.plane_width(0), sf.plane_height(0), sf.stride(0) as u32, sf.data(0)));
-    
+
                                 Ok(())
                             });
                             proc.start_decoder_only(vec![(0.0, 0.0)], Arc::new(AtomicBool::new(false)))?;
@@ -697,7 +697,7 @@ impl RenderQueue {
                         render_options.trim_end = 1.0;
 
                         let ratio = info.width as f64 / info.height as f64;
-        
+
                         if info.duration_ms > 0.0 && info.fps > 0.0 {
 
                             let video_size = (info.width as usize, info.height as usize);
@@ -708,7 +708,7 @@ impl RenderQueue {
                             }
                             let _ = stab.load_gyro_data(&path, |_|(), Arc::new(AtomicBool::new(false)));
                             let camera_id = stab.camera_id.read();
-        
+
                             let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
                             if !id_str.is_empty() {
                                 let db = stab.lens_profile_db.read();
@@ -738,7 +738,7 @@ impl RenderQueue {
                             // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
                             loaded(render_options);
-    
+
                             if let Err(e) = fetch_thumb(&path, ratio) {
                                 err(("An error occured: %1".to_string(), e.to_string()));
                             }

@@ -88,7 +88,7 @@ Rectangle {
                 width: parent.width;
                 parent: leftPanel;
                 id: gflogo;
-                
+
                 Item {
                     width: parent.width;
                     height: children[0].height * 1.5;
@@ -190,7 +190,7 @@ Rectangle {
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
-                    
+
                     property bool enabled2: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
                     Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
@@ -313,7 +313,7 @@ Rectangle {
             }
         }
         el.buttons = buttonTexts;
-        
+
         el.opened = true;
         return el;
     }
@@ -388,7 +388,7 @@ Rectangle {
         if (text.includes("ffmpeg")) {
             if (text.includes("Permission denied")) return qsTr("Permission denied. Unable to create or write file.\nChange the output path or run the program as administrator.\nMake sure you have write permissions to the target directory and make sure target file is not used by any other application.");
             if (text.includes("required nvenc API version")) return qsTr("NVIDIA GPU driver is too old, GPU encoding will not work for this format.\nUpdate your NVIDIA drivers to the newest version: %1.\nIf the issue is still present after driver update, your GPU probably doesn't support GPU encoding with this format. Disable GPU encoding in this case.").arg("<a href=\"https://www.nvidia.com/download/index.aspx\">https://www.nvidia.com/download/index.aspx</a>");
-        
+
             text = text.replace(/ @ [A-F0-9]{6,}\]/g, "]"); // Remove ffmpeg function addresses
 
             // Remove duplicate lines
@@ -418,7 +418,7 @@ Rectangle {
 
         return output;
     }
-    
+
     function reportProgress(progress: real, type: string) {
         if (videoArea.videoLoader.active) {
             if (type === "loader") ui_tools.set_progress(progress);

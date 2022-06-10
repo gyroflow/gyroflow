@@ -12,9 +12,9 @@ Rectangle {
 
     width: parent.width;
     height: t.height + 20 * dpiScale;
-    color: type == InfoMessage.Warning? "#f6a10c" : 
-           type == InfoMessage.Error?   "#f41717" : 
-           type == InfoMessage.Info?    "#17b6f4" : 
+    color: type == InfoMessage.Warning? "#f6a10c" :
+           type == InfoMessage.Error?   "#f41717" :
+           type == InfoMessage.Info?    "#17b6f4" :
            "transparent";
     radius: 5 * dpiScale;
     property alias text: t.text;
@@ -31,7 +31,7 @@ Rectangle {
     }
     property real parentWidth: parent.width;
     onParentWidthChanged: Qt.callLater(updateSize);
-    
+
     Text {
         id: t;
         font.pixelSize: 13 * dpiScale;

@@ -22,7 +22,7 @@ MenuItem {
     FileDialog {
         id: fileDialog;
         property var extensions: [
-            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", 
+            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360",
             "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "INSV", "GCSV", "log"
         ];
 
@@ -89,8 +89,8 @@ MenuItem {
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
 
-            Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
-            if (root.pendingOffsets) { 
+            Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart()));
+            if (root.pendingOffsets) {
                 for (const ts in root.pendingOffsets) {
                     controller.set_offset(ts, root.pendingOffsets[ts]);
                 }
@@ -113,7 +113,7 @@ MenuItem {
     }
     TableList {
         id: info;
-            
+
         Component.onCompleted: {
             QT_TRANSLATE_NOOP("TableList", "File name"),
             QT_TRANSLATE_NOOP("TableList", "Detected format")

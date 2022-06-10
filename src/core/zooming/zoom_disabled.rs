@@ -22,7 +22,7 @@ impl ZoomingAlgorithm for ZoomDisabled {
         // this is for mode, 0 = disabled
         // TODO: this should be handled in a call to this, once zooming::Mode is in the compute struct
         hasher.write_u64(0);
-    }  
+    }
 }
 
 impl ZoomDisabled {

@@ -67,7 +67,7 @@ impl EstimatorItemInterface for ItemAkaze {
             let mut arrsac = Arrsac::new(1e-10, Xoshiro256PlusPlus::seed_from_u64(0));
                 //.initialization_hypotheses(2048)
                 //.max_candidate_hypotheses(512);
-            for threshold in thresholds { 
+            for threshold in thresholds {
                 arrsac = arrsac.inlier_threshold(threshold);
 
                 let eight_point = eight_point::EightPoint::new();
@@ -134,7 +134,7 @@ impl ItemAkaze {
             features
         };*/
 
-        Self { 
+        Self {
             features: points.into_iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect(),
             descriptors
         }
@@ -171,7 +171,7 @@ fn serialize_features(x: &DetectedFeatures) -> Vec<u8> {
 fn deserialize_features(x: &[u8]) -> DetectedFeatures {
     let val: SerializedFeatures = bincode::deserialize(x).unwrap();
     (
-        val.0.into_iter().map(SerializedKeypoint::into).collect(), 
-        val.1.into_iter().map(|x| { let mut a = [0u8; 64]; a.copy_from_slice(&x); BitArray::<64>::new(a) }).collect(), 
+        val.0.into_iter().map(SerializedKeypoint::into).collect(),
+        val.1.into_iter().map(|x| { let mut a = [0u8; 64]; a.copy_from_slice(&x); BitArray::<64>::new(a) }).collect(),
     )
 }*/

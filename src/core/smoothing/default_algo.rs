@@ -169,7 +169,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         // Calculate velocity
         let mut velocity = BTreeMap::<i64, Vector3<f64>>::new();
-        
+
         let first_quat = quats.iter().next().unwrap(); // First quat
         velocity.insert(*first_quat.0, Vector3::from_element(0.0));
 
@@ -237,9 +237,9 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 let pitch_factor = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - ratio[1]) + alpha_0_1s * ratio[1];
                 let roll_factor = alpha_smoothness * (1.0 - ratio[2]) + alpha_0_1s * ratio[2];
-    
+
                 let euler_rot = (q.inverse() * x).euler_angles();
-    
+
                 let quat_rot = Quat64::from_euler_angles(
                     euler_rot.0 * pitch_factor.min(1.0),
                     euler_rot.1 * yaw_factor.min(1.0),
@@ -357,9 +357,9 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 let pitch_factor = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - vel_ratio[1] * dist_ratio[1]) + alpha_0_1s * vel_ratio[1] * dist_ratio[1];
                 let roll_factor = alpha_smoothness * (1.0 - vel_ratio[2] * dist_ratio[2]) + alpha_0_1s * vel_ratio[2] * dist_ratio[2];
-    
+
                 let euler_rot = (q.inverse() * x).euler_angles();
-    
+
                 let quat_rot = Quat64::from_euler_angles(
                     euler_rot.0 * pitch_factor.min(1.0),
                     euler_rot.1 * yaw_factor.min(1.0),
@@ -382,9 +382,9 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 let pitch_factor = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - vel_ratio[1] * dist_ratio[1]) + alpha_0_1s * vel_ratio[1] * dist_ratio[1];
                 let roll_factor = alpha_smoothness * (1.0 - vel_ratio[2] * dist_ratio[2]) + alpha_0_1s * vel_ratio[2] * dist_ratio[2];
-    
+
                 let euler_rot = (q.inverse() * x).euler_angles();
-    
+
                 let quat_rot = Quat64::from_euler_angles(
                     euler_rot.0 * pitch_factor.min(1.0),
                     euler_rot.1 * yaw_factor.min(1.0),

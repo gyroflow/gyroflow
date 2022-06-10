@@ -33,7 +33,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
             let cpp_name = f_name.replace('/', "_").replace(".qml", ".cpp").replace(".js", ".cpp");
             let cpp_path = out_dir.join(cpp_name).to_string_lossy().to_string();
 
-            config.file(&cpp_path); 
+            config.file(&cpp_path);
             files.push((f_name, cpp_path));
         }
     });
@@ -44,13 +44,13 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     } else {
         "qmlcachegen".to_string()
     };
-    
+
     qrc.push_str("</qresource>\n</RCC>");
     let qrc_path = Path::new(&main_dir).join("ui.qrc").to_string_lossy().to_string();
     std::fs::write(&qrc_path, qrc).unwrap();
 
     for (qml, cpp) in &files {
-        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success()); 
+        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success());
     }
 
     let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();
@@ -81,7 +81,7 @@ fn main() {
     for f in env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
     }
-    
+
     if cfg!(target_os = "macos") {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");

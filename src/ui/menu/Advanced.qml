@@ -180,7 +180,7 @@ MenuItem {
             width: parent.width;
             function setLang() {
                 settings.lang = langs[currentIndex][1];
-                
+
                 window.LayoutMirroring.enabled = settings.lang == "ar" || settings.lang == "fa" || settings.lang == "he";
                 window.LayoutMirroring.childrenInherit = true;
                 ui_tools.set_language(settings.lang);

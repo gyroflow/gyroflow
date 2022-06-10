@@ -25,7 +25,7 @@ impl SmoothingAlgorithm for Plain {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
-    
+
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([
             {

@@ -30,7 +30,7 @@ impl EstimatorItemInterface for ItemOpenCV {
             *y *= ratio as f64;
         }
     }
-    
+
     fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
@@ -48,15 +48,15 @@ impl EstimatorItemInterface for ItemOpenCV {
 
             let mut mask = Mat::default();
             let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 1000, &mut mask)?;
-        
+
             let mut r1 = Mat::default();
             let mut t = Mat::default();
-            
+
             let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
             if inliers < 20 {
                 return Err(opencv::Error::new(0, "Model not found".to_string()));
             }
-            
+
             cv_to_rot2(r1)
         }();
 
@@ -68,7 +68,7 @@ impl EstimatorItemInterface for ItemOpenCV {
             }
         }
     }
-    
+
     fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair {
         self.get_matched_features(to)
     }
@@ -81,9 +81,9 @@ impl ItemOpenCV {
     pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
         let (w, h) = (img.width() as i32, img.height() as i32);
         let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, w as usize) };
-        
+
         // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
-        
+
         let mut pts = Mat::default();
 
         //let inp = inp.get_umat(ACCESS_READ, UMatUsageFlags::USAGE_DEFAULT).unwrap();
@@ -102,7 +102,7 @@ impl ItemOpenCV {
             img
         }
     }
-    
+
     fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
         if let EstimatorItem::ItemOpenCV(next) = next {
             let (w, h) = self.size;
@@ -111,12 +111,12 @@ impl ItemOpenCV {
             let result = || -> Result<(Vec<(f64, f64)>, Vec<(f64, f64)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
                 let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-                
+
                 let pts1: Vec<Point2f> = self.features.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32)).collect();
 
                 let a1_pts = Mat::from_slice(&pts1)?;
                 //let a2_pts = a2.features;
-                
+
                 let mut a2_pts = Mat::default();
                 let mut status = Mat::default();
                 let mut err = Mat::default();
@@ -129,7 +129,7 @@ impl ItemOpenCV {
                     if *status.at::<u8>(i)? == 1u8 {
                         let pt1 = a1_pts.at::<Point2f>(i)?;
                         let pt2 = a2_pts.at::<Point2f>(i)?;
-                        if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32 
+                        if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32
                         && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
                             pts1.push((pt1.x as f64, pt1.y as f64));
                             pts2.push((pt2.x as f64, pt2.y as f64));

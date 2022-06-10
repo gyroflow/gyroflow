@@ -54,7 +54,7 @@ Item {
     }
 
     Hr { width: parent.width - 10 * dpiScale; y: 35 * dpiScale; color: "#fff"; opacity: 0.3; }
-    
+
     Row {
         id: progressRow;
         y: 55 * dpiScale;
@@ -78,7 +78,7 @@ Item {
                     totalTime.remaining = "---";
                 }
             }
-            
+
             Item {
                 width: parent.width;
                 height: 20 * dpiScale;
@@ -454,7 +454,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter;
                     width: btnsRowInner.width;
                     height: btnsRowInner.height;
-                    Ease on width { } 
+                    Ease on width { }
 
                     component IconButton: LinkButton {
                         width: 30 * dpiScale;

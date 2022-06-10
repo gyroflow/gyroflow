@@ -154,7 +154,7 @@ impl<'a> FfmpegProcessor<'a> {
             end_ms: None,
 
             decoder_fps,
-        
+
             video: VideoTranscoder {
                 gpu_encoding: true,
                 gpu_decoding,
@@ -262,7 +262,7 @@ impl<'a> FfmpegProcessor<'a> {
                         copied_stream_first_pts = packet.pts();
                         copied_stream_first_dts = packet.dts();
                     }
-        
+
                     packet.rescale_ts(ist_time_bases[ist_index], ost_time_base);
                     packet.set_position(-1);
                     packet.set_stream(ost_index as _);
@@ -295,7 +295,7 @@ impl<'a> FfmpegProcessor<'a> {
                         }
                     }
                 }
- 
+
                 match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms) {
                     Ok(encoding_status) => {
                         if self.video.encoder.is_some() {
@@ -330,7 +330,7 @@ impl<'a> FfmpegProcessor<'a> {
                 process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base)?;
             }
         }
-    
+
         // Flush encoders and decoders.
         {
             let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
@@ -373,7 +373,7 @@ impl<'a> FfmpegProcessor<'a> {
                 // TODO this doesn't work for some reason
                 // let c_name = CString::new("resize").unwrap();
                 // let c_val = CString::new("1280x720").unwrap();
-                // unsafe { ffi::av_opt_set((*codec.as_mut_ptr()).priv_data, c_name.as_ptr(), c_val.as_ptr(), 1); } 
+                // unsafe { ffi::av_opt_set((*codec.as_mut_ptr()).priv_data, c_name.as_ptr(), c_val.as_ptr(), 1); }
 
                 self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
                 self.video.time_base = Some(stream.rate().invert());
@@ -425,7 +425,7 @@ impl<'a> FfmpegProcessor<'a> {
                 break;
             }
         }
-    
+
         // Flush decoder.
         self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
         self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
@@ -443,7 +443,7 @@ impl<'a> FfmpegProcessor<'a> {
     pub fn get_video_info(path: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
         let context = format::input(&path)?;
         if let Some(stream) = context.streams().best(media::Type::Video) {
-            let codec = codec::context::Context::from_parameters(stream.parameters())?;    
+            let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(video) = codec.decoder().video() {
                 let mut bitrate = video.bit_rate();
                 if bitrate == 0 { bitrate = context.bit_rate() as usize; }

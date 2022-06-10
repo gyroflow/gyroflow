@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-/// The basic idea here is to find chessboard every 10 frames and save all points to a map. 
+/// The basic idea here is to find chessboard every 10 frames and save all points to a map.
 /// Then we pick a random 10 frames from that map and calculate the calibration.
 /// Repeat that 1000 times, with new random set of frames each time and return the set which resulted in the lowest RMS
 
 #[cfg(feature = "use-opencv")]
 use opencv::{
-    core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 }, 
-    prelude::MatTraitConst, 
+    core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 },
+    prelude::MatTraitConst,
     calib3d::{ CALIB_CB_MARKER, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
@@ -75,7 +75,7 @@ impl LensCalibrator {
 
             width: 0,
             height: 0,
-            
+
             ..Default::default()
         };
 
@@ -156,7 +156,7 @@ impl LensCalibrator {
                             points.push((pt.x * pt_scale, pt.y * pt_scale));
                         }
                         log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
-                        if avg_sharpness < max_sharpness || is_forced { 
+                        if avg_sharpness < max_sharpness || is_forced {
                             img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, frame, avg_sharpness, is_forced });
                         }
                         all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness, frame, is_forced });
@@ -177,7 +177,7 @@ impl LensCalibrator {
         } else {
             self.image_points.read().keys().copied().collect()
         };
-        
+
         let find_min = |a: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
 
         let image_points = self.image_points.read().clone();
@@ -228,7 +228,7 @@ impl LensCalibrator {
             if final_frames.len() == 1 {
                 return (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), final_frames);
             }
-  
+
             let imgpoints = Vector::<Vector<Point2f>>::from_iter(
                 final_frames.iter().filter_map(|k| Some(Vector::from_iter(
                     image_points.get(k)?.points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
@@ -239,10 +239,10 @@ impl LensCalibrator {
                     objp.iter().map(|(x, y)| Point3d::new(*x, *y, 0.0))
                 ))
             );
-        
+
             let mut k  = Mat::default(); let mut d  = Mat::default();
             let mut rv = Mat::default(); let mut tv = Mat::default();
-        
+
             if let Ok(rms) = opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
                 if let Ok(k) = cv_to_mat3(k) {
                     if let Ok(d) = cv_to_vec4(d) {

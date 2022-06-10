@@ -45,7 +45,7 @@ Item {
         const time = Math.max(0, durationMs * pos);
         return new Date(time).toISOString().substring(11, 11+8);
     }
-    
+
     function setTrim(start: real, end: real) {
         if (start >= end) {
             resetTrim();
@@ -199,7 +199,7 @@ Item {
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton;
 
             property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0});
-            
+
             onMouseXChanged: {
                 if (pressed) {
                     if (pressedButtons & Qt.MiddleButton) {
@@ -326,8 +326,8 @@ Item {
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
 
-                    const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" + 
-                                      "This feature is experimental, the results may not be correct at all.\n" + 
+                    const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" +
+                                      "This feature is experimental, the results may not be correct at all.\n" +
                                       "Are you sure you want to continue?");
                     messageBox(Modal.Warning, text, [
                         { text: qsTr("Yes"), clicked: function() {
@@ -568,7 +568,7 @@ Item {
     LoaderOverlay { anchors.topMargin: 10 * dpiScale; }
 
     Item {
-        width: parent.width; 
+        width: parent.width;
         anchors.bottom: parent.bottom;
         ToolTip {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")

@@ -53,7 +53,7 @@ QQC.Popup {
                 font: popup.font;
                 Component.onCompleted: { if (implicitWidth > popup.maxItemWidth) popup.maxItemWidth = implicitWidth; }
             }
-            
+
             scale: dlg.down? 0.970 : 1.0;
             Ease on scale { }
 

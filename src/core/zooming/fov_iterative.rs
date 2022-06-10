@@ -17,13 +17,13 @@ Iterative FOV calculation:
 */
 
 pub struct FovIterative {
-    input_dim: (f64, f64), 
+    input_dim: (f64, f64),
     output_dim: (f64, f64),
     output_inv_aspect: f64,
     compute_params: ComputeParams,
     debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
-impl FieldOfViewAlgorithm for FovIterative { 
+impl FieldOfViewAlgorithm for FovIterative {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
         self.debug_points.read().clone()
     }
@@ -89,16 +89,16 @@ impl FovIterative {
         if self.compute_params.zooming_debug_points {
             self.debug_points.write().insert(ts_us, polygon.iter().map(|(x, y)| (x / self.input_dim.0, y / self.input_dim.1)).collect());
         }
-        
+
         let initial = (1000000.0, 1000000.0 * self.output_inv_aspect);
         let mut nearest = (None, initial);
-        
+
         for _ in 1..5 {
             nearest = self.nearest_edge(&polygon, center, nearest.1);
             if let Some(idx) = nearest.0 {
                 let len = rect.len();
                 let relevant = [
-                    rect[(idx - 1) % len], 
+                    rect[(idx - 1) % len],
                     rect[idx],
                     rect[(idx + 1) % len]
                 ];
@@ -114,7 +114,7 @@ impl FovIterative {
                 break;
             }
         }
-        
+
         nearest.1.0 * 2.0 / self.output_dim.0
     }
 
@@ -144,7 +144,7 @@ fn points_around_rect(mut w: f64, mut h: f64, w_div: usize, h_div: usize) -> Vec
 
     let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
     let (wstep, hstep) = (w / wcnt as f64, h / hcnt as f64);
-    
+
     // ordered!
     let mut distorted_points: Vec<(f64, f64)> = Vec::with_capacity((wcnt + hcnt) * 2);
     for i in 0..wcnt { distorted_points.push((i as f64 * wstep,          0.0)); }

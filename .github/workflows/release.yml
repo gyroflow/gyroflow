@@ -10,11 +10,11 @@ jobs:
       matrix:
         targets: [
           {
-            os: ubuntu-latest, 
+            os: ubuntu-latest,
             target: x86_64-unknown-linux-gnu,
             target2: x86_64-unknown-linux-gnu,
-            cross: false, 
-            name: linux64, 
+            cross: false,
+            name: linux64,
             ext: "",
             vcpkg: "x64-linux-release",
             vcpkg2: "x64-linux-release",
@@ -26,7 +26,7 @@ jobs:
             target: x86_64-apple-darwin,
             target2: aarch64-apple-darwin,
             cross: false,
-            name: mac-universal, 
+            name: mac-universal,
             ext: "",
             vcpkg: "x64-osx-release",
             vcpkg2: "arm64-osx",
@@ -38,7 +38,7 @@ jobs:
             target: x86_64-pc-windows-msvc,
             target2: x86_64-pc-windows-msvc,
             cross: false,
-            name: windows64, 
+            name: windows64,
             ext: ".exe",
             vcpkg: "x64-windows-release",
             vcpkg2: "x64-windows-release",
@@ -62,7 +62,7 @@ jobs:
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
-        
+
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
         with:
@@ -75,7 +75,7 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: 314018fef43c7e3a52a3e46599313b70ace3977a
-      
+
       # Download and install OpenCV
       - name: Install OpenCV and curl
         if: ${{ matrix.targets.os != 'ubuntu-latest' }}
@@ -160,7 +160,7 @@ jobs:
       - name: Install Mac certificate
         if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v1
-        with: 
+        with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
@@ -191,7 +191,7 @@ jobs:
         env:
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
         run: |
-          ${{ github.workspace }}/_deployment/deploy-windows.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy 
+          ${{ github.workspace }}/_deployment/deploy-windows.bat ${{ github.workspace }} ${{ env.Qt6_DIR }} ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/bin ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy
           cd ${{ github.workspace }}/_deployment/_binaries/win64/
           7z a ../Gyroflow-${{ matrix.targets.name }}.zip *
 
@@ -210,7 +210,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: gyroflow
-   
+
       - run: ls -l
 
       - name: Publish

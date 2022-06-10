@@ -37,9 +37,9 @@ struct CalibrationItem {
 }
 
 #[derive(Default, QObject)]
-pub struct Controller { 
-    base: qt_base_class!(trait QObject),  
- 
+pub struct Controller {
+    base: qt_base_class!(trait QObject),
+
     init_player: qt_method!(fn(&self, player: QJSValue)),
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
@@ -181,7 +181,7 @@ pub struct Controller {
 
     url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
     path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
-    
+
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
 
     message: qt_signal!(text: QString, arg: QString, callback: QString),
@@ -286,7 +286,7 @@ impl Controller {
 
             let ranges = sync.get_ranges();
             let cancel_flag = self.cancel_flag.clone();
-            
+
             let video_path = self.stabilizer.video_path.read().clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
@@ -302,7 +302,7 @@ impl Controller {
                     dict.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
                     decoder_options = Some(dict);
                 }
-                
+
                 match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
                     Ok(mut proc) => {
                         proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
@@ -312,7 +312,7 @@ impl Controller {
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
-            
+
                                         sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                     },
                                     Err(e) => {
@@ -347,7 +347,7 @@ impl Controller {
         // sample 400 ms
         let ranges_ms: Vec<(f64, f64)> = timestamps_fract.iter().map(|x| {
             let range = (
-                ((x * org_duration_ms) - (200.0)).max(0.0), 
+                ((x * org_duration_ms) - (200.0)).max(0.0),
                 ((x * org_duration_ms) + (200.0)).min(org_duration_ms)
             );
             (range.0, range.1)
@@ -418,7 +418,7 @@ impl Controller {
                 this.loading_gyro_in_progress = false;
                 this.loading_gyro_progress(1.0);
                 this.loading_gyro_in_progress_changed();
-                
+
                 this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
@@ -436,7 +436,7 @@ impl Controller {
                     this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()));
                 }
             });
-            
+
             if duration_ms > 0.0 && fps > 0.0 {
                 core::run_threaded(move || {
                     let last_progress = RefCell::new(std::time::Instant::now());
@@ -509,7 +509,7 @@ impl Controller {
         self.lens_profile_loaded(QString::from(json), QString::from(filepath));
         self.request_recompute();
     }
-    
+
     fn set_preview_resolution(&mut self, target_height: i32, player: QJSValue) {
         self.preview_resolution = target_height;
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
@@ -613,7 +613,7 @@ impl Controller {
                 out_pixels.resize_with(os*oh, u8::default);
 
                 let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, (width as usize, height as usize, stride as usize), (ow, oh, os), pixels, &mut out_pixels);
-                
+
                 // println!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {
                     (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
@@ -676,7 +676,7 @@ impl Controller {
     fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64) {
         self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, false, 11.0, sync_duration_ms, every_nth_frame, true, override_fps);
     }
-    
+
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
     }
@@ -809,7 +809,7 @@ impl Controller {
 
                         if let Some(name) = name {
                             ::log::info!("Latest version: {}, current version: {}", name, util::get_version());
-                            
+
                             if let Ok(latest_version) = semver::Version::parse(name.trim_start_matches('v')) {
                                 if let Ok(this_version) = semver::Version::parse(env!("CARGO_PKG_VERSION")) {
                                     if latest_version > this_version {
@@ -898,7 +898,7 @@ impl Controller {
             let total = ((frame_count as f64 * trim_ratio) / every_nth_frame as f64) as usize;
             let total_read = Arc::new(AtomicUsize::new(0));
             let processed = Arc::new(AtomicUsize::new(0));
-            
+
             let video_path = stab.video_path.read().clone();
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
@@ -954,7 +954,7 @@ impl Controller {
                 while processed.load(SeqCst) < total_read.load(SeqCst) {
                     std::thread::sleep(std::time::Duration::from_millis(500));
                 }
-                
+
                 let mut lock = cal.write();
                 let cal = lock.as_mut().unwrap();
                 if let Err(e) = cal.calibrate(is_forced) {
@@ -979,7 +979,7 @@ impl Controller {
             let used_points = cal.read().as_ref().map(|x| x.used_points.clone()).unwrap_or_default();
 
             self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
-                timestamp_us: v.timestamp_us, 
+                timestamp_us: v.timestamp_us,
                 sharpness: v.avg_sharpness,
                 is_forced: v.is_forced
             }).collect());
@@ -989,10 +989,10 @@ impl Controller {
             })(());
         }
     }
-    
+
     fn add_calibration_point(&mut self, timestamp_us: i64, no_marker: bool) {
         dbg!(timestamp_us);
-        
+
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0, no_marker);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
@@ -1029,7 +1029,7 @@ impl Controller {
 
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
         let info_json = info.to_json().to_string();
- 
+
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
             #[cfg(feature = "opencv")]
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
@@ -1043,14 +1043,14 @@ impl Controller {
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
         let path = util::url_to_path(url);
         let info_json = info.to_json().to_string();
- 
+
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 #[cfg(feature = "opencv")]
                 if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                     profile.set_from_calibrator(cal);
                 }
-        
+
                 match profile.save_to_file(&path) {
                     Ok(json) => {
                         ::log::debug!("Lens profile json: {}", json);
@@ -1081,7 +1081,7 @@ impl Controller {
             // db.process_adjusted_metadata();
             let all_names = db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect();
             loaded(all_names);
-        });        
+        });
     }
 
     fn fetch_profiles_from_github(&self) {
@@ -1129,7 +1129,7 @@ impl Controller {
             }
         });
     }
-    
+
     fn rate_profile(&self, name: QString, is_good: bool) {
         core::run_threaded(move || {
             if let Ok(Ok(body)) = ureq::post(&format!("https://api.gyroflow.xyz/rate?good={}", is_good)).set("Content-Type", "application/json; charset=utf-8").send_string(&name.to_string()).map(|x| x.into_string()) {

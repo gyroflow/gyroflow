@@ -19,7 +19,7 @@ use crate::stabilization_params::StabilizationParams;
 
 pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
-    
+
     fn get_parameters_json(&self) -> serde_json::Value;
     fn get_status_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
@@ -53,7 +53,7 @@ impl Default for Smoothing {
 
             quats_checksum: 0,
             current_id: 1,
-            
+
             horizon_lock: horizon::HorizonLock::default(),
         }
     }
@@ -129,7 +129,7 @@ impl Smoothing {
         let mut max_pitch = 0.0;
         let mut max_yaw = 0.0;
         let mut max_roll = 0.0;
-        
+
         for (timestamp, quat) in smoothed_quats.iter() {
             if timestamp >= &start_ts && timestamp <= &end_ts {
                 let dist = quat.inverse() * quats.get(timestamp).unwrap_or(&identity_quat);
@@ -139,7 +139,7 @@ impl Smoothing {
                 if euler_dist.1.abs() > max_yaw   { max_yaw   = euler_dist.1.abs(); }
             }
         }
-        
+
         const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
         (max_pitch * RAD2DEG, max_yaw * RAD2DEG, max_roll * RAD2DEG)
     }

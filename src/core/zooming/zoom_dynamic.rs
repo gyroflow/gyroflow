@@ -5,7 +5,7 @@ use super::*;
 use std::collections::BTreeMap;
 
 pub struct ZoomDynamic {
-    window: f64, 
+    window: f64,
     fov_estimator: Box<dyn FieldOfViewAlgorithm>,
     compute_params: ComputeParams,
 }
@@ -31,7 +31,7 @@ impl ZoomingAlgorithm for ZoomDynamic {
 
         let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
         fov_values = convolve(&fov_min_pad, &gaussian);
-        
+
         fov_values.iter().copied().zip(center_position.iter().copied()).collect()
     }
 
@@ -41,7 +41,7 @@ impl ZoomingAlgorithm for ZoomDynamic {
 
     fn hash(&self, hasher: &mut dyn Hasher) {
         hasher.write_u64(self.window.to_bits());
-    }   
+    }
 }
 
 impl ZoomDynamic {

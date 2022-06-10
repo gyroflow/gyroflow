@@ -8,10 +8,10 @@ pub struct GoProSuperview { }
 
 impl GoProSuperview {
     pub const ASPECT_SCALE: f32 = 1.33333333;
-    
+
     /// `pt` range: [-0.5, 0.5]
     pub fn from_superview(mut pt: (f64, f64)) -> (f64, f64) {
-        pt.0 *= 1.0 - 0.45 * pt.0.abs(); 
+        pt.0 *= 1.0 - 0.45 * pt.0.abs();
         pt.0 *= 0.168827 * (5.53572 + pt.0.abs());
         pt.1 *= 0.130841 * (7.14285 + pt.1.abs());
 
@@ -35,7 +35,7 @@ impl GoProSuperview {
         pt2.0 -= 0.125; // (3840 - 2880) / 2 / 3840
 
         (
-            (pt2.0 as f32 + 0.5), 
+            (pt2.0 as f32 + 0.5),
             (pt2.1 as f32 + 0.5)
         )
     }
@@ -43,13 +43,13 @@ impl GoProSuperview {
     pub fn opencl_functions() -> &'static str {
         r#"
         float2 from_superview(float2 uv) {
-            uv.x *= 1.0f - 0.45f * fabs(uv.x); 
+            uv.x *= 1.0f - 0.45f * fabs(uv.x);
             uv.x *= 0.168827f * (5.53572f + fabs(uv.x));
             uv.y *= 0.130841f * (7.14285f + fabs(uv.y));
 
             return uv;
         }
-        float2 to_superview(float2 uv) {            
+        float2 to_superview(float2 uv) {
             uv.y = (3.57143f - 0.5f * sqrt(51.0203f + 30.5714f * fabs(uv.y))) * (-uv.y / fmax(0.000001f, fabs(uv.y)));
             uv.x = (2.76785f - 0.5f * sqrt(30.6441f + 23.6928f * fabs(uv.x))) * (-uv.x / fmax(0.000001f, fabs(uv.x)));
             uv.x = (1.11111f - 0.5f * sqrt(4.93827f - 8.88889f * fabs(uv.x))) * ( uv.x / fmax(0.000001f, fabs(uv.x)));
@@ -57,12 +57,12 @@ impl GoProSuperview {
             return uv;
         }"#
     }
-    pub fn wgsl_functions() -> &'static str { 
+    pub fn wgsl_functions() -> &'static str {
         r#"
         fn from_superview(uv: vec2<f32>) -> vec2<f32> {
             var uv = uv;
 
-            uv.x *= 1.0 - 0.45 * abs(uv.x); 
+            uv.x *= 1.0 - 0.45 * abs(uv.x);
             uv.x *= 0.168827 * (5.53572 + abs(uv.x));
             uv.y *= 0.130841 * (7.14285 + abs(uv.y));
 
@@ -70,11 +70,11 @@ impl GoProSuperview {
         }
         fn to_superview(uv: vec2<f32>) -> vec2<f32> {
             var uv = uv;
-            
+
             uv.y = (3.57143 - 0.5 * sqrt(51.0203 + 30.5714 * abs(uv.y))) * (-uv.y / max(0.000001, abs(uv.y)));
             uv.x = (2.76785 - 0.5 * sqrt(30.6441 + 23.6928 * abs(uv.x))) * (-uv.x / max(0.000001, abs(uv.x)));
             uv.x = (1.11111 - 0.5 * sqrt(4.93827 - 8.88889 * abs(uv.x))) * ( uv.x / max(0.000001, abs(uv.x)));
-            
+
             return uv;
         }"#
     }

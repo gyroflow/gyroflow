@@ -15,8 +15,8 @@ cpp! {{
 }}
 
 #[derive(Default, QObject)]
-pub struct UITools { 
-    base: qt_base_class!(trait QObject), 
+pub struct UITools {
+    base: qt_base_class!(trait QObject),
     set_theme: qt_method!(fn(&self, theme: String)),
     set_language: qt_method!(fn(&self, lang_id: QString)),
     get_default_language: qt_method!(fn(&self) -> QString),
@@ -74,7 +74,7 @@ impl UITools {
     pub fn set_theme(&self, theme: String) {
         if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
-        
+
             cpp!(unsafe [] { auto f = QGuiApplication::font(); f.setFamily("Arial"); QGuiApplication::setFont(f); });
             engine.set_property("styleFont".into(), QString::from("Arial").into());
 
@@ -130,7 +130,7 @@ impl UITools {
         });
         if self.main_window_handle.is_none() {
             self.main_window_handle = Some(hwnd);
-            
+
             #[cfg(target_os = "windows")]
             unsafe {
                 let _ = CoInitializeEx(std::ptr::null_mut(), COINIT_MULTITHREADED);
@@ -168,7 +168,7 @@ impl UITools {
             let calib_ctl = self.calibrator_ctl.as_ref().unwrap();
             calib_ctl.borrow().init_calibrator();
             let calib_ctlpinned = unsafe { QObjectPinned::new(calib_ctl) };
-    
+
             if let Some(engine) = self.engine_ptr {
                 let engine = unsafe { &mut *(engine) };
                 engine.set_object_property("calib_controller".into(), calib_ctlpinned);

@@ -18,7 +18,7 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
     #export LD_LIBRARY_PATH="$PROJECT_DIR/ext/6.3.0/macos/lib"
     export MACOSX_DEPLOYMENT_TARGET="10.11"
-    
+
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
     export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx-release/lib
     export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx-release/include/
@@ -199,7 +199,7 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
         done
 
         codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
-    
+
         codesign -vvvv --deep --verify $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
     fi
 

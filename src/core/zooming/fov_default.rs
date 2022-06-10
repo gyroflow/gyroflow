@@ -10,12 +10,12 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterat
 
 pub struct FovDefault {
     compute_params: ComputeParams,
-    input_dim: (f64, f64), 
+    input_dim: (f64, f64),
     output_dim: (f64, f64),
     debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
 
-impl FieldOfViewAlgorithm for FovDefault { 
+impl FieldOfViewAlgorithm for FovDefault {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
         self.debug_points.read().clone()
     }
@@ -38,7 +38,7 @@ impl FieldOfViewAlgorithm for FovDefault {
 
         let mut fov_values: Vec<f64> = crop_center_positions.par_iter()
                                                             .zip(boundary_polygons.into_par_iter())
-                                                            .filter_map(|(&center, polygon)| 
+                                                            .filter_map(|(&center, polygon)|
                                                                 self.find_fov(center, &polygon)
                                                             ).collect();
 
@@ -60,7 +60,7 @@ impl FieldOfViewAlgorithm for FovDefault {
     }
 }
 
-impl FovDefault { 
+impl FovDefault {
     pub fn new(compute_params: ComputeParams) -> Self {
         let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
@@ -112,7 +112,7 @@ impl FovDefault {
         if idx < 1 { return None; }
         let n_p = polygon.len();
         let relevant_p = [
-            polygon[(idx - 1) % n_p], 
+            polygon[(idx - 1) % n_p],
             polygon[idx],
             polygon[(idx + 1) % n_p]
         ];

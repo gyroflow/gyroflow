@@ -25,7 +25,7 @@ Item {
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
-    
+
     property alias dropRect: dropRect;
     property bool isCalibrator: false;
 
@@ -186,7 +186,7 @@ Item {
         repeat: false;
         running: false;
         interval: 100;
-        onTriggered: Qt.callLater(() => controller.update_chart(timeline.getChart())); 
+        onTriggered: Qt.callLater(() => controller.update_chart(timeline.getChart()));
     }
 
     Item {
@@ -223,9 +223,9 @@ Item {
 
                 property bool stabEnabled: true;
                 transform: [
-                    Scale { 
-                        origin.x: vid.width / 2; origin.y: vid.height / 2; 
-                        xScale: vid.stabEnabled? 1 : vid.videoWidth  / Math.max(1, root.outWidth); 
+                    Scale {
+                        origin.x: vid.width / 2; origin.y: vid.height / 2;
+                        xScale: vid.stabEnabled? 1 : vid.videoWidth  / Math.max(1, root.outWidth);
                         yScale: vid.stabEnabled? 1 : vid.videoHeight / Math.max(1, root.outHeight);
                     },
                     Rotation {
@@ -312,7 +312,7 @@ Item {
                 width: vid.width;
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
-                text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera."); 
+                text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
             }
             MouseArea {
                 anchors.fill: parent;

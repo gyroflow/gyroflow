@@ -11,12 +11,12 @@ pub struct ZoomStatic {
 
 impl ZoomingAlgorithm for ZoomStatic {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
-    
+
     fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)> {
         if timestamps.is_empty() {
             return Vec::new();
         }
-        
+
         let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
         if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {

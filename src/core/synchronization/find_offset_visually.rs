@@ -57,7 +57,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEs
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
                     if p1.0 > 0.0 && p1.0 < w as f64 && p1.1 > 0.0 && p1.1 < h as f64 &&
                        p2.0 > 0.0 && p2.0 < w as f64 && p2.1 > 0.0 && p2.1 < h as f64 {
-                        let dist = ((p2.0 - p1.0) * (p2.0 - p1.0)) 
+                        let dist = ((p2.0 - p1.0) * (p2.0 - p1.0))
                                       + ((p2.1 - p1.1) * (p2.1 - p1.1));
                         distances.push(dist as u64);
                     }
@@ -157,7 +157,7 @@ if let Some(curr) = l.get(&frame) {
                 let (w, h) = curr.size;
                 let mut inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, curr.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
                 let mut inp2 = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img_bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
-                
+
                 let k_cv = Mat::from_slice_2d(&[
                     [scaled_k[(0, 0)], scaled_k[(0, 1)], scaled_k[(0, 2)]],
                     [scaled_k[(1, 0)], scaled_k[(1, 1)], scaled_k[(1, 2)]],
@@ -191,7 +191,7 @@ if let Some(curr) = l.get(&frame) {
                         ::opencv::imgproc::line(&mut outp1, Point::new(p1.0 as i32, p1.1 as i32), Point::new(p2.0 as i32, p2.1 as i32), Scalar::new(255.0, 0.0, 0.0, 0.0), 1, ::opencv::imgproc::LINE_8, 0).unwrap();
                     }
                     ::opencv::imgproc::remap(&outp1, &mut outp, &map1, &map2, INTER_LINEAR, BORDER_CONSTANT, Scalar::default()).unwrap();
-                    
+
                     for (&p1, &p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
                         ::opencv::imgproc::line(&mut outp, Point::new(p1.0 as i32, p1.1 as i32), Point::new(p2.0 as i32, p2.1 as i32), Scalar::new(0.0, 0.0, 255.0, 0.0), 1, ::opencv::imgproc::LINE_8, 0).unwrap();
                     }

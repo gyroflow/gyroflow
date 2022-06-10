@@ -79,7 +79,7 @@ impl<'a> VideoTranscoder<'a> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(output_index).unwrap();
         let encoder_codec = encoder_codec.unwrap();
-        
+
         let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(encoder_codec.as_ptr()) };
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
         let mut encoder = context.encoder().video()?;
@@ -130,24 +130,24 @@ impl<'a> VideoTranscoder<'a> {
                 }
             }
         }
-    
+
         let encoder = encoder.open_with(codec_options)?;
         ost.set_parameters(&encoder);
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
-        
+
         if codec_name.contains("hevc") || codec_name.contains("x265") {
             let hvc1_tag: u32 = (b'h' as u32) | ((b'v' as u32) << 8) | ((b'c' as u32) << 16) | ((b'1' as u32) << 24);
             unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = hvc1_tag; }
         }
-        
+
         Ok(context.encoder().video()?)
     }
-    
+
     pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>) -> Result<Status, FFmpegError> {
         let mut status = Status::Continue;
-        
+
         let decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
-        
+
         let mut frame = frame::Video::empty();
         let mut sw_frame = &mut self.buffers.sw_frame;
 
@@ -167,7 +167,7 @@ impl<'a> VideoTranscoder<'a> {
                     let timestamp = Some(ts.rescale((1, 1000000), time_base));
 
                     let mut hw_formats = None;
-                    let input_frame = 
+                    let input_frame =
                         if unsafe { !(*frame.as_mut_ptr()).hw_frames_ctx.is_null() } {
                             hw_formats = Some(unsafe { super::ffmpeg_hw::get_transfer_formats_from_gpu(frame.as_mut_ptr()) });
                             // log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
@@ -198,7 +198,7 @@ impl<'a> VideoTranscoder<'a> {
                         if input_frame.format() == format::Pixel::RGB24 || input_frame.format() == format::Pixel::RGB48 {
                             self.processing_order = ProcessingOrder::PostConversion;
                         }
-                        
+
                         if self.processing_order == ProcessingOrder::PreConversion && self.buffers.output_frame_pre.is_none()  {
                             let mut out_frame = frame::Video::new(input_frame.format(), size.0, size.1);
                             unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), input_frame.as_ptr()) }
@@ -216,7 +216,7 @@ impl<'a> VideoTranscoder<'a> {
                     // Encode output frame
                     if !self.decode_only {
                         let in_format = input_frame.format();
-                        let mut final_frame = if self.processing_order == ProcessingOrder::PreConversion { 
+                        let mut final_frame = if self.processing_order == ProcessingOrder::PreConversion {
                             self.buffers.output_frame_pre.as_mut().unwrap()
                         } else {
                             input_frame
@@ -240,7 +240,7 @@ impl<'a> VideoTranscoder<'a> {
                             if self.encoder_converter.is_none() {
                                 log::debug!("Converting from {:?} to {:?}", final_frame.format(), target_format);
                                 self.buffers.converted_frame = frame::Video::new(target_format, final_frame.width(), final_frame.height());
-                                
+
                                 unsafe { Self::copy_frame_props(self.buffers.converted_frame.as_mut_ptr(), final_frame.as_ptr()) }
                                 let mut conv = software::scaling::Context::get(
                                     final_frame.format(), // input
@@ -286,36 +286,36 @@ impl<'a> VideoTranscoder<'a> {
                                     unsafe { Self::copy_frame_props(out_frame.as_mut_ptr(), final_frame.as_ptr()) }
                                     self.buffers.output_frame_post = Some(out_frame);
                                 }
-    
+
                                 cb(timestamp_us, final_frame, self.buffers.output_frame_post.as_mut(), &mut self.converter)?;
 
                                 final_frame = self.buffers.output_frame_post.as_mut().unwrap();
                             }
                         }
-                            
+
                         if self.encoder.is_none() {
                             let octx = octx.as_deref_mut().ok_or(FFmpegError::NoOutputContext)?;
-                
+
                             log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.hw_device_type, self.encoder_pixel_format);
                             let pixel_format = self.encoder_pixel_format.unwrap_or_else(|| final_frame.format());
                             if !self.codec_supported_formats.contains(&pixel_format) {
                                 return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
                             }
-                
+
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
-                
+
                             let result = Self::init_encoder(final_frame, self.encoder_codec.as_mut(), decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
-                
+
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
                             // drop(stderr_buf);
                             // println!("output: {:?}", output);
-                            
+
                             self.encoder = Some(result?);
-                
+
                             octx.write_header()?;
                             // format::context::output::dump(&octx, 0, Some(&output_path));
-                    
+
                             for (ost_index, _) in octx.streams().enumerate() {
                                 ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
                             }

@@ -139,7 +139,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
     for x in encoders {
         if let Some(mut enc) = encoder::find_by_name(x.0) {
             if !x.1 { return (x.0, x.1, None); } // If not HW encoder
-            
+
             for i in 0..20 {
                 unsafe {
                     let type_ = if !x.0.contains("videotoolbox") {
@@ -173,7 +173,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
 
                             dbg!(&dev.hw_formats);
                             dbg!(&dev.sw_formats);
-                
+
                             ffi::av_hwframe_constraints_free(&mut constraints);
                         }
                         return (x.0, x.1, Some(dev.device_type()));
@@ -275,7 +275,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                     if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_QSV || type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VAAPI {
                         (*frames_ctx).initial_pool_size = 20;
                     }
-                    
+
                     let err = ffi::av_hwframe_ctx_init(frames_ctx_ref);
                     if err < 0 {
                         super::append_log(&format!("Failed to initialize frame context. Error code: {}\n", err));

@@ -119,7 +119,7 @@ MenuItem {
         const output = obj.output || { };
         if (output && Object.keys(output).length > 0) {
             if (output.output_path) window.outputFile = output.output_path;
-            
+
             if (output.codec)         setComboValue(codec,        output.codec);
             if (output.codec_options) setComboValue(codecOptions, output.codec_options);
 
@@ -183,7 +183,7 @@ MenuItem {
             NumberField {
                 id: outputWidth;
                 tooltip: qsTr("Width");
-                anchors.verticalCenter: parent.verticalCenter;               
+                anchors.verticalCenter: parent.verticalCenter;
                 anchors.left: parent.left;
                 width: (sizeMenuBtn.x - outputHeight.anchors.rightMargin - x - lockAspectRatio.width) / 2 - lockAspectRatio.anchors.leftMargin;
                // width: 60 * dpiScale;
@@ -208,7 +208,7 @@ MenuItem {
                 bottomPadding: 4 * dpiScale;
                 leftPadding: 3 * dpiScale;
                 rightPadding: -3 * dpiScale;
-                anchors.verticalCenter: parent.verticalCenter;                
+                anchors.verticalCenter: parent.verticalCenter;
                 anchors.left: outputWidth.right;
                 anchors.leftMargin: 5 * dpiScale;
                 onClicked: checked = !checked;

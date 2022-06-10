@@ -25,7 +25,7 @@ pub struct ItemOpenCVDis {
 impl EstimatorItemInterface for ItemOpenCVDis {
     fn get_features(&self) -> &Vec<(f64, f64)> { &self.features }
     fn rescale(&mut self, _ratio: f32) { }
-    
+
     fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
@@ -43,15 +43,15 @@ impl EstimatorItemInterface for ItemOpenCVDis {
 
             let mut mask = Mat::default();
             let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 1000, &mut mask)?;
-        
+
             let mut r1 = Mat::default();
             let mut t = Mat::default();
-            
+
             let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
             if inliers < 20 {
                 return Err(opencv::Error::new(0, "Model not found".to_string()));
             }
-            
+
             cv_to_rot2(r1)
         }();
 
@@ -63,7 +63,7 @@ impl EstimatorItemInterface for ItemOpenCVDis {
             }
         }
     }
-    
+
     fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair {
         self.get_matched_features(to)
     }
@@ -83,7 +83,7 @@ impl ItemOpenCVDis {
             img
         }
     }
-    
+
     fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
         if let EstimatorItem::ItemOpenCVDis(next) = next {
             let (w, h) = self.size;
@@ -96,7 +96,7 @@ impl ItemOpenCVDis {
             let result = || -> Result<(Vec<(f64, f64)>, Vec<(f64, f64)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
                 let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-                
+
                 let mut of = Mat::default();
                 let mut optflow = <dyn opencv::video::DISOpticalFlow>::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
                 optflow.calc(&a1_img, &a2_img, &mut of)?;

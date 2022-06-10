@@ -8,11 +8,11 @@ use crate::gyro_source::TimeQuat;
 
 pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference
-    
+
     let x_axis = nalgebra::Vector3::<f64>::x_axis();
     let y_axis = nalgebra::Vector3::<f64>::y_axis();
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
-  
+
     let test_vec = q * nalgebra::Vector3::<f64>::z_axis();
     let pitch    = (-test_vec.z).asin();
     let yaw      = test_vec.y.simd_atan2(test_vec.x);
@@ -22,7 +22,7 @@ pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> Unit
     let rot_roll  = UnitQuaternion::from_axis_angle(&z_axis, roll_correction);
 
     let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2) * UnitQuaternion::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2);
-     
+
     initial_quat * rot_yaw * rot_pitch * rot_roll
 }
 

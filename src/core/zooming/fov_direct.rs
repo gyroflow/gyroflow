@@ -20,13 +20,13 @@ Direct FOV calculation:
 */
 
 pub struct FovDirect {
-    input_dim: (f64, f64), 
+    input_dim: (f64, f64),
     output_dim: (f64, f64),
     output_inv_aspect: f64,
     compute_params: ComputeParams,
     debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
-impl FieldOfViewAlgorithm for FovDirect { 
+impl FieldOfViewAlgorithm for FovDirect {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
         self.debug_points.read().clone()
     }
@@ -77,7 +77,7 @@ impl FieldOfViewAlgorithm for FovDirect {
     }
 }
 
-impl FovDirect { 
+impl FovDirect {
     pub fn new(compute_params: ComputeParams) -> Self {
         let ratio = compute_params.video_width as f64 / compute_params.video_output_width.max(1) as f64;
         let input_dim = (compute_params.video_width as f64, compute_params.video_height as f64);
@@ -116,8 +116,8 @@ impl FovDirect {
         let min_intersection: (f64, f64) = intersections_up
             .iter()
             .chain(&intersections_down)
-            .fold(nearest_point, |mp, &point| { 
-                if point.0.abs() < mp.0.abs() { point } else { mp } 
+            .fold(nearest_point, |mp, &point| {
+                if point.0.abs() < mp.0.abs() { point } else { mp }
             });
         nearest_point = (min_intersection.0.abs(), min_intersection.1.abs());
 
@@ -130,10 +130,10 @@ fn points_around_rect(mut w: f64, mut h: f64, w_div: usize, h_div: usize) -> Vec
     let margin = 2.0;
     w -= margin * 2.0;
     h -= margin * 2.0;
-    
+
     let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
     let (wstep, hstep) = (w / wcnt as f64, h / hcnt as f64);
-    
+
     // ordered!
     let mut distorted_points: Vec<(f64, f64)> = Vec::with_capacity((wcnt + hcnt) * 2);
     for i in 0..wcnt { distorted_points.push((i as f64 * wstep,          0.0)); }
@@ -154,13 +154,13 @@ fn points_around_rect(mut w: f64, mut h: f64, w_div: usize, h_div: usize) -> Vec
 // Returns None, when they don't intersect
 fn line_intersection(p0: &(f64,f64), rise: f64, p2: &(f64,f64), p3: &(f64,f64)) -> Option<(f64,f64)> {
 	let s32 = (p3.0 - p2.0, p3.1 - p2.1);
-	
+
 	let denom = s32.0 * rise - s32.1;
 	if denom == 0.0 { return None; }
-	
+
 	let s20 = (p2.0 - p0.0, p2.1 - p0.1);
 	let numer = s20.1 - rise * s20.0;
-	
+
 	let t = numer / denom;
 	if t < 0.0 || t > 1.0 {
         None

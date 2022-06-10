@@ -48,7 +48,7 @@ impl WgpuWrapper {
         let name = info.name.clone();
 
         *ADAPTER.write() = Some(adapter);
-        
+
         Some(name)
     }
 

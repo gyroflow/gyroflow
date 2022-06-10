@@ -152,7 +152,7 @@ MenuItem {
             }
         }
     }
-    
+
     InfoMessageSmall {
         id: officialInfo;
         type: InfoMessage.Warning;
@@ -163,7 +163,7 @@ MenuItem {
               qsTr("Rate this profile: [Good] | [Bad]")
               .replace(/\[(.*?)\]/, "<a href=\"#good\">$1</a>")
               .replace(/\[(.*?)\]/, "<a href=\"#bad\">$1</a>") : (thankYou? "<br>" + qsTr("Thank you for rating this profile.") : ""));
-    
+
         MouseArea {
             anchors.fill: parent;
             cursorShape: parent.t.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
@@ -191,8 +191,8 @@ MenuItem {
         show: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight);
         property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(5);
         property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(5);
-        text: lensRatio != videoRatio? qsTr("Lens profile aspect ratio doesn't match the file aspect ratio. The result will not look correct.") : 
-                                       qsTr("Lens profile dimensions don't match the file dimensions. The result may not look correct."); 
+        text: lensRatio != videoRatio? qsTr("Lens profile aspect ratio doesn't match the file aspect ratio. The result will not look correct.") :
+                                       qsTr("Lens profile dimensions don't match the file dimensions. The result may not look correct.");
     }
 
     TableList {
@@ -269,7 +269,7 @@ MenuItem {
                     spacing: 4 * dpiScale;
                     width: parent.width;
                     SmallNumberField { id: k3; param: "k3"; precision: 16; }
-                    SmallNumberField { id: k4; param: "k4"; precision: 16; } 
+                    SmallNumberField { id: k4; param: "k4"; precision: 16; }
                 }
             }
         }

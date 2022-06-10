@@ -49,7 +49,7 @@ pub trait FieldOfViewAlgorithm {
 pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
     compute_params.fov_scale = 1.0;
     compute_params.fovs.clear();
-    
+
     // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
     // Then we can use real `output_dim` to fit the fov
     compute_params.width = compute_params.video_width;
@@ -85,7 +85,7 @@ pub fn get_checksum(zoom: &Box<dyn ZoomingAlgorithm>) -> u64 {
         hasher.write_u64(compute_params.distortion_coeffs[2].to_bits());
         hasher.write_u64(compute_params.distortion_coeffs[3].to_bits());
     }
-    
+
     hasher.write_usize(compute_params.video_width);
     hasher.write_usize(compute_params.video_height);
     hasher.write_usize(compute_params.video_output_width);
@@ -97,5 +97,5 @@ pub fn get_checksum(zoom: &Box<dyn ZoomingAlgorithm>) -> u64 {
 
     zoom.hash(&mut hasher);
 
-    hasher.finish() 
+    hasher.finish()
 }

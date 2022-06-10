@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 use nalgebra::Vector4;
 
-#[derive(Clone, Copy)] 
+#[derive(Clone, Copy)]
 pub enum BackgroundMode {
     SolidColor = 0,
     RepeatPixels = 1,
@@ -58,7 +58,7 @@ pub struct StabilizationParams {
 
     pub framebuffer_inverted: bool,
     pub is_calibrator: bool,
-    
+
     pub stab_enabled: bool,
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
@@ -76,8 +76,8 @@ impl Default for StabilizationParams {
             stab_enabled: true,
             show_detected_features: true,
             show_optical_flow: true,
-            frame_readout_time: 0.0, 
-            adaptive_zoom_window: 0.0, 
+            frame_readout_time: 0.0,
+            adaptive_zoom_window: 0.0,
             adaptive_zoom_center_offset: (0.0, 0.0),
 
             size: (0, 0),
@@ -91,7 +91,7 @@ impl Default for StabilizationParams {
             background_mode: BackgroundMode::SolidColor,
             background_margin: 0.0,
             background_margin_feather: 0.0,
-            
+
             framebuffer_inverted: false,
             is_calibrator: false,
 
@@ -99,9 +99,9 @@ impl Default for StabilizationParams {
             trim_end: 1.0,
 
             zooming_debug_points: BTreeMap::new(),
-        
+
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
-    
+
             sync_method: 1,
 
             fps: 0.0,
@@ -140,16 +140,16 @@ impl StabilizationParams {
 
     pub fn clear(&mut self) {
         *self = StabilizationParams {
-            stab_enabled:              self.stab_enabled, 
-            show_detected_features:    self.show_detected_features, 
-            show_optical_flow:         self.show_optical_flow, 
-            background:                self.background, 
-            adaptive_zoom_window:      self.adaptive_zoom_window, 
-            framebuffer_inverted:      self.framebuffer_inverted, 
-            lens_correction_amount:    self.lens_correction_amount, 
-            background_mode:           self.background_mode, 
-            background_margin:         self.background_margin, 
-            background_margin_feather: self.background_margin_feather, 
+            stab_enabled:              self.stab_enabled,
+            show_detected_features:    self.show_detected_features,
+            show_optical_flow:         self.show_optical_flow,
+            background:                self.background,
+            adaptive_zoom_window:      self.adaptive_zoom_window,
+            framebuffer_inverted:      self.framebuffer_inverted,
+            lens_correction_amount:    self.lens_correction_amount,
+            background_mode:           self.background_mode,
+            background_margin:         self.background_margin,
+            background_margin_feather: self.background_margin_feather,
             sync_method:               self.sync_method,
             ..Default::default()
         };

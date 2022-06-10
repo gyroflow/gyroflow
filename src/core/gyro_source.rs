@@ -64,7 +64,7 @@ pub struct GyroSource {
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
     pub smoothing_status: serde_json::Value,
-    
+
     offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
@@ -86,11 +86,11 @@ impl GyroSource {
     pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
-    
+
         let input = Input::from_stream(&mut stream, filesize, &path, progress_cb, cancel_flag)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
-    
+
         let mut detected_source = input.camera_type();
         if let Some(m) = input.camera_model() { detected_source.push(' '); detected_source.push_str(m); }
 
@@ -111,7 +111,7 @@ impl GyroSource {
                         if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<TimeQuaternion<f64>>> {
                             for v in arr {
                                 quats.insert((v.t * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(
-                                    v.v.w, 
+                                    v.v.w,
                                     Vector3::new(v.v.x, v.v.y, v.v.z)
                                 )));
                             }
@@ -220,7 +220,7 @@ impl GyroSource {
         }
 
         self.gravity_vectors = telemetry.gravity_vectors.clone();
-        
+
         if let Some(imu) = &telemetry.raw_imu {
             self.org_raw_imu = imu.clone();
             self.apply_transforms();
@@ -230,8 +230,8 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
-            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") { 
-                    QuaternionConverter::convert(&self.org_quaternions, &self.raw_imu, self.duration_ms) 
+            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") {
+                    QuaternionConverter::convert(&self.org_quaternions, &self.raw_imu, self.duration_ms)
                 } else {
                     self.org_quaternions.clone()
                 },
@@ -303,8 +303,8 @@ impl GyroSource {
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
             self.imu_rotation = Some(Rotation3::from_euler_angles(
-                yaw_deg * DEG2RAD, 
-                pitch_deg * DEG2RAD, 
+                yaw_deg * DEG2RAD,
+                pitch_deg * DEG2RAD,
                 roll_deg * DEG2RAD
             ))
         } else {
@@ -329,8 +329,8 @@ impl GyroSource {
             for x in &mut self.raw_imu {
                 if let Some(g) = x.gyro.as_mut() {
                     *g = [
-                        g[0] + bias[0], 
-                        g[1] + bias[1], 
+                        g[0] + bias[0],
+                        g[1] + bias[1],
                         g[2] + bias[2]
                     ];
                 }
@@ -342,7 +342,7 @@ impl GyroSource {
                     match o as char {
                         'X' => inp[0], 'x' => -inp[0],
                         'Y' => inp[1], 'y' => -inp[1],
-                        'Z' => inp[2], 'z' => -inp[2], 
+                        'Z' => inp[2], 'z' => -inp[2],
                         err => { panic!("Invalid orientation {}", err); }
                     }
                 };
@@ -362,9 +362,9 @@ impl GyroSource {
                 [rotated[0], rotated[1], rotated[2]]
             };
             for x in &mut self.raw_imu {
-                if let Some(g) = x.gyro.as_mut() { *g = rotate(g); } 
-                if let Some(a) = x.accl.as_mut() { *a = rotate(a); } 
-                if let Some(m) = x.magn.as_mut() { *m = rotate(m); } 
+                if let Some(g) = x.gyro.as_mut() { *g = rotate(g); }
+                if let Some(a) = x.accl.as_mut() { *a = rotate(a); }
+                if let Some(m) = x.magn.as_mut() { *m = rotate(m); }
             }
         }
 
@@ -375,7 +375,7 @@ impl GyroSource {
         if quats.len() < 2 || self.duration_ms <= 0.0 { return Quat64::identity(); }
 
         timestamp_ms -= self.offset_at_video_timestamp(timestamp_ms);
-    
+
         if let Some(&first_ts) = quats.keys().next() {
             if let Some(&last_ts) = quats.keys().next_back() {
                 let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
@@ -394,10 +394,10 @@ impl GyroSource {
         }
         Quat64::identity()
     }
-    
+
     pub fn      org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.quaternions,          timestamp_ms) }
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
-    
+
     fn offset_at_timestamp(&self, offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
         match offsets.len() {
             0 => 0.0,
@@ -405,7 +405,7 @@ impl GyroSource {
             _ => {
                 if let Some(&first_ts) = offsets.keys().next() {
                     if let Some(&last_ts) = offsets.keys().next_back() {
-                        let timestamp_us = (timestamp_ms * 1000.0) as i64; 
+                        let timestamp_us = (timestamp_ms * 1000.0) as i64;
                         let lookup_ts = (timestamp_us).min(last_ts-1).max(first_ts+1);
                         if let Some(offs1) = offsets.range(..=lookup_ts).next_back() {
                             if *offs1.0 == lookup_ts {
@@ -432,7 +432,7 @@ impl GyroSource {
             duration_ms:          self.duration_ms,
             fps:                  self.fps,
             quaternions:          self.quaternions.clone(),
-            smoothed_quaternions: self.smoothed_quaternions.clone(),            
+            smoothed_quaternions: self.smoothed_quaternions.clone(),
             offsets:              self.offsets.clone(),
             offsets_adjusted:     self.offsets_adjusted.clone(),
             gravity_vectors:      self.gravity_vectors.clone(),
@@ -460,7 +460,7 @@ impl GyroSource {
         for b in bias_vals.iter_mut() {
             *b /= n.max(1) as f64;
         }
-        
+
         (bias_vals[0], bias_vals[1], bias_vals[2])
     }
 }

@@ -50,7 +50,7 @@ impl<'a> Converter {
             convert_from.run(frame, sw_frame_converted)?;
 
             cb(sw_frame_converted, sw_frame_converted_out);
-            
+
             convert_to.run(sw_frame_converted_out, out_frame)?;
         } else {
             cb(frame, out_frame);

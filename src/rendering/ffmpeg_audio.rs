@@ -66,19 +66,19 @@ impl AudioTranscoder {
 
     pub fn receive_and_process_decoded_frames(&mut self, octx: &mut Output, ost_time_base: Rational, start_ms: Option<f64>) -> Result<(), Error> {
         let mut frame = frame::Audio::empty();
-        
+
         while self.decoder.receive_frame(&mut frame).is_ok() {
-            
+
             if let Some(mut ts) = frame.timestamp() {
                 let timestamp_us = ts.rescale(self.decoder.time_base(), (1, 1000000));
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
-                
+
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
                     if self.first_frame_ts.is_none() {
                         self.first_frame_ts = frame.timestamp();
                     }
                     ts -= self.first_frame_ts.unwrap();
-                    
+
                     frame.set_pts(Some(ts));
 
                     self.resampler.new_frame(&mut frame)?;

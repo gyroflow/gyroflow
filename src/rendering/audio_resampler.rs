@@ -58,7 +58,7 @@ impl AudioResampler {
             let bytes_per_sample = self.resampler.output().format.bytes();
             let dest_byte_offset = self.buffer_frame_offset * bytes_per_sample;
             let src_byte_offset = self.src_frame_offset * bytes_per_sample;
-            
+
             let channels = self.resampler.output().channel_layout.channels().max(1) as usize;
             if self.resampler.output().format.is_planar() {
                 for c in 0..channels {
@@ -82,7 +82,7 @@ impl AudioResampler {
 
             self.src_frame_offset += copy_samples;
             self.buffer_frame_offset += copy_samples;
-            
+
             if self.buffer_frame_offset >= self.chunk_size {
                 self.buffer_frame.set_samples(self.chunk_size);
                 self.buffer_frame_offset = 0;

@@ -26,7 +26,7 @@ MenuItem {
         property alias showFeatures: showFeatures.checked;
         property alias showOF: showOF.checked;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
-        //property alias everyNthFrame: everyNthFrame.value; 
+        //property alias everyNthFrame: everyNthFrame.value;
     }
 
     property alias timePerSyncpoint: timePerSyncpoint.value;
@@ -74,7 +74,7 @@ MenuItem {
         property bool usesQuats: window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && window.motionData.filename == window.vidInfo.filename;
         show: usesQuats && controller.offsets_model.rowCount() > 0;
         text: qsTr("This file uses synced motion data, additional sync points are not needed and can make the output look worse.");
-        onUsesQuatsChanged: sync.opened = !usesQuats; 
+        onUsesQuatsChanged: sync.opened = !usesQuats;
     }
 
     Label {
@@ -157,7 +157,7 @@ MenuItem {
         }
         InfoMessageSmall {
             show: syncMethod.currentValue == "AKAZE";
-            text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results"); 
+            text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results");
         }
         Label {
             position: Label.Left;

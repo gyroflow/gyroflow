@@ -70,7 +70,7 @@ MenuItem {
 
         root.fps = framerate;
         root.org_fps = framerate;
-        
+
         controller.set_video_rotation(root.videoRotation)
 
         Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
@@ -130,7 +130,7 @@ MenuItem {
             "Rotation": {
                 "unit": "°",
                 "from": -360,
-                "to": 360, 
+                "to": 360,
                 "value": function() { return root.videoRotation; },
                 "onChange": function(value) {
                     root.videoRotation = value;
@@ -154,7 +154,7 @@ MenuItem {
                     const chart = window.videoArea.timeline.getChart();
                     chart.setDurationMs(controller.get_scaled_duration_ms());
                     window.videoArea.durationMs = controller.get_scaled_duration_ms();
-                    Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart())); 
+                    Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart()));
                 }
             }
         });

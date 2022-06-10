@@ -72,7 +72,7 @@ pub struct FrameResult {
     pub rotation: Option<Rotation3<f64>>,
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>,
-    
+
     optical_flow: RefCell<BTreeMap<usize, OpticalFlowPairWithTs>>
 }
 unsafe impl Send for FrameResult {}
@@ -150,7 +150,7 @@ impl PoseEstimator {
                 }
             }
         }
-        
+
         let results = self.sync_results.clone();
         frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
             let l = results.read();
@@ -164,7 +164,7 @@ impl PoseEstimator {
                         drop(l);
 
                         if let Some(rot) = curr.estimate_pose(&next, params) {
-                            let mut l = results.write(); 
+                            let mut l = results.write();
                             if let Some(x) = l.get_mut(ts) {
                                 x.rotation = Some(rot);
                                 x.quat = Some(Quat64::from(rot));
@@ -220,7 +220,7 @@ impl PoseEstimator {
                             if from_fr.frame_no + d == to_item.frame_no {
                                 let of = from_fr.item.optical_flow_to(&to_item.item);
                                 if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
-                                    from_of.insert(d, 
+                                    from_of.insert(d,
                                         of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
                                     );
                                 }
@@ -281,7 +281,7 @@ impl PoseEstimator {
 
     pub fn recalculate_gyro_data(&self, fps: f64, final_pass: bool) {
         let lpf = self.lpf.load(SeqCst) as f64 / 100.0;
-        
+
         let mut gyro = BTreeMap::new();
         let mut quats = TimeQuat::new();
         let mut update_eulers = BTreeMap::<i64, Option<(f64, f64, f64)>>::new();
@@ -320,7 +320,7 @@ impl PoseEstimator {
 
                 if let Some(e) = eul {
                     // Analyzed motion in reality happened during the transition from this frame to the next frame
-                    // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames 
+                    // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames
                     // TODO: figure out if rolling shutter time can be used to make better calculation here
                     let mut ts = *k as f64 / 1000.0;
                     if let Some(next_ts) = iter.peek().map(|(&k, _)| k as f64 / 1000.0) {

@@ -53,7 +53,7 @@ pub fn set_gpu_type_from_name(name: &str) {
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
     if codec.contains("EXR") || codec.contains("exr") { return vec![("exr", false)]; }
-    
+
     let mut encoders = if use_gpu {
         match codec {
             "x264" => vec![
@@ -259,7 +259,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     let progress2 = progress.clone();
     let mut process_frame = 0;
-    
+
     proc.on_encoder_initialized(|enc: &ffmpeg_next::encoder::video::Video| {
         encoder_initialized(enc.codec().map(|x| x.name().to_string()).unwrap_or_default());
         Ok(())
@@ -407,7 +407,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
             Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
             Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE |
             Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE |
-            Pixel::AYUV64LE | 
+            Pixel::AYUV64LE |
             Pixel::RGB24 | Pixel::RGBA | Pixel::RGB48BE | Pixel::RGBA64BE => {
                 undistort_frame(input_frame, output_frame)
             },
@@ -417,10 +417,10 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                 })?;
             }
         }
-        
+
         process_frame += 1;
         // log::debug!("process_frame: {}, timestamp_us: {}", process_frame, timestamp_us);
-        
+
         Ok(())
     });
 
@@ -463,13 +463,13 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
     if level <= ffi::av_log_get_level() {
         let mut line = vec![0u8; 2048];
         let mut prefix: i32 = *LAST_PREFIX.read();
-        
+
         ffi::av_log_default_callback(avcl, level, fmt, vl);
         #[cfg(target_os = "android")]
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut u8, line.len() as i32, &mut prefix);
         #[cfg(not(target_os = "android"))]
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
-        if written > 0 { 
+        if written > 0 {
             line.resize(written as usize, 0u8);
         }
 
@@ -548,7 +548,7 @@ pub fn test() {
             output_width: video_size.0,
             output_height: video_size.1,
             bitrate: 100.0,
-            use_gpu: true, 
+            use_gpu: true,
             audio: true,
             pixel_format: "".into(),
         },
@@ -572,7 +572,7 @@ pub fn test_decode() {
         let mut bytes = small_frame.data_mut(0);
         let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
         opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());*/
-        
+
     });
     let _ = proc.start_decoder_only(vec![
         (100, 2000),

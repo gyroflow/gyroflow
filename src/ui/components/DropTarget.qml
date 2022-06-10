@@ -12,8 +12,8 @@ Rectangle {
     opacity: da.containsDrag? 0.8 : 0.0;
     Ease on opacity { duration: 300; }
 
-    signal loadFile(string path); 
-    signal loadFiles(var urls); 
+    signal loadFile(string path);
+    signal loadFiles(var urls);
 
     BasicText {
         id: dropText;

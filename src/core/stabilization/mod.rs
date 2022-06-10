@@ -22,7 +22,7 @@ pub use cpu_undistort::{ undistort_points, undistort_points_with_params, undisto
 #[derive(Clone, Copy)]
 pub enum Interpolation {
     Bilinear = 2,
-    Bicubic = 4, 
+    Bicubic = 4,
     Lanczos4 = 8
 }
 impl Default for Interpolation {
@@ -213,20 +213,20 @@ impl<T: PixelType> Stabilization<T> {
                     return true;
                 }
             }
-    
+
             // wgpu path
             if let Some(ref mut wgpu) = self.wgpu {
                 wgpu.undistort_image(pixels, out_pixels, &itm);
                 return true;
             }
-    
+
             // CPU path
             match self.interpolation {
                 Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
                 Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
                 Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
             }
-    
+
             return true;
         }
         false

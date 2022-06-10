@@ -75,7 +75,7 @@ impl SmoothingAlgorithm for Fixed {
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();
         let z_axis = nalgebra::Vector3::<f64>::z_axis();
-        
+
         let rot_x = Rotation3::from_axis_angle(&x_axis, self.pitch * DEG2RAD);
         let rot_y = Rotation3::from_axis_angle(&y_axis, (self.roll + 90.0) * DEG2RAD);
         let rot_z = Rotation3::from_axis_angle(&z_axis, self.yaw * DEG2RAD);

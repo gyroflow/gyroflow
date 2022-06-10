@@ -22,7 +22,7 @@ impl FrameTransform {
     }
     fn get_new_k(params: &ComputeParams, fov: f64) -> Matrix3<f64> {
         let img_dim_ratio = Self::get_ratio(params);
-        
+
         let out_dim = (params.output_width as f64, params.output_height as f64);
         //let focal_center = (params.video_width as f64 / 2.0, params.video_height as f64 / 2.0);
 
@@ -54,10 +54,10 @@ impl FrameTransform {
                 ui_fov /= params.lens_fov_adjustment;
             }
         }
-    
+
         let scaled_k = params.camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, fov);
-        
+
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, true);
 
@@ -90,15 +90,15 @@ impl FrameTransform {
                 r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
                 r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             }
-            
+
             let i_r = (new_k * r).pseudo_inverse(0.000001);
             if let Err(err) = i_r {
                 log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
             }
             let i_r: Matrix3<f32> = nalgebra::convert(i_r.unwrap_or_default());
             [
-                i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)], 
-                i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)], 
+                i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)],
+                i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)],
                 i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
             ]
         }).collect::<Vec<[f32; 9]>>();
@@ -107,8 +107,8 @@ impl FrameTransform {
             matrix_count:  matrices.len() as i32,
             f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
-            k:             [params.distortion_coeffs[0] as f32, params.distortion_coeffs[1] as f32, params.distortion_coeffs[2] as f32, params.distortion_coeffs[3] as f32], 
-            fov:           fov as f32, 
+            k:             [params.distortion_coeffs[0] as f32, params.distortion_coeffs[1] as f32, params.distortion_coeffs[2] as f32, params.distortion_coeffs[3] as f32],
+            fov:           fov as f32,
             r_limit:       params.radial_distortion_limit as f32,
             lens_correction_amount:   params.lens_correction_amount as f32,
             input_vertical_stretch:   params.input_vertical_stretch as f32,
@@ -162,7 +162,7 @@ impl FrameTransform {
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
             r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
-            
+
             new_k * r
         }).collect();
 

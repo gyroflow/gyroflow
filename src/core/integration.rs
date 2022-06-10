@@ -21,12 +21,12 @@ pub struct ComplementaryIntegrator { }
 
 
 impl QuaternionConverter {
-    pub fn convert(org_quaternions: &TimeQuat, imu_data: &[TimeIMU], _duration_ms: f64) -> TimeQuat {        
+    pub fn convert(org_quaternions: &TimeQuat, imu_data: &[TimeIMU], _duration_ms: f64) -> TimeQuat {
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();
         let z_axis = nalgebra::Vector3::<f64>::z_axis();
 
-        let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2) 
+        let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2)
                          * UnitQuaternion::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2);
 
         let pitch_offset = if imu_data.is_empty() {
@@ -58,7 +58,7 @@ impl GyroIntegrator for MadgwickIntegrator {
         let mut quats = BTreeMap::new();
         let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
-    
+
         let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.02, init_pos);
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
@@ -102,7 +102,7 @@ impl GyroIntegrator for MahonyIntegrator {
         let mut quats = BTreeMap::new();
         let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
-    
+
         let mut ahrs = Mahony::new_with_quat(sample_time_s, 0.5, 0.0, init_pos);
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
@@ -167,7 +167,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
                     // no idea how it fully works, but it does
                     let mut ha = omega * dt * 0.5;
                     let l = ha.dot(&ha).sqrt();
-            
+
                     if l > 1.0e-12 {
                         ha *= l.sin() / l;
                         Quaternion::from_parts(l.cos(), ha).normalize()
@@ -208,25 +208,25 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let mut f = ComplementaryFilter::default();
         let init_pos_q = init_pos.quaternion();
         f.set_orientation(init_pos_q.scalar(), init_pos_q.vector()[0], init_pos_q.vector()[1], init_pos_q.vector()[2]);
-        
+
         const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
- 
+
                 if let Some(acc) = Vector3::new(-a[1], a[0], a[2]).try_normalize(0.0) {
                     if let Some(m) = v.magn.as_ref() {
                         if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
                             f.update_mag(acc[0], acc[1], acc[2],
-                                -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD, 
+                                -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
                                 magn[0], magn[1], magn[2],
                                 (v.timestamp_ms - prev_time) / 1000.0);
                         }
                     } else {
                         f.update(acc[0], acc[1], acc[2],
-                            -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD, 
+                            -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
                             (v.timestamp_ms - prev_time) / 1000.0);
                     }
                     let x = f.get_orientation();

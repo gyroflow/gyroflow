@@ -52,7 +52,7 @@ pub struct LensProfile {
     pub calib_params: CameraParams,
 
     pub identifier: String,
-    
+
     pub calibrator_version: String,
     pub date: String,
 
@@ -87,7 +87,7 @@ impl LensProfile {
         if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
             return Err(serde_json::Error::io(std::io::ErrorKind::InvalidData.into()));
         }
-        
+
         Ok(())
     }
 
@@ -95,7 +95,7 @@ impl LensProfile {
     pub fn set_from_calibrator(&mut self, cal: &LensCalibrator) {
         if self.input_horizontal_stretch <= 0.01 { self.input_horizontal_stretch = 1.0; }
         if self.input_vertical_stretch   <= 0.01 { self.input_vertical_stretch   = 1.0; }
-        
+
         self.use_opencv_fisheye = true;
         self.calib_dimension = Dimensions { w: cal.width, h: cal.height };
         self.orig_dimension  = Dimensions { w: cal.width, h: cal.height };
@@ -137,9 +137,9 @@ impl LensProfile {
         }
 
         let ratios = [
-            (1.0, "1:1"), 
-            (3.0/2.0, "3:2"), (2.0/3.0, "2:3"), 
-            (4.0/3.0, "4:3"), (3.0/4.0, "3:4"), 
+            (1.0, "1:1"),
+            (3.0/2.0, "3:2"), (2.0/3.0, "2:3"),
+            (4.0/3.0, "4:3"), (3.0/4.0, "3:4"),
             (16.0/9.0, "16:9"), (9.0/16.0, "9:16")
         ];
         let ratio = self.calib_dimension.w as f64 / self.calib_dimension.h as f64;
@@ -154,7 +154,7 @@ impl LensProfile {
 
         let ratio1 = self.calib_dimension.w / gcd;
         let ratio2 = self.calib_dimension.h / gcd;
-        
+
         if ratio1 >= 20 || ratio2 >= 20 {
             format!("{:.2}:1", ratio)
         } else {
@@ -187,8 +187,8 @@ impl LensProfile {
     fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mut mat = nalgebra::Matrix3::from_rows(&[
-                self.fisheye_params.camera_matrix[0].into(), 
-                self.fisheye_params.camera_matrix[1].into(), 
+                self.fisheye_params.camera_matrix[0].into(),
+                self.fisheye_params.camera_matrix[1].into(),
                 self.fisheye_params.camera_matrix[2].into()
             ]);
             mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
@@ -205,7 +205,7 @@ impl LensProfile {
             if self.optimal_fov.is_none() && self.num_images > 3 {
                 self.optimal_fov = Some(self.calculate_optimal_fov(video_size));
             }
-            
+
             mat
         } else {
             // Default camera matrix
@@ -296,7 +296,7 @@ impl LensProfile {
                 }
             }
         }
-            
+
         let include_size = all_sizes.len() <= 1;
         let include_fps = all_fps.len() <= 1 || (all_fps.len() == 2 && all_fps.into_iter().next().unwrap() >= 200_0000);
 

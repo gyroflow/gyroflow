@@ -21,7 +21,7 @@ void init_live_reload(QQmlApplicationEngine *engine, const QString &path) {
     }
 
     QUrl mainPath = QUrl::fromLocalFile(path + "/App.qml");
-    
+
     QObject::connect(w, &QFileSystemWatcher::fileChanged, [=](const QString &file) {
         QTimer::singleShot(50, [=] {
             static QQuickItem *previousItem = nullptr;
@@ -37,7 +37,7 @@ void init_live_reload(QQmlApplicationEngine *engine, const QString &path) {
                     delete itm;
                 }
             }
-            
+
             if (previousItem) {
                 auto toDelete = previousItem;
                 QTimer::singleShot(5000, [=] {

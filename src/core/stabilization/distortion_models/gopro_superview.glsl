@@ -2,7 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 vec2 from_superview(vec2 uv) {
-    uv.x *= 1.0 - 0.45 * abs(uv.x); 
+    uv.x *= 1.0 - 0.45 * abs(uv.x);
     uv.x *= 0.168827 * (5.53572 + abs(uv.x));
     uv.y *= 0.130841 * (7.14285 + abs(uv.y));
 

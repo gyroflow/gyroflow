@@ -28,7 +28,7 @@ pub fn decompress_from_base91(base91: &str) -> Option<Vec<u8>> {
 
     let compressed = base91::slice_decode(base91.as_bytes());
     let mut e = flate2::read::ZlibDecoder::new(&compressed[..]);
-    
+
     let mut decompressed = Vec::new();
     e.read_to_end(&mut decompressed).ok()?;
     Some(decompressed)
@@ -50,7 +50,7 @@ impl<V> MapClosest<V> for BTreeMap<i64, V> {
 
         let r1 = self.range(..key);
         let mut r2 = self.range(key..);
-        
+
         let f = r1.last();
         let b = r2.next();
         let bd = (key - b.map(|v| *v.0).unwrap_or(-99999)).abs();
@@ -78,9 +78,9 @@ pub fn rename_calib_videos() {
                 let (w, h, fps) = util::get_video_metadata(&f_name).unwrap();
                 let mut stream = File::open(&f_name).unwrap();
                 let filesize = stream.metadata().unwrap().len() as usize;
-            
+
                 let input = Input::from_stream(&mut stream, filesize, &f_name).unwrap();
-        
+
                 let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, w as usize, h as usize, fps);
                 if let Ok(id) = camera_identifier {
                     let mut add = 0;

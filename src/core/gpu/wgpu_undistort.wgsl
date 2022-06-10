@@ -51,13 +51,13 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
 
     let bg = params.background / bg_scaler;
     var sum = vec4<f32>(0.0);
-    
+
     let shift = (params.interpolation >> 2u) + 1u;
     var indices: array<i32, 3> = array<i32, 3>(0, 64, 192);
     let ind = indices[params.interpolation >> 2u];
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
     let offset = offsets[params.interpolation >> 2u];
-    
+
     let uv = uv - offset;
 
     let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
@@ -89,7 +89,7 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
             sum = sum + bg * coeffs[coeffs_y + yp];
         }
     }
-    
+
     return sum;
 }
 
@@ -111,7 +111,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
             uv = to_superview((uv / size) - 0.5);
             uv = (uv + 0.5) * size;
         }
-        
+
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
         if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
@@ -129,7 +129,7 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
     return vec4<f32>(positions[in_vertex_index], 0.0, 1.0);
 }
 
-// Adapted from OpenCV: initUndistortRectifyMap + remap 
+// Adapted from OpenCV: initUndistortRectifyMap + remap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
 @fragment
@@ -149,14 +149,14 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
         }
     }
     ///////////////////////////////////////////////////////////////////
- 
+
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
         let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
         let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
         let out_f = (params.f / params.fov) / factor;
-        
+
         if (bool(params.flags & 2)) { // Re-add GoPro Superview
             let out_c2 = out_c * 2.0;
             var pt2 = from_superview((out_pos / out_c2) - 0.5);
@@ -171,7 +171,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     ///////////////////////////////////////////////////////////////////
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 9u;
- 
+
     var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k);
     if (uv.x > -99998.0) {
         let width_f = f32(params.width);

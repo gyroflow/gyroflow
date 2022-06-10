@@ -138,7 +138,7 @@ impl TimelineGyroChart {
                                 x: map_to_visible_area(*data.0 as f64 / duration_us) * rect.width,
                                 y: (1.0 - *data.1 * self.vscale) * half_height
                             };
-                            
+
                             let new_line = serie.is_optflow && *data.0 - prev_point.0 > 100_000;
                             if new_line {
                                 serie.lines.push(line);

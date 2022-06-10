@@ -17,7 +17,7 @@ TextField {
     property bool allowText: false;
     property bool intNoThousandSep: false;
     property var reset: () => { value = defaultValue; };
-    
+
     Keys.onDownPressed: (e) => {
         const lastDigit = Math.pow(10, precision);
         if (allowText) return;
@@ -46,7 +46,7 @@ TextField {
     }
     onTextChanged: if (live) updateValue();
     onEditingFinished: updateValue();
-    
+
     Component.onCompleted: {
         if (isNaN(defaultValue)) defaultValue = value;
         valueChanged();

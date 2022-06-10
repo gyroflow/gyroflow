@@ -102,19 +102,19 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Windows 10 64-bit (1809 or later) [Install VC redist if it doesn't run](https://aka.ms/vs/17/release/vc_redist.x64.exe)
     - If you have Windows "N" install, go to `Settings` -> `Apps` -> `Optional features` -> `Add a feature` -> enable `Media Feature Pack`
 - macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
-- Linux: 
+- Linux:
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
     - `.AppImage` should work everywhere
     - Make sure you have latest graphics drivers installed
     - Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev vdpau-va-driver libvulkan1`
-    - GPU specific packages: 
+    - GPU specific packages:
         - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd libnvcuvid1 libnvidia-encode1`
         - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
         - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 - Android 6+
 
 ## Help and support
-For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D). 
+For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D).
 
 For companies or people wishing to get in touch with the team privately for collaborative purposes: devteam@gyroflow.xyz.
 
@@ -123,7 +123,7 @@ For companies or people wishing to get in touch with the team privately for coll
 See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of proposed features and known issues.
 There's also a ton of TODO comments throughout the code.
 
-### Video editor plugins 
+### Video editor plugins
 Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx).
 
 Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
@@ -193,7 +193,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
-    - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer 
+    - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
     - `Qt 6.3.0` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.3.0 win64_msvc2019_64 -m qtshadertools` or use the [official installer](https://www.qt.io/download-qt-installer)
@@ -240,7 +240,7 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Compile and run GyroFlow with the `profile` profile: `cargo run --profile profile`
 3. In Visual Studio, go to `Debug -> Performance Profiler...`
     - Under `Target`, open `Change Target` and select `Running Process...`, select the running `gyroflow.exe` process
-    
+
 ## License
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.

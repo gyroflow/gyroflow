@@ -29,7 +29,7 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(x) => x.distort_point(point, k, amount),)*
                 }
             }
-        
+
             pub fn id(&self)               -> i32          { match &self.inner { $(DistortionModels::$name(x) => x.id(),)* } }
             pub fn name(&self)             -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.name(),)* } }
             pub fn opencl_functions(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.opencl_functions(),)* } }

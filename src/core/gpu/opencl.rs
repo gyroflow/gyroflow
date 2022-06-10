@@ -79,13 +79,13 @@ impl OclWrapper {
         let name = format!("{} {}", device.vendor()?, device.name()?);
 
         *CONTEXT.write() = Some(CtxWrapper { device, context });
-        
+
         Ok(name)
     }
 
     pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
-    
+
         let context_initialized = CONTEXT.read().is_some();
         if !context_initialized { Self::initialize_context()?; }
         let lock = CONTEXT.read();
@@ -134,7 +134,7 @@ impl OclWrapper {
             }
 
             let kernel = builder.build()?;
-        
+
             Ok(Self {
                 kernel,
                 src: source_buffer,
@@ -146,7 +146,7 @@ impl OclWrapper {
             Err(ocl::BufferCmdError::AlreadyMapped.into())
         }
     }
-    
+
     pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 

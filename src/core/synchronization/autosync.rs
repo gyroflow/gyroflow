@@ -52,21 +52,21 @@ impl AutosyncProcess {
 
         let ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
             let range = (
-                ((x * org_duration_ms) - (sync_duration_ms / 2.0)).max(0.0), 
+                ((x * org_duration_ms) - (sync_duration_ms / 2.0)).max(0.0),
                 ((x * org_duration_ms) + (sync_duration_ms / 2.0)).min(org_duration_ms)
             );
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
         let scaled_ranges_us = ranges_us.iter().map(|(f, t)| (
-            (*f as f64 / fps_scale.unwrap_or(1.0)) as i64, 
+            (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
             (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
         ).collect();
 
         let estimator = stab.pose_estimator.clone();
 
         estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
-        
+
         let mut comp_params = ComputeParams::from_manager(stab);
         comp_params.gyro.raw_imu = stab.gyro.read().raw_imu.clone();
         if !for_rs {
@@ -101,10 +101,10 @@ impl AutosyncProcess {
     pub fn get_ranges(&self) -> Vec<(f64, f64)> {
         self.ranges_us.iter().map(|&v| (v.0 as f64 / 1000.0, v.1 as f64 / 1000.0)).collect()
     }
-    
+
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, width: u32, height: u32, stride: usize, pixels: &[u8]) {
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
-    
+
         let method = self.method;
         let estimator = self.estimator.clone();
         let total_detected_frames = self.total_detected_frames.clone();
@@ -152,7 +152,7 @@ impl AutosyncProcess {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) - 1 {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
-        
+
         let progress_cb = self.progress_cb.clone();
 
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());

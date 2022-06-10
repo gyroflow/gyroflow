@@ -50,7 +50,7 @@ QQC.Button {
 
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
-    
+
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
             root.clicked();

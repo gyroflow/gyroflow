@@ -50,9 +50,9 @@ float2 distort_point(float2 pos, float4 k) {
     float r = length(pos);
 
     float theta = atan(r);
-    float theta2 = theta*theta, 
-          theta4 = theta2*theta2, 
-          theta6 = theta4*theta2, 
+    float theta2 = theta*theta,
+          theta4 = theta2*theta2,
+          theta6 = theta4*theta2,
           theta8 = theta4*theta4;
 
     float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));

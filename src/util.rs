@@ -52,7 +52,7 @@ pub fn url_to_path(url: QUrl) -> String {
     let path = cpp!(unsafe [url as "QUrl"] -> QString as "QString" {
         return url.toLocalFile();
     });
-    path.to_string()    
+    path.to_string()
 }
 
 pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
@@ -114,12 +114,12 @@ pub fn resolve_android_url(url: QString) -> QString {
 
                 QJniObject activity(QNativeInterface::QAndroidApplication::context());
 
-                QString url = QJniObject::callStaticObjectMethod("org/ekkescorner/utils/QSharePathResolver", 
+                QString url = QJniObject::callStaticObjectMethod("org/ekkescorner/utils/QSharePathResolver",
                     "getRealPathFromURI",
                     "(Landroid/content/Context;Landroid/net/Uri;)Ljava/lang/String;",
                     activity.object(), jniUri.object()
                 ).toString();
-                
+
                 return QVariant::fromValue(url);
             }).result();
             return res.toString();

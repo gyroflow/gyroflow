@@ -17,7 +17,7 @@ if [ "$1" != "CI" ]; then
     ./vcpkg/vcpkg install "opencv[core]:arm64-osx"
 fi
 
-# Download and extract ffmpeg 
+# Download and extract ffmpeg
 curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-5.0-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
 7z x ffmpeg.tar.xz
 tar -xf ffmpeg.tar

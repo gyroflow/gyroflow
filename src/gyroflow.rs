@@ -48,7 +48,7 @@ fn entry() {
     crate::resources::rsrc();
     #[cfg(not(compiled_qml))]
     crate::resources_qml::rsrc_qml();
-    
+
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
 

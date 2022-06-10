@@ -81,7 +81,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(
         progress_cb((current_sync_point.load(SeqCst) as f64 + progress) / num_sync_points);
         !cancel_flag.load(Relaxed)
     });
-    
+
     for range in matched_points {
         if range.len() < 2 {
             log::warn!("Not enough data for sync! range.len: {}", range.len());

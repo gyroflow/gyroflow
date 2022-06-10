@@ -16,24 +16,24 @@ impl OpenCVFisheye {
         let t_9 = T::from(9.0f32).unwrap();
         let t_fpi = T::from(std::f64::consts::PI).unwrap();
         let t_eps = T::from(1e-6f64).unwrap();
-        
+
         let t_max_fix = T::from(0.9f32).unwrap();
-    
+
         let mut theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
-    
+
         // the current camera model is only valid up to 180 FOV
         // for larger FOV the loop below does not converge
         // clip values so we still get plausible results for super fisheye images > 180 grad
         theta_d = theta_d.max(-t_fpi).min(t_fpi);
-    
+
         let mut converged = false;
         let mut theta = theta_d;
-    
+
         let mut scale = t_0;
-    
+
         if theta_d.abs() > t_eps {
             theta = t_0;
-    
+
             // compensate distortion iteratively
             for _ in 0..10 {
                 let theta2 = theta*theta;
@@ -48,52 +48,52 @@ impl OpenCVFisheye {
                 let mut theta_fix = (theta * (t_1 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
                                 /
                                 (t_1 + t_3 * k0_theta2 + t_5 * k1_theta4 + t_7 * k2_theta6 + t_9 * k3_theta8);
-                
+
                 theta_fix = theta_fix.max(-t_max_fix).min(t_max_fix);
-    
+
                 theta = theta - theta_fix;
                 if theta_fix.abs() < t_eps {
                     converged = true;
                     break;
                 }
             }
-    
+
             scale = theta.tan() / theta_d;
         } else {
             converged = true;
         }
-    
+
         // theta is monotonously increasing or decreasing depending on the sign of theta
         // if theta has flipped, it might converge due to symmetry but on the opposite of the camera center
         // so we can check whether theta has changed the sign during the optimization
         let theta_flipped = (theta_d < t_0 && theta > t_0) || (theta_d > t_0 && theta < t_0);
-    
+
         if converged && !theta_flipped {
             // Apply only requested amount
             scale = t_1 + (scale - t_1) * (t_1 - amount);
-    
+
             return Some((point.0 * scale, point.1 * scale));
         }
         None
     }
-    
+
     pub fn distort_point<T: num_traits::Float>(&self, point: (T, T), k: &[T], amount: T) -> (T, T) {
         let t_0 = T::from(0.0f32).unwrap();
         let t_1 = T::from(1.0f32).unwrap();
-    
+
         let r = (point.0 * point.0 + point.1 * point.1).sqrt();
-    
+
         let theta = r.atan();
         let theta2 = theta*theta;
         let theta4 = theta2*theta2;
         let theta6 = theta4*theta2;
         let theta8 = theta4*theta4;
-    
+
         let theta_d = theta * (t_1 + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
-    
+
         let mut scale = if r == t_0 { t_1 } else { theta_d / r };
         scale = t_1 + (scale - t_1) * (t_1 - amount);
-    
+
         (
             point.0 * scale,
             point.1 * scale

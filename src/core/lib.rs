@@ -75,17 +75,17 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
             params: Arc::new(RwLock::new(StabilizationParams::default())),
-            
+
             stabilization: Arc::new(RwLock::new(Stabilization::<T>::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
-            
+
             current_compute_id: Arc::new(AtomicU64::new(0)),
             smoothing_checksum: Arc::new(AtomicU64::new(0)),
             zooming_checksum: Arc::new(AtomicU64::new(0)),
 
             current_fov_10000: Arc::new(AtomicU64::new(0)),
-            
+
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
@@ -111,7 +111,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
 
         self.pose_estimator.sync_results.write().clear();
-        
+
         Ok(())
     }
 
@@ -177,7 +177,7 @@ impl<T: PixelType> StabilizationManager<T> {
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
             self.stabilization.write().init_size(bg, (w, h, s), (ow, oh, os));
             self.lens.write().optimal_fov = None;
-            
+
             self.invalidate_smoothing();
         }
     }
@@ -195,7 +195,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_output_size(&self, width: usize, height: usize) -> bool {
         if width > 0 && height > 0 {
             let params = self.params.upgradable_read();
-            
+
             let ratio = params.size.0 as f64 / width as f64;
             let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
             let video_output_size = (width, height);
@@ -265,7 +265,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn invalidate_ongoing_computations(&self) {
         self.current_compute_id.store(fastrand::u64(..), SeqCst);
     }
-    
+
     pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
@@ -305,7 +305,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 lib_gyro.smoothing_status = smoothing.get_status_json();
                 smoothing_changed = true;
             }
-            
+
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut zoom = zooming::from_compute_params(params.clone());
@@ -318,7 +318,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 stab_params.set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
                 stab_params.zooming_debug_points = zoom.get_debug_points();
             }
-            
+
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             stabilization.write().set_compute_params(params);
@@ -370,7 +370,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             // Only allocate if we actually have any points
                             ret = Some(Vec::with_capacity(2048));
                         }
-                        let line = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize)); 
+                        let line = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize));
                         for point in line {
                             ret.as_mut().unwrap().push((point.0 as i32, point.1 as i32, a));
                         }
@@ -425,7 +425,7 @@ impl<T: PixelType> StabilizationManager<T> {
                     for (x, mut y, _) in pxs {
                         if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                        if pixels.len() > pos + 2 { 
+                        if pixels.len() > pos + 2 {
                             pixels[pos + 0] = 0x0c; // R
                             pixels[pos + 1] = 0xff; // G
                             pixels[pos + 2] = 0x00; // B
@@ -436,7 +436,7 @@ impl<T: PixelType> StabilizationManager<T> {
                     for (x, mut y, a) in pxs {
                         if framebuffer_inverted { y = height as i32 - y; }
                         let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                        if pixels.len() > pos + 2 { 
+                        if pixels.len() > pos + 2 {
                             pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
                             pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
                             pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
@@ -477,7 +477,7 @@ impl<T: PixelType> StabilizationManager<T> {
                                     let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
                                     if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
                                         let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                                        if out_pixels.len() > pos + 2 { 
+                                        if out_pixels.len() > pos + 2 {
                                             out_pixels[pos + 0] = 0xff; // R
                                             out_pixels[pos + 1] = 0x00; // G
                                             out_pixels[pos + 2] = 0x00; // B
@@ -533,7 +533,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
         self.invalidate_zooming();
     }
-    
+
     pub fn remove_offset(&self, timestamp_us: i64) {
         self.gyro.write().remove_offset(timestamp_us);
         self.invalidate_zooming();
@@ -575,10 +575,10 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn set_lens_param(&self, param: &str, value: f64) {
         let mut lens = self.lens.write();
-        if lens.fisheye_params.distortion_coeffs.len() >= 4 && 
-           lens.fisheye_params.camera_matrix.len() == 3 && 
-           lens.fisheye_params.camera_matrix[0].len() == 3 && 
-           lens.fisheye_params.camera_matrix[1].len() == 3 && 
+        if lens.fisheye_params.distortion_coeffs.len() >= 4 &&
+           lens.fisheye_params.camera_matrix.len() == 3 &&
+           lens.fisheye_params.camera_matrix[0].len() == 3 &&
+           lens.fisheye_params.camera_matrix[1].len() == 3 &&
            lens.fisheye_params.camera_matrix[2].len() == 3 {
             match param {
                 "fx" => lens.fisheye_params.camera_matrix[0][0] = value,
@@ -609,7 +609,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);
-        
+
         self.invalidate_smoothing();
 
         smooth.current().get_parameters_json()
@@ -661,7 +661,7 @@ impl<T: PixelType> StabilizationManager<T> {
         *self.camera_id.write() = None;
 
         *self.gyro.write() = GyroSource::new();
-        
+
         self.pose_estimator.clear();
     }
 
@@ -672,7 +672,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 params.fps_scale = Some(fps / params.fps);
             } else {
                 params.fps_scale = None;
-            } 
+            }
             self.gyro.write().init_from_params(&params);
         }
 
@@ -713,7 +713,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
 
         let video_path = self.video_path.read().clone();
-        
+
         let obj = serde_json::json!({
             "title": "Gyroflow data file",
             "version": 2,
@@ -726,7 +726,7 @@ impl<T: PixelType> StabilizationManager<T> {
             "background_mode":  params.background_mode as i32,
             "background_margin":          params.background_margin,
             "background_margin_feather":  params.background_margin_feather,
-    
+
             "video_info": {
                 "width":       params.video_size.0,
                 "height":      params.video_size.1,

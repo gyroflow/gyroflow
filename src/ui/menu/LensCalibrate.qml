@@ -225,7 +225,7 @@ MenuItem {
                 "onChange": function(value) {
                     if (/^[0-9]{1,5}x[0-9]{1,5}$/.test(value)) {
                         list.updateEntry("Default output size", value);
-                        
+
                         const parts = value.split('x');
                         const ow = +parts[0], oh = +parts[1];
 
