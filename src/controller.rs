@@ -6,8 +6,8 @@ use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
-use std::sync::atomic::{ AtomicBool, AtomicUsize };
-use std::sync::atomic::Ordering::SeqCst;
+use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
+use std::collections::BTreeSet;
 
 use qml_video_rs::video_item::MDKVideoItem;
 
@@ -94,7 +94,7 @@ pub struct Controller {
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
 
-    recompute_threaded: qt_method!(fn(&self)),
+    recompute_threaded: qt_method!(fn(&mut self)),
     request_recompute: qt_signal!(),
 
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
@@ -193,6 +193,8 @@ pub struct Controller {
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
+
+    ongoing_computations: BTreeSet<u64>,
 
     pub stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>,
 }
@@ -657,10 +659,17 @@ impl Controller {
         util::serde_json_to_qt_array(&serde_json::json!([max_angles.0, max_angles.1, max_angles.2]))
     }
 
-    fn recompute_threaded(&self) {
-        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback(self, |this, id: u64| {
-            this.compute_progress(id, 1.0);
+    fn recompute_threaded(&mut self) {
+        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(self, |this, (id, _discarded): (u64, bool)| {
+            if !this.ongoing_computations.contains(&id) {
+                ::log::error!("Unknown compute_id: {}", id);
+            }
+            this.ongoing_computations.remove(&id);
+            let finished = this.ongoing_computations.is_empty();
+            this.compute_progress(id, if finished { 1.0 } else { 0.0 });
         }));
+        self.ongoing_computations.insert(id);
+
         self.compute_progress(id, 0.0);
     }
 

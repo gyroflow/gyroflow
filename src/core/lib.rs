@@ -266,7 +266,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.current_compute_id.store(fastrand::u64(..), SeqCst);
     }
     
-    pub fn recompute_threaded<F: Fn(u64) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
+    pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
         let mut params = stabilization::ComputeParams::from_manager(self);
@@ -285,7 +285,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let stabilization = self.stabilization.clone();
         THREAD_POOL.spawn(move || {
             // std::thread::sleep(std::time::Duration::from_millis(20));
-            if current_compute_id.load(SeqCst) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum() != smoothing_checksum.load(SeqCst) {
@@ -295,7 +295,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 };
                 params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read());
 
-                if current_compute_id.load(SeqCst) != compute_id { return; }
+                if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.quaternions = params.gyro.quaternions.clone();
@@ -306,26 +306,26 @@ impl<T: PixelType> StabilizationManager<T> {
                 smoothing_changed = true;
             }
             
-            if current_compute_id.load(SeqCst) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
                 params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
 
-                if current_compute_id.load(SeqCst) != compute_id { return; }
+                if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut stab_params = stabilization_params.write();
                 stab_params.set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
                 stab_params.zooming_debug_points = zoom.get_debug_points();
             }
             
-            if current_compute_id.load(SeqCst) != compute_id { return; }
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             stabilization.write().set_compute_params(params);
 
             smoothing_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
             zooming_checksum.store(zooming::get_checksum(&zoom), SeqCst);
-            cb(compute_id);
+            cb((compute_id, false));
         });
         compute_id
     }
