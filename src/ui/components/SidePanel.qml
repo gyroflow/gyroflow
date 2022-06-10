@@ -7,7 +7,7 @@ import QtQuick.Controls as QQC
 ResizablePanel {
     height: parent? parent.height - y : 0;
     default property alias data: col.data;
-    implicitWidth: 300 * dpiScale;
+    defaultWidth: 300 * dpiScale;
     property real topPadding: 0;
     property real bottomPadding: 0;
 

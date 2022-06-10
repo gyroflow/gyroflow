@@ -10,6 +10,7 @@ MenuItem {
     text: qsTr("Advanced");
     icon: "settings";
     opened: false;
+    objectName: "advanced";
 
     Settings {
         id: settings;

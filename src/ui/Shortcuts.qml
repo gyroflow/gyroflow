@@ -131,4 +131,9 @@ Item {
         sequence: "Shift+w";
         onActivated: videoArea.timeline.toggleAxis(3, true);
     }
+    // Exit full screen mode
+    Shortcut {
+        sequence: "Esc";
+        onActivated: videoArea.fullScreen = false;
+    }
 }

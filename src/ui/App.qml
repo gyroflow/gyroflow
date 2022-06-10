@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls as QQC
 import QtQuick.Dialogs
+import Qt.labs.settings
 
 import "."
 import "components/"
@@ -25,8 +26,8 @@ Rectangle {
             leftPanel.y = 0;
             rightPanel.x = Qt.binding(() => leftPanel.width + videoAreaCol.width);
             rightPanel.y = 0;
-            videoAreaCol.x = Qt.binding(() => leftPanel.width);
-            videoAreaCol.width = Qt.binding(() => mainLayout.width - leftPanel.width - rightPanel.width);
+            videoAreaCol.x = Qt.binding(() => (videoArea.fullScreen? 0 : leftPanel.width));
+            videoAreaCol.width = Qt.binding(() => mainLayout.width - (videoArea.fullScreen? 0 : leftPanel.width + rightPanel.width));
             videoAreaCol.height = Qt.binding(() => mainLayout.height);
             leftPanel.fixedWidth = 0;
             rightPanel.fixedWidth = 0;
@@ -35,7 +36,7 @@ Rectangle {
             videoAreaCol.y = 0;
             videoAreaCol.x = 0;
             videoAreaCol.width = Qt.binding(() => window.width);
-            videoAreaCol.height = Qt.binding(() => window.height * 0.5);
+            videoAreaCol.height = Qt.binding(() => window.height * (videoArea.fullScreen? 1 : 0.5));
             leftPanel.fixedWidth = Qt.binding(() => window.width * 0.4);
             rightPanel.fixedWidth = Qt.binding(() => window.width * 0.6);
             leftPanel.y = Qt.binding(() => videoAreaCol.height);
@@ -53,8 +54,11 @@ Rectangle {
     property alias sync: sync;
     property alias stab: stab;
     property alias renderBtn: renderBtn;
+    property alias settings: settings;
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
+
+    Settings { id: settings; }
 
     FileDialog {
         id: fileDialog;
@@ -77,6 +81,9 @@ Rectangle {
             id: leftPanel;
             direction: SidePanel.HandleRight;
             topPadding: gflogo.height;
+            visible: !videoArea.fullScreen;
+            implicitWidth: settings.value("leftPanelSize", defaultWidth);
+            onWidthChanged: settings.setValue("leftPanelSize", width);
             Column {
                 width: parent.width;
                 parent: leftPanel;
@@ -111,12 +118,12 @@ Rectangle {
         Column {
             id: videoAreaCol;
             y: 0;
-            x: leftPanel.width;
-            width: parent? parent.width - leftPanel.width - rightPanel.width : 0;
+            x: videoArea.fullScreen? 0 : leftPanel.width;
+            width: parent? parent.width - (videoArea.fullScreen? 0 : leftPanel.width + rightPanel.width) : 0;
             height: parent? parent.height : 0;
             VideoArea {
                 id: videoArea;
-                height: parent.height - exportbar.height;
+                height: parent.height - (videoArea.fullScreen? 0 : exportbar.height);
                 vidInfo: vidInfo;
             }
 
@@ -175,18 +182,20 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter;
                     text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
                     icon.name: "video";
-                    enabled: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     opacity: enabled? 1.0 : 0.6;
                     popup.width: width * 2;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
                     property bool isAddToQueue: false;
-
-                    model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
-
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
+                    
+                    property bool enabled2: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
+                    onEnabled2Changed: et.start();
+                    Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
+
+                    model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
 
                     function render() {
                         if (!controller.lens_loaded && !allowLens) {
@@ -260,8 +269,11 @@ Rectangle {
 
         SidePanel {
             id: rightPanel;
+            visible: !videoArea.fullScreen;
             x: leftPanel.width + videoAreaCol.width;
             direction: SidePanel.HandleLeft;
+            implicitWidth: settings.value("rightPanelSize", defaultWidth);
+            onWidthChanged: settings.setValue("rightPanelSize", width);
             Menu.Synchronization {
                 id: sync;
             }

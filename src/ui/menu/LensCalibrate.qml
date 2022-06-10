@@ -13,6 +13,7 @@ MenuItem {
     icon: "lens";
     innerItem.enabled: !controller.calib_in_progress;
     loader: controller.calib_in_progress;
+    objectName: "lenscalib";
 
     property alias rms: rms.value;
     property alias autoCalibBtn: autoCalibBtn;

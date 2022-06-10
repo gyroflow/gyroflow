@@ -12,6 +12,7 @@ MenuItem {
     icon: "sync";
     innerItem.enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
     loader: controller.sync_in_progress;
+    objectName: "synchronization";
 
     Settings {
         property alias initialOffset: initialOffset.value;

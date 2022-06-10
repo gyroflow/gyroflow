@@ -15,6 +15,8 @@ Rectangle {
 
     property real lastWidth: implicitWidth;
     property real lastHeight: implicitHeight;
+    property real defaultWidth: implicitWidth;
+    property real defaultHeight: implicitHeight;
     property real minWidth: 100 * dpiScale;
     property real minHeight: 100 * dpiScale;
     width:  fixedWidth  > 0? fixedWidth  : (rp.direction === 2 || rp.direction === 3? Math.max(minWidth,  (rpd.active? (rpd.activeTranslation.x * (rp.direction === 3? -1 : 1)) : 0) + lastWidth  + additionalWidth)  : lastWidth);
@@ -55,6 +57,23 @@ Rectangle {
                 }
             }
         }
-        MouseArea { anchors.fill: parent; cursorShape: rp.direction === 2 || rp.direction === 3? Qt.SplitHCursor : Qt.SplitVCursor; acceptedButtons: Qt.NoButton; }
+        MouseArea {
+            id: ma;
+            anchors.fill: parent;
+            cursorShape: rp.direction === 2 || rp.direction === 3? Qt.SplitHCursor : Qt.SplitVCursor;
+            acceptedButtons: Qt.LeftButton;
+
+            // onDoubleClicked is not emitted because of DragHandler, create our own
+            property int count: 0;
+            onClicked: {
+                count += 1;
+                rt.start();
+                if (count >= 2) { // double clicked
+                    rp.lastWidth = rp.defaultWidth;
+                    rp.lastHeight = rp.defaultHeight; 
+                }
+            }
+            Timer { id: rt; interval: 400; onTriggered: ma.count = 0; }
+        }
     }
 }

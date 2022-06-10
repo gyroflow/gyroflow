@@ -12,6 +12,7 @@ MenuItem {
     text: qsTr("Export settings");
     icon: "save";
     innerItem.enabled: window.videoArea.vid.loaded;
+    objectName: "export";
 
     function updateCodecParams() {
         codec.currentIndexChanged();

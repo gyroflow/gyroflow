@@ -11,6 +11,7 @@ MenuItem {
     text: qsTr("Stabilization");
     icon: "gyroflow";
     innerItem.enabled: window.videoArea.vid.loaded;
+    objectName: "stabilization";
 
     property alias fovSlider: fov;
     property alias maxValues: maxValues;

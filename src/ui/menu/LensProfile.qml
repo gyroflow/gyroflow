@@ -10,6 +10,7 @@ MenuItem {
     id: root;
     text: qsTr("Lens profile");
     icon: "lens";
+    objectName: "lens";
 
     property int calibWidth: 0;
     property int calibHeight: 0;

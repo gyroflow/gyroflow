@@ -11,6 +11,7 @@ MenuItem {
     text: qsTr("Motion data");
     icon: "chart";
     loader: controller.loading_gyro_in_progress;
+    objectName: "motiondata";
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property alias integrationMethod: integrator.currentIndex;

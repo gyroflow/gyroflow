@@ -10,6 +10,7 @@ MenuItem {
     id: root;
     text: qsTr("Video information");
     icon: "info";
+    objectName: "info";
 
     property real videoRotation: 0;
     property real fps: 0;

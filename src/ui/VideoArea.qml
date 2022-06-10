@@ -33,6 +33,8 @@ Item {
     property var pendingGyroflowData: null;
     property url loadedFileUrl;
 
+    property bool fullScreen: false;
+
     property Menu.VideoInformation vidInfo: null;
 
     function loadGyroflowData(obj) {
@@ -189,7 +191,7 @@ Item {
 
     Item {
         width: parent.width;
-        height: parent.height - tlcol.height;
+        height: parent.height - (root.fullScreen? 0 : tlcol.height);
         Item {
             id: vidParent;
             property real orgW: root.outWidth || vid.videoWidth;
@@ -315,6 +317,7 @@ Item {
             MouseArea {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;
+                onDoubleClicked: root.fullScreen = !root.fullScreen;
             }
         }
         Rectangle {
@@ -426,6 +429,7 @@ Item {
 
     Column {
         id: tlcol;
+        visible: !root.fullScreen;
         width: parent.width;
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.bottom: parent.bottom;
@@ -531,11 +535,13 @@ Item {
 
         ResizablePanel {
             direction: ResizablePanel.HandleUp;
-            implicitHeight: 165 * dpiScale;
             width: parent.width;
             color: "transparent";
             hr.height: 30 * dpiScale;
             additionalHeight: timeline.additionalHeight;
+            defaultHeight: 165 * dpiScale;
+            implicitHeight: window.settings.value("bottomPanelSize", defaultHeight);
+            onHeightChanged: window.settings.setValue("bottomPanelSize", height);
             Timeline {
                 id: timeline;
                 durationMs: vid.duration;
