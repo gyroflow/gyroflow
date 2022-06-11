@@ -168,6 +168,7 @@ Window {
                 isCalibrator: true;
                 onSelectFileRequest: fileDialog.open();
                 opened: false;
+                objectName: "calibinfo";
             }
             Hr {
 

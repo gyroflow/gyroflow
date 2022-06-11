@@ -6,15 +6,15 @@ import QtQuick
 Grid {
     id: root;
 
-    enum LabelPosition { Top, Left }
+    enum LabelPosition { TopPosition, LeftPosition }
 
-    property int position: Label.Top;
+    property int position: Label.TopPosition;
     default property alias data: inner.data;
     property alias text: t.text;
     property alias inner: inner;
 
-    rows:    position === Label.Top? 2 : 1;
-    columns: position === Label.Top? 1 : 2;
+    rows:    position === Label.TopPosition? 2 : 1;
+    columns: position === Label.TopPosition? 1 : 2;
     spacing: 8 * dpiScale;
     width: parent.width;
 
@@ -22,7 +22,7 @@ Grid {
         id: t;
         leftPadding: 0;
         verticalAlignment: Text.AlignVCenter;
-        height: root.position === Label.Top? undefined : inner.height;
+        height: root.position === Label.TopPosition? undefined : inner.height;
         MouseArea {
             anchors.fill: t;
             acceptedButtons: Qt.LeftButton;
@@ -48,7 +48,7 @@ Grid {
 
     Item {
         id: inner;
-        width: parent.width - (root.position === Label.Top? 0 : t.width + root.spacing);
+        width: parent.width - (root.position === Label.TopPosition? 0 : t.width + root.spacing);
         height: children[0].height + 2 * dpiScale;
     }
 }

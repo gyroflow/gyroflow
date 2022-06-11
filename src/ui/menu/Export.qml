@@ -349,7 +349,7 @@ MenuItem {
 
     AdvancedSection {
         Label {
-            position: Label.Top;
+            position: Label.TopPosition;
             text: qsTr("Custom encoder options");
 
             TextField {
