@@ -414,7 +414,7 @@ impl PoseEstimator {
             points.push(points_per_range);
         }
 
-        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params, progress_cb, cancel_flag)
+        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params, true, progress_cb, cancel_flag)
     }
 
     pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
