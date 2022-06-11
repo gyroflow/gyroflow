@@ -160,6 +160,8 @@ Window {
         SidePanel {
             id: leftPanel;
             direction: SidePanel.HandleRight;
+            implicitWidth: settings.value("calibPanelSize", defaultWidth);
+            onWidthChanged: settings.setValue("calibPanelSize", width);
 
             Menu.VideoInformation {
                 id: vidInfo;

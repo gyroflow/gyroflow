@@ -347,7 +347,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Top;
+            position: 0; //Label.Top;
             text: qsTr("Input horizontal stretch");
             SliderWithField {
                 from: 0.1;
@@ -362,7 +362,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Top;
+            position: 0; //Label.Top;
             text: qsTr("Input vertical stretch");
             SliderWithField {
                 from: 0.1;

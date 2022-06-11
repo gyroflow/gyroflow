@@ -11,12 +11,17 @@ Item {
     signal clicked();
     property alias text: btn.text;
     property alias icon: btn.icon.name;
-    property bool opened: window.settings.value(objectName + "-opened", col.children.length > 0) == "true";
+    property bool opened: col.children.length > 0;
     property alias loader: loader.active;
     property alias loaderProgress: loader.progress;
     property alias spacing: col.spacing;
     property alias innerItem: innerItem;
     default property alias data: col.data;
+
+    Component.onCompleted: {
+        const val = window.settings.value(root.objectName + "-opened", root.opened);
+        root.opened = val || val == "true";
+    }
 
     function ensureVisible() {
         const flick = parent.parent.parent;
@@ -81,7 +86,14 @@ Item {
         }
 
         DropdownChevron { visible: col.children.length > 0; opened: root.opened; anchors.rightMargin: 5 * dpiScale; }
-        onClicked: if (col.children.length > 0) { root.opened = !root.opened; window.settings.setValue(root.objectName + "-opened", root.opened); } else { root.clicked(); }
+        onClicked: {
+            if (col.children.length > 0) {
+                root.opened = !root.opened;
+                window.settings.setValue(root.objectName + "-opened", root.opened);
+            } else {
+                root.clicked();
+            }
+        }
 
         Keys.onPressed: (e) => {
             if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
