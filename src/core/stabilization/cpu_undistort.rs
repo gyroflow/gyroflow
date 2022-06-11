@@ -159,6 +159,13 @@ impl<T: PixelType> Stabilization<T> {
 
                     let mut out_pos = (x as f32 + params.translation2d[0], y as f32 + params.translation2d[1]);
 
+                    let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
+
+                    if (params.flags & 4) == 4 { // Fill with background
+                        *pix_out = bg_t;
+                        return;
+                    }
+
                     ///////////////////////////////////////////////////////////////////
                     // Calculate source `y` for rolling shutter
                     let mut sy = y;
@@ -187,8 +194,6 @@ impl<T: PixelType> Stabilization<T> {
                         out_pos = ((out_pos.0 * out_f.0) + out_c.0, (out_pos.1 * out_f.1) + out_c.1);
                     }
                     ///////////////////////////////////////////////////////////////////
-
-                    let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
                     let idx = sy.min(params.matrix_count as usize - 1);
                     if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {

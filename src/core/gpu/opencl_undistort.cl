@@ -186,6 +186,13 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     if (matrices == 0 || params->width < 1) return;
 
     if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
+        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * params->output_stride];
+
+        if (params->flags & 4) { // Fill with background
+            *out_pix = DATA_CONVERT(bg);
+            return;
+        }
+
         float2 out_pos = (float2)(x, y) + params->translation2d;
 
         ///////////////////////////////////////////////////////////////////
@@ -219,8 +226,6 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             out_pos = out_f * out_pos + out_c;
         }
         ///////////////////////////////////////////////////////////////////
-
-        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * params->output_stride];
 
         int idx = min(sy, params->matrix_count - 1) * 9;
         float2 uv = rotate_and_distort(out_pos, idx, params, matrices);

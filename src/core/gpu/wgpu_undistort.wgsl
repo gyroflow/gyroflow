@@ -138,6 +138,10 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
     var out_pos = position.xy + params.translation2d;
 
+    if (bool(params.flags & 4)) { // Fill with background
+        return bg;
+    }
+
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = u32(position.y);

@@ -1353,6 +1353,7 @@ dependencies = [
  "qmetaobject",
  "qml-video-rs",
  "qttypes",
+ "regex",
  "semver 1.0.9",
  "serde",
  "serde_json",

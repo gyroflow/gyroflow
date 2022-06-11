@@ -24,6 +24,7 @@ nalgebra = "0.30"
 semver = "1.0.9"
 fastrand = "1.7.0"
 itertools = "0.10.3"
+regex = "1"
 
 breakpad-sys = "0.1.1"
 

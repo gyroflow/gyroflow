@@ -9,6 +9,7 @@ use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
 use std::collections::HashMap;
 use parking_lot::RwLock;
+use regex::Regex;
 
 #[derive(Default, Clone, SimpleListItem)]
 struct RenderQueueItem {
@@ -56,7 +57,13 @@ pub struct RenderOptions {
     pub use_gpu: bool,
     pub audio: bool,
     pub pixel_format: String,
-    pub override_fps: f64
+    pub override_fps: f64,
+
+    // Advanced
+    pub encoder_options: String,
+    pub keyframe_distance: f64,
+    pub preserve_other_tracks: bool,
+    pub pad_with_black: bool,
 }
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
@@ -68,6 +75,23 @@ impl RenderOptions {
         };
 
         format!("{}x{} {:.3}fps | {}", self.output_width, self.output_height, fps, codec_info)
+    }
+
+    pub fn get_encoder_options_dict(&self) -> ffmpeg_next::Dictionary {
+        let re = Regex::new(r#"-([^\s"]+)\s+("[^"]+"|[^\s"]+)"#).unwrap();
+
+        let mut options = ffmpeg_next::Dictionary::new();
+        let mut iter = re.captures_iter(&self.encoder_options);
+        while let Some(x) = iter.next() {
+            if let Some(k) = x.get(1) {
+                if let Some(v) = x.get(2) {
+                    let k = k.as_str();
+                    let v = v.as_str().trim_matches('"');
+                    options.set(k, v);
+                }
+            }
+        }
+        options
     }
 }
 
@@ -119,6 +143,9 @@ pub struct RenderQueue {
     convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
     error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
     added: qt_signal!(job_id: u32),
+
+    get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
+    get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
     pause_flag: Arc<AtomicBool>,
 
@@ -760,5 +787,12 @@ impl RenderQueue {
             }
         }
         false
+    }
+
+    fn get_default_encoder(&self, codec: String, gpu: bool) -> String {
+        rendering::get_default_encoder(&codec, gpu)
+    }
+    fn get_encoder_options(&self, encoder: String) -> String {
+        rendering::get_encoder_options(&encoder)
     }
 }

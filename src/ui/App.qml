@@ -167,7 +167,7 @@ Rectangle {
                         id: outputFileDialog;
                         fileMode: FileDialog.SaveFile;
                         title: qsTr("Select file destination");
-                        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png)"];
+                        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png *.exr)"];
                         onAccepted: {
                             outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
                         }
@@ -298,7 +298,8 @@ Rectangle {
 
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
-        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, text: text, iconType: type});
+        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type });
+        el.text = text;
         el.onClicked.connect((index) => {
             if (buttons[index].clicked)
                 buttons[index].clicked();

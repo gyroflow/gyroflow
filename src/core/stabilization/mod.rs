@@ -32,8 +32,9 @@ impl Default for Interpolation {
 bitflags::bitflags! {
     #[derive(Default)]
     pub struct KernelParamsFlags: i32 {
-        const FIX_COLOR_RANGE    = 1;
-        const IS_GOPRO_SUPERVIEW = 2;
+        const FIX_COLOR_RANGE      = 1;
+        const IS_GOPRO_SUPERVIEW   = 2;
+        const FILL_WITH_BACKGROUND = 4;
     }
 }
 
@@ -76,7 +77,7 @@ unsafe impl bytemuck::Pod for KernelParams {}
 
 #[derive(Default)]
 pub struct Stabilization<T: PixelType> {
-    stab_data: BTreeMap<i64, FrameTransform>,
+    pub stab_data: BTreeMap<i64, FrameTransform>,
 
     size:        (usize, usize, usize), // width, height, stride
     output_size: (usize, usize, usize), // width, height, stride
@@ -105,7 +106,7 @@ impl<T: PixelType> Stabilization<T> {
         self.kernel_flags.set(KernelParamsFlags::IS_GOPRO_SUPERVIEW, self.compute_params.is_superview);
     }
 
-    fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64) {
+    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64) {
         if !self.stab_data.contains_key(&timestamp_us) {
             let timestamp_ms = (timestamp_us as f64) / 1000.0;
             let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs

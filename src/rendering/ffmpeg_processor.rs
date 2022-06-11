@@ -28,6 +28,8 @@ pub struct FfmpegProcessor<'a> {
 
     pub decoder_fps: f64,
 
+    pub preserve_other_tracks: bool,
+
     ost_time_bases: Vec<Rational>,
 }
 
@@ -153,13 +155,18 @@ impl<'a> FfmpegProcessor<'a> {
             start_ms: None,
             end_ms: None,
 
+            preserve_other_tracks: false,
+
             decoder_fps,
 
             video: VideoTranscoder {
                 gpu_encoding: true,
                 gpu_decoding,
                 input_index: stream.index(),
-                codec_options: Dictionary::new(),
+                encoder_params: EncoderParams {
+                    options: Dictionary::new(),
+                    ..EncoderParams::default()
+                },
                 decoder: Some(decoder_ctx.decoder().video()?),
                 ..VideoTranscoder::default()
             },
@@ -184,7 +191,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         for (i, stream) in self.input_context.streams().enumerate() {
             let medium = stream.parameters().medium();
-            if medium != media::Type::Audio && medium != media::Type::Video/* && medium != media::Type::Data*/ {
+            if medium != media::Type::Audio && medium != media::Type::Video && (!self.preserve_other_tracks || medium != media::Type::Data) {
                 stream_mapping[i] = -1;
                 continue;
             }
@@ -207,10 +214,10 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 }
                 let mut out_stream = octx.add_stream(codec)?;
-                self.video.encoder_codec = Some(codec);
+                self.video.encoder_params.codec = Some(codec);
 
-                self.video.frame_rate = Some(stream.avg_frame_rate());
-                self.video.time_base = Some(stream.rate().invert());
+                self.video.encoder_params.frame_rate = Some(stream.avg_frame_rate());
+                self.video.encoder_params.time_base = Some(stream.rate().invert());
 
                 out_stream.set_rate(stream.rate());
                 out_stream.set_time_base(stream.time_base());
@@ -218,23 +225,23 @@ impl<'a> FfmpegProcessor<'a> {
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
-                /*if stream.codec().id() == self.audio_codec {
+                if self.preserve_other_tracks/*stream.codec().id() == self.audio_codec*/ {
                     // Direct stream copy
                     let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
                     ost.set_parameters(stream.parameters());
                     // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format.
                     unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = 0; }
-                } else */{
+                } else {
                     // Transcode audio
                     atranscoders.insert(i, AudioTranscoder::new(self.audio_codec, &stream, &mut octx, output_index as _)?);
                 }
                 output_index += 1;
-            } else if medium == media::Type::Data {
+            } else if self.preserve_other_tracks && medium == media::Type::Data {
                 // Direct stream copy
-                // let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
-                // ost.set_parameters(stream.parameters());
-                // ost.set_avg_frame_rate(stream.avg_frame_rate());
-                // output_index += 1;
+                let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
+                ost.set_parameters(stream.parameters());
+                ost.set_avg_frame_rate(stream.avg_frame_rate());
+                output_index += 1;
             }
         }
 
@@ -245,8 +252,8 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut pending_packets: Vec<(Stream, ffmpeg_next::Packet, usize, isize)> = Vec::new();
 
-        let mut copied_stream_first_pts = None;
-        let mut copied_stream_first_dts = None;
+        // let mut copied_stream_first_pts = None;
+        // let mut copied_stream_first_dts = None;
 
         let mut process_stream = |octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, ist_index: usize, ost_index: isize, ost_time_base: Rational| -> Result<(), Error> {
             match atranscoders.get_mut(&ist_index) {
@@ -258,16 +265,16 @@ impl<'a> FfmpegProcessor<'a> {
                 None => {
                     // Direct stream copy
                     // TODO: Wrong pts, shifted by length of packet, would need to synchronize with first video frame pts
-                    if copied_stream_first_pts.is_none() {
-                        copied_stream_first_pts = packet.pts();
-                        copied_stream_first_dts = packet.dts();
-                    }
+                    // if copied_stream_first_pts.is_none() {
+                    //     copied_stream_first_pts = packet.pts();
+                    //     copied_stream_first_dts = packet.dts();
+                    // }
 
                     packet.rescale_ts(ist_time_bases[ist_index], ost_time_base);
                     packet.set_position(-1);
                     packet.set_stream(ost_index as _);
-                    packet.set_pts(packet.pts().map(|x| x - copied_stream_first_pts.unwrap_or_default()));
-                    packet.set_dts(packet.dts().map(|x| x - copied_stream_first_dts.unwrap_or_default()));
+                    // packet.set_pts(packet.pts().map(|x| x - copied_stream_first_pts.unwrap_or_default()));
+                    // packet.set_dts(packet.dts().map(|x| x - copied_stream_first_dts.unwrap_or_default()));
                     packet.write_interleaved(octx)?;
                 }
             }
@@ -321,7 +328,7 @@ impl<'a> FfmpegProcessor<'a> {
                         }
                     }
                 }
-            } else if self.audio_codec != codec::Id::None {
+            } else if self.audio_codec != codec::Id::None || self.preserve_other_tracks {
                 if !video_inited {
                     pending_packets.push((stream, packet, ist_index, ost_index));
                     continue;
@@ -375,8 +382,8 @@ impl<'a> FfmpegProcessor<'a> {
                 // let c_val = CString::new("1280x720").unwrap();
                 // unsafe { ffi::av_opt_set((*codec.as_mut_ptr()).priv_data, c_name.as_ptr(), c_val.as_ptr(), 1); }
 
-                self.video.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
-                self.video.time_base = Some(stream.rate().invert());
+                self.video.encoder_params.frame_rate = self.video.decoder.as_ref().unwrap().frame_rate();
+                self.video.encoder_params.time_base = Some(stream.rate().invert());
                 break;
             }
         }

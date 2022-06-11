@@ -31,23 +31,27 @@ pub enum ProcessingOrder {
 impl Default for ProcessingOrder { fn default() -> Self { Self::PreConversion } }
 
 #[derive(Default)]
+pub struct EncoderParams<'a> {
+    pub codec: Option<codec::codec::Codec>,
+    pub hw_device_type: Option<ffi::AVHWDeviceType>,
+    pub options: Dictionary<'a>,
+    pub pixel_format: Option<format::Pixel>,
+    pub frame_rate: Option<Rational>,
+    pub time_base: Option<Rational>,
+    pub keyframe_distance_s: f64,
+}
+#[derive(Default)]
 pub struct VideoTranscoder<'a> {
     pub input_index: usize,
     pub output_index: Option<usize>,
     pub decoder: Option<decoder::Video>,
     pub encoder: Option<encoder::video::Video>,
-    pub encoder_codec: Option<codec::codec::Codec>,
     pub encoder_name: String,
-    pub frame_rate: Option<Rational>,
-    pub time_base: Option<Rational>,
 
-    pub codec_options: Dictionary<'a>,
-
-    pub hw_device_type: Option<ffi::AVHWDeviceType>,
+    pub encoder_params: EncoderParams<'a>,
 
     pub codec_supported_formats: Vec<format::Pixel>,
 
-    pub encoder_pixel_format: Option<format::Pixel>,
     pub encoder_converter: Option<software::scaling::Context>,
 
     pub decode_only: bool,
@@ -75,16 +79,16 @@ macro_rules! ffmpeg {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, encoder_codec: Option<&mut codec::codec::Codec>, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, hw_device_type: Option<ffi::AVHWDeviceType>, codec_options: Dictionary, format: Option<format::Pixel>, frame_rate: Option<Rational>, time_base: Rational, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
+    fn init_encoder(frame: &mut frame::Video, params: &EncoderParams, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(output_index).unwrap();
-        let encoder_codec = encoder_codec.unwrap();
+        let encoder_codec = params.codec.unwrap();
 
         let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(encoder_codec.as_ptr()) };
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
         let mut encoder = context.encoder().video()?;
         let codec_name = encoder.codec().map(|x| x.name().to_string()).unwrap_or_default();
-        let pixel_format = format.unwrap_or_else(|| frame.format());
+        let pixel_format = params.pixel_format.unwrap_or_else(|| frame.format());
         let mut color_range = frame.color_range();
 
         // Workaround for a bug in prores videotoolbox encoder
@@ -98,8 +102,8 @@ impl<'a> VideoTranscoder<'a> {
         encoder.set_height(size.1);
         encoder.set_aspect_ratio(frame.aspect_ratio());
         encoder.set_format(pixel_format);
-        encoder.set_frame_rate(frame_rate);
-        encoder.set_time_base(time_base);
+        encoder.set_frame_rate(params.frame_rate);
+        encoder.set_time_base(params.time_base.unwrap());
         let bitrate = bitrate_mbps.map(|x| (x * 1024.0*1024.0) as usize).unwrap_or_else(|| decoder.bit_rate());
         encoder.set_bit_rate(bitrate);
         encoder.set_max_bit_rate(bitrate);
@@ -108,8 +112,8 @@ impl<'a> VideoTranscoder<'a> {
         }
         encoder.set_color_range(color_range);
         encoder.set_colorspace(frame.color_space());
-        let gop: f64 = frame_rate.unwrap_or(Rational::new(30, 1)).into();
-        encoder.set_gop((gop as u32).max(1));
+        let gop: f64 = params.frame_rate.unwrap_or(Rational::new(30, 1)).into();
+        encoder.set_gop(((gop * params.keyframe_distance_s) as u32).max(1));
 
         unsafe {
             if !codec_name.contains("videotoolbox") {
@@ -122,8 +126,8 @@ impl<'a> VideoTranscoder<'a> {
             encoder.set_flags(codec::Flags::GLOBAL_HEADER);
         }
 
-        log::debug!("hw_device_type {:?}", hw_device_type);
-        if let Some(hw_type) = hw_device_type {
+        log::debug!("hw_device_type {:?}", params.hw_device_type);
+        if let Some(hw_type) = params.hw_device_type {
             unsafe {
                 if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size).is_err() {
                     super::append_log("Failed to create encoder HW context.\n");
@@ -131,7 +135,7 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
 
-        let encoder = encoder.open_with(codec_options)?;
+        let encoder = encoder.open_with(params.options.to_owned())?;
         ost.set_parameters(&encoder);
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
 
@@ -152,7 +156,7 @@ impl<'a> VideoTranscoder<'a> {
         let mut sw_frame = &mut self.buffers.sw_frame;
 
         while decoder.receive_frame(&mut frame).is_ok() {
-            let time_base = self.time_base.unwrap();
+            let time_base = self.encoder_params.time_base.unwrap();
 
             if let Some(mut ts) = frame.timestamp() {
                 let timestamp_us = ts;
@@ -186,12 +190,12 @@ impl<'a> VideoTranscoder<'a> {
 
                     if !self.decode_only {
                         if self.encoder_name.is_empty() {
-                            self.encoder_name = self.encoder_codec.map(|x| x.name().to_string()).unwrap_or_default();
+                            self.encoder_name = self.encoder_params.codec.map(|x| x.name().to_string()).unwrap_or_default();
                         }
 
                         // Videotoolbox doesn't support YUV420P, Use NV12 instead
                         if self.encoder_name.contains("videotoolbox") && input_frame.format() == format::Pixel::YUV420P {
-                            self.encoder_pixel_format = Some(format::Pixel::NV12);
+                            self.encoder_params.pixel_format = Some(format::Pixel::NV12);
                             self.processing_order = ProcessingOrder::PostConversion;
                         }
 
@@ -222,20 +226,20 @@ impl<'a> VideoTranscoder<'a> {
                             input_frame
                         };
 
-                        if self.gpu_decoding && self.encoder_pixel_format.is_none() {
+                        if self.gpu_decoding && self.encoder_params.pixel_format.is_none() {
                             log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
                             if let Some(hw_formats) = hw_formats {
                                 if !hw_formats.is_empty() {
                                     let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                                     let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
                                     if picked != format::Pixel::None {
-                                        self.encoder_pixel_format = Some(picked);
+                                        self.encoder_params.pixel_format = Some(picked);
                                     }
                                 }
                             }
                         }
 
-                        let target_format = self.encoder_pixel_format.unwrap_or(in_format);
+                        let target_format = self.encoder_params.pixel_format.unwrap_or(in_format);
                         if in_format != target_format {
                             if self.encoder_converter.is_none() {
                                 log::debug!("Converting from {:?} to {:?}", final_frame.format(), target_format);
@@ -296,15 +300,15 @@ impl<'a> VideoTranscoder<'a> {
                         if self.encoder.is_none() {
                             let octx = octx.as_deref_mut().ok_or(FFmpegError::NoOutputContext)?;
 
-                            log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.hw_device_type, self.encoder_pixel_format);
-                            let pixel_format = self.encoder_pixel_format.unwrap_or_else(|| final_frame.format());
+                            log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.encoder_params.hw_device_type, self.encoder_params.pixel_format);
+                            let pixel_format = self.encoder_params.pixel_format.unwrap_or_else(|| final_frame.format());
                             if !self.codec_supported_formats.contains(&pixel_format) {
                                 return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
                             }
 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                            let result = Self::init_encoder(final_frame, self.encoder_codec.as_mut(), decoder, size, bitrate, octx, self.hw_device_type, self.codec_options.to_owned(), self.encoder_pixel_format, self.frame_rate, self.time_base.unwrap(), self.output_index.unwrap_or_default());
+                            let result = Self::init_encoder(final_frame, &self.encoder_params, decoder, size, bitrate, octx, self.output_index.unwrap_or_default());
 
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -341,7 +345,7 @@ impl<'a> VideoTranscoder<'a> {
                         // Copy of receive_and_process_encoded_packets
                         let ost_time_base = ost_time_bases[self.output_index.unwrap_or_default()];
                         let octx = octx.as_mut().unwrap();
-                        let time_base = self.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
+                        let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
                         let mut encoded = Packet::empty();
                         while encoder.receive_packet(&mut encoded).is_ok() {
                             encoded.set_stream(self.output_index.unwrap_or_default());
@@ -372,7 +376,7 @@ impl<'a> VideoTranscoder<'a> {
 
     pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_base: Rational) -> Result<(), FFmpegError> {
         if !self.decode_only {
-            let time_base = self.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
+            let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
             let mut encoded = Packet::empty();
             while self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.receive_packet(&mut encoded).is_ok() {
                 encoded.set_stream(self.output_index.unwrap_or_default());

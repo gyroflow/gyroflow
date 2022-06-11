@@ -78,6 +78,11 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_lim
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
 
+    if (bool(params.flags & 4)) { // Fill with background
+        fragColor = params.background / 255.0;
+        return;
+    }
+
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     float sy = texPos.y;

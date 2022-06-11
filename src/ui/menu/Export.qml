@@ -34,6 +34,9 @@ MenuItem {
         id: settings;
         property alias defaultCodec: codec.currentIndex;
         property alias exportAudio: audio.checked;
+        property alias keyframeDistance: keyframeDistance.value;
+        property alias preserveOtherTracks: preserveOtherTracks.checked;
+        property alias padWithBlack: padWithBlack.checked;
     }
 
     property real aspectRatio: 1.0;
@@ -65,7 +68,13 @@ MenuItem {
             use_gpu:        root.outGpu,
             audio:          root.outAudio,
             pixel_format:   "",
-            override_fps:   root.overrideFps
+            override_fps:   root.overrideFps,
+
+            // Advanced
+            encoder_options:       encoderOptions.text,
+            keyframe_distance:     keyframeDistance.value,
+            preserve_other_tracks: preserveOtherTracks.checked,
+            pad_with_black:        padWithBlack.checked,
         };
     }
 
@@ -131,6 +140,12 @@ MenuItem {
             if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
             if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
             if (output.hasOwnProperty("override_fps")) root.overrideFps = +output.override_fps || 0;
+
+            // Advanced
+            if (output.hasOwnProperty("encoder_options"))       encoderOptions.text         = output.encoder_options;
+            if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
+            if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
+            if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
         }
     }
 
@@ -156,6 +171,10 @@ MenuItem {
             } else {
                 gpu.checked = gpuChecked == 1;
             }
+
+            encoderOptions.preventSave = true;
+            encoderOptions.text = settings.value("encoderOptions-" + exportFormats[currentIndex].name, "");
+            encoderOptions.preventSave = false;
         }
         onCurrentIndexChanged: {
             const format = exportFormats[currentIndex];
@@ -326,5 +345,69 @@ MenuItem {
         checked: true;
         property bool enabled2: true;
         enabled: enabled2;
+    }
+
+    AdvancedSection {
+        Label {
+            position: Label.Top;
+            text: qsTr("Custom encoder options");
+
+            TextField {
+                id: encoderOptions;
+                width: parent.width;
+                validator: RegularExpressionValidator {
+                    regularExpression: /(-([^\s"]+)\s+("[^"]+"|[^\s"]+)\s*?)*/
+                }
+                onEditingFinished: {
+                    if (!preventSave)
+                        settings.setValue("encoderOptions-" + exportFormats[codec.currentIndex].name, text);
+                }
+                property bool preventSave: false;
+            }
+            LinkButton {
+                id: encoderOptionsInfo;
+                height: parent.height;
+                icon.name: "info";
+                leftPadding: 3 * dpiScale;
+                rightPadding: 3 * dpiScale;
+                y: -encoderOptions.height;
+                anchors.right: parent.right;
+                display: QQC.Button.IconOnly;
+                tooltip: qsTr("Show available options");
+                onClicked: {
+                    const text = render_queue.get_encoder_options(render_queue.get_default_encoder(root.outCodec, root.outGpu));
+                    const el = window.messageBox(Modal.Info, text, [ { text: qsTr("Ok") } ], undefined, Text.MarkdownText);
+                    el.t.horizontalAlignment = Text.AlignLeft;
+                }
+            }
+        }
+        Label {
+            position: Label.Left;
+            text: qsTr("Keyframe distance");
+
+            NumberField {
+                id: keyframeDistance;
+                width: parent.width;
+                height: 25 * dpiScale;
+                value: 1;
+                from: 0.01;
+                precision: 2;
+                unit: qsTr("s");
+            }
+        }
+        CheckBox {
+            id: preserveOtherTracks;
+            text: qsTr("Preserve other tracks");
+            checked: false;
+            tooltip: qsTr("This disables trim range and you need to use the .mov output file extension");
+            onCheckedChanged: if (checked) codec.updateExtension(".mov");
+        }
+        CheckBox {
+            id: padWithBlack;
+            text: qsTr("Use black frames outside trim range and keep original file duration");
+            checked: false;
+            width: parent.width;
+            Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
+        }
     }
 }

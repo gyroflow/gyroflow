@@ -15,6 +15,7 @@ use crate::core::{ StabilizationManager, stabilization::* };
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
 use std::ffi::c_void;
 use std::os::raw::c_char;
+use std::os::raw::c_int;
 use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
 
@@ -129,11 +130,16 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
     let params = stab.params.read();
-    let trim_ratio = render_options.trim_end - render_options.trim_start;
+    let trim_ratio = if !render_options.pad_with_black && !render_options.preserve_other_tracks {
+        render_options.trim_end - render_options.trim_start
+    } else {
+        1.0
+    };
     let total_frame_count = params.frame_count;
-    let _fps = params.fps;
     let fps_scale = params.fps_scale;
     let has_alpha = params.background[3] < 255.0;
+
+    let mut pixel_format = render_options.pixel_format.clone();
 
     #[cfg(not(target_os = "android"))]
     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
@@ -165,22 +171,24 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu));
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
-    proc.video.hw_device_type = encoder.2;
-    proc.video.codec_options.set("threads", "auto");
+    proc.video.encoder_params.hw_device_type = encoder.2;
+    proc.video.encoder_params.options.set("threads", "auto");
     proc.video.processing_order = order;
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
-    if render_options.trim_start > 0.0 { proc.start_ms = Some(render_options.trim_start * duration_ms); }
-    if render_options.trim_end   < 1.0 { proc.end_ms   = Some(render_options.trim_end   * duration_ms); }
+    if !render_options.pad_with_black && !render_options.preserve_other_tracks {
+        if render_options.trim_start > 0.0 { proc.start_ms = Some(render_options.trim_start * duration_ms); }
+        if render_options.trim_end   < 1.0 { proc.end_ms   = Some(render_options.trim_end   * duration_ms); }
+    }
 
     match proc.video_codec.as_deref() {
         Some("prores_ks") | Some("prores_videotoolbox") => {
             let profiles = ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"];
             let pix_fmts = [Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUV422P10LE, Pixel::YUVA444P10LE, Pixel::YUVA444P10LE];
             if let Some(profile) = profiles.iter().position(|&x| x == render_options.codec_options) {
-                proc.video.codec_options.set("profile", &format!("{}", profile));
+                proc.video.encoder_params.options.set("profile", &format!("{}", profile));
                 if proc.video_codec.as_deref() == Some("prores_ks") {
-                    proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+                    proc.video.encoder_params.pixel_format = Some(pix_fmts[profile]);
                 }
             }
             proc.video.clone_frames = proc.video_codec.as_deref() == Some("prores_ks");
@@ -189,24 +197,24 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
             let profiles = ["DNxHD", "DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"];
             let pix_fmts = [Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P, Pixel::YUV422P10LE, Pixel::YUV444P10LE];
             if let Some(profile) = profiles.iter().position(|&x| x == render_options.codec_options) {
-                proc.video.codec_options.set("profile", &format!("{}", profile));
-                proc.video.encoder_pixel_format = Some(pix_fmts[profile]);
+                proc.video.encoder_params.options.set("profile", &format!("{}", profile));
+                proc.video.encoder_params.pixel_format = Some(pix_fmts[profile]);
             }
             proc.video.clone_frames = true;
         }
         Some("png") => {
             if render_options.codec_options.contains("16-bit") {
-                proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA64BE } else { Pixel::RGB48BE });
+                proc.video.encoder_params.pixel_format = Some(if has_alpha { Pixel::RGBA64BE } else { Pixel::RGB48BE });
             } else {
-                proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::RGBA } else { Pixel::RGB24 });
+                proc.video.encoder_params.pixel_format = Some(if has_alpha { Pixel::RGBA } else { Pixel::RGB24 });
             }
             proc.video.clone_frames = true;
         }
         Some("exr") => {
             proc.video.clone_frames = true;
-            proc.video.codec_options.set("compression", "1"); // RLE compression
-            proc.video.codec_options.set("gamma", "1.0");
-            proc.video.encoder_pixel_format = Some(if has_alpha { Pixel::GBRAPF32LE } else { Pixel::GBRPF32LE });
+            proc.video.encoder_params.options.set("compression", "1"); // RLE compression
+            proc.video.encoder_params.options.set("gamma", "1.0");
+            proc.video.encoder_params.pixel_format = Some(if has_alpha { Pixel::GBRAPF32LE } else { Pixel::GBRPF32LE });
             /*Decoder options:
                 -layer             <string>     .D.V....... Set the decoding layer (default "")
                 -part              <int>        .D.V....... Set the decoding part (from 0 to INT_MAX) (default 0)
@@ -233,17 +241,30 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         _ => { }
     }
 
-    if !render_options.pixel_format.is_empty() {
-        use std::str::FromStr;
-        match Pixel::from_str(&render_options.pixel_format.to_ascii_lowercase()) {
-            Ok(px) => { proc.video.encoder_pixel_format = Some(px); },
-            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", render_options.pixel_format, e); }
+    //proc.video.codec_options.set("preset", "medium");
+    proc.video.encoder_params.options.set("allow_sw", "1");
+    proc.video.encoder_params.options.set("realtime", "0");
+
+    proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
+
+    proc.preserve_other_tracks = render_options.preserve_other_tracks;
+
+    for (key, value) in render_options.get_encoder_options_dict().iter() {
+        log::info!("Setting encoder option {}: {}", key, value);
+        if key == "pix_fmt" {
+            pixel_format = value.to_string();
+            continue;
         }
+        proc.video.encoder_params.options.set(key, value);
     }
 
-    //proc.video.codec_options.set("preset", "medium");
-    proc.video.codec_options.set("allow_sw", "1");
-    proc.video.codec_options.set("realtime", "0");
+    if !pixel_format.is_empty() {
+        use std::str::FromStr;
+        match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
+            Ok(px) => { proc.video.encoder_params.pixel_format = Some(px); },
+            Err(e) => { ::log::debug!("Unknown requested pixel format: {}, {:?}", pixel_format, e); }
+        }
+    }
 
     let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
 
@@ -253,7 +274,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     log::debug!("start_us: {}, render_duration: {}, render_frame_count: {}", start_us, render_duration, render_frame_count);
 
-    let mut planes = Vec::<Box<dyn FnMut(i64, &mut Video, &mut Video, usize)>>::new();
+    let mut planes = Vec::<Box<dyn FnMut(i64, &mut Video, &mut Video, usize, bool)>>::new();
 
     let is_prores_videotoolbox = proc.video_codec.as_deref() == Some("prores_videotoolbox");
 
@@ -266,6 +287,10 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     });
 
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
+        let fill_with_background = render_options.pad_with_black &&
+            (timestamp_us < (render_options.trim_start * duration_ms * 1000.0).round() as i64 ||
+             timestamp_us > (render_options.trim_end   * duration_ms * 1000.0).round() as i64);
+
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }
@@ -295,12 +320,18 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
                     plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
                     plane.set_compute_params(ComputeParams::from_manager(&stab));
-                    $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize| {
+                    $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
                         let size        = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
                         let output_size = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
 
+                        plane.ensure_stab_data_at_timestamp(timestamp_us);
+                        if fill_with_background {
+                            if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
+                                transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
+                            }
+                        }
                         plane.process_pixels(timestamp_us, size, output_size, buffer, out_buffer);
                     }));
                 })*
@@ -395,7 +426,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
         let mut undistort_frame = |frame: &mut Video, out_frame: &mut Video| {
             for (i, cb) in planes.iter_mut().enumerate() {
-                (*cb)(timestamp_us, frame, out_frame, i);
+                (*cb)(timestamp_us, frame, out_frame, i, fill_with_background);
             }
             progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count, false));
         };
@@ -496,6 +527,63 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
 pub fn append_log(msg: &str) { ::log::debug!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
 pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
 pub fn clear_log() { FFMPEG_LOG.write().clear() }
+
+unsafe fn to_str<'a>(ptr: *const c_char) -> std::borrow::Cow<'a, str> {
+    if ptr.is_null() { return std::borrow::Cow::Borrowed(""); }
+    std::ffi::CStr::from_ptr(ptr).to_string_lossy()
+}
+unsafe fn codec_options(c: *const ffi::AVCodec) {
+    let mut ret = String::new();
+    ret.push_str(&format!("{} **{}**:\n\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name)));
+
+    if !(*c).pix_fmts.is_null() {
+        ret.push_str("Supported pixel formats (-pix_fmt): ");
+        for i in 0..100 {
+            let p = *(*c).pix_fmts.offset(i);
+            if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
+                break;
+            }
+            if i > 0 { ret.push_str(", "); }
+            ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
+        }
+        ret.push('\n');
+    }
+
+    if !(*c).priv_class.is_null() {
+        ret.push_str("```\n");
+        FFMPEG_LOG.write().push_str(&ret);
+        show_help_children((*c).priv_class, ffi::AV_OPT_FLAG_ENCODING_PARAM | ffi::AV_OPT_FLAG_DECODING_PARAM);
+        FFMPEG_LOG.write().push_str("\n```");
+    }
+}
+
+unsafe fn show_help_children(mut class: *const ffi::AVClass, flags: c_int) {
+    if !(*class).option.is_null() {
+        let ptr = std::ptr::null_mut();
+        ffi::av_opt_show2((&mut class) as *mut *const _ as *mut _, ptr, flags, 0);
+    }
+    // let mut iter = std::ptr::null_mut();
+    // loop {
+    //     let child = ffi::av_opt_child_class_iterate(class, &mut iter);
+    //     if child.is_null() {
+    //         break;
+    //     }
+    //     show_help_children(child, flags);
+    // }
+}
+
+pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
+    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&codec, gpu));
+    encoder.0.to_string()
+}
+pub fn get_encoder_options(name: &str) -> String {
+    clear_log();
+    let encoder = ffmpeg_next::encoder::find_by_name(name).unwrap();
+    unsafe { codec_options(encoder.as_ptr()); }
+    let ret = get_log().replace("E..V.......", "");
+    clear_log();
+    ret
+}
 
 /*
 pub fn test() {
