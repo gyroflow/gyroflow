@@ -302,7 +302,7 @@ Item {
             }
             Action {
                 id: guessOrientationHere;
-                icon.name: "spinner";
+                icon.name: "axes";
                 text: qsTr("Guess IMU orientation here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
