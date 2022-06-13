@@ -5,14 +5,14 @@
 pub mod opencl;
 pub mod wgpu;
 
-pub fn initialize_contexts() -> Option<String> {
+pub fn initialize_contexts() -> Option<(String, String)> {
     #[cfg(feature = "use-opencl")]
     if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
         let cl = std::panic::catch_unwind(|| {
             opencl::OclWrapper::initialize_context()
         });
         match cl {
-            Ok(Ok(name)) => { return Some(name); },
+            Ok(Ok(names)) => { return Some(names); },
             Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
             Err(e) => {
                 if let Some(s) = e.downcast_ref::<&str>() {
@@ -31,7 +31,7 @@ pub fn initialize_contexts() -> Option<String> {
             wgpu::WgpuWrapper::initialize_context()
         });
         match wgpu {
-            Ok(Some(name)) => { return Some(name); },
+            Ok(Some(names)) => { return Some(names); },
             Ok(None) => { log::error!("wgpu init error"); },
             Err(e) => {
                 if let Some(s) = e.downcast_ref::<&str>() {

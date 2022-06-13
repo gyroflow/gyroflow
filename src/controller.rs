@@ -174,6 +174,11 @@ pub struct Controller {
     set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
     set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
 
+    list_gpu_devices: qt_method!(fn(&self)),
+    set_device: qt_method!(fn(&self, i: i32)),
+    set_rendering_gpu_type_from_name: qt_method!(fn(&self, name: String)),
+    gpu_list_loaded: qt_signal!(list: QJsonArray),
+
     is_superview: qt_property!(bool; WRITE set_is_superview),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
@@ -1146,6 +1151,20 @@ impl Controller {
                 ::log::debug!("Lens profile rated: {}", body.as_str());
             }
         });
+    }
+
+    fn list_gpu_devices(&self) {
+        let finished = util::qt_queued_callback(self, |this, list: Vec<String>| {
+            this.gpu_list_loaded(util::serde_json_to_qt_array(&serde_json::json!(list)))
+        });
+        self.stabilizer.list_gpu_devices(finished);
+    }
+    fn set_device(&self, i: i32) {
+        let mut l = self.stabilizer.stabilization.write();
+        l.set_device(i as isize);
+    }
+    fn set_rendering_gpu_type_from_name(&self, name: String) {
+        rendering::set_gpu_type_from_name(&name);
     }
 
     // Utilities

@@ -93,6 +93,8 @@ pub struct Stabilization<T: PixelType> {
 
     backend_initialized: bool,
 
+    pub gpu_list: Vec<String>,
+
     pub current_fov: f64,
     compute_params: ComputeParams,
 
@@ -145,6 +147,53 @@ impl<T: PixelType> Stabilization<T> {
     pub fn get_undistortion_data(&mut self, timestamp_us: i64) -> Option<&FrameTransform> {
         self.ensure_stab_data_at_timestamp(timestamp_us);
         self.stab_data.get(&timestamp_us)
+    }
+
+    pub fn list_devices(&self) -> Vec<String> {
+        let mut ret = Vec::new();
+
+        #[cfg(feature = "use-opencl")]
+        if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
+            ret.extend(opencl::OclWrapper::list_devices().into_iter().map(|x| format!("[OpenCL] {x}")));
+        }
+        if std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
+            ret.extend(wgpu::WgpuWrapper::list_devices().into_iter().map(|x| format!("[wgpu] {x}")));
+        }
+        ret
+    }
+
+    pub fn set_device(&mut self, i: isize) -> bool {
+        if i < 0 { // CPU
+            self.cl = None;
+            self.wgpu = None;
+            self.backend_initialized = true;
+            return true;
+        }
+        if let Some(name) = self.gpu_list.get(i as usize) {
+            if name.starts_with("[OpenCL]") {
+                self.backend_initialized = false;
+                #[cfg(feature = "use-opencl")]
+                match opencl::OclWrapper::set_device(i as usize) {
+                    Ok(_) => { return true; },
+                    Err(e) => {
+                        log::error!("Failed to set OpenCL device {}: {:?}", name, e);
+                    }
+                }
+            } else if name.starts_with("[wgpu]") {
+                self.backend_initialized = false;
+                let first_ind = self.gpu_list.iter().enumerate().find(|(_, m)| m.starts_with("[wgpu]")).map(|(idx, _)| idx).unwrap_or(0);
+                let wgpu_ind = i - first_ind as isize;
+                if wgpu_ind >= 0 {
+                    match wgpu::WgpuWrapper::set_device(wgpu_ind as usize) {
+                        Some(_) => { return true; },
+                        None => {
+                            log::error!("Failed to set wgpu device {}", name);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     pub fn init_backends(&mut self, timestamp_us: i64) {

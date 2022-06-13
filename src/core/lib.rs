@@ -684,6 +684,20 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_smoothing();
     }
 
+    pub fn list_gpu_devices<F: Fn(Vec<String>) + Send + Sync + 'static>(&self, cb: F) {
+        let stab = self.stabilization.clone();
+        run_threaded(move || {
+            let lock = stab.upgradable_read();
+            let list = lock.list_devices();
+
+            {
+                let mut lock = RwLockUpgradableReadGuard::upgrade(lock);
+                lock.gpu_list = list.clone();
+            }
+            cb(list);
+        });
+    }
+
     pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, output_options: String) -> std::io::Result<()> {
         let data = self.export_gyroflow_data(thin, output_options)?;
         std::fs::write(filepath, data)?;

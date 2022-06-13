@@ -31,7 +31,31 @@ lazy_static::lazy_static! {
 }
 
 impl WgpuWrapper {
-    pub fn initialize_context() -> Option<String> {
+    pub fn list_devices() -> Vec<String> {
+        let instance = wgpu::Instance::new(wgpu::Backends::all());
+
+        let adapters = instance.enumerate_adapters(wgpu::Backends::all());
+        adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
+    }
+
+    pub fn set_device(index: usize) -> Option<()> {
+        let instance = wgpu::Instance::new(wgpu::Backends::all());
+
+        let mut i = 0;
+        for a in instance.enumerate_adapters(wgpu::Backends::all()) {
+            if i == index {
+                let info = a.get_info();
+                log::debug!("WGPU adapter: {:?}", &info);
+
+                *ADAPTER.write() = Some(a);
+                return Some(());
+            }
+            i += 1;
+        }
+        None
+    }
+
+    pub fn initialize_context() -> Option<(String, String)> {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
 
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -46,10 +70,11 @@ impl WgpuWrapper {
         }
 
         let name = info.name.clone();
+        let list_name = format!("[wgpu] {} ({:?})", info.name, info.backend);
 
         *ADAPTER.write() = Some(adapter);
 
-        Some(name)
+        Some((name, list_name))
     }
 
     pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), lens_model_funcs: &str) -> Option<Self> {

@@ -208,4 +208,41 @@ MenuItem {
         checked: true;
         onCheckedChanged: controller.set_gpu_decoding(checked);
     }
+    Label {
+        position: Label.TopPosition;
+        text: qsTr("Device for video processing");
+        visible: processingDevice.model.length > 0;
+        ComboBox {
+            id: processingDevice;
+            model: [];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            property bool preventChange: true;
+            Connections {
+                target: controller;
+                function onGpu_list_loaded(list) {
+                    processingDevice.preventChange = true;
+                    processingDevice.model = [...list, qsTr("CPU only")];
+                    for (let i = 0; i < list.length; ++i) {
+                        if (list[i] == defaultInitializedDevice) {
+                            processingDevice.currentIndex = i;
+                            break;
+                        }
+                    }
+                    processingDevice.preventChange = false;
+                }
+            }
+            Component.onCompleted: controller.list_gpu_devices();
+            onCurrentIndexChanged: {
+                if (preventChange) return;
+
+                if (currentIndex == model.length - 1) {
+                    controller.set_device(-1);
+                } else {
+                    controller.set_device(currentIndex);
+                }
+            }
+        }
+    }
 }

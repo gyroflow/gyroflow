@@ -409,5 +409,42 @@ MenuItem {
             width: parent.width;
             Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
         }
+        Label {
+            position: Label.TopPosition;
+            text: qsTr("Device for rendering");
+            visible: root.outGpu && renderingDevice.model.length > 0;
+            ComboBox {
+                id: renderingDevice;
+                model: [];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 0;
+                property bool preventChange: true;
+                Connections {
+                    target: controller;
+                    function onGpu_list_loaded(list) {
+                        const hasOpencl = !!list.find(x => x.includes("[OpenCL]"));
+                        const hasWgpu   = !!list.find(x => x.includes("[wgpu]"));
+                        if (hasOpencl && hasWgpu) {
+                                 if (defaultInitializedDevice.includes("[OpenCL]")) list = list.filter(x => !x.includes("[wgpu]"));
+                            else if (defaultInitializedDevice.includes("[wgpu]"))   list = list.filter(x => !x.includes("[OpenCL]"));
+                        }
+                        renderingDevice.preventChange = true;
+                        renderingDevice.model = list.map(x => x.replace("[OpenCL] ", "").replace("[wgpu] ", ""));
+                        for (let i = 0; i < list.length; ++i) {
+                            if (list[i] == defaultInitializedDevice) {
+                                renderingDevice.currentIndex = i;
+                                break;
+                            }
+                        }
+                        renderingDevice.preventChange = false;
+                    }
+                }
+                onCurrentTextChanged: {
+                    if (preventChange) return;
+                    controller.set_rendering_gpu_type_from_name(currentText);
+                }
+            }
+        }
     }
 }

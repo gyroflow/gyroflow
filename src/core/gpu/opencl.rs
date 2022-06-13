@@ -24,8 +24,44 @@ lazy_static::lazy_static! {
     static ref CONTEXT: RwLock<Option<CtxWrapper>> = RwLock::new(None);
 }
 
+const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
+
 impl OclWrapper {
-    pub fn initialize_context() -> ocl::Result<String> {
+    pub fn list_devices() -> Vec<String> {
+        let mut ret = Vec::new();
+        for p in Platform::list() {
+            if let Ok(devs) = Device::list_all(p) {
+                ret.extend(devs.into_iter().filter_map(|x| Some(format!("{} {}", p.name().ok()?, x.name().ok()?))));
+            }
+        }
+        ret.drain(..).filter(|x| !EXCLUSIONS.iter().any(|e| x.contains(e))).collect()
+    }
+
+    pub fn set_device(index: usize) -> ocl::Result<()> {
+        let mut i = 0;
+        for p in Platform::list() {
+            if let Ok(devs) = Device::list_all(p) {
+                for d in devs {
+                    if EXCLUSIONS.iter().any(|x| d.name().unwrap_or_default().contains(x)) { continue; }
+                    if i == index {
+                        ::log::info!("OpenCL Platform: {}, Device: {} {}", p.name()?, d.vendor()?, d.name()?);
+
+                        let context = Context::builder()
+                            .platform(p)
+                            .devices(d)
+                            .build()?;
+
+                        *CONTEXT.write() = Some(CtxWrapper { device: d, context });
+                        return Ok(());
+                    }
+                    i += 1;
+                }
+            }
+        }
+        Err(ocl::BufferCmdError::MapUnavailable.into())
+    }
+
+    pub fn initialize_context() -> ocl::Result<(String, String)> {
         // List all devices
         Platform::list().iter().for_each(|p| {
             if let Ok(devs) = Device::list_all(p) {
@@ -66,7 +102,7 @@ impl OclWrapper {
                 }
             }
         }
-        if device.is_none() { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
+        if device.is_none() { return Err(ocl::BufferCmdError::MapUnavailable.into()); }
         let platform = platform.unwrap();
         let device = device.unwrap();
         ::log::info!("OpenCL Platform: {}, Device: {} {}", platform.name()?, device.vendor()?, device.name()?);
@@ -77,10 +113,11 @@ impl OclWrapper {
             .build()?;
 
         let name = format!("{} {}", device.vendor()?, device.name()?);
+        let list_name = format!("[OpenCL] {} {}", platform.name()?, device.name()?);
 
         *CONTEXT.write() = Some(CtxWrapper { device, context });
 
-        Ok(name)
+        Ok((name, list_name))
     }
 
     pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str) -> ocl::Result<Self> {
