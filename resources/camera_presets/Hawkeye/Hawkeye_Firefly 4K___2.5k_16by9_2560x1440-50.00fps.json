@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly 4K___2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "I7-7700K",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly 4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0376884754822078,
+    "camera_matrix": [
+      [
+        1437.8778573771478,
+        0.0,
+        1389.9147854262496
+      ],
+      [
+        0.0,
+        1438.6732599991983,
+        727.4709008205931
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2140902473239859,
+      -0.44916257226229606,
+      0.6755886614062304,
+      -0.367328099433368
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO4 Silver__48fps_1080p_4by3_1920x1440-47.95fps",
+  "note": "48fps",
+  "calibrated_by": "Jens Krumrei",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Silver",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 47.952049,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4231199827856893,
+    "camera_matrix": [
+      [
+        844.1428258729915,
+        0.0,
+        977.4828771665202
+      ],
+      [
+        0.0,
+        844.17525112957,
+        709.1559862571171
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05111256546914846,
+      0.00828787956670785,
+      0.0024080353917428662,
+      -0.00294805061748454
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

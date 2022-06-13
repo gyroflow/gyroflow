@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5mm_C4K_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "C4K",
+  "calibrated_by": "Captain Kangaroo",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4835730979200326,
+    "camera_matrix": [
+      [
+        1661.9322261176706,
+        0.0,
+        2056.901460756359
+      ],
+      [
+        0.0,
+        1662.2145976789243,
+        1062.0975555204204
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3257516451003388,
+      0.1287458361916268,
+      -0.04330130196073896,
+      0.0967382887131097
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

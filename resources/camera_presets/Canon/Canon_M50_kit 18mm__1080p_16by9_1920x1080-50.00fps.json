@@ -1,0 +1,69 @@
+{
+  "name": "Canon_M50_kit 18mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Tomasz Kuban",
+  "camera_brand": "Canon",
+  "camera_model": "M50",
+  "lens_model": "kit 18mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5051531703172775,
+    "camera_matrix": [
+      [
+        1657.512108256801,
+        0.0,
+        952.8846729550794
+      ],
+      [
+        0.0,
+        1660.1149277766249,
+        526.3652587388933
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13798490005481617,
+      0.3777539182933974,
+      -0.981703920260656,
+      1.5746468175158457
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

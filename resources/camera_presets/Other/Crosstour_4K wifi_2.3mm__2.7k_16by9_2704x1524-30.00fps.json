@@ -1,0 +1,69 @@
+{
+  "name": "Crosstour_4K wifi_2.3mm__2.7k_16by9_2704x1524-30.00fps",
+  "note": "",
+  "calibrated_by": "Till Kramer",
+  "camera_brand": "Crosstour",
+  "camera_model": "4K wifi",
+  "lens_model": "2.3mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1524
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.65856884004479,
+    "camera_matrix": [
+      [
+        1929.6801926015887,
+        0.0,
+        1351.6292835243269
+      ],
+      [
+        0.0,
+        1926.5570972735013,
+        825.1424844413121
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.13998534876263932,
+      0.05978828860670278,
+      -0.1706255856000399,
+      0.15796792931485923
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

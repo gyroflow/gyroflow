@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Mi 11 lite 5g__f2.0_4k_16by9_3840x2160-24.01fps",
+  "note": "",
+  "calibrated_by": "Amit1 K (阿米特_Askey_TW)",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 11 lite 5g",
+  "lens_model": "",
+  "camera_setting": "f2.0",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.006401,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6591892918033393,
+    "camera_matrix": [
+      [
+        2844.3879554286514,
+        0.0,
+        1915.8493964439729
+      ],
+      [
+        0.0,
+        2846.6841077213594,
+        1071.0134546736474
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5020075845042901,
+      -1.3327059810183433,
+      5.898840100470975,
+      -8.547415666187826
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

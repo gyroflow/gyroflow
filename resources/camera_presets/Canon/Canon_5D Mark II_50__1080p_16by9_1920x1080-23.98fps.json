@@ -1,0 +1,66 @@
+{
+  "name": "Canon_5D Mark II_50__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Admin",
+  "camera_brand": "Canon",
+  "camera_model": "5D Mark II",
+  "lens_model": "50",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2228438155100887,
+    "camera_matrix": [
+      [
+        3170.2578604427717,
+        0.0,
+        971.982497838186
+      ],
+      [
+        0.0,
+        3165.466977644237,
+        566.3871729463234
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13803831603416236,
+      1.855285430624772,
+      -14.054527621606338,
+      -16.62513852619163
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-23",
+  "compatible_settings": []
+}

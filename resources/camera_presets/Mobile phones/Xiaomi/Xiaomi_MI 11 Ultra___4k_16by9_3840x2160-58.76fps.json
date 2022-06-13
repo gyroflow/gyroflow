@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_MI 11 Ultra___4k_16by9_3840x2160-58.76fps",
+  "note": "",
+  "calibrated_by": "CharlesFPV",
+  "camera_brand": "Xiaomi",
+  "camera_model": "MI 11 Ultra",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 58.762264,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6676638682982045,
+    "camera_matrix": [
+      [
+        3386.2197483479117,
+        0.0,
+        1929.207803280884
+      ],
+      [
+        0.0,
+        3387.854568153766,
+        1035.3200686126745
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3347385818171214,
+      0.06392624520521227,
+      4.457507861873854,
+      -18.81013591733612
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

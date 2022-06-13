@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Rokinon 12mm T2.2_DCI Prores Proxy8_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "4096X2160",
+  "calibrated_by": "Paco FPV",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Rokinon 12mm T2.2",
+  "camera_setting": "DCI Prores Proxy8",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.45737433366814634,
+    "camera_matrix": [
+      [
+        2759.3823887665785,
+        0.0,
+        2061.2858462433096
+      ],
+      [
+        0.0,
+        2731.8313118823976,
+        1076.689989197078
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29792206623321077,
+      0.1204494226259018,
+      0.10539117162417937,
+      -0.093502930594951
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

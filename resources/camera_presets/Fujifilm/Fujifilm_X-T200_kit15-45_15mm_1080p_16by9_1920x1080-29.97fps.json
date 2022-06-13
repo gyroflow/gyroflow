@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-T200_kit15-45_15mm_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Vikker",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T200",
+  "lens_model": "kit15-45",
+  "camera_setting": "15mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.722147873997457,
+    "camera_matrix": [
+      [
+        1226.93905235132,
+        0.0,
+        961.1469169389416
+      ],
+      [
+        0.0,
+        1221.221238143466,
+        528.2269894687308
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2324860114149544,
+      0.8142834301710434,
+      -1.8978362037392649,
+      1.9734175331147592
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-31",
+  "compatible_settings": []
+}

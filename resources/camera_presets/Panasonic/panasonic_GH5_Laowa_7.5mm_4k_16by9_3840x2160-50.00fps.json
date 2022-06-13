@@ -1,0 +1,66 @@
+{
+  "name": "panasonic_GH5_Laowa_7.5mm_4k_16by9_3840x2160-50.00fps",
+  "note": "7.5mm",
+  "calibrated_by": "ROYFPV",
+  "camera_brand": "panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Laowa",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8617641390754074,
+    "camera_matrix": [
+      [
+        1997.711989725462,
+        0.0,
+        1919.7595385649936
+      ],
+      [
+        0.0,
+        1994.04153207332,
+        1111.1511411414615
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.37809106596553627,
+      -0.17112339880089145,
+      0.7552328207815513,
+      -0.6707746226715391
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-03-01",
+  "compatible_settings": []
+}

@@ -1,7 +1,7 @@
 {
   "name": "GoPro_HERO5 Black___2.7k_16by9_2704x1520-59.94fps",
   "note": "",
-  "calibrated_by": "Romuald Graffan",
+  "calibrated_by": "覃先生",
   "camera_brand": "GoPro",
   "camera_model": "HERO5 Black",
   "lens_model": "",
@@ -21,22 +21,22 @@
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 11,
+  "num_images": 15,
   "fps": 59.94006,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.5074315343650903,
+    "RMS_error": 0.6132148466035379,
     "camera_matrix": [
       [
-        1458.219602806434,
+        959.0053382671158,
         0.0,
-        1373.9500231056095
+        1357.641531383262
       ],
       [
         0.0,
-        1456.0712098353652,
-        738.7896558374935
+        954.7245213093164,
+        745.4477463440469
       ],
       [
         0.0,
@@ -45,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.05865213122360228,
-      -0.0007235527692518322,
-      0.003798091773031621,
-      0.0005747755454099688
+      0.15687058209888446,
+      0.054440124983312875,
+      -0.05134975301247504,
+      0.02430581855761624
     ],
     "radial_distortion_limit": null
   },
@@ -60,7 +60,7 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc5",
-  "date": "2022-04-10",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
   "compatible_settings": []
 }

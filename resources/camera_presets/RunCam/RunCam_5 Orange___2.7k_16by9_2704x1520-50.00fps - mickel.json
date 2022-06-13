@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_5 Orange___2.7k_16by9_2704x1520-50.00fps",
+  "note": "",
+  "calibrated_by": "mickel",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9568363312980096,
+    "camera_matrix": [
+      [
+        1435.7354901732074,
+        0.0,
+        1406.4272175563929
+      ],
+      [
+        0.0,
+        1444.7884989336496,
+        720.7950503466501
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0021816823562249062,
+      -0.08882882852825665,
+      0.1375073148847357,
+      -0.07888851708487538
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

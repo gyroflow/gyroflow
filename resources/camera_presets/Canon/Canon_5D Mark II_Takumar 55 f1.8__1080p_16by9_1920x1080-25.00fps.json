@@ -1,0 +1,69 @@
+{
+  "name": "Canon_5D Mark II_Takumar 55 f/1.8__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "simion",
+  "camera_brand": "Canon",
+  "camera_model": "5D Mark II",
+  "lens_model": "Takumar 55 f/1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6928644759450798,
+    "camera_matrix": [
+      [
+        3358.22718702037,
+        0.0,
+        941.1746816405148
+      ],
+      [
+        0.0,
+        3352.9691875258595,
+        505.1668739335827
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1853093909517631,
+      0.5036089712665438,
+      12.33146204329616,
+      -171.86117735731085
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

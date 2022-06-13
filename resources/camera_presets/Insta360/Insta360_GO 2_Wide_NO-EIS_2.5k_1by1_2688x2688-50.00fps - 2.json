@@ -1,7 +1,7 @@
 {
   "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
   "note": "NO-EIS",
-  "calibrated_by": "Administrator",
+  "calibrated_by": "Marc Foix Anglés",
   "camera_brand": "Insta360",
   "camera_model": "GO 2",
   "lens_model": "Wide",
@@ -15,28 +15,28 @@
     "h": 2688
   },
   "output_dimension": {
-    "w": 2560,
-    "h": 1440
+    "w": 2688,
+    "h": 2688
   },
-  "frame_readout_time": 16.88,
-  "gyro_lpf": 0.0,
+  "frame_readout_time": null,
+  "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 15,
+  "num_images": 12,
   "fps": 50.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.2601782566174669,
+    "RMS_error": 0.6385977390605379,
     "camera_matrix": [
       [
-        1301.025488683453,
+        1309.3845692729442,
         0.0,
-        1354.6257431556407
+        1348.9144324464162
       ],
       [
         0.0,
-        1301.0574479129475,
-        1322.2860049488388
+        1310.05585809359,
+        1350.0217177780146
       ],
       [
         0.0,
@@ -45,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.02783440870501138,
-      -0.01893298853924645,
-      -0.016329780688593473,
-      0.025323043710088283
+      -0.03948541937307391,
+      -0.012265987072665466,
+      -0.01634299356261574,
+      0.01755158350510729
     ],
     "radial_distortion_limit": null
   },
@@ -59,8 +59,8 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "insta360-go2-wide-2688x2688@50000-no-eis",
+  "identifier": "",
   "calibrator_version": "1.0.0-rc1",
-  "date": "2022-02-09",
+  "date": "2022-02-06",
   "compatible_settings": []
 }

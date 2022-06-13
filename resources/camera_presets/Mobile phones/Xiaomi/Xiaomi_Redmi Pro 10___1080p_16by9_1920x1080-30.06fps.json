@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Redmi Pro 10___1080p_16by9_1920x1080-30.06fps",
+  "note": "",
+  "calibrated_by": "yosward rios casanova",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Pro 10",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 30.061909,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5483773593452187,
+    "camera_matrix": [
+      [
+        1683.1894886507432,
+        0.0,
+        957.7684715746952
+      ],
+      [
+        0.0,
+        1678.738849116807,
+        563.6001439193163
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6042384572928289,
+      -2.619454235423792,
+      13.66861619363929,
+      -27.231462934996618
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Denver_ACK-8062W___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Jarkko Pitkänen",
+  "camera_brand": "Denver",
+  "camera_model": "ACK-8062W",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5380194240535627,
+    "camera_matrix": [
+      [
+        2727.330870582141,
+        0.0,
+        1937.1464703405695
+      ],
+      [
+        0.0,
+        2722.656681907284,
+        1171.3220495794242
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.11541552240987522,
+      -0.07074237800101102,
+      0.26300053847156557,
+      -0.3300408056699483
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

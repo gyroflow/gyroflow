@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Yio___2k_16by9_2304x1296-25.00fps",
+  "note": "",
+  "calibrated_by": "张栗钒",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yio",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9742956250320364,
+    "camera_matrix": [
+      [
+        969.049179050642,
+        0.0,
+        1190.5919855421537
+      ],
+      [
+        0.0,
+        969.4968206402656,
+        680.3802340679972
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0723878260701748,
+      0.024202732925449853,
+      -0.021048410383175495,
+      0.007791458021596857
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-20",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

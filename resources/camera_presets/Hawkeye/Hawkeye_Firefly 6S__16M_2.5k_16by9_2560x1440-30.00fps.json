@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly 6S__16M_2.5k_16by9_2560x1440-30.00fps",
+  "note": "16M",
+  "calibrated_by": "Vanessa Vallerini",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly 6S",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1720115284319317,
+    "camera_matrix": [
+      [
+        1810.743804477412,
+        0.0,
+        1304.260443024942
+      ],
+      [
+        0.0,
+        1800.3814671395935,
+        686.0588454169207
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0514286679582212,
+      0.10696209967121548,
+      -0.15303027163183644,
+      0.018556769800861583
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Laowa 14MM F4 FFii RF_6K_5k_16by9_5760x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Kim Tang",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 14MM F4 FFii RF",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7617258714643372,
+    "camera_matrix": [
+      [
+        3360.066858057044,
+        0.0,
+        2880.1737550288067
+      ],
+      [
+        0.0,
+        3359.9630123380716,
+        1634.989286833121
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.345722349565697,
+      0.10036292169743329,
+      0.040560867768413215,
+      0.03970659253412337
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

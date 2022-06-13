@@ -1,0 +1,69 @@
+{
+  "name": "Canon_RP_RF 50 mm 1.8__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Mateusz Pogonowski",
+  "camera_brand": "Canon",
+  "camera_model": "RP",
+  "lens_model": "RF 50 mm 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4188585022701573,
+    "camera_matrix": [
+      [
+        2966.835651868288,
+        0.0,
+        963.2121136408248
+      ],
+      [
+        0.0,
+        2961.8267029561985,
+        501.1110589853715
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4394837793004749,
+      -2.355925207819472,
+      37.67188059425609,
+      -221.2427450408537
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

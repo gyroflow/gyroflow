@@ -1,0 +1,69 @@
+{
+  "name": "BetaFPV_Nano HD_nano hd__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "张栗钒",
+  "camera_brand": "BetaFPV",
+  "camera_model": "Nano HD",
+  "lens_model": "nano hd",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3287290133969053,
+    "camera_matrix": [
+      [
+        821.1654780180047,
+        0.0,
+        944.3769842201568
+      ],
+      [
+        0.0,
+        821.2672206642656,
+        537.6694921177536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.013376269681029163,
+      -0.07225382854127517,
+      0.04364528771639598,
+      -0.010924402043676172
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

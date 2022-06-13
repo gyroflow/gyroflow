@@ -1,0 +1,66 @@
+{
+  "name": "OnePlus_OnePlus 8 Pro__Normal FOV_1080p_16by9_1920x1080-60.04fps",
+  "note": "",
+  "calibrated_by": "David Shlemayev",
+  "camera_brand": "OnePlus",
+  "camera_model": "OnePlus 8 Pro",
+  "lens_model": "",
+  "camera_setting": "Normal FOV",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.039444,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3705726593861883,
+    "camera_matrix": [
+      [
+        1825.1408235468505,
+        0.0,
+        971.1990387466508
+      ],
+      [
+        0.0,
+        1823.5852797432503,
+        514.2192750386095
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3387726400580035,
+      0.29423832096226615,
+      -2.6372652419445863,
+      7.609371874088912
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-10",
+  "compatible_settings": []
+}

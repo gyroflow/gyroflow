@@ -1,0 +1,69 @@
+{
+  "name": "AKASO_Brave 8___4k_4by3_3840x2880-29.97fps",
+  "note": "",
+  "calibrated_by": "Albert",
+  "camera_brand": "AKASO",
+  "camera_model": "Brave 8",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2880
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2880
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4560407085509862,
+    "camera_matrix": [
+      [
+        1859.890172490124,
+        0.0,
+        1919.7880540341064
+      ],
+      [
+        0.0,
+        1861.1954619366547,
+        1434.5505980869673
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1349357251134309,
+      0.3734532449681108,
+      -0.278796279846599,
+      0.060198679415337866
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

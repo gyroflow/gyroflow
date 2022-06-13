@@ -1,0 +1,66 @@
+{
+  "name": "RED_KOMODO_Laowa 12mm_17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "GOOD",
+  "calibrated_by": "Shikijo Petroski",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 12mm",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9845762005820462,
+    "camera_matrix": [
+      [
+        2964.233172987257,
+        0.0,
+        3126.9373680490853
+      ],
+      [
+        0.0,
+        2963.9496807854493,
+        1584.856679354656
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31724080673472344,
+      0.1227301013380311,
+      0.11024604142746436,
+      -0.04580642874534746
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-26",
+  "compatible_settings": []
+}

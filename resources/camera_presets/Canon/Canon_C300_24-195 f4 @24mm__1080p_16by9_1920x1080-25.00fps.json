@@ -1,0 +1,66 @@
+{
+  "name": "Canon_C300_24-195 f4 @24mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Guillem Valle",
+  "camera_brand": "Canon",
+  "camera_model": "C300",
+  "lens_model": "24-195 f4 @24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.24703662447778377,
+    "camera_matrix": [
+      [
+        1918.0546805344632,
+        0.0,
+        960.8357999781302
+      ],
+      [
+        0.0,
+        1916.8053516368032,
+        531.4915441493913
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2592403625212664,
+      -0.28342641034153737,
+      2.897882073178626,
+      -5.971584864261599
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-06",
+  "compatible_settings": []
+}

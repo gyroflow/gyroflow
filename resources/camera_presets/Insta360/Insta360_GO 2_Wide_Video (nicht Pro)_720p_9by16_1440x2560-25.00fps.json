@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_GO 2_Wide_Video (nicht Pro)_720p_9by16_1440x2560-25.00fps",
+  "note": "EIS",
+  "calibrated_by": "Thomas König",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Wide",
+  "camera_setting": "Video (nicht Pro)",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 2560
+  },
+  "frame_readout_time": 25.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4305953302789651,
+    "camera_matrix": [
+      [
+        1121.8296042715408,
+        0.0,
+        713.4668561908451
+      ],
+      [
+        0.0,
+        1123.4340408821458,
+        1289.579106805989
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17151359213405934,
+      -0.3244684534678958,
+      0.5222703865381699,
+      -0.2810301756045049
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-wide-1440x2560@25000-eis",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

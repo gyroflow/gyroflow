@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_SIGMA 14MM__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Jake P",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "SIGMA 14MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 32,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4511959972971242,
+    "camera_matrix": [
+      [
+        766.7970708561995,
+        0.0,
+        934.9867835212318
+      ],
+      [
+        0.0,
+        766.028317711054,
+        541.2036357091938
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2116096383417005,
+      0.023776557851955368,
+      0.08947420326563413,
+      0.03851810060363126
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

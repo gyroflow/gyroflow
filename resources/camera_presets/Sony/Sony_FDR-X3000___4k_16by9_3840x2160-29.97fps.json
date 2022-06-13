@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FDR-X3000___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Антон",
+  "camera_brand": "Sony",
+  "camera_model": "FDR-X3000",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.926381668776355,
+    "camera_matrix": [
+      [
+        1638.73694409602,
+        0.0,
+        1935.7582980315576
+      ],
+      [
+        0.0,
+        1635.876049555812,
+        1090.5484660289735
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13259328876448503,
+      0.10932398566674084,
+      -0.06649491878837724,
+      0.04038940153165511
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

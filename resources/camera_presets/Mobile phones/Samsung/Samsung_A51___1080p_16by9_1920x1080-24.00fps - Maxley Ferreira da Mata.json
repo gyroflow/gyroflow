@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_A51___1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Maxley Ferreira da Mata",
+  "camera_brand": "Samsung",
+  "camera_model": "A51",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.000944,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6151636333457042,
+    "camera_matrix": [
+      [
+        1315.6620266904708,
+        0.0,
+        956.102797706979
+      ],
+      [
+        0.0,
+        1315.5651554238882,
+        517.3657370830072
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4820451949069844,
+      -0.6123772119598077,
+      2.3296600278754265,
+      -2.685190692931984
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

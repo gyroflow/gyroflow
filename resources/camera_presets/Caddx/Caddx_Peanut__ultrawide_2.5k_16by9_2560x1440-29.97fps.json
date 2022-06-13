@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Peanut__ultrawide_2.5k_16by9_2560x1440-29.97fps",
+  "note": "export from insta360 studio",
+  "calibrated_by": "Andreas Halemba",
+  "camera_brand": "Caddx",
+  "camera_model": "Peanut",
+  "lens_model": "",
+  "camera_setting": "ultrawide",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.5133382328614573,
+    "camera_matrix": [
+      [
+        1328.1163189290182,
+        0.0,
+        1303.7490147231088
+      ],
+      [
+        0.0,
+        1324.0101144362338,
+        720.3708055263983
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0557839902328165,
+      0.24894907805279487,
+      -0.4628390031460974,
+      0.25916101036097505
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Pocket 2_Wide Angle Lens_4k 60 fps_4k_16by9_3840x2160-59.94fps",
+  "note": "4k 60 fps",
+  "calibrated_by": "Jake",
+  "camera_brand": "DJI",
+  "camera_model": "Pocket 2",
+  "lens_model": "Wide Angle Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2318478685200531,
+    "camera_matrix": [
+      [
+        2093.675626985191,
+        0.0,
+        1921.467467257688
+      ],
+      [
+        0.0,
+        2094.316032332915,
+        1057.4520474753774
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.47155353564791747,
+      -0.9113038522394038,
+      1.164928927867509,
+      -0.3939699549442202
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

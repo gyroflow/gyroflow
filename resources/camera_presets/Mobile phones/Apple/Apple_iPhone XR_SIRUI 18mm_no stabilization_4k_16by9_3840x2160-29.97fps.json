@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone XR_SIRUI 18mm_no stabilization_4k_16by9_3840x2160-29.97fps",
+  "note": "ProMovie",
+  "calibrated_by": "Максим Золотарёв",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone XR",
+  "lens_model": "SIRUI 18mm",
+  "camera_setting": "no stabilization",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.973467,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.838004750292045,
+    "camera_matrix": [
+      [
+        1881.9934618021623,
+        0.0,
+        1906.7919911104057
+      ],
+      [
+        0.0,
+        1881.719057407479,
+        1025.7176339533082
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4121365280628456,
+      -0.19928510638915617,
+      0.24542175737752275,
+      0.14049546654500786
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

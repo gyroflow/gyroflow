@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_LAOWA 7.5mm_Calibrated at 8:1_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Giovanni Strondl",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "LAOWA 7.5mm",
+  "camera_setting": "Calibrated at 8:1",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4403666724865302,
+    "camera_matrix": [
+      [
+        1660.786925749595,
+        0.0,
+        2074.357553823676
+      ],
+      [
+        0.0,
+        1661.945488670575,
+        1196.561144414944
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32627249588440466,
+      0.1346505133769726,
+      -0.07210706794076963,
+      0.11456744386276928
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

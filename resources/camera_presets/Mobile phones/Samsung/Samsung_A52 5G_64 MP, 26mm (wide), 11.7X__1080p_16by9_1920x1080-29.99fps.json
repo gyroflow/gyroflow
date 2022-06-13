@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_A52 5G_64 MP, 26mm (wide), 1/1.7X\"__1080p_16by9_1920x1080-29.99fps",
+  "note": "",
+  "calibrated_by": "MrChris",
+  "camera_brand": "Samsung",
+  "camera_model": "A52 5G",
+  "lens_model": "64 MP, 26mm (wide), 1/1.7X\"",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.987085,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.30031887375843364,
+    "camera_matrix": [
+      [
+        1289.2524374000495,
+        0.0,
+        967.3934461774772
+      ],
+      [
+        0.0,
+        1291.3759710522952,
+        501.83830352275214
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6196182184226479,
+      -1.4843850834036405,
+      4.2033702780319535,
+      -3.917652980680444
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

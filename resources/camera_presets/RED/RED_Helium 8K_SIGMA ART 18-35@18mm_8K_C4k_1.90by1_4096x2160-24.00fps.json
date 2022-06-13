@@ -1,0 +1,69 @@
+{
+  "name": "RED_Helium 8K_SIGMA ART 18-35@18mm_8K_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Mateffy Istvan",
+  "camera_brand": "RED",
+  "camera_model": "Helium 8K",
+  "lens_model": "SIGMA ART 18-35@18mm",
+  "camera_setting": "8K",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.60277827482082,
+    "camera_matrix": [
+      [
+        2534.945292950564,
+        0.0,
+        2033.9379169370684
+      ],
+      [
+        0.0,
+        2536.08455421556,
+        1085.2500471504777
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22433262520470676,
+      0.2306639722965732,
+      -0.21750997928026097,
+      0.4806915670976694
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

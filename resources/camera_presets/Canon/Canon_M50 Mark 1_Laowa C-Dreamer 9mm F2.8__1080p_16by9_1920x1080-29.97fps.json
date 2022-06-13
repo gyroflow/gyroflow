@@ -1,0 +1,69 @@
+{
+  "name": "Canon_M50 Mark 1_Laowa C-Dreamer 9mm F2.8__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Caleb Dalziel",
+  "camera_brand": "Canon",
+  "camera_model": "M50 Mark 1",
+  "lens_model": "Laowa C-Dreamer 9mm F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27258194676922876,
+    "camera_matrix": [
+      [
+        801.2256739070182,
+        0.0,
+        969.4828482938776
+      ],
+      [
+        0.0,
+        801.2139116118781,
+        530.3923097745408
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3514727157814308,
+      0.1011985427963668,
+      0.021218437006383737,
+      0.0882547042565637
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

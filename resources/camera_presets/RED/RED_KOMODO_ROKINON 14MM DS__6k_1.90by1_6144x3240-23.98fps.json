@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_ROKINON 14MM DS__6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "Julio Lopez",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "ROKINON 14MM DS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.972692066617101,
+    "camera_matrix": [
+      [
+        3196.1673153163006,
+        0.0,
+        3066.772056326977
+      ],
+      [
+        0.0,
+        3193.2519687945864,
+        1588.1043371288467
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15474755069885002,
+      0.3593472031343696,
+      -0.8261030062077205,
+      0.9932306704568682
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

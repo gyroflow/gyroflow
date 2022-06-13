@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Split HD 43___2.7k_4by3_2704x2032-60.00fps",
+  "note": "",
+  "calibrated_by": "lenovo",
+  "camera_brand": "RunCam",
+  "camera_model": "Split HD 43",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 2.3952095808383236,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0025266744746508,
+    "camera_matrix": [
+      [
+        1131.47701395102,
+        0.0,
+        1361.6589942922749
+      ],
+      [
+        0.0,
+        1137.1381341814931,
+        1082.5293361161605
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14763979046004905,
+      0.08111489782771666,
+      -0.17341747231700733,
+      0.09195034618565016
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

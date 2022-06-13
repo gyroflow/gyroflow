@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Canon FD 17MM_6K 23.98 17.9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "Rob Antill",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Canon FD 17MM",
+  "camera_setting": "6K 23.98 17.9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.3267166194652025,
+    "camera_matrix": [
+      [
+        4065.8683305235145,
+        0.0,
+        3022.762674720595
+      ],
+      [
+        0.0,
+        3966.787743440728,
+        1641.2829130153568
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26674263293175915,
+      -0.12338718441936852,
+      1.2219226347632874,
+      -1.7298702189607431
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

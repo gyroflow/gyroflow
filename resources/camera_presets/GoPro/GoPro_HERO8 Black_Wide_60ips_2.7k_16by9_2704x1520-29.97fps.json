@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO8 Black_Wide_60ips_2.7k_16by9_2704x1520-29.97fps",
+  "note": "HS élevé",
+  "calibrated_by": "Alex",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO8 Black",
+  "lens_model": "Wide",
+  "camera_setting": "60ips",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3138236319169264,
+    "camera_matrix": [
+      [
+        1344.686228302983,
+        0.0,
+        1375.134781169928
+      ],
+      [
+        0.0,
+        1366.0059499888778,
+        762.1050521618462
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.026857911922711315,
+      0.10216801866276108,
+      -0.1249160591550644,
+      0.05847304080769511
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero8black-wide-2704x1520@29970-hshigh",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-28",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly X Lite___2.7k_4by3_2704x2028-59.94fps",
+  "note": "",
+  "calibrated_by": "MarkFpv",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8311505820326938,
+    "camera_matrix": [
+      [
+        1396.803059972808,
+        0.0,
+        1398.0528746111904
+      ],
+      [
+        0.0,
+        1396.1036712903056,
+        1034.1033126616298
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05994363563580763,
+      0.007511214163901819,
+      -0.006299625911735404,
+      0.0030388839284256463
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

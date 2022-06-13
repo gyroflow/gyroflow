@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi 9_13MP__1080p_16by9_1920x1080-29.60fps",
+  "note": "",
+  "calibrated_by": "Nolca",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi 9",
+  "lens_model": "13MP",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.595572,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.510333126484961,
+    "camera_matrix": [
+      [
+        1657.1597681922651,
+        0.0,
+        954.784428002014
+      ],
+      [
+        0.0,
+        1657.874577254515,
+        554.0184110772275
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7706924237043711,
+      -2.979930486172611,
+      8.309220730508049,
+      -6.917684111305048
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-15",
+  "compatible_settings": []
+}

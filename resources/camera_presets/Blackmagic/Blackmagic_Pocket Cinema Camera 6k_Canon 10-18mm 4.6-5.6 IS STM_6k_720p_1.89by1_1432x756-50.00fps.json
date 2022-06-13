@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Canon 10-18mm 4.6-5.6 IS STM_6k_720p_1.89by1_1432x756-50.00fps",
+  "note": "",
+  "calibrated_by": "Sebastian Köster",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Canon 10-18mm 4.6-5.6 IS STM",
+  "camera_setting": "6k",
+  "calib_dimension": {
+    "w": 1432,
+    "h": 756
+  },
+  "orig_dimension": {
+    "w": 1432,
+    "h": 756
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1628966132511081,
+    "camera_matrix": [
+      [
+        1408.7695853023315,
+        0.0,
+        774.385510365706
+      ],
+      [
+        0.0,
+        1409.1229028858531,
+        334.4809859535979
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33680685750502937,
+      0.031247122058164444,
+      0.3268114830959699,
+      1.318227476609123
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

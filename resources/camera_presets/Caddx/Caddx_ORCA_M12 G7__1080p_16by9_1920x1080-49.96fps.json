@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_ORCA_M12 G7__1080p_16by9_1920x1080-49.96fps",
+  "note": "",
+  "calibrated_by": "",
+  "camera_brand": "Caddx",
+  "camera_model": "ORCA",
+  "lens_model": "M12 G7",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 49.958378,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4032453908142778,
+    "camera_matrix": [
+      [
+        956.39389345716,
+        0.0,
+        963.0225775102706
+      ],
+      [
+        0.0,
+        956.6866001057584,
+        544.9893306883434
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03668555167913835,
+      0.004172622357258268,
+      -0.012099222465446634,
+      0.0060263158210144725
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

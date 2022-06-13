@@ -1,7 +1,7 @@
 {
   "name": "RunCam_5 Orange___4k_16by9_3840x2160-30.00fps",
   "note": "",
-  "calibrated_by": "Mori Bullemer",
+  "calibrated_by": "Пользователь",
   "camera_brand": "RunCam",
   "camera_model": "5 Orange",
   "lens_model": "",
@@ -21,22 +21,22 @@
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 15,
+  "num_images": 10,
   "fps": 30.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.6143252319758812,
+    "RMS_error": 0.8675960003190913,
     "camera_matrix": [
       [
-        1947.3439472047448,
+        1919.487840225209,
         0.0,
-        1820.5744096120147
+        1933.212454874615
       ],
       [
         0.0,
-        1459.779159346023,
-        1073.2324463078285
+        1922.263701374165,
+        1099.0610426703224
       ],
       [
         0.0,
@@ -45,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.03165421038154768,
-      0.002367928325272642,
-      -0.02163161982233141,
-      0.011951762164824296
+      0.27549388779367195,
+      0.025978232329201177,
+      0.0227447664733013,
+      0.0255803853955637
     ],
     "radial_distortion_limit": null
   },
@@ -60,7 +60,7 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc5",
-  "date": "2022-04-10",
+  "calibrator_version": "1.0.0-rc3",
+  "date": "2022-02-12",
   "compatible_settings": []
 }

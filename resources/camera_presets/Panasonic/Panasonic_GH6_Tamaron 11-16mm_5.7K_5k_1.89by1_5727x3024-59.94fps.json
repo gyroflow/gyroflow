@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_GH6_Tamaron 11-16mm_5.7K_5k_1.89by1_5727x3024-59.94fps",
+  "note": "0.71x SB and lens at 16mm",
+  "calibrated_by": "Cyprian Lewicki",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH6",
+  "lens_model": "Tamaron 11-16mm",
+  "camera_setting": "5.7K",
+  "calib_dimension": {
+    "w": 5727,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5727,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5728,
+    "h": 3024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8210260962621426,
+    "camera_matrix": [
+      [
+        3623.7168744426735,
+        0.0,
+        2821.8068013671555
+      ],
+      [
+        0.0,
+        3625.1430806306544,
+        1510.6671655783368
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.348695624502954,
+      -0.06109460732854273,
+      0.41440107058715886,
+      -0.3442472936124973
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-03",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

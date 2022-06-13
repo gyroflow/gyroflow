@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_Ultrawide 110_NO-EIS_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "MacPro",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Ultrawide 110",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0982925130895762,
+    "camera_matrix": [
+      [
+        2204.3251140577595,
+        0.0,
+        2715.437994806211
+      ],
+      [
+        0.0,
+        2204.121855032201,
+        1576.4443885874537
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06002591073214594,
+      -0.0058551191028717725,
+      0.011746041969209049,
+      -0.00829050496572599
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

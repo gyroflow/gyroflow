@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6300_1650_无防抖_1080p_16by9_1920x1080-50.00fps",
+  "note": "无防抖",
+  "calibrated_by": "吴金生",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "1650",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4900635404092839,
+    "camera_matrix": [
+      [
+        1319.668265792127,
+        0.0,
+        967.6020040639272
+      ],
+      [
+        0.0,
+        1319.7522544996336,
+        530.9021364348254
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35189359361620887,
+      -0.725491253938639,
+      4.22365872379703,
+      -6.574945999478213
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

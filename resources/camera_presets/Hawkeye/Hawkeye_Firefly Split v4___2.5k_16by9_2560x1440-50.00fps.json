@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly Split v4___2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "GIOVI-FPV",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Split v4",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2646024750299695,
+    "camera_matrix": [
+      [
+        1112.8821277390416,
+        0.0,
+        1287.758495290321
+      ],
+      [
+        0.0,
+        1113.0734639115165,
+        731.469712856332
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1278522012736854,
+      0.06398469523594963,
+      -0.1090035300935773,
+      0.0403020838126586
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

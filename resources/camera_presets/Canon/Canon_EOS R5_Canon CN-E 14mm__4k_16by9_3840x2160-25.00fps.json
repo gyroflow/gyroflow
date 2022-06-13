@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5_Canon CN-E 14mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Moviement HD",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "Canon CN-E 14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.813228023431785,
+    "camera_matrix": [
+      [
+        1756.4988520707295,
+        0.0,
+        1895.553239339179
+      ],
+      [
+        0.0,
+        1755.3492681015882,
+        1080.1320259385732
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30545060939025115,
+      0.09283100239363792,
+      0.11322631749917218,
+      -0.07313925625786932
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

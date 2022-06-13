@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6000_Samyang 85mm t1.5 VDSLR__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "commander",
+  "camera_brand": "Sony",
+  "camera_model": "a6000",
+  "lens_model": "Samyang 85mm t1.5 VDSLR",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4677970933259706,
+    "camera_matrix": [
+      [
+        10107.562451218651,
+        0.0,
+        701.2134826270761
+      ],
+      [
+        0.0,
+        10119.865394355782,
+        972.7568420299352
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.056329077467524274,
+      52.18449446384065,
+      -3338.914483322509,
+      63618.18608623182
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

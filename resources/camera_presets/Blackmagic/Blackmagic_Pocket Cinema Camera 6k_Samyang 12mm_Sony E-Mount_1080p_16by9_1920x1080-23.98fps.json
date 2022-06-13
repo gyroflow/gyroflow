@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Samyang 12mm_Sony E-Mount_1080p_16by9_1920x1080-23.98fps",
+  "note": "Sony E-Mount",
+  "calibrated_by": "Russell Spurlock",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Samyang 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.47998487942083606,
+    "camera_matrix": [
+      [
+        1025.8390181701757,
+        0.0,
+        968.3531417620522
+      ],
+      [
+        0.0,
+        1024.1973982134211,
+        544.0429186150653
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3123497862604937,
+      0.05004428549192433,
+      0.1998715164769779,
+      -0.09626267730425515
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

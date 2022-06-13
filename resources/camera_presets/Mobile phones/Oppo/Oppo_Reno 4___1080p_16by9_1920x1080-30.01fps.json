@@ -1,0 +1,69 @@
+{
+  "name": "Oppo_Reno 4___1080p_16by9_1920x1080-30.01fps",
+  "note": "",
+  "calibrated_by": "DRONIC",
+  "camera_brand": "Oppo",
+  "camera_model": "Reno 4",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.006365,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0538960210864268,
+    "camera_matrix": [
+      [
+        1218.4311943780865,
+        0.0,
+        956.0905700780368
+      ],
+      [
+        0.0,
+        1227.4488487489805,
+        550.6003857685956
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.332314057033988,
+      0.5957229590639065,
+      -0.3380408419172627,
+      0.5925927323739534
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

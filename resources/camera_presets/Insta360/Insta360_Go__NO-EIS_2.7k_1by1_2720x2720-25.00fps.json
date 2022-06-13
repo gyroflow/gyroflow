@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_Go__NO-EIS_2.7k_1by1_2720x2720-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "阮运筹",
+  "camera_brand": "Insta360",
+  "camera_model": "Go",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.8779229952374745,
+    "camera_matrix": [
+      [
+        954.792224405672,
+        0.0,
+        1316.6976222444189
+      ],
+      [
+        0.0,
+        949.5635973739804,
+        1442.2373440105664
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10563203301437292,
+      0.06993488465212098,
+      -0.05850524974676544,
+      0.009767004522211048
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-14",
+  "compatible_settings": []
+}

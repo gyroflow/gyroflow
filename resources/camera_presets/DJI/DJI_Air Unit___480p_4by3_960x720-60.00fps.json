@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Air Unit___480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "lenovo",
+  "camera_brand": "DJI",
+  "camera_model": "Air Unit",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6065959258107987,
+    "camera_matrix": [
+      [
+        444.23401185149856,
+        0.0,
+        485.46691535731566
+      ],
+      [
+        0.0,
+        444.18679194184733,
+        360.6266329629399
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.045862726298252936,
+      -0.028886521992795757,
+      0.04256789079298147,
+      -0.02156485953679107
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

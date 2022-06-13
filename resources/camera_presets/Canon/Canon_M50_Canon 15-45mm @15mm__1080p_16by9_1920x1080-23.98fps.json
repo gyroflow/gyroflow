@@ -1,0 +1,69 @@
+{
+  "name": "Canon_M50_Canon 15-45mm @15mm__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Enginair",
+  "camera_brand": "Canon",
+  "camera_model": "M50",
+  "lens_model": "Canon 15-45mm @15mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6459231412744726,
+    "camera_matrix": [
+      [
+        1339.1029316684126,
+        0.0,
+        987.6590263712336
+      ],
+      [
+        0.0,
+        1323.7165592168517,
+        543.8745341811091
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1670221325317578,
+      0.4152641074833755,
+      -0.7912823615065422,
+      1.0455782191662508
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

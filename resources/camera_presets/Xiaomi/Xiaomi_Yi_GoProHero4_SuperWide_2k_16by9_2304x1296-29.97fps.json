@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Yi_GoProHero4_SuperWide_2k_16by9_2304x1296-29.97fps",
+  "note": "",
+  "calibrated_by": "Zugetsu",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "GoProHero4",
+  "camera_setting": "SuperWide",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9897883096175568,
+    "camera_matrix": [
+      [
+        1010.0432593774102,
+        0.0,
+        1148.2203238645193
+      ],
+      [
+        0.0,
+        1010.36211058317,
+        662.7676565425959
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.059344238244492115,
+      -0.0014178333826145905,
+      0.020680912838345413,
+      -0.014036530786065158
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_4K Boost_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Wahrendorff, Stefan",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "4K Boost",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.075016714365547,
+    "camera_matrix": [
+      [
+        1858.643173640918,
+        0.0,
+        1992.7690639282043
+      ],
+      [
+        0.0,
+        1857.545016594455,
+        1480.2871809050268
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09300134746291044,
+      -0.10477321096049594,
+      0.11139671052297365,
+      -0.05002220657512327
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-unknown1104-4000x3000@29970-no-eis",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

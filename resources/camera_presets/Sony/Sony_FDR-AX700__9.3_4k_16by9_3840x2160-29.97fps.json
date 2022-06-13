@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FDR-AX700__9.3_4k_16by9_3840x2160-29.97fps",
+  "note": "9.3",
+  "calibrated_by": "MY",
+  "camera_brand": "Sony",
+  "camera_model": "FDR-AX700",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0130182135619987,
+    "camera_matrix": [
+      [
+        3251.4159060030092,
+        0.0,
+        1947.43132184797
+      ],
+      [
+        0.0,
+        3245.918354024738,
+        1065.9044417010955
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3429703592411724,
+      0.07020072631370522,
+      0.434362631597523,
+      -0.730632760968702
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

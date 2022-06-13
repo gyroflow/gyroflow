@@ -1,0 +1,69 @@
+{
+  "name": "Canon_80D_canon 18-55_18mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Марина",
+  "camera_brand": "Canon",
+  "camera_model": "80D",
+  "lens_model": "canon 18-55",
+  "camera_setting": "18mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4750322173337614,
+    "camera_matrix": [
+      [
+        1564.49692851043,
+        0.0,
+        944.1664135913952
+      ],
+      [
+        0.0,
+        1566.3522857451578,
+        557.9995246101662
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14395668073464907,
+      0.28135373081027687,
+      -0.7430980423466222,
+      1.7399919955938596
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

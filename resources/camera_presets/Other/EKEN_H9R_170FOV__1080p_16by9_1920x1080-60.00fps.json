@@ -1,0 +1,69 @@
+{
+  "name": "EKEN_H9R_170FOV__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "gabriel timm",
+  "camera_brand": "EKEN",
+  "camera_model": "H9R",
+  "lens_model": "170FOV",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5327805398675278,
+    "camera_matrix": [
+      [
+        1109.197169329813,
+        0.0,
+        1011.6982770197964
+      ],
+      [
+        0.0,
+        1108.736516387774,
+        555.7684134973881
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.10772542771062392,
+      -0.0149426296070847,
+      0.0697684269677841,
+      -0.07293247745697876
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

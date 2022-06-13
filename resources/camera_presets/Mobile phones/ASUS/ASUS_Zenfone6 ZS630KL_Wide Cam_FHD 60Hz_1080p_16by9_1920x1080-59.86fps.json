@@ -1,0 +1,69 @@
+{
+  "name": "ASUS_Zenfone6 ZS630KL_Wide Cam_FHD 60Hz_1080p_16by9_1920x1080-59.86fps",
+  "note": "",
+  "calibrated_by": "User987654321",
+  "camera_brand": "ASUS",
+  "camera_model": "Zenfone6 ZS630KL",
+  "lens_model": "Wide Cam",
+  "camera_setting": "FHD 60Hz",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.864365,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5707659739724021,
+    "camera_matrix": [
+      [
+        1097.264219734214,
+        0.0,
+        989.690090375769
+      ],
+      [
+        0.0,
+        1096.676093499761,
+        523.3056905069053
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17850072732456282,
+      0.9065225604620878,
+      -2.7313379465403167,
+      2.8162546633095817
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

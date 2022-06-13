@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-S6_Rokinon 8mm f/2.8_6K Open Gate_6k_3by2_6244x4168-29.97fps",
+  "note": "",
+  "calibrated_by": "Lance Lao",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Rokinon 8mm f/2.8",
+  "camera_setting": "6K Open Gate",
+  "calib_dimension": {
+    "w": 6244,
+    "h": 4168
+  },
+  "orig_dimension": {
+    "w": 6244,
+    "h": 4168
+  },
+  "output_dimension": {
+    "w": 6244,
+    "h": 3512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9682630302287732,
+    "camera_matrix": [
+      [
+        2237.162853056493,
+        0.0,
+        3130.5965439639135
+      ],
+      [
+        0.0,
+        2234.397133312521,
+        2130.8775480213308
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03966243061268677,
+      0.010117500959850367,
+      0.0033733612757550643,
+      -0.009169883270104325
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

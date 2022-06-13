@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Protek25_Fixed Lens__2.7k_16by9_2704x1520-59.94fps",
+  "note": "",
+  "calibrated_by": "Virgil Dizon",
+  "camera_brand": "RunCam",
+  "camera_model": "Protek25",
+  "lens_model": "Fixed Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.1237798256139873,
+    "camera_matrix": [
+      [
+        1173.967285006631,
+        0.0,
+        1357.43487391112
+      ],
+      [
+        0.0,
+        1170.2482172997748,
+        776.8391340566496
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3436863592456749,
+      0.17797216319869283,
+      0.06391046006309085,
+      0.06132470989269201
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

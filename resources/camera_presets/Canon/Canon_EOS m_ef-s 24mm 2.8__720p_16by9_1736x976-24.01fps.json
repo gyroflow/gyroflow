@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS m_ef-s 24mm 2.8__720p_16by9_1736x976-24.01fps",
+  "note": "",
+  "calibrated_by": "smallbear_M1",
+  "camera_brand": "Canon",
+  "camera_model": "EOS m",
+  "lens_model": "ef-s 24mm 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "orig_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "output_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.01,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4132701676480388,
+    "camera_matrix": [
+      [
+        1883.217840819386,
+        0.0,
+        830.2740382670272
+      ],
+      [
+        0.0,
+        1882.596123650348,
+        534.2255305832715
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2195289716197104,
+      -0.13064383540223237,
+      2.3240430307208424,
+      -5.785984625104989
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

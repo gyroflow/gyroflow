@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Laowa 15MM_17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "Rob Antill",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 15MM",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.508084007591041,
+    "camera_matrix": [
+      [
+        3620.774230920326,
+        0.0,
+        3090.36488507865
+      ],
+      [
+        0.0,
+        3532.5837831698714,
+        1629.3712061159713
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34540172328325086,
+      -0.09191532787195417,
+      0.756765544042741,
+      -0.7966484674126134
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Canon_C300_16-35 mm f2.8 L_16mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "16mm",
+  "calibrated_by": "Guillem Valle",
+  "camera_brand": "Canon",
+  "camera_model": "C300",
+  "lens_model": "16-35 mm f2.8 L",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3350977796621766,
+    "camera_matrix": [
+      [
+        1167.0782164166446,
+        0.0,
+        956.0652533615952
+      ],
+      [
+        0.0,
+        1167.035997792151,
+        543.4407176678242
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2051661859705257,
+      0.1792824434273832,
+      -0.05681432397123824,
+      0.07296193444809305
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

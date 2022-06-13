@@ -1,0 +1,68 @@
+{
+  "name": "Sony_RX0II-C-Mount-MOD_LH0811-12MP_EXPERIMENTAL_1080p_16by9_1920x1080-119.88fps",
+  "note": "EXPERIMENTAL",
+  "calibrated_by": "Nicecrash_22",
+  "camera_brand": "Sony",
+  "camera_model": "RX0II-C-Mount-MOD",
+  "lens_model": "LH0811-12MP",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3199620023701717,
+    "camera_matrix": [
+      [
+        1244.4116706187122,
+        0.0,
+        958.9783802412932
+      ],
+      [
+        0.0,
+        1238.9304633087283,
+        516.5172313099569
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.08546975636505058,
+      1.969584373047133,
+      -3.3782785685797396,
+      2.1886217756117343
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-28",
+  "compatible_settings": [],
+  "distortion_model_id": 0
+}

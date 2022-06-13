@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a5100_viltrox 23mm f.14_xavc-s_1080p_16by9_1920x1080-23.98fps",
+  "note": "23mm",
+  "calibrated_by": "Hengki Luo",
+  "camera_brand": "Sony",
+  "camera_model": "a5100",
+  "lens_model": "viltrox 23mm f.14",
+  "camera_setting": "xavc-s",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2777861025207985,
+    "camera_matrix": [
+      [
+        2040.8785768753849,
+        0.0,
+        971.6745350323084
+      ],
+      [
+        0.0,
+        2037.5312086087104,
+        532.4645405913863
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24878108010568503,
+      -0.400484501806168,
+      4.506239810288334,
+      -8.136570176736923
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

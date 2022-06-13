@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_Olympus M.Zuiko 12mm f2.0 MFT__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Moviement HD",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Olympus M.Zuiko 12mm f2.0 MFT",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6324289277722455,
+    "camera_matrix": [
+      [
+        2652.338504769575,
+        0.0,
+        1970.9836740299136
+      ],
+      [
+        0.0,
+        2652.3435034146414,
+        1103.5065869894574
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23303957553526217,
+      -0.239210984649365,
+      0.8707075319105344,
+      -0.9932437866842392
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

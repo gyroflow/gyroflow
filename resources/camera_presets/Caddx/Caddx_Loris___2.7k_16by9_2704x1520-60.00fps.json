@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Loris___2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Benji Forever",
+  "camera_brand": "Caddx",
+  "camera_model": "Loris",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 150.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5116576139618771,
+    "camera_matrix": [
+      [
+        1305.9433632876144,
+        0.0,
+        1342.478802673798
+      ],
+      [
+        0.0,
+        1291.1616221882423,
+        794.2776898443932
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0736980557321735,
+      -0.00873779602932415,
+      0.00939931819226903,
+      -0.004482236057220378
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

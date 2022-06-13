@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Mavic Pro 2_28mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "ryan light",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic Pro 2",
+  "lens_model": "28mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 28,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.68855941957488,
+    "camera_matrix": [
+      [
+        2319.906544141062,
+        0.0,
+        1960.209817682128
+      ],
+      [
+        0.0,
+        2322.0227307228893,
+        1308.5222621447986
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29148841568012934,
+      0.19002999577323448,
+      -0.5405990189331032,
+      0.794486313773587
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

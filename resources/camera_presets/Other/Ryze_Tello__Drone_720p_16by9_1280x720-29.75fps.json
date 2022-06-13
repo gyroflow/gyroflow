@@ -1,0 +1,66 @@
+{
+  "name": "Ryze_Tello__Drone_720p_16by9_1280x720-29.75fps",
+  "note": "",
+  "calibrated_by": "Erlend Ellingsen",
+  "camera_brand": "Ryze",
+  "camera_model": "Tello",
+  "lens_model": "",
+  "camera_setting": "Drone",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.746031,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4242819553389989,
+    "camera_matrix": [
+      [
+        1368.6490487649112,
+        0.0,
+        638.5834331686794
+      ],
+      [
+        0.0,
+        1368.684302005487,
+        347.59599852595676
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4208853421503855,
+      -1.2720968477375332,
+      7.308726055526397,
+      -10.22624192277487
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-12",
+  "compatible_settings": []
+}

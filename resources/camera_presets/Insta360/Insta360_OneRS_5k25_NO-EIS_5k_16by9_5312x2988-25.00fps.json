@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_5k25_NO-EIS_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "5k25",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2454723201749385,
+    "camera_matrix": [
+      [
+        2206.076980760769,
+        0.0,
+        2720.7531499973084
+      ],
+      [
+        0.0,
+        2208.2339641998615,
+        1579.2364640141516
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05688327874009912,
+      0.005226284470077143,
+      -0.0070458028386856456,
+      0.0018500559322974
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-ultrawide110-5312x2988@25000-no-eis",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

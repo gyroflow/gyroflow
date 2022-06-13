@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 7.5mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Lancelot Tintignies",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.20184274311086528,
+    "camera_matrix": [
+      [
+        836.2617750167354,
+        0.0,
+        988.3743915820828
+      ],
+      [
+        0.0,
+        836.3560643352444,
+        554.7357211387206
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33101084415404836,
+      0.13570128373858925,
+      -0.08858611530984639,
+      0.13387997509895488
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

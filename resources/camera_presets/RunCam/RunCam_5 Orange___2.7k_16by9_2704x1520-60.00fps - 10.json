@@ -1,7 +1,7 @@
 {
   "name": "RunCam_5 Orange___2.7k_16by9_2704x1520-60.00fps",
   "note": "",
-  "calibrated_by": "Venzu",
+  "calibrated_by": "Константин Мятлев",
   "camera_brand": "RunCam",
   "camera_model": "5 Orange",
   "lens_model": "",
@@ -21,22 +21,23 @@
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 15,
+  "input_vertical_stretch": 1.0,
+  "num_images": 21,
   "fps": 60.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3302754539257675,
+    "RMS_error": 1.0542824629120386,
     "camera_matrix": [
       [
-        1466.0330152753113,
+        1446.4521730803935,
         0.0,
-        1388.0653816425925
+        1401.9893039197405
       ],
       [
         0.0,
-        1476.5797734006255,
-        768.4196033533289
+        1459.5074274030414,
+        788.4087593954918
       ],
       [
         0.0,
@@ -45,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.03882231608518065,
-      -0.011777724050035377,
-      -0.005551267200198079,
-      0.02066574980360108
+      -0.014030004857544544,
+      -0.0330630515018911,
+      0.024582671126259725,
+      -0.009614644522020988
     ],
     "radial_distortion_limit": null
   },
@@ -60,7 +61,9 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc5",
-  "date": "2022-03-11",
-  "compatible_settings": []
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
 }

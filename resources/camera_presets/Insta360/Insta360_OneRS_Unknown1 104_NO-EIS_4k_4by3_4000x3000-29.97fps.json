@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_Unknown1 104_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Jason moussa",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Unknown1 104",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5601275166996746,
+    "camera_matrix": [
+      [
+        1856.6244269173608,
+        0.0,
+        1989.9660512079593
+      ],
+      [
+        0.0,
+        1855.2124546880011,
+        1493.392181240683
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08720472427265596,
+      -0.09135166114775103,
+      0.0950280701485394,
+      -0.04410398661834533
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

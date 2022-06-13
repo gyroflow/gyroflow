@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_Ultrawide 96_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "X10Dead",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Ultrawide 96",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 65,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8519206342987444,
+    "camera_matrix": [
+      [
+        1850.447010884427,
+        0.0,
+        1993.4783218892037
+      ],
+      [
+        0.0,
+        1850.2772709532828,
+        1481.7227954066636
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08984438753887151,
+      -0.09539555934235422,
+      0.09695208703509836,
+      -0.04406391075467535
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

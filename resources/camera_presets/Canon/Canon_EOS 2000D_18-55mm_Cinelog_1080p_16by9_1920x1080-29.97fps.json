@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 2000D_18-55mm_Cinelog_1080p_16by9_1920x1080-29.97fps",
+  "note": "Cinelog",
+  "calibrated_by": "Hrvoje Krešo",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 2000D",
+  "lens_model": "18-55mm",
+  "camera_setting": "Cinelog",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6654290455073373,
+    "camera_matrix": [
+      [
+        2662.0961459782943,
+        0.0,
+        892.8400746361597
+      ],
+      [
+        0.0,
+        2669.6030364488397,
+        562.3490341806893
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29051205607147856,
+      -2.6110858923023,
+      42.66913981083553,
+      -190.65903900870563
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_FE 4/12-24 G_12mm Auto ISO XAVC S HD_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "HP Z4 G4",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "FE 4/12-24 G",
+  "camera_setting": "12mm Auto ISO XAVC S HD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2643504025815316,
+    "camera_matrix": [
+      [
+        663.2254578915519,
+        0.0,
+        954.4655202270152
+      ],
+      [
+        0.0,
+        662.8191290220511,
+        543.807700839211
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2953637503454836,
+      0.15427783815130955,
+      -0.08177683779719647,
+      0.10488090409438058
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-28",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

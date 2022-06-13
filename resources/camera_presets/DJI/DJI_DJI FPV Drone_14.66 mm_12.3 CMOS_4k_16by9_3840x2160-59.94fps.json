@@ -1,0 +1,66 @@
+{
+  "name": "DJI_DJI FPV Drone_14.66 mm_1/2.3\" CMOS_4k_16by9_3840x2160-59.94fps",
+  "note": "1/2.3\" CMOS",
+  "calibrated_by": "FAHAD.FPV",
+  "camera_brand": "DJI",
+  "camera_model": "DJI FPV Drone",
+  "lens_model": "14.66 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5723735533204201,
+    "camera_matrix": [
+      [
+        1724.421504051729,
+        0.0,
+        1925.852195338228
+      ],
+      [
+        0.0,
+        1723.2049955879922,
+        1069.2459379241136
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.049256660755879714,
+      0.25629569196178703,
+      -0.6375284475945864,
+      0.5337350923221869
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-12",
+  "compatible_settings": []
+}

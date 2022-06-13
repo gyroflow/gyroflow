@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_S10+___4k_16by9_3840x2160-50.49fps",
+  "note": "",
+  "calibrated_by": "yoga sabraina",
+  "camera_brand": "Samsung",
+  "camera_model": "S10+",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.489262,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7163840061985899,
+    "camera_matrix": [
+      [
+        3043.962352639375,
+        0.0,
+        1863.4672529015927
+      ],
+      [
+        0.0,
+        3041.8221600702286,
+        1028.68064314369
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8549901304789912,
+      -4.146361063947679,
+      14.154728705930046,
+      -15.679353013948724
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

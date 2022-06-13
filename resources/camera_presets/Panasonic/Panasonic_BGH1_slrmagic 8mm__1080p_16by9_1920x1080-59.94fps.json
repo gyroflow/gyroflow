@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_BGH1_slrmagic 8mm__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "DRFILMER.COM",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "slrmagic 8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6659473994415513,
+    "camera_matrix": [
+      [
+        917.0993503016678,
+        0.0,
+        975.194993407708
+      ],
+      [
+        0.0,
+        919.6617386445098,
+        525.2701089592052
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31900969623205844,
+      -0.05001193991670985,
+      0.3987315383086658,
+      -0.23555216510686047
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

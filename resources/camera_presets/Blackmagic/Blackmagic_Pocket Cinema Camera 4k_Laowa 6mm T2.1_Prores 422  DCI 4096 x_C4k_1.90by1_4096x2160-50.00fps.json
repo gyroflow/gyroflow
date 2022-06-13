@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 6mm T2.1_Prores 422  DCI 4096 x_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Taruma Tribudiman",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 6mm T2.1",
+  "camera_setting": "Prores 422  DCI 4096 x",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 30,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6814717791275444,
+    "camera_matrix": [
+      [
+        1360.6163024909229,
+        0.0,
+        2056.710766495892
+      ],
+      [
+        0.0,
+        1360.393359283339,
+        1068.6979940147742
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33064248339717883,
+      0.1657725768414666,
+      -0.036362534548805094,
+      0.07673944378668639
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

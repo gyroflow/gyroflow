@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R5_16mm 2.8__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Steppen Wolf",
+  "camera_brand": "Canon",
+  "camera_model": "R5",
+  "lens_model": "16mm 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.263582134644038,
+    "camera_matrix": [
+      [
+        773.781437929983,
+        0.0,
+        948.4339290741312
+      ],
+      [
+        0.0,
+        773.6995559699668,
+        530.8934255794455
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3729759285791768,
+      -0.0387664536921248,
+      0.3430783338744382,
+      -0.12389228287290265
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

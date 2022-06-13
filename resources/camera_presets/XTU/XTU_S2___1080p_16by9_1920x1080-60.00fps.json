@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S2___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "XT",
+  "camera_brand": "XTU",
+  "camera_model": "S2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4280592792847851,
+    "camera_matrix": [
+      [
+        1610.348824409585,
+        0.0,
+        898.5618957965913
+      ],
+      [
+        0.0,
+        1554.132790125007,
+        580.3843997076887
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.055783343175288,
+      -0.05879089720784928,
+      0.11855398863830216,
+      -0.0603763666537573
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-05",
+  "compatible_settings": []
+}

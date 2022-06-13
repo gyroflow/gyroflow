@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_SIGMA 14MM PRIME_XAVC S HD 50 FPS_1080p_16by9_1920x1080-59.94fps",
+  "note": "1/80, ISO1600, F8",
+  "calibrated_by": "Jake P",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "SIGMA 14MM PRIME",
+  "camera_setting": "XAVC S HD 50 FPS",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 25,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.30822963027199246,
+    "camera_matrix": [
+      [
+        761.7188677653922,
+        0.0,
+        937.636124793034
+      ],
+      [
+        0.0,
+        760.7041547703291,
+        538.3643197393859
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19457933839618555,
+      0.13206168007040117,
+      -0.09739432963030992,
+      0.17592308377429464
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-05",
+  "compatible_settings": []
+}

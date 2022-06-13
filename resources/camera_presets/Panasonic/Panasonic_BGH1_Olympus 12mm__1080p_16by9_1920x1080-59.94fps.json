@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_BGH1_Olympus 12mm__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "DRFILMER.COM",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Olympus 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3076807351243234,
+    "camera_matrix": [
+      [
+        1094.5463601057638,
+        0.0,
+        979.5091106404144
+      ],
+      [
+        0.0,
+        1097.3859346172835,
+        536.4943899988698
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32382699973233037,
+      0.03205525176658118,
+      0.2287708704087572,
+      -0.09711823075052813
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

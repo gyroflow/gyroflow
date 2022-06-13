@@ -1,0 +1,69 @@
+{
+  "name": "POCO_F3___1080p_16by9_1920x1080-30.03fps",
+  "note": "",
+  "calibrated_by": "Stefano Nolletti",
+  "camera_brand": "POCO",
+  "camera_model": "F3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.029066,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4615199060969148,
+    "camera_matrix": [
+      [
+        1775.6047327824654,
+        0.0,
+        962.1676182418804
+      ],
+      [
+        0.0,
+        1775.6103841464767,
+        539.1835226561298
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6444371200740252,
+      -3.0904498648912364,
+      17.948236721564943,
+      -30.388177267843428
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

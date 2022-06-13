@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T3_14mm f2.8_200bit_4k_16by9_3840x2160-59.94fps",
+  "note": "200bit",
+  "calibrated_by": "juanforerof",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "14mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6000888327294173,
+    "camera_matrix": [
+      [
+        2861.5029665490742,
+        0.0,
+        1938.6431306805127
+      ],
+      [
+        0.0,
+        2861.9926922184422,
+        1051.8338621012151
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3512568115613534,
+      -0.15356266859362588,
+      1.2545883685905508,
+      -1.9600869784939627
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

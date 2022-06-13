@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 50D_Canon EF 50mm 1.8f_MOV_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "LCF-FPV",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 50D",
+  "lens_model": "Canon EF 50mm 1.8f",
+  "camera_setting": "MOV",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.35962168480252865,
+    "camera_matrix": [
+      [
+        5751.663945991126,
+        0.0,
+        1210.510281838051
+      ],
+      [
+        0.0,
+        5898.88092851614,
+        376.28346526920615
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5398413098470325,
+      -19.716569808097383,
+      570.0716932376837,
+      -5614.207362499981
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

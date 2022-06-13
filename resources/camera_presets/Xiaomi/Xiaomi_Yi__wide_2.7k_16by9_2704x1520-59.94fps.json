@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Yi__wide_2.7k_16by9_2704x1520-59.94fps",
+  "note": "",
+  "calibrated_by": "Andrea Caserotti",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "",
+  "camera_setting": "wide",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.730984945671397,
+    "camera_matrix": [
+      [
+        1355.6775763407325,
+        0.0,
+        1366.269266611716
+      ],
+      [
+        0.0,
+        1354.2316432438352,
+        746.5647923438744
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08221776084220367,
+      0.017258515914489753,
+      -0.028503716453028335,
+      0.008925885067871942
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-05-14",
+  "compatible_settings": []
+}

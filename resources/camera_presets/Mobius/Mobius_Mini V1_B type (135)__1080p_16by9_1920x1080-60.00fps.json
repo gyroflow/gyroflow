@@ -1,0 +1,69 @@
+{
+  "name": "Mobius_Mini V1_B type (135°)__1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Amos Wong",
+  "camera_brand": "Mobius",
+  "camera_model": "Mini V1",
+  "lens_model": "B type (135°)",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 30,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5634665574630785,
+    "camera_matrix": [
+      [
+        1162.8329009730207,
+        0.0,
+        987.4769835173784
+      ],
+      [
+        0.0,
+        1162.331756219585,
+        568.5866956081363
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07732441514297841,
+      -0.12922251335723034,
+      0.25399678029245826,
+      -0.197632140993328
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

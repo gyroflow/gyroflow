@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_Max___C4k_3.05by1_4096x1344-29.97fps",
+  "note": "",
+  "calibrated_by": "Damian Danchenko",
+  "camera_brand": "GoPro",
+  "camera_model": "Max",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1344
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1344
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1344
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 9.844853863135167,
+    "camera_matrix": [
+      [
+        3459.1642374455378,
+        0.0,
+        2038.6073890051384
+      ],
+      [
+        0.0,
+        3065.1215041967253,
+        627.7423126790591
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -2.292869075898772,
+      7.885057275574294,
+      -10.03400696873898,
+      5.141531760523243
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera (2013 first model)_Lumix 12-35mm f2.8 I (H-HS12035)_35mm_1080p_16by9_1920x1080-24.00fps",
+  "note": "35mm",
+  "calibrated_by": "Tom.my",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera (2013 first model)",
+  "lens_model": "Lumix 12-35mm f2.8 I (H-HS12035)",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3778410240173235,
+    "camera_matrix": [
+      [
+        6156.492597151578,
+        0.0,
+        897.3925871703509
+      ],
+      [
+        0.0,
+        6161.7356940279615,
+        542.8732037812945
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6121523711142316,
+      -20.355947513368086,
+      1754.589669273106,
+      -48422.56851548723
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

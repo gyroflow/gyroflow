@@ -1,0 +1,69 @@
+{
+  "name": "Canon_C300 Mk 1_Canon 24-105 f4 @ 24mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Guillem Valle",
+  "camera_brand": "Canon",
+  "camera_model": "C300 Mk 1",
+  "lens_model": "Canon 24-105 f4 @ 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2430869624922464,
+    "camera_matrix": [
+      [
+        1891.1962951458197,
+        0.0,
+        962.7143203088832
+      ],
+      [
+        0.0,
+        1891.1222286426848,
+        532.3621633146103
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2164182861265773,
+      0.39095137932667745,
+      -1.813180260824873,
+      4.740012869803584
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

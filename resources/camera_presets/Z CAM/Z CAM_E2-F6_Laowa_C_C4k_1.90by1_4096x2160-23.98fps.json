@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-F6_Laowa_C_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Slade McMichael",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Laowa",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.026361888714106,
+    "camera_matrix": [
+      [
+        3288.440065821716,
+        0.0,
+        3623.075305993029
+      ],
+      [
+        0.0,
+        3455.2644120269174,
+        939.403194727751
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8849342835794731,
+      -1.8206151390599556,
+      2.4441644260530757,
+      -1.1013313064009644
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-05-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

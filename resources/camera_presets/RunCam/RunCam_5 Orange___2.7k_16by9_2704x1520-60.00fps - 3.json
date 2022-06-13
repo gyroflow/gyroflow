@@ -1,7 +1,7 @@
 {
   "name": "RunCam_5 Orange___2.7k_16by9_2704x1520-60.00fps",
   "note": "",
-  "calibrated_by": "Giada",
+  "calibrated_by": "Роман Г.",
   "camera_brand": "RunCam",
   "camera_model": "5 Orange",
   "lens_model": "",
@@ -26,17 +26,17 @@
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 6.529206326589592,
+    "RMS_error": 1.1118786841960613,
     "camera_matrix": [
       [
-        106238.96294955592,
+        1481.706685042942,
         0.0,
-        1510.173026571564
+        1372.791100571722
       ],
       [
         0.0,
-        80907.44297329808,
-        892.3359408376941
+        1491.0209398409413,
+        759.4900371594723
       ],
       [
         0.0,
@@ -45,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      89.91131046451227,
-      376361.3344687464,
-      -425158756.03862625,
-      15738502037.735
+      -0.03166330852620314,
+      -0.0019570078300007615,
+      -0.04489907973784126,
+      0.037766748722499695
     ],
     "radial_distortion_limit": null
   },
@@ -61,6 +61,6 @@
   },
   "identifier": "",
   "calibrator_version": "1.0.0-rc5",
-  "date": "2022-03-24",
+  "date": "2022-05-02",
   "compatible_settings": []
 }
