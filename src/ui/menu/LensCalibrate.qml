@@ -145,7 +145,7 @@ MenuItem {
         height: rmsLabel.height;
         Label {
             id: rmsLabel;
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Reprojection error") + ":";
 
             BasicText {
@@ -172,7 +172,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Max calibration points");
 
         NumberField {
@@ -307,7 +307,7 @@ MenuItem {
     }
     AdvancedSection {
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("FOV");
             SliderWithField {
                 from: 0.1;
@@ -319,7 +319,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Analyze every n-th frame");
 
             NumberField {
@@ -331,7 +331,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Sharpness limit");
 
             NumberField {
@@ -377,7 +377,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Iterations");
 
             NumberField {
@@ -411,7 +411,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Preview resolution");
 
             ComboBox {

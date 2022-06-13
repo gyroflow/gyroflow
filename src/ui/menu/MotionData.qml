@@ -158,7 +158,7 @@ MenuItem {
             width: parent.width;
             spacing: 5 * dpiScale;
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("Pitch");
                 width: undefined;
                 inner.width: 50 * dpiScale;
@@ -166,7 +166,7 @@ MenuItem {
                 NumberField { id: p; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); tooltip: qsTr("Pitch is camera angle up/down when using FPV blackbox data"); }
             }
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("Roll");
                 width: undefined;
                 inner.width: 50 * dpiScale;
@@ -174,7 +174,7 @@ MenuItem {
                 NumberField { id: r; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
             }
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("Yaw");
                 width: undefined;
                 inner.width: 50 * dpiScale;
@@ -202,7 +202,7 @@ MenuItem {
             width: parent.width;
             spacing: 5 * dpiScale;
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("X");
                 width: undefined;
                 inner.width: 65 * dpiScale;
@@ -210,7 +210,7 @@ MenuItem {
                 NumberField { id: bx; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
             }
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("Y");
                 width: undefined;
                 inner.width: 65 * dpiScale;
@@ -218,7 +218,7 @@ MenuItem {
                 NumberField { id: by; unit: "°/s"; precision: 2; width: 65 * dpiScale; onValueChanged: gyrobias.update_bias(); }
             }
             Label {
-                position: Label.Left;
+                position: Label.LeftPosition;
                 text: qsTr("Z");
                 width: undefined;
                 inner.width: 65 * dpiScale;
@@ -228,7 +228,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("IMU orientation");
 
         TextField {
@@ -241,7 +241,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Integration method");
 
         ComboBox {

@@ -194,7 +194,7 @@ MenuItem {
         onCurrentTextChanged: root.outCodecOptions = currentText;
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Output size");
         Item {
             width: parent.width;
@@ -309,7 +309,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Bitrate");
         visible: outCodec === "x264" || outCodec === "x265";
 
@@ -382,7 +382,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Keyframe distance");
 
             NumberField {

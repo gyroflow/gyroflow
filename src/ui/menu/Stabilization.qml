@@ -205,7 +205,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("FOV");
         SliderWithField {
             id: fov;
@@ -427,7 +427,7 @@ MenuItem {
             width: parent.width;
             Label {
                 text: qsTr("X");
-                position: Label.Left;
+                position: Label.LeftPosition;
                 SliderWithField {
                     id: zoomingCenterX;
                     precision: 0;
@@ -442,7 +442,7 @@ MenuItem {
             }
             Label {
                 text: qsTr("Y");
-                position: Label.Left;
+                position: Label.LeftPosition;
                 SliderWithField {
                     id: zoomingCenterY;
                     precision: 0;

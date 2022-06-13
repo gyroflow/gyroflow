@@ -78,7 +78,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Rough gyro offset");
 
         NumberField {
@@ -101,7 +101,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Sync search size");
 
         NumberField {
@@ -114,7 +114,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Max sync points");
 
         NumberField {
@@ -130,7 +130,7 @@ MenuItem {
 
     AdvancedSection {
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Analyze every n-th frame");
 
             NumberField {
@@ -142,7 +142,7 @@ MenuItem {
             }
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Time to analyze per sync point");
 
             NumberField {
@@ -160,7 +160,7 @@ MenuItem {
             text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results");
         }
         Label {
-            position: Label.Left;
+            position: Label.LeftPosition;
             text: qsTr("Optical flow method");
 
             ComboBox {

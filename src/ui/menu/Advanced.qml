@@ -33,7 +33,7 @@ MenuItem {
         if (obj.background_color) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Preview resolution");
 
         ComboBox {
@@ -56,7 +56,7 @@ MenuItem {
     }
 
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Background mode");
         ComboBox {
             id: backgroundMode;
@@ -100,7 +100,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         visible: backgroundMode.currentIndex == 0;
         text: qsTr("Render background");
 
@@ -112,7 +112,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Theme");
 
         ComboBox {
@@ -128,7 +128,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("UI scaling");
         ComboBox {
             id: uiScaling;
@@ -142,7 +142,7 @@ MenuItem {
         }
     }
     Label {
-        position: Label.Left;
+        position: Label.LeftPosition;
         text: qsTr("Language");
 
         ComboBox {
