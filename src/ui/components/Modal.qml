@@ -14,7 +14,9 @@ Rectangle {
     property alias mainColumn: mainColumn;
     property bool opened: false;
     property bool isWide: root.text.length > 200;
+    property real widthRatio: 0.8;
     property int accentButton: -1;
+    default property alias data: mainColumn.data;
     onTextChanged: {
         if (text.indexOf("<") > -1 && textFormat != Text.MarkdownText) {
             text = text.replace(/\n/g, "<br>");
@@ -57,7 +59,7 @@ Rectangle {
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * 0.8 : 400 * dpiScale));
+        width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * root.widthRatio : 400 * dpiScale));
         height: col.height + 30 * dpiScale;
         property real offs: 0;
         color: styleBackground2;

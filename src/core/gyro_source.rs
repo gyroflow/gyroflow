@@ -463,14 +463,4 @@ impl GyroSource {
 
         (bias_vals[0], bias_vals[1], bias_vals[2])
     }
-
-    pub fn copy_org_into(&self, into: &mut GyroSource) {
-        into.org_raw_imu = self.org_raw_imu.clone();
-        into.imu_orientation = self.imu_orientation.clone();
-        into.imu_rotation_angles = self.imu_rotation_angles.clone();
-        into.imu_rotation = self.imu_rotation.clone();
-        into.imu_lpf = self.imu_lpf;
-        into.gyro_bias = self.gyro_bias;
-        into.integration_method = self.integration_method;
-    }
 }

@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use walkdir::WalkDir;
-use std::collections::{ HashSet, HashMap };
+use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
 
@@ -17,6 +17,8 @@ pub struct LensProfileDatabase {
 
 impl LensProfileDatabase {
     pub fn get_path() -> PathBuf {
+        // return std::fs::canonicalize("D:/lens_review/").unwrap_or_default();
+
         let candidates = [
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             PathBuf::from("../Resources/camera_presets/"),
@@ -109,8 +111,17 @@ impl LensProfileDatabase {
         for (k, v) in &self.map {
             if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
-                    let name = v.get_display_name();
+                    let mut name = v.get_display_name();
                     let mut new_name = name.clone();
+                    if set.contains(&new_name) {
+                        if let Some((kk, vv)) = ret.iter_mut().find(|(k, _)| *k == new_name) {
+                            set.remove(kk);
+                            *kk = format!("{} by {}", *kk, self.map[vv].calibrated_by);
+                            set.insert(kk.clone());
+                        }
+                        name = format!("{} by {}", name, v.calibrated_by);
+                        new_name = name.clone();
+                    }
                     let mut i = 2;
                     while set.contains(&new_name) {
                         new_name = format!("{} - {}", name, i);
@@ -152,8 +163,16 @@ impl LensProfileDatabase {
 
         let mut lines = Vec::new();
         let path = Self::get_path().to_string_lossy().replace('\\', "/");
+        let mut coeffs_map = BTreeMap::new();
         for (_k, v) in &self.map {
-            lines.push(format!("[{:<50}, {:<50}, {:<50}, {:<80}, {}],", q(&v.camera_brand), q(&v.camera_model), q(&v.lens_model), q(&v.camera_setting), q(&v.filename.replace(&path, ""))));
+            if !v.is_copy {
+                let coeffs = format!("{:?}", v.fisheye_params.distortion_coeffs);
+                if coeffs_map.contains_key(&coeffs) {
+                    println!("Duplicate profile:\n{}\n{}\n", coeffs_map[&coeffs], v.filename.replace(&path, ""))
+                }
+                coeffs_map.insert(coeffs, v.filename.replace(&path, ""));
+                lines.push(format!("[{:<50}, {:<50}, {:<50}, {:<80}, {}],", q(&v.camera_brand), q(&v.camera_model), q(&v.lens_model), q(&v.camera_setting), q(&v.filename.replace(&path, ""))));
+            }
         }
         lines.sort_by(|a, b| a.to_lowercase().trim().cmp(&b.to_lowercase().trim()));
         let mut out: String = "[\n".into();
@@ -227,10 +246,15 @@ impl LensProfileDatabase {
 
                 let parsed = LensProfile::from_json(&serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                 *prof.get_mut("name").unwrap() = serde_json::Value::String(parsed.get_name());
+                let mut calibrated_by = prof.get("calibrated_by").and_then(|x| x.as_str().map(|x| x.to_string())).unwrap_or_default();
+                if !calibrated_by.chars().all(|c| c.is_ascii()) {
+                    // println!("Non-ascii author: {}", calibrated_by);
+                    calibrated_by.clear();
+                }
 
                 let new_prof = serde_json::to_string_pretty(&prof).unwrap();
                 //dbg!(new_prof);
-                let new_filename = parsed.get_name().chars().filter(|c| c.is_ascii()).collect::<String>()
+                let mut new_filename = parsed.get_name().chars().filter(|c| c.is_ascii()).collect::<String>()
                     .replace("\n", "")
                     .replace("|", "_")
                     .replace("*", "_")
@@ -245,6 +269,11 @@ impl LensProfileDatabase {
                 let mut new_path = old_path.with_file_name(format!("{}.json", new_filename));
                 let mut i = 2;
                 if new_path != old_path {
+                    if !calibrated_by.is_empty() && new_path.exists() {
+                        new_filename.push_str(" - ");
+                        new_filename.push_str(&calibrated_by);
+                        new_path = old_path.with_file_name(format!("{}.json", new_filename));
+                    }
                     while new_path.exists() {
                         new_path = old_path.with_file_name(format!("{} - {}.json", new_filename, i));
                         i += 1;

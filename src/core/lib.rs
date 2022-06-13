@@ -235,7 +235,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
     pub fn recompute_adaptive_zoom(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let params = stabilization::ComputeParams::from_manager(self, false);
         let lens_fov_adjustment = params.lens_fov_adjustment;
         let mut zoom = zooming::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
@@ -255,7 +255,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_undistortion(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let params = stabilization::ComputeParams::from_manager(self, false);
         self.stabilization.write().set_compute_params(params);
     }
 
@@ -272,7 +272,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
-        let mut params = stabilization::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self, false);
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
@@ -679,7 +679,7 @@ impl<T: PixelType> StabilizationManager<T> {
             self.gyro.write().init_from_params(&params);
         }
 
-        self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self));
+        self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self, false));
 
         self.invalidate_smoothing();
     }

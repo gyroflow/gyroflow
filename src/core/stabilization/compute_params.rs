@@ -47,7 +47,7 @@ pub struct ComputeParams {
     pub distortion_model: DistortionModel
 }
 impl ComputeParams {
-    pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>) -> Self {
+    pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>, full_gyro: bool) -> Self {
         let params = mgr.params.read();
 
         let mut camera_matrix = mgr.lens.write().get_camera_matrix(params.size, params.video_size);
@@ -75,7 +75,7 @@ impl ComputeParams {
         let distortion_model = DistortionModel::from_id(lens.distortion_model_id);
 
         Self {
-            gyro: mgr.gyro.read().clone_quaternions(),
+            gyro: if full_gyro { mgr.gyro.read().clone() } else { mgr.gyro.read().clone_quaternions() },
 
             frame_count: params.frame_count,
             fov_scale: params.fov,

@@ -319,7 +319,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                     }
 
                     plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
-                    plane.set_compute_params(ComputeParams::from_manager(&stab));
+                    plane.set_compute_params(ComputeParams::from_manager(&stab, false));
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
                         let size        = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
                         let output_size = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
