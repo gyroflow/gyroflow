@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use gyroflow_core::stabilization;
+use itertools::Either;
 use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
@@ -51,12 +52,13 @@ pub struct Controller {
 
     set_sync_method: qt_method!(fn(&self, v: u32)),
     offset_method: qt_property!(u32),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, override_fps: f64)), // QString is workaround for now
+    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, guess_orientation: bool, override_fps: f64)), // QString is workaround for now
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
     estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
+    orientation_guessed: qt_signal!(orientation: QString),
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
@@ -220,7 +222,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, override_fps: f64) {
+    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, guess_orientation: bool, override_fps: f64) {
         rendering::clear_log();
 
         if every_nth_frame <= 0 { every_nth_frame = 1; }
@@ -261,6 +263,10 @@ impl Controller {
             this.update_offset_model();
             this.request_recompute();
         });
+        let set_orientation = util::qt_queued_callback_mut(self, move |this, orientation: String| {
+            ::log::info!("Setting orientation {}", &orientation);
+            this.orientation_guessed(QString::from(orientation));
+        });
         let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
             arg.push_str("\n\n");
             arg.push_str(&rendering::get_log());
@@ -276,12 +282,16 @@ impl Controller {
 
         self.cancel_flag.store(false, SeqCst);
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs, self.cancel_flag.clone()) {
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs, guess_orientation, self.cancel_flag.clone()) {
             sync.on_progress(move |percent, ready, total| {
                 progress((percent, ready, total));
             });
-            sync.on_finished(move |offsets| {
-                set_offsets(offsets);
+            sync.on_finished(move |arg| {
+                match arg {
+                    Either::Left(offsets)=>set_offsets(offsets),
+                    Either::Right(Some(orientation))=> set_orientation(orientation.0),
+                    _=> ()
+                };
             });
 
             let ranges = sync.get_ranges();
@@ -674,7 +684,7 @@ impl Controller {
     }
 
     fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64) {
-        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, false, 11.0, sync_duration_ms, every_nth_frame, true, override_fps);
+        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, false, 11.0, sync_duration_ms, every_nth_frame, true, false, override_fps);
     }
 
     fn cancel_current_operation(&mut self) {

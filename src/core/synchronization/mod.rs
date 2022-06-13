@@ -14,6 +14,7 @@ use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 use crate::gyro_source::{ Quat64, TimeQuat };
 use crate::stabilization::ComputeParams;
 
+use self::find_offset_rssync::FindOffsetsRssync;
 #[cfg(feature = "use-opencv")]
 use self::opencv::ItemOpenCV;
 #[cfg(feature = "use-opencv")]
@@ -397,7 +398,7 @@ impl PoseEstimator {
         find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params, progress_cb, cancel_flag)
     }
 
-    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    fn collect_points_for_rssync(&self,  ranges: &[(i64, i64)]) -> Vec<Vec<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>> {
         let mut points = Vec::new();
         for (from_ts, to_ts) in ranges {
             let mut points_per_range = Vec::new();
@@ -413,8 +414,15 @@ impl PoseEstimator {
             }
             points.push(points_per_range);
         }
+        points
+    }
 
-        find_offset_rssync::find_offsets(ranges, &points, initial_offset, search_size, params, progress_cb, cancel_flag)
+    pub fn guess_orientation_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Option<(String, f64)> {
+        FindOffsetsRssync::new(ranges, &self.collect_points_for_rssync(ranges), initial_offset, search_size, params, progress_cb, cancel_flag).guess_orient()
+    }
+
+    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        FindOffsetsRssync::new(ranges, &self.collect_points_for_rssync(ranges), initial_offset, search_size, params, progress_cb, cancel_flag).full_sync()
     }
 
     pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>

@@ -103,6 +103,9 @@ MenuItem {
             by.value = biasY;
             bz.value = biasZ;
         }
+        function onOrientation_guessed(value: string) {
+             orientation.text = value;
+        }
     }
 
     Button {

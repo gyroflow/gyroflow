@@ -297,7 +297,16 @@ Item {
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.checkNegativeInitialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, window.exportSettings.overrideFps);
+                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.checkNegativeInitialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, false, window.exportSettings.overrideFps);
+                }
+            }
+            Action {
+                id: guessOrientationHere;
+                icon.name: "axes";
+                text: qsTr("Guess IMU orientation here");
+                onTriggered: {
+                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.checkNegativeInitialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, true, window.exportSettings.overrideFps);
                 }
             }
             Action {

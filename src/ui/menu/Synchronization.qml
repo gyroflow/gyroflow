@@ -54,7 +54,7 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, window.sync.checkNegativeInitialOffset, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, window.exportSettings.overrideFps);
+            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, window.sync.checkNegativeInitialOffset, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, false, window.exportSettings.overrideFps);
         }
         onClicked: {
             if (!controller.lens_loaded) {

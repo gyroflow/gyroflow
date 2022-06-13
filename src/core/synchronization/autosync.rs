@@ -3,6 +3,7 @@
 
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::Relaxed, Ordering::SeqCst };
 use std::sync::Arc;
+use itertools::Either;
 use parking_lot::RwLock;
 
 use crate::StabilizationManager;
@@ -19,6 +20,7 @@ pub struct AutosyncProcess {
     org_fps: f64,
     fps_scale: Option<f64>,
     for_rs: bool, // for rolling shutter estimation
+    guess_orient: bool,
     ranges_us: Vec<(i64, i64)>,
     scaled_ranges_us: Vec<(i64, i64)>,
     estimator: Arc<PoseEstimator>,
@@ -27,13 +29,13 @@ pub struct AutosyncProcess {
     compute_params: Arc<RwLock<ComputeParams>>,
     cancel_flag: Arc<AtomicBool>,
     progress_cb: Option<Arc<Box<dyn Fn(f64, usize, usize) + Send + Sync + 'static>>>,
-    finished_cb: Option<Arc<Box<dyn Fn(Vec<(f64, f64, f64)>) + Send + Sync + 'static>>>,
+    finished_cb: Option<Arc<Box<dyn Fn(Either<Vec<(f64, f64, f64)>, Option<(String, f64)>>) + Send + Sync + 'static>>>,
 
     thread_pool: rayon::ThreadPool,
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
+    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, guess_orient: bool, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
@@ -68,6 +70,7 @@ impl AutosyncProcess {
         estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
 
         let mut comp_params = ComputeParams::from_manager(stab);
+        stab.gyro.read().copy_org_into(&mut comp_params.gyro);
         comp_params.gyro.raw_imu = stab.gyro.read().raw_imu.clone();
         if !for_rs {
             comp_params.gyro.clear_offsets();
@@ -80,6 +83,7 @@ impl AutosyncProcess {
             org_fps,
             scaled_fps,
             for_rs,
+            guess_orient,
             method,
             ranges_us,
             scaled_ranges_us,
@@ -184,7 +188,9 @@ impl AutosyncProcess {
 
         if let Some(cb) = &self.finished_cb {
             if self.for_rs {
-                cb(self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone()));
+                cb(Either::Left(self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
+            } else if self.guess_orient {
+                cb(Either::Right(self.estimator.guess_orientation_rssync(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone())));
             } else {
                 let offsets = match method {
                     0 => self.estimator.find_offsets(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
@@ -202,18 +208,18 @@ impl AutosyncProcess {
                         _ => { panic!("Unsupported offset method: {}", method); }
                     };
                     if offsets2.len() > offsets.len() {
-                        cb(offsets2);
+                        cb(Either::Left(offsets2));
                     } else if offsets2.len() == offsets.len() {
                         let sum1: f64 = offsets.iter().map(|(_, _, cost)| *cost).sum();
                         let sum2: f64 = offsets2.iter().map(|(_, _, cost)| *cost).sum();
                         if sum1 < sum2 {
-                            cb(offsets);
+                            cb(Either::Left(offsets));
                         } else {
-                            cb(offsets2);
+                            cb(Either::Left(offsets2));
                         }
                     }
                 } else {
-                    cb(offsets);
+                    cb(Either::Left(offsets));
                 }
             }
         }
@@ -226,7 +232,7 @@ impl AutosyncProcess {
     pub fn on_progress<F>(&mut self, cb: F) where F: Fn(f64, usize, usize) + Send + Sync + 'static {
         self.progress_cb = Some(Arc::new(Box::new(cb)));
     }
-    pub fn on_finished<F>(&mut self, cb: F) where F: Fn(Vec<(f64, f64, f64)>) + Send + Sync + 'static {
+    pub fn on_finished<F>(&mut self, cb: F) where F:  Fn(Either<Vec<(f64, f64, f64)>, Option<(String, f64)>>) + Send + Sync + 'static {
         self.finished_cb = Some(Arc::new(Box::new(cb)));
     }
 }
