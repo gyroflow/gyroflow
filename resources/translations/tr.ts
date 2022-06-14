@@ -77,6 +77,16 @@ Bu seçenek çok daha iyi bir arayüz performansı sunmalı.</translation>
       <source>Use GPU decoding</source>
       <translation>GPU decoding kullan</translation>
     </message>
+    <message>
+      <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
+      <source>Device for video processing</source>
+      <translation type="unfinished">Device for video processing</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Advanced.qml" line="227"/>
+      <source>CPU only</source>
+      <translation type="unfinished">CPU only</translation>
+    </message>
   </context>
   <context>
     <name>AdvancedSection</name>
@@ -89,142 +99,143 @@ Bu seçenek çok daha iyi bir arayüz performansı sunmalı.</translation>
   <context>
     <name>App</name>
     <message>
-      <location filename="../../src/ui/App.qml" line="70"/>
+      <location filename="../../src/ui/App.qml" line="67"/>
       <source>Choose a video file</source>
       <translation>Bir video dosyası seç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="71"/>
-      <location filename="../../src/ui/App.qml" line="170"/>
+      <location filename="../../src/ui/App.qml" line="68"/>
+      <location filename="../../src/ui/App.qml" line="167"/>
       <source>Video files</source>
       <translation>Video dosyaları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="143"/>
+      <location filename="../../src/ui/App.qml" line="140"/>
       <source>Output path:</source>
       <translation>Çıktı yolu:</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="183"/>
+      <location filename="../../src/ui/App.qml" line="181"/>
       <source>Export</source>
       <translation>Dışarı aktar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="183"/>
+      <location filename="../../src/ui/App.qml" line="181"/>
       <source>Add to render queue</source>
       <translation>Render sırasına ekle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="223"/>
-      <location filename="../../src/ui/App.qml" line="417"/>
+      <location filename="../../src/ui/App.qml" line="222"/>
+      <location filename="../../src/ui/App.qml" line="443"/>
       <source>Output file already exists, do you want to overwrite it?</source>
       <translation>Çıktı dosyası zaten var, varolanın üzerine yazmak ister misin?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="209"/>
-      <location filename="../../src/ui/App.qml" line="217"/>
-      <location filename="../../src/ui/App.qml" line="224"/>
+      <location filename="../../src/ui/App.qml" line="208"/>
+      <location filename="../../src/ui/App.qml" line="216"/>
+      <location filename="../../src/ui/App.qml" line="223"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="225"/>
-      <location filename="../../src/ui/App.qml" line="363"/>
+      <location filename="../../src/ui/App.qml" line="224"/>
+      <location filename="../../src/ui/App.qml" line="379"/>
       <source>Rename</source>
       <translation>Yeniden adlandır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="210"/>
-      <location filename="../../src/ui/App.qml" line="218"/>
-      <location filename="../../src/ui/App.qml" line="226"/>
+      <location filename="../../src/ui/App.qml" line="209"/>
+      <location filename="../../src/ui/App.qml" line="217"/>
+      <location filename="../../src/ui/App.qml" line="225"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="169"/>
-      <location filename="../../src/ui/App.qml" line="384"/>
+      <location filename="../../src/ui/App.qml" line="166"/>
+      <location filename="../../src/ui/App.qml" line="401"/>
+      <location filename="../../src/ui/App.qml" line="410"/>
       <source>Select file destination</source>
       <translation>Dosya konumunu seç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="183"/>
+      <location filename="../../src/ui/App.qml" line="181"/>
       <source>Save</source>
       <translation>Kaydet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="208"/>
+      <location filename="../../src/ui/App.qml" line="207"/>
       <source>Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</source>
       <translation>Lens profiliniz yüklenmedi, sonuçlarınız hatalı olacak. Bu dosyayı render etmek istediğinize emin misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="216"/>
+      <location filename="../../src/ui/App.qml" line="215"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
       <translation>Senkronizasyon noktaları belirlenmedi, sonuçlarınız hatalı olacak. Bu dosyayı render etmek istediğinize emin misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="278"/>
+      <location filename="../../src/ui/App.qml" line="293"/>
       <source>Render queue</source>
       <translation>Render sırası</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="340"/>
-      <location filename="../../src/ui/App.qml" line="343"/>
+      <location filename="../../src/ui/App.qml" line="355"/>
+      <location filename="../../src/ui/App.qml" line="358"/>
       <source>Ok</source>
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="349"/>
+      <location filename="../../src/ui/App.qml" line="364"/>
       <source>There&apos;s a newer version available: %1.</source>
       <translation>Yeni bir versiyon mevcut: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="350"/>
+      <location filename="../../src/ui/App.qml" line="365"/>
       <source>Download</source>
       <translation>İndir</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="350"/>
+      <location filename="../../src/ui/App.qml" line="365"/>
       <source>Close</source>
       <translation>Kapat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="359"/>
+      <location filename="../../src/ui/App.qml" line="375"/>
       <source>`.gyroflow` file already exists, what do you want to do?</source>
       <translation>`.gyroflow` dosyası zaten var, ne yapmak istersiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="360"/>
+      <location filename="../../src/ui/App.qml" line="376"/>
       <source>Overwrite</source>
       <translation>Üzerine yaz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="372"/>
+      <location filename="../../src/ui/App.qml" line="388"/>
       <source>Choose a different location</source>
       <translation>Başka bir konum seç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="377"/>
+      <location filename="../../src/ui/App.qml" line="394"/>
       <source>Cancel</source>
       <translation>İptal et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="393"/>
+      <location filename="../../src/ui/App.qml" line="419"/>
       <source>An error occured: %1</source>
       <translation>Bir hata oluştu: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="394"/>
+      <location filename="../../src/ui/App.qml" line="420"/>
       <source>Gyroflow file exported to %1.</source>
       <translation>Gyroflow dosyası şuraya aktarıldı: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="395"/>
+      <location filename="../../src/ui/App.qml" line="421"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
       <translation>--TÜRKÇE--</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="404"/>
+      <location filename="../../src/ui/App.qml" line="430"/>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
@@ -233,7 +244,7 @@ Make sure you have write permissions to the target directory and make sure targe
 Hedeflediğiniz çıktı yoluna yazma izniniz olduğundan ve hedef dosyanın başka bir program tarafından kullanılmadığından emin olun.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="405"/>
+      <location filename="../../src/ui/App.qml" line="431"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
@@ -242,16 +253,26 @@ En son NVIDIA sürücülerini edinin: %1.
 Güncelleme sonrasında sorun devam ederse, GPU'nuz muhtemelen bu formatta GPU encoding'i desteklemiyordur. Bu durumda GPU encoding'i devre dışı bırakın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
+      <location filename="../../src/ui/App.qml" line="440"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
       <translation>GPU hızlanırılmış encoder bu piksel formatını desteklemiyor (%1). Desteklenen bir piksel formatına dönüştürmek ister misiniz yoksa orjinali koruyup CPU üzerinde render etmek mi istersiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="420"/>
+      <location filename="../../src/ui/App.qml" line="446"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
       <translation>GPU encoder başlatılamadığı için render işlemi, çok daha yavaş bir alternatif olan CPU üzerinde yapıldı. Modern bir cihaza ve cihazın güncel GPU sürücü yazılımına sahipseniz ve burada bir sorun olduğunu düşünüyorsanız, bu durumu gyroflow.log dosyasıyla birlikte GitHub üzerinden raporlayın.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="449"/>
+      <source>Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</source>
+      <translation type="unfinished">Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="452"/>
+      <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
+      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
     </message>
   </context>
   <context>
@@ -275,59 +296,59 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="78"/>
+      <location filename="../../src/ui/Calibrator.qml" line="75"/>
       <source>Choose a video file</source>
       <translation>Bir video dosyası seçin</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="79"/>
+      <location filename="../../src/ui/Calibrator.qml" line="76"/>
       <source>Video files</source>
       <translation>Video dosyaları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="83"/>
+      <location filename="../../src/ui/Calibrator.qml" line="80"/>
       <source>You selected multiple files. Do you want to process them automatically and export lens profiles?</source>
       <translation>Birden çok dosya seçtiniz. Tümünü otomatik olarak işleyip lens profillerini dışarı aktarmak mı istiyorsunuz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="84"/>
-      <location filename="../../src/ui/Calibrator.qml" line="241"/>
+      <location filename="../../src/ui/Calibrator.qml" line="81"/>
+      <location filename="../../src/ui/Calibrator.qml" line="238"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="85"/>
-      <location filename="../../src/ui/Calibrator.qml" line="242"/>
+      <location filename="../../src/ui/Calibrator.qml" line="82"/>
+      <location filename="../../src/ui/Calibrator.qml" line="239"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="198"/>
+      <location filename="../../src/ui/Calibrator.qml" line="195"/>
       <source>or</source>
       <translation>veya</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="201"/>
+      <location filename="../../src/ui/Calibrator.qml" line="198"/>
       <source>Open calibration target</source>
       <translation>Kalibrasyon hedefini aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="207"/>
+      <location filename="../../src/ui/Calibrator.qml" line="204"/>
       <source>How to calibrate lens?</source>
       <translation>Lens nasıl kalibre edilir?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="224"/>
+      <location filename="../../src/ui/Calibrator.qml" line="221"/>
       <source>%1 good frames</source>
       <translation>%1 iyi frame'ler</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="227"/>
+      <location filename="../../src/ui/Calibrator.qml" line="224"/>
       <source>Analyzing %1...</source>
       <translation>Analiz ediliyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/Calibrator.qml" line="240"/>
+      <location filename="../../src/ui/Calibrator.qml" line="237"/>
       <source>Are you sure you want to close the calibrator?</source>
       <translation>Kaibratörü kapatmak istediğinize emin misiniz?</translation>
     </message>
@@ -343,129 +364,134 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
   <context>
     <name>Export</name>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="12"/>
+      <location filename="../../src/ui/menu/Export.qml" line="13"/>
       <source>Export settings</source>
       <translation>Dışa aktarma ayarları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="198"/>
+      <location filename="../../src/ui/menu/Export.qml" line="197"/>
       <source>Output size</source>
       <translation>Çıktı boyutu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="204"/>
+      <location filename="../../src/ui/menu/Export.qml" line="203"/>
       <source>Width</source>
       <translation>Genişlik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="241"/>
+      <location filename="../../src/ui/menu/Export.qml" line="240"/>
       <source>Height</source>
       <translation>Yükseklik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="236"/>
+      <location filename="../../src/ui/menu/Export.qml" line="235"/>
       <source>Lock aspect ratio</source>
       <translation>Açıklık oranını kilitle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="267"/>
+      <location filename="../../src/ui/menu/Export.qml" line="266"/>
       <source>Output size preset</source>
       <translation>Çıktı boyutu önayarı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="301"/>
+      <location filename="../../src/ui/menu/Export.qml" line="300"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>Bu çözünürlük seçili codec tarafından desteklenmiyor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="302"/>
+      <location filename="../../src/ui/menu/Export.qml" line="301"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>Desteklenen maksimum çözünürlük şudur: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="308"/>
+      <location filename="../../src/ui/menu/Export.qml" line="307"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>Çözünürlük çift sayı olmalı.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="313"/>
+      <location filename="../../src/ui/menu/Export.qml" line="312"/>
       <source>Bitrate</source>
       <translation>Bitrate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="320"/>
+      <location filename="../../src/ui/menu/Export.qml" line="319"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="327"/>
+      <location filename="../../src/ui/menu/Export.qml" line="326"/>
       <source>Use GPU encoding</source>
       <translation>GPU encoding kullan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="336"/>
+      <location filename="../../src/ui/menu/Export.qml" line="335"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>GPU encoder'lar yazılımsal encoder'lardan daha düşük kalitede sonuç verirler, ancak daha hızlı çalışırlar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="337"/>
+      <location filename="../../src/ui/menu/Export.qml" line="336"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>Ayrı görüntü kalitesi elde etmek için daha yüksek bitrate'e ihtiyaç duyarlar, veya aynı bitrate'te daha düşük görüntü kalitesinde çıktı verirler.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="338"/>
+      <location filename="../../src/ui/menu/Export.qml" line="337"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>Maksimum muhtemel kalite için bu seçeneği kaldırın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="340"/>
+      <location filename="../../src/ui/menu/Export.qml" line="339"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>GPU hızlandırması bu videonun piksel formatı için mevcut değil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="344"/>
+      <location filename="../../src/ui/menu/Export.qml" line="343"/>
       <source>Export audio</source>
       <translation>Sesi dışa aktar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="353"/>
+      <location filename="../../src/ui/menu/Export.qml" line="352"/>
       <source>Custom encoder options</source>
       <translation>Özel encoder seçenekleri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="376"/>
+      <location filename="../../src/ui/menu/Export.qml" line="375"/>
       <source>Show available options</source>
       <translation>Mevcut seçenekleri göster</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="379"/>
+      <location filename="../../src/ui/menu/Export.qml" line="378"/>
       <source>Ok</source>
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="386"/>
+      <location filename="../../src/ui/menu/Export.qml" line="385"/>
       <source>Keyframe distance</source>
       <translation>Keyframe uzaklığı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="395"/>
+      <location filename="../../src/ui/menu/Export.qml" line="394"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="400"/>
+      <location filename="../../src/ui/menu/Export.qml" line="399"/>
       <source>Preserve other tracks</source>
       <translation>Diğer trackleri koru</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="402"/>
+      <location filename="../../src/ui/menu/Export.qml" line="401"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
       <translation>Bu seçenek kırpma aralığı özelliğini etkisiz kılar ve .mov çıktı dosya uzantısını kullanmanızı gerektirir</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="407"/>
+      <location filename="../../src/ui/menu/Export.qml" line="406"/>
       <source>Use black frames outside trim range and keep original file duration</source>
       <translation>Kırpma aralığı dışında siyah kare kullan ve orijinal süreyi koru</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Export.qml" line="413"/>
+      <source>Device for rendering</source>
+      <translation type="unfinished">Device for rendering</translation>
     </message>
   </context>
   <context>
@@ -728,12 +754,12 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <translation>Hareket verisi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="29"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="26"/>
       <source>Choose a motion data file</source>
       <translation>Hareket veri dosyası seç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="30"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="27"/>
       <source>Motion data files</source>
       <translation>Hareket veri dosyaları</translation>
     </message>
@@ -839,27 +865,32 @@ Profilinizi yüklemek istiyor musunuz?</translation>
   <context>
     <name>Popup</name>
     <message>
-      <location filename="../../src/ui/App.qml" line="199"/>
+      <location filename="../../src/ui/App.qml" line="197"/>
       <source>Export</source>
       <translation>Dışarı aktar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="200"/>
+      <location filename="../../src/ui/App.qml" line="198"/>
       <source>Create settings preset</source>
       <translation>Önayar oluştur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="201"/>
+      <location filename="../../src/ui/App.qml" line="199"/>
       <source>Apply selected settings to all items in the render queue</source>
       <translation>Seçili ayarları render sırasındaki her şeye uygula</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="202"/>
+      <location filename="../../src/ui/App.qml" line="200"/>
+      <source>Export project file (including processed gyro data)</source>
+      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="201"/>
       <source>Export project file (including gyro data)</source>
       <translation>Proje dosyasını dışa aktar (gyro verisi dahil)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="203"/>
+      <location filename="../../src/ui/App.qml" line="202"/>
       <source>Export project file</source>
       <translation>Proje dosyasını dışa aktar</translation>
     </message>
@@ -935,32 +966,32 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <translation>Sabitlenmiş kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="394"/>
       <source>No zooming</source>
       <translation>Zoom yok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="394"/>
       <source>Dynamic zooming</source>
       <translation>Dinamik zoomlama</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="394"/>
       <source>Static zoom</source>
       <translation>Statik zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
       <source>Using essential matrix</source>
       <translation>Temel matris kullanılıyor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
       <source>Using visual features</source>
       <translation>Görsel özellikler kullanılıyor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1112,149 +1143,175 @@ Do you want to convert to a different supported pixel format or keep the origina
   <context>
     <name>SettingsSelector</name>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="55"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="66"/>
       <source>Select settings you want to include in the preset</source>
       <translation>Önayarda bulunmasını istediğiniz ayarları seçin</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="56"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="67"/>
       <source>Select settings you want to apply to all items in the render queue</source>
       <translation>Render sırasındaki her şeye uygulamak istediğiniz ayarları seçin</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="73"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="85"/>
       <source>Video</source>
       <translation>Video</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="74"/>
-      <location filename="../../src/ui/SettingsSelector.qml" line="79"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="86"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <source>Rotation</source>
       <translation>Rotasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="75"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="87"/>
       <source>Frame rate</source>
       <translation>Frame hızı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="76"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="88"/>
       <source>Lens profile</source>
       <translation>Lens profili</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="77"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="89"/>
       <source>Motion data</source>
       <translation>Hareket verisi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="78"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Low pass filter</source>
       <translation>Alçak geçiş filtresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="80"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
+      <source>Gyro bias</source>
+      <translation type="unfinished">Gyro bias</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>IMU orientation</source>
       <translation>IMU konumlaması</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="81"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Integration method</source>
       <translation>Entegrasyon metodu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="82"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Trim range</source>
       <translation>Kırpma aralığı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="83"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>Offsets</source>
       <translation>Ötelemeler</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="84"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
+      <source>Synchronization</source>
+      <translation type="unfinished">Synchronization</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
+      <source>Rough gyro offset</source>
+      <translation type="unfinished">Rough gyro offset</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
+      <source>Sync search size</source>
+      <translation type="unfinished">Sync search size</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
+      <source>Max sync points</source>
+      <translation type="unfinished">Max sync points</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Stabilization</source>
       <translation>Stabilizasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="85"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>FOV</source>
       <translation>Görüş açısı (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="86"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Smoothing params</source>
       <translation>Yumuşatma parametreleri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="87"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <source>Horizon lock</source>
       <translation>Ufuk kilitleme</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="88"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Rolling shutter correction</source>
       <translation>Jöle etkisi düzeltmesi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="89"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>Zooming</source>
       <translation>Zoomlama</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
       <source>Lens correction strength</source>
       <translation>Lens düzeltme sertliği</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Export settings</source>
       <translation>Dışa aktarma ayarları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
       <source>Codec</source>
       <translation>Codec</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Audio</source>
       <translation>Ses</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
       <source>Output path</source>
       <translation>Çıktı yolu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Output size</source>
       <translation>Çıktı boyutu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
-      <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Advanced</source>
       <translation>Gelişmiş</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Background</source>
       <translation>Arkaplan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="193"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Save</source>
       <translation>Kaydet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="193"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Apply</source>
       <translation>Uygula</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="193"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Cancel</source>
       <translation>İptal et</translation>
     </message>
@@ -1316,13 +1373,13 @@ Do you want to convert to a different supported pixel format or keep the origina
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="172"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="340"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="342"/>
       <source>Roll angle correction</source>
       <translation>Roll açısı düzeltme</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="173"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="358"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="360"/>
       <source>Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.</source>
       <translation>İsabetli oryantasyon determinasyonu gerekli. Complementary, Mahony veya Madgwick entegrasyon metodunu deneyin.</translation>
     </message>
@@ -1390,95 +1447,95 @@ Hız faktörünü istediğiniz değerleri elde edene kadar modifiye edin (20'den
       <translation>Tepkisellik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="202"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="204"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Görüş açısı 1.0 dan büyük, siyah sınır çizgileri görebilirsiniz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="207"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="209"/>
       <source>FOV</source>
       <translation>Görüş açısı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="317"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="319"/>
       <source>Lock horizon</source>
       <translation>Ufku kilitle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="322"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="324"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Kilitleme miktarı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="330"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="436"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="451"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="332"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="438"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="453"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="348"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="350"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="379"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="381"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Maksimum rotasyon: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="386"/>
       <source>Max zoom: %1</source>
       <translation>Maksimum zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="407"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="409"/>
       <source>Zooming speed</source>
       <translation>Zoomlama hızı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="415"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="417"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="422"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="424"/>
       <source>Zooming center offset</source>
       <translation>Zoomlama merkezi ötelemesi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="461"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="463"/>
       <source>Rolling shutter correction</source>
       <translation>Jöle etkisi düzeltmesi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="469"/>
       <source>Frame readout time</source>
       <translation>Frame okuma süresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="473"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="475"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="485"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="487"/>
       <source>Bottom to top</source>
       <translation>Alttan üste</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="494"/>
       <source>Lens correction strength</source>
       <translation>Lens doğrulama sertliği</translation>
     </message>
@@ -1491,97 +1548,97 @@ Hız faktörünü istediğiniz değerleri elde edene kadar modifiye edin (20'den
       <translation>Senkronizasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="39"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="66"/>
       <source>Auto sync</source>
       <translation>Oto senkronizasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="43"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="70"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Hareket verisi yüklenmedi, senkronizasyon yapılamıyor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="61"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Lens profili yüklenmedi, senkronizasyon kuvvetle muhtemel hatalı sonuç verecek. Devam etmek istediğinize emin misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="62"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="89"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="65"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="76"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="103"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Bu dosya senkronize edilmiş hareket verisi kullanmakta, ek senkronizasyon noktalarına gerek yok; dahası, ek noktalar çıktının daha kötü gözükmesine sebep olabilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="82"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
       <source>Rough gyro offset</source>
       <translation>Kaba gyro ötelemesi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="90"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="113"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="154"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="99"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="126"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Hem pozitif hem negatif ötelemeyi analiz et.
 Bu seçenek hesaplama süresini ikiye katlar. Dolayısıyla, bu seçeneği sadece başlangıç noktası için aktif edin ve ötelemeyi öğrendiğinizde seçimi kaldırın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="105"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
       <source>Sync search size</source>
       <translation>Senkronizasyon arama boyutu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="118"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
       <source>Max sync points</source>
       <translation>Maksimum senkronizasyon noktaları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="134"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
       <source>Analyze every n-th frame</source>
       <translation>Her n. frame'i analiz et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="146"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
       <source>Time to analyze per sync point</source>
       <translation>Her bir senkronizasyon noktasını analiz etme süresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="160"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="187"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZE metodu daha isabetli olabilir fakat OpenCV'den çok daha yavaş çalışır. Yalnızca OpenCV güzel sonuç vermediğinde kullanın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="164"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
       <source>Optical flow method</source>
       <translation>Optik akış metodu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Offset calculation method</source>
       <translation>Öteleme hesaplama metodu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="188"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Kameranın rotasyon açılarını elde etmek için optik akıştan kamera transformasyon matrisini hesaplayın. Sonra, bu açıları gyro açıları ile eşleştirmeye çalışın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="189"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="216"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1590,29 +1647,29 @@ Sonra, optik akış çizgi uzunluklarını hesaplayın.
 Elde ettiğiniz öteleme değeri, çizgilerin en kısa olduğu; yani videodaki hareketin en az olduğu ötelemedir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="190"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Jöle etkili video - gyro senkronizasyonu algoritması. 
 Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin olun.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="197"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="224"/>
       <source>Low pass filter</source>
       <translation>Alçak geçiş filtresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="202"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="229"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="214"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
       <source>Show detected features</source>
       <translation>Tespit edilmiş özellikleri göster</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="220"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
       <source>Show optical flow</source>
       <translation>Optik akışı göster</translation>
     </message>
@@ -1742,17 +1799,17 @@ Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin 
       <translation>Burada oto senkronize et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="315"/>
       <source>Add manual sync point here</source>
       <translation>Buraya el ile senkronizasyon noktası ekle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="325"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="334"/>
       <source>Estimate rolling shutter here</source>
       <translation>Burada jöle etkisini tahmin et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="329"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="338"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1763,12 +1820,12 @@ Are you sure you want to continue?</source>
 Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek istediğinize emin misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="333"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="342"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="336"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
@@ -1778,84 +1835,89 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
       <translation>Kalibrasyon noktası ekle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="343"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <source>Guess IMU orientation here</source>
+      <translation type="unfinished">Guess IMU orientation here</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
       <source>Estimate gyro bias here</source>
       <translation>Burada gyro kaymasını tahmini yap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="348"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
       <source>Delete all sync points</source>
       <translation>Tüm senkronizasyon noktalarını sil</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="354"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
       <source>Chart display mode</source>
       <translation>Çizelge gösterim modu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="355"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
       <source>Gyroscope</source>
       <translation>Gyroskop</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="356"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="365"/>
       <source>Accelerometer</source>
       <translation>İvmeölçer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="366"/>
       <source>Magnetometer</source>
       <translation>Manyetometre</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="358"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="367"/>
       <source>Quaternions</source>
       <translation>Quaternionlar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="476"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="485"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
       <source>Control+Shift+Scroll</source>
       <translation>Ctrl + Shift + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="577"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
       <source>Command+Scroll</source>
       <translation>Cmd + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="577"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="574"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 yatay zoom, %2 dikey zoom, %3 pan, zoomu sıfırlamak için çift tıkla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="575"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
       <source>Scroll</source>
       <translation>Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
       <source>Alt+Scroll</source>
       <translation>Alt + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="444"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="528"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="535"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="537"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="544"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="555"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="564"/>
       <source>Save</source>
       <translation>Kaydet</translation>
     </message>
@@ -1914,120 +1976,120 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="133"/>
+      <location filename="../../src/ui/VideoArea.qml" line="140"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>Bu videoyla ilişkilendirilmiş bir dosya var %1. Yüklemek ister misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="134"/>
+      <location filename="../../src/ui/VideoArea.qml" line="141"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="137"/>
+      <location filename="../../src/ui/VideoArea.qml" line="144"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="240"/>
+      <location filename="../../src/ui/VideoArea.qml" line="247"/>
       <source>Zoom: %1</source>
       <translation>Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="264"/>
+      <location filename="../../src/ui/VideoArea.qml" line="271"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Seçilen dosyanın yüklemesi başarısız oldu; desteklenmiyor veya bozuk olabilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="102"/>
-      <location filename="../../src/ui/VideoArea.qml" line="264"/>
+      <location filename="../../src/ui/VideoArea.qml" line="109"/>
+      <location filename="../../src/ui/VideoArea.qml" line="271"/>
       <source>Ok</source>
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="101"/>
+      <location filename="../../src/ui/VideoArea.qml" line="108"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation>Görüntü sekansı seçildi.
 Lütfen frame rate'i belirtin: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="108"/>
+      <location filename="../../src/ui/VideoArea.qml" line="115"/>
       <source>Cancel</source>
       <translation>İptal et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="315"/>
+      <location filename="../../src/ui/VideoArea.qml" line="322"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Lens profili yüklenmedi, sonuçlar düzgün gözükmeyecek. Lütfen kameranızın lens profilini yükleyin.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="341"/>
+      <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Loading %1...</source>
       <translation>Yükleniyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="341"/>
+      <location filename="../../src/ui/VideoArea.qml" line="348"/>
       <source>Drop video file here</source>
       <translation>Video dosyasını buraya bırakın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="414"/>
+      <location filename="../../src/ui/VideoArea.qml" line="421"/>
       <source>Analyzing %1...</source>
       <translation>Analiz ediliyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="423"/>
+      <location filename="../../src/ui/VideoArea.qml" line="430"/>
       <source>Loading gyro data %1...</source>
       <translation>Gyro verisi yükleniyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="472"/>
+      <location filename="../../src/ui/VideoArea.qml" line="479"/>
       <source>Trim start</source>
       <translation>Kırpma başlangıcı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="473"/>
+      <location filename="../../src/ui/VideoArea.qml" line="480"/>
       <source>Previous frame</source>
       <translation>Önceki frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="476"/>
+      <location filename="../../src/ui/VideoArea.qml" line="483"/>
       <source>Pause</source>
       <translation>Duraklat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="476"/>
+      <location filename="../../src/ui/VideoArea.qml" line="483"/>
       <source>Play</source>
       <translation>Oynat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="479"/>
+      <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Next frame</source>
       <translation>Sonraki frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="480"/>
+      <location filename="../../src/ui/VideoArea.qml" line="487"/>
       <source>Trim end</source>
       <translation>Kırpma sonu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="507"/>
+      <location filename="../../src/ui/VideoArea.qml" line="514"/>
       <source>Toggle stabilization</source>
       <translation>Stabilizasyonu aç/kapa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="513"/>
+      <location filename="../../src/ui/VideoArea.qml" line="520"/>
       <source>Mute</source>
       <translation>Sesi kapat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="513"/>
+      <location filename="../../src/ui/VideoArea.qml" line="520"/>
       <source>Unmute</source>
       <translation>Sesi aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="529"/>
+      <location filename="../../src/ui/VideoArea.qml" line="536"/>
       <source>Playback speed</source>
       <translation>Oynatma hızı</translation>
     </message>

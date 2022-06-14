@@ -94,6 +94,11 @@ Modal {
             QT_TR_NOOP("Integration method");
         QT_TR_NOOP("Trim range");
         QT_TR_NOOP("Offsets");
+        QT_TR_NOOP("Synchronization");
+            QT_TR_NOOP("Rough gyro offset");
+            QT_TR_NOOP("Sync search size");
+            QT_TR_NOOP("Max sync points");
+            QT_TR_NOOP("Advanced");
         QT_TR_NOOP("Stabilization");
             QT_TR_NOOP("FOV");
             QT_TR_NOOP("Smoothing params");
