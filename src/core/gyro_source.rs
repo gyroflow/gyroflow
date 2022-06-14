@@ -81,7 +81,6 @@ impl GyroSource {
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.fps = stabilization_params.get_scaled_fps();
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
-        self.clear_offsets();
     }
     pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;

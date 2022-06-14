@@ -39,6 +39,7 @@ struct Job {
     queue_index: usize,
     input_file: String,
     render_options: RenderOptions,
+    sync_options: String,
     cancel_flag: Arc<AtomicBool>,
     stab: Arc<StabilizationManager<stabilization::RGBA8>>
 }
@@ -97,7 +98,6 @@ impl RenderOptions {
         if let serde_json::Value::Object(obj) = obj {
             if let Some(v) = obj.get("codec")          .and_then(|x| x.as_str())  { self.codec = v.to_string(); }
             if let Some(v) = obj.get("codec_options")  .and_then(|x| x.as_str())  { self.codec_options = v.to_string(); }
-            // if let Some(v) = obj.get("output_path")    .and_then(|x| x.as_str())  { self.output_path = v; }
             if let Some(v)  = obj.get("trim_start")     .and_then(|x| x.as_f64())  { self.trim_start = v; }
             if let Some(v)  = obj.get("trim_end")       .and_then(|x| x.as_f64())  { self.trim_end = v; }
             if let Some(v)  = obj.get("output_width")   .and_then(|x| x.as_u64())  { self.output_width = v as usize; }
@@ -108,11 +108,19 @@ impl RenderOptions {
             if let Some(v) = obj.get("pixel_format")   .and_then(|x| x.as_str())  { self.pixel_format = v.to_string(); }
             if let Some(v)  = obj.get("override_fps")   .and_then(|x| x.as_f64())  { self.override_fps = v; }
 
-            // Adnvaced
+            // Advanced
             if let Some(v) = obj.get("encoder_options")      .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
             if let Some(v)  = obj.get("keyframe_distance")    .and_then(|x| x.as_f64())  { self.keyframe_distance = v; }
             if let Some(v) = obj.get("preserve_other_tracks").and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
             if let Some(v) = obj.get("pad_with_black")       .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
+
+            if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
+                let cur_path = std::path::Path::new(&self.output_path);
+                let new_path = std::path::Path::new(v);
+                if let Some(fname) = cur_path.file_name() {
+                    self.output_path = new_path.with_file_name(fname.to_string_lossy().to_string()).to_string_lossy().replace('\\', "/");
+                }
+            }
         }
     }
 }
@@ -124,7 +132,7 @@ pub struct RenderQueue {
     queue: qt_property!(RefCell<SimpleListModel<RenderQueueItem>>; NOTIFY queue_changed),
     jobs: HashMap<u32, Job>,
 
-    add: qt_method!(fn(&mut self, controller: QJSValue, options_json: String, thumbnail_url: QString) -> u32),
+    add: qt_method!(fn(&mut self, controller: QJSValue, options_json: String, sync_options_json: String, thumbnail_url: QString) -> u32),
     remove: qt_method!(fn(&mut self, job_id: u32)),
 
     start: qt_method!(fn(&mut self)),
@@ -136,7 +144,7 @@ pub struct RenderQueue {
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
-    add_file: qt_method!(fn(&mut self, url: QUrl, controller: QJSValue, options_json: String) -> u32),
+    add_file: qt_method!(fn(&mut self, url: QUrl, controller: QJSValue, options_json: String, sync_options_json: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
@@ -245,7 +253,7 @@ impl RenderQueue {
         });
     }
 
-    pub fn add(&mut self, controller: QJSValue, options_json: String, thumbnail_url: QString) -> u32 {
+    pub fn add(&mut self, controller: QJSValue, options_json: String, sync_options_json: String, thumbnail_url: QString) -> u32 {
         let job_id = if self.editing_job_id > 0 {
             self.editing_job_id
         } else {
@@ -255,13 +263,13 @@ impl RenderQueue {
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
             if let Ok(render_options) = serde_json::from_str(&options_json) as serde_json::Result<RenderOptions> {
-                self.add_internal(job_id, ctl.stabilizer.clone(), render_options, thumbnail_url);
+                self.add_internal(job_id, ctl.stabilizer.clone(), render_options, sync_options_json, thumbnail_url);
             }
         }
         job_id
     }
 
-    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, thumbnail_url: QString) {
+    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, sync_options_json: String, thumbnail_url: QString) {
         let stab = Arc::new(stab.get_render_stabilizer((render_options.output_width, render_options.output_height)));
         let params = stab.params.read();
         let trim_ratio = render_options.trim_end - render_options.trim_start;
@@ -302,6 +310,7 @@ impl RenderQueue {
             queue_index: 0,
             input_file: video_path,
             render_options,
+            sync_options: sync_options_json,
             cancel_flag: Default::default(),
             stab: stab.clone()
         });
@@ -440,7 +449,7 @@ impl RenderQueue {
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
-            if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default()) {
+            if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default(), job.sync_options.clone()) {
                 return QString::from(data);
             }
         }
@@ -615,7 +624,7 @@ impl RenderQueue {
         path.to_string_lossy().to_string()
     }
 
-    pub fn add_file(&mut self, url: QUrl, controller: QJSValue, options_json: String) -> u32 {
+    pub fn add_file(&mut self, url: QUrl, controller: QJSValue, options_json: String, sync_options_json: String) -> u32 {
         let job_id = fastrand::u32(..);
 
         let path = util::url_to_path(url);
@@ -681,7 +690,7 @@ impl RenderQueue {
                 let stab2 = stab.clone();
                 let loaded = util::qt_queued_callback_mut(self, move |this, render_options: RenderOptions| {
                     let out_path = render_options.output_path.clone();
-                    this.add_internal(job_id, stab2.clone(), render_options, QString::default());
+                    this.add_internal(job_id, stab2.clone(), render_options, sync_options_json.clone(), QString::default());
 
                     if std::path::Path::new(&out_path).exists() {
                         update_model!(this, job_id, itm {
@@ -827,9 +836,7 @@ impl RenderQueue {
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
-
-                        // TODO: output_path
-                        // itm.output_path = QString::from(job.render_options.output_path.as_str());
+                        itm.output_path = QString::from(job.render_options.output_path.as_str());
                     }
 
                     q.change_line(job.queue_index, itm);

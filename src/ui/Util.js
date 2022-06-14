@@ -45,3 +45,14 @@ function calculateTimesAndFps(progress, current_frame, start_timestamp, end_time
         return false;
     }
 }
+
+function setComboValue(c, text) {
+    let i = 0;
+    for (const x of c.model) {
+        if (x == text) {
+            c.currentIndex = i;
+            break;
+        }
+        i++;
+    }
+}

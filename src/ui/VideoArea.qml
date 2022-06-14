@@ -68,14 +68,15 @@ Item {
                 window.motionData.loadGyroflow(obj);
                 window.stab.loadGyroflow(obj);
                 window.advanced.loadGyroflow(obj);
+                window.sync.loadGyroflow(obj);
                 Qt.callLater(window.exportSettings.loadGyroflow, obj);
 
                 const info = obj.video_info || { };
-                if (info) {
-                    if (Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
+                if (info && Object.keys(info).length > 0) {
+                    if (info.hasOwnProperty("vfr_fps") && Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
                         vidInfo.updateEntryWithTrigger("Frame rate", +info.vfr_fps);
                     }
-                    if (Math.abs(+info.rotation) > 0) {
+                    if (info.hasOwnProperty("rotation") && Math.abs(+info.rotation) > 0) {
                         vidInfo.updateEntryWithTrigger("Rotation", +info.rotation);
                     }
                 }

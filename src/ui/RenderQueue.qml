@@ -520,7 +520,7 @@ Item {
             const options = exportSettings.getExportOptionsJson();
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(url, controller, options);
+                const job_id = render_queue.add_file(url, controller, options, window.sync.getSettingsJson());
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();

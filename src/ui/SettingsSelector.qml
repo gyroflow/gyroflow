@@ -35,6 +35,12 @@ Modal {
         "Offsets":    ["offsets"]
     },
     { // Right column
+        "Synchronization|synchronization": {
+            "Rough gyro offset":          ["rough_offset", "rough_offset_inv"],
+            "Sync search size":           ["search_size"],
+            "Max sync points":            ["max_sync_points"],
+            "Advanced":                   ["every_nth_frame", "time_per_syncpoint", "of_method", "offset_method"]
+        },
         "Stabilization|stabilization": {
             "FOV":                        ["fov"],
             "Smoothing params":           ["method", "smoothing_params"],
@@ -74,6 +80,7 @@ Modal {
         });
     }
     Component.onCompleted: {
+        if (!root.isPreset) delete root.desc[1]["Synchronization|synchronization"];
         groupsRepeater.model = [root.getData(0), root.getData(1)];
         QT_TR_NOOP("Video");
             QT_TR_NOOP("Rotation");

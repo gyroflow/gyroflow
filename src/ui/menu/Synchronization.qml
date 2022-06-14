@@ -35,6 +35,33 @@ MenuItem {
     property alias syncSearchSize: syncSearchSize.value;
     property alias everyNthFrame: everyNthFrame.value;
 
+    function loadGyroflow(obj) {
+        const o = obj.synchronization || { };
+        if (o && Object.keys(o).length > 0) {
+            if (o.hasOwnProperty("rough_offset"))       sync.initialOffset                 = +o.rough_offset;
+            if (o.hasOwnProperty("rough_offset_inv"))   sync.checkNegativeInitialOffset    = !!o.rough_offset_inv;
+            if (o.hasOwnProperty("search_size"))        sync.syncSearchSize                = +o.search_size;
+            if (o.hasOwnProperty("max_sync_points"))    maxSyncPoints.value                = +o.max_sync_points;
+            if (o.hasOwnProperty("every_nth_frame"))    sync.everyNthFrame                 = +o.every_nth_frame;
+            if (o.hasOwnProperty("time_per_syncpoint")) sync.timePerSyncpoint              = +o.time_per_syncpoint;
+            if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex            = +o.of_method;
+            if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex          = +o.offset_method;
+        }
+    }
+    function getSettings() {
+        return {
+            "rough_offset":       sync.initialOffset,
+            "rough_offset_inv":   sync.checkNegativeInitialOffset,
+            "search_size":        sync.syncSearchSize,
+            "max_sync_points":    maxSyncPoints.value,
+            "every_nth_frame":    sync.everyNthFrame,
+            "time_per_syncpoint": sync.timePerSyncpoint,
+            "of_method":          syncMethod.currentIndex,
+            "offset_method":      offsetMethod.currentIndex
+        };
+    }
+    function getSettingsJson() { return JSON.stringify(getSettings()); }
+
     Button {
         text: qsTr("Auto sync");
         icon.name: "spinner"

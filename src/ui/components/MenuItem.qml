@@ -20,7 +20,7 @@ Item {
 
     Component.onCompleted: {
         const val = window.settings.value(root.objectName + "-opened", root.opened);
-        root.opened = val || val == "true";
+        root.opened = (val == true || val == 1 || val == "true");
     }
 
     function ensureVisible() {

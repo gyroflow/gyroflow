@@ -120,6 +120,7 @@ impl<T: PixelType> StabilizationManager<T> {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
+            gyro.clear_offsets();
             gyro.file_path = path.to_string();
         }
 
@@ -707,13 +708,13 @@ impl<T: PixelType> StabilizationManager<T> {
         });
     }
 
-    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, output_options: String) -> std::io::Result<()> {
-        let data = self.export_gyroflow_data(thin, extended, output_options)?;
+    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, output_options: String, sync_options: String) -> std::io::Result<()> {
+        let data = self.export_gyroflow_data(thin, extended, output_options, sync_options)?;
         std::fs::write(filepath, data)?;
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, output_options: String) -> std::io::Result<String> {
+    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, output_options: String, sync_options: String) -> std::io::Result<String> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -737,6 +738,7 @@ impl<T: PixelType> StabilizationManager<T> {
         };
 
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
+        let sync_options: serde_json::Value = serde_json::from_str(&sync_options).unwrap_or_default();
 
         let video_path = self.video_path.read().clone();
 
@@ -789,11 +791,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 // "smoothed_quaternions": smooth_quats
             },
             "output": render_options,
-            /*"autosync": { // TODO
-                // TODO: input settings?
-                "camera_matrix": {}, // frame, Matrix3
-                "euler_angles": {} // frame, rotation vector
-            },*/
+            "synchronization": sync_options,
             "offsets": gyro.get_offsets(), // timestamp, offset value
 
             "trim_start": params.trim_start,
@@ -804,8 +802,12 @@ impl<T: PixelType> StabilizationManager<T> {
         });
         if extended {
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-                obj["integrated_quaternions"] = serde_json::json!(util::compress_to_base91(&gyro.quaternions));
-                obj["smoothed_quaternions"]   = serde_json::json!(util::compress_to_base91(&gyro.smoothed_quaternions));
+                if let Some(q) = util::compress_to_base91(&gyro.quaternions) {
+                    obj.insert("integrated_quaternions".into(), serde_json::Value::String(q));
+                }
+                if let Some(q) = util::compress_to_base91(&gyro.smoothed_quaternions) {
+                    obj.insert("smoothed_quaternions".into(),   serde_json::Value::String(q));
+                }
             }
         }
 
@@ -872,7 +874,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
 
                 // Load IMU data only if it's from another file
-                if org_gyro_path != org_video_path {
+                if !org_gyro_path.is_empty() && org_gyro_path != org_video_path {
                     let mut raw_imu = None;
                     let mut quaternions = None;
                     let mut gravity_vectors = None;

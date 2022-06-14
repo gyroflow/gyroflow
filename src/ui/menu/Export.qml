@@ -6,6 +6,7 @@ import QtQuick.Controls as QQC
 import Qt.labs.settings
 
 import "../components/"
+import "../Util.js" as Util;
 
 MenuItem {
     id: root;
@@ -115,23 +116,20 @@ MenuItem {
         setDefaultSize(w, h);
         Qt.callLater(notifySizeChanged);
     }
-    function setComboValue(c: QtObject, text: string) {
-        let i = 0;
-        for (const x of c.model) {
-            if (x == text) {
-                c.currentIndex = i;
-                break;
-            }
-            i++;
-        }
-    }
     function loadGyroflow(obj) {
         const output = obj.output || { };
         if (output && Object.keys(output).length > 0) {
-            if (output.output_path) window.outputFile = output.output_path;
+            if (output.output_path) {
+                if (window.outputFile && output.output_path.endsWith("/") || output.output_path.endsWith("\\")) {
+                    // It's a folder, so adjust current file
+                    window.outputFile = output.output_path + Util.getFilename(window.outputFile);
+                } else {
+                    window.outputFile = output.output_path;
+                }
+            }
 
-            if (output.codec)         setComboValue(codec,        output.codec);
-            if (output.codec_options) setComboValue(codecOptions, output.codec_options);
+            if (output.codec)         Util.setComboValue(codec,        output.codec);
+            if (output.codec_options) Util.setComboValue(codecOptions, output.codec_options);
 
             if (output.output_width && output.output_height) {
                 setDefaultSize(output.output_width, output.output_height);
