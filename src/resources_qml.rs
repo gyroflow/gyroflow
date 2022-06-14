@@ -12,6 +12,7 @@ qrc!(pub rsrc_qml,
         "src/ui/CalibrationTarget.qml",
         "src/ui/Shortcuts.qml",
         "src/ui/RenderQueue.qml",
+        "src/ui/SettingsSelector.qml",
         "src/ui/Util.js",
 
         "src/ui/menu/Advanced.qml",

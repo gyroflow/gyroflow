@@ -21,13 +21,10 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [
-            "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360",
-            "CSV", "TXT", "BBL", "BFL", "MP4", "MOV", "MXF", "INSV", "GCSV", "log"
-        ];
+        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log" ];
 
         title: qsTr("Choose a motion data file")
-        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.join(" *.") + ")"];
+        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url: url) {

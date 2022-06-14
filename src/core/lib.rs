@@ -707,13 +707,13 @@ impl<T: PixelType> StabilizationManager<T> {
         });
     }
 
-    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, output_options: String) -> std::io::Result<()> {
-        let data = self.export_gyroflow_data(thin, output_options)?;
+    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, output_options: String) -> std::io::Result<()> {
+        let data = self.export_gyroflow_data(thin, extended, output_options)?;
         std::fs::write(filepath, data)?;
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, thin: bool, output_options: String) -> std::io::Result<String> {
+    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, output_options: String) -> std::io::Result<String> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -740,7 +740,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         let video_path = self.video_path.read().clone();
 
-        let obj = serde_json::json!({
+        let mut obj = serde_json::json!({
             "title": "Gyroflow data file",
             "version": 2,
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
@@ -802,6 +802,12 @@ impl<T: PixelType> StabilizationManager<T> {
             // "frame_orientation": {}, // timestamp, original frame quaternion
             // "stab_transform":    {} // timestamp, final quaternion
         });
+        if extended {
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+                obj["integrated_quaternions"] = serde_json::json!(util::compress_to_base91(&gyro.quaternions));
+                obj["smoothed_quaternions"]   = serde_json::json!(util::compress_to_base91(&gyro.smoothed_quaternions));
+            }
+        }
 
         Ok(serde_json::to_string_pretty(&obj)?)
     }
@@ -836,16 +842,17 @@ impl<T: PixelType> StabilizationManager<T> {
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
-                params.video_size = (
-                    vid_info.get("width") .and_then(|x| x.as_u64()).unwrap_or_default() as usize,
-                    vid_info.get("height").and_then(|x| x.as_u64()).unwrap_or_default() as usize
-                );
+                if let Some(w) = vid_info.get("width").and_then(|x| x.as_u64()) {
+                    if let Some(h) = vid_info.get("height").and_then(|x| x.as_u64()) {
+                        params.video_size = (w as usize, h as usize);
+                    }
+                }
                 output_size = Some(params.video_size);
-                params.video_rotation = vid_info.get("rotation")   .and_then(|x| x.as_f64()).unwrap_or_default();
-                params.frame_count    = vid_info.get("num_frames") .and_then(|x| x.as_u64()).unwrap_or_default() as usize;
-                params.fps            = vid_info.get("fps")        .and_then(|x| x.as_f64()).unwrap_or_default();
-                params.duration_ms    = vid_info.get("duration_ms").and_then(|x| x.as_f64()).unwrap_or_default();
-                params.fps_scale      = vid_info.get("fps_scale")  .and_then(|x| x.as_f64());
+                if let Some(v) = vid_info.get("rotation")   .and_then(|x| x.as_f64()) { params.video_rotation = v; }
+                if let Some(v) = vid_info.get("num_frames") .and_then(|x| x.as_u64()) { params.frame_count    = v as usize; }
+                if let Some(v) = vid_info.get("fps")        .and_then(|x| x.as_f64()) { params.fps            = v; }
+                if let Some(v) = vid_info.get("duration_ms").and_then(|x| x.as_f64()) { params.duration_ms    = v; }
+                if let Some(v) = vid_info.get("fps_scale") { params.fps_scale = v.as_f64(); }
 
                 self.gyro.write().init_from_params(&params);
             }
@@ -857,7 +864,9 @@ impl<T: PixelType> StabilizationManager<T> {
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
                 let org_gyro_path = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone());
-                obj["filepath"] = serde_json::Value::String(util::path_to_str(&gyro_path));
+                if let Some(fp) = obj.get_mut("filepath") {
+                    *fp = serde_json::Value::String(util::path_to_str(&gyro_path));
+                }
                 use crate::gyro_source::TimeIMU;
 
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
@@ -934,9 +943,12 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
 
                 let mut gyro = self.gyro.write();
-                gyro.file_path           = util::path_to_str(&gyro_path);
-                gyro.imu_lpf             = obj.get("lpf").and_then(|x| x.as_f64()).unwrap_or_default();
-                gyro.integration_method  = obj.get("integration_method").and_then(|x| x.as_u64()).unwrap_or(1) as usize;
+                if !org_gyro_path.is_empty() {
+                    gyro.file_path = util::path_to_str(&gyro_path);
+                }
+
+                if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
+                if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
                 if let Some(v) = obj.get("rotation")  { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("gyro_bias") { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
 
@@ -953,10 +965,10 @@ impl<T: PixelType> StabilizationManager<T> {
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();
-                params.fov                     = obj.get("fov")                   .and_then(|x| x.as_f64()).unwrap_or(1.0);
-                params.frame_readout_time      = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()).unwrap_or_default();
-                params.adaptive_zoom_window    = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()).unwrap_or_default();
-                params.lens_correction_amount  = obj.get("lens_correction_amount").and_then(|x| x.as_f64()).unwrap_or(1.0);
+                if let Some(v) = obj.get("fov")                   .and_then(|x| x.as_f64()) { params.fov                     = v; }
+                if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; }
+                if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
+                if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
 
                 if let Some(center_offs) = obj.get("adaptive_zoom_center_offset").and_then(|x| x.as_array()) {
                     params.adaptive_zoom_center_offset = (
@@ -965,16 +977,17 @@ impl<T: PixelType> StabilizationManager<T> {
                     );
                 }
 
-                let method = obj.get("method").and_then(|x| x.as_str()).unwrap_or_default();
-                let method_idx = self.get_smoothing_algs()
-                    .iter().enumerate()
-                    .find(|(_, m)| method == m.as_str())
-                    .map(|(idx, _)| idx)
-                    .unwrap_or(1);
+                if let Some(method) = obj.get("method").and_then(|x| x.as_str()) {
+                    let method_idx = self.get_smoothing_algs()
+                        .iter().enumerate()
+                        .find(|(_, m)| method == m.as_str())
+                        .map(|(idx, _)| idx)
+                        .unwrap_or(1);
+
+                    self.smoothing.write().set_current(method_idx);
+                }
 
                 let mut smoothing = self.smoothing.write();
-                smoothing.set_current(method_idx);
-
                 let empty_vec = Vec::new();
                 let smoothing_params = obj.get("smoothing_params").and_then(|x| x.as_array()).unwrap_or(&empty_vec);
                 let smoothing_alg = smoothing.current_mut();
@@ -986,25 +999,29 @@ impl<T: PixelType> StabilizationManager<T> {
                         Some(())
                     })();
                 }
-
-                let horizon_amount= obj.get("horizon_lock_amount").and_then(|x| x.as_f64()).unwrap_or(0.0);
-                let horizon_roll  = obj.get("horizon_roll")       .and_then(|x| x.as_f64()).unwrap_or(0.0);
-                smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll);
+                if let Some(horizon_amount) = obj.get("horizon_lock_amount").and_then(|x| x.as_f64()) {
+                    if let Some(horizon_roll) = obj.get("horizon_roll").and_then(|x| x.as_f64()) {
+                        smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll);
+                    }
+                }
 
                 obj.remove("adaptive_zoom_fovs");
             }
             if let Some(serde_json::Value::Object(ref obj)) = obj.get("output") {
-                output_size = Some((
-                    obj.get("output_width") .and_then(|x| x.as_u64()).unwrap_or_default() as usize,
-                    obj.get("output_height").and_then(|x| x.as_u64()).unwrap_or_default() as usize
-                ));
+                if let Some(w) =  obj.get("output_width").and_then(|x| x.as_u64()) {
+                    if let Some(h) =  obj.get("output_height").and_then(|x| x.as_u64()) {
+                        output_size = Some((w as usize, h as usize));
+                    }
+                }
             }
 
             if let Some(serde_json::Value::Object(offsets)) = obj.get("offsets") {
                 self.gyro.write().set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
             }
 
-            *self.video_path.write() = util::path_to_str(&video_path);
+            if !org_video_path.is_empty() {
+                *self.video_path.write() = util::path_to_str(&video_path);
+            }
 
             if blocking {
                 if let Some(output_size) = output_size {

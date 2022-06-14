@@ -83,7 +83,9 @@ Item {
                 for (const ts in obj.offsets) {
                     controller.set_offset(ts, obj.offsets[ts]);
                 }
-                timeline.setTrim(obj.trim_start, obj.trim_end);
+                if (obj.hasOwnProperty("trim_start")) {
+                    timeline.setTrim(obj.trim_start, obj.trim_end);
+                }
             }
         }
     }

@@ -93,6 +93,28 @@ impl RenderOptions {
         }
         options
     }
+    pub fn update_from_json(&mut self, obj: &serde_json::Value) {
+        if let serde_json::Value::Object(obj) = obj {
+            if let Some(v) = obj.get("codec")          .and_then(|x| x.as_str())  { self.codec = v.to_string(); }
+            if let Some(v) = obj.get("codec_options")  .and_then(|x| x.as_str())  { self.codec_options = v.to_string(); }
+            // if let Some(v) = obj.get("output_path")    .and_then(|x| x.as_str())  { self.output_path = v; }
+            if let Some(v)  = obj.get("trim_start")     .and_then(|x| x.as_f64())  { self.trim_start = v; }
+            if let Some(v)  = obj.get("trim_end")       .and_then(|x| x.as_f64())  { self.trim_end = v; }
+            if let Some(v)  = obj.get("output_width")   .and_then(|x| x.as_u64())  { self.output_width = v as usize; }
+            if let Some(v)  = obj.get("output_height")  .and_then(|x| x.as_u64())  { self.output_height = v as usize; }
+            if let Some(v)  = obj.get("bitrate")        .and_then(|x| x.as_f64())  { self.bitrate = v; }
+            if let Some(v) = obj.get("use_gpu")        .and_then(|x| x.as_bool()) { self.use_gpu = v; }
+            if let Some(v) = obj.get("audio")          .and_then(|x| x.as_bool()) { self.audio = v; }
+            if let Some(v) = obj.get("pixel_format")   .and_then(|x| x.as_str())  { self.pixel_format = v.to_string(); }
+            if let Some(v)  = obj.get("override_fps")   .and_then(|x| x.as_f64())  { self.override_fps = v; }
+
+            // Adnvaced
+            if let Some(v) = obj.get("encoder_options")      .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
+            if let Some(v)  = obj.get("keyframe_distance")    .and_then(|x| x.as_f64())  { self.keyframe_distance = v; }
+            if let Some(v) = obj.get("preserve_other_tracks").and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
+            if let Some(v) = obj.get("pad_with_black")       .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
+        }
+    }
 }
 
 #[derive(Default, QObject)]
@@ -146,6 +168,8 @@ pub struct RenderQueue {
 
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
+
+    apply_to_all: qt_method!(fn(&mut self, data: QJsonObject)),
 
     pause_flag: Arc<AtomicBool>,
 
@@ -416,7 +440,7 @@ impl RenderQueue {
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
-            if let Ok(data) = job.stab.export_gyroflow_data(true, serde_json::to_string(&job.render_options).unwrap_or_default()) {
+            if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default()) {
                 return QString::from(data);
             }
         }
@@ -776,6 +800,42 @@ impl RenderQueue {
         }
 
         job_id
+    }
+
+    fn apply_to_all(&mut self, data: QJsonObject) {
+        let data = data.to_json().to_string();
+        dbg!(&data);
+        let mut new_output_options = None;
+        if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
+            if let Some(output) = obj.get("output") {
+                new_output_options = Some(output.clone());
+            }
+        }
+        let data = data.as_bytes();
+        let mut q = self.queue.borrow_mut();
+        for (_id, job) in self.jobs.iter_mut() {
+            if job.queue_index < q.row_count() as usize {
+                let mut itm = q[job.queue_index].clone();
+                if itm.status == JobStatus::Queued {
+                    let stab = job.stab.clone();
+                    let data_vec = data.to_vec();
+                    core::run_threaded(move || {
+                        if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
+                            ::log::error!("Failed to update queue stab data: {:?}", e);
+                        }
+                    });
+                    if let Some(ref new_output_options) = new_output_options {
+                        job.render_options.update_from_json(new_output_options);
+                        itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
+
+                        // TODO: output_path
+                        // itm.output_path = QString::from(job.render_options.output_path.as_str());
+                    }
+
+                    q.change_line(job.queue_index, itm);
+                }
+            }
+        }
     }
 
     fn file_exists(&self, path: QString) -> bool {

@@ -4,4 +4,5 @@ Calibrator 1.0 Calibrator.qml
 RenderQueue 1.0 RenderQueue.qml
 Shortcuts 1.0 Shortcuts.qml
 VideoArea 1.0 VideoArea.qml
+SettingsSelector 1.0 SettingsSelector.qml
 Util 1.0 Util.js

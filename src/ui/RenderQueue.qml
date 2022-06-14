@@ -517,7 +517,7 @@ Item {
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
         onLoadFiles: (urls) => {
-            const options = JSON.stringify(exportSettings.getExportOptions());
+            const options = exportSettings.getExportOptionsJson();
 
             for (const url of urls) {
                 const job_id = render_queue.add_file(url, controller, options);

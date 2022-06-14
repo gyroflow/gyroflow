@@ -77,6 +77,7 @@ MenuItem {
             pad_with_black:        padWithBlack.checked,
         };
     }
+    function getExportOptionsJson() { return JSON.stringify(getExportOptions()); }
 
     property bool disableUpdate: false;
     function notifySizeChanged() {

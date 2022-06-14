@@ -51,7 +51,7 @@ QQC.Popup {
                 bottomPadding: popup.itemHeight / 3.5;
 
                 font: popup.font;
-                Component.onCompleted: { if (implicitWidth > popup.maxItemWidth) popup.maxItemWidth = implicitWidth; }
+                onImplicitWidthChanged: { if (implicitWidth > popup.maxItemWidth) popup.maxItemWidth = implicitWidth; }
             }
 
             scale: dlg.down? 0.970 : 1.0;

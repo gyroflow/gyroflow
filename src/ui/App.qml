@@ -62,13 +62,10 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [
-            "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr",
-            "MP4", "MOV", "MXF", "MKV", "WEBM", "INSV", "GYROFLOW", "PNG", "EXR"
-        ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr" ];
 
         title: qsTr("Choose a video file")
-        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.join(" *.") + ")"];
+        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
         onAccepted: videoArea.loadFile(fileDialog.selectedFile);
     }
 
@@ -170,6 +167,7 @@ Rectangle {
                         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png *.exr)"];
                         onAccepted: {
                             outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
+                            window.exportSettings.updateCodecParams();
                         }
                     }
                 }
@@ -183,19 +181,26 @@ Rectangle {
                     text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
                     icon.name: "video";
                     opacity: enabled? 1.0 : 0.6;
-                    popup.width: width * 2;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
                     property bool isAddToQueue: false;
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
+                    enabled: false;
 
                     property bool enabled2: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
                     Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
 
-                    model: [isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file (including gyro data)"), QT_TRANSLATE_NOOP("Popup", "Export .gyroflow file")];
+                    model: [
+                        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"),
+                        QT_TRANSLATE_NOOP("Popup", "Create settings preset"),
+                        QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue"),
+                        QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)"),
+                        QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)"),
+                        QT_TRANSLATE_NOOP("Popup", "Export project file")
+                    ];
 
                     function render() {
                         if (!controller.lens_loaded && !allowLens) {
@@ -223,7 +228,7 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
-                            const job_id = render_queue.add(controller, JSON.stringify(exportSettings.getExportOptions()), controller.image_to_b64(result.image));
+                            const job_id = render_queue.add(controller, exportSettings.getExportOptionsJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
                                 videoArea.queue.shown = true;
@@ -242,13 +247,37 @@ Rectangle {
                         render();
                     }
                     popup.onClicked: (index) => {
-                        if (index == 0) { // Add to render queue or Export
-                            renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
-                            popup.close();
-                            renderBtn.clicked();
-                            return;
+                        switch (index) {
+                            case 0: // Add to render queue or Export
+                                renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
+                                popup.close();
+                                renderBtn.clicked();
+                            break;
+                            case 1: // Create preset
+                            case 2: // Apply settings to render queue
+                                const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
+                                el.opened = true;
+                                el.onApply.connect((obj) => {
+                                    const allData = JSON.parse(controller.export_gyroflow_data(true, false, exportSettings.getExportOptions()));
+                                    const finalData = el.getFilteredObject(allData, obj);
+
+                                    if (index == 1) { // Preset
+                                        if (finalData.hasOwnProperty("output") && finalData.output.output_path) {
+                                            finalData.output.output_path = Util.getFolder(finalData.output.output_path);
+                                        }
+                                        presetFileDialog.presetData = finalData;
+                                        presetFileDialog.open();
+                                    } else { // Apply
+                                        render_queue.apply_to_all(finalData);
+                                    }
+                                });
+                            break;
+                            case 3: // Export project file (including processed gyro data)
+                            case 4: // Export project file (including gyro data)
+                            case 5: // Export project file
+                                controller.export_gyroflow_file(/*thin*/index == 5, /*ext*/index == 3, exportSettings.getExportOptions(), "", false);
+                            break;
                         }
-                        controller.export_gyroflow_file(index == 2, JSON.stringify(exportSettings.getExportOptions()), "", false);
                     }
                 }
                 LinkButton {
@@ -336,15 +365,16 @@ Rectangle {
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
-        function onRequest_location(path: string, thin: bool) {
+        function onRequest_location(path: string, thin: bool, extended: bool) {
             gfFileDialog.thin = thin;
+            gfFileDialog.extended = extended;
             gfFileDialog.currentFolder = controller.path_to_url(path);
             gfFileDialog.open();
         }
-        function onGyroflow_exists(path: string, thin: bool) {
+        function onGyroflow_exists(path: string, thin: bool, extended: bool) {
             messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
                 { text: qsTr("Overwrite"), "accent": true, clicked: () => {
-                    controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), path, true);
+                    controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), path, true);
                 } },
                 { text: qsTr("Rename"), clicked: () => {
                     let output = path;
@@ -353,10 +383,11 @@ Rectangle {
                         output = path.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
                         if (i > 1000) break;
                     }
-                    controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), output, true);
+                    controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), output, true);
                 } },
                 { text: qsTr("Choose a different location"), clicked: () => {
                     gfFileDialog.thin = thin;
+                    gfFileDialog.extended = extended;
                     gfFileDialog.currentFolder = controller.path_to_url(path);
                     gfFileDialog.open();
                 } },
@@ -370,7 +401,16 @@ Rectangle {
         title: qsTr("Select file destination");
         nameFilters: ["*.gyroflow"];
         property bool thin: true;
-        onAccepted: controller.export_gyroflow_file(thin, exportSettings.getExportOptions(), controller.url_to_path(selectedFile), true);
+        property bool extended: true;
+        onAccepted: controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), controller.url_to_path(selectedFile), true);
+    }
+    FileDialog {
+        id: presetFileDialog;
+        fileMode: FileDialog.SaveFile;
+        title: qsTr("Select file destination");
+        nameFilters: ["*.gyroflow"];
+        property var presetData: ({});
+        onAccepted: controller.export_preset(selectedFile, presetData);
     }
 
     Component.onCompleted: {
@@ -404,6 +444,12 @@ Rectangle {
         }
         if (text.startsWith("uses_cpu")) {
             return qsTr("GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.\nIf you have a modern device, latest GPU drivers and you think this shouldn't happen, report this on GitHub including gyroflow.log file.");
+        }
+        if (text.includes("hevc") && text.includes("-12912")) {
+            return qsTr("Your GPU doesn't support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.");
+        }
+        if (text.includes("codec not currently supported in container")) {
+            return qsTr("Make sure your output extension supports the selected codec. \".mov\" should work in most cases.") + "\n\n" + text;
         }
 
         return text.trim();

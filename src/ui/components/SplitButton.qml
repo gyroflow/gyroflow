@@ -33,9 +33,9 @@ Button {
     }
     Popup {
         id: popup;
-        x: -width + parent.width;
-        width: parent.width * 1.5;
+        x: -width + root.width;
         y: -height - 5 * dpiScale;
+        width: Math.max(root.width, popup.maxItemWidth + 10 * dpiScale);
         currentIndex: -1;
     }
 

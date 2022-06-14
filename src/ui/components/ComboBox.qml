@@ -49,6 +49,9 @@ QQC.ComboBox {
         anchors.leftMargin: 10 * dpiScale;
         verticalAlignment: Text.AlignVCenter;
         opacity: parent.enabled? 1.0 : 0.5;
+        anchors.right: parent.right;
+        anchors.rightMargin: 20 * dpiScale;
+        elide: Text.ElideRight;
     }
 
     popup: Popup {
@@ -56,6 +59,8 @@ QQC.ComboBox {
         font: root.font;
         model: root.delegateModel;
         currentIndex: root.currentIndex;
+        width: Math.max(root.width, pp.maxItemWidth + 10 * dpiScale);
+        x: -(width - parent.width);
         highlightedIndex: root.highlightedIndex;
     }
 
