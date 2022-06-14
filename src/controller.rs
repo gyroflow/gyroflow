@@ -754,8 +754,13 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(false, SeqCst);
+        cancel_flag.store(true, SeqCst);
         core::run_threaded(move || {
+            if Arc::strong_count(&cancel_flag) > 2 {
+                // Wait for other tasks to finish
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+            cancel_flag.store(false, SeqCst);
             finished(stab.import_gyroflow_file(&path, false, progress, cancel_flag));
         });
     }
@@ -776,8 +781,13 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(false, SeqCst);
+        cancel_flag.store(true, SeqCst);
         core::run_threaded(move || {
+            if Arc::strong_count(&cancel_flag) > 2 {
+                // Wait for other tasks to finish
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+            cancel_flag.store(false, SeqCst);
             finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag));
         });
     }

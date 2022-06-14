@@ -148,7 +148,8 @@ impl<T: PixelType> StabilizationManager<T> {
             self.gyro.write().load_from_telemetry(&md);
         }
         self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        let quats = self.gyro.read().quaternions.clone();
+        self.smoothing.write().update_quats_checksum(&quats);
 
         if let Some(lens) = md.lens_profile {
             let mut l = self.lens.write();

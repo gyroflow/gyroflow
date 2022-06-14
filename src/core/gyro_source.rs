@@ -193,8 +193,14 @@ impl GyroSource {
     }
 
     pub fn load_from_telemetry(&mut self, telemetry: &FileMetadata) {
-        assert!(self.duration_ms > 0.0);
-        assert!(self.fps > 0.0);
+        if self.duration_ms <= 0.0 {
+            ::log::error!("Invalid duration_ms {}", self.duration_ms);
+            return;
+        }
+        if self.fps <= 0.0 {
+            ::log::error!("Invalid fps {}", self.fps);
+            return;
+        }
 
         self.quaternions.clear();
         self.org_quaternions.clear();
