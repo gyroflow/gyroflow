@@ -132,9 +132,10 @@ impl<T: PixelType> Stabilization<T> {
 
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize, usize), output_size: (usize, usize, usize)) {
         self.background = bg;
-        if self.cl.is_some() || self.wgpu.is_some() {
-            self.backend_initialized = false;
-        }
+
+        #[cfg(feature = "use-opencl")]
+        if self.cl  .is_some() { self.backend_initialized = false; }
+        if self.wgpu.is_some() { self.backend_initialized = false; }
 
         self.size = size;
         self.output_size = output_size;
@@ -166,7 +167,8 @@ impl<T: PixelType> Stabilization<T> {
 
     pub fn set_device(&mut self, i: isize) -> bool {
         if i < 0 { // CPU
-            self.cl = None;
+            #[cfg(feature = "use-opencl")]
+            { self.cl = None; }
             self.wgpu = None;
             self.backend_initialized = true;
             return true;
