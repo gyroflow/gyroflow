@@ -691,7 +691,7 @@ impl RenderQueue {
                     };
 
                     if path.ends_with(".gyroflow") {
-                        match stab.import_gyroflow_file(&path, true) {
+                        match stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false))) {
                             Ok(obj) => {
                                 if let Some(out) = obj.get("output") {
                                     if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {

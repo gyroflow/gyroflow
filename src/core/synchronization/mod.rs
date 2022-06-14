@@ -400,7 +400,17 @@ impl PoseEstimator {
     pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs, progress_cb, cancel_flag)
     }
-    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], mut initial_offset: f64, mut search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        // If search size is larger than 10s, try essential matrix first, because it's much faster
+        if search_size.abs() > 10_000.0 && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
+            let gyro = self.estimated_gyro.read().clone();
+            let offset = find_offset::find_offsets(&ranges[0..1], &gyro, initial_offset, search_size, params, &progress_cb, cancel_flag.clone());
+            if let Some((_ts, offs, _cost)) = offset.first() {
+                initial_offset = *offs;
+                search_size = 3000.0;
+            }
+        }
+
         FindOffsetsRssync::new(ranges, self.sync_results.clone(), initial_offset, search_size, params, progress_cb, cancel_flag).full_sync()
     }
 

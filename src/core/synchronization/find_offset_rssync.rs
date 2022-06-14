@@ -67,7 +67,7 @@ impl FindOffsetsRssync<'_> {
             let cur_sync_point = ret.current_sync_point.clone();
             let cur_orientation = ret.current_orientation.clone();
             ret.sync.on_progress( move |progress| -> bool {
-                let num_orientations  = if is_guess_orient.load(SeqCst) {48.0} else {1.0};
+                let num_orientations  = if is_guess_orient.load(SeqCst) { 48.0 } else { 1.0 };
                 progress_cb((cur_orientation.load(SeqCst) as f64 + ((cur_sync_point.load(SeqCst) as f64 + progress) / num_sync_points)) / num_orientations);
                 !cancel_flag.load(Relaxed)
             });
@@ -210,7 +210,7 @@ impl FindOffsetsRssync<'_> {
 
 }
 
-fn set_quats (sync: &mut SyncProblem, source_quats: &TimeQuat) {
+fn set_quats(sync: &mut SyncProblem, source_quats: &TimeQuat) {
     let mut quats = Vec::new();
     let mut timestamps = Vec::new();
     let rotation = *Quat64::from_scaled_axis(Vector3::new(PI, 0.0, 0.0)).quaternion();

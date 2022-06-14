@@ -420,19 +420,25 @@ MenuItem {
                 width: parent.width;
                 currentIndex: 0;
                 property bool preventChange: true;
+                property var orgList: [];
                 Connections {
                     target: controller;
                     function onGpu_list_loaded(list) {
+                    const saved = settings.value("renderingDevice", defaultInitializedDevice);
                         const hasOpencl = !!list.find(x => x.includes("[OpenCL]"));
                         const hasWgpu   = !!list.find(x => x.includes("[wgpu]"));
                         if (hasOpencl && hasWgpu) {
                                  if (defaultInitializedDevice.includes("[OpenCL]")) list = list.filter(x => !x.includes("[wgpu]"));
                             else if (defaultInitializedDevice.includes("[wgpu]"))   list = list.filter(x => !x.includes("[OpenCL]"));
                         }
+                        renderingDevice.orgList = list;
                         renderingDevice.preventChange = true;
                         renderingDevice.model = list.map(x => x.replace("[OpenCL] ", "").replace("[wgpu] ", ""));
                         for (let i = 0; i < list.length; ++i) {
-                            if (list[i] == defaultInitializedDevice) {
+                            if (list[i] == saved) {
+                                if (saved != defaultInitializedDevice) {
+                                    renderingDevice.preventChange = false;
+                                }
                                 renderingDevice.currentIndex = i;
                                 break;
                             }
@@ -443,6 +449,9 @@ MenuItem {
                 onCurrentTextChanged: {
                     if (preventChange) return;
                     controller.set_rendering_gpu_type_from_name(currentText);
+                    Qt.callLater(() => {
+                         settings.setValue("renderingDevice", renderingDevice.orgList[renderingDevice.currentIndex]);
+                    });
                 }
             }
         }

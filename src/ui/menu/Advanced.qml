@@ -222,15 +222,23 @@ MenuItem {
             Connections {
                 target: controller;
                 function onGpu_list_loaded(list) {
+                    const saved = settings.value("processingDevice", defaultInitializedDevice);
                     processingDevice.preventChange = true;
                     processingDevice.model = [...list, qsTr("CPU only")];
                     for (let i = 0; i < list.length; ++i) {
-                        if (list[i] == defaultInitializedDevice) {
+                        if (list[i] == saved) {
+                            if (saved != defaultInitializedDevice) {
+                                processingDevice.preventChange = false;
+                            }
                             processingDevice.currentIndex = i;
                             break;
                         }
                     }
                     processingDevice.preventChange = false;
+                    if (saved == "cpu") {
+                        processingDevice.currentIndex = processingDevice.model.length - 1;
+                        controller.set_device(-1);
+                    }
                 }
             }
             Component.onCompleted: controller.list_gpu_devices();
@@ -242,6 +250,10 @@ MenuItem {
                 } else {
                     controller.set_device(currentIndex);
                 }
+                Qt.callLater(() => {
+                    const text = processingDevice.currentIndex == processingDevice.model.length - 1? "cpu" : processingDevice.currentText;
+                    settings.setValue("processingDevice", text);
+                });
             }
         }
     }

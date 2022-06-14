@@ -132,7 +132,9 @@ impl<T: PixelType> Stabilization<T> {
 
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize, usize), output_size: (usize, usize, usize)) {
         self.background = bg;
-        self.backend_initialized = false;
+        if self.cl.is_some() || self.wgpu.is_some() {
+            self.backend_initialized = false;
+        }
 
         self.size = size;
         self.output_size = output_size;

@@ -162,9 +162,10 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    get_thin_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
-    import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QJsonObject),
-    import_gyroflow_data: qt_method!(fn(&mut self, data: QString) -> QJsonObject),
+    get_videopath_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QString),
+    import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
+    import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
+    gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
     export_gyroflow_file: qt_method!(fn(&self, thin: bool, output_options: QJsonObject, override_location: QString, overwrite: bool)),
 
     check_updates: qt_method!(fn(&self)),
@@ -454,15 +455,6 @@ impl Controller {
 
             if duration_ms > 0.0 && fps > 0.0 {
                 core::run_threaded(move || {
-                    let last_progress = RefCell::new(std::time::Instant::now());
-                    let progress = |p| {
-                        let now = std::time::Instant::now();
-                        if (now - *last_progress.borrow()).as_millis() > 100 {
-                            progress(p);
-                            *last_progress.borrow_mut() = now;
-                        }
-                    };
-
                     if is_main_video {
                         if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
@@ -722,23 +714,66 @@ impl Controller {
         }
     }
 
-    fn get_thin_gyroflow_file(&mut self, url: QUrl) -> QJsonObject {
-        let tmp_stab = StabilizationManager::<stabilization::RGBA8>::default();
-        match tmp_stab.import_gyroflow_file(&util::url_to_path(url), false) {
-            Ok(thin_obj) => {
-                util::serde_json_to_qt_object(&thin_obj)
-            },
-            Err(e) => {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
-                QJsonObject::default()
+    fn get_videopath_from_gyroflow_file(&mut self, url: QUrl) -> QString {
+        let path = util::url_to_path(url);
+        if let Ok(data) = std::fs::read(&path) {
+            let path = std::path::Path::new(&path).to_path_buf();
+
+            if let Ok(obj) = serde_json::from_slice(&data) {
+                if let serde_json::Value::Object(obj) = obj {
+                    let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+
+                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path));
+                    return QString::from(core::util::path_to_str(&video_path));
+                }
             }
         }
+        QString::default()
     }
-    fn import_gyroflow_file(&mut self, url: QUrl) -> QJsonObject {
-        self.import_gyroflow_internal(self.stabilizer.import_gyroflow_file(&util::url_to_path(url), false))
+    fn import_gyroflow_file(&mut self, url: QUrl) {
+        let path = util::url_to_path(url);
+        let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+            this.loading_gyro_in_progress = progress < 1.0;
+            this.loading_gyro_progress(progress);
+            this.loading_gyro_in_progress_changed();
+        });
+        let finished = util::qt_queued_callback_mut(self, move |this, obj: std::io::Result<serde_json::Value>| {
+            this.loading_gyro_in_progress = false;
+            this.loading_gyro_progress(1.0);
+            this.loading_gyro_in_progress_changed();
+
+            let obj = this.import_gyroflow_internal(obj);
+            this.gyroflow_file_loaded(obj);
+        });
+
+        let stab = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        cancel_flag.store(false, SeqCst);
+        core::run_threaded(move || {
+            finished(stab.import_gyroflow_file(&path, false, progress, cancel_flag));
+        });
     }
-    fn import_gyroflow_data(&mut self, data: QString) -> QJsonObject {
-        self.import_gyroflow_internal(self.stabilizer.import_gyroflow_data(data.to_string().as_bytes(), false, None))
+    fn import_gyroflow_data(&mut self, data: QString) {
+        let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+            this.loading_gyro_in_progress = progress < 1.0;
+            this.loading_gyro_progress(progress);
+            this.loading_gyro_in_progress_changed();
+        });
+        let finished = util::qt_queued_callback_mut(self, move |this, obj: std::io::Result<serde_json::Value>| {
+            this.loading_gyro_in_progress = false;
+            this.loading_gyro_progress(1.0);
+            this.loading_gyro_in_progress_changed();
+
+            let obj = this.import_gyroflow_internal(obj);
+            this.gyroflow_file_loaded(obj);
+        });
+
+        let stab = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        cancel_flag.store(false, SeqCst);
+        core::run_threaded(move || {
+            finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag));
+        });
     }
     fn import_gyroflow_internal(&mut self, result: std::io::Result<serde_json::Value>) -> QJsonObject {
         match result {

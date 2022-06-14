@@ -123,6 +123,15 @@ impl<T: PixelType> StabilizationManager<T> {
             gyro.file_path = path.to_string();
         }
 
+        let last_progress = std::cell::RefCell::new(std::time::Instant::now());
+        let progress_cb = |p| {
+            let now = std::time::Instant::now();
+            if (now - *last_progress.borrow()).as_millis() > 100 {
+                progress_cb(p);
+                *last_progress.borrow_mut() = now;
+            }
+        };
+
         let (fps, size) = {
             let params = self.params.read();
             (params.fps, params.video_size)
@@ -796,30 +805,31 @@ impl<T: PixelType> StabilizationManager<T> {
 
         Ok(serde_json::to_string_pretty(&obj)?)
     }
-    pub fn import_gyroflow_file(&self, path: &str, blocking: bool) -> std::io::Result<serde_json::Value> {
-        let data = std::fs::read(path)?;
-        self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()))
-    }
-    pub fn import_gyroflow_data(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>) -> std::io::Result<serde_json::Value> {
-        let get_new_path = |file_path: &str| -> PathBuf {
-            let mut file_path = std::path::Path::new(file_path).to_path_buf();
-            if path.is_some() && !file_path.exists() {
-                if let Some(filename) = file_path.file_name() {
-                    let new_path = path.as_ref().unwrap().with_file_name(filename);
-                    if new_path.exists() {
-                        file_path = new_path;
-                    }
+
+    pub fn get_new_videofile_path(file_path: &str, path: Option<std::path::PathBuf>) -> PathBuf {
+        let mut file_path = std::path::Path::new(file_path).to_path_buf();
+        if path.is_some() && !file_path.exists() {
+            if let Some(filename) = file_path.file_name() {
+                let new_path = path.as_ref().unwrap().with_file_name(filename);
+                if new_path.exists() {
+                    file_path = new_path;
                 }
             }
-            file_path
-        };
+        }
+        file_path
+    }
 
+    pub fn import_gyroflow_file<F: Fn(f64)>(&self, path: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
+        let data = std::fs::read(path)?;
+        self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag)
+    }
+    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
             let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
 
-            let video_path = get_new_path(&org_video_path);
+            let video_path = Self::get_new_videofile_path(&org_video_path, path.clone());
             if let Some(videofile) = obj.get_mut("videofile") {
                 *videofile = serde_json::Value::String(util::path_to_str(&video_path));
             }
@@ -846,7 +856,7 @@ impl<T: PixelType> StabilizationManager<T> {
             obj.remove("stab_transform");
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
                 let org_gyro_path = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
-                let gyro_path = get_new_path(&org_gyro_path);
+                let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone());
                 obj["filepath"] = serde_json::Value::String(util::path_to_str(&gyro_path));
                 use crate::gyro_source::TimeIMU;
 
@@ -913,12 +923,12 @@ impl<T: PixelType> StabilizationManager<T> {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), |_|(), Arc::new(AtomicBool::new(false))) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), |_|(), Arc::new(AtomicBool::new(false))) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }
