@@ -1,5 +1,5 @@
 #!/bin/bash
-QSB='../../../ext/6.3.0/msvc2019_64/bin/qsb.exe --glsl "100 es,200 es,300 es,330,400,120,100" --hlsl 50 --msl 12'
+QSB='../../../ext/6.3.1/msvc2019_64/bin/qsb.exe --glsl "100 es,200 es,300 es,330,400,120,100" --hlsl 50 --msl 12'
 
 DISTORTION_MODELS=( "opencv_fisheye" )
 
