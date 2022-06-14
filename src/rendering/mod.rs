@@ -455,6 +455,10 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         Ok(())
     });
 
+    if let Some(parent_dir) = std::path::Path::new(&render_options.output_path).parent() {
+        let _ = std::fs::create_dir_all(parent_dir);
+    }
+
     proc.render(&render_options.output_path, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     progress((1.0, render_frame_count, render_frame_count, true));

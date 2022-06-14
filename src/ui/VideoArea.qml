@@ -62,7 +62,9 @@ Item {
                 if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
                     // If video not loaded, try to load the associated file
                     root.pendingGyroflowData = obj;
+                    const editing_id = render_queue.editing_job_id;
                     loadFile(controller.path_to_url(videofile));
+                    render_queue.editing_job_id = editing_id;
                     return;
                 }
                 window.motionData.loadGyroflow(obj);

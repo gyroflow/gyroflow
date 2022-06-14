@@ -518,9 +518,10 @@ Item {
         extensions: fileDialog.extensions;
         onLoadFiles: (urls) => {
             const options = exportSettings.getExportOptionsJson();
+            const sync_options = window.sync.getSettingsJson();
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(url, controller, options, window.sync.getSettingsJson());
+                const job_id = render_queue.add_file(url, controller, options, sync_options);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();

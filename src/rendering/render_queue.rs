@@ -116,9 +116,10 @@ impl RenderOptions {
 
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
                 let cur_path = std::path::Path::new(&self.output_path);
-                let new_path = std::path::Path::new(v);
+                let mut new_path = std::path::Path::new(v).to_path_buf();
                 if let Some(fname) = cur_path.file_name() {
-                    self.output_path = new_path.with_file_name(fname.to_string_lossy().to_string()).to_string_lossy().replace('\\', "/");
+                    new_path.push(fname.to_string_lossy().to_string());
+                    self.output_path = new_path.to_string_lossy().replace('\\', "/");
                 }
             }
         }
@@ -177,7 +178,7 @@ pub struct RenderQueue {
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
-    apply_to_all: qt_method!(fn(&mut self, data: QJsonObject)),
+    apply_to_all: qt_method!(fn(&mut self, data: String)),
 
     pause_flag: Arc<AtomicBool>,
 
@@ -259,6 +260,10 @@ impl RenderQueue {
         } else {
             fastrand::u32(..) + 1
         };
+        if self.editing_job_id > 0 {
+            self.editing_job_id = 0;
+            self.queue_changed();
+        }
 
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
@@ -702,6 +707,10 @@ impl RenderQueue {
                 let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
                     update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
                 });
+                let apply_preset = util::qt_queued_callback_mut(self, move |this, preset: String| {
+                    this.apply_to_all(preset);
+                    this.added(job_id);
+                });
 
                 core::run_threaded(move || {
                     let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
@@ -724,6 +733,20 @@ impl RenderQueue {
                     };
 
                     if path.ends_with(".gyroflow") {
+                        let video_path = || -> Option<String> {
+                            let data = std::fs::read(&path).ok()?;
+                            let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
+                            Some(obj.get("videofile")?.as_str()?.to_string())
+                        }().unwrap_or_default();
+
+                        if video_path.is_empty() {
+                            // It's a preset
+                            if let Ok(data) = std::fs::read_to_string(&path) {
+                                apply_preset(data);
+                            }
+                            return;
+                        }
+
                         match stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false))) {
                             Ok(obj) => {
                                 if let Some(out) = obj.get("output") {
@@ -811,8 +834,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn apply_to_all(&mut self, data: QJsonObject) {
-        let data = data.to_json().to_string();
+    fn apply_to_all(&mut self, data: String) {
         dbg!(&data);
         let mut new_output_options = None;
         if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
@@ -820,6 +842,7 @@ impl RenderQueue {
                 new_output_options = Some(output.clone());
             }
         }
+        dbg!(&new_output_options);
         let data = data.as_bytes();
         let mut q = self.queue.borrow_mut();
         for (_id, job) in self.jobs.iter_mut() {
