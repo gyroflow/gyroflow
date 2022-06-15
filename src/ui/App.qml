@@ -194,7 +194,7 @@ Rectangle {
                     Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
 
                     model: [
-                        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : QT_TRANSLATE_NOOP("Popup", render_queue.editing_job_id > 0? "Save" : "Add to render queue"),
+                        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue")),
                         QT_TRANSLATE_NOOP("Popup", "Create settings preset"),
                         QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue"),
                         QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)"),

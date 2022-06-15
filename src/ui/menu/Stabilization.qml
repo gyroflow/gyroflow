@@ -161,6 +161,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Per axis");
         QT_TRANSLATE_NOOP("Stabilization", "Max smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Second smoothing pass");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
