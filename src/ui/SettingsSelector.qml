@@ -61,7 +61,7 @@ Modal {
         }
     }];
 
-    property var defaultOff: ["trim_start", "offsets"];
+    property var defaultOff: ["trim_start", "offsets", "video_infofps_scale", "video_inforotation"];
 
     text: isPreset? qsTr("Select settings you want to include in the preset")
                   : qsTr("Select settings you want to apply to all items in the render queue");
@@ -166,7 +166,7 @@ Modal {
                                         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
                                             if (invert  && cb.parent == groupCb) return;
                                             if (!invert && cb.parent != groupCb) return;
-                                            if (invert && root.defaultOff.includes(cb.props[0])) return;
+                                            if (invert && root.defaultOff.includes(cb.group + cb.props[0])) return;
                                             cb.checked = !cb.checked;
                                         });
                                     }
@@ -177,7 +177,7 @@ Modal {
                                 model: modelData[1];
                                 CheckBox {
                                     text: qsTr(modelData[0]);
-                                    checked: !root.defaultOff.includes(props[0]);
+                                    checked: !root.defaultOff.includes(group + props[0]);
                                     property string group: modelData[1];
                                     property var props: modelData[2];
                                 }

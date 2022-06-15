@@ -80,12 +80,12 @@ Malo by to zlepšiť plynulosť programu.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Zariadenie na spracovanie videa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="227"/>
       <source>CPU only</source>
-      <translation type="unfinished">CPU only</translation>
+      <translation>Len CPU</translation>
     </message>
   </context>
   <context>
@@ -269,12 +269,12 @@ Ak máš novší počítač, aktuálne ovládače na GPU a myslíš si, že by s
     <message>
       <location filename="../../src/ui/App.qml" line="449"/>
       <source>Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</translation>
+      <translation>Tvoja GPU nepodporuje  HEVC/x265 encódovanie, skús použiť x264, alebo vypni GPU enkódovanie v nastaveniach exportu.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="452"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
+      <translation>Uisti sa, že výstupný formát videa podporuje vybraný kodek. &quot;.mov&quot; by mal fungovať vo väčšine prípadov.</translation>
     </message>
   </context>
   <context>
@@ -468,7 +468,7 @@ Ak máš novší počítač, aktuálne ovládače na GPU a myslíš si, že by s
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="385"/>
       <source>Keyframe distance</source>
-      <translation type="unfinished">Keyframe distance</translation>
+      <translation>Vzdialenosť keyframe snímkov</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="394"/>
@@ -478,22 +478,22 @@ Ak máš novší počítač, aktuálne ovládače na GPU a myslíš si, že by s
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="399"/>
       <source>Preserve other tracks</source>
-      <translation type="unfinished">Preserve other tracks</translation>
+      <translation>Zachovať ostatné stopy</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="401"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation type="unfinished">This disables trim range and you need to use the .mov output file extension</translation>
+      <translation>Toto zakáže rozsah orezania a musíš použiť príponu výstupného súboru .mov</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="406"/>
       <source>Use black frames outside trim range and keep original file duration</source>
-      <translation type="unfinished">Use black frames outside trim range and keep original file duration</translation>
+      <translation>Použijú sa čierne snímky mimo rozsahu orezania a zachová sa pôvodná dĺžka videa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="413"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Zariadenie na renderovanie</translation>
     </message>
   </context>
   <context>
@@ -624,7 +624,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="453"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
-      <translation type="unfinished">Plain chessboard pattern (previous version without dots in the middle)</translation>
+      <translation>Obyčajný vzor šachovnice (predchádzajúca verzia bez bodiek v strede)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="251"/>
@@ -874,27 +874,27 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
       <source>Create settings preset</source>
-      <translation type="unfinished">Create settings preset</translation>
+      <translation>Vytvor predvoľbu nastavení</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="199"/>
       <source>Apply selected settings to all items in the render queue</source>
-      <translation type="unfinished">Apply selected settings to all items in the render queue</translation>
+      <translation>Použiť vybraté nastavenia na všetky položky vo fronte</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="200"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Exportovať projekt (vrátane spracovaných gyro dát)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="201"/>
       <source>Export project file (including gyro data)</source>
-      <translation type="unfinished">Export project file (including gyro data)</translation>
+      <translation>Exportovať projekt (vrátane gyro dát)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="202"/>
       <source>Export project file</source>
-      <translation type="unfinished">Export project file</translation>
+      <translation>Exportovať projekt</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="41"/>
@@ -1148,175 +1148,175 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="66"/>
       <source>Select settings you want to include in the preset</source>
-      <translation type="unfinished">Select settings you want to include in the preset</translation>
+      <translation>Vyber nastavenia, ktoré chceš zahrnúť do predvoľby</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="67"/>
       <source>Select settings you want to apply to all items in the render queue</source>
-      <translation type="unfinished">Select settings you want to apply to all items in the render queue</translation>
+      <translation>Vyber nastavenia, ktoré chceš použiť na všetky položky vo fronte</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="85"/>
       <source>Video</source>
-      <translation type="unfinished">Video</translation>
+      <translation>Video</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="86"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <source>Rotation</source>
-      <translation type="unfinished">Rotation</translation>
+      <translation>Rotácia</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="87"/>
       <source>Frame rate</source>
-      <translation type="unfinished">Frame rate</translation>
+      <translation>Snímková frekvencia</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="88"/>
       <source>Lens profile</source>
-      <translation type="unfinished">Lens profile</translation>
+      <translation>Profil objektívu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="89"/>
       <source>Motion data</source>
-      <translation type="unfinished">Motion data</translation>
+      <translation>Pohybové dáta</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Low pass filter</source>
-      <translation type="unfinished">Low pass filter</translation>
+      <translation>Dolnopriepustný filter</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Sklon gyro</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>IMU orientation</source>
-      <translation type="unfinished">IMU orientation</translation>
+      <translation>Orientácia IMU</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Metóda integrácie</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Rozsah orezania</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>Offsets</source>
-      <translation type="unfinished">Offsets</translation>
+      <translation>Odchýlka</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Synchronizácia</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Približný časový rozdiel gyro</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
       <source>Sync search size</source>
-      <translation type="unfinished">Sync search size</translation>
+      <translation>Oblasť pre synchronizáciu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Max. počet synchr. bodov</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Stabilization</source>
-      <translation type="unfinished">Stabilization</translation>
+      <translation>Stabilizácia</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>Zorné pole (FOV)</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Smoothing params</source>
-      <translation type="unfinished">Smoothing params</translation>
+      <translation>Parametre vyhladenia</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <source>Horizon lock</source>
-      <translation type="unfinished">Horizon lock</translation>
+      <translation>Zamknutý horizont</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Rolling shutter correction</source>
-      <translation type="unfinished">Rolling shutter correction</translation>
+      <translation>Korekcia rolling-shutter</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Priblížiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Sila korekcie skreslenia šošovky</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Export settings</source>
-      <translation type="unfinished">Export settings</translation>
+      <translation>Nastavenia exportu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
       <source>Codec</source>
-      <translation type="unfinished">Codec</translation>
+      <translation>Kodek</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Audio</source>
-      <translation type="unfinished">Audio</translation>
+      <translation>Zvuk</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
       <source>Output path</source>
-      <translation type="unfinished">Output path</translation>
+      <translation>Adresa výstupu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Output size</source>
-      <translation type="unfinished">Output size</translation>
+      <translation>Výstupné rozlíšenie</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Pokročilé</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Background</source>
-      <translation type="unfinished">Background</translation>
+      <translation>Pozadie</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Uložiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Použiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="215"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Zrušiť</translation>
     </message>
   </context>
   <context>
@@ -1842,7 +1842,7 @@ Chceš pokračovať?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="306"/>
       <source>Guess IMU orientation here</source>
-      <translation type="unfinished">Guess IMU orientation here</translation>
+      <translation>Odhadni orientáciu IMU tu</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="352"/>

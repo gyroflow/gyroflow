@@ -35,17 +35,11 @@ MenuItem {
             if (stab.smoothing_params) {
                 Qt.callLater(function() {
                     for (const x of stab.smoothing_params) {
-                        if (smoothingOptions.children.length > 0) {
-                            for (const y in smoothingOptions.children[0].children) {
-                                const el = smoothingOptions.children[0].children[y];
-                                if (el && el.inner && el.inner.children.length > 0) {
-                                    const slider = el.inner.children[0];
-                                    if (slider.objectName == "param-" + x.name) {
-                                        console.log("Setting param", x.name, x.value);
-                                        slider.value = x.value;
-                                    }
-                                }
-                            }
+                        const el = root.getParamElement(x.name);
+                        if (el) {
+                            console.log("Setting param", x.name, x.value);
+                            if (el.value) el.value = x.value;
+                            if (el.checked) el.checked = +x.value > 0;
                         }
                     }
                 });
