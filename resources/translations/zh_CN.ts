@@ -874,12 +874,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>保存</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>添加到渲染队列</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
@@ -1377,7 +1377,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>二阶平滑过程</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>

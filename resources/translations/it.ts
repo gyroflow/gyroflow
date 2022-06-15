@@ -871,12 +871,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Salva</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Aggiungi alla coda di rendering</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
@@ -1373,7 +1373,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>Secondo passaggio di smoothing</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>

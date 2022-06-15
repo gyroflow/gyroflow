@@ -26,7 +26,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="88"/>
       <source>Feather</source>
-      <translation type="unfinished">Feather</translation>
+      <translation>Φτερό</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="105"/>
@@ -84,7 +84,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="227"/>
       <source>CPU only</source>
-      <translation type="unfinished">CPU only</translation>
+      <translation>Μόνο επεξεργαστής</translation>
     </message>
   </context>
   <context>
@@ -121,7 +121,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="181"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Προσθήκη στη λίστα αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="222"/>
@@ -159,7 +159,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="181"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Αποθήκευση</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="207"/>
@@ -174,7 +174,7 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="293"/>
       <source>Render queue</source>
-      <translation type="unfinished">Render queue</translation>
+      <translation>Ουρά αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="355"/>
@@ -205,17 +205,17 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="376"/>
       <source>Overwrite</source>
-      <translation type="unfinished">Overwrite</translation>
+      <translation>Αντικατάσταση</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="388"/>
       <source>Choose a different location</source>
-      <translation type="unfinished">Choose a different location</translation>
+      <translation>Επιλέξτε διαφορετική τοποθεσία</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="394"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Ακύρωση</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="419"/>
@@ -255,15 +255,15 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
       <location filename="../../src/ui/App.qml" line="440"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation type="unfinished">GPU accelerated encoder doesn&apos;t support this pixel format (%1).
-Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</translation>
+      <translation>Η επιτάχυνση κωδικοποίησης της κάρτας γραφικών σας δεν υποστηρίζει αυτή τη μορφή εικονοστοιχείων (%1).
+Θέλετε να μετατρέψετε σε διαφορετική μορφή εικονοστοιχείων ή να κρατήσετε την αρχική και να αποτυπώσετε με τον επεξεργαστή;</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="446"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
-      <translation type="unfinished">GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
-If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</translation>
+      <translation>Ο κωδικοποιητής GPU απέτυχε να ξεκινήσει. Η αποτύπωση γίνεται στην CPU, η οποία είναι πολύ πιο αργή.
+Εάν έχετε μια σύγχρονη συσκευή, τα τελευταία προγράμματα οδήγησης GPU και νομίζετε ότι αυτό δεν θα έπρεπε να συμβεί, αναφέρετε το στο GitHub συμπεριλαμβανομένου του αρχείου gyroflow.log.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="449"/>
@@ -452,17 +452,17 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="352"/>
       <source>Custom encoder options</source>
-      <translation type="unfinished">Custom encoder options</translation>
+      <translation>Προσαρμοσμένες Ρυθμίσεις Κωδικοποιητή</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="375"/>
       <source>Show available options</source>
-      <translation type="unfinished">Show available options</translation>
+      <translation>Εμφάνιση διαθέσιμων επιλογών</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="378"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Οκ</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="385"/>
@@ -472,7 +472,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="394"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>δ</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="399"/>
@@ -744,7 +744,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="124"/>
       <source>Hide</source>
-      <translation type="unfinished">Hide</translation>
+      <translation>Απόκρυψη</translation>
     </message>
   </context>
   <context>
@@ -868,17 +868,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Εξαγωγή</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Αποθήκευση</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Προσθήκη στη λίστα αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>

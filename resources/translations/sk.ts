@@ -478,12 +478,12 @@ Ak máš novší počítač, aktuálne ovládače na GPU a myslíš si, že by s
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="399"/>
       <source>Preserve other tracks</source>
-      <translation>Zachovať ostatné stopy</translation>
+      <translation>Zachovať ďalšie stopy videa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="401"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation>Toto zakáže rozsah orezania a je nutné použiť .mov ako príponu výstupného videa</translation>
+      <translation>(napr. titulky, timecode) Zaškrtnutím sa zakáže možnosť orezania videa a použije sa .mov ako prípona výstupného videa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="406"/>
@@ -874,12 +874,12 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Uložiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Pridaj do fronty na render</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
@@ -1377,7 +1377,7 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>Dodatočné vyhladenie</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
