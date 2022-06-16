@@ -137,6 +137,7 @@ MenuItem {
             height: 25 * dpiScale;
             precision: 1;
             value: 5;
+            defaultValue: 5;
             unit: qsTr("s");
         }
     }
@@ -165,6 +166,7 @@ MenuItem {
                 width: parent.width;
                 height: 25 * dpiScale;
                 value: 1;
+                defaultValue: 1;
                 from: 1;
             }
         }
@@ -177,6 +179,7 @@ MenuItem {
                 width: parent.width;
                 height: 25 * dpiScale;
                 value: 1.5;
+                defaultValue: 1.5;
                 precision: 2;
                 unit: qsTr("s");
                 from: 0.01;
@@ -229,6 +232,7 @@ MenuItem {
                 unit: qsTr("Hz");
                 precision: 2;
                 value: 0;
+                defaultValue: 0;
                 from: 0;
                 width: parent.width;
                 onValueChanged: {

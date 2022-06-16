@@ -28,13 +28,28 @@ const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
 
 impl OclWrapper {
     pub fn list_devices() -> Vec<String> {
-        let mut ret = Vec::new();
-        for p in Platform::list() {
-            if let Ok(devs) = Device::list_all(p) {
-                ret.extend(devs.into_iter().filter_map(|x| Some(format!("{} {}", p.name().ok()?, x.name().ok()?))));
+        let devices = std::panic::catch_unwind(|| -> Vec<String> {
+            let mut ret = Vec::new();
+            for p in Platform::list() {
+                if let Ok(devs) = Device::list_all(p) {
+                    ret.extend(devs.into_iter().filter_map(|x| Some(format!("{} {}", p.name().ok()?, x.name().ok()?))));
+                }
+            }
+            ret.drain(..).filter(|x| !EXCLUSIONS.iter().any(|e| x.contains(e))).collect()
+        });
+        match devices {
+            Ok(devices) => { return devices; },
+            Err(e) => {
+                if let Some(s) = e.downcast_ref::<&str>() {
+                    log::error!("Failed to initialize OpenCL {}", s);
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    log::error!("Failed to initialize OpenCL {}", s);
+                } else {
+                    log::error!("Failed to initialize OpenCL {:?}", e);
+                }
             }
         }
-        ret.drain(..).filter(|x| !EXCLUSIONS.iter().any(|e| x.contains(e))).collect()
+        Vec::new()
     }
 
     pub fn set_device(index: usize) -> ocl::Result<()> {
