@@ -80,12 +80,12 @@ Bu seçenek çok daha iyi bir arayüz performansı sunmalı.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Video işleme cihazı</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="227"/>
       <source>CPU only</source>
-      <translation type="unfinished">CPU only</translation>
+      <translation>Sadece CPU</translation>
     </message>
   </context>
   <context>
@@ -267,12 +267,12 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="449"/>
       <source>Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</translation>
+      <translation>GPU'nuz HEVC/x265 encoding'i desteklemiyor. x264 kullanmayı veya Dışa Aktarma ayarlarında GPU encoding'i kapatmayı deneyin.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="452"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
+      <translation>Çıktı dosya uzantınızın seçili codec'i desteklediğinden emin olun.&quot;.mov&quot; uzantısı, çoğu durumda uygun bir seçimdir.</translation>
     </message>
   </context>
   <context>
@@ -491,7 +491,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="413"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Render cihazı</translation>
     </message>
   </context>
   <context>
@@ -872,12 +872,12 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Kaydet</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Render sırasına ekle</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
@@ -892,7 +892,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="200"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Proje dosyasını dışa aktar (işlenmiş gyro verisiyle birlikte)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="201"/>
@@ -1196,7 +1196,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Gyro kayması</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
@@ -1221,22 +1221,22 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Senkronizasyon</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Kaba gyro ötelemesi</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
       <source>Sync search size</source>
-      <translation type="unfinished">Sync search size</translation>
+      <translation>Sync arama boyutu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Maksimum sync noktaları</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
@@ -1374,7 +1374,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>Yumuşatma işlemi ikinci kez yapılıyor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
@@ -1852,7 +1852,7 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="306"/>
       <source>Guess IMU orientation here</source>
-      <translation type="unfinished">Guess IMU orientation here</translation>
+      <translation>IMU konumlamasını burada tahmin et</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="352"/>
