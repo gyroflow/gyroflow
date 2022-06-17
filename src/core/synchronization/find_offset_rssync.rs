@@ -140,15 +140,12 @@ impl FindOffsetsRssync<'_> {
                 4,
             ) {
                 let offset = delay.1 * 1000.0;
-                if (offset - initial_delay).abs() <= presync_radius {
+                // Only accept offsets that are within 90% of search size range
+                if (offset - initial_delay).abs() < presync_radius * 0.9 {
                     let offset = -offset - (self.frame_readout_time * 1000.0 / 2.0);
                     offsets.push(((from_ts + to_ts) as f64 / 2.0 / 1000.0, offset, delay.0));
                 } else {
-                    log::warn!(
-                        "Sync point out of acceptable range {} < {}",
-                        presync_radius,
-                        (offset - initial_delay).abs()
-                    );
+                    log::warn!("Sync point out of acceptable range {} < {}", (offset - initial_delay).abs(), presync_radius * 0.9);
                 }
             }
             self.current_sync_point.fetch_add(1, SeqCst);
