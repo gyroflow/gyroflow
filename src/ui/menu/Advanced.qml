@@ -227,33 +227,32 @@ MenuItem {
                     processingDevice.model = [...list, qsTr("CPU only")];
                     for (let i = 0; i < list.length; ++i) {
                         if (list[i] == saved) {
-                            if (saved != defaultInitializedDevice) {
-                                processingDevice.preventChange = false;
-                            }
                             processingDevice.currentIndex = i;
                             break;
                         }
                     }
+                    if (saved != defaultInitializedDevice) {
+                        Qt.callLater(processingDevice.updateController);
+                    }
                     processingDevice.preventChange = false;
                     if (saved == "cpu") {
                         processingDevice.currentIndex = processingDevice.model.length - 1;
-                        controller.set_device(-1);
                     }
                 }
             }
             Component.onCompleted: controller.list_gpu_devices();
             onCurrentIndexChanged: {
                 if (preventChange) return;
-
+                Qt.callLater(processingDevice.updateController);
+            }
+            function updateController() {
                 if (currentIndex == model.length - 1) {
                     controller.set_device(-1);
                 } else {
                     controller.set_device(currentIndex);
                 }
-                Qt.callLater(() => {
-                    const text = processingDevice.currentIndex == processingDevice.model.length - 1? "cpu" : processingDevice.currentText;
-                    settings.setValue("processingDevice", text);
-                });
+                const text = currentIndex == model.length - 1? "cpu" : currentText;
+                settings.setValue("processingDevice", text);
             }
         }
     }

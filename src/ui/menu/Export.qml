@@ -423,7 +423,7 @@ MenuItem {
                 Connections {
                     target: controller;
                     function onGpu_list_loaded(list) {
-                    const saved = settings.value("renderingDevice", defaultInitializedDevice);
+                        const saved = settings.value("renderingDevice", defaultInitializedDevice);
                         const hasOpencl = !!list.find(x => x.includes("[OpenCL]"));
                         const hasWgpu   = !!list.find(x => x.includes("[wgpu]"));
                         if (hasOpencl && hasWgpu) {
@@ -435,22 +435,23 @@ MenuItem {
                         renderingDevice.model = list.map(x => x.replace("[OpenCL] ", "").replace("[wgpu] ", ""));
                         for (let i = 0; i < list.length; ++i) {
                             if (list[i] == saved) {
-                                if (saved != defaultInitializedDevice) {
-                                    renderingDevice.preventChange = false;
-                                }
                                 renderingDevice.currentIndex = i;
                                 break;
                             }
+                        }
+                        if (saved != defaultInitializedDevice) {
+                            Qt.callLater(renderingDevice.updateController);
                         }
                         renderingDevice.preventChange = false;
                     }
                 }
                 onCurrentTextChanged: {
                     if (preventChange) return;
-                    controller.set_rendering_gpu_type_from_name(currentText);
-                    Qt.callLater(() => {
-                         settings.setValue("renderingDevice", renderingDevice.orgList[renderingDevice.currentIndex]);
-                    });
+                    Qt.callLater(renderingDevice.updateController);
+                }
+                function updateController() {
+                    controller.set_rendering_gpu_type_from_name(renderingDevice.currentText);
+                    settings.setValue("renderingDevice", renderingDevice.orgList[renderingDevice.currentIndex]);
                 }
             }
         }

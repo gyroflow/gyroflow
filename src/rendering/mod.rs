@@ -48,7 +48,7 @@ pub fn set_gpu_type_from_name(name: &str) {
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
 
-    dbg!(gpu_type);
+    ::log::debug!("GPU type: {:?}, from name: {}", gpu_type, name);
 }
 
 pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
