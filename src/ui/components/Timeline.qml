@@ -308,15 +308,6 @@ Item {
                 }
             }
             Action {
-                id: guessOrientationHere;
-                icon.name: "axes";
-                text: qsTr("Guess IMU orientation here");
-                onTriggered: {
-                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation", window.exportSettings.overrideFps);
-                }
-            }
-            Action {
                 id: addSyncAction;
                 icon.name: "plus";
                 text: qsTr("Add manual sync point here");
@@ -333,6 +324,15 @@ Item {
                         syncPointSlider.to    = final_offset + Math.max(15, Math.abs(final_offset));
                         syncPointSlider.value = final_offset;
                     });
+                }
+            }
+            Action {
+                id: guessOrientationHere;
+                icon.name: "axes";
+                text: qsTr("Guess IMU orientation here");
+                onTriggered: {
+                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation", window.exportSettings.overrideFps);
                 }
             }
             Action {

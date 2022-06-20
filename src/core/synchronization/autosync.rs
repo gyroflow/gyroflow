@@ -191,7 +191,10 @@ impl AutosyncProcess {
             if self.mode == "estimate_rolling_shutter" {
                 cb(Either::Left(self.estimator.find_offsets_visually(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
             } else if self.mode == "guess_imu_orientation" {
-                cb(Either::Right(self.estimator.guess_orientation_rssync(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone())));
+                let guessed = self.estimator.guess_orientation_rssync(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
+                if !self.cancel_flag.load(SeqCst) {
+                    cb(Either::Right(guessed));
+                }
             } else {
                 let offsets = match offset_method {
                     0 => self.estimator.find_offsets(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),

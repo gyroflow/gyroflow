@@ -305,8 +305,8 @@ impl Controller {
             });
             sync.on_finished(move |arg| {
                 match arg {
-                    Either::Left(offsets)=>set_offsets(offsets),
-                    Either::Right(Some(orientation))=> set_orientation(orientation.0),
+                    Either::Left(offsets) => set_offsets(offsets),
+                    Either::Right(Some(orientation)) => set_orientation(orientation.0),
                     _=> ()
                 };
             });
