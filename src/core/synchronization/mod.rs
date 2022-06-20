@@ -418,7 +418,8 @@ impl PoseEstimator {
         // Try essential matrix first, because it's much faster
         let mut sync_params = sync_params.clone();
         if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
-            fn median(v: &Vec<f64>) -> f64 {
+            fn median(mut v: Vec<f64>) -> f64 {
+                v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
                 let len = v.len();
                 if (len % 2) == 0 {
                     (v[len / 2 - 1] + v[len / 2]) / 2.0
@@ -430,7 +431,7 @@ impl PoseEstimator {
             let gyro = self.estimated_gyro.read().clone();
             let offsets = find_offset::find_offsets(&ranges, &gyro, &sync_params, params, &progress_cb, cancel_flag.clone());
             if !offsets.is_empty() {
-                let median_offset = median(&offsets.iter().map(|x| x.1).collect());
+                let median_offset = median(offsets.iter().map(|x| x.1).collect());
                 sync_params.initial_offset = median_offset;
                 sync_params.initial_offset_inv = false;
                 sync_params.search_size = 3000.0;
