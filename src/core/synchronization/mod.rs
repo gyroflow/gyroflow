@@ -42,6 +42,20 @@ pub type OpticalFlowPoints = Vec<(f64, f64)>; // timestamp_us, points
 pub type OpticalFlowPair = Option<(OpticalFlowPoints, OpticalFlowPoints)>;
 pub type OpticalFlowPairWithTs = Option<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>;
 
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct SyncParams {
+    pub initial_offset: f64,
+    pub initial_offset_inv: bool,
+    pub search_size: f64,
+    pub calc_initial_fast: bool,
+    pub max_sync_points: usize,
+    pub every_nth_frame: usize,
+    pub time_per_syncpoint: f64,
+    pub of_method: usize,
+    pub offset_method: usize
+}
+
 #[enum_dispatch]
 #[derive(Clone)]
 pub enum EstimatorItem {
@@ -105,7 +119,7 @@ impl PoseEstimator {
         }
     }
 
-    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: u32, img: Arc<image::GrayImage>) {
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: usize, img: Arc<image::GrayImage>) {
         let frame_size = (img.width(), img.height());
         let item = match method {
             0 => ItemAkaze::detect_features(timestamp_us, img).into(),
@@ -393,28 +407,42 @@ impl PoseEstimator {
         ranges
     }
 
-    pub fn find_offsets<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    pub fn find_offsets<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         let gyro = self.estimated_gyro.read().clone();
-        find_offset::find_offsets(ranges, &gyro, initial_offset, search_size, params, progress_cb, cancel_flag)
+        find_offset::find_offsets(ranges, &gyro, sync_params, params, progress_cb, cancel_flag)
     }
-    pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset_visually::find_offsets(ranges, self, initial_offset, search_size, params, for_rs, progress_cb, cancel_flag)
+    pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        find_offset_visually::find_offsets(ranges, self, sync_params, params, for_rs, progress_cb, cancel_flag)
     }
-    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], mut initial_offset: f64, mut search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        // If search size is larger than 10s, try essential matrix first, because it's much faster
-        if search_size.abs() > 10_000.0 && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
+    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+        // Try essential matrix first, because it's much faster
+        let mut sync_params = sync_params.clone();
+        if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
+            fn median(v: &Vec<f64>) -> f64 {
+                let len = v.len();
+                if (len % 2) == 0 {
+                    (v[len / 2 - 1] + v[len / 2]) / 2.0
+                } else {
+                    v[len / 2]
+                }
+            }
+
             let gyro = self.estimated_gyro.read().clone();
-            let offset = find_offset::find_offsets(&ranges[0..1], &gyro, initial_offset, search_size, params, &progress_cb, cancel_flag.clone());
-            if let Some((_ts, offs, _cost)) = offset.first() {
-                initial_offset = *offs;
-                search_size = 3000.0;
+            let offsets = find_offset::find_offsets(&ranges, &gyro, &sync_params, params, &progress_cb, cancel_flag.clone());
+            if !offsets.is_empty() {
+                let median_offset = median(&offsets.iter().map(|x| x.1).collect());
+                sync_params.initial_offset = median_offset;
+                sync_params.initial_offset_inv = false;
+                sync_params.search_size = 3000.0;
+                log::debug!("Initial offset: {}", median_offset);
             }
         }
 
-        FindOffsetsRssync::new(ranges, self.sync_results.clone(), initial_offset, search_size, params, progress_cb, cancel_flag).full_sync()
+        let offsets = FindOffsetsRssync::new(ranges, self.sync_results.clone(), &sync_params, params, progress_cb, cancel_flag).full_sync();
+        offsets
     }
 
-    pub fn guess_orientation_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Option<(String, f64)> {
-        FindOffsetsRssync::new(ranges, self.sync_results.clone(), initial_offset, search_size, params, progress_cb, cancel_flag).guess_orient()
+    pub fn guess_orientation_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Option<(String, f64)> {
+        FindOffsetsRssync::new(ranges, self.sync_results.clone(), sync_params, params, progress_cb, cancel_flag).guess_orient()
     }
 }

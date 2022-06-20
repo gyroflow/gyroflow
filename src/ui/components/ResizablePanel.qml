@@ -70,7 +70,7 @@ Rectangle {
                 rt.start();
                 if (count >= 2) { // double clicked
                     rp.lastWidth = rp.defaultWidth;
-                    rp.lastHeight = rp.defaultHeight; 
+                    rp.lastHeight = rp.defaultHeight;
                 }
             }
             Timer { id: rt; interval: 400; onTriggered: ma.count = 0; }

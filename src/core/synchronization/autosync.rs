@@ -9,18 +9,14 @@ use parking_lot::RwLock;
 use crate::StabilizationManager;
 use crate::stabilization::ComputeParams;
 use super::PoseEstimator;
+use super::SyncParams;
 
 pub struct AutosyncProcess {
-    method: u32,
-    initial_offset: f64,
-    check_negative_initial_offset: bool,
-    sync_search_size: f64,
     frame_count: usize,
     scaled_fps: f64,
     org_fps: f64,
     fps_scale: Option<f64>,
-    for_rs: bool, // for rolling shutter estimation
-    guess_orient: bool,
+    mode: String, // synchronize, guess_imu_orientation, estimate_rolling_shutter
     ranges_us: Vec<(i64, i64)>,
     scaled_ranges_us: Vec<(i64, i64)>,
     estimator: Arc<PoseEstimator>,
@@ -31,11 +27,13 @@ pub struct AutosyncProcess {
     progress_cb: Option<Arc<Box<dyn Fn(f64, usize, usize) + Send + Sync + 'static>>>,
     finished_cb: Option<Arc<Box<dyn Fn(Either<Vec<(f64, f64, f64)>, Option<(String, f64)>>) + Send + Sync + 'static>>>,
 
+    sync_params: SyncParams,
+
     thread_pool: rayon::ThreadPool,
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, method: u32, timestamps_fract: &[f64], initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, mut sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, guess_orient: bool, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
+    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, timestamps_fract: &[f64], sync_params: SyncParams, mode: String, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
@@ -43,19 +41,26 @@ impl AutosyncProcess {
         let fps_scale = params.fps_scale;
         let duration_ms = params.get_scaled_duration_ms();
 
+        let SyncParams {
+            search_size,
+            mut time_per_syncpoint,
+            every_nth_frame,
+            ..
+        } = sync_params;
+
         if let Some(scale) = &fps_scale {
-            sync_duration_ms *= scale;
+            time_per_syncpoint *= scale;
         }
-        let frame_count = ((timestamps_fract.len() as f64 * (sync_duration_ms / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
+        let frame_count = ((timestamps_fract.len() as f64 * (time_per_syncpoint / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
 
         drop(params);
 
-        if duration_ms < 10.0 || frame_count < 2 || sync_duration_ms < 10.0 || sync_search_size < 10.0 { return Err(()); }
+        if duration_ms < 10.0 || frame_count < 2 || time_per_syncpoint < 10.0 || search_size < 10.0 { return Err(()); }
 
         let ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
             let range = (
-                ((x * org_duration_ms) - (sync_duration_ms / 2.0)).max(0.0),
-                ((x * org_duration_ms) + (sync_duration_ms / 2.0)).min(org_duration_ms)
+                ((x * org_duration_ms) - (time_per_syncpoint / 2.0)).max(0.0),
+                ((x * org_duration_ms) + (time_per_syncpoint / 2.0)).min(org_duration_ms)
             );
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
@@ -70,7 +75,7 @@ impl AutosyncProcess {
         estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
 
         let mut comp_params = ComputeParams::from_manager(stab, true);
-        if !for_rs {
+        if mode == "synchronize" {
             comp_params.gyro.clear_offsets();
         }
         // Make sure we apply full correction for autosync
@@ -80,16 +85,12 @@ impl AutosyncProcess {
             frame_count,
             org_fps,
             scaled_fps,
-            for_rs,
-            guess_orient,
-            method,
+            sync_params,
+            mode,
             ranges_us,
             scaled_ranges_us,
             estimator,
             fps_scale,
-            initial_offset,
-            check_negative_initial_offset,
-            sync_search_size,
             total_read_frames: Arc::new(AtomicUsize::new(1)), // Start with 1 to keep the loader active until `finished_feeding_frames` overrides it with final value
             total_detected_frames: Arc::new(AtomicUsize::new(0)),
             compute_params: Arc::new(RwLock::new(comp_params)),
@@ -107,7 +108,7 @@ impl AutosyncProcess {
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, width: u32, height: u32, stride: usize, pixels: &[u8]) {
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
 
-        let method = self.method;
+        let method = self.sync_params.of_method;
         let estimator = self.estimator.clone();
         let total_detected_frames = self.total_detected_frames.clone();
         let total_read_frames = self.total_read_frames.clone();
@@ -150,16 +151,18 @@ impl AutosyncProcess {
         }
     }
 
-    pub fn finished_feeding_frames(&self, method: u32) {
+    pub fn finished_feeding_frames(&self) {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) - 1 {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
+
+        let offset_method = self.sync_params.offset_method;
 
         let progress_cb = self.progress_cb.clone();
 
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.org_fps, true);
-        self.estimator.cache_optical_flow(if method == 1 { 2 } else { 1 });
+        self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 
         if let Some(cb) = &progress_cb {
@@ -168,7 +171,7 @@ impl AutosyncProcess {
             cb(0.6, d, t);
         }
 
-        let check_negative = self.check_negative_initial_offset && self.initial_offset.abs() > 1.0;
+        let check_negative = self.sync_params.initial_offset_inv && self.sync_params.initial_offset.abs() > 1.0;
 
         let for_negative = AtomicBool::new(false);
 
@@ -185,25 +188,27 @@ impl AutosyncProcess {
         };
 
         if let Some(cb) = &self.finished_cb {
-            if self.for_rs {
-                cb(Either::Left(self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
-            } else if self.guess_orient {
-                cb(Either::Right(self.estimator.guess_orientation_rssync(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone())));
+            if self.mode == "estimate_rolling_shutter" {
+                cb(Either::Left(self.estimator.find_offsets_visually(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
+            } else if self.mode == "guess_imu_orientation" {
+                cb(Either::Right(self.estimator.guess_orientation_rssync(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone())));
             } else {
-                let offsets = match method {
-                    0 => self.estimator.find_offsets(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
-                    1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), false, progress_cb2, self.cancel_flag.clone()),
-                    2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
-                    _ => { panic!("Unsupported offset method: {}", method); }
+                let offsets = match offset_method {
+                    0 => self.estimator.find_offsets(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
+                    1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), false, progress_cb2, self.cancel_flag.clone()),
+                    2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
+                    _ => { log::error!("Unsupported offset method: {}", offset_method); Vec::new() }
                 };
                 if check_negative {
                     for_negative.store(true, SeqCst);
                     // Try also negative rough offset
-                    let offsets2 = match method {
-                        0 => self.estimator.find_offsets(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
-                        1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read(), false, progress_cb2, self.cancel_flag.clone()),
-                        2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, -self.initial_offset, self.sync_search_size, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
-                        _ => { panic!("Unsupported offset method: {}", method); }
+                    let mut sync_params = self.sync_params.clone();
+                    sync_params.initial_offset = -sync_params.initial_offset;
+                    let offsets2 = match offset_method {
+                        0 => self.estimator.find_offsets(&self.scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
+                        1 => self.estimator.find_offsets_visually(&self.scaled_ranges_us, &sync_params, &self.compute_params.read(), false, progress_cb2, self.cancel_flag.clone()),
+                        2 => self.estimator.find_offsets_rssync(&self.scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()),
+                        _ => { log::error!("Unsupported offset method: {}", offset_method); Vec::new() }
                     };
                     if offsets2.len() > offsets.len() {
                         cb(Either::Left(offsets2));

@@ -25,6 +25,8 @@ Item {
     property alias pressed: ma.pressed;
     property alias inner: inner;
 
+    property bool fullScreen: false;
+
     property real value: 0;
     readonly property real position: vid.currentFrame / (vid.frameCount - 1);
 
@@ -80,6 +82,7 @@ Item {
     focus: true;
 
     Column {
+        visible: !root.fullScreen;
         x: 3 * dpiScale;
         y: 50 * dpiScale;
         spacing: 3 * dpiScale;
@@ -89,6 +92,7 @@ Item {
         TimelineAxisButton { id: a3; text: "W"; onCheckedChanged: chart.setAxisVisible(3, checked); checked: chart.getAxisVisible(3); }
     }
     Column {
+        visible: !root.fullScreen;
         anchors.right: parent.right;
         anchors.rightMargin: 3 * dpiScale;
         y: 50 * dpiScale;
@@ -101,18 +105,18 @@ Item {
 
     Item {
         id: inner;
-        x: 33 * dpiScale;
+        x: (root.fullScreen? 10 : 33) * dpiScale;
         y: 15 * dpiScale;
-        width: parent.width - x - 33 * dpiScale;
+        width: parent.width - x - (root.fullScreen? 10 : 33) * dpiScale;
         height: parent.height - y - 30 * dpiScale - parent.additionalHeight;
 
         Rectangle {
             x: 0;
-            y: 35 * dpiScale;
+            y: (root.fullScreen? 0 : 35) * dpiScale;
             width: parent.width
             radius: 4 * dpiScale;
-            color: Qt.lighter(styleButtonColor, 1.1)
-            height: parent.height - 35 * dpiScale;
+            color: root.fullScreen? "transparent" : Qt.lighter(styleButtonColor, 1.1)
+            height: parent.height - y;
             opacity: root.trimActive? 0.9 : 1.0;
 
             TimelineGyroChart {
@@ -120,8 +124,8 @@ Item {
                 visibleAreaLeft: root.visibleAreaLeft;
                 visibleAreaRight: root.visibleAreaRight;
                 anchors.fill: parent;
-                anchors.topMargin: 5 * dpiScale;
-                anchors.bottomMargin: 5 * dpiScale;
+                anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
                 opacity: root.trimActive? 0.9 : 1.0;
                 onAxisVisibleChanged: {
                     a0.checked = chart.getAxisVisible(0);
@@ -140,6 +144,7 @@ Item {
         // TODO QQuickPaintedItem
         Column {
             width: parent.width;
+            visible: !root.fullScreen;
             Row {
                 width: parent.width;
                 spacing: (100 * dpiScale) - children[0].width;
@@ -197,8 +202,10 @@ Item {
             anchors.fill: parent;
             hoverEnabled: true;
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton;
+            anchors.topMargin: (root.fullScreen? -8 : 0) * dpiScale;
+            anchors.bottomMargin: (root.fullScreen? -10 : 0) * dpiScale;
 
-            property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0});
+            property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0 });
 
             onMouseXChanged: {
                 if (pressed) {
@@ -297,7 +304,7 @@ Item {
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.checkNegativeInitialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, false, window.exportSettings.overrideFps);
+                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
                 }
             }
             Action {
@@ -306,7 +313,7 @@ Item {
                 text: qsTr("Guess IMU orientation here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos, window.sync.initialOffset * 1000, window.sync.checkNegativeInitialOffset, window.sync.syncSearchSize * 1000, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, false, true, window.exportSettings.overrideFps);
+                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation", window.exportSettings.overrideFps);
                 }
             }
             Action {
@@ -340,7 +347,7 @@ Item {
                                       "Are you sure you want to continue?");
                     messageBox(Modal.Warning, text, [
                         { text: qsTr("Yes"), clicked: function() {
-                             controller.estimate_rolling_shutter(pos, window.sync.timePerSyncpoint * 1000, window.sync.everyNthFrame, window.exportSettings.overrideFps);
+                            controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "estimate_rolling_shutter", window.exportSettings.overrideFps);
                         }},
                         { text: qsTr("No"), accent: true },
                     ]);
@@ -380,6 +387,8 @@ Item {
             TimelineRangeIndicator {
                 trimStart: root.trimStart;
                 trimEnd: root.trimEnd;
+                y: (root.fullScreen? 0 : 35) * dpiScale;
+                height: parent.height - y;
 
                 onActiveChanged: if (active) vid.setPlaybackRange(0, vid.duration);
                 onTrimStartAdjustmentChanged: {
@@ -446,6 +455,7 @@ Item {
             model: controller.offsets_model;
 
             TimelineSyncPoint {
+                y: (root.fullScreen? 0 : 35) * dpiScale;
                 timeline: root;
                 org_timestamp_us: timestamp_us;
                 position: (timestamp_us + offset_ms * 1000) / (root.durationMs * 1000.0); // TODO: Math.round?
@@ -464,8 +474,8 @@ Item {
                     controller.remove_offset(ts_us);
                 }
                 onZoomIn: (ts_us) => {
-                    const start_ts = ts_us - (window.sync.timePerSyncpoint * 1000000 / 2) * 1.05;
-                    const end_ts   = ts_us + (window.sync.timePerSyncpoint * 1000000 / 2) * 1.05;
+                    const start_ts = ts_us - (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
+                    const end_ts   = ts_us + (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
                     root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
                     root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
                     chart.setVScaleToVisibleArea();
@@ -477,6 +487,7 @@ Item {
             model: isCalibrator? controller.calib_model : [];
 
             TimelineSyncPoint {
+                y: (root.fullScreen? 0 : 35) * dpiScale;
                 timeline: root;
                 color: is_forced? "#11d144" : "#17b3f0"
                 org_timestamp_us: timestamp_us;
@@ -497,6 +508,7 @@ Item {
         QQC.ScrollBar {
             id: scrollbar;
             hoverEnabled: true;
+            visible: !root.fullScreen;
             active: hovered || pressed;
             orientation: Qt.Horizontal;
             size: root.visibleAreaRight - root.visibleAreaLeft;

@@ -15,8 +15,6 @@ Rectangle {
 
     x: parent.width * mapToVisibleArea(Math.max(0.0, trimStart + trimStartAdjustment));
     width: Math.max(10, parent.width * mapToVisibleArea(Math.min(1.0, trimEnd + trimEndAdjustment)) - x);
-    y: 35 * dpiScale;
-    height: parent.height - y;
     color: "#19ffffff";
     border.width: 2 * dpiScale;
     border.color: styleAccentColor;

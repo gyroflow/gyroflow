@@ -36,8 +36,8 @@ Modal {
     },
     { // Right column
         "Synchronization|synchronization": {
-            "Rough gyro offset":          ["rough_offset", "rough_offset_inv"],
-            "Sync search size":           ["search_size"],
+            "Rough gyro offset":          ["initial_offset", "initial_offset_inv"],
+            "Sync search size":           ["search_size" "calc_initial_fast"],
             "Max sync points":            ["max_sync_points"],
             "Advanced":                   ["every_nth_frame", "time_per_syncpoint", "of_method", "offset_method"]
         },

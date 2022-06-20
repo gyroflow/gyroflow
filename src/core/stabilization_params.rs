@@ -63,7 +63,7 @@ pub struct StabilizationParams {
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
 
-    pub sync_method: u32,
+    pub of_method: u32,
 
     pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>
 }
@@ -102,7 +102,7 @@ impl Default for StabilizationParams {
 
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
 
-            sync_method: 1,
+            of_method: 2,
 
             fps: 0.0,
             fps_scale: None,
@@ -150,7 +150,7 @@ impl StabilizationParams {
             background_mode:           self.background_mode,
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,
-            sync_method:               self.sync_method,
+            of_method:                 self.of_method,
             ..Default::default()
         };
     }

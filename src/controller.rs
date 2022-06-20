@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use gyroflow_core::stabilization;
 use itertools::Either;
 use qmetaobject::*;
 use nalgebra::Vector4;
@@ -17,6 +16,8 @@ use crate::core::StabilizationManager;
 #[cfg(feature = "opencv")]
 use crate::core::calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
+use crate::core::stabilization;
+use crate::core::synchronization;
 use crate::rendering;
 use crate::util;
 use crate::wrap_simple_method;
@@ -50,11 +51,9 @@ pub struct Controller {
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
-    set_sync_method: qt_method!(fn(&self, v: u32)),
-    offset_method: qt_property!(u32),
-    start_autosync: qt_method!(fn(&self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, every_nth_frame: u32, for_rs: bool, guess_orientation: bool, override_fps: f64)), // QString is workaround for now
+    set_of_method: qt_method!(fn(&self, v: u32)),
+    start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String, override_fps: f64)),
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
-    estimate_rolling_shutter: qt_method!(fn(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
@@ -212,7 +211,6 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Self {
-            offset_method: 0,
             preview_resolution: 720,
             ..Default::default()
         }
@@ -230,21 +228,32 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: QString, initial_offset: f64, check_negative_initial_offset: bool, sync_search_size: f64, sync_duration_ms: f64, mut every_nth_frame: u32, for_rs: bool, guess_orientation: bool, override_fps: f64) {
+    fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String, override_fps: f64) {
         rendering::clear_log();
 
-        if every_nth_frame <= 0 { every_nth_frame = 1; }
+        let sync_params = serde_json::from_str(&sync_params) as serde_json::Result<synchronization::SyncParams>;
+        if let Err(e) = sync_params {
+            self.sync_in_progress = false;
+            self.sync_in_progress_changed();
+            return self.error(QString::from("An error occured: %1"), QString::from(format!("JSON parse error: {}", e)), QString::default());
+        }
+        let mut sync_params = sync_params.unwrap();
 
-        let offset_method = self.offset_method;
+        sync_params.initial_offset     *= 1000.0; // s to ms
+        sync_params.time_per_syncpoint *= 1000.0; // s to ms
+        sync_params.search_size        *= 1000.0; // s to ms
+        sync_params.every_nth_frame     = sync_params.every_nth_frame.max(1);
+
+        let for_rs = mode == "estimate_rolling_shutter";
+
+        let every_nth_frame = sync_params.every_nth_frame;
+
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
 
-        let (size, method) = {
-            let params = self.stabilizer.params.read();
-            (params.size, params.sync_method)
-        };
+        let size = self.stabilizer.params.read().size;
 
-        let timestamps_fract: Vec<f64> = timestamps_fract.to_string().split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
+        let timestamps_fract: Vec<f64> = timestamps_fract.split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
         let progress = util::qt_queued_callback_mut(self, |this, (percent, ready, total): (f64, usize, usize)| {
             this.sync_in_progress = ready < total || percent < 1.0;
@@ -290,7 +299,7 @@ impl Controller {
 
         self.cancel_flag.store(false, SeqCst);
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, method, &timestamps_fract, initial_offset, check_negative_initial_offset, sync_search_size, sync_duration_ms, every_nth_frame, for_rs, guess_orientation, self.cancel_flag.clone()) {
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, &timestamps_fract, sync_params, mode, self.cancel_flag.clone()) {
             sync.on_progress(move |percent, ready, total| {
                 progress((percent, ready, total));
             });
@@ -345,7 +354,7 @@ impl Controller {
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         }
-                        sync.finished_feeding_frames(offset_method);
+                        sync.finished_feeding_frames();
                     }
                     Err(error) => {
                         err(("An error occured: %1".to_string(), error.to_string()));
@@ -682,10 +691,6 @@ impl Controller {
         self.compute_progress(id, 0.0);
     }
 
-    fn estimate_rolling_shutter(&mut self, timestamp_fract: f64, sync_duration_ms: f64, every_nth_frame: u32, override_fps: f64) {
-        self.start_autosync(QString::from(format!("{}", timestamp_fract)), 0.0, false, 11.0, sync_duration_ms, every_nth_frame, true, false, override_fps);
-    }
-
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
     }
@@ -831,7 +836,7 @@ impl Controller {
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
-    wrap_simple_method!(set_sync_method,        v: u32; recompute; chart_data_changed);
+    wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);

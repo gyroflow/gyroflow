@@ -438,7 +438,6 @@ Item {
 
     Column {
         id: tlcol;
-        visible: !root.fullScreen;
         width: parent.width;
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.bottom: parent.bottom;
@@ -446,6 +445,7 @@ Item {
         Item {
             width: parent.width;
             height: 40 * dpiScale;
+            visible: !root.fullScreen;
 
             Column {
                 enabled: vid.loaded;
@@ -540,21 +540,24 @@ Item {
             }
         }
 
-        Item { width: 1; height: 10 * dpiScale; }
+        Item { width: 1; height: 10 * dpiScale; visible: !root.fullScreen; }
 
         ResizablePanel {
             direction: ResizablePanel.HandleUp;
             width: parent.width;
             color: "transparent";
             hr.height: 30 * dpiScale;
+            hr.opacity: root.fullScreen? 0.1 : 1.0;
             additionalHeight: timeline.additionalHeight;
             defaultHeight: 165 * dpiScale;
+            minHeight: (root.fullScreen? 50 : 100) * dpiScale;
             implicitHeight: window.settings.value("bottomPanelSize", defaultHeight);
             onHeightChanged: window.settings.setValue("bottomPanelSize", height);
             Timeline {
                 id: timeline;
                 durationMs: vid.duration;
                 anchors.fill: parent;
+                fullScreen: root.fullScreen;
 
                 onTrimStartChanged: {
                     controller.set_trim_start(trimStart);

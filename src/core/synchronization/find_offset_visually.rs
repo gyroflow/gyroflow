@@ -5,8 +5,9 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ stabilization, stabilization::ComputeParams };
 use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use super::PoseEstimator;
+use super::SyncParams;
 
-pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEstimator, initial_offset: f64, search_size: f64, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEstimator, sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
@@ -100,11 +101,11 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEs
             }
         } else {
             // First search every 1 ms
-            let steps = search_size as usize;
+            let steps = sync_params.search_size as usize;
             let lowest = (0..steps)
                 .into_par_iter()
                 .map(|i| {
-                    let offs = initial_offset + (-(search_size / 2.0) + (i as f64));
+                    let offs = sync_params.initial_offset + (-(sync_params.search_size / 2.0) + (i as f64));
                     (offs, calculate_distance(offs, None))
                 })
                 .reduce_with(find_min)
@@ -124,10 +125,10 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEs
                 let middle_timestamp = (*from_ts as f64 + (to_ts - from_ts) as f64 / 2.0) / 1000.0;
 
                 // Only accept offsets that are within 90% of search size range
-                if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
+                if (lowest.0 - sync_params.initial_offset).abs() < sync_params.search_size * 0.9 {
                     final_offsets.push((middle_timestamp, lowest.0, lowest.1));
                 } else {
-                    log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
+                    log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - sync_params.initial_offset).abs(), sync_params.search_size * 0.9);
                 }
             }
         }

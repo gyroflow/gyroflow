@@ -372,7 +372,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut ret = None;
         let (show, method) = {
             let params = self.params.read();
-            (params.show_optical_flow, params.sync_method)
+            (params.show_optical_flow, params.of_method)
         };
         if show {
             let num = if method == 2 { 1 } else { 3 };
@@ -516,7 +516,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.invalidate_smoothing(); }
     pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.invalidate_smoothing(); }
 
-    pub fn set_sync_method(&self, v: u32) { self.params.write().sync_method = v; self.pose_estimator.clear(); }
+    pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }

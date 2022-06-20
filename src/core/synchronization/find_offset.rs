@@ -6,10 +6,11 @@ use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use std::collections::BTreeMap;
 use crate::filtering::Lowpass;
 use crate::stabilization::ComputeParams;
+use super::SyncParams;
 
 use crate::gyro_source::TimeIMU;
 
-pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, initial_offset: f64, search_size: f64, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let mut offsets = Vec::new();
     let gyro = &params.gyro;
     let ranges_len = ranges.len() as f64;
@@ -22,8 +23,8 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &B
             if !of_item.is_empty() {
                 let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
                 let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu.iter().filter_map(|x| {
-                    let ts = x.timestamp_ms + initial_offset;
-                    if ts >= of_item[0].timestamp_ms - search_size && ts <= last_of_timestamp + search_size {
+                    let ts = x.timestamp_ms + sync_params.initial_offset;
+                    if ts >= of_item[0].timestamp_ms - sync_params.search_size && ts <= last_of_timestamp + sync_params.search_size {
                         Some(x.clone())
                     } else {
                         None
@@ -45,11 +46,11 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &B
                 let find_min = |a: (f64, f64), b: (f64, f64)| -> (f64, f64) { if a.1 < b.1 { a } else { b } };
 
                 // First search every 1 ms
-                let steps = search_size as usize * 2;
+                let steps = sync_params.search_size as usize * 2;
                 let lowest = (0..steps)
                     .into_par_iter()
                     .map(|i| {
-                        let offs = initial_offset - search_size + (i as f64);
+                        let offs = sync_params.initial_offset - sync_params.search_size + (i as f64);
                         (offs, calculate_cost(offs, &of_item, &gyro_bintree))
                     })
                     .reduce_with(find_min)
@@ -71,10 +72,10 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &B
                     let middle_timestamp = (*from_ts as f64 + (to_ts - from_ts) as f64 / 2.0) / 1000.0;
 
                     // Only accept offsets that are within 90% of search size range
-                    if (lowest.0 - initial_offset).abs() < search_size * 0.9 {
+                    if (lowest.0 - sync_params.initial_offset).abs() < sync_params.search_size * 0.9 {
                         offsets.push((middle_timestamp, lowest.0, lowest.1));
                     } else {
-                        log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - initial_offset).abs(), search_size * 0.9);
+                        log::warn!("Sync point out of acceptable range {} < {}", (lowest.0 - sync_params.initial_offset).abs(), sync_params.search_size * 0.9);
                     }
                 }
             }

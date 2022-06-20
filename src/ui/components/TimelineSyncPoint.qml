@@ -15,9 +15,8 @@ Rectangle {
     id: root;
 
     x: timeline.mapToVisibleArea(position) * (parent.width);
-    y: 35 * dpiScale;
     radius: width;
-    height: parent.height - 25 * dpiScale;
+    height: parent.height - y + 10 * dpiScale;
     width: 1 * dpiScale;
     color: "#dcae24";
     visible: x >= 0 && x <= parent.width;
@@ -66,7 +65,7 @@ Rectangle {
                     mouse.accepted = false;
                 }
             }
-            onDoubleClicked: root.zoomIn(root.org_timestamp_us + root.value * 1000.0); 
+            onDoubleClicked: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
             acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
         BasicText {

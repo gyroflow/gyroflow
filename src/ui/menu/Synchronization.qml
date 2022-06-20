@@ -29,33 +29,32 @@ MenuItem {
         //property alias everyNthFrame: everyNthFrame.value;
     }
 
-    property alias timePerSyncpoint: timePerSyncpoint.value;
-    property alias initialOffset: initialOffset.value;
-    property alias checkNegativeInitialOffset: checkNegativeInitialOffset.checked;
-    property alias syncSearchSize: syncSearchSize.value;
-    property alias everyNthFrame: everyNthFrame.value;
+    property alias timePerSyncpoint: timePerSyncpoint;
+    property alias everyNthFrame: everyNthFrame;
 
     function loadGyroflow(obj) {
         const o = obj.synchronization || { };
         if (o && Object.keys(o).length > 0) {
-            if (o.hasOwnProperty("rough_offset"))       sync.initialOffset                 = +o.rough_offset;
-            if (o.hasOwnProperty("rough_offset_inv"))   sync.checkNegativeInitialOffset    = !!o.rough_offset_inv;
-            if (o.hasOwnProperty("search_size"))        sync.syncSearchSize                = +o.search_size;
-            if (o.hasOwnProperty("max_sync_points"))    maxSyncPoints.value                = +o.max_sync_points;
-            if (o.hasOwnProperty("every_nth_frame"))    sync.everyNthFrame                 = +o.every_nth_frame;
-            if (o.hasOwnProperty("time_per_syncpoint")) sync.timePerSyncpoint              = +o.time_per_syncpoint;
-            if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex            = +o.of_method;
-            if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex          = +o.offset_method;
+            if (o.hasOwnProperty("initial_offset"))     initialOffset.value                 = +o.initial_offset;
+            if (o.hasOwnProperty("initial_offset_inv")) checkNegativeInitialOffset.checked  = !!o.initial_offset_inv;
+            if (o.hasOwnProperty("search_size"))        syncSearchSize.value                = +o.search_size;
+            if (o.hasOwnProperty("calc_initial_fast"))  calculateInitialOffsetFirst.checked = !!o.calc_initial_fast;
+            if (o.hasOwnProperty("max_sync_points"))    maxSyncPoints.value                 = +o.max_sync_points;
+            if (o.hasOwnProperty("every_nth_frame"))    everyNthFrame.value                 = +o.every_nth_frame;
+            if (o.hasOwnProperty("time_per_syncpoint")) timePerSyncpoint.value              = +o.time_per_syncpoint;
+            if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
+            if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
         }
     }
     function getSettings() {
         return {
-            "rough_offset":       sync.initialOffset,
-            "rough_offset_inv":   sync.checkNegativeInitialOffset,
-            "search_size":        sync.syncSearchSize,
+            "initial_offset":     initialOffset.value,
+            "initial_offset_inv": checkNegativeInitialOffset.checked,
+            "search_size":        syncSearchSize.value,
+            "calc_initial_fast":  calculateInitialOffsetFirst.checked,
             "max_sync_points":    maxSyncPoints.value,
-            "every_nth_frame":    sync.everyNthFrame,
-            "time_per_syncpoint": sync.timePerSyncpoint,
+            "every_nth_frame":    everyNthFrame.value,
+            "time_per_syncpoint": timePerSyncpoint.value,
             "of_method":          syncMethod.currentIndex,
             "offset_method":      offsetMethod.currentIndex
         };
@@ -81,7 +80,7 @@ MenuItem {
                 ranges.push(pos);
             }
 
-            controller.start_autosync(ranges.join(";"), initialOffset.value * 1000, window.sync.checkNegativeInitialOffset, syncSearchSize.value * 1000, timePerSyncpoint.value * 1000, everyNthFrame.value, false, false, window.exportSettings.overrideFps);
+            controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
         }
         onClicked: {
             if (!controller.lens_loaded) {
@@ -133,12 +132,23 @@ MenuItem {
 
         NumberField {
             id: syncSearchSize;
-            width: parent.width;
+            width: parent.width - (calculateInitialOffsetFirst.visible? calculateInitialOffsetFirst.width : 0);
             height: 25 * dpiScale;
             precision: 1;
             value: 5;
             defaultValue: 5;
             unit: qsTr("s");
+            onValueChanged: if (calculateInitialOffsetFirst.visible) calculateInitialOffsetFirst.checked = value > 10;
+        }
+        CheckBox {
+            id: calculateInitialOffsetFirst;
+            anchors.left: syncSearchSize.right;
+            anchors.leftMargin: 5 * dpiScale;
+            anchors.verticalCenter: parent.verticalCenter;
+            contentItem.visible: false;
+            scale: 0.7;
+            visible: offsetMethod.currentIndex > 0;
+            tooltip: qsTr("Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.");
         }
     }
     Label {
@@ -199,7 +209,7 @@ MenuItem {
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
-                onCurrentIndexChanged: controller.set_sync_method(currentIndex);
+                onCurrentIndexChanged: controller.set_of_method(currentIndex);
                 Component.onCompleted: currentIndexChanged();
             }
         }
@@ -212,8 +222,6 @@ MenuItem {
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
-                onCurrentIndexChanged: controller.offset_method = currentIndex;
-                Component.onCompleted: currentIndexChanged();
                 property var tooltips: ([
                     qsTr("Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.\nThen try to match these angles to gyroscope angles."),
                     qsTr("Undistort optical flow points using gyro and candidate offset.\nThen calculate lengths of the optical flow lines.\nResulting offset is the one where lines were the shortest, meaning the video was moving the least visually."),

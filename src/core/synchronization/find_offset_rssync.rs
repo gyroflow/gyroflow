@@ -3,6 +3,7 @@
 
 use super::OpticalFlowPoints;
 use super::FrameResult;
+use super::SyncParams;
 use crate::gyro_source::{ Quat64, TimeQuat, GyroSource };
 use crate::stabilization::{ undistort_points_with_params, ComputeParams };
 use nalgebra::{ Matrix3, Vector3 };
@@ -20,8 +21,7 @@ pub struct FindOffsetsRssync<'a> {
     gyro_source: &'a GyroSource,
     frame_readout_time: f64,
     sync_points: Vec::<(i64, i64)>,
-    initial_offset: f64,
-    search_size: f64,
+    sync_params: &'a SyncParams,
     is_guess_orient: Arc<AtomicBool>,
 
     current_sync_point: Arc<AtomicUsize>,
@@ -32,14 +32,11 @@ impl FindOffsetsRssync<'_> {
     pub fn new<'a, F: Fn(f64) + Sync + 'a>(
         ranges: &'a [(i64, i64)],
         sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>,
-        initial_offset: f64,
-        search_size: f64,
+        sync_params: &'a SyncParams,
         params: &'a ComputeParams,
         progress_cb: F,
         cancel_flag: Arc<AtomicBool>,
     ) -> FindOffsetsRssync<'a> {
-        // Vec<(timestamp, offset, cost)>
-
         let matched_points = Self::collect_points(sync_results, ranges);
 
         let mut frame_readout_time = params.frame_readout_time;
@@ -53,8 +50,7 @@ impl FindOffsetsRssync<'_> {
             gyro_source: &params.gyro,
             frame_readout_time: frame_readout_time,
             sync_points: Vec::new(),
-            initial_offset,
-            search_size,
+            sync_params,
             is_guess_orient: Arc::new(AtomicBool::new(false)),
             current_sync_point: Arc::new(AtomicUsize::new(0)),
             current_orientation: Arc::new(AtomicUsize::new(0))
@@ -119,7 +115,7 @@ impl FindOffsetsRssync<'_> {
         ret
     }
 
-    pub fn full_sync(&mut self) -> Vec<(f64, f64, f64)> {
+    pub fn full_sync(&mut self) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
         self.is_guess_orient.store(false, SeqCst);
 
         let mut offsets = Vec::new();
@@ -128,8 +124,8 @@ impl FindOffsetsRssync<'_> {
         for (from_ts, to_ts) in &self.sync_points {
 
             let presync_step = 3.0;
-            let presync_radius = self.search_size;
-            let initial_delay = -self.initial_offset;
+            let presync_radius = self.sync_params.search_size;
+            let initial_delay = -self.sync_params.initial_offset;
 
             if let Some(delay) = self.sync.full_sync(
                 initial_delay / 1000.0,
@@ -172,11 +168,11 @@ impl FindOffsetsRssync<'_> {
 
             let total_cost: f64 = self.sync_points.iter().map(|(from_ts, to_ts)| {
                 self.sync.pre_sync(
-                    -self.initial_offset / 1000.0,
+                    -self.sync_params.initial_offset / 1000.0,
                     *from_ts,
                     *to_ts,
                     3.0 / 1000.0,
-                    self.search_size / 1000.0
+                    self.sync_params.search_size / 1000.0
                 ).unwrap_or((0.0,0.0))
             }).map(|v| {v.0}).sum();
 
