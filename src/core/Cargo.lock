@@ -1132,9 +1132,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c6392766afd7964e2531940894cffe4bd8d7d17dbc3c1c4857040fd4b33bdb3"
+checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.1",
@@ -2350,7 +2350,7 @@ dependencies = [
  "serde",
  "serde_json",
  "slog",
- "time 0.3.10",
+ "time 0.3.11",
 ]
 
 [[package]]
@@ -2363,7 +2363,7 @@ dependencies = [
  "slog",
  "term",
  "thread_local",
- "time 0.3.10",
+ "time 0.3.11",
 ]
 
 [[package]]
@@ -2451,7 +2451,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#17ec557f84407bb7d81c46728a7d7eb3566c428b"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#8f2d3b582f02260e2d37c664f7524dd39be60d85"
 dependencies = [
  "argh",
  "byteorder",
@@ -2541,9 +2541,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.10"
+version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82501a4c1c0330d640a6e176a3d6a204f5ec5237aca029029d21864a902e27b0"
+checksum = "72c91f41dcb2f096c05f0873d667dceec1087ce5bcf984ec8ffb19acddbb3217"
 dependencies = [
  "itoa 1.0.2",
  "libc",
@@ -2716,7 +2716,7 @@ checksum = "9c97e489d8f836838d497091de568cf16b117486d529ec5579233521065bd5e4"
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -2736,7 +2736,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -2760,7 +2760,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "android-properties",
  "arrayvec 0.7.2",
@@ -2798,7 +2798,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "bitflags",
 ]

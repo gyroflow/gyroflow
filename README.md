@@ -91,7 +91,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] iOS apps: `Sensor Logger`, [`G-Field Recorder`](https://apps.apple.com/at/app/g-field-recorder/id1154585693), [`Gyro`](https://apps.apple.com/us/app/gyro-record-device-motion-data/id1161532981)
 - [x] Android apps: [`Sensor Logger`](https://play.google.com/store/apps/details?id=com.kelvin.sensorapp&hl=de_AT&gl=US), [`Sensor Record`](https://play.google.com/store/apps/details?id=de.martingolpashin.sensor_record)
 - [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/logging/gcsv/)
-- [x] ArduPilot VideoStabilization logging (*.log)
+- [x] ArduPilot logs (*.bin, *.log)
 
 ### Info for cameras not on the list
 

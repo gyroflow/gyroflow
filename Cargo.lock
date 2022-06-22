@@ -1547,9 +1547,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c6392766afd7964e2531940894cffe4bd8d7d17dbc3c1c4857040fd4b33bdb3"
+checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.1",
@@ -2999,7 +2999,7 @@ checksum = "48dfff04aade74dd495b007c831cd6f4e0cee19c344dd9dc0884c0289b70a786"
 dependencies = [
  "log",
  "termcolor",
- "time 0.3.10",
+ "time 0.3.11",
 ]
 
 [[package]]
@@ -3035,7 +3035,7 @@ dependencies = [
  "serde",
  "serde_json",
  "slog",
- "time 0.3.10",
+ "time 0.3.11",
 ]
 
 [[package]]
@@ -3048,7 +3048,7 @@ dependencies = [
  "slog",
  "term",
  "thread_local",
- "time 0.3.10",
+ "time 0.3.11",
 ]
 
 [[package]]
@@ -3152,7 +3152,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git#17ec557f84407bb7d81c46728a7d7eb3566c428b"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git#8f2d3b582f02260e2d37c664f7524dd39be60d85"
 dependencies = [
  "argh",
  "byteorder",
@@ -3256,9 +3256,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.10"
+version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82501a4c1c0330d640a6e176a3d6a204f5ec5237aca029029d21864a902e27b0"
+checksum = "72c91f41dcb2f096c05f0873d667dceec1087ce5bcf984ec8ffb19acddbb3217"
 dependencies = [
  "itoa 1.0.2",
  "libc",
@@ -3581,7 +3581,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3601,7 +3601,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3625,7 +3625,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "android-properties",
  "arrayvec 0.7.2",
@@ -3663,7 +3663,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.12.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#f27a9788fd2d45334eaba781f30760fd05fdb9a9"
+source = "git+https://github.com/gfx-rs/wgpu.git#a9f1b4f8e0ef3c7a05f9909736bb387a60078d14"
 dependencies = [
  "bitflags",
 ]
@@ -3886,9 +3886,9 @@ dependencies = [
 
 [[package]]
 name = "zvariant"
-version = "3.3.1"
+version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d591e3f579e495afb10804fc2aa3539179da4349c5336209b2dab5bb383623cc"
+checksum = "f5153c0515dd394aa6ba229d2473f5971fede96d158e275ce1b99251fb34f2e3"
 dependencies = [
  "byteorder",
  "enumflags2",
@@ -3900,9 +3900,9 @@ dependencies = [
 
 [[package]]
 name = "zvariant_derive"
-version = "3.3.1"
+version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1243857b54e900ff11d850b0703cc0ae041f2367fc4f6c89a791a4e301dd47a2"
+checksum = "f97c18b59344f5a7547d7db12c032868601790ad64e4a9bf043766849007614c"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
