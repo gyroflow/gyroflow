@@ -994,17 +994,17 @@ Do you want to submit your profile?</source>
       <translation>固定ズーム</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using essential matrix</source>
       <translation>マトリックスを使用</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using visual features</source>
       <translation>視覚的特徴を使用</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>rs-sync</source>
       <translation>ローリングシャッター同期</translation>
     </message>
@@ -1567,99 +1567,104 @@ Modify velocity factor until you get the desired values (recommended less than 2
       <translation>同期</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="66"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="65"/>
       <source>Auto sync</source>
       <translation>自動同期</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="70"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="69"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>モーションデータが読み込まれていないため、同期できません。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>レンズのプロファイルが読み込まれないため正しく同期できません。続行してもよろしいですか？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="89"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
       <source>Yes</source>
       <translation>はい</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="91"/>
       <source>No</source>
       <translation>いいえ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="103"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="102"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>このファイルはビデオ映像と同期されたモーションデータを使用しているため、同期ポイントを追加する必要はありません。同期ポイントを追加するとかえってブレが発生する場合があります。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="108"/>
       <source>Rough gyro offset</source>
       <translation>おおまかなジャイロデータとのオフセット</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="116"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
       <source>s</source>
       <translation>秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="126"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="125"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>正と負の両方のオフセットを分析します。
 計算時間が2倍になりますので、最初の点だけを確認し、オフセットが分かったらチェックを外してください。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="131"/>
       <source>Sync search size</source>
       <translation>同期点を検索する範囲</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="151"/>
+      <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
+      <translation>最初に初期オフセットを計算し(マトリックスを使用)、より遅いがより正確な rs-sync メソッドを使用してリファインします。</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="156"/>
       <source>Max sync points</source>
       <translation>同期ポイントの最大数</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="172"/>
       <source>Analyze every n-th frame</source>
       <translation>n番目のフレーム毎に解析</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
       <source>Time to analyze per sync point</source>
       <translation>同期ポイントごとの解析時間</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="200"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZEはより精度が上がりますがOpenCVより「かなり遅い」です。
 OpenCVが良い結果を得られない場合にのみ使用してください。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Optical flow method</source>
       <translation>オプティカルフロー方法</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
       <source>Offset calculation method</source>
       <translation>オフセット計算方法</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="226"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>オプティカルフローからカメラの3軸の回転角度を求めます。
 次にこの角度をジャイロスコープの角度と一致する場所を検索します。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="227"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1668,29 +1673,29 @@ Resulting offset is the one where lines were the shortest, meaning the video was
 結果として得られるオフセットは、線が最も短いオフセットです。つまり、ビデオの視覚的な動きが最も少なくなります。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="228"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>ローリングシャッターのあるビデオをジャイロに同期させるアルゴリズムです。
 同期する前に、適切なローリングシャッター値を設定してください。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="235"/>
       <source>Low pass filter</source>
       <translation>ローパスフィルター</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="229"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="253"/>
       <source>Show detected features</source>
       <translation>検出された特徴を表示</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Show optical flow</source>
       <translation>オプティカルフローを表示</translation>
     </message>
@@ -1815,22 +1820,22 @@ Make sure you have proper rolling shutter value set before syncing.</source>
   <context>
     <name>Timeline</name>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="297"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="304"/>
       <source>Auto sync here</source>
       <translation>ここで自動同期</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="315"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="313"/>
       <source>Add manual sync point here</source>
       <translation>ここに手動同期ポイントを追加</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="334"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate rolling shutter here</source>
       <translation>ここでローリングシャッターを推定する</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="338"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1843,104 +1848,104 @@ Are you sure you want to continue?</source>
 本当に続けますか？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="342"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="349"/>
       <source>Yes</source>
       <translation>はい</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
       <source>No</source>
       <translation>いいえ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="287"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Add calibration point</source>
       <translation>キャリブレーションポイントを追加</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="332"/>
       <source>Guess IMU orientation here</source>
       <translation>ジャイロの向きを推測する</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="359"/>
       <source>Estimate gyro bias here</source>
       <translation>ジャイロ偏位の推定値</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
       <source>Delete all sync points</source>
       <translation>すべての同期ポイントを削除</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="370"/>
       <source>Chart display mode</source>
       <translation>グラフの表示を変更</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="371"/>
       <source>Gyroscope</source>
       <translation>ジャイロ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="365"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="372"/>
       <source>Accelerometer</source>
       <translation>加速度センサー</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="366"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="373"/>
       <source>Magnetometer</source>
       <translation>地磁気センサー</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="367"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="374"/>
       <source>Quaternions</source>
       <translation>四元数</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="485"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="496"/>
       <source>px</source>
       <translation>ピクセル</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Control+Shift+Scroll</source>
       <translation>Ctrl + Shift + スクロールホイール</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Command+Scroll</source>
       <translation>Command+スクロールホイール</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+スクロールホイール</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="595"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 で水平方向、%2 で垂直方向にズーム、%3 でタイムラインの移動、ダブルクリックでズームがリセットされます。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="596"/>
       <source>Scroll</source>
       <translation>スクロールホイール</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Alt+Scroll</source>
       <translation>Alt+スクロールホイール</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="537"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="544"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="463"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="549"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="556"/>
       <source>ms</source>
       <translation>ミリ秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="564"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
       <source>Save</source>
       <translation>保存</translation>
     </message>
@@ -1948,22 +1953,22 @@ Are you sure you want to continue?</source>
   <context>
     <name>TimelineSyncPoint</name>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="85"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="84"/>
       <source>Edit offset</source>
       <translation>オフセットを編集</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete sync point</source>
       <translation>同期ポイントを削除</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete calibration point</source>
       <translation>キャリブレーションポイントを削除</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="95"/>
       <source>Zoom in</source>
       <translation>拡大</translation>
     </message>

@@ -993,17 +993,17 @@ Do you want to submit your profile?</source>
       <translation>静态缩放</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using essential matrix</source>
       <translation>使用本质矩阵</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using visual features</source>
       <translation>使用视觉特征</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>rs-sync</source>
       <translation>卷帘快门同步</translation>
     </message>
@@ -1566,98 +1566,103 @@ Pitch: %1, Yaw: %2, Roll: %3.
       <translation>同步</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="66"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="65"/>
       <source>Auto sync</source>
       <translation>自动同步</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="70"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="69"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>未加载运动数据，无法同步。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>镜头配置文件并未加载，同步很可能会产生错误的结果。您确定要继续吗？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="89"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="91"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="103"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="102"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>此文件使用同步的运动数据，并不需要额外的同步点，强行植入可能会使输出结果变得更糟。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="108"/>
       <source>Rough gyro offset</source>
       <translation>陀螺大致偏移</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="116"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
       <source>s</source>
       <translation>秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="126"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="125"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>分析正负偏移。
 这将使计算时间翻倍，所以请只在初始同步时勾选，并在您知道确切偏移量侯取消勾选。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="131"/>
       <source>Sync search size</source>
       <translation>同步搜索尺寸</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="151"/>
+      <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
+      <translation>首先计算初始偏移量 (使用本质矩阵方法)，然后使用较慢但更精确的卷帘快门同步法进行改善。</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="156"/>
       <source>Max sync points</source>
       <translation>最大同步点数</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="172"/>
       <source>Analyze every n-th frame</source>
       <translation>每 N 帧执行分析</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
       <source>Time to analyze per sync point</source>
       <translation>每个同步点分析时长</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="200"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZE 方法或许更精准但明显慢于 OpenCV。请仅在 OpenCV 并未产生好结果的情况下使用。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Optical flow method</source>
       <translation>光流方式</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
       <source>Offset calculation method</source>
       <translation>偏移计算方法</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="226"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>根据光学流量计算相机转换矩阵以获得相机的旋转角度。
 然后尝试将这些角度与陀螺仪角度匹配。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="227"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1666,29 +1671,29 @@ Resulting offset is the one where lines were the shortest, meaning the video was
 最短的线即是结果偏移量，这意味着在此处视频在视觉上的位移是最小的。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="228"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>卷帘快门视频到陀螺仪同步算法。
 在同步之前请确保你已设置了正确的卷帘快门值。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="235"/>
       <source>Low pass filter</source>
       <translation>低通滤波器</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="229"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="253"/>
       <source>Show detected features</source>
       <translation>显示检测到的特性</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Show optical flow</source>
       <translation>显示光学流量</translation>
     </message>
@@ -1813,22 +1818,22 @@ Make sure you have proper rolling shutter value set before syncing.</source>
   <context>
     <name>Timeline</name>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="297"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="304"/>
       <source>Auto sync here</source>
       <translation>在此自动同步</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="315"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="313"/>
       <source>Add manual sync point here</source>
       <translation>在此处添加手动同步点</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="334"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate rolling shutter here</source>
       <translation>在此估算卷帘快门</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="338"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1841,104 +1846,104 @@ Are you sure you want to continue?</source>
 您确定要继续吗？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="342"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="349"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="287"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Add calibration point</source>
       <translation>添加校准点</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="332"/>
       <source>Guess IMU orientation here</source>
       <translation>在此推测 IMU 方向</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="359"/>
       <source>Estimate gyro bias here</source>
       <translation>在此估算陀螺仪偏差</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
       <source>Delete all sync points</source>
       <translation>删除全部同步点</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="370"/>
       <source>Chart display mode</source>
       <translation>图表显示模式</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="371"/>
       <source>Gyroscope</source>
       <translation>陀螺仪</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="365"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="372"/>
       <source>Accelerometer</source>
       <translation>加速度计</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="366"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="373"/>
       <source>Magnetometer</source>
       <translation>磁力计</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="367"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="374"/>
       <source>Quaternions</source>
       <translation>四元数</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="485"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="496"/>
       <source>px</source>
       <translation>像素 (px)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Control+Shift+Scroll</source>
       <translation>命令+Shift+滚轮</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Command+Scroll</source>
       <translation>命令+滚轮</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+滚轮</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="595"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 水平缩放，%2 垂直缩放，%3 平铺，双击重置缩放</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="596"/>
       <source>Scroll</source>
       <translation>滑轮中键</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Alt+Scroll</source>
       <translation>Alt+滚轮</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="537"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="544"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="463"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="549"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="556"/>
       <source>ms</source>
       <translation>毫秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="564"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
       <source>Save</source>
       <translation>保存</translation>
     </message>
@@ -1946,22 +1951,22 @@ Are you sure you want to continue?</source>
   <context>
     <name>TimelineSyncPoint</name>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="85"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="84"/>
       <source>Edit offset</source>
       <translation>编辑偏移</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete sync point</source>
       <translation>删除同步点</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete calibration point</source>
       <translation>删除校准点</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="95"/>
       <source>Zoom in</source>
       <translation>放大</translation>
     </message>

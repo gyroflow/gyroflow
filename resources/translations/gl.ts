@@ -992,17 +992,17 @@ Quere envialo seu perfil?</translation>
       <translation>Zoom estático</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using essential matrix</source>
       <translation>Usando a matriz esencial</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using visual features</source>
       <translation>Usando características visuais</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>rs-sync</source>
       <translation type="unfinished">rs-sync</translation>
     </message>
@@ -1564,98 +1564,103 @@ Modifique o factor de velocidade ata obter os valores desexados (recomendado a m
       <translation>Sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="66"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="65"/>
       <source>Auto sync</source>
       <translation>Sincronización automática</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="70"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="69"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Non hai datos de movemento cargados, non se pode sincronizar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>O perfil de lente non está cargado, a sincronización probablemente dará resultados erróneos. Está seguro de que queres continuar?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="89"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
       <source>Yes</source>
       <translation>Sí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="91"/>
       <source>No</source>
       <translation>Non</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="103"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="102"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Este ficheiro usa datos de movemento sincronizados, non son necesarios puntos de sincronización adicionais e poden empeorar a saída.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="108"/>
       <source>Rough gyro offset</source>
       <translation>Desfase de punto do gyro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="116"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="126"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="125"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation type="unfinished">Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="131"/>
       <source>Sync search size</source>
       <translation>Tamaño da búsqueda da sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="151"/>
+      <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
+      <translation type="unfinished">Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="156"/>
       <source>Max sync points</source>
       <translation>Puntos de sincronización máxima</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="172"/>
       <source>Analyze every n-th frame</source>
       <translation>Analizar cada cadro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
       <source>Time to analyze per sync point</source>
       <translation>Tiempo para analizar por punto de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="200"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>O método de Akaze pode ser máis preciso, pero é significativamente máis lento que o OpenCV. Use só se OpenCV non&apos; produce bos resultados</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Optical flow method</source>
       <translation>Método de fluxo óptico</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
       <source>Offset calculation method</source>
       <translation>Método de cálculo de compensación</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="226"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Calcule a matriz de transformación da cámara desde o fluxo óptico para obter os ángulos de rotación da cámara.
 A continuación, intenta sincroonizar estes ángulos cos ángulos do xiroscopio.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="227"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1664,29 +1669,29 @@ A continuación, calcula a lonxitude das liñas de fluxo óptico.
 O desprazamento resultante é o que ten liñas máis curtas, significa que o vídeo menos se estaba movendo visualmente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="228"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation type="unfinished">Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="235"/>
       <source>Low pass filter</source>
       <translation>Filtro paso baixo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="229"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="253"/>
       <source>Show detected features</source>
       <translation>Mostrar características detectadas</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Show optical flow</source>
       <translation>Mostrar fluxo óptico</translation>
     </message>
@@ -1811,22 +1816,22 @@ Make sure you have proper rolling shutter value set before syncing.</translation
   <context>
     <name>Timeline</name>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="297"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="304"/>
       <source>Auto sync here</source>
       <translation>Sincronización automática aquí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="315"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="313"/>
       <source>Add manual sync point here</source>
       <translation>Engadir punto de sincronización manual aquí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="334"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate rolling shutter here</source>
       <translation>Estimar o obturador de rodaxe aquí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="338"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1839,104 +1844,104 @@ Esta característica é experimental, os resultados poden non ser correctos.
 Está seguro de que quere continuar?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="342"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="349"/>
       <source>Yes</source>
       <translation>Sí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
       <source>No</source>
       <translation>Non</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="287"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Add calibration point</source>
       <translation>Engadir punto de calibración</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="332"/>
       <source>Guess IMU orientation here</source>
       <translation type="unfinished">Guess IMU orientation here</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="359"/>
       <source>Estimate gyro bias here</source>
       <translation>Estimar o desvío do xiro aquí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
       <source>Delete all sync points</source>
       <translation>Borrar tódolos puntos de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="370"/>
       <source>Chart display mode</source>
       <translation>Modo de visualización de gráficos</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="371"/>
       <source>Gyroscope</source>
       <translation>Xiroscopio</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="365"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="372"/>
       <source>Accelerometer</source>
       <translation>Acelerómetro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="366"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="373"/>
       <source>Magnetometer</source>
       <translation>Magnetómetro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="367"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="374"/>
       <source>Quaternions</source>
       <translation>Cuaternario</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="485"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="496"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Control+Shift+Scroll</source>
       <translation>Control+Shift+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Command+Scroll</source>
       <translation>Comando+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="595"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 Para zoom horizontal, %2 para zoom vertical, %3 para facer unha panorámica, dobre clic para restablecer o zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="596"/>
       <source>Scroll</source>
       <translation>Desprazamento</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Alt+Scroll</source>
       <translation>Alt+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="537"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="544"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="463"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="549"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="556"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="564"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
       <source>Save</source>
       <translation>Gardar</translation>
     </message>
@@ -1944,22 +1949,22 @@ Está seguro de que quere continuar?</translation>
   <context>
     <name>TimelineSyncPoint</name>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="85"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="84"/>
       <source>Edit offset</source>
       <translation>Editar desprazamento</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete sync point</source>
       <translation>Borrar punto de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete calibration point</source>
       <translation>Borrar punto de calibración</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="95"/>
       <source>Zoom in</source>
       <translation>Achegar</translation>
     </message>

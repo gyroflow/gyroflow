@@ -80,12 +80,12 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Устройство для обработки видео</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="227"/>
       <source>CPU only</source>
-      <translation type="unfinished">CPU only</translation>
+      <translation>Только процессор</translation>
     </message>
   </context>
   <context>
@@ -263,18 +263,18 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/App.qml" line="446"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
-      <translation type="unfinished">GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
-If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</translation>
+      <translation>Энкодер GPU не смог инициализироваться, и рендеринг выполняется на CPU, что значительно медленнее.
+Если у вас современное видеокарта и установлены последние GPU драйверы, сообщите об этом на GitHub, добавив файл gyroflow.log.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="449"/>
       <source>Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.</translation>
+      <translation>Ваша видеокарта не поддерживает HEVC/x265 кодировку, попробуйте использовать x264 или отключите GPU кодировку в настройках экспорта.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="452"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
+      <translation>Убедитесь, что выходное расширение поддерживает выбранный кодек. ".mov" должен работать в большинстве случаев.</translation>
     </message>
   </context>
   <context>
@@ -473,7 +473,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="394"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>с</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="399"/>
@@ -493,7 +493,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="413"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Устройство для рендеринга</translation>
     </message>
   </context>
   <context>
@@ -874,12 +874,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Сохранить</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="197"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Добавить в очередь рендера</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="198"/>
@@ -993,17 +993,17 @@ Do you want to submit your profile?</source>
       <translation>Статический зум</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using essential matrix</source>
       <translation>Использование основной матрицы</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>Using visual features</source>
       <translation>Использование визуальных особенностей</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1199,7 +1199,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Расположение гироскопа</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
@@ -1214,7 +1214,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Диапазон триммирования</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
@@ -1224,12 +1224,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Синхронизация</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Примерное смещение гироскопа</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
@@ -1239,7 +1239,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Максимальное кол-во точек синхронизации</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
@@ -1269,7 +1269,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Увеличение</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -1525,12 +1525,12 @@ Pitch: %1, Yaw: %2, Roll: %3.
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="424"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
@@ -1566,98 +1566,103 @@ Pitch: %1, Yaw: %2, Roll: %3.
       <translation>Синхронизация</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="66"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="65"/>
       <source>Auto sync</source>
       <translation>Автосинхронизация</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="70"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="69"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Данные о движении не загружены, синхронизация невозможна.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Профиль объектива не загружен, синхронизация, скорее всего, даст неверные результаты. Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="89"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="88"/>
       <source>Yes</source>
       <translation>Да</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="92"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="91"/>
       <source>No</source>
       <translation>Нет</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="103"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="102"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Этот файл использует синхронизированные данные движения, дополнительные точки синхронизации не нужны и могут ухудшить результат.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="108"/>
       <source>Rough gyro offset</source>
       <translation>Примерное смещение</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="117"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="116"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
       <source>s</source>
       <translation>с</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="126"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="125"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Анализировать как положительное, так и отрицательное смещение.
 Это удваивает время расчета, поэтому установите этот флажок только для начальной точки и снимите его после того, как будет известно смещение.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="131"/>
       <source>Sync search size</source>
       <translation>Диапазон поиска</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="151"/>
+      <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
+      <translation>Сначала рассчитать начальное смещение (используя метод с ипользовением матрицы) затем уточнить его с помощью более медленного, но более точного метода rs-sync.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="156"/>
       <source>Max sync points</source>
       <translation>Макс. точек синхронизации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="172"/>
       <source>Analyze every n-th frame</source>
       <translation>Анализировать каждый N-й кадр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="173"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="185"/>
       <source>Time to analyze per sync point</source>
       <translation>Время анализа на точку синхронизации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="200"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>Метод AKAZE может быть более точным, но работает значительно медленнее, чем OpenCV. Используйте только в том случае, если OpenCV не дает хороших результатов</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Optical flow method</source>
       <translation>Метод оптического слежения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
       <source>Offset calculation method</source>
       <translation>Метод вычисления смещения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="226"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Вычисляет углы вращения камеры используя оптические (визуальные) данные.
 Затем пробует сопоставить полученные значения с данными гироскопа.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="227"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1665,29 +1670,29 @@ Resulting offset is the one where lines were the shortest, meaning the video was
 Результирующее смещение - это то, где линии короче, т. е. видео визуально менее подвижно.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="217"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="228"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Алгоритм синхронизации видео с данными гироскопа с помощью значений роллинг-шаттера.
 Убедитесь, что перед синхронизацией установлено правильное значение роллинг-шаттера.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="235"/>
       <source>Low pass filter</source>
       <translation>Фильтр нижних частот</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="229"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Hz</source>
       <translation>Гц</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="253"/>
       <source>Show detected features</source>
       <translation>Показать обнаруженные элементы</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Show optical flow</source>
       <translation>Показать оптическое слежение</translation>
     </message>
@@ -1812,22 +1817,22 @@ Make sure you have proper rolling shutter value set before syncing.</source>
   <context>
     <name>Timeline</name>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="297"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="304"/>
       <source>Auto sync here</source>
       <translation>Синхронизировать автоматически в этой точке</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="315"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="313"/>
       <source>Add manual sync point here</source>
       <translation>Добавить точку синхронизации вручную</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="334"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="341"/>
       <source>Estimate rolling shutter here</source>
       <translation>Рассчитать роллинг-шаттер здесь</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="338"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -1839,104 +1844,104 @@ Are you sure you want to continue?</source>
 Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="342"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="349"/>
       <source>Yes</source>
       <translation>Да</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="345"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
       <source>No</source>
       <translation>Нет</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="287"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Add calibration point</source>
       <translation>Добавить точку калибровки</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="306"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="332"/>
       <source>Guess IMU orientation here</source>
       <translation type="unfinished">Guess IMU orientation here</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="352"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="359"/>
       <source>Estimate gyro bias here</source>
       <translation>Оцените смещение гироскопа</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="357"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
       <source>Delete all sync points</source>
       <translation>Удалить все точки синхронизации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="363"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="370"/>
       <source>Chart display mode</source>
       <translation>Режим отображения графика</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="364"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="371"/>
       <source>Gyroscope</source>
       <translation>Гироскоп</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="365"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="372"/>
       <source>Accelerometer</source>
       <translation>Акселерометр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="366"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="373"/>
       <source>Magnetometer</source>
       <translation>Магнитометр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="367"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="374"/>
       <source>Quaternions</source>
       <translation>Кватернионы</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="485"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="496"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Control+Shift+Scroll</source>
       <translation>Control+Shift+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Command+Scroll</source>
       <translation>Command+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="586"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="598"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="595"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 для увеличения по горизонтали, %2 для увеличения по вертикали, дважды щелкните %3 для сброса масштаба</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="596"/>
       <source>Scroll</source>
       <translation>Прокрутка</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="585"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="597"/>
       <source>Alt+Scroll</source>
       <translation>Alt+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="453"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="537"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="544"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="463"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="549"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="556"/>
       <source>ms</source>
       <translation>мсек</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="564"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="576"/>
       <source>Save</source>
       <translation>Сохранить</translation>
     </message>
@@ -1944,22 +1949,22 @@ Are you sure you want to continue?</source>
   <context>
     <name>TimelineSyncPoint</name>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="85"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="84"/>
       <source>Edit offset</source>
       <translation>Изменить смещение</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete sync point</source>
       <translation>Удалить эту точку синхронизации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="90"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete calibration point</source>
       <translation>Удалить точку калибровки</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
+      <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="95"/>
       <source>Zoom in</source>
       <translation>Увеличить</translation>
     </message>
@@ -1989,7 +1994,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/Util.js" line="27"/>
       <source>&amp;lt; 1s</source>
-      <translation type="unfinished">&amp;lt; 1s</translation>
+      <translation>&amp;lt; 1с</translation>
     </message>
   </context>
   <context>
@@ -2060,7 +2065,7 @@ Please provide frame rate: </source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="432"/>
       <source>Loading gyro data %1...</source>
-      <translation type="unfinished">Loading gyro data %1...</translation>
+      <translation>Загрузка данных гироскопа %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="481"/>
