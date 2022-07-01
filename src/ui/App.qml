@@ -79,6 +79,7 @@ Rectangle {
             direction: SidePanel.HandleRight;
             topPadding: gflogo.height;
             visible: !videoArea.fullScreen;
+            maxWidth: parent.width - rightPanel.width - 50 * dpiScale;
             implicitWidth: settings.value("leftPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("leftPanelSize", width);
             Column {
@@ -301,6 +302,7 @@ Rectangle {
             visible: !videoArea.fullScreen;
             x: leftPanel.width + videoAreaCol.width;
             direction: SidePanel.HandleLeft;
+            maxWidth: parent.width - leftPanel.width - 50 * dpiScale;
             implicitWidth: settings.value("rightPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("rightPanelSize", width);
             Menu.Synchronization {

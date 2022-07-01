@@ -5,15 +5,13 @@ use std::collections::BTreeMap;
 
 use nalgebra::Vector4;
 
-#[derive(Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 pub enum BackgroundMode {
+    #[default]
     SolidColor = 0,
     RepeatPixels = 1,
     MirrorPixels = 2,
     MarginWithFeather = 3,
-}
-impl Default for BackgroundMode {
-    fn default() -> Self { Self::SolidColor }
 }
 impl From<i32> for BackgroundMode {
     fn from(v: i32) -> Self {

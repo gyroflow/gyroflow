@@ -115,7 +115,7 @@ impl LensProfile {
 
     pub fn init(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
-        self.date = chrono::Local::today().naive_local().to_string();
+        self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();
     }
 

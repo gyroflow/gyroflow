@@ -749,7 +749,7 @@ impl<T: PixelType> StabilizationManager<T> {
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
             "videofile": video_path,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
-            "date": chrono::Local::today().naive_local().to_string(),
+            "date": time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default(),
 
             "background_color": params.background.as_slice(),
             "background_mode":  params.background_mode as i32,

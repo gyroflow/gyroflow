@@ -27,14 +27,14 @@ struct RenderQueueItem {
     status: JobStatus,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Default, Clone, PartialEq)]
 enum JobStatus {
+    #[default]
     Queued,
     Rendering,
     Finished,
     Error
 }
-impl Default for JobStatus { fn default() -> Self { JobStatus::Queued }}
 struct Job {
     queue_index: usize,
     input_file: String,

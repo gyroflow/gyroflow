@@ -108,7 +108,7 @@ impl WgpuWrapper {
             // Replace it in source to allow for loop unrolling when compiling shader
             shader_str = shader_str.replace("params.interpolation", &format!("{}u", params.interpolation));
 
-            let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+            let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
                 source: wgpu::ShaderSource::Wgsl(Cow::Owned(shader_str)),
                 label: None
             });
@@ -153,11 +153,11 @@ impl WgpuWrapper {
                 fragment: Some(wgpu::FragmentState {
                     module: &shader,
                     entry_point: "undistort_fragment",
-                    targets: &[wgpu::ColorTargetState {
+                    targets: &[Some(wgpu::ColorTargetState {
                         format: wgpu_format.0,
                         blend: None,
                         write_mask: wgpu::ColorWrites::ALL,
-                    }],
+                    })],
                 }),
                 primitive: wgpu::PrimitiveState {
                     topology: wgpu::PrimitiveTopology::TriangleList,
@@ -233,14 +233,14 @@ impl WgpuWrapper {
         {
             let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: None,
-                color_attachments: &[wgpu::RenderPassColorAttachment {
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                         store: true,
                     },
-                }],
+                })],
                 depth_stencil_attachment: None,
             });
             rpass.set_pipeline(&self.render_pipeline);

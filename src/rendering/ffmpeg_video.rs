@@ -23,12 +23,12 @@ impl Default for FrameBuffers {
     } }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Default, PartialEq, Debug)]
 pub enum ProcessingOrder {
+    #[default]
     PreConversion,
     PostConversion
 }
-impl Default for ProcessingOrder { fn default() -> Self { Self::PreConversion } }
 
 #[derive(Default)]
 pub struct EncoderParams<'a> {

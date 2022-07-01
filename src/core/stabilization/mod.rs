@@ -19,14 +19,12 @@ pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
 pub use cpu_undistort::{ undistort_points, undistort_points_with_params, undistort_points_with_rolling_shutter, COEFFS };
 
-#[derive(Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 pub enum Interpolation {
+    #[default]
     Bilinear = 2,
     Bicubic = 4,
     Lanczos4 = 8
-}
-impl Default for Interpolation {
-    fn default() -> Self { Interpolation::Bilinear }
 }
 
 bitflags::bitflags! {

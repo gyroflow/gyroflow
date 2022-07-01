@@ -19,12 +19,16 @@ Rectangle {
     property real defaultHeight: implicitHeight;
     property real minWidth: 100 * dpiScale;
     property real minHeight: 100 * dpiScale;
-    width:  fixedWidth  > 0? fixedWidth  : (rp.direction === 2 || rp.direction === 3? Math.max(minWidth,  (rpd.active? (rpd.activeTranslation.x * (rp.direction === 3? -1 : 1)) : 0) + lastWidth  + additionalWidth)  : lastWidth);
-    height: fixedHeight > 0? fixedHeight : (rp.direction === 0 || rp.direction === 1? Math.max(minHeight, (rpd.active? (rpd.activeTranslation.y * (rp.direction === 0? -1 : 1)) : 0) + lastHeight + additionalHeight) : lastHeight);
+    property real maxWidth: 10000;
+    property real maxHeight: 10000;
+    width:  fixedWidth  > 0? fixedWidth  : (rp.direction === 2 || rp.direction === 3? Math.min(maxWidth,  Math.max(minWidth,  (rpd.active? (rpd.activeTranslation.x * (rp.direction === 3? -1 : 1)) : 0) + lastWidth  + additionalWidth))  : lastWidth);
+    height: fixedHeight > 0? fixedHeight : (rp.direction === 0 || rp.direction === 1? Math.min(maxHeight, Math.max(minHeight, (rpd.active? (rpd.activeTranslation.y * (rp.direction === 0? -1 : 1)) : 0) + lastHeight + additionalHeight)) : lastHeight);
     property real additionalWidth: 0;
     property real additionalHeight: 0;
     property real fixedWidth: 0;
     property real fixedHeight: 0;
+
+    signal heightAdjusted();
 
     property alias hr: rphr;
 
@@ -54,6 +58,7 @@ Rectangle {
                 if (!active) {
                     if (rp.direction === 2 || rp.direction === 3) rp.lastWidth = rp.width - additionalWidth;
                     else rp.lastHeight = height - additionalHeight;
+                    rp.heightAdjusted();
                 }
             }
         }
@@ -71,6 +76,7 @@ Rectangle {
                 if (count >= 2) { // double clicked
                     rp.lastWidth = rp.defaultWidth;
                     rp.lastHeight = rp.defaultHeight;
+                    rp.heightAdjusted();
                 }
             }
             Timer { id: rt; interval: 400; onTriggered: ma.count = 0; }

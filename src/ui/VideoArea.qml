@@ -543,6 +543,7 @@ Item {
         Item { width: 1; height: 10 * dpiScale; visible: !root.fullScreen; }
 
         ResizablePanel {
+            id: bottomPanel;
             direction: ResizablePanel.HandleUp;
             width: parent.width;
             color: "transparent";
@@ -551,8 +552,13 @@ Item {
             additionalHeight: timeline.additionalHeight;
             defaultHeight: 165 * dpiScale;
             minHeight: (root.fullScreen? 50 : 100) * dpiScale;
-            implicitHeight: window.settings.value("bottomPanelSize", defaultHeight);
-            onHeightChanged: window.settings.setValue("bottomPanelSize", height);
+            lastHeight: window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), defaultHeight);
+            onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
+            Connections {
+                target: root;
+                onFullScreenChanged: bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
+            }
+            maxHeight: root.height - 50 * dpiScale;
             Timeline {
                 id: timeline;
                 durationMs: vid.duration;
