@@ -256,7 +256,10 @@ Item {
                     }
                 }
 
-                onCurrentFrameChanged: fovChanged();
+                onCurrentFrameChanged: {
+                    fovChanged();
+                    controller.video_position_changed(timestamp);
+                }
                 onMetadataLoaded: (md) => {
                     loaded = frameCount > 0;
                     videoLoader.active = false;

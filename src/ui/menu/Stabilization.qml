@@ -429,8 +429,8 @@ MenuItem {
                     unit: qsTr("%");
                     width: parent.width;
                     keyframe: "ZoomingCenterX";
-                    finalValue: value / 100.0;
-                    onFinalValueChanged: controller.zooming_center_x = finalValue;
+                    scaler: 100.0;
+                    onValueChanged: controller.zooming_center_x = value;
                 }
             }
             Label {
@@ -446,8 +446,8 @@ MenuItem {
                     unit: qsTr("%");
                     width: parent.width;
                     keyframe: "ZoomingCenterY";
-                    finalValue: value / 100.0;
-                    onFinalValueChanged: controller.zooming_center_y = finalValue;
+                    scaler: 100.0;
+                    onValueChanged: controller.zooming_center_y = value;
                 }
             }
         }
@@ -497,8 +497,8 @@ MenuItem {
             precision: 0;
             width: parent.width;
             keyframe: "LensCorrectionStrength";
-            finalValue: value / 100.0;
-            onFinalValueChanged: Qt.callLater(() => { controller.lens_correction_amount = finalValue; });
+            scaler: 100.0;
+            onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
         }
     }
 

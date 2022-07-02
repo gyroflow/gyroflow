@@ -10,7 +10,6 @@ Row {
     height: 25 * dpiScale;
     property alias slider: slider;
     property alias field: field;
-    property alias value: field.value;
     property alias defaultValue: field.defaultValue;
     property alias from: slider.from;
     property alias to: slider.to;
@@ -19,11 +18,26 @@ Row {
     property alias precision: field.precision;
     property string keyframe: "";
     property bool keyframesEnabled: false;
-    property real finalValue: value;
+    property real scaler: 1;
 
-    onFinalValueChanged: {
-        if (keyframe && keyframesEnabled) {
-            controller.set_keyframe(keyframe, window.videoArea.timeline.getTimestampUs(), finalValue);
+    property bool preventChange: false;
+
+    property real value: defaultValue;
+
+    onValueChanged: {
+        if (!root.preventChange) {
+            field.value = value / scaler;
+        }
+    }
+    Connections {
+        target: controller;
+        enabled: root.keyframe.length > 0;
+        function onKeyframe_value_updated(keyframe: string, value: real) {
+            if (keyframe == root.keyframe) {
+                root.preventChange = true;
+                field.value = value / root.scaler;
+                root.preventChange = false;
+            }
         }
     }
 
@@ -103,6 +117,16 @@ Row {
             slider.preventChange = true;
             slider.value = value;
             Qt.callLater(() => { if (slider) slider.preventChange = false; });
+
+            if (!root.preventChange) {
+                root.preventChange = true;
+                root.value = value * root.scaler;
+                root.preventChange = false;
+
+                if (root.keyframe && root.keyframesEnabled) {
+                    controller.set_keyframe(root.keyframe, window.videoArea.timeline.getTimestampUs(), root.value);
+                }
+            }
         }
     }
 }

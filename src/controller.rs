@@ -213,6 +213,9 @@ pub struct Controller {
     clear_keyframes_type: qt_method!(fn(&self, typ: String)),
     keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
 
+    keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
+    video_position_changed: qt_method!(fn(&self, timestamp_ms: f64)),
+
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
@@ -1308,6 +1311,15 @@ impl Controller {
             }
         }
         QJSValue::default()
+    }
+
+    fn video_position_changed(&self, timestamp_ms: f64) {
+        let keyframes = self.stabilizer.keyframes.read();
+        for kf in keyframes.get_all_keys() {
+            if let Some(v) = keyframes.value_at_video_timestamp(kf, timestamp_ms) {
+                self.keyframe_value_updated(kf.to_string(), v);
+            }
+        }
     }
 
     // Utilities
