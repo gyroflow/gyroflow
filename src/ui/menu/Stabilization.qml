@@ -151,8 +151,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "No smoothing");
         QT_TRANSLATE_NOOP("Popup", "Default"),
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
-        QT_TRANSLATE_NOOP("Popup", "Velocity dampened"),
-        QT_TRANSLATE_NOOP("Popup", "Velocity dampened (advanced)"),
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
 
         QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
@@ -161,6 +159,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Per axis");
         QT_TRANSLATE_NOOP("Stabilization", "Max smoothness");
+        QT_TRANSLATE_NOOP("Stabilization", "Max smoothness at high velocity");
         QT_TRANSLATE_NOOP("Stabilization", "Second smoothing pass");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
@@ -169,14 +168,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
-        QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify dampening settings until you get the desired values (recommended around 6 on all axes).");
-        QT_TRANSLATE_NOOP("Stabilization", "Max rotation:\nPitch: %1, Yaw: %2, Roll: %3.\nModify velocity factor until you get the desired values (recommended less than 20).");
-        QT_TRANSLATE_NOOP("Stabilization", "Modify dampening settings until you get the desired values (recommended around 6 on all axes).");
-        QT_TRANSLATE_NOOP("Stabilization", "Modify velocity factor until you get the desired values (recommended less than 20).");
-        QT_TRANSLATE_NOOP("Stabilization", "Smoothness at high velocity");
-        QT_TRANSLATE_NOOP("Stabilization", "Velocity factor");
-        QT_TRANSLATE_NOOP("Stabilization", "Smoothness multiplier");
-        QT_TRANSLATE_NOOP("Stabilization", "Responsiveness");
     }
 
     Connections {
@@ -209,6 +200,7 @@ MenuItem {
             value: 1.0;
             defaultValue: 1.0;
             width: parent.width;
+            keyframe: "Fov";
             onValueChanged: controller.fov = value;
         }
     }
@@ -244,6 +236,7 @@ MenuItem {
                         case 'Slider':
                         case 'SliderWithField':
                         case 'NumberField':
+                            const kf = (x.type == 'SliderWithField' || x.type == 'NumberField') && x.keyframe? `keyframe: "${x.keyframe}";` : "";
                             str = `Label {
                                 width: parent.width;
                                 spacing: 2 * dpiScale;
@@ -260,6 +253,7 @@ MenuItem {
                                     precision: ${x.precision} || 2;
                                     onValueChanged: root.setSmoothingParam("${x.name}", value);
                                     ${add}
+                                    ${kf}
                                 }
                             }`;
                         break;
@@ -327,6 +321,7 @@ MenuItem {
                 unit: qsTr("%");
                 precision: 0;
                 value: 100;
+                keyframe: "LockHorizonAmount";
                 onValueChanged: Qt.callLater(updateHorizonLock);
             }
         }
@@ -344,6 +339,7 @@ MenuItem {
                 defaultValue: 0;
                 unit: qsTr("°");
                 precision: 1;
+                keyframe: "LockHorizonRoll";
                 onValueChanged: Qt.callLater(updateHorizonLock);
             }
         }
@@ -432,7 +428,9 @@ MenuItem {
                     to: 100;
                     unit: qsTr("%");
                     width: parent.width;
-                    onValueChanged: controller.zooming_center_x = value / 100;
+                    keyframe: "ZoomingCenterX";
+                    finalValue: value / 100.0;
+                    onFinalValueChanged: controller.zooming_center_x = finalValue;
                 }
             }
             Label {
@@ -447,7 +445,9 @@ MenuItem {
                     to: 100;
                     unit: qsTr("%");
                     width: parent.width;
-                    onValueChanged: controller.zooming_center_y = value / 100;
+                    keyframe: "ZoomingCenterY";
+                    finalValue: value / 100.0;
+                    onFinalValueChanged: controller.zooming_center_y = finalValue;
                 }
             }
         }
@@ -496,7 +496,9 @@ MenuItem {
             defaultValue: 100.0;
             precision: 0;
             width: parent.width;
-            onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value / 100.0; });
+            keyframe: "LensCorrectionStrength";
+            finalValue: value / 100.0;
+            onFinalValueChanged: Qt.callLater(() => { controller.lens_correction_amount = finalValue; });
         }
     }
 

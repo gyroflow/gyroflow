@@ -19,7 +19,10 @@ Row {
 
     function updateEntry(key: string, value: string) {
         model[key] = value;
-        modelChanged();
+        let index = Object.keys(tl.model).indexOf(key);
+        if (index !== -1) {
+            col2.children[index].children[0].text = value;
+        }
     }
     function updateEntryWithTrigger(key: string, value: string) {
         updateEntry(key, value);
@@ -95,6 +98,7 @@ Row {
                 topPadding: 0; bottomPadding: 0;
                 width: (desc.width || 50) * dpiScale;
                 font.pixelSize: 12 * dpiScale;
+                keyframe: desc.keyframe || "";
                 onAccepted: {
                     visible = false;
                     parent.parent.parent.children[0].visible = true;

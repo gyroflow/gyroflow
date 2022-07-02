@@ -6,7 +6,6 @@ pub mod none;
 pub mod plain;
 pub mod fixed;
 pub mod default_algo;
-pub mod velocity_dampened_advanced;
 
 pub use nalgebra::*;
 use super::gyro_source::TimeQuat;
@@ -15,6 +14,7 @@ use dyn_clone::{ clone_trait_object, DynClone };
 
 use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
+use crate::keyframes::*;
 use crate::stabilization_params::StabilizationParams;
 
 pub trait SmoothingAlgorithm: DynClone {
@@ -26,7 +26,7 @@ pub trait SmoothingAlgorithm: DynClone {
 
     fn get_checksum(&self) -> u64;
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat;
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat;
 }
 clone_trait_object!(SmoothingAlgorithm);
 
@@ -47,7 +47,6 @@ impl Default for Smoothing {
                 Box::new(self::none::None::default()),
                 Box::new(self::default_algo::DefaultAlgo::default()),
                 Box::new(self::plain::Plain::default()),
-                Box::new(self::velocity_dampened_advanced::VelocityDampenedAdvanced::default()),
                 Box::new(self::fixed::Fixed::default())
             ],
 

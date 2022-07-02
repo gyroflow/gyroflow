@@ -132,6 +132,7 @@ MenuItem {
                 "from": -360,
                 "to": 360,
                 "value": function() { return root.videoRotation; },
+                "keyframe": "VideoRotation",
                 "onChange": function(value) {
                     root.videoRotation = value;
                     root.updateEntry("Rotation", root.videoRotation + " °");
@@ -151,10 +152,7 @@ MenuItem {
                     const scale = root.fps / root.org_fps;
                     window.sync.everyNthFrame.value = Math.max(1, Math.floor(scale));
 
-                    const chart = window.videoArea.timeline.getChart();
-                    chart.setDurationMs(controller.get_scaled_duration_ms());
-                    window.videoArea.durationMs = controller.get_scaled_duration_ms();
-                    Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart()));
+                    window.videoArea.timeline.updateDurations();
                 }
             }
         });

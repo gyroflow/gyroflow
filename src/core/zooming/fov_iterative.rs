@@ -3,6 +3,7 @@
 
 use super::*;
 use crate::stabilization::undistort_points_with_rolling_shutter;
+use crate::keyframes::*;
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };
@@ -81,10 +82,13 @@ impl FovIterative {
     fn find_fov(&self, rect: &[(f64, f64)], ts: f64, center: &Point2D) -> f64 {
         let ts_us = (ts * 1000.0).round() as i64;
 
+        let adaptive_zoom_center_x = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.0);
+        let adaptive_zoom_center_y = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.1);
+
         let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params);
         for (x, y) in polygon.iter_mut() {
-            *x -= self.compute_params.adaptive_zoom_center_offset.0 * self.input_dim.0;
-            *y -= self.compute_params.adaptive_zoom_center_offset.1 * self.input_dim.1;
+            *x -= adaptive_zoom_center_x * self.input_dim.0;
+            *y -= adaptive_zoom_center_y * self.input_dim.1;
         }
         if self.compute_params.zooming_debug_points {
             self.debug_points.write().insert(ts_us, polygon.iter().map(|(x, y)| (x / self.input_dim.0, y / self.input_dim.1)).collect());
@@ -106,8 +110,8 @@ impl FovIterative {
                 let distorted = interpolate_points(&relevant, 30);
                 polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params);
                 for (x, y) in polygon.iter_mut() {
-                    *x -= self.compute_params.adaptive_zoom_center_offset.0 * self.input_dim.0;
-                    *y -= self.compute_params.adaptive_zoom_center_offset.1 * self.input_dim.1;
+                    *x -= adaptive_zoom_center_x * self.input_dim.0;
+                    *y -= adaptive_zoom_center_y * self.input_dim.1;
                 }
                 nearest = self.nearest_edge(&polygon, center, nearest.1);
             } else {

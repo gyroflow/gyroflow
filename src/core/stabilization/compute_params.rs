@@ -5,12 +5,14 @@ use super::StabilizationManager;
 use super::PixelType;
 use super::distortion_models::DistortionModel;
 use crate::GyroSource;
+use crate::keyframes::KeyframeManager;
 use nalgebra::Matrix3;
 
 #[derive(Default, Clone)]
 pub struct ComputeParams {
     pub gyro: GyroSource,
     pub fovs: Vec<f64>,
+    pub keyframes: KeyframeManager,
 
     pub frame_count: usize,
     pub fov_scale: f64,
@@ -109,6 +111,8 @@ impl ComputeParams {
             is_superview: lens.is_superview,
 
             distortion_model,
+
+            keyframes: mgr.keyframes.read().clone(),
 
             zooming_debug_points: false
         }

@@ -56,6 +56,7 @@ pub struct LensCalibrator {
     pub no_marker: bool,
 
     pub is_superview: bool,
+    pub asymmetrical: bool,
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
     pub image_points: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected

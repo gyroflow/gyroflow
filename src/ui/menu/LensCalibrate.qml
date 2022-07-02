@@ -449,6 +449,12 @@ MenuItem {
             }
         }
         CheckBox {
+            text: qsTr("Lens is asymmetrical");
+            checked: false;
+            width: parent.width;
+            onCheckedChanged: controller.lens_is_asymmetrical = checked;
+        }
+        CheckBox {
             id: noMarker;
             text: qsTr("Plain chessboard pattern (previous version without dots in the middle)");
             checked: false;

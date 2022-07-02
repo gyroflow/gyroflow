@@ -18,6 +18,16 @@ TextField {
     property bool intNoThousandSep: false;
     property var reset: () => { value = defaultValue; };
 
+    property string keyframe: "";
+    property bool keyframesEnabled: false;
+    property real finalValue: value;
+
+    onFinalValueChanged: {
+        if (keyframe && keyframesEnabled) {
+            controller.set_keyframe(keyframe, window.videoArea.timeline.getTimestampUs(), finalValue);
+        }
+    }
+
     Keys.onDownPressed: (e) => {
         const lastDigit = Math.pow(10, precision);
         if (allowText) return;
@@ -109,6 +119,19 @@ TextField {
             text: qsTr("Reset value");
             enabled: value != defaultValue;
             onTriggered: root.reset()
+        }
+        Action {
+            icon.name: "keyframe";
+            enabled: root.keyframe.length > 0;
+            text: qsTr("Enable keyframing");
+            checked: root.keyframesEnabled;
+            onTriggered: {
+                checked = !checked;
+                root.keyframesEnabled = checked;
+                if (!checked) {
+                    controller.clear_keyframes_type(root.keyframe);
+                }
+            }
         }
     }
 

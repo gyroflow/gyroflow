@@ -17,6 +17,15 @@ Row {
     property alias live: slider.live;
     property alias unit: field.unit;
     property alias precision: field.precision;
+    property string keyframe: "";
+    property bool keyframesEnabled: false;
+    property real finalValue: value;
+
+    onFinalValueChanged: {
+        if (keyframe && keyframesEnabled) {
+            controller.set_keyframe(keyframe, window.videoArea.timeline.getTimestampUs(), finalValue);
+        }
+    }
 
     Slider {
         id: slider;
@@ -66,6 +75,19 @@ Row {
                 enabled: field.value != defaultValue;
                 onTriggered: {
                     field.value = defaultValue;
+                }
+            }
+            Action {
+                icon.name: "keyframe";
+                enabled: root.keyframe.length > 0;
+                text: qsTr("Enable keyframing");
+                checked: root.keyframesEnabled;
+                onTriggered: {
+                    checked = !checked;
+                    root.keyframesEnabled = checked;
+                    if (!checked) {
+                        controller.clear_keyframes_type(root.keyframe);
+                    }
                 }
             }
         }

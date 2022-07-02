@@ -7,9 +7,10 @@ use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
 use std::fs::File;
 use telemetry_parser::{ Input, util };
-use telemetry_parser::tags_impl::{GetWithType, GroupId, TagId, TimeQuaternion};
+use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
 
 use crate::camera_identifier::CameraIdentifier;
+use crate::keyframes::KeyframeManager;
 
 use super::integration::*;
 use super::smoothing::SmoothingAlgorithm;
@@ -248,9 +249,9 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams) {
-        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params);
-        horizon_lock.lock(&mut self.smoothed_quaternions, &mut self.quaternions, &self.gravity_vectors, self.integration_method);
+    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
+        self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
+        horizon_lock.lock(&mut self.smoothed_quaternions, &mut self.quaternions, &self.gravity_vectors, self.integration_method, keyframes);
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
@@ -292,7 +293,7 @@ impl GyroSource {
         self.adjust_offsets();
     }
     fn adjust_offsets(&mut self) {
-        self.offsets_adjusted = self.offsets.iter().map(|(k, v)| (*k + (*v * 1000.0.round()) as i64, *v)).collect::<BTreeMap<i64, f64>>();
+        self.offsets_adjusted = self.offsets.iter().map(|(k, v)| (*k + (*v * 1000.0).round() as i64, *v)).collect::<BTreeMap<i64, f64>>();
     }
 
     pub fn set_lowpass_filter(&mut self, freq: f64) {
@@ -403,7 +404,7 @@ impl GyroSource {
     pub fn      org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.quaternions,          timestamp_ms) }
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
 
-    fn offset_at_timestamp(&self, offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
+    pub fn offset_at_timestamp(offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
         match offsets.len() {
             0 => 0.0,
             1 => *offsets.values().next().unwrap(),
@@ -429,8 +430,8 @@ impl GyroSource {
             }
         }
     }
-    pub fn offset_at_video_timestamp(&self, timestamp_ms: f64) -> f64 { self.offset_at_timestamp(&self.offsets_adjusted, timestamp_ms) }
-    pub fn offset_at_gyro_timestamp (&self, timestamp_ms: f64) -> f64 { self.offset_at_timestamp(&self.offsets, timestamp_ms) }
+    pub fn offset_at_video_timestamp(&self, timestamp_ms: f64) -> f64 { Self::offset_at_timestamp(&self.offsets_adjusted, timestamp_ms) }
+    pub fn offset_at_gyro_timestamp (&self, timestamp_ms: f64) -> f64 { Self::offset_at_timestamp(&self.offsets, timestamp_ms) }
 
     pub fn clone_quaternions(&self) -> Self {
         Self {

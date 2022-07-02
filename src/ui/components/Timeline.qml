@@ -17,6 +17,7 @@ Item {
     property bool trimActive: trimStart > 0.01 || trimEnd < 0.99;
 
     property real durationMs: 0;
+    property real orgDurationMs: 0;
 
     property real visibleAreaLeft: 0.0;
     property real visibleAreaRight: 1.0;
@@ -33,9 +34,13 @@ Item {
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
 
-    function redrawChart() { chart.update(); }
+    function redrawChart() { chart.update(); keyframes.update(); }
     function getChart(): TimelineGyroChart { return chart; }
+    function getKeyframesView(): TimelineKeyframesView { return keyframes; }
 
+    function getTimestampUs(): real {
+        return vid.timestamp * 1000;
+    }
     function setPosition(pos: real) {
         vid.currentFrame = frameAtPosition(pos);
     }
@@ -73,6 +78,16 @@ Item {
                     chart.setAxisVisible(i, false);
             }
         }
+    }
+
+    function updateDurations() {
+        chart.setDurationMs(controller.get_scaled_duration_ms());
+        keyframes.setDurationMs(controller.get_org_duration_ms());
+        root.durationMs    = controller.get_scaled_duration_ms();
+        root.orgDurationMs = controller.get_org_duration_ms();
+
+        Qt.callLater(controller.update_chart, chart);
+        Qt.callLater(controller.update_keyframes_view, keyframes);
     }
 
     Settings {
@@ -136,6 +151,74 @@ Item {
                     a5.checked = chart.getAxisVisible(5);
                     a6.checked = chart.getAxisVisible(6);
                     a7.checked = chart.getAxisVisible(7);
+                }
+            }
+            TimelineKeyframesView {
+                id: keyframes;
+                visibleAreaLeft: root.visibleAreaLeft;
+                visibleAreaRight: root.visibleAreaRight;
+                anchors.fill: parent;
+                anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
+                    const pt = ma.mapToItem(keyframes, x, y);
+                    const kf = keyframes.keyframeAtXY(pt.x, pt.y);
+                    if (kf) {
+                        const [keyframe, timestamp] = kf.split(":");
+                        if (pressed && (pressedButtons & Qt.RightButton)) {
+                            keyframeContextMenu.pressedKeyframe = keyframe;
+                            keyframeContextMenu.pressedKeyframeTs = timestamp;
+                            keyframeContextMenu.updateEasingMenu();
+                            keyframeContextMenu.popup();
+                            return true;
+                        }
+                        if (pressed && (pressedButtons & Qt.LeftButton)) {
+                            vid.setTimestamp(timestamp / 1000);
+                            return true;
+                        }
+                        ma.cursorShape = Qt.PointingHandCursor;
+                    } else {
+                        ma.cursorShape = Qt.ArrowCursor;
+                    }
+                    return false;
+                }
+                Menu {
+                    id: keyframeContextMenu;
+                    property string pressedKeyframe: "";
+                    property real pressedKeyframeTs: 0;
+
+                    font.pixelSize: 11.5 * dpiScale;
+                    Action {
+                        icon.name: "bin;#f67575";
+                        text: qsTr("Delete");
+                        onTriggered: controller.remove_keyframe(keyframeContextMenu.pressedKeyframe, keyframeContextMenu.pressedKeyframeTs);
+                    }
+                    Action {
+                        id: easeIn;
+                        icon.name: "ease_in";
+                        text: qsTr("Ease in");
+                        checkable: true;
+                        onTriggered: keyframeContextMenu.updateEasing();
+                    }
+                    Action {
+                        id: easeOut;
+                        icon.name: "ease_out";
+                        text: qsTr("Ease out");
+                        checkable: true;
+                        onTriggered: keyframeContextMenu.updateEasing();
+                    }
+                    function updateEasingMenu() {
+                        let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
+                        easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
+                        easeOut.checked = e == "EaseOut" || e == "EaseInOut";
+                    }
+                    function updateEasing() {
+                        let e = "NoEasing";
+                        if (easeIn.checked) e = "EaseIn";
+                        if (easeOut.checked) e = "EaseOut";
+                        if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                        controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
+                    }
                 }
             }
         }
@@ -209,6 +292,7 @@ Item {
 
             onMouseXChanged: {
                 if (pressed) {
+                    if (cursorShape == Qt.PointingHandCursor) return; // Don't seek when clicking over a keyframe
                     if (pressedButtons & Qt.MiddleButton) {
                         const dx = mouseX - panInit.x;
                         const stepsPerPixel = panInit.visibleAreaWidth / parent.width;
@@ -227,8 +311,11 @@ Item {
                             root.setPosition(newPos);
                         }
                     }
+                } else {
+                    Qt.callLater(keyframes.handleMouseMove, mouseX, mouseY, false, 0);
                 }
             }
+            onMouseYChanged: if (!pressed) Qt.callLater(keyframes.handleMouseMove, mouseX, mouseY, false, 0);
             onPressed: (mouse) => {
                 panInit.x = mouse.x;
                 panInit.y = mouse.y;
@@ -244,6 +331,8 @@ Item {
                 }
             }
             onClicked: (mouse) => {
+                if (keyframes.handleMouseMove(mouse.x, mouse.y, true, mouse.button))
+                    return;
                 if (mouse.button === Qt.RightButton) {
                     timelineContextMenu.pressedX = mouse.x;
                     timelineContextMenu.popup();
@@ -489,7 +578,7 @@ Item {
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;
                 timeline: root;
-                color: is_forced? "#11d144" : "#17b3f0"
+                color: is_forced? "#11d144" : "#17b3f0";
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: sharpness;
@@ -508,7 +597,7 @@ Item {
         QQC.ScrollBar {
             id: scrollbar;
             hoverEnabled: true;
-            visible: !root.fullScreen;
+            visible: !root.fullScreen && size < 1.0;
             active: hovered || pressed;
             orientation: Qt.Horizontal;
             size: root.visibleAreaRight - root.visibleAreaLeft;

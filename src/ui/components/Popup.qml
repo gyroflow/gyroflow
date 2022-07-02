@@ -75,10 +75,11 @@ QQC.Popup {
             }
 
             background: Rectangle {
-                color: dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent";
+                color: dlg.checked? styleAccentColor : (dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent");
                 anchors.fill: parent;
                 anchors.margins: 2 * dpiScale;
                 radius: 4 * dpiScale;
+                opacity: dlg.checked? 0.5 : 1.0;
 
                 Rectangle {
                     x: 1 * dpiScale;

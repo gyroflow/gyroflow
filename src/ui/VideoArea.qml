@@ -189,13 +189,16 @@ Item {
         function onChart_data_changed() {
             chartUpdateTimer.start();
         }
+        function onKeyframes_changed() {
+            Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
+        }
     }
     Timer {
         id: chartUpdateTimer;
         repeat: false;
         running: false;
         interval: 100;
-        onTriggered: Qt.callLater(() => controller.update_chart(timeline.getChart()));
+        onTriggered: Qt.callLater(controller.update_chart, timeline.getChart());
     }
 
     Item {
@@ -260,7 +263,7 @@ Item {
                     vidInfo.loader = false;
                     timeline.resetTrim();
 
-                    controller.load_telemetry(vid.url, true, vid, timeline.getChart());
+                    controller.load_telemetry(vid.url, true, vid, timeline.getChart(), timeline.getKeyframesView());
                     vidInfo.loadFromVideoMetadata(md);
                     // for (var i in md) console.info(i, md[i]);
                 }
@@ -556,7 +559,7 @@ Item {
             onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
             Connections {
                 target: root;
-                onFullScreenChanged: bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
+                function onFullScreenChanged() { bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight); }
             }
             maxHeight: root.height - 50 * dpiScale;
             Timeline {

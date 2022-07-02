@@ -45,6 +45,8 @@ pub struct LensProfile {
 
     pub official: bool,
 
+    pub asymmetrical: bool,
+
     pub use_opencv_fisheye: bool,
     pub fisheye_params: CameraParams,
 
@@ -102,6 +104,8 @@ impl LensProfile {
         self.num_images = cal.used_points.len();
         self.is_superview = cal.is_superview;
         self.optimal_fov = None;
+
+        self.asymmetrical = cal.asymmetrical;
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
@@ -191,8 +195,10 @@ impl LensProfile {
                 self.fisheye_params.camera_matrix[1].into(),
                 self.fisheye_params.camera_matrix[2].into()
             ]);
-            mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
-            mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
+            if !self.asymmetrical {
+                mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
+                mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
+            }
             Some(mat)
         } else {
             None

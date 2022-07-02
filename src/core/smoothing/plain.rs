@@ -4,6 +4,8 @@
 use super::*;
 
 use crate::gyro_source::TimeQuat;
+use crate::keyframes::*;
+use std::collections::BTreeMap;
 
 #[derive(Clone)]
 pub struct Plain {
@@ -36,7 +38,8 @@ impl SmoothingAlgorithm for Plain {
                 "to": 10.0,
                 "value": self.time_constant,
                 "default": 0.25,
-                "unit": "s"
+                "unit": "s",
+                "keyframe": "SmoothingParamTimeConstant"
             }
         ])
     }
@@ -50,26 +53,37 @@ impl SmoothingAlgorithm for Plain {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
 
+        let get_alpha = |time_constant: f64| {
+            1.0 - (-(1.0 / sample_rate) / time_constant).exp()
+        };
         let mut alpha = 1.0;
         if self.time_constant > 0.0 {
-            alpha = 1.0 - (-(1.0 / sample_rate) / self.time_constant).exp();
+            alpha = get_alpha(self.time_constant);
+        }
+
+        let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
+        if keyframes.is_value_changing(&KeyframeType::SmoothingParamTimeConstant) {
+            alpha_per_timestamp = quats.iter().map(|(ts, _)| {
+                let timestamp_ms = *ts as f64 / 1000.0;
+                (*ts, get_alpha(keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant)))
+            }).collect();
         }
 
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
-            q = q.slerp(x.1, alpha);
+            q = q.slerp(x.1, *alpha_per_timestamp.get(x.0).unwrap_or(&alpha));
             (*x.0, q)
         }).collect();
 
         // Reverse pass, while leveling horizon
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
-            q = q.slerp(x.1, alpha);
+            q = q.slerp(x.1, *alpha_per_timestamp.get(x.0).unwrap_or(&alpha));
             (*x.0, q)
         }).collect()
     }

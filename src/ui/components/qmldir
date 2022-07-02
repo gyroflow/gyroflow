@@ -31,7 +31,6 @@ TableList 1.0 TableList.qml
 TextField 1.0 TextField.qml
 Timeline 1.0 Timeline.qml
 TimelineAxisButton 1.0 TimelineAxisButton.qml
-TimelineGyroChart.rs 1.0 TimelineGyroChart.rs
 TimelineRangeIndicator 1.0 TimelineRangeIndicator.qml
 TimelineSyncPoint 1.0 TimelineSyncPoint.qml
 ToolTip 1.0 ToolTip.qml

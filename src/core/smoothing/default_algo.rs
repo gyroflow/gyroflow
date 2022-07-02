@@ -18,6 +18,7 @@ use super::*;
 use crate::gyro_source::TimeQuat;
 use nalgebra::*;
 use crate::Quat64;
+use crate::keyframes::*;
 
 #[derive(Clone)]
 pub struct DefaultAlgo {
@@ -28,6 +29,7 @@ pub struct DefaultAlgo {
     pub per_axis: bool,
     pub second_pass: bool,
     pub max_smoothness: f64,
+    pub alpha_0_1s: f64,
 }
 
 impl Default for DefaultAlgo {
@@ -38,7 +40,8 @@ impl Default for DefaultAlgo {
         smoothness_roll: 0.5,
         per_axis: false,
         second_pass: true,
-        max_smoothness: 1.0
+        max_smoothness: 1.0,
+        alpha_0_1s: 0.1
     } }
 }
 
@@ -54,6 +57,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "per_axis" => self.per_axis = val > 0.1,
             "second_pass" => self.second_pass = val > 0.1,
             "max_smoothness" => self.max_smoothness = val,
+            "alpha_0_1s" => self.alpha_0_1s = val,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
@@ -69,7 +73,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "value": self.smoothness,
                 "default": 0.5,
                 "unit": "",
-                "precision": 3
+                "precision": 3,
+                "keyframe": "SmoothingParamSmoothness"
             },
             {
                 "name": "smoothness_pitch",
@@ -80,7 +85,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "value": self.smoothness_pitch,
                 "default": 0.5,
                 "unit": "",
-                "precision": 3
+                "precision": 3,
+                "keyframe": "SmoothingParamPitch"
             },
             {
                 "name": "smoothness_yaw",
@@ -91,7 +97,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "value": self.smoothness_yaw,
                 "default": 0.5,
                 "unit": "",
-                "precision": 3
+                "precision": 3,
+                "keyframe": "SmoothingParamYaw"
             },
             {
                 "name": "smoothness_roll",
@@ -102,7 +109,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "value": self.smoothness_roll,
                 "default": 0.5,
                 "unit": "",
-                "precision": 3
+                "precision": 3,
+                "keyframe": "SmoothingParamRoll"
             },
             {
                 "name": "per_axis",
@@ -136,7 +144,20 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "to": 5.0,
                 "value": self.max_smoothness,
                 "default": 1.0,
-                "unit": "s"
+                "unit": "s",
+                "keyframe": "SmoothingParamTimeConstant"
+            },
+            {
+                "name": "alpha_0_1s",
+                "description": "Max smoothness at high velocity",
+                "advanced": true,
+                "type": "SliderWithField",
+                "from": 0.01,
+                "to": 1.0,
+                "value": self.alpha_0_1s,
+                "default": 0.1,
+                "unit": "s",
+                "keyframe": "SmoothingParamTimeConstant2"
             }
         ])
     }
@@ -151,12 +172,14 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.write_u64(self.smoothness_pitch.to_bits());
         hasher.write_u64(self.smoothness_yaw.to_bits());
         hasher.write_u64(self.smoothness_roll.to_bits());
+        hasher.write_u64(self.max_smoothness.to_bits());
+        hasher.write_u64(self.alpha_0_1s.to_bits());
         hasher.write_u8(if self.per_axis { 1 } else { 0 });
         hasher.write_u8(if self.second_pass { 1 } else { 0 });
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat { // TODO Result<>?
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const MAX_VELOCITY: f64 = 500.0;
@@ -164,8 +187,31 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
         let rad_to_deg_per_sec: f64 = sample_rate * RAD_TO_DEG;
 
-        let alpha_smoothness = 1.0 - (-(1.0 / sample_rate) / self.max_smoothness).exp();
-        let alpha_0_1s = 1.0 - (-(1.0 / sample_rate) / 0.1).exp();
+        let get_alpha = |time_constant: f64| {
+            1.0 - (-(1.0 / sample_rate) / time_constant).exp()
+        };
+        let noop = |v| v;
+
+        let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
+            let mut ret = BTreeMap::<i64, f64>::new();
+            if keyframes.is_value_changing(typ) {
+                ret = quats.iter().map(|(ts, _)| {
+                    let timestamp_ms = *ts as f64 / 1000.0;
+                    (*ts, cb(keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def)))
+                }).collect();
+            }
+            ret
+        };
+
+        let alpha_smoothness_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamTimeConstant, self.max_smoothness, &get_alpha);
+        let alpha_0_1s_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamTimeConstant2, self.alpha_0_1s, &get_alpha);
+        let smoothness_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamSmoothness, self.smoothness, &noop);
+        let smoothness_pitch_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamPitch, self.smoothness_pitch, &noop);
+        let smoothness_yaw_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamYaw, self.smoothness_yaw, &noop);
+        let smoothness_roll_per_timestamp = get_keyframed_param(&KeyframeType::SmoothingParamRoll, self.smoothness_roll, &noop);
+
+        let alpha_smoothness = get_alpha(self.max_smoothness);
+        let alpha_0_1s = get_alpha(self.alpha_0_1s);
 
         // Calculate velocity
         let mut velocity = BTreeMap::<i64, Vector3<f64>>::new();
@@ -200,27 +246,32 @@ impl SmoothingAlgorithm for DefaultAlgo {
             prev_velocity = *vel;
         }
 
-        // Calculate max velocity
-        let mut max_velocity = Vector3::from_element(MAX_VELOCITY);
-        if self.per_axis {
-            max_velocity[0] *= self.smoothness_pitch;
-            max_velocity[1] *= self.smoothness_yaw;
-            max_velocity[2] *= self.smoothness_roll;
-        } else {
-            max_velocity[0] *= self.smoothness;
-        }
-
-        // Doing this to get similar max zoom as without second pass
-        if self.second_pass {
-            max_velocity[0] *= 0.5;
-            if self.per_axis {
-                max_velocity[1] *= 0.5;
-                max_velocity[2] *= 0.5;
-            }
-        }
-
         // Normalize velocity
-        for (_ts, vel) in velocity.iter_mut() {
+        for (ts, vel) in velocity.iter_mut() {
+            let smoothness_pitch = smoothness_pitch_per_timestamp.get(ts).unwrap_or(&self.smoothness_pitch);
+            let smoothness_yaw   = smoothness_yaw_per_timestamp  .get(ts).unwrap_or(&self.smoothness_yaw);
+            let smoothness_roll  = smoothness_roll_per_timestamp .get(ts).unwrap_or(&self.smoothness_roll);
+            let smoothness       = smoothness_per_timestamp      .get(ts).unwrap_or(&self.smoothness);
+
+            // Calculate max velocity
+            let mut max_velocity = [MAX_VELOCITY, MAX_VELOCITY, MAX_VELOCITY];
+            if self.per_axis {
+                max_velocity[0] *= smoothness_pitch;
+                max_velocity[1] *= smoothness_yaw;
+                max_velocity[2] *= smoothness_roll;
+            } else {
+                max_velocity[0] *= smoothness;
+            }
+
+            // Doing this to get similar max zoom as without second pass
+            if self.second_pass {
+                max_velocity[0] *= 0.5;
+                if self.per_axis {
+                    max_velocity[1] *= 0.5;
+                    max_velocity[2] *= 0.5;
+                }
+            }
+
             vel[0] /= max_velocity[0];
             if self.per_axis {
                 vel[1] /= max_velocity[1];
@@ -233,6 +284,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|(ts, x)| {
             let ratio = velocity[ts];
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
             if self.per_axis {
                 let pitch_factor = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - ratio[1]) + alpha_0_1s * ratio[1];
@@ -256,6 +309,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
             let ratio = velocity[ts];
             if self.per_axis {
                 let pitch_factor = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
@@ -351,6 +406,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         // Forward pass
         let mut q = *smoothed2.iter().next().unwrap().1;
         let smoothed1: TimeQuat = smoothed2.iter().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
             let vel_ratio = velocity[ts];
             let dist_ratio = distance[ts];
             if self.per_axis {
@@ -376,6 +433,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
             let vel_ratio = velocity[ts];
             let dist_ratio = distance[ts];
             if self.per_axis {

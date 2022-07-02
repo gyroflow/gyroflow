@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
 use std::collections::BTreeSet;
+use std::str::FromStr;
 
 use qml_video_rs::video_item::MDKVideoItem;
 
@@ -18,11 +19,13 @@ use crate::core::calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
 use crate::core::stabilization;
 use crate::core::synchronization;
+use crate::core::keyframes::*;
 use crate::rendering;
 use crate::util;
 use crate::wrap_simple_method;
 use crate::rendering::FfmpegProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
+use crate::ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use crate::qt_gpu::qrhi_undistort;
 
 #[derive(Default, SimpleListItem)]
@@ -45,7 +48,7 @@ pub struct Controller {
     init_player: qt_method!(fn(&self, player: QJSValue)),
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
-    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue)),
+    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: String)),
     load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
@@ -54,6 +57,7 @@ pub struct Controller {
     set_of_method: qt_method!(fn(&self, v: u32)),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String, override_fps: f64)),
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
+    update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
@@ -92,6 +96,7 @@ pub struct Controller {
     set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
 
     override_video_fps: qt_method!(fn(&self, fps: f64)),
+    get_org_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
 
@@ -112,6 +117,7 @@ pub struct Controller {
 
     input_horizontal_stretch: qt_property!(f64; WRITE set_input_horizontal_stretch),
     input_vertical_stretch: qt_property!(f64; WRITE set_input_vertical_stretch),
+    lens_is_asymmetrical: qt_property!(bool; WRITE set_lens_is_asymmetrical),
 
     background_mode: qt_property!(i32; WRITE set_background_mode),
     background_margin: qt_property!(f64; WRITE set_background_margin),
@@ -135,6 +141,7 @@ pub struct Controller {
     set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
 
     chart_data_changed: qt_signal!(),
+    keyframes_changed: qt_signal!(),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
 
@@ -199,6 +206,13 @@ pub struct Controller {
     gyroflow_exists: qt_signal!(path: QString, thin: bool, extended: bool),
     request_location: qt_signal!(path: QString, thin: bool, extended: bool),
 
+    set_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64, value: f64)),
+    set_keyframe_easing: qt_method!(fn(&self, typ: String, timestamp_us: i64, easing: String)),
+    keyframe_easing: qt_method!(fn(&self, typ: String, timestamp_us: i64) -> String),
+    remove_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64)),
+    clear_keyframes_type: qt_method!(fn(&self, typ: String)),
+    keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
+
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
@@ -219,6 +233,7 @@ impl Controller {
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
         self.chart_data_changed();
+        self.keyframes_changed();
         self.update_offset_model();
         *self.stabilizer.video_path.write() = util::url_to_path(url.clone());
 
@@ -275,6 +290,7 @@ impl Controller {
                     gyro.remove_offsets_near(new_ts, 100.0);
                     gyro.set_offset(new_ts, x.1);
                 }
+                this.stabilizer.keyframes.write().update_gyro(&gyro);
                 this.stabilizer.invalidate_zooming();
             }
             this.update_offset_model();
@@ -396,6 +412,13 @@ impl Controller {
             chart.setFromGyroSource(&self.stabilizer.gyro.read());
         }
     }
+    fn update_keyframes_view(&mut self, view: QJSValue) {
+        if let Some(view) = view.to_qobject::<TimelineKeyframesView>() {
+            let view = unsafe { &mut *view.as_ptr() }; // _self.borrow_mut();
+
+            view.setKeyframes(&*self.stabilizer.keyframes.read());
+        }
+    }
 
     fn update_offset_model(&mut self) {
         self.offsets_model = RefCell::new(self.stabilizer.gyro.read().get_offsets().iter().map(|(k, v)| OffsetItem {
@@ -409,7 +432,7 @@ impl Controller {
         })(());
     }
 
-    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue) {
+    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue) {
         let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
@@ -491,6 +514,10 @@ impl Controller {
                     if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
                         let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
                         chart.setDurationMs(duration_ms);
+                    }
+                    if let Some(kfview) = kfview.to_qobject::<TimelineKeyframesView>() {
+                        let kfview = unsafe { &mut *kfview.as_ptr() }; // _self.borrow_mut();
+                        kfview.setDurationMs(duration_ms);
                     }
                     let camera_id = stab.camera_id.read();
 
@@ -806,6 +833,8 @@ impl Controller {
                     self.lens_profile_loaded(QString::from(lens_json), QString::default());
                 }
                 self.request_recompute();
+                self.chart_data_changed();
+                self.keyframes_changed();
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
@@ -840,6 +869,7 @@ impl Controller {
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
+    wrap_simple_method!(set_lens_is_asymmetrical,      v: bool; recompute);
     wrap_simple_method!(set_input_vertical_stretch,    v: f64; recompute);
     wrap_simple_method!(set_background_mode,           v: i32; recompute);
     wrap_simple_method!(set_background_margin,         v: f64; recompute);
@@ -855,6 +885,7 @@ impl Controller {
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
 
+    fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_current_fov       (&self) -> f64 { self.stabilizer.get_current_fov() }
@@ -1231,6 +1262,54 @@ impl Controller {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
     }
+
+    fn set_keyframe(&self, typ: String, timestamp_us: i64, value: f64) {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            self.stabilizer.set_keyframe(&kf, timestamp_us, value);
+            self.keyframes_changed();
+            self.request_recompute();
+        }
+    }
+    fn set_keyframe_easing(&self, typ: String, timestamp_us: i64, easing: String) {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            if let Ok(e) = Easing::from_str(&easing) {
+                self.stabilizer.set_keyframe_easing(&kf, timestamp_us, e);
+                self.keyframes_changed();
+                self.request_recompute();
+            }
+        }
+    }
+    fn keyframe_easing(&self, typ: String, timestamp_us: i64) -> String {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            if let Some(e) = self.stabilizer.keyframe_easing(&kf, timestamp_us) {
+                return e.to_string();
+            }
+        }
+        String::new()
+    }
+    fn remove_keyframe(&self, typ: String, timestamp_us: i64) {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            self.stabilizer.remove_keyframe(&kf, timestamp_us);
+            self.keyframes_changed();
+            self.request_recompute();
+        }
+    }
+    fn clear_keyframes_type(&self, typ: String) {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            self.stabilizer.clear_keyframes_type(&kf);
+            self.keyframes_changed();
+            self.request_recompute();
+        }
+    }
+    fn keyframe_value_at_video_timestamp(&self, typ: String, timestamp_ms: f64) -> QJSValue {
+        if let Ok(typ) = KeyframeType::from_str(&typ) {
+            if let Some(v) = self.stabilizer.keyframe_value_at_video_timestamp(&typ, timestamp_ms) {
+                return QJSValue::from(v);
+            }
+        }
+        QJSValue::default()
+    }
+
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }

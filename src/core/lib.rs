@@ -11,6 +11,7 @@ pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
 pub mod camera_identifier;
+pub mod keyframes;
 
 pub mod zooming;
 pub mod smoothing;
@@ -23,6 +24,7 @@ pub mod stabilization_params;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
 use std::path::PathBuf;
+use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
 use gyro_source::{ GyroSource, Quat64, TimeQuat, TimeVec };
@@ -66,6 +68,8 @@ pub struct StabilizationManager<T: PixelType> {
 
     pub video_path: Arc<RwLock<String>>,
 
+    pub keyframes: Arc<RwLock<KeyframeManager>>,
+
     pub params: Arc<RwLock<StabilizationParams>>
 }
 
@@ -95,6 +99,8 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             #[cfg(feature = "opencv")]
             lens_calibrator: Arc::new(RwLock::new(None)),
 
+            keyframes: Arc::new(RwLock::new(KeyframeManager::new())),
+
             camera_id: Arc::new(RwLock::new(None)),
         }
     }
@@ -111,6 +117,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
 
         self.pose_estimator.sync_results.write().clear();
+        self.keyframes.write().clear();
 
         Ok(())
     }
@@ -259,10 +266,11 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_smoothness(&self) {
         let mut gyro = self.gyro.write();
         let params = self.params.read();
+        let keyframes = self.keyframes.read();
         let mut smoothing = self.smoothing.write();
         let horizon_lock = smoothing.horizon_lock.clone();
 
-        gyro.recompute_smoothness(smoothing.current_mut().as_mut(), horizon_lock, &params);
+        gyro.recompute_smoothness(smoothing.current_mut().as_mut(), horizon_lock, &params, &keyframes);
     }
 
     pub fn recompute_undistortion(&self) {
@@ -287,6 +295,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
+        let keyframes = self.keyframes.clone();
         let gyro = self.gyro.clone();
 
         let compute_id = fastrand::u64(..);
@@ -307,7 +316,7 @@ impl<T: PixelType> StabilizationManager<T> {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
-                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read());
+                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes.read());
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
@@ -536,7 +545,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
     pub fn get_min_fov               (&self) -> f64 { self.params.read().min_fov }
 
-    pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); }
+    pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
     pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
 
     pub fn set_is_superview(&self, v: bool) {
@@ -547,17 +556,27 @@ impl<T: PixelType> StabilizationManager<T> {
         }
         self.invalidate_zooming();
     }
+    pub fn set_lens_is_asymmetrical(&self, v: bool) {
+        self.lens.write().asymmetrical = v;
+        if let Some(ref mut calib) = *self.lens_calibrator.write() {
+            calib.asymmetrical = v;
+        }
+        self.invalidate_zooming();
+    }
 
     pub fn remove_offset(&self, timestamp_us: i64) {
         self.gyro.write().remove_offset(timestamp_us);
+        self.keyframes.write().update_gyro(&self.gyro.read());
         self.invalidate_zooming();
     }
     pub fn set_offset(&self, timestamp_us: i64, offset_ms: f64) {
         self.gyro.write().set_offset(timestamp_us, offset_ms);
+        self.keyframes.write().update_gyro(&self.gyro.read());
         self.invalidate_zooming();
     }
     pub fn clear_offsets(&self) {
         self.gyro.write().clear_offsets();
+        self.keyframes.write().update_gyro(&self.gyro.read());
         self.invalidate_zooming();
     }
     pub fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
@@ -670,11 +689,11 @@ impl<T: PixelType> StabilizationManager<T> {
         self.params.write().clear();
         self.invalidate_ongoing_computations();
         self.invalidate_smoothing();
-        self.invalidate_zooming();
         self.video_path.write().clear();
         *self.camera_id.write() = None;
 
         *self.gyro.write() = GyroSource::new();
+        self.keyframes.write().clear();
 
         self.pose_estimator.clear();
     }
@@ -688,6 +707,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 params.fps_scale = None;
             }
             self.gyro.write().init_from_params(&params);
+            self.keyframes.write().timestamp_scale = params.fps_scale;
         }
 
         self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self, false));
@@ -794,6 +814,7 @@ impl<T: PixelType> StabilizationManager<T> {
             "output": render_options,
             "synchronization": sync_options,
             "offsets": gyro.get_offsets(), // timestamp, offset value
+            "keyframes": self.keyframes.read().serialize(),
 
             "trim_start": params.trim_start,
             "trim_end":   params.trim_end,
@@ -1020,6 +1041,11 @@ impl<T: PixelType> StabilizationManager<T> {
 
             if let Some(serde_json::Value::Object(offsets)) = obj.get("offsets") {
                 self.gyro.write().set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
+                self.keyframes.write().update_gyro(&self.gyro.read());
+            }
+
+            if let Some(keyframes) = obj.get("keyframes") {
+                self.keyframes.write().deserialize(keyframes);
             }
 
             if !org_video_path.is_empty() {
@@ -1037,6 +1063,46 @@ impl<T: PixelType> StabilizationManager<T> {
             }
         }
         Ok(obj)
+    }
+
+    pub fn set_keyframe(&self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
+        self.keyframes.write().set(typ, timestamp_us, value);
+        self.keyframes_updated(typ);
+    }
+    pub fn set_keyframe_easing(&self, typ: &KeyframeType, timestamp_us: i64, easing: Easing) {
+        self.keyframes.write().set_easing(typ, timestamp_us, easing);
+        self.keyframes_updated(typ);
+    }
+    pub fn keyframe_easing(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<Easing> {
+        self.keyframes.read().easing(typ, timestamp_us)
+    }
+    pub fn remove_keyframe(&self, typ: &KeyframeType, timestamp_us: i64) {
+        self.keyframes.write().remove(typ, timestamp_us);
+        self.keyframes_updated(typ);
+    }
+    pub fn clear_keyframes_type(&self, typ: &KeyframeType) {
+        self.keyframes.write().clear_type(typ);
+        self.keyframes_updated(typ);
+    }
+    pub fn keyframe_value_at_video_timestamp(&self, typ: &KeyframeType, timestamp_ms: f64) -> Option<f64> {
+        self.keyframes.read().value_at_video_timestamp(typ, timestamp_ms)
+    }
+    fn keyframes_updated(&self, typ: &KeyframeType) {
+        match typ {
+            KeyframeType::VideoRotation |
+            KeyframeType::ZoomingCenterX |
+            KeyframeType::ZoomingCenterY => self.invalidate_zooming(),
+
+            KeyframeType::LockHorizonAmount |
+            KeyframeType::LockHorizonRoll |
+            KeyframeType::SmoothingParamTimeConstant |
+            KeyframeType::SmoothingParamTimeConstant2 |
+            KeyframeType::SmoothingParamSmoothness |
+            KeyframeType::SmoothingParamPitch |
+            KeyframeType::SmoothingParamRoll |
+            KeyframeType::SmoothingParamYaw => self.invalidate_smoothing(),
+            _ => { }
+        }
     }
 }
 

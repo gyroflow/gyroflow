@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator, IntoParallelRefIterator };
 
+// TODO: Implement adaptive_zoom_center_offset
+
 pub struct FovDefault {
     compute_params: ComputeParams,
     input_dim: (f64, f64),

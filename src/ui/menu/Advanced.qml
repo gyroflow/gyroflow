@@ -81,6 +81,7 @@ MenuItem {
                 unit: "%";
                 precision: 0;
                 width: parent.width;
+                keyframe: "BackgroundMargin";
                 onValueChanged: controller.background_margin = value / 100;
             }
         }
@@ -95,6 +96,7 @@ MenuItem {
                 unit: "%";
                 precision: 0;
                 width: parent.width;
+                keyframe: "BackgroundFeather";
                 onValueChanged: controller.background_margin_feather = value / 100;
             }
         }

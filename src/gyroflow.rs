@@ -16,10 +16,11 @@ pub mod rendering;
 mod resources;
 #[cfg(not(compiled_qml))]
 mod resources_qml;
-pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; } }
+pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; pub mod TimelineKeyframesView; } }
 pub mod qt_gpu { pub mod qrhi_undistort; }
 
 use ui::components::TimelineGyroChart::TimelineGyroChart;
+use ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use ui::ui_tools::UITools;
 
 cpp! {{
@@ -51,6 +52,7 @@ fn entry() {
 
     qml_video_rs::register_qml_types();
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
+    qml_register_type::<TimelineKeyframesView>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineKeyframesView"));
 
     // let _time = std::time::Instant::now();
     // rendering::set_gpu_type_from_name("Apple M1");

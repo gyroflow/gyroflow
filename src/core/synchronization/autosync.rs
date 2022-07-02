@@ -75,6 +75,7 @@ impl AutosyncProcess {
         estimator.every_nth_frame.store(every_nth_frame.max(1) as usize, SeqCst);
 
         let mut comp_params = ComputeParams::from_manager(stab, true);
+        comp_params.keyframes.clear();
         if mode == "synchronize" {
             comp_params.gyro.clear_offsets();
         }

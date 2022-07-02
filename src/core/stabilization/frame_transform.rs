@@ -4,6 +4,7 @@
 use nalgebra::Matrix3;
 use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use crate::keyframes::KeyframeType;
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
@@ -36,16 +37,26 @@ impl FrameTransform {
     pub fn get_ratio(params: &ComputeParams) -> f64 {
         params.width as f64 / params.video_width.max(1) as f64
     }
-    fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool) -> f64 {
-        let mut fov = if use_fovs && params.fovs.len() > frame { params.fovs[frame] * params.fov_scale } else { params.fov_scale }.max(0.001);
+    fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64) -> f64 {
+        let fov_scale = params.keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_ms).unwrap_or(params.fov_scale);
+        let mut fov = if use_fovs && params.fovs.len() > frame { params.fovs[frame] * fov_scale } else { fov_scale }.max(0.001);
         //fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
         fov *= params.width as f64 / params.output_width.max(1) as f64;
         fov
     }
 
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
+        // ----------- Keyframes -----------
+        let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+        let background_margin = params.keyframes.value_at_video_timestamp(&KeyframeType::BackgroundMargin, timestamp_ms).unwrap_or(params.background_margin);
+        let background_feather = params.keyframes.value_at_video_timestamp(&KeyframeType::BackgroundFeather, timestamp_ms).unwrap_or(params.background_margin_feather);
+        let lens_correction_amount = params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount);
+        let adaptive_zoom_center_x = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.0);
+        let adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
+        // ----------- Keyframes -----------
+
         let img_dim_ratio = Self::get_ratio(params);
-        let mut fov = Self::get_fov(params, frame, true);
+        let mut fov = Self::get_fov(params, frame, true, timestamp_ms);
         let mut ui_fov = fov / (params.width as f64 / params.output_width.max(1) as f64);
         if params.lens_fov_adjustment > 0.0001 {
             if params.fovs.is_empty() {
@@ -65,7 +76,7 @@ impl FrameTransform {
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
-        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+        let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
 
@@ -110,13 +121,13 @@ impl FrameTransform {
             k:             [params.distortion_coeffs[0] as f32, params.distortion_coeffs[1] as f32, params.distortion_coeffs[2] as f32, params.distortion_coeffs[3] as f32],
             fov:           fov as f32,
             r_limit:       params.radial_distortion_limit as f32,
-            lens_correction_amount:   params.lens_correction_amount as f32,
+            lens_correction_amount:   lens_correction_amount as f32,
             input_vertical_stretch:   params.input_vertical_stretch as f32,
             input_horizontal_stretch: params.input_horizontal_stretch as f32,
             background_mode:          params.background_mode as i32,
-            background_margin:        params.background_margin as f32,
-            background_margin_feather:params.background_margin_feather as f32,
-            translation2d: [(params.adaptive_zoom_center_offset.0 * params.width as f64 / fov) as f32, (params.adaptive_zoom_center_offset.1 * params.height as f64 / fov) as f32],
+            background_margin:        background_margin as f32,
+            background_margin_feather:background_feather as f32,
+            translation2d: [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32],
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             ..Default::default()
         };
@@ -129,8 +140,12 @@ impl FrameTransform {
     }
 
     pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+        // ----------- Keyframes -----------
+        let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+        // ----------- Keyframes -----------
+
         let img_dim_ratio = Self::get_ratio(params);
-        let fov = Self::get_fov(params, 0, false);
+        let fov = Self::get_fov(params, 0, false, timestamp_ms);
 
         let scaled_k = params.camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, fov);
@@ -142,7 +157,7 @@ impl FrameTransform {
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
-        let image_rotation = Matrix3::new_rotation(params.video_rotation * (std::f64::consts::PI / 180.0));
+        let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
 

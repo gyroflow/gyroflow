@@ -32,7 +32,7 @@ MenuItem {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
-        controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart());
+        controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart(), window.videoArea.timeline.getKeyframesView());
     }
 
     function loadGyroflow(obj) {
@@ -79,14 +79,11 @@ MenuItem {
                 Qt.callLater(() => integrator.currentIndex = 1);
             }
 
-            const chart = window.videoArea.timeline.getChart();
-            chart.setDurationMs(controller.get_scaled_duration_ms());
-            window.videoArea.durationMs = controller.get_scaled_duration_ms();
-
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
 
-            Qt.callLater(() => controller.update_chart(window.videoArea.timeline.getChart()));
+            window.videoArea.timeline.updateDurations();
+
             if (root.pendingOffsets) {
                 for (const ts in root.pendingOffsets) {
                     controller.set_offset(ts, root.pendingOffsets[ts]);

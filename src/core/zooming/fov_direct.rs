@@ -19,6 +19,8 @@ Direct FOV calculation:
     - from the nearest point of (1),(2) or (3), calculate the FOV
 */
 
+// TODO: Implement adaptive_zoom_center_offset
+
 pub struct FovDirect {
     input_dim: (f64, f64),
     output_dim: (f64, f64),

@@ -857,8 +857,9 @@ dependencies = [
 
 [[package]]
 name = "d3d12"
-version = "0.4.1"
-source = "git+https://github.com/gfx-rs/d3d12-rs.git?rev=ffe5e261da0a6cb85332b82ab310abd2a7e849f6#ffe5e261da0a6cb85332b82ab310abd2a7e849f6"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "827914e1f53b1e0e025ecd3d967a7836b7bcb54520f90e21ef8df7b4d88a2759"
 dependencies = [
  "bitflags",
  "libloading",
@@ -1434,6 +1435,7 @@ dependencies = [
  "sample-consensus",
  "serde",
  "serde_json",
+ "simple-easing",
  "space",
  "telemetry-parser",
  "time 0.3.11",
@@ -1820,8 +1822,9 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.23.1"
-source = "git+https://github.com/gfx-rs/metal-rs?rev=1aaa903#1aaa9033a22b2af7ff8cae2ed412a4733799c3d3"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de11355d1f6781482d027a3b4d4de7825dcedb197bf573e0596d00008402d060"
 dependencies = [
  "bitflags",
  "block",
@@ -2922,18 +2925,18 @@ checksum = "a2333e6df6d6598f2b1974829f853c2b4c5f4a6e503c10af918081aa6f8564e1"
 
 [[package]]
 name = "serde"
-version = "1.0.137"
+version = "1.0.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61ea8d54c77f8315140a05f4c7237403bf38b72704d031543aa1d16abbf517d1"
+checksum = "1578c6245786b9d168c5447eeacfb96856573ca56c9d68fdcf394be134882a47"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.137"
+version = "1.0.138"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f26faba0c3959972377d3b2d306ee9f71faee9714294e41bb777f83f88578be"
+checksum = "023e9b1467aef8a10fb88f25611870ada9800ef7e22afce356bb0d2387b6f27c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2997,6 +3000,12 @@ dependencies = [
  "paste",
  "wide",
 ]
+
+[[package]]
+name = "simple-easing"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d27ce00599090be80336a61223db24348c42fdf864a430af62e6175b0dbd41a"
 
 [[package]]
 name = "simplelog"
@@ -3326,9 +3335,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.21"
+version = "0.1.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc6b8ad3567499f98a1db7a752b07a7c8c7c7c34c332ec00effb2b0027974b7c"
+checksum = "11c75893af559bc8e10716548bdef5cb2b983f8e637db9d0e15126b61b484ee2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3374,9 +3383,9 @@ checksum = "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
 
 [[package]]
 name = "unicode-normalization"
-version = "0.1.20"
+version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81dee68f85cab8cf68dec42158baf3a79a1cdc065a8b103025965d6ccb7f6cbd"
+checksum = "854cbdc4f7bc6ae19c820d44abdc3277ac3e1b2b93db20a636825d9322fb60e6"
 dependencies = [
  "tinyvec",
 ]
@@ -3588,7 +3597,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#93dbffa5d3d5ae2b26ee0c573862fef2f9f4de52"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb0646f8da8280a357001f13da8a336578252947"
 dependencies = [
  "arrayvec 0.7.2",
  "js-sys",
@@ -3608,7 +3617,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#93dbffa5d3d5ae2b26ee0c573862fef2f9f4de52"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb0646f8da8280a357001f13da8a336578252947"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -3632,7 +3641,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#93dbffa5d3d5ae2b26ee0c573862fef2f9f4de52"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb0646f8da8280a357001f13da8a336578252947"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.2",
@@ -3670,7 +3679,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/wgpu.git#93dbffa5d3d5ae2b26ee0c573862fef2f9f4de52"
+source = "git+https://github.com/gfx-rs/wgpu.git#cb0646f8da8280a357001f13da8a336578252947"
 dependencies = [
  "bitflags",
 ]

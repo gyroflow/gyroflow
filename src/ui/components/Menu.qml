@@ -21,7 +21,7 @@ QQC.Menu {
     delegate: QQC.MenuItem {
         id: dlg;
 
-        property color textColor: orgIconColor.a > 0.1? orgIconColor : styleTextColor;
+        property color textColor: orgIconColor.a > 0.1? orgIconColor : (dlg.checked? styleTextColorOnAccent : styleTextColor);
         QQCM.Material.foreground: textColor;
 
         property color orgIconColor: "transparent";
@@ -63,7 +63,7 @@ QQC.Menu {
         Ease on scale { }
 
         background: Rectangle {
-            color: dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent";
+            color: dlg.checked? styleAccentColor : (dlg.hovered || dlg.highlighted? styleHighlightColor : "transparent");
             implicitHeight: itemHeight;
             radius: 4 * dpiScale;
         }

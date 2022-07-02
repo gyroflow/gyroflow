@@ -3,7 +3,8 @@
 
 use super::*;
 use nalgebra::*;
-use crate::gyro_source::TimeQuat;
+use crate::gyro_source::{TimeQuat, Quat64};
+use crate::keyframes::*;
 
 #[derive(Default, Clone)]
 pub struct Fixed {
@@ -34,7 +35,8 @@ impl SmoothingAlgorithm for Fixed {
                 "to": 180,
                 "value": self.roll,
                 "default": 0,
-                "unit": "°"
+                "unit": "°",
+                "keyframe": "SmoothingParamRoll"
             },
             {
                 "name": "pitch",
@@ -44,7 +46,8 @@ impl SmoothingAlgorithm for Fixed {
                 "to": 90,
                 "value": self.pitch,
                 "default": 0,
-                "unit": "°"
+                "unit": "°",
+                "keyframe": "SmoothingParamPitch"
             },
             {
                 "name": "yaw",
@@ -54,7 +57,8 @@ impl SmoothingAlgorithm for Fixed {
                 "to": 180,
                 "value": self.yaw,
                 "default": 0,
-                "unit": "°"
+                "unit": "°",
+                "keyframe": "SmoothingParamYaw"
             }
         ])
     }
@@ -68,28 +72,44 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams) -> TimeQuat {
+    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-        let x_axis = nalgebra::Vector3::<f64>::x_axis();
-        let y_axis = nalgebra::Vector3::<f64>::y_axis();
-        let z_axis = nalgebra::Vector3::<f64>::z_axis();
+        fn quat_for_rpy(roll: f64, pitch: f64, yaw: f64) -> Quat64 {
+            const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
+            let x_axis = nalgebra::Vector3::<f64>::x_axis();
+            let y_axis = nalgebra::Vector3::<f64>::y_axis();
+            let z_axis = nalgebra::Vector3::<f64>::z_axis();
 
-        let rot_x = Rotation3::from_axis_angle(&x_axis, self.pitch * DEG2RAD);
-        let rot_y = Rotation3::from_axis_angle(&y_axis, (self.roll + 90.0) * DEG2RAD);
-        let rot_z = Rotation3::from_axis_angle(&z_axis, self.yaw * DEG2RAD);
+            let rot_x = Rotation3::from_axis_angle(&x_axis, pitch * DEG2RAD);
+            let rot_y = Rotation3::from_axis_angle(&y_axis, (roll + 90.0) * DEG2RAD);
+            let rot_z = Rotation3::from_axis_angle(&z_axis, yaw * DEG2RAD);
 
-        let correction = Rotation3::from_axis_angle(&z_axis, 90.0 * DEG2RAD) * Rotation3::from_axis_angle(&y_axis, 90.0 * DEG2RAD);
+            let correction = Rotation3::from_axis_angle(&z_axis, 90.0 * DEG2RAD) * Rotation3::from_axis_angle(&y_axis, 90.0 * DEG2RAD);
 
-        // Z rotation corresponds to body-centric roll, so placed last
-        // using x as second rotation corresponds gives the usual pan/tilt combination
-        let combined_rot = rot_z * rot_x * rot_y * correction;
+            // Z rotation corresponds to body-centric roll, so placed last
+            // using x as second rotation corresponds gives the usual pan/tilt combination
+            let combined_rot = rot_z * rot_x * rot_y * correction;
 
-        let fixed_quat = UnitQuaternion::from_rotation_matrix(&combined_rot);
+            UnitQuaternion::from_rotation_matrix(&combined_rot)
+        }
+
+        let fixed_quat = quat_for_rpy(self.roll, self.pitch, self.yaw);
+
+        let is_changing = keyframes.is_value_changing(&KeyframeType::SmoothingParamRoll)
+                            || keyframes.is_value_changing(&KeyframeType::SmoothingParamPitch)
+                            || keyframes.is_value_changing(&KeyframeType::SmoothingParamYaw);
 
         quats.iter().map(|x| {
-            (*x.0, fixed_quat)
+            if is_changing {
+                let timestamp_ms = *x.0 as f64 / 1000.0;
+                let r = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamRoll, timestamp_ms).unwrap_or(self.roll);
+                let p = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamPitch, timestamp_ms).unwrap_or(self.pitch);
+                let y = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamYaw, timestamp_ms).unwrap_or(self.yaw);
+                (*x.0, quat_for_rpy(r, p, y))
+            } else {
+                (*x.0, fixed_quat)
+            }
         }).collect()
         // No need to reverse the BTreeMap, because it's sorted by definition
     }
