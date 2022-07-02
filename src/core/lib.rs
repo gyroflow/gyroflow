@@ -754,8 +754,12 @@ impl<T: PixelType> StabilizationManager<T> {
                     }
                 }
             }
+            let mut horizon_amount = smoothing_lock.horizon_lock.horizonlockpercent;
+            if !smoothing_lock.horizon_lock.lock_enabled {
+                horizon_amount = 0.0;
+            }
 
-            (smoothing.get_name(), parameters, smoothing_lock.horizon_lock.horizonlockpercent, smoothing_lock.horizon_lock.horizonroll)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll)
         };
 
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
