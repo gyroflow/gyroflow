@@ -27,41 +27,30 @@ impl ZoomingAlgorithm for ZoomDynamic {
 
         let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
-        let get_frames_per_window = |window: f64| -> usize {
-            let mut frames = (window * self.compute_params.scaled_fps).floor() as usize;
-            if frames % 2 == 0 {
-                frames += 1;
-            }
-            frames
-        };
-
-        let mut data_per_timestamp: Vec<DataPerTimestamp> = Vec::new();
-
         if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) {
-            data_per_timestamp = timestamps.iter().map(|ts| {
-                let window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(0.0);
-                let frames = get_frames_per_window(window);
+            // Keyframed window
+            let mut max_window = 0;
+            let data_per_timestamp = timestamps.iter().map(|ts| {
+                let window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(1.0);
+                let frames = self.get_frames_per_window(window);
+                if frames > max_window { max_window = frames; }
                 DataPerTimestamp {
                     frames,
                     half_frames: (frames / 2) as isize,
                     gaussian_window: gaussian_window_normalized(frames, frames as f64 / 6.0)
                 }
-            }).collect();
-        }
-        let max_frames = data_per_timestamp.iter().map(|x| x.frames).max();
+            }).collect::<Vec<_>>();
 
-        if !data_per_timestamp.is_empty() && max_frames.is_some() {
-            // Keyframed window
-            let max_frames2 = max_frames.unwrap() / 2;
+            let max_window_half = max_window / 2;
 
-            let fov_values_pad = pad_edge(&fov_values, (max_frames2, max_frames2));
-            let fov_min = min_rolling_dynamic(&fov_values_pad, max_frames2 as isize, &data_per_timestamp);
-            let fov_min_pad = pad_edge(&fov_min, (max_frames2, max_frames2));
+            let fov_values_pad = pad_edge(&fov_values, (max_window_half, max_window_half));
+            let fov_min = min_rolling_dynamic(&fov_values_pad, max_window_half as isize, &data_per_timestamp);
+            let fov_min_pad = pad_edge(&fov_min, (max_window_half, max_window_half));
 
-            fov_values = convolve_dynamic(&fov_min_pad, max_frames2 as isize, &data_per_timestamp);
+            fov_values = convolve_dynamic(&fov_min_pad, max_window_half as isize, &data_per_timestamp);
         } else {
             // Static window
-            let frames = get_frames_per_window(self.window);
+            let frames = self.get_frames_per_window(self.window);
 
             let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
             let fov_min = min_rolling(&fov_values_pad, frames);
@@ -90,6 +79,14 @@ impl ZoomDynamic {
             fov_estimator,
             compute_params,
         }
+    }
+
+    fn get_frames_per_window(&self, window: f64) -> usize {
+        let mut frames = (window * self.compute_params.scaled_fps).floor() as usize;
+        if frames % 2 == 0 {
+            frames += 1;
+        }
+        frames
     }
 }
 
