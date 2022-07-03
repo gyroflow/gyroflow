@@ -10,7 +10,7 @@ use crate::gyro_source::GyroSource;
 pub enum KeyframeType {
     Fov,
     VideoRotation,
-    // ZoomingSpeed,
+    ZoomingSpeed,
     ZoomingCenterX,
     ZoomingCenterY,
     BackgroundMargin,
@@ -81,7 +81,7 @@ impl KeyframeManager {
             x.remove(&timestamp_us);
         }
     }
-    pub fn is_value_changing(&self, typ: &KeyframeType) -> bool {
+    pub fn is_keyframed(&self, typ: &KeyframeType) -> bool {
         if let Some(x) = self.keyframes.get(typ) {
             return x.len() > 0;
         }
@@ -170,7 +170,7 @@ pub fn color_for_keyframe(kf: &KeyframeType) -> &'static str {
     match kf {
         KeyframeType::Fov                         => "#8ee6ea",
         KeyframeType::VideoRotation               => "#eae38e",
-        // KeyframeType::ZoomingSpeed             => "#32e595",
+        KeyframeType::ZoomingSpeed                => "#32e595",
         KeyframeType::ZoomingCenterX              => "#6fefb6",
         KeyframeType::ZoomingCenterY              => "#5ddba2",
         KeyframeType::BackgroundMargin            => "#6e5ddb",

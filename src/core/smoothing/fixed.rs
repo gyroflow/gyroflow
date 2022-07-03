@@ -96,12 +96,12 @@ impl SmoothingAlgorithm for Fixed {
 
         let fixed_quat = quat_for_rpy(self.roll, self.pitch, self.yaw);
 
-        let is_changing = keyframes.is_value_changing(&KeyframeType::SmoothingParamRoll)
-                            || keyframes.is_value_changing(&KeyframeType::SmoothingParamPitch)
-                            || keyframes.is_value_changing(&KeyframeType::SmoothingParamYaw);
+        let is_keyframed = keyframes.is_keyframed(&KeyframeType::SmoothingParamRoll)
+                             || keyframes.is_keyframed(&KeyframeType::SmoothingParamPitch)
+                             || keyframes.is_keyframed(&KeyframeType::SmoothingParamYaw);
 
         quats.iter().map(|x| {
-            if is_changing {
+            if is_keyframed {
                 let timestamp_ms = *x.0 as f64 / 1000.0;
                 let r = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamRoll, timestamp_ms).unwrap_or(self.roll);
                 let p = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamPitch, timestamp_ms).unwrap_or(self.pitch);

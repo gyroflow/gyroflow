@@ -15,6 +15,7 @@ use enterpolation::Merge;
 use std::collections::BTreeMap;
 
 use crate::stabilization::{ ComputeParams };
+use crate::keyframes::*;
 
 #[derive(PartialEq, Clone)]
 pub enum Mode {
@@ -35,7 +36,7 @@ impl Merge<f64> for Point2D {
 }
 
 pub trait ZoomingAlgorithm {
-    fn compute(&self, timestamps: &[f64]) -> Vec<(f64, Point2D)>;
+    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager) -> Vec<(f64, Point2D)>;
     fn compute_params(&self) -> &ComputeParams;
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
     fn hash(&self, hasher: &mut dyn Hasher);

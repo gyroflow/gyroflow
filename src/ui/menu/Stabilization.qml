@@ -407,6 +407,7 @@ MenuItem {
             to: 15;
             unit: qsTr("s");
             width: parent.width;
+            keyframe: "ZoomingSpeed";
             onValueChanged: controller.adaptive_zoom = value;
         }
     }

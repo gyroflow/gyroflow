@@ -5,6 +5,8 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use serde::{ Serialize, Deserialize };
+use crate::keyframes::KeyframeManager;
+
 use super::zooming;
 
 #[cfg(feature = "opencv")]
@@ -359,6 +361,6 @@ impl LensProfile {
         params.distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
 
         let zoom = zooming::from_compute_params(params);
-        zoom.compute(&[0.0]).first().map(|x| x.0).unwrap_or(1.0)
+        zoom.compute(&[0.0], &KeyframeManager::new()).first().map(|x| x.0).unwrap_or(1.0)
     }
 }

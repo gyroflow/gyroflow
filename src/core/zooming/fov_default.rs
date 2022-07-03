@@ -123,7 +123,7 @@ impl FovDefault {
         // let distance = {
         //     let mut sum = 0.0;
         //     let mut d: Vec<f64> = relevant_p[1..].iter().enumerate().map(|(i, v)| {
-        //         sum += ((v.0 - relevant_p[i].0).powf(2.0) + (v.1 - relevant_p[i].1).powf(2.0)).sqrt();
+        //         sum += ((v.0 - relevant_p[i].0).powi(2) + (v.1 - relevant_p[i].1).powi(2)).sqrt();
         //         sum
         //     }).collect();
         //     d.insert(0, 0.0);

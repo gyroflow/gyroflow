@@ -235,7 +235,7 @@ impl<T: PixelType> StabilizationManager<T> {
         false
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>) -> Vec<f64> {
+    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> Vec<f64> {
         let (window, frames, fps) = {
             let params = params.read();
             (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
@@ -246,7 +246,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 timestamps.push(i as f64 * 1000.0 / fps);
             }
 
-            let fovs = zoom.compute(&timestamps);
+            let fovs = zoom.compute(&timestamps, &keyframes);
             fovs.iter().map(|v| v.0).collect()
         } else {
             Vec::new()
@@ -256,7 +256,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let params = stabilization::ComputeParams::from_manager(self, false);
         let lens_fov_adjustment = params.lens_fov_adjustment;
         let mut zoom = zooming::from_compute_params(params);
-        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params);
+        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
 
         let mut stab_params = self.params.write();
         stab_params.set_fovs(fovs, lens_fov_adjustment);
@@ -295,7 +295,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
-        let keyframes = self.keyframes.clone();
+        let keyframes = self.keyframes.read().clone();
         let gyro = self.gyro.clone();
 
         let compute_id = fastrand::u64(..);
@@ -316,7 +316,7 @@ impl<T: PixelType> StabilizationManager<T> {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
-                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes.read());
+                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
@@ -333,7 +333,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params);
+                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 

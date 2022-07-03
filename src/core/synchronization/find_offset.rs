@@ -108,9 +108,9 @@ fn calculate_cost(offs: f64, of: &[TimeIMU], gyro: &BTreeMap<usize, TimeIMU>) ->
             if let Some(gg) = g.gyro.as_ref() {
                 if let Some(og) = o.gyro.as_ref() {
                     matches_count += 1;
-                    sum += (gg[0] - og[0]).powf(2.0) * 70.0;
-                    sum += (gg[1] - og[1]).powf(2.0) * 70.0;
-                    sum += (gg[2] - og[2]).powf(2.0) * 100.0;
+                    sum += (gg[0] - og[0]).powi(2) * 70.0;
+                    sum += (gg[1] - og[1]).powi(2) * 70.0;
+                    sum += (gg[2] - og[2]).powi(2) * 100.0;
                 }
             }
         }

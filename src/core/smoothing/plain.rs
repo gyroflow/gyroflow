@@ -67,7 +67,7 @@ impl SmoothingAlgorithm for Plain {
         }
 
         let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
-        if keyframes.is_value_changing(&KeyframeType::SmoothingParamTimeConstant) {
+        if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant) {
             alpha_per_timestamp = quats.iter().map(|(ts, _)| {
                 let timestamp_ms = *ts as f64 / 1000.0;
                 (*ts, get_alpha(keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant)))

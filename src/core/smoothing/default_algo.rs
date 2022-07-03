@@ -194,7 +194,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();
-            if keyframes.is_value_changing(typ) {
+            if keyframes.is_keyframed(typ) {
                 ret = quats.iter().map(|(ts, _)| {
                     let timestamp_ms = *ts as f64 / 1000.0;
                     (*ts, cb(keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def)))
