@@ -47,7 +47,7 @@ MenuItem {
             setFrameReadoutTime(+stab.frame_readout_time);
 
             if (typeof stab.lens_correction_amount !== "undefined") {
-                correctionAmount.value = +stab.lens_correction_amount * 100;
+                correctionAmount.value = +stab.lens_correction_amount;
             }
 
             const az = +stab.adaptive_zoom_window;
@@ -60,8 +60,8 @@ MenuItem {
                 croppingMode.currentIndex = 0; // No cropping
             }
             if (stab.hasOwnProperty("adaptive_zoom_center_offset")) {
-                zoomingCenterX.value = stab.adaptive_zoom_center_offset[0] * 100;
-                zoomingCenterY.value = stab.adaptive_zoom_center_offset[1] * 100;
+                zoomingCenterX.value = stab.adaptive_zoom_center_offset[0];
+                zoomingCenterY.value = stab.adaptive_zoom_center_offset[1];
             }
 
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
