@@ -10,11 +10,11 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "8898414" }
 ahrs = { version = "0.5.0", features = ["field_access"] }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "681ed64" }
 
 mimalloc = { version = "0.1.29", default-features = false }
 nalgebra = { version = "0.30", features = ["serde-serialize"] }
@@ -22,16 +22,16 @@ rayon = "1.5.3"
 biquad = "0.4.2"
 fastrand = "1.7.0"
 lazy_static = "1.4.0"
-crossbeam-channel = "0.5.4"
+crossbeam-channel = "0.5.5"
 parking_lot = "0.12.1"
 bincode = "1.3.3"
-serde = "1.0.137"
-serde_json = "1.0.81"
+serde = "1.0.138"
+serde_json = "1.0.82"
 crc32fast = "1.3.2"
 byteorder = "1.4.3"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = "0.3"
+time = "0.3.11"
 itertools = "0.10.3"
 num = "0.4.0"
 num-traits = "0.2.15"
@@ -42,12 +42,12 @@ enum_dispatch = "0.3.8"
 
 simple-easing = "1.0.0"
 
-dyn-clone = "1.0.5"
+dyn-clone = "1.0.6"
 
-akaze = { version = "*", git = "https://github.com/rust-cv/cv.git" }
-eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git" }
-cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git" }
-cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git" }
+akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
+eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
+cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
+cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
 sample-consensus = "1.0.2"
 arrsac = "0.10.0"
 rand_xoshiro = "0.6.0"
@@ -58,10 +58,10 @@ enterpolation = "0.1.1"
 
 walkdir = "2.3.2"
 
-opencv = { version = "0.64", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.65", features = ["clang-runtime"], optional = true }
 
-wgpu = { version = "*", git = "https://github.com/gfx-rs/wgpu.git" }
-bytemuck = "1.9.1"
+wgpu = "0.13.1"
+bytemuck = "1.10.0"
 pollster = "0.2.5"
 futures-intrusive = "0.4.0"
 
