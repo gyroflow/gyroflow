@@ -113,6 +113,16 @@ Gyroflow is an application that can stabilize your video by using motion data fr
         - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 - Android 6+
 
+
+## Install Gyroflow
+---
+### MacOS
+  ```shell
+  brew install gyroflow
+  ```
+  To upgrade  gyroflow, run `brew update` then `brew upgrade gyroflow`
+
+
 ## Help and support
 For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D).
 
