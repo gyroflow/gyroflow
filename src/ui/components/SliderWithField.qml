@@ -26,7 +26,7 @@ Row {
 
     onValueChanged: {
         if (!root.preventChange) {
-            field.value = value / scaler;
+            field.value = value * scaler;
         }
     }
     Connections {
@@ -35,7 +35,7 @@ Row {
         function onKeyframe_value_updated(keyframe: string, value: real) {
             if (keyframe == root.keyframe) {
                 root.preventChange = true;
-                field.value = value / root.scaler;
+                field.value = value * root.scaler;
                 root.preventChange = false;
             }
         }
@@ -120,7 +120,7 @@ Row {
 
             if (!root.preventChange) {
                 root.preventChange = true;
-                root.value = value * root.scaler;
+                root.value = value / root.scaler;
                 root.preventChange = false;
 
                 if (root.keyframe && root.keyframesEnabled) {

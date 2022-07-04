@@ -32,7 +32,8 @@ Modal {
             "Integration method": ["integration_method"],
         },
         "Trim range": ["trim_start", "trim_end"],
-        "Offsets":    ["offsets"]
+        "Offsets":    ["offsets"],
+        "Keyframes":  ["keyframes"]
     },
     { // Right column
         "Synchronization|synchronization": {
@@ -94,6 +95,7 @@ Modal {
             QT_TR_NOOP("Integration method");
         QT_TR_NOOP("Trim range");
         QT_TR_NOOP("Offsets");
+        QT_TR_NOOP("Keyframes");
         QT_TR_NOOP("Synchronization");
             QT_TR_NOOP("Rough gyro offset");
             QT_TR_NOOP("Sync search size");
