@@ -558,6 +558,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_lens_is_asymmetrical(&self, v: bool) {
         self.lens.write().asymmetrical = v;
+        #[cfg(feature = "opencv")]
         if let Some(ref mut calib) = *self.lens_calibrator.write() {
             calib.asymmetrical = v;
         }
