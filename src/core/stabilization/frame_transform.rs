@@ -39,7 +39,7 @@ impl FrameTransform {
     }
     fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64) -> f64 {
         let fov_scale = params.keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_ms).unwrap_or(params.fov_scale);
-        let mut fov = if use_fovs && params.fovs.len() > frame { params.fovs[frame] * fov_scale } else { fov_scale }.max(0.001);
+        let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(&1.0) * fov_scale } else { 1.0 }.max(0.001);
         //fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
         fov *= params.width as f64 / params.output_width.max(1) as f64;
         fov
