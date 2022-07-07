@@ -189,6 +189,28 @@ pub fn color_for_keyframe(kf: &KeyframeType) -> &'static str {
     }
 }
 
+pub fn name_for_keyframe(kf: &KeyframeType) -> &'static str {
+    match kf {
+        KeyframeType::Fov                         => "FOV",
+        KeyframeType::VideoRotation               => "Video rotation",
+        KeyframeType::ZoomingSpeed                => "Zooming speed",
+        KeyframeType::ZoomingCenterX              => "Zooming center offset X",
+        KeyframeType::ZoomingCenterY              => "Zooming center offset Y",
+        KeyframeType::BackgroundMargin            => "Background margin",
+        KeyframeType::BackgroundFeather           => "Background feather",
+        KeyframeType::LockHorizonAmount           => "Horizon lock amount",
+        KeyframeType::LockHorizonRoll             => "Horizon lock roll correction",
+        KeyframeType::LensCorrectionStrength      => "Lens correction strength",
+
+        KeyframeType::SmoothingParamTimeConstant  => "Max smoothness",
+        KeyframeType::SmoothingParamTimeConstant2 => "Max smoothness at high velocity",
+        KeyframeType::SmoothingParamSmoothness    => "Smoothness",
+        KeyframeType::SmoothingParamPitch         => "Smoothness pitch",
+        KeyframeType::SmoothingParamRoll          => "Smoothness roll",
+        KeyframeType::SmoothingParamYaw           => "Smoothness yaw",
+    }
+}
+
 impl Easing {
     pub fn get(a: &Self, b: &Self, _alpha: f64) -> Self {
         // let a_in  = a == &Self::EaseIn  || a == &Self::EaseInOut;

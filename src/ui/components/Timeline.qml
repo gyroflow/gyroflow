@@ -165,7 +165,7 @@ Item {
                     const pt = ma.mapToItem(keyframes, x, y);
                     const kf = keyframes.keyframeAtXY(pt.x, pt.y);
                     if (kf) {
-                        const [keyframe, timestamp] = kf.split(":");
+                        const [keyframe, timestamp, name] = kf.split(":", 3);
                         if (pressed && (pressedButtons & Qt.RightButton)) {
                             keyframeContextMenu.pressedKeyframe = keyframe;
                             keyframeContextMenu.pressedKeyframeTs = timestamp;
@@ -178,15 +178,25 @@ Item {
                             return true;
                         }
                         ma.cursorShape = Qt.PointingHandCursor;
+                        if (!kftt.visible) {
+                            kftt.x       = pt.x + 10 * dpiScale;
+                            kftt.offsetY = pt.y + 10 * dpiScale + kftt.height;
+                            kftt.text = qsTr(name);
+                            kftt.visible = true;
+                        }
                     } else {
                         ma.cursorShape = Qt.ArrowCursor;
+                        if (kftt.visible)
+                            kftt.visible = false;
                     }
                     return false;
                 }
+                ToolTip { id: kftt; z: 5; }
                 Menu {
                     id: keyframeContextMenu;
                     property string pressedKeyframe: "";
                     property real pressedKeyframeTs: 0;
+                    z: 6;
 
                     font.pixelSize: 11.5 * dpiScale;
                     Action {

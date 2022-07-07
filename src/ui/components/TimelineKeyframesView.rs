@@ -51,7 +51,7 @@ impl TimelineKeyframesView {
             for (pt, ts) in v.points.iter().zip(v.timestamps_per_point.iter()) {
                 if x >= pt.x - 8.0 && x <= pt.x + 8.0 &&
                    y >= pt.y - 8.0 && y <= pt.y + 8.0 {
-                    return QJSValue::from(QString::from(format!("{:?}:{}", kf, ts)));
+                    return QJSValue::from(QString::from(format!("{:?}:{}:{}", kf, ts, name_for_keyframe(kf))));
                 }
             }
         }
@@ -155,7 +155,7 @@ impl TimelineKeyframesView {
         let idx = &self.series[keyframe].playback_keyframe_idx;
         if *idx >= 0 && *idx < self.series[keyframe].points.len() as i32 {
             p.set_brush(QBrush::from_style(BrushStyle::NoBrush));
-            
+
             let mut pen = QPen::from_color(QColor::from_name("white"));
             pen.set_width_f(1.0); // TODO * dpiScale
             p.set_pen(pen);

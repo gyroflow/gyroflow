@@ -7,6 +7,7 @@ import QtQuick.Controls as QQC
 QQC.ToolTip {
     id: root;
     delay: 500;
+    property real offsetY: 0;
     background: Rectangle {
         color: styleButtonColor;
         border.width: 1 * dpiScale;
@@ -14,11 +15,11 @@ QQC.ToolTip {
         radius: 4 * dpiScale;
     }
     enter: Transition {
-        NumberAnimation { property: "y"; from: -height/1.3 - bottomMargin; to: -height - bottomMargin; easing.type: Easing.OutExpo; duration: 500; }
+        NumberAnimation { property: "y"; from: -height/1.3 - bottomMargin + offsetY; to: -height - bottomMargin + offsetY; easing.type: Easing.OutExpo; duration: 500; }
         NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; easing.type: Easing.OutExpo; duration: 500; }
     }
     exit: Transition {
-        NumberAnimation { property: "y"; from: -height - bottomMargin; to: -height/1.3 - bottomMargin; easing.type: Easing.OutExpo; duration: 500; }
+        NumberAnimation { property: "y"; from: -height - bottomMargin + offsetY; to: -height/1.3 - bottomMargin + offsetY; easing.type: Easing.OutExpo; duration: 500; }
         NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; easing.type: Easing.OutExpo; duration: 500; }
     }
     contentItem: Text {
