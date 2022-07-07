@@ -14,6 +14,7 @@ struct Series {
     line: Vec<QPointF>,
     points: Vec<QPointF>,
     timestamps_per_point: Vec<i64>,
+    playback_keyframe_idx: i32,
 }
 
 const POINT_SIZE: f64 = 3.5;
@@ -26,6 +27,7 @@ pub struct TimelineKeyframesView {
     visibleAreaLeft: qt_property!(f64; WRITE setVisibleAreaLeft),
     visibleAreaRight: qt_property!(f64; WRITE setVisibleAreaRight),
     vscale: qt_property!(f64; WRITE setVScale),
+    videoTimestamp: qt_property!(f64; WRITE setVideoTimestamp),
 
     setDurationMs: qt_method!(fn(&mut self, v: f64)),
     keyframeAtXY: qt_method!(fn(&self, x: f64, y: f64) -> QJSValue),
@@ -42,6 +44,7 @@ impl TimelineKeyframesView {
     fn setVisibleAreaLeft (&mut self, v: f64) { self.visibleAreaLeft = v; self.update(); }
     fn setVisibleAreaRight(&mut self, v: f64) { self.visibleAreaRight = v; self.update(); }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
+    fn setVideoTimestamp  (&mut self, v: f64) { self.videoTimestamp = v; self.update_video_timestamp(true); }
 
     fn keyframeAtXY(&self, x: f64, y: f64) -> QJSValue {
         for (kf, v) in &self.series {
@@ -56,8 +59,26 @@ impl TimelineKeyframesView {
         QJSValue::default()
     }
 
+    fn update_video_timestamp(&mut self, redraw: bool) {
+        let vid_ts = (self.videoTimestamp * 1000.0) as i64;
+        let mut changed = false;
+        for v in self.series.values_mut() {
+            let mut new_idx: i32 = -1;
+
+            if let Some(idx) = v.timestamps_per_point.iter().position(|&ts| ts == vid_ts) {
+                new_idx = idx as i32;
+            }
+            if new_idx != v.playback_keyframe_idx {
+                v.playback_keyframe_idx = new_idx;
+                changed = true;
+            }
+        }
+        if redraw && changed { self.update(); }
+     }
+
     pub fn update(&mut self) {
         self.calculate_lines();
+        self.update_video_timestamp(false);
         util::qt_queued_callback(self, |this, _| {
             (this as &dyn QQuickItem).update();
         })(());
@@ -112,7 +133,7 @@ impl TimelineKeyframesView {
                     line.push(point);
                 }
             }
-            self.series.insert(*kf, Series { line, points, timestamps_per_point });
+            self.series.insert(*kf, Series { line, points, timestamps_per_point, playback_keyframe_idx: -1 });
         }
     }
 
@@ -130,11 +151,24 @@ impl TimelineKeyframesView {
         for pt in &self.series[keyframe].points {
             p.draw_ellipse_with_center(*pt, POINT_SIZE, POINT_SIZE);
         }
+
+        let idx = &self.series[keyframe].playback_keyframe_idx;
+        if *idx >= 0 && *idx < self.series[keyframe].points.len() as i32 {
+            p.set_brush(QBrush::from_style(BrushStyle::NoBrush));
+            
+            let mut pen = QPen::from_color(QColor::from_name("white"));
+            pen.set_width_f(1.0); // TODO * dpiScale
+            p.set_pen(pen);
+
+            let pt = &self.series[keyframe].points[*idx as usize];
+            p.draw_ellipse_with_center(*pt, POINT_SIZE*1.5, POINT_SIZE*1.5);
+        }
     }
 
     pub fn setKeyframes(&mut self, mgr: &KeyframeManager) {
         self.mgr = mgr.clone();
         self.calculate_lines();
+        self.update_video_timestamp(false);
         self.update();
     }
 }
@@ -156,6 +190,7 @@ impl QQuickItem for TimelineKeyframesView {
 
     fn geometry_changed(&mut self, _new: QRectF, _old: QRectF) {
         self.calculate_lines();
+        self.update_video_timestamp(false);
         (self as &dyn QQuickItem).update();
     }
     fn mouse_event(&mut self, event: QMouseEvent) -> bool {

@@ -155,6 +155,7 @@ Item {
             }
             TimelineKeyframesView {
                 id: keyframes;
+                videoTimestamp: vid.timestamp;
                 visibleAreaLeft: root.visibleAreaLeft;
                 visibleAreaRight: root.visibleAreaRight;
                 anchors.fill: parent;
