@@ -268,6 +268,7 @@ Item {
 
                     controller.load_telemetry(vid.url, true, vid, timeline.getChart(), timeline.getKeyframesView());
                     vidInfo.loadFromVideoMetadata(md);
+                    window.sync.customSyncTimestamps = [];
                     // for (var i in md) console.info(i, md[i]);
                 }
                 property bool errorShown: false;
