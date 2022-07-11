@@ -58,6 +58,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Supports and renders 10-bit videos (up to 16-bit 4:4:4:4 for regular codecs and 32-bit float for OpenEXR - works directly on YUV data to keep maximum quality)
 - Customizable lens correction strength
 - Render queue
+- Keyframes
 - Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
 - Visual display of smoothed quaternions
 - Real time offset adjustments
@@ -92,6 +93,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] Android apps: [`Sensor Logger`](https://play.google.com/store/apps/details?id=com.kelvin.sensorapp&hl=de_AT&gl=US), [`Sensor Record`](https://play.google.com/store/apps/details?id=de.martingolpashin.sensor_record)
 - [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/logging/gcsv/)
 - [x] ArduPilot logs (*.bin, *.log)
+- [x] Blackmagic BRAW (*.braw)
 
 ### Info for cameras not on the list
 

@@ -30,6 +30,7 @@ pub struct FileMetadata {
     pub gravity_vectors:  Option<TimeVec>,
     pub detected_source: Option<String>,
     pub frame_readout_time: Option<f64>,
+    pub frame_rate: Option<f64>,
     pub camera_identifier: Option<CameraIdentifier>,
     pub lens_profile: Option<serde_json::Value>
 }
@@ -98,6 +99,7 @@ impl GyroSource {
         let mut quaternions = None;
         let mut gravity_vectors: Option<TimeVec> = None;
         let mut lens_profile = None;
+        let mut frame_rate = None;
 
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
@@ -123,6 +125,11 @@ impl GyroSource {
                         }
                         if let Some(v) = map.get_t(TagId::Name) as Option<&String> {
                             lens_profile = Some(serde_json::Value::String(v.clone()));
+                        }
+                    }
+                    if let Some(map) = tag_map.get(&GroupId::Default) {
+                        if let Some(v) = map.get_t(TagId::FrameRate) as Option<&f64> {
+                            frame_rate = Some(*v);
                         }
                     }
                     if let Some(map) = tag_map.get(&GroupId::GravityVector) {
@@ -188,6 +195,7 @@ impl GyroSource {
             gravity_vectors,
             raw_imu,
             frame_readout_time: input.frame_readout_time(),
+            frame_rate,
             lens_profile,
             camera_identifier
         })

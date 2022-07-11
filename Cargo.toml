@@ -17,7 +17,7 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "c
 [dependencies]
 cstr = "0.2.10"
 cpp = "0.5.7"
-serde = "1.0.138"
+serde = "1.0.139"
 serde_json = "1.0.82"
 bytemuck = "1.10.0"
 nalgebra = "0.30"
@@ -30,7 +30,7 @@ breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "2c64250" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "f801e8d" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.0.3", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -40,7 +40,7 @@ parking_lot = "0.12.1"
 simplelog = "0.12.0"
 log = "0.4.17"
 
-ureq = "2.4"
+ureq = "2.5"
 whoami = "1.2.1"
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]

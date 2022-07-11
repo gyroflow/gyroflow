@@ -956,6 +956,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             raw_imu,
                             lens_profile: None,
                             frame_readout_time: None,
+                            frame_rate: None,
                             camera_identifier: None,
                         };
 

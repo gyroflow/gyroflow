@@ -3,6 +3,7 @@ $PROJECT_DIR="$PSScriptRoot\.."
 $QT_LIBS = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\lib"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\mingw_64\bin\"
+$Env:Path += ";$PROJECT_DIR\ext\llvm-13-win64\bin"
 $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk-bundle"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
@@ -20,6 +21,13 @@ $SDK_REPLACED = $Env:ANDROID_SDK_ROOT.replace('\', '/');
 $PROJECT_DIR_UNIX = $PROJECT_DIR.replace('\', '/');
 $Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/13.0.0/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
 
+Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"           -Destination "$QT_LIBS\libQt6Core.so"           -ErrorAction SilentlyContinue
+Copy-Item -Path "$QT_LIBS\libQt6Gui_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Gui.so"            -ErrorAction SilentlyContinue
+Copy-Item -Path "$QT_LIBS\libQt6Widgets_arm64-v8a.so"        -Destination "$QT_LIBS\libQt6Widgets.so"        -ErrorAction SilentlyContinue
+Copy-Item -Path "$QT_LIBS\libQt6Quick_arm64-v8a.so"          -Destination "$QT_LIBS\libQt6Quick.so"          -ErrorAction SilentlyContinue
+Copy-Item -Path "$QT_LIBS\libQt6Qml_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Qml.so"            -ErrorAction SilentlyContinue
+Copy-Item -Path "$QT_LIBS\libQt6QuickControls2_arm64-v8a.so" -Destination "$QT_LIBS\libQt6QuickControls2.so" -ErrorAction SilentlyContinue
+
 cargo apk build --release
 
 mkdir "$PROJECT_DIR\target\android-build" -ErrorAction SilentlyContinue
@@ -27,6 +35,7 @@ mkdir "$PROJECT_DIR\target\android-build\libs" -ErrorAction SilentlyContinue
 Copy-Item -Path "$PROJECT_DIR\target\release\apk\lib\*" -Destination "$PROJECT_DIR\target\android-build\libs\" -Recurse -Force
 Copy-Item -Path "$PROJECT_DIR\_deployment\android\src" -Destination "$PROJECT_DIR\target\android-build\" -Recurse -Force
 Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\release\libffmpeg.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
+Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\release\libqtav-mediacodec.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
 Move-Item -Path "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
 $qtlibs = @(
@@ -46,6 +55,15 @@ $qtlibs = @(
     "libQt6QuickTemplates2_arm64-v8a.so",
     "libQt6Sql_arm64-v8a.so",
     "libQt6Svg_arm64-v8a.so",
+    "libQt6Core_arm64-v8a.so",
+    "libQt6Gui_arm64-v8a.so",
+    "libQt6Network_arm64-v8a.so",
+    "libQt6OpenGL_arm64-v8a.so",
+    "libQt6Qml_arm64-v8a.so",
+    "libQt6QmlModels_arm64-v8a.so",
+    "libQt6Quick_arm64-v8a.so",
+    "libQt6QuickControls2_arm64-v8a.so",
+    "libQt6QuickTemplates2_arm64-v8a.so",
     "libQt6Widgets_arm64-v8a.so",
     "..\plugins\iconengines\libplugins_iconengines_qsvgicon_arm64-v8a.so",
     "..\plugins\imageformats\libplugins_imageformats_qsvg_arm64-v8a.so",
