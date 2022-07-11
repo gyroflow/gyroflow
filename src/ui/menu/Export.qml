@@ -53,6 +53,8 @@ MenuItem {
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
     property real overrideFps: 0;
+    property real originalWidth: outWidth;
+    property real originalHeight: outHeight;
 
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
@@ -105,6 +107,8 @@ MenuItem {
     }
     function videoInfoLoaded(w: real, h: real, br: real) {
         setDefaultSize(w, h);
+        root.originalWidth = w;
+        root.originalHeight = h;
         Qt.callLater(notifySizeChanged);
 
         outBitrate     = br;
@@ -279,6 +283,8 @@ MenuItem {
                     disableUpdate = false;
                 }
 
+                Action { text: qsTr("Original (%1 x %2)").arg(root.originalWidth).arg(root.originalHeight); onTriggered: sizeMenu.setSize(root.originalWidth, root.originalHeight) }
+                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
                 Action { text: "6k (6016 x 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
                 Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize(3840, 2160) }

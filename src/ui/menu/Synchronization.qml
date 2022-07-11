@@ -31,6 +31,7 @@ MenuItem {
 
     property alias timePerSyncpoint: timePerSyncpoint;
     property alias everyNthFrame: everyNthFrame;
+    property var customSyncTimestamps: [];
 
     function loadGyroflow(obj) {
         const o = obj.synchronization || { };
@@ -44,6 +45,7 @@ MenuItem {
             if (o.hasOwnProperty("time_per_syncpoint")) timePerSyncpoint.value              = +o.time_per_syncpoint;
             if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
+            if (o.hasOwnProperty("custom_sync_timestamps")) sync.customSyncTimestamps       = o.custom_sync_timestamps;
         }
     }
     function getSettings() {
@@ -78,6 +80,9 @@ MenuItem {
             for (let i = 0; i < points; ++i) {
                 const pos = start + (i*chunks);
                 ranges.push(pos);
+            }
+            if (sync.customSyncTimestamps.length > 0) {
+                ranges = sync.customSyncTimestamps.map(v => v / window.videoArea.timeline.durationMs);
             }
 
             controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
