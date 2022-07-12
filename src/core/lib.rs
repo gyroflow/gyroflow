@@ -266,7 +266,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn recompute_smoothness(&self) {
         let mut gyro = self.gyro.write();
         let params = self.params.read();
-        let keyframes = self.keyframes.read();
+        let keyframes = self.keyframes.read().clone();
         let mut smoothing = self.smoothing.write();
         let horizon_lock = smoothing.horizon_lock.clone();
 
@@ -1047,8 +1047,9 @@ impl<T: PixelType> StabilizationManager<T> {
             }
 
             if let Some(serde_json::Value::Object(offsets)) = obj.get("offsets") {
-                self.gyro.write().set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
-                self.keyframes.write().update_gyro(&self.gyro.read());
+                let mut gyro = self.gyro.write();
+                gyro.set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
+                self.keyframes.write().update_gyro(&gyro);
             }
 
             if let Some(keyframes) = obj.get("keyframes") {

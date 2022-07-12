@@ -2550,7 +2550,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=f801e8d#f801e8d132556f115259c9ce4d025cf33c063ddf"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=950a5b8#950a5b8a1ff551b12748edaa6e6edbc35180c8eb"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3168,7 +3168,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=9cdb422#9cdb422134f58cd1bb2c56aca9a6bfe1fada4fa9"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=3fc9d6d#3fc9d6d56bb2c8b9de49d6ebbb1b6f1c342574bc"
 dependencies = [
  "argh",
  "byteorder",
