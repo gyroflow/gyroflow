@@ -101,10 +101,11 @@ impl FovIterative {
             nearest = self.nearest_edge(&polygon, center, nearest.1);
             if let Some(idx) = nearest.0 {
                 let len = rect.len();
+                if len == 0 { continue; }
                 let relevant = [
-                    rect[(idx - 1) % len],
+                    rect[idx.overflowing_sub(1).0 % len],
                     rect[idx],
-                    rect[(idx + 1) % len]
+                    rect[idx.overflowing_add(1).0 % len]
                 ];
 
                 let distorted = interpolate_points(&relevant, 30);

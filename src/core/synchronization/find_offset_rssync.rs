@@ -186,7 +186,7 @@ impl FindOffsetsRssync<'_> {
         let mut points = Vec::new();
         for (from_ts, to_ts) in ranges {
             let mut points_per_range = Vec::new();
-            {
+            if to_ts > from_ts {
                 let l = sync_results.read();
                 for (_ts, x) in l.range(from_ts..to_ts) {
                     if let Ok(of) = x.optical_flow.try_borrow() {

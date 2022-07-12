@@ -18,6 +18,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &B
         for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
             if cancel_flag.load(Relaxed) { break; }
             progress_cb(i as f64 / ranges_len);
+            if to_ts <= from_ts { continue; }
 
             let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).map(|v| v.1.clone()).collect();
             if !of_item.is_empty() {

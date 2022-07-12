@@ -82,7 +82,8 @@ MenuItem {
                 ranges.push(pos);
             }
             if (sync.customSyncTimestamps.length > 0) {
-                ranges = sync.customSyncTimestamps.map(v => v / window.videoArea.timeline.durationMs);
+                const duration = window.videoArea.timeline.durationMs;
+                ranges = sync.customSyncTimestamps.filter(v => v <= duration).map(v => v / duration);
             }
 
             controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
