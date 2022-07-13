@@ -8,7 +8,6 @@ use std::collections::BTreeMap;
 use gyroflow_core::keyframes::*;
 use qmetaobject::*;
 use crate::util;
-use cpp::*;
 
 struct Point {
     point: QPointF,
@@ -78,7 +77,7 @@ impl TimelineKeyframesView {
             }
         }
         if redraw && changed { self.update(); }
-     }
+    }
 
     pub fn update(&mut self) {
         self.calculate_lines();
@@ -180,13 +179,6 @@ impl TimelineKeyframesView {
 }
 
 impl QQuickItem for TimelineKeyframesView {
-    fn component_complete(&mut self) {
-        let obj = self.get_cpp_object();
-        cpp!(unsafe [obj as "QQuickItem *"] {
-            obj->setAcceptedMouseButtons(Qt::AllButtons);
-            obj->setAcceptHoverEvents(true);
-        });
-    }
     fn class_begin(&mut self) {
         self.duration_ms = 1.0;
         self.visibleAreaLeft = 0.0;
@@ -198,14 +190,6 @@ impl QQuickItem for TimelineKeyframesView {
         self.calculate_lines();
         self.update_video_timestamp(false);
         (self as &dyn QQuickItem).update();
-    }
-    fn mouse_event(&mut self, event: QMouseEvent) -> bool {
-        dbg!(event.position());
-        let obj = self.get_cpp_object();
-        cpp!(unsafe [obj as "QQuickItem *"] {
-            obj->setCursor(Qt::PointingHandCursor);
-        });
-        false
     }
 }
 

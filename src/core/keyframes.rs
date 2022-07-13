@@ -4,8 +4,6 @@
 use std::{ collections::BTreeMap, collections::btree_map::Entry, str::FromStr };
 use crate::gyro_source::GyroSource;
 
-// TODO: points on timeline are rendered with slight horizontal offset
-
 macro_rules! define_keyframes {
     ($($name:ident, $color:literal, $text:literal, $format:expr,)*) => {
         #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, ::serde::Serialize, ::serde::Deserialize)]

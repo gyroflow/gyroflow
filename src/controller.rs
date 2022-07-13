@@ -1313,8 +1313,9 @@ impl Controller {
         QJSValue::default()
     }
 
-    fn video_position_changed(&self, timestamp_ms: f64) {
+    fn video_position_changed(&self, mut timestamp_ms: f64) {
         let keyframes = self.stabilizer.keyframes.read();
+        timestamp_ms /= keyframes.timestamp_scale.unwrap_or(1.0);
         for kf in keyframes.get_all_keys() {
             if let Some(v) = keyframes.value_at_video_timestamp(kf, timestamp_ms) {
                 self.keyframe_value_updated(kf.to_string(), v);

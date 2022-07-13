@@ -29,7 +29,7 @@ Item {
     property bool fullScreen: false;
 
     property real value: 0;
-    readonly property real position: vid.currentFrame / (vid.frameCount - 1);
+    readonly property real position: vid.timestamp / root.orgDurationMs;
 
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
