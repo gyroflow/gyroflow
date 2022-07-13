@@ -5,28 +5,43 @@ use std::{ collections::BTreeMap, collections::btree_map::Entry, str::FromStr };
 use crate::gyro_source::GyroSource;
 
 // TODO: points on timeline are rendered with slight horizontal offset
-// TODO: tooltips are not translated
-// TODO: keyframe value in tooltip
 
-#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, ::serde::Serialize, ::serde::Deserialize)]
-pub enum KeyframeType {
-    Fov,
-    VideoRotation,
-    ZoomingSpeed,
-    ZoomingCenterX,
-    ZoomingCenterY,
-    BackgroundMargin,
-    BackgroundFeather,
-    LockHorizonAmount,
-    LockHorizonRoll,
-    LensCorrectionStrength,
+macro_rules! define_keyframes {
+    ($($name:ident, $color:literal, $text:literal, $format:expr,)*) => {
+        #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, ::serde::Serialize, ::serde::Deserialize)]
+        pub enum KeyframeType {
+            $($name),*
+        }
+        pub fn keyframe_color(kf: &KeyframeType) -> &'static str {
+            match kf { $(KeyframeType::$name => $color),* }
+        }
+        pub fn keyframe_text(kf: &KeyframeType) -> &'static str {
+            match kf { $(KeyframeType::$name => $text),* }
+        }
+        pub fn keyframe_format_value(kf: &KeyframeType, v: f64) -> String {
+            match kf { $(KeyframeType::$name => $format(v)),* }
+        }
+    };
+}
 
-    SmoothingParamTimeConstant,
-    SmoothingParamTimeConstant2,
-    SmoothingParamSmoothness,
-    SmoothingParamPitch,
-    SmoothingParamRoll,
-    SmoothingParamYaw,
+define_keyframes! {
+    Fov,                         "#8ee6ea", "FOV",                              |v| format!("{:.2}", v),
+    VideoRotation,               "#eae38e", "Video rotation",                   |v| format!("{:.1}°", v),
+    ZoomingSpeed,                "#32e595", "Zooming speed",                    |v| format!("{:.2}s", v),
+    ZoomingCenterX,              "#6fefb6", "Zooming center offset X",          |v| format!("{:.0}%", v * 100.0),
+    ZoomingCenterY,              "#5ddba2", "Zooming center offset Y",          |v| format!("{:.0}%", v * 100.0),
+    BackgroundMargin,            "#6e5ddb", "Background margin",                |v| format!("{:.0}%", v),
+    BackgroundFeather,           "#9d93e1", "Background feather",               |v| format!("{:.0}%", v),
+    LockHorizonAmount,           "#ed7789", "Horizon lock amount",              |v| format!("{:.0}%", v),
+    LockHorizonRoll,             "#e86176", "Horizon lock roll correction",     |v| format!("{:.1}°", v),
+    LensCorrectionStrength,      "#e8ae61", "Lens correction strength",         |v| format!("{:.0}%", v * 100.0),
+
+    SmoothingParamTimeConstant,  "#94ea8e", "Max smoothness",                   |v| format!("{:.2}", v),
+    SmoothingParamTimeConstant2, "#89df82", "Max smoothness at high velocity",  |v| format!("{:.2}", v),
+    SmoothingParamSmoothness,    "#7ced74", "Smoothness",                       |v| format!("{:.2}", v),
+    SmoothingParamPitch,         "#59c451", "Smoothness pitch",                 |v| format!("{:.2}", v),
+    SmoothingParamRoll,          "#51c485", "Smoothness roll",                  |v| format!("{:.2}", v),
+    SmoothingParamYaw,           "#88c451", "Smoothness yaw",                   |v| format!("{:.2}", v),
 }
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, ::serde::Serialize, ::serde::Deserialize)]
@@ -166,51 +181,6 @@ impl FromStr for Easing {
 }
 impl ToString for Easing {
     fn to_string(&self) -> String { format!("{:?}", self) }
-}
-
-pub fn color_for_keyframe(kf: &KeyframeType) -> &'static str {
-    match kf {
-        KeyframeType::Fov                         => "#8ee6ea",
-        KeyframeType::VideoRotation               => "#eae38e",
-        KeyframeType::ZoomingSpeed                => "#32e595",
-        KeyframeType::ZoomingCenterX              => "#6fefb6",
-        KeyframeType::ZoomingCenterY              => "#5ddba2",
-        KeyframeType::BackgroundMargin            => "#6e5ddb",
-        KeyframeType::BackgroundFeather           => "#9d93e1",
-        KeyframeType::LockHorizonAmount           => "#ed7789",
-        KeyframeType::LockHorizonRoll             => "#e86176",
-        KeyframeType::LensCorrectionStrength      => "#e8ae61",
-
-        KeyframeType::SmoothingParamTimeConstant  => "#94ea8e",
-        KeyframeType::SmoothingParamTimeConstant2 => "#89df82",
-        KeyframeType::SmoothingParamSmoothness    => "#7ced74",
-        KeyframeType::SmoothingParamPitch         => "#59c451",
-        KeyframeType::SmoothingParamRoll          => "#51c485",
-        KeyframeType::SmoothingParamYaw           => "#88c451",
-        // _ => { ::log::warn!("Unknown color for keyframe {:?}", kf); "#8e96ea" }
-    }
-}
-
-pub fn name_for_keyframe(kf: &KeyframeType) -> &'static str {
-    match kf {
-        KeyframeType::Fov                         => "FOV",
-        KeyframeType::VideoRotation               => "Video rotation",
-        KeyframeType::ZoomingSpeed                => "Zooming speed",
-        KeyframeType::ZoomingCenterX              => "Zooming center offset X",
-        KeyframeType::ZoomingCenterY              => "Zooming center offset Y",
-        KeyframeType::BackgroundMargin            => "Background margin",
-        KeyframeType::BackgroundFeather           => "Background feather",
-        KeyframeType::LockHorizonAmount           => "Horizon lock amount",
-        KeyframeType::LockHorizonRoll             => "Horizon lock roll correction",
-        KeyframeType::LensCorrectionStrength      => "Lens correction strength",
-
-        KeyframeType::SmoothingParamTimeConstant  => "Max smoothness",
-        KeyframeType::SmoothingParamTimeConstant2 => "Max smoothness at high velocity",
-        KeyframeType::SmoothingParamSmoothness    => "Smoothness",
-        KeyframeType::SmoothingParamPitch         => "Smoothness pitch",
-        KeyframeType::SmoothingParamRoll          => "Smoothness roll",
-        KeyframeType::SmoothingParamYaw           => "Smoothness yaw",
-    }
 }
 
 impl Easing {

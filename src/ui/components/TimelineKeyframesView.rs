@@ -10,10 +10,14 @@ use qmetaobject::*;
 use crate::util;
 use cpp::*;
 
+struct Point {
+    point: QPointF,
+    timestamp: i64,
+    value: f64
+}
 struct Series {
     line: Vec<QPointF>,
-    points: Vec<QPointF>,
-    timestamps_per_point: Vec<i64>,
+    points: Vec<Point>,
     playback_keyframe_idx: i32,
 }
 
@@ -48,10 +52,10 @@ impl TimelineKeyframesView {
 
     fn keyframeAtXY(&self, x: f64, y: f64) -> QJSValue {
         for (kf, v) in &self.series {
-            for (pt, ts) in v.points.iter().zip(v.timestamps_per_point.iter()) {
-                if x >= pt.x - 8.0 && x <= pt.x + 8.0 &&
-                   y >= pt.y - 8.0 && y <= pt.y + 8.0 {
-                    return QJSValue::from(QString::from(format!("{:?}:{}:{}", kf, ts, name_for_keyframe(kf))));
+            for pt in &v.points {
+                if x >= pt.point.x - 8.0 && x <= pt.point.x + 8.0 &&
+                   y >= pt.point.y - 8.0 && y <= pt.point.y + 8.0 {
+                    return QJSValue::from(QString::from(format!("{:?}:{}:{}:{}", kf, pt.timestamp, keyframe_text(kf), keyframe_format_value(kf, pt.value))));
                 }
             }
         }
@@ -65,7 +69,7 @@ impl TimelineKeyframesView {
         for v in self.series.values_mut() {
             let mut new_idx: i32 = -1;
 
-            if let Some(idx) = v.timestamps_per_point.iter().position(|&ts| ts == vid_ts) {
+            if let Some(idx) = v.points.iter().position(|pt| pt.timestamp == vid_ts) {
                 new_idx = idx as i32;
             }
             if new_idx != v.playback_keyframe_idx {
@@ -97,7 +101,6 @@ impl TimelineKeyframesView {
         for kf in self.mgr.get_all_keys() {
             let mut line = Vec::with_capacity(rect.width as usize);
             let mut points = Vec::new();
-            let mut timestamps_per_point = Vec::new();
             let mut max = 1.0;
             let mut min = -1.0;
             if let Some(all_keyframes) = self.mgr.get_keyframes(kf) {
@@ -114,11 +117,14 @@ impl TimelineKeyframesView {
                 min = -both_max;
 
                 for (ts, v) in all_keyframes {
-                    points.push(QPointF {
-                        x: map_to_visible_area(*ts as f64 / duration_us) * rect.width,
-                        y: TOP_BOTTOM_MARGIN + (1.0 - ((v.value - min) / (max - min)) * self.vscale) * (rect.height - TOP_BOTTOM_MARGIN*2.0)
+                    points.push(Point {
+                        point: QPointF {
+                            x: map_to_visible_area(*ts as f64 / duration_us) * rect.width,
+                            y: TOP_BOTTOM_MARGIN + (1.0 - ((v.value - min) / (max - min)) * self.vscale) * (rect.height - TOP_BOTTOM_MARGIN*2.0)
+                        },
+                        timestamp: *ts,
+                        value: v.value
                     });
-                    timestamps_per_point.push(*ts);
                 }
             }
 
@@ -133,7 +139,7 @@ impl TimelineKeyframesView {
                     line.push(point);
                 }
             }
-            self.series.insert(*kf, Series { line, points, timestamps_per_point, playback_keyframe_idx: -1 });
+            self.series.insert(*kf, Series { line, points, playback_keyframe_idx: -1 });
         }
     }
 
@@ -149,7 +155,7 @@ impl TimelineKeyframesView {
         p.set_brush(QBrush::from_color(color));
         p.set_pen(QPen::from_style(PenStyle::NoPen));
         for pt in &self.series[keyframe].points {
-            p.draw_ellipse_with_center(*pt, POINT_SIZE, POINT_SIZE);
+            p.draw_ellipse_with_center(pt.point, POINT_SIZE, POINT_SIZE);
         }
 
         let idx = &self.series[keyframe].playback_keyframe_idx;
@@ -161,7 +167,7 @@ impl TimelineKeyframesView {
             p.set_pen(pen);
 
             let pt = &self.series[keyframe].points[*idx as usize];
-            p.draw_ellipse_with_center(*pt, POINT_SIZE*1.5, POINT_SIZE*1.5);
+            p.draw_ellipse_with_center(pt.point, POINT_SIZE*1.5, POINT_SIZE*1.5);
         }
     }
 
@@ -208,7 +214,7 @@ impl QQuickPaintedItem for TimelineKeyframesView {
         p.set_render_hint(QPainterRenderHint::Antialiasing, true);
 
         for kf in self.mgr.get_all_keys() {
-            self.drawKeyframe(p, kf, color_for_keyframe(kf));
+            self.drawKeyframe(p, kf, keyframe_color(kf));
         }
     }
 }

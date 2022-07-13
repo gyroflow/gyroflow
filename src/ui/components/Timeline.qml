@@ -165,7 +165,7 @@ Item {
                     const pt = ma.mapToItem(keyframes, x, y);
                     const kf = keyframes.keyframeAtXY(pt.x, pt.y);
                     if (kf) {
-                        const [keyframe, timestamp, name] = kf.split(":", 3);
+                        const [keyframe, timestamp, name, value] = kf.split(":", 4);
                         if (pressed && (pressedButtons & Qt.RightButton)) {
                             keyframeContextMenu.pressedKeyframe = keyframe;
                             keyframeContextMenu.pressedKeyframeTs = timestamp;
@@ -181,7 +181,7 @@ Item {
                         if (!kftt.visible) {
                             kftt.x       = pt.x + 10 * dpiScale;
                             kftt.offsetY = pt.y + 10 * dpiScale + kftt.height;
-                            kftt.text = qsTr(name);
+                            kftt.text = qsTr(name) + " - " + value;
                             kftt.visible = true;
                         }
                     } else {
@@ -230,6 +230,24 @@ Item {
                         if (easeIn.checked && easeOut.checked) e = "EaseInOut";
                         controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
                     }
+                }
+                Component.onCompleted: {
+                    QT_TR_NOOP("FOV");
+                    QT_TR_NOOP("Video rotation");
+                    QT_TR_NOOP("Zooming speed");
+                    QT_TR_NOOP("Zooming center offset X");
+                    QT_TR_NOOP("Zooming center offset Y");
+                    QT_TR_NOOP("Background margin");
+                    QT_TR_NOOP("Background feather");
+                    QT_TR_NOOP("Horizon lock amount");
+                    QT_TR_NOOP("Horizon lock roll correction");
+                    QT_TR_NOOP("Lens correction strength");
+                    QT_TR_NOOP("Max smoothness");
+                    QT_TR_NOOP("Max smoothness at high velocity");
+                    QT_TR_NOOP("Smoothness");
+                    QT_TR_NOOP("Smoothness pitch");
+                    QT_TR_NOOP("Smoothness roll");
+                    QT_TR_NOOP("Smoothness yaw");
                 }
             }
         }
