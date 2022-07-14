@@ -25,6 +25,7 @@ MenuItem {
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
+        type: "gyro";
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url: url) {
@@ -106,7 +107,7 @@ MenuItem {
         text: qsTr("Open file");
         icon.name: "file-empty"
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: fileDialog.open();
+        onClicked: fileDialog.open2();
     }
     TableList {
         id: info;

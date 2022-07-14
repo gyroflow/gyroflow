@@ -182,6 +182,8 @@ pub struct RenderQueue {
 
     pause_flag: Arc<AtomicBool>,
 
+    default_suffix: qt_property!(QString),
+
     paused_timestamp: Option<u64>
 }
 
@@ -206,6 +208,7 @@ impl RenderQueue {
     pub fn new() -> Self {
         Self {
             status: QString::from("stopped"),
+            default_suffix: QString::from("_stabilized"),
             ..Default::default()
         }
     }
@@ -613,7 +616,7 @@ impl RenderQueue {
         }
     }
 
-    fn get_output_path(path: &str, codec: &str) -> String {
+    fn get_output_path(suffix: &str, path: &str, codec: &str) -> String {
         let mut path = std::path::Path::new(path).with_extension("");
 
         let ext = match codec {
@@ -624,7 +627,7 @@ impl RenderQueue {
             _ => ".mp4"
         };
 
-        path.set_file_name(format!("{}_stabilized{}", path.file_name().map(|v| v.to_string_lossy()).unwrap_or_default(), ext));
+        path.set_file_name(format!("{}{}{}", path.file_name().map(|v| v.to_string_lossy()).unwrap_or_default(), suffix, ext));
 
         path.to_string_lossy().to_string()
     }
@@ -642,6 +645,8 @@ impl RenderQueue {
             });
             this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
         });
+
+        let suffix = self.default_suffix.to_string();
 
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
@@ -775,7 +780,7 @@ impl RenderQueue {
                         render_options.bitrate = render_options.bitrate.max(info.bitrate);
                         render_options.output_width = info.width as usize;
                         render_options.output_height = info.height as usize;
-                        render_options.output_path = Self::get_output_path(&path, &render_options.codec);
+                        render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec);
                         render_options.trim_start = 0.0;
                         render_options.trim_end = 1.0;
 

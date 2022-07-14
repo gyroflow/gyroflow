@@ -74,6 +74,7 @@ Window {
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
+        type: "calib-video";
 
         onAccepted: {
             if (fileDialog.selectedFiles.length > 1) {
@@ -163,7 +164,7 @@ Window {
             Menu.VideoInformation {
                 id: vidInfo;
                 isCalibrator: true;
-                onSelectFileRequest: fileDialog.open();
+                onSelectFileRequest: fileDialog.open2();
                 opened: false;
                 objectName: "calibinfo";
             }

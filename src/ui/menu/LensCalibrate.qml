@@ -128,6 +128,7 @@ MenuItem {
 
         title: qsTr("Export lens profile");
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
+        type: "output-preset";
         onAccepted: {
             if (uploadProfile.checked) {
                 messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
@@ -297,7 +298,7 @@ MenuItem {
         onClicked: {
             list.commitAll();
             fileDialog.currentFile = controller.export_lens_profile_filename(calib.calibrationInfo);
-            fileDialog.open();
+            fileDialog.open2();
         }
     }
     CheckBox {

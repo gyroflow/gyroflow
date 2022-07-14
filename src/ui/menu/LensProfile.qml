@@ -28,6 +28,7 @@ MenuItem {
 
         title: qsTr("Choose a lens profile")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
+        type: "lens";
         onAccepted: loadFile(fileDialog.selectedFile);
     }
     function loadFile(url: url) {
@@ -132,7 +133,7 @@ MenuItem {
         Button {
             text: qsTr("Open file");
             icon.name: "file-empty"
-            onClicked: fileDialog.open();
+            onClicked: fileDialog.open2();
         }
         Button {
             text: qsTr("Create new");

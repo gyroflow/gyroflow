@@ -10,6 +10,7 @@ import Qt.labs.settings
 import "."
 import "components/"
 import "menu/" as Menu
+import "Util.js" as Util
 
 Rectangle {
     id: window;
@@ -66,7 +67,8 @@ Rectangle {
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
-        onAccepted: videoArea.loadFile(fileDialog.selectedFile);
+        type: "video";
+        onAccepted: videoArea.loadFile(selectedFile);
     }
 
     Item {
@@ -101,7 +103,7 @@ Rectangle {
 
             Menu.VideoInformation {
                 id: vidInfo;
-                onSelectFileRequest: fileDialog.open();
+                onSelectFileRequest: fileDialog.open2();
             }
             Hr { }
             Menu.LensProfile {
@@ -157,6 +159,7 @@ Rectangle {
                             onClicked: {
                                 outputFileDialog.defaultSuffix = outputFile.text.substring(outputFile.text.length - 3);
                                 outputFileDialog.currentFile = controller.path_to_url(outputFile.text);
+                                outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(outputFile.text));
                                 outputFileDialog.open();
                             }
                         }
@@ -166,6 +169,7 @@ Rectangle {
                         fileMode: FileDialog.SaveFile;
                         title: qsTr("Select file destination");
                         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png *.exr)"];
+                        type: "output-video";
                         onAccepted: {
                             outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
                             window.exportSettings.updateCodecParams();
@@ -267,7 +271,7 @@ Rectangle {
                                     }
                                     if (index == 1) { // Preset
                                         presetFileDialog.presetData = finalData;
-                                        presetFileDialog.open();
+                                        presetFileDialog.open2();
                                     } else { // Apply
                                         render_queue.apply_to_all(JSON.stringify(finalData));
                                     }
@@ -402,6 +406,7 @@ Rectangle {
         fileMode: FileDialog.SaveFile;
         title: qsTr("Select file destination");
         nameFilters: ["*.gyroflow"];
+        type: "output-project";
         property bool thin: true;
         property bool extended: true;
         onAccepted: controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), sync.getSettings(), controller.url_to_path(selectedFile), true);
@@ -411,6 +416,7 @@ Rectangle {
         fileMode: FileDialog.SaveFile;
         title: qsTr("Select file destination");
         nameFilters: ["*.gyroflow"];
+        type: "output-preset";
         property var presetData: ({});
         onAccepted: controller.export_preset(selectedFile, presetData);
     }
@@ -458,10 +464,11 @@ Rectangle {
     }
 
     function renameOutput(orgOutput: string) {
+        const suffix = window.advanced.defaultSuffix.text;
         let output = orgOutput;
         let i = 1;
         while (controller.file_exists(output) || render_queue.file_exists(output)) {
-            output = orgOutput.replace(/_stabilized(_\d+)?\.([a-z0-9]+)$/i, "_stabilized_" + i++ + ".$2");
+            output = orgOutput.replace(new RegExp(suffix + "(_\\d+)?\\.([a-z0-9]+)$", "i"), suffix + "_" + i++ + ".$2");
             if (i > 1000) break;
         }
 

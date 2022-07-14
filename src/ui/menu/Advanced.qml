@@ -23,8 +23,10 @@ MenuItem {
         property alias backgroundMode: backgroundMode.currentIndex;
         property alias marginPixels: marginPixels.value;
         property alias featherPixels: featherPixels.value;
+        property alias defaultSuffix: defaultSuffix.text;
         property string lang: ui_tools.get_default_language();
     }
+    property alias defaultSuffix: defaultSuffix;
 
     function loadGyroflow(obj) {
         if (obj.background_mode) backgroundMode.currentIndex = obj.background_mode;
@@ -256,6 +258,17 @@ MenuItem {
                 const text = currentIndex == model.length - 1? "cpu" : currentText;
                 settings.setValue("processingDevice", text);
             }
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Default file suffix");
+
+        TextField {
+            id: defaultSuffix;
+            text: "_stabilized";
+            width: parent.width;
+            onTextChanged: render_queue.default_suffix = text;
         }
     }
 }

@@ -131,7 +131,8 @@ Item {
         const pathParts = url.toString().split(".");
         pathParts.pop();
         if (!isCalibrator) {
-            window.outputFile = controller.url_to_path(pathParts.join(".") + "_stabilized.mp4").replace(/%0[0-9]+d/, "");
+            const suffix = window.advanced.defaultSuffix.text;
+            window.outputFile = controller.url_to_path(pathParts.join(".") + suffix + ".mp4").replace(/%0[0-9]+d/, "");
             window.exportSettings.updateCodecParams();
         }
         if (!root.pendingGyroflowData) {
