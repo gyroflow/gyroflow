@@ -94,6 +94,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/logging/gcsv/)
 - [x] ArduPilot logs (*.bin, *.log)
 - [x] Blackmagic RAW (*.braw)
+- [x] RED RAW (*.r3d)
 
 ### Info for cameras not on the list
 

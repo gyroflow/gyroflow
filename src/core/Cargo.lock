@@ -1094,6 +1094,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
 
 [[package]]
+name = "human-sort"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "140a09c9305e6d5e557e2ed7cbc68e05765a7d4213975b87cb04920689cc6219"
+
+[[package]]
 name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2467,13 +2473,14 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=3fc9d6d#3fc9d6d56bb2c8b9de49d6ebbb1b6f1c342574bc"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=2d4be6c#2d4be6cf5d05cb52f49cf3be4994fc9d7e82f37d"
 dependencies = [
  "argh",
  "byteorder",
  "chrono",
  "csv",
  "fc-blackbox",
+ "human-sort",
  "memchr",
  "mp4parse",
  "once_cell",
@@ -2752,9 +2759,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "266ca6be6004fd1b2a768023b1cb0afbf7af0cbffaba19af25c5792d44e74784"
+checksum = "89b92788dec9d0c1bed849a1b83f01b2ee12819bf04a79c90f68e4173f7b5ba2"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -2777,9 +2784,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bef50e48812c7eb958fa52d28a912f8b77c96453ebab21c72b01cdda61d3e65d"
+checksum = "20cbdfc3d0637dba3d5536b93adef3d26023a0b96f0e1ee5ee9560a401d9f646"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.2",
@@ -2816,9 +2823,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.13.0"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f48d691b733b9d50ea8cb18f377fd1ed927c90c55ad1ec5b90f68885471977f7"
+checksum = "1f762cbc08e1a51389859cf9c199c7aef544789cf3510889aab12c607f701604"
 dependencies = [
  "bitflags",
 ]
