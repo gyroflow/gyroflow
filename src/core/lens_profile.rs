@@ -64,6 +64,8 @@ pub struct LensProfile {
 
     pub is_superview: bool,
 
+    pub sync_settings: Option<serde_json::Value>,
+
     #[serde(skip)]
     pub filename: String,
 

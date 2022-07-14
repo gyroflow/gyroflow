@@ -94,6 +94,11 @@ MenuItem {
                     if (+obj.gyro_lpf && Math.abs(+obj.gyro_lpf) > 0) {
                         window.motionData.setGyroLpf(obj.gyro_lpf);
                     }
+                    if (obj.sync_settings && Object.keys(obj.sync_settings).length > 0) {
+                        window.sync.loadGyroflow({
+                            synchronization: obj.sync_settings
+                        });
+                    }
 
                     const input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
                     const input_vertical_stretch   = obj.input_vertical_stretch   > 0.01? obj.input_vertical_stretch   : 1.0;

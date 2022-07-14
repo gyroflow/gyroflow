@@ -24,6 +24,15 @@
   "fps": 29.97,
   "official": true,
   "use_opencv_fisheye": true,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.5,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true
+  },
   "fisheye_params": {
     "RMS_error": 0.6331491258519996,
     "camera_matrix": [

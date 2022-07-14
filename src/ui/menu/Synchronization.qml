@@ -46,6 +46,19 @@ MenuItem {
             if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
             if (o.hasOwnProperty("custom_sync_timestamps")) sync.customSyncTimestamps       = o.custom_sync_timestamps;
+            if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
+        }
+    }
+    Timer {
+        id: autosyncTimer;
+        interval: 200;
+        property bool doRun: false;
+        property bool canRun: controller.lens_loaded && controller.gyro_loaded && !window.isDialogOpened && doRun;
+        onCanRunChanged: if (canRun) start();
+        onTriggered: {
+            doRun = false;
+            if (controller.offsets_model.rowCount() == 0)
+                autosync.doSync();
         }
     }
     function getSettings() {
@@ -64,6 +77,7 @@ MenuItem {
     function getSettingsJson() { return JSON.stringify(getSettings()); }
 
     Button {
+        id: autosync;
         text: qsTr("Auto sync");
         icon.name: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;

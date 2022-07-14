@@ -13,7 +13,7 @@ FileDialog {
     onAccepted: window.settings.setValue("folder-" + type, Util.getFolder(controller.url_to_path(selectedFile)));
 
     function open2() {
-        const savedFolder = settings.value("folder-" + type, "");
+        const savedFolder = window.settings.value("folder-" + type, "");
         if (savedFolder) currentFolder = controller.path_to_url(savedFolder);
         open();
     }

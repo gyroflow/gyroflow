@@ -58,6 +58,7 @@ Rectangle {
     property alias settings: settings;
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
+    property bool isDialogOpened: false;
 
     Settings { id: settings; }
 
@@ -340,6 +341,7 @@ Rectangle {
                 buttons[index].clicked();
             el.opened = false;
             el.destroy(1000);
+            window.isDialogOpened = false;
         });
         let buttonTexts = [];
         for (const i in buttons) {
@@ -351,6 +353,7 @@ Rectangle {
         el.buttons = buttonTexts;
 
         el.opened = true;
+        window.isDialogOpened = true;
         return el;
     }
 
