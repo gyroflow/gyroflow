@@ -698,11 +698,12 @@ impl RenderQueue {
                 let stab = Arc::new(stab);
 
                 let stab2 = stab.clone();
-                let loaded = util::qt_queued_callback_mut(self, move |this, render_options: RenderOptions| {
+                let sync_options_json2 = sync_options_json.clone();
+                let loaded = util::qt_queued_callback_mut(self, move |this, (render_options, ask_path): (RenderOptions, bool)| {
                     let out_path = render_options.output_path.clone();
-                    this.add_internal(job_id, stab2.clone(), render_options, sync_options_json.clone(), QString::default());
+                    this.add_internal(job_id, stab2.clone(), render_options, sync_options_json2.clone(), QString::default());
 
-                    if std::path::Path::new(&out_path).exists() {
+                    if ask_path && std::path::Path::new(&out_path).exists() {
                         update_model!(this, job_id, itm {
                             itm.error_string = QString::from(format!("file_exists:{}", out_path));
                             itm.status = JobStatus::Error;
@@ -756,7 +757,7 @@ impl RenderQueue {
                             Ok(obj) => {
                                 if let Some(out) = obj.get("output") {
                                     if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
-                                        loaded(render_options2);
+                                        loaded((render_options2, true));
                                     }
                                 }
                                 if let Some(out) = obj.get("videofile").and_then(|x| x.as_str()) {
@@ -821,11 +822,115 @@ impl RenderQueue {
 
                             stab.set_size(video_size.0, video_size.1);
                             stab.set_output_size(render_options.output_width, render_options.output_height);
+
+                            let contains_gyro = !stab.gyro.read().quaternions.is_empty();
+
+                            let mut ask_path = true;
+
+                            let sync_settings = stab.lens.read().sync_settings.clone();
+                            if let Some(sync_settings) = sync_settings {
+                                if contains_gyro && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+                                    // ----------------------------------------------------------------------------
+                                    // --------------------------------- AUtosync ---------------------------------
+                                    loaded((render_options.clone(), true));
+                                    ask_path = false;
+                                    use gyroflow_core::synchronization::AutosyncProcess;
+                                    use gyroflow_core::synchronization;
+                                    use crate::rendering::FfmpegProcessor;
+                                    use itertools::Either;
+
+                                    if let Ok(serde_json::Value::Object(mut sync_options)) = serde_json::from_str(&sync_options_json) {
+                                        for (k, v) in sync_settings.as_object().unwrap() {
+                                            sync_options.insert(k.clone(), v.clone());
+                                        }
+
+                                        if let Some(points) = sync_options.get("max_sync_points").and_then(|v| v.as_i64()) {
+                                            let chunks = 1.0 / points as f64;
+                                            let start = chunks / 2.0;
+                                            let mut timestamps_fract: Vec<f64> = (0..points).map(|i| start + (i as f64 * chunks)).collect();
+                                            if let Some(v) = sync_options.get("custom_sync_timestamps").and_then(|v| v.as_array()) {
+                                                timestamps_fract = v.iter().filter_map(|v| v.as_f64()).filter(|v| *v <= info.duration_ms).map(|v| v / info.duration_ms).collect();
+                                            }
+
+                                            if let Ok(mut sync_params) = serde_json::from_value(serde_json::Value::Object(sync_options)) as serde_json::Result<synchronization::SyncParams> {
+
+                                                let cancel_flag = Arc::new(AtomicBool::new(false));
+                                                sync_params.initial_offset     *= 1000.0; // s to ms
+                                                sync_params.time_per_syncpoint *= 1000.0; // s to ms
+                                                sync_params.search_size        *= 1000.0; // s to ms
+
+                                                let size = stab.params.read().size;
+                                                let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
+                                                stab.set_size(sw as usize, sh as usize);
+
+                                                if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
+                                                    let stab2 = stab.clone();
+                                                    sync.on_finished(move |arg| {
+                                                        match arg {
+                                                            Either::Left(offsets) => {
+                                                                let mut gyro = stab2.gyro.write();
+                                                                for x in offsets {
+                                                                    ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                                                                    let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                                                                    // Remove existing offsets within 100ms range
+                                                                    gyro.remove_offsets_near(new_ts, 100.0);
+                                                                    gyro.set_offset(new_ts, x.1);
+                                                                }
+                                                                stab2.keyframes.write().update_gyro(&gyro);
+                                                            },
+                                                            _=> ()
+                                                        };
+                                                    });
+
+                                                    let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
+                                                    let gpu_decoding = *rendering::GPU_DECODING.read();
+
+                                                    let mut frame_no = 0;
+
+                                                    match FfmpegProcessor::from_file(&path, gpu_decoding, 0, None) {
+                                                        Ok(mut proc) => {
+                                                            proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                                                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                                                    Ok(small_frame) => {
+                                                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+
+                                                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                                                    },
+                                                                    Err(e) => {
+                                                                        err(("An error occured: %1".to_string(), e.to_string()))
+                                                                    }
+                                                                }
+                                                                frame_no += 1;
+                                                                Ok(())
+                                                            });
+                                                            if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag.clone()) {
+                                                                err(("An error occured: %1".to_string(), e.to_string()));
+                                                            }
+                                                            sync.finished_feeding_frames();
+                                                        }
+                                                        Err(error) => {
+                                                            dbg!(&error.to_string());
+                                                            err(("An error occured: %1".to_string(), error.to_string()));
+                                                        }
+                                                    }
+                                                } else {
+                                                    err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+                                                }
+
+                                                stab.set_size(video_size.0, video_size.1);
+                                            }
+                                        }
+                                    }
+                                    // --------------------------------- AUtosync ---------------------------------
+                                    // ----------------------------------------------------------------------------
+                                }
+                            }
+
                             stab.recompute_blocking();
 
                             // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
-                            loaded(render_options);
+                            loaded((render_options, ask_path));
 
                             if let Err(e) = fetch_thumb(&path, ratio) {
                                 err(("An error occured: %1".to_string(), e.to_string()));

@@ -53,8 +53,7 @@ MenuItem {
         id: autosyncTimer;
         interval: 200;
         property bool doRun: false;
-        property bool canRun: controller.lens_loaded && controller.gyro_loaded && !window.isDialogOpened && doRun;
-        onCanRunChanged: if (canRun) start();
+        running: controller.lens_loaded && controller.gyro_loaded && !window.isDialogOpened && doRun && render_queue.editing_job_id == 0;
         onTriggered: {
             doRun = false;
             if (controller.offsets_model.rowCount() == 0)
