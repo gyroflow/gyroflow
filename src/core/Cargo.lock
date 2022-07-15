@@ -707,9 +707,9 @@ checksum = "453440c271cf5577fd2a40e4942540cb7d0d2f85e27c8d07dd0023c925a67541"
 
 [[package]]
 name = "dyn-clone"
-version = "1.0.6"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "140206b78fb2bc3edbcfc9b5ccbd0b30699cfe8d348b8b31b330e47df5291a5a"
+checksum = "9d07a982d1fb29db01e5a59b1918e03da4df7297eaeee7686ac45542fd4e59c8"
 
 [[package]]
 name = "eight-point"
@@ -2473,7 +2473,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=2d4be6c#2d4be6cf5d05cb52f49cf3be4994fc9d7e82f37d"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=852e0ee#852e0ee3e61d98622cdf26144f318b85cb5b4038"
 dependencies = [
  "argh",
  "byteorder",

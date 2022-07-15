@@ -67,6 +67,7 @@ pub struct Controller {
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
+    realtime_fps_loaded: qt_signal!(fps: f64),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
@@ -489,21 +490,40 @@ impl Controller {
                     this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()));
                 }
             });
+            let on_metadata = util::qt_queued_callback_mut(self, move |this, md: core::gyro_source::FileMetadata| {
+                if let Some(md_fps) = md.frame_rate {
+                    let fps = this.stabilizer.params.read().fps;
+                    if (md_fps - fps).abs() > 1.0 {
+                        this.realtime_fps_loaded(md_fps);
+                    }
+                }
+            });
 
             if duration_ms > 0.0 && fps > 0.0 {
                 core::run_threaded(move || {
+                    let mut file_metadata = None;
                     if is_main_video {
                         if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
-                            let _ = stab.load_gyro_data(&s, progress, cancel_flag); // Ignore the error here, video file may not contain the telemetry and it's ok
+                            // Ignore the error here, video file may not contain the telemetry and it's ok
+                            if let Ok(md) = stab.load_gyro_data(&s, progress, cancel_flag) {
+                                file_metadata = Some(md);
+                            }
 
                             if stab.set_output_size(video_size.0, video_size.1) {
                                 stab.recompute_undistortion();
                             }
                         }
-                    } else if let Err(e) = stab.load_gyro_data(&s, progress, cancel_flag) {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                    } else {
+                        match stab.load_gyro_data(&s, progress, cancel_flag) {
+                            Ok(md) => {
+                                file_metadata = Some(md);
+                            },
+                            Err(e) => {
+                                err(("An error occured: %1".to_string(), e.to_string()));
+                            }
+                        }
                     }
                     stab.recompute_smoothness();
 
@@ -532,6 +552,9 @@ impl Controller {
                         }
                     }
                     reload_lens(());
+                    if let Some(md) = file_metadata {
+                        on_metadata(md);
+                    }
 
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();

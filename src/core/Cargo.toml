@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "2d4be6c" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "852e0ee" }
 ahrs = { version = "0.5.0", features = ["field_access"] }
 
 #rs-sync = { path = "../../../rs-sync" }
@@ -42,7 +42,7 @@ enum_dispatch = "0.3.8"
 
 simple-easing = "1.0.0"
 
-dyn-clone = "1.0.6"
+dyn-clone = "1.0.8"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }

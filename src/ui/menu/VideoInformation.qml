@@ -115,6 +115,12 @@ MenuItem {
 
         return format + (format? " " : "") + rate;
     }
+    Connections {
+        target: controller;
+        function onRealtime_fps_loaded(fps: real) {
+            root.updateEntryWithTrigger("Frame rate", fps);
+        }
+    }
 
     Button {
         text: qsTr("Open file");

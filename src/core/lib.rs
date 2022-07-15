@@ -122,7 +122,7 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(())
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<()> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -158,7 +158,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let quats = self.gyro.read().quaternions.clone();
         self.smoothing.write().update_quats_checksum(&quats);
 
-        if let Some(lens) = md.lens_profile {
+        if let Some(ref lens) = md.lens_profile {
             let mut l = self.lens.write();
             if let Some(lens_str) = lens.as_str() {
                 let db = self.lens_profile_db.read();
@@ -166,14 +166,14 @@ impl<T: PixelType> StabilizationManager<T> {
                     *l = found.clone();
                 }
             } else {
-                l.load_from_json_value(&lens);
+                l.load_from_json_value(lens);
                 l.filename = path.to_string();
             }
         }
-        if let Some(id) = md.camera_identifier {
-            *self.camera_id.write() = Some(id);
+        if let Some(ref id) = md.camera_identifier {
+            *self.camera_id.write() = Some(id.clone());
         }
-        Ok(())
+        Ok(md)
     }
 
     pub fn load_lens_profile(&self, path: &str) -> Result<(), serde_json::Error> {
