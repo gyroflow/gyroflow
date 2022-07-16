@@ -113,10 +113,12 @@ Window {
             target: controller;
             function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
                 calibrator_window.anyFileLoaded = true;
+                videoArea.timeline.updateDurations();
+
                 if (!batch.active) return;
                 batch.runIn(2000, function() {
                     lensCalib.autoCalibBtn.clicked();
-                })
+                });
             }
             function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
                 if (!batch.active) return;
