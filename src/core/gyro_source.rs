@@ -49,6 +49,8 @@ pub struct GyroSource {
 
     pub imu_rotation_angles: Option<[f64; 3]>,
     pub imu_rotation: Option<Rotation3<f64>>,
+    pub acc_rotation_angles: Option<[f64; 3]>,
+    pub acc_rotation: Option<Rotation3<f64>>,
     pub imu_lpf: f64,
 
     pub gyro_bias: Option<[f64; 3]>,
@@ -220,6 +222,7 @@ impl GyroSource {
         self.raw_imu.clear();
         self.org_raw_imu.clear();
         self.imu_rotation = None;
+        self.acc_rotation = None;
         self.imu_lpf = 0.0;
 
         self.imu_orientation = telemetry.imu_orientation.clone();
@@ -320,9 +323,23 @@ impl GyroSource {
                 yaw_deg * DEG2RAD,
                 pitch_deg * DEG2RAD,
                 roll_deg * DEG2RAD
-            ))
+            ));
         } else {
             self.imu_rotation = None;
+        }
+        self.apply_transforms();
+    }
+    pub fn set_acc_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
+        self.acc_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
+        if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
+            self.acc_rotation = Some(Rotation3::from_euler_angles(
+                yaw_deg * DEG2RAD,
+                pitch_deg * DEG2RAD,
+                roll_deg * DEG2RAD
+            ));
+        } else {
+            self.acc_rotation = None;
         }
         self.apply_transforms();
     }
@@ -370,15 +387,17 @@ impl GyroSource {
             }
         }
         // Rotate
-        if let Some(rotation) = self.imu_rotation {
-            let rotate = |inp: &[f64; 3]| -> [f64; 3] {
-                let rotated = rotation.transform_vector(&Vector3::new(inp[0], inp[1], inp[2]));
+        if self.imu_rotation.is_some() || self.acc_rotation.is_some() {
+            let rotate = |inp: &[f64; 3], rot: Rotation3<f64>| -> [f64; 3] {
+                let rotated = rot.transform_vector(&Vector3::new(inp[0], inp[1], inp[2]));
                 [rotated[0], rotated[1], rotated[2]]
             };
+            let grot = self.imu_rotation;
+            let arot = if self.acc_rotation.is_some() { self.acc_rotation } else { self.imu_rotation };
             for x in &mut self.raw_imu {
-                if let Some(g) = x.gyro.as_mut() { *g = rotate(g); }
-                if let Some(a) = x.accl.as_mut() { *a = rotate(a); }
-                if let Some(m) = x.magn.as_mut() { *m = rotate(m); }
+                if let Some(g) = x.gyro.as_mut() { if let Some(grot) = grot { *g = rotate(g, grot); } }
+                if let Some(a) = x.accl.as_mut() { if let Some(arot) = arot { *a = rotate(a, arot); } }
+                if let Some(m) = x.magn.as_mut() { if let Some(grot) = grot { *m = rotate(m, grot); } }
             }
         }
 

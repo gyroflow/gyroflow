@@ -592,6 +592,10 @@ impl<T: PixelType> StabilizationManager<T> {
         self.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
         self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
     }
+    pub fn set_acc_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
+        self.gyro.write().set_acc_rotation(pitch_deg, roll_deg, yaw_deg);
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+    }
     pub fn set_imu_orientation(&self, orientation: String) {
         let mut gyro = self.gyro.write();
         let mut smoothing = self.smoothing.write();
@@ -809,6 +813,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "filepath":           gyro.file_path,
                 "lpf":                gyro.imu_lpf,
                 "rotation":           gyro.imu_rotation_angles,
+                "acc_rotation":       gyro.acc_rotation_angles,
                 "imu_orientation":    gyro.imu_orientation,
                 "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
@@ -981,6 +986,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
                 if let Some(v) = obj.get("rotation")  { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("acc_rotation")  { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("gyro_bias") { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
 
                 if blocking {

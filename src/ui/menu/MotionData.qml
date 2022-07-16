@@ -49,6 +49,13 @@ MenuItem {
                 y.value = gyro.rotation[2];
                 rot.checked = Math.abs(p.value) > 0 || Math.abs(r.value) > 0 || Math.abs(y.value) > 0;
             }
+            if (gyro.acc_rotation && gyro.acc_rotation.length == 3) {
+                ap.value = gyro.acc_rotation[0];
+                ar.value = gyro.acc_rotation[1];
+                ay.value = gyro.acc_rotation[2];
+                arot.checked = Math.abs(ap.value) > 0 || Math.abs(ar.value) > 0 || Math.abs(ay.value) > 0;
+                arot_action.checked = arot.checked;
+            }
             if (gyro.imu_orientation) orientation.text = gyro.imu_orientation;
             if (gyro.hasOwnProperty("integration_method")) {
                 const index = +gyro.integration_method;
@@ -82,6 +89,7 @@ MenuItem {
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
+            controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
 
             window.videoArea.timeline.updateDurations();
 
@@ -140,13 +148,91 @@ MenuItem {
             }
         }
     }
+    Item {
+        width: parent.width;
+        height: rot.height;
+        CheckBoxWithContent {
+            id: rot;
+            text: qsTr("Rotation");
+            onCheckedChanged: update_rotation();
+            function update_rotation() {
+                controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
+            }
+
+            Flow {
+                width: parent.width;
+                spacing: 5 * dpiScale;
+                Label {
+                    position: Label.LeftPosition;
+                    text: qsTr("Pitch");
+                    width: undefined;
+                    inner.width: 50 * dpiScale;
+                    spacing: 5 * dpiScale;
+                    NumberField { id: p; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); tooltip: qsTr("Pitch is camera angle up/down when using FPV blackbox data"); }
+                }
+                Label {
+                    position: Label.LeftPosition;
+                    text: qsTr("Roll");
+                    width: undefined;
+                    inner.width: 50 * dpiScale;
+                    spacing: 5 * dpiScale;
+                    NumberField { id: r; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
+                }
+                Label {
+                    position: Label.LeftPosition;
+                    text: qsTr("Yaw");
+                    width: undefined;
+                    inner.width: 50 * dpiScale;
+                    spacing: 5 * dpiScale;
+                    NumberField { id: y; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent;
+            acceptedButtons: Qt.LeftButton | Qt.RightButton;
+            propagateComposedEvents: true;
+            cursorShape: Qt.PointingHandCursor;
+
+            onPressAndHold: (mouse) => {
+                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                    contextMenu.popup();
+                    mouse.accepted = true;
+                } else {
+                    mouse.accepted = false;
+                }
+            }
+
+            function _onClicked(mouse) {
+                if (mouse.button === Qt.RightButton) {
+                    contextMenu.popup();
+                    mouse.accepted = true;
+                } else {
+                    mouse.accepted = false;
+                }
+            }
+
+            onClicked: (mouse) => _onClicked(mouse);
+            onPressed: (mouse) => _onClicked(mouse);
+        }
+        Menu {
+            id: contextMenu;
+            font.pixelSize: 11.5 * dpiScale;
+            Action {
+                id: arot_action;
+                icon.name: "axes";
+                text: qsTr("Separate accelerometer rotation");
+                checkable: true;
+            }
+        }
+    }
     CheckBoxWithContent {
-        id: rot;
-        text: qsTr("Rotation");
-        //inner.visible: true;
+        id: arot;
+        visible: arot_action.checked;
+        text: qsTr("Accelerometer rotation");
         onCheckedChanged: update_rotation();
         function update_rotation() {
-            controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
+            controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
         }
 
         Flow {
@@ -158,7 +244,7 @@ MenuItem {
                 width: undefined;
                 inner.width: 50 * dpiScale;
                 spacing: 5 * dpiScale;
-                NumberField { id: p; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); tooltip: qsTr("Pitch is camera angle up/down when using FPV blackbox data"); }
+                NumberField { id: ap; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: arot.update_rotation(); }
             }
             Label {
                 position: Label.LeftPosition;
@@ -166,7 +252,7 @@ MenuItem {
                 width: undefined;
                 inner.width: 50 * dpiScale;
                 spacing: 5 * dpiScale;
-                NumberField { id: r; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
+                NumberField { id: ar; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: arot.update_rotation(); }
             }
             Label {
                 position: Label.LeftPosition;
@@ -174,16 +260,9 @@ MenuItem {
                 width: undefined;
                 inner.width: 50 * dpiScale;
                 spacing: 5 * dpiScale;
-                NumberField { id: y; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
+                NumberField { id: ay; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: arot.update_rotation(); }
             }
         }
-        /*BasicText {
-            leftPadding: 0;
-            width: parent.width;
-            wrapMode: Text.WordWrap;
-            font.pixelSize: 11 * dpiScale;
-            text: qsTr("Pitch is camera angle up/down when using FPV blackbox data");
-        }*/
     }
     CheckBoxWithContent {
         id: gyrobias;

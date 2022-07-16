@@ -26,7 +26,7 @@ Modal {
         "Lens profile": ["calibration_data"],
         "Motion data|gyro_source": {
             "Low pass filter":    ["lpf"],
-            "Rotation":           ["rotation"],
+            "Rotation":           ["rotation", "acc_rotation"],
             "Gyro bias":          ["gyro_bias"],
             "IMU orientation":    ["imu_orientation"],
             "Integration method": ["integration_method"],
