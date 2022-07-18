@@ -101,6 +101,27 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - For cameras which do have built-in gyro, please contact us and we will implement support for that camera. Refer to the [documentation](https://docs.gyroflow.xyz) for information about the gyro logging process.
 - For cameras which don't have built-in gyro, please consider using Betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
 
+## Installation
+### Windows
+- Download `Gyroflow-windows64.zip` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `Gyroflow.exe`
+
+### MacOS
+- Download `Gyroflow-mac-universal.dmg` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, run the downloaded file, and drag & drop `Gyroflow` app to the Applications folder (or anywhere you want, like on Desktop)
+- You can also install using brew: `brew install gyroflow`. To upgrade Gyroflow, run `brew update` then `brew upgrade gyroflow`
+
+### Linux
+- Download `Gyroflow-linux64.tar.gz` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `./Gyroflow` in the terminal.
+- If that doesn't work, you can try the `Gyroflow-linux64.AppImage`, but the .tar.gz one is preferred.
+- Make sure you have latest graphics drivers installed
+- Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0libc++-dev vdpau-va-driver libvulkan1`
+- GPU specific packages:
+    - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd libnvcuvid1 libnvidia-encode1`
+    - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
+    - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
+
+### Nightly build
+Latest development version is always available here: https://gyroflow.xyz/devbuild/.
+
 ## Minimum system requirements:
 - Windows 10 64-bit (1809 or later) [Install VC redist if it doesn't run](https://aka.ms/vs/17/release/vc_redist.x64.exe)
     - If you have Windows "N" install, go to `Settings` -> `Apps` -> `Optional features` -> `Add a feature` -> enable `Media Feature Pack`
@@ -108,12 +129,6 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Linux:
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
     - `.AppImage` should work everywhere
-    - Make sure you have latest graphics drivers installed
-    - Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev vdpau-va-driver libvulkan1`
-    - GPU specific packages:
-        - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd libnvcuvid1 libnvidia-encode1`
-        - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
-        - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 - Android 6+
 
 ## Help and support
@@ -121,15 +136,18 @@ For general support and discussion, you can find the developers and other users 
 
 For companies or people wishing to get in touch with the team privately for collaborative purposes: devteam@gyroflow.xyz.
 
+## Test data
+You can download some clips with gyro data from here: https://drive.google.com/drive/folders/1sbZiLN5-sv_sGul1E_DUOluB5OMHfySh?usp=sharing
+
 ## Roadmap
 
 See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of proposed features and known issues.
 There's also a ton of TODO comments throughout the code.
 
 ### Video editor plugins
-Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx).
+Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx). OpenFX plugin was tested in DaVinci Resolve
 
-Adobe After Effects and Davinci Resolve plugins are planned, but not ready yet
+Adobe After Effects plugin is planned, but not ready yet
 
 ## Contributing
 
