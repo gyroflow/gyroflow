@@ -295,7 +295,7 @@ Rectangle {
                     icon.height: 25 * dpiScale;
                     // textColor: styleTextColor;
                     anchors.verticalCenter: parent.verticalCenter;
-                    icon.name: "queue";
+                    iconName: "queue";
                     tooltip: qsTr("Render queue");
                     onClicked: videoArea.queue.shown = !videoArea.queue.shown;
                 }
