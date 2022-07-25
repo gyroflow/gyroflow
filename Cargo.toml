@@ -30,7 +30,7 @@ breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "33eb660" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "950a5b8" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.0.3", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }

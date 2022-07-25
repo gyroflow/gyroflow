@@ -47,7 +47,6 @@ Item {
         height: 34 * dpiScale;
         textColor: styleTextColor;
         icon.name: "close";
-        icon.source: "qrc:/resources/icons/svg/close.svg";
         leftPadding: 0;
         rightPadding: 0;
         topPadding: 10 * dpiScale;
@@ -185,7 +184,6 @@ Item {
             })
             text: statuses[status][0];
             icon.name: statuses[status][1];
-            icon.source: "qrc:/resources/icons/svg/" + statuses[status][1] + ".svg";
             accentColor: statuses[status][2];
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
@@ -259,14 +257,12 @@ Item {
                 font.pixelSize: 11.5 * dpiScale;
                 Action {
                     icon.name: "play";
-                    icon.source: "qrc:/resources/icons/svg/play.svg";
                     text: qsTr("Render now");
                     enabled: !isFinished && !isInProgress;
                     onTriggered: render_queue.render_job(job_id, true);
                 }
                 Action {
                     icon.name: "pencil";
-                    icon.source: "qrc:/resources/icons/svg/pencil.svg";
                     text: qsTr("Edit");
                     enabled: !isInProgress;
                     onTriggered:{
@@ -280,7 +276,6 @@ Item {
                 }
                 Action {
                     icon.name: isInProgress? "close" : "spinner";
-                    icon.source: isInProgress? "qrc:/resources/icons/svg/close.svg" : "qrc:/resources/icons/svg/spinner.svg";
                     text: isInProgress? qsTr("Stop") : qsTr("Reset status");
                     enabled: isError || isFinished || isQuestion || isInProgress;
                     onTriggered: render_queue.reset_job(job_id);
@@ -480,7 +475,6 @@ Item {
                         IconButton {
                             visible: dlg.isFinished;
                             icon.name: "play";
-                            icon.source: "qrc:/resources/icons/svg/play.svg";
                             icon.width: 25 * dpiScale;
                             icon.height: 25 * dpiScale;
                             tooltip: qsTr("Open rendered file");
@@ -489,7 +483,6 @@ Item {
                         IconButton {
                             visible: dlg.isFinished;
                             icon.name: "folder";
-                            icon.source: "qrc:/resources/icons/svg/folder.svg";
                             tooltip: qsTr("Open file location");
                             onClicked: controller.open_file_externally(Util.getFolder(output_path));
                         }
@@ -497,7 +490,6 @@ Item {
                             tooltip: qsTr("Remove");
                             textColor: "#f67575"
                             icon.name: dlg.isFinished? "close" : "bin";
-                            icon.source: dlg.isFinished? "qrc:/resources/icons/svg/close.svg" : "qrc:/resources/icons/svg/bin.svg";
                             onClicked: render_queue.remove(job_id);
                         }
                     }

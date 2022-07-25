@@ -487,24 +487,13 @@ Item {
                 spacing: 5 * dpiScale;
                 enabled: vid.loaded;
                 Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); }
-                Button {
-                    icon.name: "chevron-left";
-                    icon.source: "qrc:/resources/icons/svg/chevron-left.svg";
-                    tooltip: qsTr("Previous frame");
-                    onClicked: vid.currentFrame -= 1;
-                }
+                Button { icon.name: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
                 Button {
                     onClicked: if (vid.playing) vid.pause(); else vid.play();
                     tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
                     icon.name: vid.playing? "pause" : "play";
-                    icon.source: vid.playing? "qrc:/resources/icons/svg/pause.svg" : "qrc:/resources/icons/svg/play.svg";
                 }
-                Button {
-                    icon.name: "chevron-right";
-                    icon.source: "qrc:/resources/icons/svg/chevron-right.svg";
-                    tooltip: qsTr("Next frame");
-                    onClicked: vid.currentFrame += 1;
-                }
+                Button { icon.name: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
                 Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); }
             }
             Row {
@@ -531,14 +520,12 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     icon.name: "gyroflow";
-                    icon.source: "qrc:/resources/icons/svg/gyroflow.svg";
                     onCheckedChanged: { vid.stabEnabled = checked; controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
                 SmallLinkButton {
                     icon.name: checked? "sound" : "sound-mute";
-                    icon.source: checked? "qrc:/resources/icons/svg/sound.svg" : "qrc:/resources/icons/svg/sound-mute.svg" ;
                     onClicked: vid.muted = !vid.muted;
                     tooltip: checked? qsTr("Mute") : qsTr("Unmute");
                     checked: !vid.muted;

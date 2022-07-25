@@ -10,7 +10,6 @@ MenuItem {
     id: root;
     text: qsTr("Stabilization");
     icon: "gyroflow";
-    iconSource: "qrc:/resources/icons/svg/gyroflow.svg";
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "stabilization";
 

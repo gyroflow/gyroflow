@@ -39,7 +39,6 @@ QQC.Popup {
                 anchors.fill: parent;
                 text: qsTr(modelData);
                 icon.name: popup.icons[index] || "";
-                icon.source: popup.icons[index] ? "qrc:/resources/icons/svg/" + popup.icons[index] + ".svg" : "";
                 icon.color: c;
                 icon.height: popup.itemHeight / 2 + 5 * dpiScale;
                 icon.width: popup.itemHeight / 2 + 5 * dpiScale;

@@ -10,7 +10,6 @@ MenuItem {
     id: root;
     text: qsTr("Video information");
     icon: "info";
-    iconSource: "qrc:/resources/icons/svg/info.svg";
     objectName: "info";
 
     property real videoRotation: 0;
@@ -126,7 +125,6 @@ MenuItem {
     Button {
         text: qsTr("Open file");
         icon.name: "video"
-        icon.source: "qrc:/resources/icons/svg/video.svg";
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: root.selectFileRequest();
     }

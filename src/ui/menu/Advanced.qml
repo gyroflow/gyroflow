@@ -9,7 +9,6 @@ import "../components/"
 MenuItem {
     text: qsTr("Advanced");
     icon: "settings";
-    iconSource: "qrc:/resources/icons/svg/settings.svg";
     opened: false;
     objectName: "advanced";
 

@@ -200,7 +200,6 @@ Window {
                     Button {
                         text: qsTr("Open calibration target");
                         icon.name: "chessboard"
-                        icon.source: "qrc:/resources/icons/svg/chessboard.svg";
                         onClicked: Qt.createComponent("CalibrationTarget.qml").createObject(calibrator_window).showMaximized();
                     }
                     LinkButton {
