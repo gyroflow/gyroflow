@@ -186,6 +186,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter;
                     text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
                     icon.name: "video";
+                    icon.source: "qrc:/resources/icons/svg/video.svg";
                     opacity: enabled? 1.0 : 0.6;
                     Ease on opacity { }
                     fadeWhenDisabled: false;
@@ -296,6 +297,7 @@ Rectangle {
                     // textColor: styleTextColor;
                     anchors.verticalCenter: parent.verticalCenter;
                     icon.name: "queue";
+                    icon.source: "qrc:/resources/icons/svg/queue.svg";
                     tooltip: qsTr("Render queue");
                     onClicked: videoArea.queue.shown = !videoArea.queue.shown;
                 }

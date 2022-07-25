@@ -10,6 +10,7 @@ MenuItem {
     id: sync;
     text: qsTr("Synchronization");
     icon: "sync";
+    iconSource: "qrc:/resources/icons/svg/sync.svg";
     innerItem.enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
     loader: controller.sync_in_progress;
     objectName: "synchronization";
@@ -79,6 +80,7 @@ MenuItem {
         id: autosync;
         text: qsTr("Auto sync");
         icon.name: "spinner"
+        icon.source: "qrc:/resources/icons/svg/spinner.svg";
         anchors.horizontalCenter: parent.horizontalCenter;
         enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";

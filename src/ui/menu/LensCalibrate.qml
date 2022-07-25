@@ -11,6 +11,7 @@ MenuItem {
     id: calib;
     text: qsTr("Calibration");
     icon: "lens";
+    iconSource: "qrc:/resources/icons/svg/lens.svg";
     innerItem.enabled: !controller.calib_in_progress;
     loader: controller.calib_in_progress;
     objectName: "lenscalib";
@@ -166,6 +167,7 @@ MenuItem {
         text: qsTr("Auto calibrate");
         enabled: calibrator_window.videoArea.vid.loaded;
         icon.name: "spinner"
+        icon.source: "qrc:/resources/icons/svg/spinner.svg";
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1, noMarker.checked);
@@ -293,6 +295,7 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         icon.name: "save"
+        icon.source: "qrc:/resources/icons/svg/save.svg";
         enabled: rms.value > 0 && rms.value < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {

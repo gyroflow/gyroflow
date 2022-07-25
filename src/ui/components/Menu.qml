@@ -40,6 +40,7 @@ QQC.Menu {
                 const parts = icon.name.split(";");
                 dlg.orgIconColor = parts[1];
                 icon.name = parts[0];
+                icon.source = "qrc:/resources/icons/svg/" + parts[0] + ".svg";
             }
             Qt.callLater(function() {
                 if (menu && dlg && dlg.implicitContentWidth > menu.maxItemWidth) menu.maxItemWidth = dlg.implicitContentWidth;

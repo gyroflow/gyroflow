@@ -116,12 +116,14 @@ TextField {
         font.pixelSize: 11.5 * dpiScale;
         Action {
             icon.name: "undo";
+            icon.source: "qrc:/resources/icons/svg/undo.svg";
             text: qsTr("Reset value");
             enabled: value != defaultValue;
             onTriggered: root.reset()
         }
         Action {
             icon.name: "keyframe";
+            icon.source: "qrc:/resources/icons/svg/keyframe.svg";
             enabled: root.keyframe.length > 0;
             text: qsTr("Enable keyframing");
             checked: root.keyframesEnabled;

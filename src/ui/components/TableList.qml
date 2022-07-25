@@ -114,6 +114,7 @@ Row {
                 id: editLinkBtn;
                 anchors.verticalCenter: parent.verticalCenter;
                 icon.name: newValue.visible? "checkmark" : "pencil";
+                icon.source: newValue.visible? "qrc:/resources/icons/svg/checkmark.svg" : "qrc:/resources/icons/svg/pencil.svg";
                 icon.height: parent.height * 0.8;
                 icon.width: parent.height * 0.8;
                 opacity: editLinkBtn.activeFocus ? 0.8 : 1;

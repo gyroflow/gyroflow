@@ -10,6 +10,7 @@ MenuItem {
     id: root;
     text: qsTr("Motion data");
     icon: "chart";
+    iconSource: "qrc:/resources/icons/svg/chart.svg";
     loader: controller.loading_gyro_in_progress;
     objectName: "motiondata";
 
@@ -114,6 +115,7 @@ MenuItem {
     Button {
         text: qsTr("Open file");
         icon.name: "file-empty"
+        icon.source: "qrc:/resources/icons/svg/file-empty.svg";
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: fileDialog.open2();
     }
@@ -221,6 +223,7 @@ MenuItem {
             Action {
                 id: arot_action;
                 icon.name: "axes";
+                icon.source: "qrc:/resources/icons/svg/axes.svg";
                 text: qsTr("Separate accelerometer rotation");
                 checkable: true;
             }

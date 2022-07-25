@@ -11,6 +11,7 @@ Item {
     signal clicked();
     property alias text: btn.text;
     property alias icon: btn.icon.name;
+    property alias iconSource: btn.icon.source;
     property bool opened: col.children.length > 0;
     property alias loader: loader.active;
     property alias loaderProgress: loader.progress;

@@ -10,6 +10,7 @@ MenuItem {
     id: root;
     text: qsTr("Lens profile");
     icon: "lens";
+    iconSource: "qrc:/resources/icons/svg/lens.svg";
     objectName: "lens";
 
     property int calibWidth: 0;
@@ -138,11 +139,13 @@ MenuItem {
         Button {
             text: qsTr("Open file");
             icon.name: "file-empty"
+            icon.source: "qrc:/resources/icons/svg/file-empty.svg";
             onClicked: fileDialog.open2();
         }
         Button {
             text: qsTr("Create new");
             icon.name: "plus";
+            icon.source: "qrc:/resources/icons/svg/plus.svg";
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
             property var calibratorWnd: null;

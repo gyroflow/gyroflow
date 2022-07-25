@@ -83,17 +83,20 @@ Rectangle {
                 id: editAction;
                 text: qsTr("Edit offset");
                 icon.name: "pencil";
+                icon.source: "qrc:/resources/icons/svg/pencil.svg";
                 onTriggered: root.edit(root.org_timestamp_us, root.value);
             }
             Action {
                 text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
                 icon.name: "bin;#f67575";
+                icon.source: "qrc:/resources/icons/svg/bin.svg";
                 onTriggered: root.remove(root.org_timestamp_us);
             }
             Action {
                 id: zoomAction;
                 text: qsTr("Zoom in");
                 icon.name: "search";
+                icon.source: "qrc:/resources/icons/svg/search.svg";
                 onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
             }
             Component.onCompleted: {

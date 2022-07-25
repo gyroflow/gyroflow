@@ -12,6 +12,7 @@ MenuItem {
     id: root;
     text: qsTr("Export settings");
     icon: "save";
+    iconSource: "qrc:/resources/icons/svg/save.svg";
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "export";
 
@@ -226,6 +227,7 @@ MenuItem {
                 checked: true;
                 height: parent.height * 0.75;
                 icon.name: checked? "lock" : "unlocked";
+                icon.source: checked? "qrc:/resources/icons/svg/lock.svg" : "qrc:/resources/icons/svg/unlocked.svg";
                 topPadding: 4 * dpiScale;
                 bottomPadding: 4 * dpiScale;
                 leftPadding: 3 * dpiScale;
@@ -262,6 +264,7 @@ MenuItem {
                 id: sizeMenuBtn;
                 height: parent.height;
                 icon.name: "settings";
+                icon.source: "qrc:/resources/icons/svg/settings.svg";
                 leftPadding: 3 * dpiScale;
                 rightPadding: 3 * dpiScale;
                 anchors.verticalCenter: parent.verticalCenter;
@@ -373,6 +376,7 @@ MenuItem {
                 id: encoderOptionsInfo;
                 height: parent.height;
                 icon.name: "info";
+                icon.source: "qrc:/resources/icons/svg/info.svg";
                 leftPadding: 3 * dpiScale;
                 rightPadding: 3 * dpiScale;
                 y: -encoderOptions.height;

@@ -201,12 +201,14 @@ Item {
                     font.pixelSize: 11.5 * dpiScale;
                     Action {
                         icon.name: "bin;#f67575";
+                        icon.source: "qrc:/resources/icons/svg/bin.svg";
                         text: qsTr("Delete");
                         onTriggered: controller.remove_keyframe(keyframeContextMenu.pressedKeyframe, keyframeContextMenu.pressedKeyframeTs);
                     }
                     Action {
                         id: easeIn;
                         icon.name: "ease_in";
+                        icon.source: "qrc:/resources/icons/svg/ease_in.svg";
                         text: qsTr("Ease in");
                         checkable: true;
                         onTriggered: keyframeContextMenu.updateEasing();
@@ -214,6 +216,7 @@ Item {
                     Action {
                         id: easeOut;
                         icon.name: "ease_out";
+                        icon.source: "qrc:/resources/icons/svg/ease_out.svg";
                         text: qsTr("Ease out");
                         checkable: true;
                         onTriggered: keyframeContextMenu.updateEasing();
@@ -409,6 +412,7 @@ Item {
             Action {
                 id: addCalibAction;
                 icon.name: "plus";
+                icon.source: "qrc:/resources/icons/svg/plus.svg";
                 text: qsTr("Add calibration point");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -419,6 +423,7 @@ Item {
             Action {
                 id: syncHereAction;
                 icon.name: "spinner";
+                icon.source: "qrc:/resources/icons/svg/spinner.svg";
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -428,6 +433,7 @@ Item {
             Action {
                 id: addSyncAction;
                 icon.name: "plus";
+                icon.source: "qrc:/resources/icons/svg/plus.svg";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
                     const pos = root.position * root.durationMs * 1000; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
@@ -447,6 +453,7 @@ Item {
             Action {
                 id: guessOrientationHere;
                 icon.name: "axes";
+                icon.source: "qrc:/resources/icons/svg/axes.svg";
                 text: qsTr("Guess IMU orientation here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -456,6 +463,7 @@ Item {
             Action {
                 id: estimateRSAction;
                 icon.name: "readout_time";
+                icon.source: "qrc:/resources/icons/svg/readout_time.svg";
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -474,11 +482,13 @@ Item {
             Action {
                 id: debiasAction;
                 icon.name: "bias";
+                icon.source: "qrc:/resources/icons/svg/bias.svg";
                 text: qsTr("Estimate gyro bias here");
                 onTriggered: controller.estimate_bias(root.position);
             }
             Action {
                 icon.name: "bin;#f67575";
+                icon.source: "qrc:/resources/icons/svg/bin.svg";
                 text: qsTr("Delete all sync points");
                 onTriggered: controller.clear_offsets();
             }
