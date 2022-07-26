@@ -519,13 +519,13 @@ Item {
 
                 SmallLinkButton {
                     id: stabEnabledBtn;
-                    icon.name: "gyroflow";
+                    iconName: "gyroflow";
                     onCheckedChanged: { vid.stabEnabled = checked; controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
                 SmallLinkButton {
-                    icon.name: checked? "sound" : "sound-mute";
+                    iconName: checked? "sound" : "sound-mute";
                     onClicked: vid.muted = !vid.muted;
                     tooltip: checked? qsTr("Mute") : qsTr("Unmute");
                     checked: !vid.muted;

@@ -46,7 +46,7 @@ Item {
         width: 34 * dpiScale;
         height: 34 * dpiScale;
         textColor: styleTextColor;
-        icon.name: "close";
+        iconName: "close";
         leftPadding: 0;
         rightPadding: 0;
         topPadding: 10 * dpiScale;

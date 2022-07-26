@@ -225,7 +225,7 @@ MenuItem {
                 id: lockAspectRatio;
                 checked: true;
                 height: parent.height * 0.75;
-                icon.name: checked? "lock" : "unlocked";
+                iconName: checked? "lock" : "unlocked";
                 topPadding: 4 * dpiScale;
                 bottomPadding: 4 * dpiScale;
                 leftPadding: 3 * dpiScale;
@@ -261,7 +261,7 @@ MenuItem {
             LinkButton {
                 id: sizeMenuBtn;
                 height: parent.height;
-                icon.name: "settings";
+                iconName: "settings";
                 leftPadding: 3 * dpiScale;
                 rightPadding: 3 * dpiScale;
                 anchors.verticalCenter: parent.verticalCenter;
