@@ -17,7 +17,7 @@ pub struct GyroOnlyIntegrator { }
 pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
 
-const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
+// const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
 const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
 impl QuaternionConverter {

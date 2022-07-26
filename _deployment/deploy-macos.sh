@@ -152,8 +152,8 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
 
         OBJECTS=(
             "Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
-            "Frameworks/mdk.framework/Versions/A/mdk"
             "Frameworks/mdk.framework/Versions/A/libmdk-braw.dylib"
+            "Frameworks/mdk.framework/Versions/A/mdk"
             "Frameworks/QtCore.framework/Versions/A/QtCore"
             "Frameworks/QtDBus.framework/Versions/A/QtDBus"
             "Frameworks/QtGui.framework/Versions/A/QtGui"
