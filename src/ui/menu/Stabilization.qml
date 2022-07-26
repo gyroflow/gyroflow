@@ -65,7 +65,7 @@ MenuItem {
                 zoomingCenterY.value = stab.adaptive_zoom_center_offset[1];
             }
             if (stab.hasOwnProperty("use_gravity_vectors")) {
-                useGravityVectors.chcked = stab.use_gravity_vectors;
+                useGravityVectors.checked = !!stab.use_gravity_vectors;
             }
 
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
