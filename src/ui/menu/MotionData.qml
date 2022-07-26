@@ -220,7 +220,7 @@ MenuItem {
             font.pixelSize: 11.5 * dpiScale;
             Action {
                 id: arot_action;
-                icon.name: "axes";
+                iconName: "axes";
                 text: qsTr("Separate accelerometer rotation");
                 checkable: true;
             }

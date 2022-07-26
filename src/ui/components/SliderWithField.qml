@@ -84,7 +84,7 @@ Row {
             id: contextMenu;
             font.pixelSize: 11.5 * dpiScale;
             Action {
-                icon.name: "undo";
+                iconName: "undo";
                 text: qsTr("Reset value");
                 enabled: field.value != defaultValue;
                 onTriggered: {
@@ -92,7 +92,7 @@ Row {
                 }
             }
             Action {
-                icon.name: "keyframe";
+                iconName: "keyframe";
                 enabled: root.keyframe.length > 0;
                 text: qsTr("Enable keyframing");
                 checked: root.keyframesEnabled;

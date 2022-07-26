@@ -200,20 +200,20 @@ Item {
 
                     font.pixelSize: 11.5 * dpiScale;
                     Action {
-                        icon.name: "bin;#f67575";
+                        iconName: "bin;#f67575";
                         text: qsTr("Delete");
                         onTriggered: controller.remove_keyframe(keyframeContextMenu.pressedKeyframe, keyframeContextMenu.pressedKeyframeTs);
                     }
                     Action {
                         id: easeIn;
-                        icon.name: "ease_in";
+                        iconName: "ease_in";
                         text: qsTr("Ease in");
                         checkable: true;
                         onTriggered: keyframeContextMenu.updateEasing();
                     }
                     Action {
                         id: easeOut;
-                        icon.name: "ease_out";
+                        iconName: "ease_out";
                         text: qsTr("Ease out");
                         checkable: true;
                         onTriggered: keyframeContextMenu.updateEasing();
@@ -408,7 +408,7 @@ Item {
             }
             Action {
                 id: addCalibAction;
-                icon.name: "plus";
+                iconName: "plus";
                 text: qsTr("Add calibration point");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -418,7 +418,7 @@ Item {
             QQC.MenuSeparator { id: msep; verticalPadding: 5 * dpiScale; }
             Action {
                 id: syncHereAction;
-                icon.name: "spinner";
+                iconName: "spinner";
                 text: qsTr("Auto sync here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -427,7 +427,7 @@ Item {
             }
             Action {
                 id: addSyncAction;
-                icon.name: "plus";
+                iconName: "plus";
                 text: qsTr("Add manual sync point here");
                 onTriggered: {
                     const pos = root.position * root.durationMs * 1000; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
@@ -446,7 +446,7 @@ Item {
             }
             Action {
                 id: guessOrientationHere;
-                icon.name: "axes";
+                iconName: "axes";
                 text: qsTr("Guess IMU orientation here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -455,7 +455,7 @@ Item {
             }
             Action {
                 id: estimateRSAction;
-                icon.name: "readout_time";
+                iconName: "readout_time";
                 text: qsTr("Estimate rolling shutter here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
@@ -473,12 +473,12 @@ Item {
             }
             Action {
                 id: debiasAction;
-                icon.name: "bias";
+                iconName: "bias";
                 text: qsTr("Estimate gyro bias here");
                 onTriggered: controller.estimate_bias(root.position);
             }
             Action {
-                icon.name: "bin;#f67575";
+                iconName: "bin;#f67575";
                 text: qsTr("Delete all sync points");
                 onTriggered: controller.clear_offsets();
             }

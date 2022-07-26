@@ -38,9 +38,11 @@ QQC.Menu {
         Component.onCompleted: {
             if (icon.name && icon.name.indexOf(";") > 0) {
                 const parts = icon.name.split(";");
-                dlg.orgIconColor = parts[1];
                 icon.name = parts[0];
                 icon.source = "qrc:/resources/icons/svg/" + parts[0] + ".svg";
+                dlg.orgIconColor = parts[1];
+            } else if (icon.name)  {
+                icon.source = "qrc:/resources/icons/svg/" + icon.name + ".svg";
             }
             Qt.callLater(function() {
                 if (menu && dlg && dlg.implicitContentWidth > menu.maxItemWidth) menu.maxItemWidth = dlg.implicitContentWidth;

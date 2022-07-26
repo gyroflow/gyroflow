@@ -3,5 +3,9 @@
 
 import QtQuick
 import QtQuick.Controls as QQC
+import QtQuick.Controls.Material as QQCM
 
-QQC.Action { }
+QQC.Action {
+    id: root;
+    property alias iconName: root.icon.name;
+}

@@ -256,13 +256,13 @@ Item {
                 id: contextMenu;
                 font.pixelSize: 11.5 * dpiScale;
                 Action {
-                    icon.name: "play";
+                    iconName: "play";
                     text: qsTr("Render now");
                     enabled: !isFinished && !isInProgress;
                     onTriggered: render_queue.render_job(job_id, true);
                 }
                 Action {
-                    icon.name: "pencil";
+                    iconName: "pencil";
                     text: qsTr("Edit");
                     enabled: !isInProgress;
                     onTriggered:{
@@ -275,7 +275,7 @@ Item {
                     }
                 }
                 Action {
-                    icon.name: isInProgress? "close" : "spinner";
+                    iconName: isInProgress? "close" : "spinner";
                     text: isInProgress? qsTr("Stop") : qsTr("Reset status");
                     enabled: isError || isFinished || isQuestion || isInProgress;
                     onTriggered: render_queue.reset_job(job_id);
