@@ -67,12 +67,6 @@ Item {
                     render_queue.editing_job_id = editing_id;
                     return;
                 }
-                window.motionData.loadGyroflow(obj);
-                window.stab.loadGyroflow(obj);
-                window.advanced.loadGyroflow(obj);
-                window.sync.loadGyroflow(obj);
-                Qt.callLater(window.exportSettings.loadGyroflow, obj);
-
                 const info = obj.video_info || { };
                 if (info && Object.keys(info).length > 0) {
                     if (info.hasOwnProperty("vfr_fps") && Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
@@ -89,6 +83,11 @@ Item {
                 if (obj.hasOwnProperty("trim_start")) {
                     timeline.setTrim(obj.trim_start, obj.trim_end);
                 }
+                window.motionData.loadGyroflow(obj);
+                window.stab.loadGyroflow(obj);
+                window.advanced.loadGyroflow(obj);
+                window.sync.loadGyroflow(obj);
+                Qt.callLater(window.exportSettings.loadGyroflow, obj);
             }
         }
     }
@@ -186,6 +185,7 @@ Item {
             if (root.pendingGyroflowData) {
                 loadGyroflowData(root.pendingGyroflowData);
             }
+            Qt.callLater(controller.recompute_threaded);
         }
         function onChart_data_changed() {
             chartUpdateTimer.start();
@@ -262,7 +262,7 @@ Item {
                     controller.video_position_changed(timestamp);
                 }
                 onMetadataLoaded: (md) => {
-                    loaded = frameCount > 0;
+                    loaded = duration > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
                     timeline.resetTrim();
@@ -274,7 +274,7 @@ Item {
                 }
                 property bool errorShown: false;
                 onMetadataChanged: {
-                    if (vid.frameCount > 0) {
+                    if (vid.duration > 0) {
                         // Trigger seek to buffer the video frames
                         bufferTrigger.start();
                     } else if (!errorShown) {

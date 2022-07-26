@@ -117,6 +117,7 @@ MenuItem {
                     cx.setInitialValue(mtrx[0][2]);
                     cy.setInitialValue(mtrx[1][2]);
                 }
+                Qt.callLater(controller.recompute_threaded);
             }
         }
     }

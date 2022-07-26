@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 use nalgebra::Vector4;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub enum BackgroundMode {
     #[default]
     SolidColor = 0,
@@ -24,7 +24,7 @@ impl From<i32> for BackgroundMode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StabilizationParams {
     pub size: (usize, usize), // Processing input size
     pub output_size: (usize, usize), // Processing output size

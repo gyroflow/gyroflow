@@ -29,6 +29,7 @@ pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> Unit
 #[derive(Clone)]
 pub struct HorizonLock {
     pub lock_enabled: bool,
+    pub use_gravity_vectors: bool,
     pub horizonlockpercent: f64,
     pub horizonroll: f64,
 }
@@ -36,6 +37,7 @@ pub struct HorizonLock {
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         lock_enabled: false,
+        use_gravity_vectors: true,
         horizonlockpercent: 100.0,
         horizonroll: 0.0,
     } }
@@ -54,17 +56,16 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, int_method: usize, keyframes: &KeyframeManager) {
+    pub fn lock(&self, smoothed_quats: &mut TimeQuat, quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, _int_method: usize, keyframes: &KeyframeManager) {
         if self.lock_enabled {
-            if int_method == 0 {
-                // Only with "None" integration method
-                if let Some(gvec) = grav {
+            if let Some(gvec) = grav {
+                if !gvec.is_empty() && self.use_gravity_vectors {
                     let z_axis = nalgebra::Vector3::<f64>::z_axis();
                     let y_axis = nalgebra::Vector3::<f64>::y_axis();
                     //let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
 
                     for (ts, smoothed_ori) in smoothed_quats.iter_mut() {
-                        let gv = gvec.get(ts).unwrap_or(&y_axis);
+                        let gv = Self::interpolate_gravity_vector(&gvec, *ts).unwrap_or(*y_axis);
                         let ori = quats.get(ts).unwrap_or(&smoothed_ori).to_rotation_matrix();
 
                         // Correct for angle difference between original and smoothed orientation
@@ -93,4 +94,31 @@ impl HorizonLock {
             }
         }
     }
+
+    pub fn interpolate_gravity_vector(gravs: &crate::gyro_source::TimeVec, timestamp_us: i64) -> Option<Vector3<f64>> {
+        match gravs.len() {
+            0 => None,
+            1 => gravs.values().next().cloned(),
+            _ => {
+                if let Some(&first_ts) = gravs.keys().next() {
+                    if let Some(&last_ts) = gravs.keys().next_back() {
+                        let lookup_ts = timestamp_us.min(last_ts).max(first_ts);
+                        if let Some(offs1) = gravs.range(..=lookup_ts).next_back() {
+                            if *offs1.0 == lookup_ts {
+                                return Some(*offs1.1);
+                            }
+                            if let Some(offs2) = gravs.range(lookup_ts..).next() {
+                                let time_delta = (offs2.0 - offs1.0) as f64;
+                                let fract = (timestamp_us - offs1.0) as f64 / time_delta;
+                                return Some(offs1.1 + (offs2.1 - offs1.1) * fract);
+                            }
+                        }
+                    }
+                }
+
+                None
+            }
+        }
+    }
+
 }

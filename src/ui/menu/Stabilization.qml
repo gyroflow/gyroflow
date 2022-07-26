@@ -22,6 +22,7 @@ MenuItem {
         property alias croppingMode: croppingMode.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
         property alias correctionAmount: correctionAmount.value;
+        property alias useGravityVectors: useGravityVectors.checked;
     }
 
     function loadGyroflow(obj) {
@@ -62,6 +63,9 @@ MenuItem {
             if (stab.hasOwnProperty("adaptive_zoom_center_offset")) {
                 zoomingCenterX.value = stab.adaptive_zoom_center_offset[0];
                 zoomingCenterY.value = stab.adaptive_zoom_center_offset[1];
+            }
+            if (stab.hasOwnProperty("use_gravity_vectors")) {
+                useGravityVectors.chcked = stab.use_gravity_vectors;
             }
 
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
@@ -209,6 +213,7 @@ MenuItem {
         const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         controller.set_horizon_lock(lockAmount, roll);
+        controller.set_use_gravity_vectors(useGravityVectors.checked);
     }
 
     ComboBox {
@@ -342,6 +347,13 @@ MenuItem {
                 keyframe: "LockHorizonRoll";
                 onValueChanged: Qt.callLater(updateHorizonLock);
             }
+        }
+        CheckBox {
+            id: useGravityVectors;
+            text: qsTr("Use gravity vectors");
+            checked: true;
+            visible: controller.has_gravity_vectors;
+            onCheckedChanged: Qt.callLater(updateHorizonLock);
         }
 
         BasicText {

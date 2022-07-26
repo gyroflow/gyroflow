@@ -37,34 +37,11 @@ Rectangle {
     onVisibleChanged: {
         if (visible && iconType != Modal.NoIcon) {
             switch (iconType) {
-                case Modal.Info:
-                    icon.name = "info";
-                    icon.source = "qrc:/resources/icons/svg/info.svg";
-                    icon.color = styleAccentColor; break;
-
-                case Modal.Warning:
-                    icon.name = "warning";
-                    icon.source = "qrc:/resources/icons/svg/warning.svg";
-                    icon.color = "#f6a10c";
-                    break;
-
-                case Modal.Error:
-                    icon.name = "error";
-                    icon.source = "qrc:/resources/icons/svg/error.svg";
-                    icon.color = "#d82626";
-                    break;
-
-                case Modal.Success:
-                    icon.name = "confirmed";
-                    icon.source = "qrc:/resources/icons/svg/confirmed.svg";
-                    icon.color = "#3cc42f";
-                    break;
-
-                case Modal.Question:
-                    icon.name = "question";
-                    icon.source = "qrc:/resources/icons/svg/question.svg";
-                    icon.color = styleAccentColor;
-                    break;
+                case Modal.Info:     icon.name = "info";      icon.color = styleAccentColor; break;
+                case Modal.Warning:  icon.name = "warning";   icon.color = "#f6a10c"; break;
+                case Modal.Error:    icon.name = "error";     icon.color = "#d82626"; break;
+                case Modal.Success:  icon.name = "confirmed"; icon.color = "#3cc42f"; break;
+                case Modal.Question: icon.name = "question";  icon.color = styleAccentColor; break;
             }
             icon.visible = true;
             ease.enabled = false;
@@ -102,6 +79,7 @@ Rectangle {
                 height: 70 * dpiScale;
                 width: height;
                 anchors.horizontalCenter: parent.horizontalCenter;
+                source: name? "qrc:/resources/icons/svg/" + name + ".svg" : "";
                 layer.enabled: true;
                 layer.textureSize: Qt.size(height*2, height*2);
                 layer.smooth: true;

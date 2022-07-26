@@ -130,6 +130,8 @@ impl<T: PixelType> StabilizationManager<T> {
             gyro.clear_offsets();
             gyro.file_path = path.to_string();
         }
+        self.invalidate_smoothing();
+        self.invalidate_zooming();
 
         let last_progress = std::cell::RefCell::new(std::time::Instant::now());
         let progress_cb = |p| {
@@ -660,6 +662,10 @@ impl<T: PixelType> StabilizationManager<T> {
         self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll);
         self.invalidate_smoothing();
     }
+    pub fn set_use_gravity_vectors(&self, v: bool) {
+        self.smoothing.write().horizon_lock.use_gravity_vectors = v;
+        self.invalidate_smoothing();
+    }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
         self.gyro.read().max_angles
     }
@@ -745,7 +751,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
-        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll) = {
+        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll, use_gravity_vectors) = {
             let smoothing_lock = self.smoothing.read();
             let smoothing = smoothing_lock.current();
 
@@ -765,7 +771,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 horizon_amount = 0.0;
             }
 
-            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll, smoothing_lock.horizon_lock.use_gravity_vectors)
         };
 
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
@@ -808,6 +814,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
+                "use_gravity_vectors":    use_gravity_vectors,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,

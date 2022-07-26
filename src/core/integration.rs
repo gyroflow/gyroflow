@@ -17,11 +17,12 @@ pub struct GyroOnlyIntegrator { }
 pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
 
-
-
+const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
+const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
 impl QuaternionConverter {
     pub fn convert(org_quaternions: &TimeQuat, imu_data: &[TimeIMU], _duration_ms: f64) -> TimeQuat {
+
         let x_axis = nalgebra::Vector3::<f64>::x_axis();
         let y_axis = nalgebra::Vector3::<f64>::y_axis();
         let z_axis = nalgebra::Vector3::<f64>::z_axis();
@@ -144,7 +145,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
         if imu_data.is_empty() { return BTreeMap::new(); }
         let mut quats = BTreeMap::new();
         let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
-                
+
         let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
 
@@ -180,13 +181,12 @@ impl GyroIntegrator for ComplementaryIntegrator {
         if imu_data.is_empty() { return BTreeMap::new(); }
         let mut quats = BTreeMap::new();
         let sample_time_ms = duration_ms / imu_data.len() as f64;
-        let init_pos = UnitQuaternion::from_euler_angles(0.0, std::f64::consts::FRAC_PI_2, 0.0);
+        let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
 
         let mut f = ComplementaryFilter::default();
         let init_pos_q = init_pos.quaternion();
-        f.set_orientation(init_pos_q.scalar(), init_pos_q.vector()[0], init_pos_q.vector()[1], init_pos_q.vector()[2]);
+        f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
 
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {

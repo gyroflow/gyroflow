@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtQuick.Controls as QQC
-import QtQuick.Controls.Material as QQCM
 
 QQC.Action {
     id: root;

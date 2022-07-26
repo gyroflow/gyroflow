@@ -74,6 +74,7 @@ pub struct Controller {
     get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
     set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64)),
+    set_use_gravity_vectors: qt_method!(fn(&self, v: bool)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
     set_integration_method: qt_method!(fn(&self, index: usize)),
@@ -131,6 +132,8 @@ pub struct Controller {
 
     gyro_loaded: qt_property!(bool; NOTIFY gyro_changed),
     gyro_changed: qt_signal!(),
+
+    has_gravity_vectors: qt_property!(bool; READ has_gravity_vectors NOTIFY gyro_changed),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -466,6 +469,7 @@ impl Controller {
                 this.loading_gyro_progress(progress);
                 this.loading_gyro_in_progress_changed();
             });
+            let stab2 = stab.clone();
             let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64, QString)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
@@ -474,10 +478,13 @@ impl Controller {
                 this.loading_gyro_progress(1.0);
                 this.loading_gyro_in_progress_changed();
 
-                this.request_recompute();
                 this.update_offset_model();
                 this.chart_data_changed();
                 this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);
+
+                stab2.invalidate_ongoing_computations();
+                stab2.invalidate_smoothing();
+                this.request_recompute();
             });
             let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
                 this.load_lens_profile(path);
@@ -720,6 +727,7 @@ impl Controller {
         self.request_recompute();
     }
     wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_use_gravity_vectors, v: bool; recompute; chart_data_changed);
     pub fn get_smoothing_algs(&self) -> QVariantList {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
     }
@@ -1346,6 +1354,10 @@ impl Controller {
                 self.keyframe_value_updated(kf.to_string(), v);
             }
         }
+    }
+
+    fn has_gravity_vectors(&self) -> bool {
+        self.stabilizer.gyro.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
 
     // Utilities
