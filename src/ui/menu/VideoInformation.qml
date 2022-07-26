@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Video information");
-    icon: "info";
+    iconName: "info";
     objectName: "info";
 
     property real videoRotation: 0;

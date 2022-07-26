@@ -113,7 +113,7 @@ Row {
             LinkButton {
                 id: editLinkBtn;
                 anchors.verticalCenter: parent.verticalCenter;
-                icon.name: newValue.visible? "checkmark" : "pencil";
+                iconName: newValue.visible? "checkmark" : "pencil";
                 icon.height: parent.height * 0.8;
                 icon.width: parent.height * 0.8;
                 opacity: editLinkBtn.activeFocus ? 0.8 : 1;

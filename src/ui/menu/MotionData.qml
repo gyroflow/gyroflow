@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Motion data");
-    icon: "chart";
+    iconName: "chart";
     loader: controller.loading_gyro_in_progress;
     objectName: "motiondata";
 

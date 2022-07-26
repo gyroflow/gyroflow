@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Lens profile");
-    icon: "lens";
+    iconName: "lens";
     objectName: "lens";
 
     property int calibWidth: 0;

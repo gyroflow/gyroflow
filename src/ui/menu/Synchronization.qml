@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: sync;
     text: qsTr("Synchronization");
-    icon: "sync";
+    iconName: "sync";
     innerItem.enabled: window.videoArea.vid.loaded && !controller.sync_in_progress;
     loader: controller.sync_in_progress;
     objectName: "synchronization";

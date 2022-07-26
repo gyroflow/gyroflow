@@ -10,7 +10,7 @@ import "../components/"
 MenuItem {
     id: calib;
     text: qsTr("Calibration");
-    icon: "lens";
+    iconName: "lens";
     innerItem.enabled: !controller.calib_in_progress;
     loader: controller.calib_in_progress;
     objectName: "lenscalib";
