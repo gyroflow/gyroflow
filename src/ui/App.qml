@@ -185,7 +185,7 @@ Rectangle {
                     anchors.rightMargin: 55 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
                     text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
-                    icon.name: "video";
+                    iconName: "video";
                     opacity: enabled? 1.0 : 0.6;
                     Ease on opacity { }
                     fadeWhenDisabled: false;

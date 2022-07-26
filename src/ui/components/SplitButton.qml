@@ -6,6 +6,11 @@ import QtQuick.Controls as QQC
 
 Button {
     id: root;
+
+    property string iconName;
+    icon.name: iconName || "";
+    icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+
     // TODO popup direction
     property alias model: popup.model;
     property alias popup: popup;
