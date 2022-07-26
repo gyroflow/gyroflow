@@ -137,12 +137,12 @@ MenuItem {
         spacing: 10 * dpiScale;
         Button {
             text: qsTr("Open file");
-            icon.name: "file-empty"
+            iconName: "file-empty"
             onClicked: fileDialog.open2();
         }
         Button {
             text: qsTr("Create new");
-            icon.name: "plus";
+            iconName: "plus";
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
             property var calibratorWnd: null;

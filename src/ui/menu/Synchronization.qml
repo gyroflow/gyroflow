@@ -78,7 +78,7 @@ MenuItem {
     Button {
         id: autosync;
         text: qsTr("Auto sync");
-        icon.name: "spinner"
+        iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";

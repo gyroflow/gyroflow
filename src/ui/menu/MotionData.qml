@@ -113,7 +113,7 @@ MenuItem {
 
     Button {
         text: qsTr("Open file");
-        icon.name: "file-empty"
+        iconName: "file-empty"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: fileDialog.open2();
     }

@@ -183,7 +183,7 @@ Item {
                 "active":  [qsTr("Pause"),           "pause", "#f6a00b",        "pause"],
             })
             text: statuses[status][0];
-            icon.name: statuses[status][1];
+            iconName: statuses[status][1];
             accentColor: statuses[status][2];
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;

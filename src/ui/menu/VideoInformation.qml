@@ -124,7 +124,7 @@ MenuItem {
 
     Button {
         text: qsTr("Open file");
-        icon.name: "video"
+        iconName: "video"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: root.selectFileRequest();
     }

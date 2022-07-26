@@ -165,7 +165,7 @@ MenuItem {
         id: autoCalibBtn;
         text: qsTr("Auto calibrate");
         enabled: calibrator_window.videoArea.vid.loaded;
-        icon.name: "spinner"
+        iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1, noMarker.checked);
@@ -292,7 +292,7 @@ MenuItem {
     Button {
         text: qsTr("Export lens profile");
         accent: true;
-        icon.name: "save"
+        iconName: "save"
         enabled: rms.value > 0 && rms.value < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {

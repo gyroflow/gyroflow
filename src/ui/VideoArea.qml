@@ -487,13 +487,13 @@ Item {
                 spacing: 5 * dpiScale;
                 enabled: vid.loaded;
                 Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); }
-                Button { icon.name: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
+                Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
                 Button {
                     onClicked: if (vid.playing) vid.pause(); else vid.play();
                     tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
-                    icon.name: vid.playing? "pause" : "play";
+                    iconName: vid.playing? "pause" : "play";
                 }
-                Button { icon.name: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
+                Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
                 Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); }
             }
             Row {
