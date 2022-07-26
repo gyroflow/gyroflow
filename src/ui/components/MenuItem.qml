@@ -10,13 +10,13 @@ Item {
     id: root;
     signal clicked();
     property alias text: btn.text;
-    property alias icon: btn.icon.name;
     property bool opened: col.children.length > 0;
     property alias loader: loader.active;
     property alias loaderProgress: loader.progress;
     property alias spacing: col.spacing;
     property alias innerItem: innerItem;
     default property alias data: col.data;
+    property string iconName;
 
     Component.onCompleted: {
         const val = window.settings.value(root.objectName + "-opened", root.opened);
@@ -47,6 +47,10 @@ Item {
 
     QQC.Button {
         id: btn;
+
+        icon.name: iconName || "";
+        icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+
         width: parent.width;
         height: 36 * dpiScale;
         hoverEnabled: true;

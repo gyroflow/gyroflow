@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Motion data");
-    icon: "chart";
+    iconName: "chart";
     loader: controller.loading_gyro_in_progress;
     objectName: "motiondata";
 
@@ -113,7 +113,7 @@ MenuItem {
 
     Button {
         text: qsTr("Open file");
-        icon.name: "file-empty"
+        iconName: "file-empty"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: fileDialog.open2();
     }
@@ -220,7 +220,7 @@ MenuItem {
             font.pixelSize: 11.5 * dpiScale;
             Action {
                 id: arot_action;
-                icon.name: "axes";
+                iconName: "axes";
                 text: qsTr("Separate accelerometer rotation");
                 checkable: true;
             }

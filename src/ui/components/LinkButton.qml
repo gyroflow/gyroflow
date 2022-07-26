@@ -37,6 +37,10 @@ QQC.Button {
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
 
+    property string iconName;
+    icon.name: iconName || "";
+    icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+
     Keys.onReturnPressed: checked = !checked;
     Keys.onEnterPressed: checked = !checked;
 }

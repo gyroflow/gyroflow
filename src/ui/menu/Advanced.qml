@@ -8,7 +8,7 @@ import "../components/"
 
 MenuItem {
     text: qsTr("Advanced");
-    icon: "settings";
+    iconName: "settings";
     opened: false;
     objectName: "advanced";
 

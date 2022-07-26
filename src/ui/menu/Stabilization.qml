@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Stabilization");
-    icon: "gyroflow";
+    iconName: "gyroflow";
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "stabilization";
 

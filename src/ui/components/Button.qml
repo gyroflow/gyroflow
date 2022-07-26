@@ -51,6 +51,10 @@ QQC.Button {
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
 
+    property string iconName;
+    icon.name: iconName || "";
+    icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
             root.clicked();

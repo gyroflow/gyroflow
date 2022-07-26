@@ -82,18 +82,18 @@ Rectangle {
             Action {
                 id: editAction;
                 text: qsTr("Edit offset");
-                icon.name: "pencil";
+                iconName: "pencil";
                 onTriggered: root.edit(root.org_timestamp_us, root.value);
             }
             Action {
                 text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
-                icon.name: "bin;#f67575";
+                iconName: "bin;#f67575";
                 onTriggered: root.remove(root.org_timestamp_us);
             }
             Action {
                 id: zoomAction;
                 text: qsTr("Zoom in");
-                icon.name: "search";
+                iconName: "search";
                 onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
             }
             Component.onCompleted: {

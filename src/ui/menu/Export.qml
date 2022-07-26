@@ -11,7 +11,7 @@ import "../Util.js" as Util;
 MenuItem {
     id: root;
     text: qsTr("Export settings");
-    icon: "save";
+    iconName: "save";
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "export";
 
@@ -225,7 +225,7 @@ MenuItem {
                 id: lockAspectRatio;
                 checked: true;
                 height: parent.height * 0.75;
-                icon.name: checked? "lock" : "unlocked";
+                iconName: checked? "lock" : "unlocked";
                 topPadding: 4 * dpiScale;
                 bottomPadding: 4 * dpiScale;
                 leftPadding: 3 * dpiScale;
@@ -261,7 +261,7 @@ MenuItem {
             LinkButton {
                 id: sizeMenuBtn;
                 height: parent.height;
-                icon.name: "settings";
+                iconName: "settings";
                 leftPadding: 3 * dpiScale;
                 rightPadding: 3 * dpiScale;
                 anchors.verticalCenter: parent.verticalCenter;
@@ -372,7 +372,7 @@ MenuItem {
             LinkButton {
                 id: encoderOptionsInfo;
                 height: parent.height;
-                icon.name: "info";
+                iconName: "info";
                 leftPadding: 3 * dpiScale;
                 rightPadding: 3 * dpiScale;
                 y: -encoderOptions.height;

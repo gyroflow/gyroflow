@@ -46,7 +46,7 @@ Item {
         width: 34 * dpiScale;
         height: 34 * dpiScale;
         textColor: styleTextColor;
-        icon.name: "close";
+        iconName: "close";
         leftPadding: 0;
         rightPadding: 0;
         topPadding: 10 * dpiScale;
@@ -183,7 +183,7 @@ Item {
                 "active":  [qsTr("Pause"),           "pause", "#f6a00b",        "pause"],
             })
             text: statuses[status][0];
-            icon.name: statuses[status][1];
+            iconName: statuses[status][1];
             accentColor: statuses[status][2];
             icon.width: 15 * dpiScale;
             icon.height: 15 * dpiScale;
@@ -256,13 +256,13 @@ Item {
                 id: contextMenu;
                 font.pixelSize: 11.5 * dpiScale;
                 Action {
-                    icon.name: "play";
+                    iconName: "play";
                     text: qsTr("Render now");
                     enabled: !isFinished && !isInProgress;
                     onTriggered: render_queue.render_job(job_id, true);
                 }
                 Action {
-                    icon.name: "pencil";
+                    iconName: "pencil";
                     text: qsTr("Edit");
                     enabled: !isInProgress;
                     onTriggered:{
@@ -275,7 +275,7 @@ Item {
                     }
                 }
                 Action {
-                    icon.name: isInProgress? "close" : "spinner";
+                    iconName: isInProgress? "close" : "spinner";
                     text: isInProgress? qsTr("Stop") : qsTr("Reset status");
                     enabled: isError || isFinished || isQuestion || isInProgress;
                     onTriggered: render_queue.reset_job(job_id);
@@ -474,7 +474,7 @@ Item {
                         id: btnsRowInner;
                         IconButton {
                             visible: dlg.isFinished;
-                            icon.name: "play";
+                            iconName: "play";
                             icon.width: 25 * dpiScale;
                             icon.height: 25 * dpiScale;
                             tooltip: qsTr("Open rendered file");
@@ -482,14 +482,14 @@ Item {
                         }
                         IconButton {
                             visible: dlg.isFinished;
-                            icon.name: "folder";
+                            iconName: "folder";
                             tooltip: qsTr("Open file location");
                             onClicked: controller.open_file_externally(Util.getFolder(output_path));
                         }
                         IconButton {
                             tooltip: qsTr("Remove");
                             textColor: "#f67575"
-                            icon.name: dlg.isFinished? "close" : "bin";
+                            iconName: dlg.isFinished? "close" : "bin";
                             onClicked: render_queue.remove(job_id);
                         }
                     }

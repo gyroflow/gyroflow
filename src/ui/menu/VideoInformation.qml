@@ -9,7 +9,7 @@ import "../components/"
 MenuItem {
     id: root;
     text: qsTr("Video information");
-    icon: "info";
+    iconName: "info";
     objectName: "info";
 
     property real videoRotation: 0;
@@ -124,7 +124,7 @@ MenuItem {
 
     Button {
         text: qsTr("Open file");
-        icon.name: "video"
+        iconName: "video"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: root.selectFileRequest();
     }
