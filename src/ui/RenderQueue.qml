@@ -474,7 +474,7 @@ Item {
                         id: btnsRowInner;
                         IconButton {
                             visible: dlg.isFinished;
-                            icon.name: "play";
+                            iconName: "play";
                             icon.width: 25 * dpiScale;
                             icon.height: 25 * dpiScale;
                             tooltip: qsTr("Open rendered file");
@@ -482,14 +482,14 @@ Item {
                         }
                         IconButton {
                             visible: dlg.isFinished;
-                            icon.name: "folder";
+                            iconName: "folder";
                             tooltip: qsTr("Open file location");
                             onClicked: controller.open_file_externally(Util.getFolder(output_path));
                         }
                         IconButton {
                             tooltip: qsTr("Remove");
                             textColor: "#f67575"
-                            icon.name: dlg.isFinished? "close" : "bin";
+                            iconName: dlg.isFinished? "close" : "bin";
                             onClicked: render_queue.remove(job_id);
                         }
                     }
