@@ -570,9 +570,9 @@ checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "concurrent-queue"
-version = "1.2.2"
+version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30ed07550be01594c6026cff2a1d7fe9c8f683caa798e12b68694ac9e88286a3"
+checksum = "af4780a44ab5696ea9e28294517f1fffb421a83a25af521333c838635509db9c"
 dependencies = [
  "cache-padded",
 ]
@@ -1045,9 +1045,9 @@ dependencies = [
 
 [[package]]
 name = "event-listener"
-version = "2.5.2"
+version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
+checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 
 [[package]]
 name = "failure"
@@ -1092,8 +1092,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6616d815efe117378f150e37c1374c650bf52b2380f0159fe3e654162927414e"
+source = "git+https://github.com/AdrianEddy/fc-blackbox#fb65c7a99a353b687853c090ed21e4798c01aa19"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2549,7 +2548,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=33eb660#33eb66005d183c0fc40901c6b4cfc8548c9b3b07"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=b3c0527#b3c0527b138fa6a697cba4d38fa161d9a0bdbdbd"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2719,9 +2718,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.15"
+version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "534cfe58d6a18cc17120fbf4635d53d14691c1fe4d951064df9bd326178d7d5a"
+checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags",
 ]
@@ -3170,7 +3169,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ab1c2a5#ab1c2a511b39e367b08eda1d07cde4c88fe816d4"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=f82b5a7#f82b5a7612b66f04b904d932c878a5c57edeb168"
 dependencies = [
  "argh",
  "byteorder",

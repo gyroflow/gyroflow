@@ -5,6 +5,7 @@ use std::process::Command;
 use std::path::Path;
 use std::env;
 use walkdir::WalkDir;
+use std::fmt::Write;
 
 fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
@@ -28,7 +29,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     WalkDir::new(dir).into_iter().flatten().for_each(|entry| {
         let f_name = entry.path().to_string_lossy().replace('\\', "/");
         if f_name.ends_with(".qml") || f_name.ends_with(".js") {
-            qrc.push_str(&format!("<file>{}</file>\n", f_name));
+            let _ = writeln!(qrc, "<file>{}</file>", f_name);
 
             let cpp_name = f_name.replace('/', "_").replace(".qml", ".cpp").replace(".js", ".cpp");
             let cpp_path = out_dir.join(cpp_name).to_string_lossy().to_string();

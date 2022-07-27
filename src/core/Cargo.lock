@@ -2130,9 +2130,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.15"
+version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "534cfe58d6a18cc17120fbf4635d53d14691c1fe4d951064df9bd326178d7d5a"
+checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags",
 ]
@@ -2473,7 +2473,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ab1c2a5#ab1c2a511b39e367b08eda1d07cde4c88fe816d4"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=f82b5a7#f82b5a7612b66f04b904d932c878a5c57edeb168"
 dependencies = [
  "argh",
  "byteorder",

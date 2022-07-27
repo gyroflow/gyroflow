@@ -130,7 +130,7 @@ impl TimelineKeyframesView {
             for x in 0..rect.width as i32 {
                 let p = x as f64 / rect.width;
                 let timestamp_ms = map_from_visible_area(p) * self.duration_ms / self.mgr.timestamp_scale.unwrap_or(1.0);
-                if let Some(v) = self.mgr.value_at_video_timestamp(&kf, timestamp_ms) {
+                if let Some(v) = self.mgr.value_at_video_timestamp(kf, timestamp_ms) {
                     let point = QPointF {
                         x: x as f64,
                         y: TOP_BOTTOM_MARGIN + (1.0 - ((v - min) / (max - min)) * self.vscale) * (rect.height - TOP_BOTTOM_MARGIN*2.0)
