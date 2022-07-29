@@ -181,6 +181,10 @@ Item {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
+                // If source was detected, but gyro data is empty
+                if (camera && !contains_gyro && !contains_quats) {
+                    messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
+                }
             }
             if (root.pendingGyroflowData) {
                 loadGyroflowData(root.pendingGyroflowData);
