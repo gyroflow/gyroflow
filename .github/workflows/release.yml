@@ -58,7 +58,7 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
         with:
-          key: gf25
+          key: gf26
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -176,15 +176,11 @@ jobs:
           chmod +x ${{ github.workspace }}/_deployment/deploy-macos.sh
           ${{ github.workspace }}/_deployment/deploy-macos.sh deploy-universal
 
-      - name: Notarize Release Build
+      - name: Notarize and staple release build
         if: ${{ matrix.targets.os == 'macos-latest' }}
         run: |
           npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
-      - name: Staple Release Build
-        if: ${{ matrix.targets.os == 'macos-latest' }}
-        uses: devbotsxyz/xcode-staple@v1
-        with:
-          product-path: ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
+          xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
 
       - name: Copy dist Windows
         if: ${{ matrix.targets.os == 'windows-2022' }}
