@@ -155,6 +155,7 @@ cp -f $QT_DIR/plugins/wayland-shell-integration/*.so                            
 cp -f $QT_DIR/plugins/xcbglintegrations/*.so                                                     "$TARGET/plugins/xcbglintegrations/"
 
 cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
+cp -f "$CARGO_TARGET/libmdk-braw.so"                   "$TARGET/lib/"
 #cp -f "$CARGO_TARGET/libffmpeg.so.5"                  "$TARGET/"
 
 cp -f "$FFMPEG_DIR/lib/libavcodec.so.59"               "$TARGET/lib/"
