@@ -136,4 +136,14 @@ Item {
         sequence: "Esc";
         onActivated: videoArea.fullScreen = false;
     }
+    // Next keyframe
+    Shortcut {
+        sequence: "Shift+Right";
+        onActivated: videoArea.timeline.jumpToNextKeyframe("");
+    }
+    // Previous keyframe
+    Shortcut {
+        sequence: "Shift+Left";
+        onActivated: videoArea.timeline.jumpToPrevKeyframe("");
+    }
 }

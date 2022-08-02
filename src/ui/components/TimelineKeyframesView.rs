@@ -3,7 +3,7 @@
 
 #![allow(non_snake_case)]
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, str::FromStr};
 
 use gyroflow_core::keyframes::*;
 use qmetaobject::*;
@@ -35,6 +35,9 @@ pub struct TimelineKeyframesView {
     setDurationMs: qt_method!(fn(&mut self, v: f64)),
     keyframeAtXY: qt_method!(fn(&self, x: f64, y: f64) -> QJSValue),
 
+    nextKeyframe: qt_method!(fn(&self, typ: String) -> QJSValue),
+    prevKeyframe: qt_method!(fn(&self, typ: String) -> QJSValue),
+
     series: BTreeMap<KeyframeType, Series>,
 
     mgr: KeyframeManager,
@@ -59,6 +62,21 @@ impl TimelineKeyframesView {
             }
         }
 
+        QJSValue::default()
+    }
+
+    fn nextKeyframe(&self, typ: String) -> QJSValue {
+        if let Some(res) = self.mgr.next_keyframe((self.videoTimestamp * 1000.0) as i64, KeyframeType::from_str(&typ).ok()) {
+            dbg!("{:?}",res);
+            return QJSValue::from(QString::from(format!("{:?}:{}:{}:{}", res.0, res.1, keyframe_text(&res.0), keyframe_format_value(&res.0, res.2.value))));
+        }
+        QJSValue::default()
+    }
+    fn prevKeyframe(&self, typ: String) -> QJSValue {
+        if let Some(res) = self.mgr.prev_keyframe((self.videoTimestamp * 1000.0) as i64, KeyframeType::from_str(&typ).ok()) {
+            dbg!("{:?}",res);
+            return QJSValue::from(QString::from(format!("{:?}:{}:{}:{}", res.0, res.1, keyframe_text(&res.0), keyframe_format_value(&res.0, res.2.value))));
+        }
         QJSValue::default()
     }
 
