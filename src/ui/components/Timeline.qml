@@ -90,6 +90,21 @@ Item {
         Qt.callLater(controller.update_keyframes_view, keyframes);
     }
 
+    function jumpToNextKeyframe(typ: string) {
+        const kf = keyframes.nextKeyframe(typ);
+        if (kf) {
+            const [keyframe, timestamp, name, value] = kf.split(":", 4);
+            vid.setTimestamp(timestamp / 1000);
+        }
+    }
+    function jumpToPrevKeyframe(typ: string) {
+        const kf = keyframes.prevKeyframe(typ);
+        if (kf) {
+            const [keyframe, timestamp, name, value] = kf.split(":", 4);
+            vid.setTimestamp(timestamp / 1000);
+        }
+    }
+
     Settings {
         property alias timelineChart: chart.viewMode;
     }
