@@ -260,6 +260,7 @@ Item {
                 onCurrentFrameChanged: {
                     fovChanged();
                     controller.video_position_changed(timestamp);
+                    window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000)
                 }
                 onMetadataLoaded: (md) => {
                     loaded = duration > 0;
