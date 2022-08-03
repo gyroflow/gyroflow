@@ -21,6 +21,8 @@ TextField {
     property string keyframe: "";
     property bool keyframesEnabled: false;
     property real finalValue: value;
+    
+    property var contextMenu: defaultContextMenu;
 
     onFinalValueChanged: {
         if (keyframe && keyframesEnabled) {
@@ -112,7 +114,7 @@ TextField {
     }
 
     Menu {
-        id: contextMenu;
+        id: defaultContextMenu;
         font.pixelSize: 11.5 * dpiScale;
         Action {
             iconName: "undo";
