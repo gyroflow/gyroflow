@@ -23,6 +23,8 @@ Row {
     property bool preventChange: false;
 
     property real value: defaultValue;
+    
+    property Menu contextMenu: defaultContextMenu;
 
     onValueChanged: {
         if (!root.preventChange) {
@@ -81,7 +83,7 @@ Row {
         }
 
         Menu {
-            id: contextMenu;
+            id: defaultContextMenu;
             font.pixelSize: 11.5 * dpiScale;
             Action {
                 iconName: "undo";
@@ -113,6 +115,7 @@ Row {
         precision: 3;
         font.pixelSize: 11 * dpiScale;
         anchors.verticalCenter: parent.verticalCenter;
+        contextMenu: root.contextMenu;
         onValueChanged: {
             slider.preventChange = true;
             slider.value = value;

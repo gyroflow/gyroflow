@@ -22,6 +22,8 @@ TextField {
     property bool keyframesEnabled: false;
     property real finalValue: value;
 
+    property Menu contextMenu: defaultContextMenu;
+
     onFinalValueChanged: {
         if (keyframe && keyframesEnabled) {
             controller.set_keyframe(keyframe, window.videoArea.timeline.getTimestampUs(), finalValue);
@@ -112,7 +114,7 @@ TextField {
     }
 
     Menu {
-        id: contextMenu;
+        id: defaultContextMenu;
         font.pixelSize: 11.5 * dpiScale;
         Action {
             iconName: "undo";
