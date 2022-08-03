@@ -4,6 +4,7 @@
 pub mod gyro_source;
 pub mod integration;
 pub mod integration_complementary; // TODO: add this to `ahrs` crate
+pub mod integration_complementary_v2;
 pub mod lens_profile;
 pub mod lens_profile_database;
 #[cfg(feature = "opencv")]
