@@ -21,8 +21,8 @@ TextField {
     property string keyframe: "";
     property bool keyframesEnabled: false;
     property real finalValue: value;
-    
-    property var contextMenu: defaultContextMenu;
+
+    property Menu contextMenu: defaultContextMenu;
 
     onFinalValueChanged: {
         if (keyframe && keyframesEnabled) {

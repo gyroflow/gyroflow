@@ -24,7 +24,7 @@ Row {
 
     property real value: defaultValue;
     
-    property var contextMenu: defaultContextMenu;
+    property Menu contextMenu: defaultContextMenu;
 
     onValueChanged: {
         if (!root.preventChange) {
