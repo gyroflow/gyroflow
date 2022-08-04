@@ -495,7 +495,10 @@ Item {
             Action {
                 iconName: "bin;#f67575";
                 text: qsTr("Delete all sync points");
-                onTriggered: controller.clear_offsets();
+                onTriggered: {
+                    root.editingSyncPoint = false;
+                    controller.clear_offsets();
+                }
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Menu {
