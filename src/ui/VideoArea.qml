@@ -196,6 +196,7 @@ Item {
         }
         function onKeyframes_changed() {
             Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
+            Qt.callLater(controller.update_keyframe_values, vid.timestamp);
         }
     }
     Timer {
@@ -263,7 +264,7 @@ Item {
 
                 onCurrentFrameChanged: {
                     fovChanged();
-                    controller.video_position_changed(timestamp);
+                    controller.update_keyframe_values(timestamp);
                 }
                 onMetadataLoaded: (md) => {
                     loaded = duration > 0;
