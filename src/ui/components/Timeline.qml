@@ -79,6 +79,10 @@ Item {
             }
         }
     }
+    function setDisplayMode(i) {
+        chart.viewMode = i;
+        controller.update_chart(chart);
+    }
 
     function updateDurations() {
         chart.setDurationMs(controller.get_scaled_duration_ms());
@@ -417,10 +421,6 @@ Item {
             property real pressedX: x;
 
             font.pixelSize: 11.5 * dpiScale;
-            function setDisplayMode(i) {
-                chart.viewMode = i;
-                controller.update_chart(chart);
-            }
             Action {
                 id: addCalibAction;
                 iconName: "plus";
@@ -504,10 +504,10 @@ Item {
             Menu {
                 font.pixelSize: 11.5 * dpiScale;
                 title: qsTr("Chart display mode")
-                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: timelineContextMenu.setDisplayMode(0); }
-                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
-                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
-                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
+                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: root.setDisplayMode(0); }
+                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: root.setDisplayMode(1); }
+                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: root.setDisplayMode(2); }
+                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: root.setDisplayMode(3); }
             }
             Component.onCompleted: {
                 if (!isCalibrator) {
