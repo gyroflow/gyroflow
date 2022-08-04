@@ -256,6 +256,7 @@ impl GyroSource {
             2 => self.quaternions = MadgwickIntegrator::integrate(&self.raw_imu, self.duration_ms),
             3 => self.quaternions = MahonyIntegrator::integrate(&self.raw_imu, self.duration_ms),
             4 => self.quaternions = GyroOnlyIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            5 => self.quaternions = VQFIntegrator::integrate(&self.raw_imu, self.duration_ms),
             _ => log::error!("Unknown integrator")
         }
     }

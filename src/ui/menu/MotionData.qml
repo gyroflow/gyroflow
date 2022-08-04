@@ -322,7 +322,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
-            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow"];
+            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");

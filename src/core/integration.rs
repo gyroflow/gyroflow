@@ -6,6 +6,12 @@ use std::collections::BTreeMap;
 use nalgebra::*;
 use super::gyro_source::{TimeIMU, Quat64, TimeQuat};
 use ahrs::{Ahrs, Madgwick, Mahony};
+use cpp::*;
+
+cpp! {{
+    //#include "vqf_combined.hpp"
+    #include <iostream>
+}}
 
 pub trait GyroIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat;
@@ -16,6 +22,8 @@ pub struct MadgwickIntegrator { }
 pub struct GyroOnlyIntegrator { }
 pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
+
+pub struct VQFIntegrator {}
 
 // const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
 const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
@@ -174,7 +182,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use super::integration_complementary_v2::ComplementaryFilter;
+use super::integration_complementary_v2::ComplementaryFilterV2;
 
 impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
@@ -182,7 +190,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let mut quats = BTreeMap::new();
         let sample_time_ms = duration_ms / imu_data.len() as f64;
 
-        let mut f = ComplementaryFilter::default();
+        let mut f = ComplementaryFilterV2::default();
         //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
         let mut counter = 0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
@@ -216,5 +224,62 @@ impl GyroIntegrator for ComplementaryIntegrator {
         }
 
         quats
+    }
+}
+
+impl GyroIntegrator for VQFIntegrator {
+    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        if imu_data.is_empty() { return BTreeMap::new(); }
+        let mut out_quats = BTreeMap::new();
+        let sample_time = duration_ms / (imu_data.len() * 1000) as f64;
+
+        let num_samples: i32 = imu_data.len().try_into().unwrap();
+
+        let mut gyr = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
+        let mut acc = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
+        let mut mag = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
+        let mut quat = Vec::<f64>::with_capacity((num_samples*4).try_into().unwrap());
+        for v in imu_data {
+            let g = v.gyro.unwrap_or_default();
+            let a = v.accl.unwrap_or_default();
+            let m = v.magn.unwrap_or_default();
+            gyr.push(-g[1] * DEG2RAD); // x
+            gyr.push(g[0] * DEG2RAD); // y
+            gyr.push(g[2] * DEG2RAD); // z
+            acc.push(-a[1]); // x
+            acc.push(a[0]); // y
+            acc.push(a[2]); // z
+            mag.push(-m[1]); // x
+            mag.push(m[0]); // y
+            mag.push(m[2]); // z
+            quat.push(1.0);
+            quat.push(0.0);
+            quat.push(0.0);
+            quat.push(0.0);
+        }
+    
+        let gyr_ptr = gyr.as_ptr();
+        let acc_ptr = acc.as_ptr();
+        let mag_ptr = mag.as_ptr();
+        let mut quat_ptr = quat.as_ptr();
+    
+        /*
+        let result: bool = unsafe { cpp!([gyr_ptr as "double *", acc_ptr as "double *", mag_ptr as "double *", mut quat_ptr as "double *", num_samples as "int32_t", sample_time as "double"] -> bool as "bool" {
+            VQFParams params;
+    
+            offlineVQF(gyr_ptr, acc_ptr, mag_ptr, num_samples, sample_time, params, 0, quat_ptr, 0, 0, 0, 0, 0);
+    
+            std::cout << "offlineVQF, mode: " << 0 << ", quat[0]: [" <<
+                         quat_ptr[0] << ", " << quat_ptr[1] << ", " << quat_ptr[2] << ", " << quat_ptr[3] << "]" << ", quat[N]: [" <<
+                         quat_ptr[4*(num_samples-1)] << ", " << quat_ptr[4*(num_samples-1)+1] << ", " << quat_ptr[4*(num_samples-1)+2] << ", " << quat_ptr[4*(num_samples-1)+3] <<
+                         "]" << std::endl;
+            return true;
+        })}; */
+
+        for (i, v) in imu_data.iter().enumerate() {
+            out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
+        }
+        
+        out_quats
     }
 }
