@@ -91,6 +91,7 @@ Item {
         sequence: "s";
         onActivated: videoArea.stabEnabledBtn.checked = !videoArea.stabEnabledBtn.checked;
     }
+
     // Hide chart axis X
     Shortcut {
         sequence: "x";
@@ -111,6 +112,7 @@ Item {
         sequence: "w";
         onActivated: videoArea.timeline.toggleAxis(3, false);
     }
+
     // Show chart axis X
     Shortcut {
         sequence: "Shift+x";
@@ -131,11 +133,28 @@ Item {
         sequence: "Shift+w";
         onActivated: videoArea.timeline.toggleAxis(3, true);
     }
-    // Exit full screen mode
+
+    // Chart display mode: Gyroscope
     Shortcut {
-        sequence: "Esc";
-        onActivated: videoArea.fullScreen = false;
+        sequence: "shift+g";
+        onActivated: videoArea.timeline.setDisplayMode(0);
     }
+    // Chart display mode: Accelerometer
+    Shortcut {
+        sequence: "shift+a";
+        onActivated: videoArea.timeline.setDisplayMode(1);
+    }
+    // Chart display mode: Magnetometer
+    Shortcut {
+        sequence: "shift+m";
+        onActivated: videoArea.timeline.setDisplayMode(2);
+    }
+    // Chart display mode: Quaternions
+    Shortcut {
+        sequence: "shift+q";
+        onActivated: videoArea.timeline.setDisplayMode(3);
+    }
+
     // Next keyframe
     Shortcut {
         sequence: "Shift+Right";
@@ -145,5 +164,11 @@ Item {
     Shortcut {
         sequence: "Shift+Left";
         onActivated: videoArea.timeline.jumpToPrevKeyframe("");
+    }
+
+    // Exit full screen mode
+    Shortcut {
+        sequence: "Esc";
+        onActivated: videoArea.fullScreen = false;
     }
 }
