@@ -165,6 +165,17 @@ Item {
         sequence: "Shift+Left";
         onActivated: videoArea.timeline.jumpToPrevKeyframe("");
     }
+    
+    // Timeline: Auto sync here
+    Shortcut {
+        sequence: "a";
+        onActivated: videoArea.timeline.addAutoSyncPoint(videoArea.timeline.position);
+    }
+    // Timeline: Add manual sync point here
+    Shortcut {
+        sequence: "p";
+        onActivated: videoArea.timeline.addManualSyncPoint(videoArea.timeline.position);
+    }
 
     // Exit full screen mode
     Shortcut {
