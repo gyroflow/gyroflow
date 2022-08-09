@@ -1,5 +1,6 @@
 // Ported from https://github.com/ccny-ros-pkg/imu_tools/blob/indigo/imu_complementary_filter/src/complementary_filter.cpp
 // Original author: Roberto G. Valenti <robertogl.valenti@gmail.com>
+// With modifications by Elvin
 
 // Based on "Keeping a Good Attitude: A Quaternion-Based Orientation Filter for IMUs and MARGs"
 // https://www.mdpi.com/1424-8220/15/8/19302
