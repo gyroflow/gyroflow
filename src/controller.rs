@@ -168,6 +168,7 @@ pub struct Controller {
     remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
 
     get_current_fov: qt_method!(fn(&self) -> f64),
+    quats_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
 
@@ -928,6 +929,13 @@ impl Controller {
 
     fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
         self.stabilizer.offset_at_video_timestamp(timestamp_us)
+    }
+    fn quats_at_timestamp(&self, timestamp_us: i64) -> QVariantList {
+        let gyro = self.stabilizer.gyro.read();
+        let ts = timestamp_us as f64 / 1000.0 - gyro.offset_at_video_timestamp(timestamp_us as f64 / 1000.0);
+        let sq = gyro.smoothed_quat_at_timestamp(ts);
+        let q = gyro.org_quat_at_timestamp(ts);
+        QVariantList::from_iter(vec![q.w,q.i,q.j,q.k,sq.w,sq.i,sq.j,sq.k]) // scalar first
     }
     fn set_lens_param(&self, param: QString, value: f64) {
         self.stabilizer.set_lens_param(param.to_string().as_str(), value);

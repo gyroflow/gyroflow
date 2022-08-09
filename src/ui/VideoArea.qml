@@ -265,6 +265,7 @@ Item {
                 onCurrentFrameChanged: {
                     fovChanged();
                     controller.update_keyframe_values(timestamp);
+                    window.motionData.orientationIndicator.updateOrientation(timestamp * 1000);
                 }
                 onMetadataLoaded: (md) => {
                     loaded = duration > 0;

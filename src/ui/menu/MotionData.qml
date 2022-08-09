@@ -15,6 +15,7 @@ MenuItem {
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property alias integrationMethod: integrator.currentIndex;
+    property alias orientationIndicator: orientationIndicator;
     property string filename: "";
 
     property var pendingOffsets: ({});
@@ -321,7 +322,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
-            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow"];
+            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
@@ -332,6 +333,111 @@ MenuItem {
             onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);
         }
     }
+
+    CheckBoxWithContent {
+        id: orientationCheckbox;
+        text: qsTr("Orientation indicator");
+        onCheckedChanged: Qt.callLater(orientationIndicator.requestPaint);
+
+        Canvas {
+            id: orientationIndicator
+            width: parent.width
+            height: 100
+            property var currentTimestamp: 0
+            property var initialDraw: false
+            onPaint: {
+                if (orientationCheckbox.checked || !initialDraw) {
+                    initialDraw = true
+                    let ctx = getContext("2d");
+                    ctx.reset();
+                    const veclen = 30;
+                    const xv = Qt.vector3d(veclen,0,0)
+                    const yv = Qt.vector3d(0,veclen,0)
+                    const zv = Qt.vector3d(0,0,veclen)
+                    const vecs = [xv, yv, zv]
+                    const colors = style === "light" ? ['#cc0000', '#00cc00', '#0000cc'] : ['#ff0000', '#00ff00', '#4444ff'];
+                    // inspired by blender camera
+                    const cam_width = 30;
+                    const cam_height = 15;
+                    const cam_length = 30;
+                    const cam_vertices = [[-cam_width,-cam_height,-cam_length],
+                                          [cam_width, -cam_height,-cam_length],
+                                          [cam_width, cam_height, -cam_length],
+                                          [-cam_width, cam_height, -cam_length],
+                                          [0,0,0]]
+                    const lines = [[0,1,2,3,0],
+                                   [0,4,1],
+                                   [2,4,3]]
+                    let cam_vert_vecs = []
+                    for (var i = 0; i < cam_vertices.length; i++) {
+                        cam_vert_vecs.push(Qt.vector3d(cam_vertices[i][0],cam_vertices[i][1],cam_vertices[i][2]));
+                    }
+                    const quats = controller.quats_at_timestamp(Math.round(currentTimestamp))
+                    const transform = Qt.quaternion( quats[0], quats[1],  quats[2], quats[3]); // wxyz
+                    const maincolor = style === "light" ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)";
+                    const transform_smooth = transform.times(Qt.quaternion( quats[4], quats[5],  quats[6], quats[7]).inverted());
+                    const transforms = [transform, transform_smooth]
+
+                    // center dots
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(width/6*(i*2+1), height/2, 4, 0, 2 * Math.PI, false);
+                        ctx.fillStyle = maincolor;
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(width/6, height/2);
+                        const transformedvec = transform.times(vecs[i])
+                        ctx.lineTo(width/6 + transformedvec.x, height/2 - transformedvec.y);
+                        ctx.lineWidth = 3;
+                        ctx.strokeStyle = colors[i];
+                        ctx.globalAlpha = 0.5;
+                        ctx.stroke();
+                        ctx.globalAlpha = Math.max(0.1, Math.min(transformedvec.z/(veclen*2)+0.5,1));
+                        ctx.beginPath();
+                        ctx.arc(width/6 + transformedvec.x, height/2 - transformedvec.y, 4, 0, 2 * Math.PI, false);
+                        ctx.fillStyle = colors[i];
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = maincolor;
+                    ctx.globalAlpha = 0.8;
+                    ctx.lineJoin = "bevel";
+                    for (let view = 0; view < 2; view++) {
+                        for (let linenum = 0; linenum < lines.length; linenum++) {
+                            ctx.beginPath()
+                            for (let pointnum=0; pointnum < lines[linenum].length; pointnum++) {
+                                const transformedvec = transforms[view].times(cam_vert_vecs[lines[linenum][pointnum]]);
+                                if (pointnum == 0) {
+                                    ctx.moveTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
+                                }
+                                else {
+                                    ctx.lineTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
+                                }
+                            }
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+            function updateOrientation(timestamp) {
+                currentTimestamp = timestamp;
+                requestPaint();
+            }
+            Connections {
+                target: controller;
+                function onChart_data_changed() {
+                    Qt.callLater(orientationIndicator.requestPaint);
+                }
+            }
+        }
+    }
+
     DropTarget {
         parent: root.innerItem;
         color: styleBackground2;
