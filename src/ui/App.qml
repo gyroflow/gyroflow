@@ -64,7 +64,7 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "braw" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -337,11 +337,13 @@ Rectangle {
         const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type });
         el.text = text;
         el.onClicked.connect((index) => {
+            let returnVal = undefined;
             if (buttons[index].clicked)
-                buttons[index].clicked();
-            el.opened = false;
-            el.destroy(1000);
-            window.isDialogOpened = false;
+                returnVal = buttons[index].clicked();
+            if (returnVal !== false) {
+                el.close();
+                window.isDialogOpened = false;
+            }
         });
         let buttonTexts = [];
         for (const i in buttons) {

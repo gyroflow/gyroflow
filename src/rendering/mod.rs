@@ -8,7 +8,10 @@ mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
 pub mod render_queue;
+pub mod mdk_processor;
+pub mod video_processor;
 
+pub use self::video_processor::VideoProcessor;
 pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
 use render_queue::RenderOptions;
 use crate::core::{ StabilizationManager, stabilization::* };

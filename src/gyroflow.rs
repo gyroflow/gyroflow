@@ -13,6 +13,7 @@ pub use gyroflow_core as core;
 pub mod util;
 pub mod controller;
 pub mod rendering;
+pub mod external_sdk;
 mod resources;
 #[cfg(not(compiled_qml))]
 mod resources_qml;
@@ -88,6 +89,7 @@ fn entry() {
         MDKVideoItem::setGlobalOption("MDK_KEY", "47FA7B212D5FF2F649A245E6D8DC2D88BAB67C208282CB3E2DEB95B9B4F9EC575102303FB92448ED49454E027A31B48ED08824EB904B58F693AD\
             B52FA63A4008B80584DE2D5F0D09B65DBA192723D277B8B67447FBF0A4584184E2659155D95CFBEB08626CBE3C94416B2FC50B1FA1201AA7381CE3E85DF3F3BF9BCB59677808");
     }
+    MDKVideoItem::setGlobalOption("plugins", "mdk-braw");
 
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };

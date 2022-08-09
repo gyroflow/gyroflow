@@ -90,7 +90,28 @@ Item {
                 Qt.callLater(window.exportSettings.loadGyroflow, obj);
             }
         }
+        function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
+            if (externalSdkModalLoader !== null) {
+                externalSdkModalLoader.visible = percent < 1;
+                externalSdkModalLoader.active = percent < 1;
+                externalSdkModalLoader.progress = percent;
+                externalSdkModalLoader.text = qsTr("Downloading %1 (%2)").arg(sdk_name);
+                if (percent >= 1) {
+                    externalSdkModal.close();
+                    externalSdkModal = null;
+                    externalSdkModalLoader = null;
+                    window.isDialogOpened = false;
+                    if (!error_string) {
+                        loadFile(path);
+                    } else {
+                        messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
+                    }
+                }
+            }
+        }
     }
+    property Modal externalSdkModal: null;
+    property LoaderOverlay externalSdkModalLoader: null;
 
     function loadFile(url: url) {
         if (Qt.platform.os == "android") {
@@ -101,6 +122,28 @@ Item {
 
         if (url.toString().endsWith(".gyroflow")) {
             return loadGyroflowData(url);
+        }
+
+        if (controller.check_external_sdk(url.toString())) {
+            const dlg = messageBox(Modal.Info, qsTr("This format requires an external SDK. Do you want to download it now?"), [
+                { text: qsTr("Yes"), accent: true, clicked: function() {
+                    dlg.btnsRow.children[0].enabled = false;
+                    controller.install_external_sdk(url.toString());
+                    return false;
+                } },
+                { text: qsTr("Cancel"), clicked: function() {
+                    externalSdkModal = null;
+                    externalSdkModalLoader = null;
+                } },
+            ]);
+            const l = Qt.createComponent("components/LoaderOverlay.qml").createObject(dlg.mainColumn, { cancelable: false, visible: false });
+            l.anchors.fill = undefined;
+            l.height = 70 * dpiScale;
+            l.pb.anchors.verticalCenterOffset = -l.height / 2 + 10 * dpiScale;
+            l.width = Qt.binding(() => dlg.mainColumn.width);
+            externalSdkModal = dlg;
+            externalSdkModalLoader = l;
+            return;
         }
 
         root.loadedFileUrl = url;
@@ -265,7 +308,7 @@ Item {
                 onCurrentFrameChanged: {
                     fovChanged();
                     controller.update_keyframe_values(timestamp);
-                    window.motionData.orientationIndicator.updateOrientation(timestamp * 1000);
+                    window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
                 }
                 onMetadataLoaded: (md) => {
                     loaded = duration > 0;

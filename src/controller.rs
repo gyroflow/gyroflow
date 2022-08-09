@@ -23,7 +23,7 @@ use crate::core::keyframes::*;
 use crate::rendering;
 use crate::util;
 use crate::wrap_simple_method;
-use crate::rendering::FfmpegProcessor;
+use crate::rendering::VideoProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
 use crate::ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use crate::qt_gpu::qrhi_undistort;
@@ -222,6 +222,10 @@ pub struct Controller {
     keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
     update_keyframe_values: qt_method!(fn(&self, timestamp_ms: f64)),
 
+    check_external_sdk: qt_method!(fn(&self, path: QString) -> bool),
+    install_external_sdk: qt_method!(fn(&self, path: QString)),
+    external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
+
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
@@ -355,9 +359,13 @@ impl Controller {
                     decoder_options = Some(dict);
                 }
 
-                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
+                let sync = std::rc::Rc::new(sync);
+
+                match VideoProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
                     Ok(mut proc) => {
-                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                        let err2 = err.clone();
+                        let sync2 = sync.clone();
+                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
                             assert!(_output_frame.is_none());
 
                             if abs_frame_no % every_nth_frame == 0 {
@@ -365,10 +373,10 @@ impl Controller {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
 
-                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                        sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                     },
                                     Err(e) => {
-                                        err(("An error occured: %1".to_string(), e.to_string()))
+                                        err2(("An error occured: %1".to_string(), e.to_string()))
                                     }
                                 }
                                 frame_no += 1;
@@ -1048,9 +1056,15 @@ impl Controller {
             let video_path = stab.video_path.read().clone();
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match FfmpegProcessor::from_file(&video_path, gpu_decoding, 0, None) {
+                match VideoProcessor::from_file(&video_path, gpu_decoding, 0, None) {
                     Ok(mut proc) => {
-                        proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                        let progress = progress.clone();
+                        let err2 = err.clone();
+                        let cal = cal.clone();
+                        let total_read = total_read.clone();
+                        let processed = processed.clone();
+                        let cancel_flag2 = cancel_flag.clone();
+                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
                             if is_forced && total_read.load(SeqCst) > 0 {
@@ -1077,10 +1091,10 @@ impl Controller {
                                             cal.forced_frames.insert(frame);
                                         }
                                         cal.no_marker = no_marker;
-                                        cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag.clone(), total, processed.clone(), progress.clone());
+                                        cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
-                                        err(("An error occured: %1".to_string(), e.to_string()))
+                                        err2(("An error occured: %1".to_string(), e.to_string()))
                                     }
                                 }
                             }
@@ -1364,6 +1378,17 @@ impl Controller {
 
     fn has_gravity_vectors(&self) -> bool {
         self.stabilizer.gyro.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
+    }
+
+    fn check_external_sdk(&self, path: QString) -> bool {
+        crate::external_sdk::requires_install(&path.to_string())
+    }
+    fn install_external_sdk(&self, path: QString) {
+        let path_str = path.to_string();
+        let progress = util::qt_queued_callback_mut(self, move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
+            this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), path.clone());
+        });
+        crate::external_sdk::install(&path_str, progress);
     }
 
     // Utilities

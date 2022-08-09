@@ -719,20 +719,20 @@ impl RenderQueue {
 
                 core::run_threaded(move || {
                     let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
-                        let mut thumb = None;
+                        let mut fetched = false;
                         {
-                            let mut proc = rendering::FfmpegProcessor::from_file(video_path, false, 0, None)?;
-                            proc.on_frame(|_timestamp_us, input_frame, _output_frame, converter| {
+                            let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
+                            proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
                                 let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
-                                thumb = Some(util::image_data_to_base64(sf.plane_width(0), sf.plane_height(0), sf.stride(0) as u32, sf.data(0)));
+                                if !fetched {
+                                    thumb_fetched(util::image_data_to_base64(sf.plane_width(0), sf.plane_height(0), sf.stride(0) as u32, sf.data(0)));
+                                    fetched = true;
+                                }
 
                                 Ok(())
                             });
                             proc.start_decoder_only(vec![(0.0, 0.0)], Arc::new(AtomicBool::new(false)))?;
-                        }
-                        if let Some(thumb) = thumb {
-                            thumb_fetched(thumb);
                         }
                         Ok(())
                     };
@@ -835,7 +835,7 @@ impl RenderQueue {
                                     ask_path = false;
                                     use gyroflow_core::synchronization::AutosyncProcess;
                                     use gyroflow_core::synchronization;
-                                    use crate::rendering::FfmpegProcessor;
+                                    use crate::rendering::VideoProcessor;
                                     use itertools::Either;
 
                                     if let Ok(serde_json::Value::Object(mut sync_options)) = serde_json::from_str(&sync_options_json) {
@@ -882,18 +882,21 @@ impl RenderQueue {
                                                     let gpu_decoding = *rendering::GPU_DECODING.read();
 
                                                     let mut frame_no = 0;
+                                                    let sync = std::rc::Rc::new(sync);
 
-                                                    match FfmpegProcessor::from_file(&path, gpu_decoding, 0, None) {
+                                                    match VideoProcessor::from_file(&path, gpu_decoding, 0, None) {
                                                         Ok(mut proc) => {
-                                                            proc.on_frame(|timestamp_us, input_frame, _output_frame, converter| {
+                                                            let err2 = err.clone();
+                                                            let sync2 = sync.clone();
+                                                            proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
                                                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                                                     Ok(small_frame) => {
                                                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
 
-                                                                        sync.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                                                        sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                                                     },
                                                                     Err(e) => {
-                                                                        err(("An error occured: %1".to_string(), e.to_string()))
+                                                                        err2(("An error occured: %1".to_string(), e.to_string()))
                                                                     }
                                                                 }
                                                                 frame_no += 1;
