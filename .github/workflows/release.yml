@@ -19,7 +19,7 @@ jobs:
             vcpkg: "x64-linux-release",
             vcpkg2: "x64-linux-release",
             ffmpeg_url: "",
-            ffmpeg_name: "ffmpeg-5.0-linux-clang-gpl-lite"
+            ffmpeg_name: "ffmpeg-5.1-linux-clang-gpl-lite"
           },
           {
             os: macos-latest,
@@ -31,7 +31,7 @@ jobs:
             vcpkg: "x64-osx-release",
             vcpkg2: "arm64-osx",
             ffmpeg_url: "",
-            ffmpeg_name: "ffmpeg-5.0-macOS-gpl-lite"
+            ffmpeg_name: "ffmpeg-5.1-macOS-gpl-lite"
           },
           {
             os: windows-2022,
@@ -42,8 +42,8 @@ jobs:
             ext: ".exe",
             vcpkg: "x64-windows-release",
             vcpkg2: "x64-windows-release",
-            ffmpeg_url: "https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.0-windows-desktop-vs2022-gpl-lite.7z/download",
-            ffmpeg_name: "ffmpeg-5.0-windows-desktop-vs2022-gpl-lite"
+            ffmpeg_url: "https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-5.1-windows-desktop-vs2022-gpl-lite.7z/download",
+            ffmpeg_name: "ffmpeg-5.1-windows-desktop-vs2022-gpl-lite"
           }
       ]
     runs-on: ${{ matrix.targets.os }}
@@ -58,7 +58,7 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
         with:
-          key: gf27
+          key: gf28
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}

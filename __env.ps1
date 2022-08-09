@@ -2,7 +2,7 @@
 $Env:Path = "$PSScriptRoot\ext\6.3.1\msvc2019_64\bin;$Env:Path"
 
 # FFmpeg
-$Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-5.0-windows-desktop-vs2022-gpl-lite"
+$Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-5.1-windows-desktop-vs2022-gpl-lite"
 $Env:Path += ";$Env:FFMPEG_DIR\bin"
 
 # OpenCV

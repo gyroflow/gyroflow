@@ -364,10 +364,11 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "chrono"
-version = "0.4.20"
+version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6127248204b9aba09a362f6c930ef6a78f2c1b2215f8a7b398c06e1083f17af0"
+checksum = "3f725f340c3854e3cb3ab736dc21f0cca183303acea3b3ffec30f141503ac8eb"
 dependencies = [
+ "iana-time-zone",
  "js-sys",
  "num-integer",
  "num-traits 0.2.15",
@@ -387,9 +388,9 @@ dependencies = [
 
 [[package]]
 name = "clang"
-version = "1.0.3"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34c6913be3a1c94f52fb975cdec7ef5a7b69de10a55de66dcbc30d7046b85fa1"
+checksum = "84c044c781163c001b913cd018fc95a628c50d0d2dfea8bca77dad71edb16e37"
 dependencies = [
  "clang-sys",
  "libc",
@@ -1041,7 +1042,7 @@ dependencies = [
  "simple-easing",
  "space",
  "telemetry-parser",
- "time 0.3.12",
+ "time 0.3.13",
  "walkdir",
  "wgpu",
 ]
@@ -1105,6 +1106,19 @@ name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
+
+[[package]]
+name = "iana-time-zone"
+version = "0.1.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1779539f58004e5dba1c1f093d44325ebeb244bfc04b791acdc0aaeca9c04570"
+dependencies = [
+ "android_system_properties",
+ "core-foundation",
+ "js-sys",
+ "wasm-bindgen",
+ "winapi",
+]
 
 [[package]]
 name = "image"
@@ -1767,9 +1781,9 @@ checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
 
 [[package]]
 name = "opencv"
-version = "0.65.0"
+version = "0.66.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f347324e04b3681daa19e32969c47ca7789e064bb8ed9f2b4c1843bb642486a"
+checksum = "ae1211402fae55d0054e5779bcb231660752b8da825f88aa8a837aef7944c68d"
 dependencies = [
  "cc",
  "clang",
@@ -1788,9 +1802,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.44.0"
+version = "0.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5478fdcadbdc932d971d904a0bdcfd9b160abef7e8a10190b5170a1294804a75"
+checksum = "1070da825ea3584b7ef0a2951fc002843f986ec430681b2273d9d425da2ffd61"
 dependencies = [
  "clang",
  "clang-sys",
@@ -2373,7 +2387,7 @@ dependencies = [
  "serde",
  "serde_json",
  "slog",
- "time 0.3.12",
+ "time 0.3.13",
 ]
 
 [[package]]
@@ -2386,7 +2400,7 @@ dependencies = [
  "slog",
  "term",
  "thread_local",
- "time 0.3.12",
+ "time 0.3.13",
 ]
 
 [[package]]
@@ -2474,7 +2488,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=f82b5a7#f82b5a7612b66f04b904d932c878a5c57edeb168"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ee4595f#ee4595f30ee9f32402ce5428011dc0d7e49db9a0"
 dependencies = [
  "argh",
  "byteorder",
@@ -2565,12 +2579,11 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74b7cc93fc23ba97fde84f7eea56c55d1ba183f495c6715defdfc7b9cb8c870f"
+checksum = "db76ff9fa4b1458b3c7f077f3ff9887394058460d21e634355b273aaf11eea45"
 dependencies = [
  "itoa 1.0.3",
- "js-sys",
  "libc",
  "num_threads",
  "time-macros",
