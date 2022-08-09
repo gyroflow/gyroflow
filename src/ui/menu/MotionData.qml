@@ -339,103 +339,104 @@ MenuItem {
         text: qsTr("Orientation indicator");
         onCheckedChanged: Qt.callLater(orientationIndicator.requestPaint);
 
-        Flow {
-            width: parent.width;
-            spacing: 5 * dpiScale;
-            Canvas {
-                id: orientationIndicator
-                width: parent.width
-                height: 100
-                property var currentTimestamp: 0
-                property var initialDraw: false
-                onPaint: {
-                    if (orientationCheckbox.checked || !initialDraw) {
-                        initialDraw = true
-                        var ctx = getContext("2d");
-                        ctx.reset();
-                        let veclen = 30;
-                        var xv = Qt.vector3d(veclen,0,0)
-                        var yv = Qt.vector3d(0,veclen,0)
-                        var zv = Qt.vector3d(0,0,veclen)
-                        var vecs = [xv, yv, zv]
-                        const colors = style === "light" ? ['#cc0000', '#00cc00', '#0000cc'] : ['#ff0000', '#00ff00', '#4444ff'];
-                        // inspired by blender camera
-                        let cam_width = 30;
-                        let cam_height = 15;
-                        let cam_length = 30;
-                        let cam_vertices = [[-cam_width,-cam_height,-cam_length],
-                                            [cam_width, -cam_height,-cam_length],
-                                            [cam_width, cam_height, -cam_length],
-                                            [-cam_width, cam_height, -cam_length],
-                                            [0,0,0]]
-                        let lines = [[0,1,2,3,0],
-                                    [0,4,1],
-                                    [2,4,3]]
-                        let cam_vert_vecs = []
-                        for (var i = 0; i < cam_vertices.length; i++) {
-                            cam_vert_vecs.push(Qt.vector3d(cam_vertices[i][0],cam_vertices[i][1],cam_vertices[i][2]));
-                        }
-                        let quats = controller.quats_at_timestamp(Math.round(currentTimestamp))
-                        let transform = Qt.quaternion( quats[0], quats[1],  quats[2], quats[3]); // wxyz
-                        let maincolor = style === "light" ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)";
-                        let transform_smooth = transform.times(Qt.quaternion( quats[4], quats[5],  quats[6], quats[7]).inverted());
-                        let transforms = [transform, transform_smooth]
+        Canvas {
+            id: orientationIndicator
+            width: parent.width
+            height: 100
+            property var currentTimestamp: 0
+            property var initialDraw: false
+            onPaint: {
+                if (orientationCheckbox.checked || !initialDraw) {
+                    initialDraw = true
+                    let ctx = getContext("2d");
+                    ctx.reset();
+                    const veclen = 30;
+                    const xv = Qt.vector3d(veclen,0,0)
+                    const yv = Qt.vector3d(0,veclen,0)
+                    const zv = Qt.vector3d(0,0,veclen)
+                    const vecs = [xv, yv, zv]
+                    const colors = style === "light" ? ['#cc0000', '#00cc00', '#0000cc'] : ['#ff0000', '#00ff00', '#4444ff'];
+                    // inspired by blender camera
+                    const cam_width = 30;
+                    const cam_height = 15;
+                    const cam_length = 30;
+                    const cam_vertices = [[-cam_width,-cam_height,-cam_length],
+                                          [cam_width, -cam_height,-cam_length],
+                                          [cam_width, cam_height, -cam_length],
+                                          [-cam_width, cam_height, -cam_length],
+                                          [0,0,0]]
+                    const lines = [[0,1,2,3,0],
+                                   [0,4,1],
+                                   [2,4,3]]
+                    let cam_vert_vecs = []
+                    for (var i = 0; i < cam_vertices.length; i++) {
+                        cam_vert_vecs.push(Qt.vector3d(cam_vertices[i][0],cam_vertices[i][1],cam_vertices[i][2]));
+                    }
+                    const quats = controller.quats_at_timestamp(Math.round(currentTimestamp))
+                    const transform = Qt.quaternion( quats[0], quats[1],  quats[2], quats[3]); // wxyz
+                    const maincolor = style === "light" ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)";
+                    const transform_smooth = transform.times(Qt.quaternion( quats[4], quats[5],  quats[6], quats[7]).inverted());
+                    const transforms = [transform, transform_smooth]
 
-                        // center dots
-                        for (let i = 0; i < 3; i++) {
-                            ctx.beginPath();
-                            ctx.arc(width/6*(i*2+1), height/2, 4, 0, 2 * Math.PI, false);
-                            ctx.fillStyle = maincolor;
-                            ctx.fill();
-                            ctx.stroke();
-                        }
-                        
-                        for (let i = 0; i < 3; i++) {
-                            ctx.beginPath();
-                            ctx.moveTo(width/6, height/2);
-                            let transformedvec = transform.times(vecs[i])
-                            ctx.lineTo(width/6 + transformedvec.x, height/2 - transformedvec.y);
-                            ctx.lineWidth = 3;
-                            ctx.strokeStyle = colors[i];
-                            ctx.globalAlpha = 0.5;
-                            ctx.stroke();
-                            ctx.globalAlpha = Math.max(0.1, Math.min(transformedvec.z/(veclen*2)+0.5,1));
-                            ctx.beginPath();
-                            ctx.arc(width/6 + transformedvec.x, height/2 - transformedvec.y, 4, 0, 2 * Math.PI, false);
-                            ctx.fillStyle = colors[i];
-                            ctx.fill();
-                            ctx.stroke();
-                        }
+                    // center dots
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(width/6*(i*2+1), height/2, 4, 0, 2 * Math.PI, false);
+                        ctx.fillStyle = maincolor;
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(width/6, height/2);
+                        const transformedvec = transform.times(vecs[i])
+                        ctx.lineTo(width/6 + transformedvec.x, height/2 - transformedvec.y);
+                        ctx.lineWidth = 3;
+                        ctx.strokeStyle = colors[i];
+                        ctx.globalAlpha = 0.5;
+                        ctx.stroke();
+                        ctx.globalAlpha = Math.max(0.1, Math.min(transformedvec.z/(veclen*2)+0.5,1));
+                        ctx.beginPath();
+                        ctx.arc(width/6 + transformedvec.x, height/2 - transformedvec.y, 4, 0, 2 * Math.PI, false);
+                        ctx.fillStyle = colors[i];
+                        ctx.fill();
+                        ctx.stroke();
+                    }
 
-                        ctx.lineWidth = 1.5;
-                        ctx.strokeStyle = maincolor;
-                        ctx.globalAlpha = 0.8;
-                        ctx.lineJoin = "bevel";
-                        for (var view = 0; view < 2; view++) {
-                            for (var linenum = 0; linenum < lines.length; linenum++) {
-                                ctx.beginPath()
-                                for (var pointnum=0; pointnum < lines[linenum].length; pointnum++) {
-                                    let transformedvec = transforms[view].times(cam_vert_vecs[lines[linenum][pointnum]]);
-                                    if (pointnum == 0) {
-                                        ctx.moveTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
-                                    }
-                                    else {
-                                        ctx.lineTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
-                                    }
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = maincolor;
+                    ctx.globalAlpha = 0.8;
+                    ctx.lineJoin = "bevel";
+                    for (let view = 0; view < 2; view++) {
+                        for (let linenum = 0; linenum < lines.length; linenum++) {
+                            ctx.beginPath()
+                            for (let pointnum=0; pointnum < lines[linenum].length; pointnum++) {
+                                const transformedvec = transforms[view].times(cam_vert_vecs[lines[linenum][pointnum]]);
+                                if (pointnum == 0) {
+                                    ctx.moveTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
                                 }
-                                ctx.stroke();
+                                else {
+                                    ctx.lineTo(transformedvec.x + width/6*(view*2 + 3), -transformedvec.y + height/2);
+                                }
                             }
+                            ctx.stroke();
                         }
                     }
                 }
-                function updateOrientation(timestamp) {
-                    currentTimestamp = timestamp;
-                    requestPaint();
+            }
+            function updateOrientation(timestamp) {
+                currentTimestamp = timestamp;
+                requestPaint();
+            }
+            Connections {
+                target: controller;
+                function onChart_data_changed() {
+                    Qt.callLater(orientationIndicator.requestPaint);
                 }
             }
         }
     }
-
 
     DropTarget {
         parent: root.innerItem;

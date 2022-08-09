@@ -1183,7 +1183,6 @@ fn filter_delta(mag_dist: &Vec<bool>, n: usize, ts: f64, params: &VQFParams, bac
     }
 }
 
-
 pub fn offline_vqf(gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize, ts: f64, params: VQFParams, out6d: Option<&mut Vec<f64>>,
     out9d: Option<&mut Vec<f64>>, out_delta: Option<&mut Vec<f64>>, out_bias: Option<&mut Vec<f64>>, out_bias_sigma: Option<&mut Vec<f64>>,
     out_rest: Option<&mut Vec<bool>>, out_mag_dist: Option<&mut Vec<bool>>) {
@@ -1309,5 +1308,4 @@ pub fn offline_vqf(gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize
         // delta = &mut vec![0.0; n];
         // quat9d = &mut vec![0.0; 4*n];
     }
-
 }
