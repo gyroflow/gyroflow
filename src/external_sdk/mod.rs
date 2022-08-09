@@ -1,7 +1,6 @@
 mod braw;
 
 use std::io::*;
-use std::fs;
 use std::io;
 use gyroflow_core::flate2::read::GzDecoder;
 

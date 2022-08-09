@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use ffmpeg_next::ffi;
 use ffmpeg_next::frame;
@@ -36,7 +38,7 @@ impl MDKProcessor {
         self.mdk.startProcessing(0, 0, 0, false, ranges_ms, move |frame_num, timestamp_ms, width, height, data| {
             println!("{frame_num}, {timestamp_ms} | {width}x{height} {} bytes", data.len());
             if frame_num == -1 || data.is_empty() {
-                tx.send(());
+                let _ = tx.send(());
                 return;
             }
             if let Some(ref mut cb) = cb {
@@ -50,7 +52,7 @@ impl MDKProcessor {
                     (*ffmpeg_frame.as_mut_ptr()).buf[0] = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
                     (*ffmpeg_frame.as_mut_ptr()).data[0] = data.as_mut_ptr();
                 }
-                cb(timestamp_us, &mut ffmpeg_frame, None, &mut converter);
+                let _ = cb(timestamp_us, &mut ffmpeg_frame, None, &mut converter); // TODO: handle Result?
             }
         });
 

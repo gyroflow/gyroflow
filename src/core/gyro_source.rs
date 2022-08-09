@@ -12,7 +12,7 @@ use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion }
 use crate::camera_identifier::CameraIdentifier;
 use crate::keyframes::KeyframeManager;
 
-use super::integration::*;
+use super::imu_integration::*;
 use super::smoothing::SmoothingAlgorithm;
 use std::io::Result;
 use crate::StabilizationParams;

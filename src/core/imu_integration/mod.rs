@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+mod complementary_v2;
+mod complementary;
+mod vqf;
+
 use std::collections::BTreeMap;
 
 use nalgebra::*;
@@ -16,8 +20,7 @@ pub struct MadgwickIntegrator { }
 pub struct GyroOnlyIntegrator { }
 pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
-
-pub struct VQFIntegrator {}
+pub struct VQFIntegrator { }
 
 // const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
 const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
@@ -176,7 +179,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use super::integration_complementary_v2::ComplementaryFilterV2;
+use complementary_v2::ComplementaryFilterV2;
 
 impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
@@ -196,8 +199,8 @@ impl GyroIntegrator for ComplementaryIntegrator {
 
                 if let Some(m) = v.magn.as_ref() {
                     if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
-                        f.update_mag(-acc[0], acc[1], acc[2],
-                            -g[2] * DEG2RAD, g[1] * DEG2RAD, g[0] * DEG2RAD,
+                        f.update_mag(acc[0], acc[1], acc[2],
+                            -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
                             magn[0], magn[1], magn[2],
                             (v.timestamp_ms - prev_time) / 1000.0);
                     }
@@ -225,7 +228,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use super::integration_vqf::{offline_vqf, VQFParams};
+use vqf::{ offline_vqf, VQFParams };
 
 impl GyroIntegrator for VQFIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
@@ -235,28 +238,19 @@ impl GyroIntegrator for VQFIntegrator {
 
         let num_samples = imu_data.len();
 
-        let mut gyr = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
-        let mut acc = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
-        let mut mag = Vec::<f64>::with_capacity((num_samples*3).try_into().unwrap());
-        let mut quat = Vec::<f64>::with_capacity((num_samples*4).try_into().unwrap());
+        let mut gyr = Vec::with_capacity(num_samples*3);
+        let mut acc = Vec::with_capacity(num_samples*3);
+        let mut mag = Vec::with_capacity(num_samples*3);
+        let mut quat = Vec::with_capacity(num_samples*4);
         for v in imu_data {
             let g = v.gyro.unwrap_or_default();
             // zero mag or acc (default) is ignored by VQF
             let a = v.accl.unwrap_or_default();
             let m = v.magn.unwrap_or_default();
-            gyr.push(-g[1] * DEG2RAD); // x
-            gyr.push(g[0] * DEG2RAD); // y
-            gyr.push(g[2] * DEG2RAD); // z
-            acc.push(-a[1]); // x
-            acc.push(a[0]); // y
-            acc.push(a[2]); // z
-            mag.push(-m[1]); // x
-            mag.push(m[0]); // y
-            mag.push(m[2]); // z
-            quat.push(1.0);
-            quat.push(0.0);
-            quat.push(0.0);
-            quat.push(0.0);
+            gyr.extend([-g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD]);
+            acc.extend([-a[1], a[0], a[2]]);
+            mag.extend([-m[1], m[0], m[2]]);
+            quat.extend([1.0, 0.0, 0.0, 0.0]);
         }
 
         // Tweak parameters here, see parameter descriptions: https://github.com/dlaidig/vqf/blob/main/vqf/cpp/vqf.hpp#L37
