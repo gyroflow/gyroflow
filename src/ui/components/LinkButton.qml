@@ -41,6 +41,6 @@ QQC.Button {
     icon.name: iconName || "";
     icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
 
-    Keys.onReturnPressed: checked = !checked;
-    Keys.onEnterPressed: checked = !checked;
+    Keys.onReturnPressed: root.clicked();
+    Keys.onEnterPressed: root.clicked();
 }

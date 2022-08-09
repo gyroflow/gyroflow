@@ -208,9 +208,7 @@ MenuItem {
                 anchors.verticalCenter: parent.verticalCenter;
                 anchors.left: parent.left;
                 width: (sizeMenuBtn.x - outputHeight.anchors.rightMargin - x - lockAspectRatio.width) / 2 - lockAspectRatio.anchors.leftMargin;
-               // width: 60 * dpiScale;
                 intNoThousandSep: true;
-                reset: () => { aspectRatio = defaultValue / Math.max(1,outHeight); value = defaultValue; };
                 onValueChanged: {
                     if (!disableUpdate) {
                         disableUpdate = true;
@@ -220,24 +218,8 @@ MenuItem {
                     }
                 }
                 live: false;
-            }
-            LinkButton {
-                id: lockAspectRatio;
-                checked: true;
-                height: parent.height * 0.75;
-                iconName: checked? "lock" : "unlocked";
-                topPadding: 4 * dpiScale;
-                bottomPadding: 4 * dpiScale;
-                leftPadding: 3 * dpiScale;
-                rightPadding: -3 * dpiScale;
-                anchors.verticalCenter: parent.verticalCenter;
-                anchors.left: outputWidth.right;
-                anchors.leftMargin: 5 * dpiScale;
-                onClicked: checked = !checked;
-                textColor: checked? styleAccentColor : styleTextColor;
-                display: QQC.Button.IconOnly;
-                tooltip: qsTr("Lock aspect ratio");
-                onCheckedChanged: if (checked) { aspectRatio = outWidth / Math.max(1,outHeight); }
+                onActiveFocusChanged: if (activeFocus) selectAll();
+                reset: () => { aspectRatio = defaultValue / Math.max(1,outHeight); value = defaultValue; };
             }
             NumberField {
                 id: outputHeight;
@@ -256,7 +238,26 @@ MenuItem {
                     }
                 }
                 live: false;
+                onActiveFocusChanged: if (activeFocus) selectAll();
                 reset: () => { aspectRatio = outWidth / Math.max(1,defaultValue); value = defaultValue; };
+            }
+            LinkButton {
+                id: lockAspectRatio;
+                checked: true;
+                height: parent.height * 0.75;
+                iconName: checked? "lock" : "unlocked";
+                topPadding: 4 * dpiScale;
+                bottomPadding: 4 * dpiScale;
+                leftPadding: 3 * dpiScale;
+                rightPadding: -3 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;
+                anchors.left: outputWidth.right;
+                anchors.leftMargin: 5 * dpiScale;
+                onClicked: checked = !checked;
+                textColor: checked? styleAccentColor : styleTextColor;
+                display: QQC.Button.IconOnly;
+                tooltip: qsTr("Lock aspect ratio");
+                onCheckedChanged: if (checked) { aspectRatio = outWidth / Math.max(1,outHeight); }
             }
             LinkButton {
                 id: sizeMenuBtn;

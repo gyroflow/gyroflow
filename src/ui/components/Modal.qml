@@ -12,6 +12,8 @@ Rectangle {
     property alias text: t.text;
     property alias buttons: btns.model;
     property alias mainColumn: mainColumn;
+    property alias mainItem: pp;
+    property alias btnsRow: btnsRow;
     property bool opened: false;
     property bool isWide: root.text.length > 200;
     property real widthRatio: 0.8;
@@ -29,6 +31,11 @@ Rectangle {
     property int iconType: Modal.Warning;
 
     signal clicked(int index);
+
+    function close() {
+        opened = false;
+        destroy(1000);
+    }
 
     anchors.fill: parent;
     color: "#80000000";

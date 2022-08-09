@@ -23,6 +23,7 @@ Item {
     property alias background: overlay.color;
     property bool canHide: false;
     property alias infoMessage: infoMessage;
+    property alias pb: pb;
 
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
