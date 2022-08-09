@@ -2,6 +2,10 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 mod opencv_fisheye;
+mod opencv_standard;
+mod poly3;
+mod poly5;
+mod ptlens;
 mod gopro_superview;
 pub use gopro_superview::GoProSuperview;
 
@@ -36,14 +40,24 @@ macro_rules! impl_models {
             pub fn wgsl_functions(&self)   -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.wgsl_functions(),)* } }
             pub fn glsl_shader_path(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.glsl_shader_path(),)* } }
 
-            pub fn from_id(_id: i32) -> Self {
-                // TODO
-                DistortionModel::default()
+            pub fn from_id(id: i32) -> Self {
+                match id {
+                    0 => Self { inner: DistortionModels::OpenCVFisheye(Default::default()) },
+                    1 => Self { inner: DistortionModels::OpenCVStandard(Default::default()) },
+                    2 => Self { inner: DistortionModels::Poly3(Default::default()) },
+                    3 => Self { inner: DistortionModels::Poly5(Default::default()) },
+                    4 => Self { inner: DistortionModels::PtLens(Default::default()) },
+                    _ => DistortionModel::default()
+                }
             }
         }
     };
 }
 
 impl_models! {
-    OpenCVFisheye => opencv_fisheye::OpenCVFisheye,
+    OpenCVFisheye  => opencv_fisheye::OpenCVFisheye,
+    OpenCVStandard => opencv_standard::OpenCVStandard,
+    Poly3          => poly3::Poly3,
+    Poly5          => poly5::Poly5,
+    PtLens         => ptlens::PtLens,
 }

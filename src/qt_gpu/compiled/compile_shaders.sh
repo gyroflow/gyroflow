@@ -1,7 +1,7 @@
 #!/bin/bash
 QSB='../../../ext/6.3.1/msvc2019_64/bin/qsb.exe --glsl "100 es,200 es,300 es,330,400,120,100" --hlsl 50 --msl 12'
 
-DISTORTION_MODELS=( "opencv_fisheye" )
+DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" )
 
 for i in "${DISTORTION_MODELS[@]}"
 do

@@ -55,6 +55,10 @@ qrc!(pub rsrc,
         "resources/icons/svg/ease_out.svg",
 
         "src/qt_gpu/compiled/undistort_opencv_fisheye.frag.qsb",
+        "src/qt_gpu/compiled/undistort_opencv_standard.frag.qsb",
+        "src/qt_gpu/compiled/undistort_poly3.frag.qsb",
+        "src/qt_gpu/compiled/undistort_poly5.frag.qsb",
+        "src/qt_gpu/compiled/undistort_ptlens.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",
 
         "resources/translations/da.qm",
