@@ -220,7 +220,7 @@ pub struct Controller {
     keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
 
     keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
-    video_position_changed: qt_method!(fn(&self, timestamp_ms: f64)),
+    update_keyframe_values: qt_method!(fn(&self, timestamp_ms: f64)),
 
     preview_resolution: i32,
 
@@ -793,13 +793,11 @@ impl Controller {
         if let Ok(data) = std::fs::read(&path) {
             let path = std::path::Path::new(&path).to_path_buf();
 
-            if let Ok(obj) = serde_json::from_slice(&data) {
-                if let serde_json::Value::Object(obj) = obj {
-                    let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+            if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
+                let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
 
-                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path));
-                    return QString::from(core::util::path_to_str(&video_path));
-                }
+                let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path));
+                return QString::from(core::util::path_to_str(&video_path));
             }
         }
         QString::default()
@@ -1354,7 +1352,7 @@ impl Controller {
         QJSValue::default()
     }
 
-    fn video_position_changed(&self, mut timestamp_ms: f64) {
+    fn update_keyframe_values(&self, mut timestamp_ms: f64) {
         let keyframes = self.stabilizer.keyframes.read();
         timestamp_ms /= keyframes.timestamp_scale.unwrap_or(1.0);
         for kf in keyframes.get_all_keys() {

@@ -22,6 +22,7 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
     export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx-release/lib
     export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx-release/include/
+    rustup target add x86_64-apple-darwin
     cargo build --target x86_64-apple-darwin --profile deploy
     strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
 

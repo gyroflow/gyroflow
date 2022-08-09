@@ -1093,8 +1093,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6616d815efe117378f150e37c1374c650bf52b2380f0159fe3e654162927414e"
+source = "git+https://github.com/AdrianEddy/fc-blackbox#fb65c7a99a353b687853c090ed21e4798c01aa19"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -2551,7 +2550,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=33eb660#33eb66005d183c0fc40901c6b4cfc8548c9b3b07"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=b3c0527#b3c0527b138fa6a697cba4d38fa161d9a0bdbdbd"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3172,7 +3171,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ab1c2a5#ab1c2a511b39e367b08eda1d07cde4c88fe816d4"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=f82b5a7#f82b5a7612b66f04b904d932c878a5c57edeb168"
 dependencies = [
  "argh",
  "byteorder",

@@ -30,7 +30,7 @@ breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "33eb660" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b3c0527" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.0.3", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -42,6 +42,9 @@ log = "0.4.17"
 
 ureq = "2.5"
 whoami = "1.2.1"
+
+[patch.crates-io]
+fc-blackbox = { git = 'https://github.com/AdrianEddy/fc-blackbox' }
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
 version = "0.38.0"

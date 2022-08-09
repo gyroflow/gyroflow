@@ -537,8 +537,9 @@ unsafe fn to_str<'a>(ptr: *const c_char) -> std::borrow::Cow<'a, str> {
     std::ffi::CStr::from_ptr(ptr).to_string_lossy()
 }
 unsafe fn codec_options(c: *const ffi::AVCodec) {
+    use std::fmt::Write;
     let mut ret = String::new();
-    ret.push_str(&format!("{} **{}**:\n\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name)));
+    let _ = writeln!(ret, "{} **{}**:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
 
     if !(*c).pix_fmts.is_null() {
         ret.push_str("Supported pixel formats (-pix_fmt): ");
@@ -577,7 +578,7 @@ unsafe fn show_help_children(mut class: *const ffi::AVClass, flags: c_int) {
 }
 
 pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
-    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&codec, gpu));
+    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, gpu));
     encoder.0.to_string()
 }
 pub fn get_encoder_options(name: &str) -> String {

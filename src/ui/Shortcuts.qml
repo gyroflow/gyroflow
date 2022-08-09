@@ -91,6 +91,7 @@ Item {
         sequence: "s";
         onActivated: videoArea.stabEnabledBtn.checked = !videoArea.stabEnabledBtn.checked;
     }
+
     // Hide chart axis X
     Shortcut {
         sequence: "x";
@@ -111,6 +112,7 @@ Item {
         sequence: "w";
         onActivated: videoArea.timeline.toggleAxis(3, false);
     }
+
     // Show chart axis X
     Shortcut {
         sequence: "Shift+x";
@@ -131,6 +133,50 @@ Item {
         sequence: "Shift+w";
         onActivated: videoArea.timeline.toggleAxis(3, true);
     }
+
+    // Chart display mode: Gyroscope
+    Shortcut {
+        sequence: "shift+g";
+        onActivated: videoArea.timeline.setDisplayMode(0);
+    }
+    // Chart display mode: Accelerometer
+    Shortcut {
+        sequence: "shift+a";
+        onActivated: videoArea.timeline.setDisplayMode(1);
+    }
+    // Chart display mode: Magnetometer
+    Shortcut {
+        sequence: "shift+m";
+        onActivated: videoArea.timeline.setDisplayMode(2);
+    }
+    // Chart display mode: Quaternions
+    Shortcut {
+        sequence: "shift+q";
+        onActivated: videoArea.timeline.setDisplayMode(3);
+    }
+
+    // Next keyframe
+    Shortcut {
+        sequence: "Shift+Right";
+        onActivated: videoArea.timeline.jumpToNextKeyframe("");
+    }
+    // Previous keyframe
+    Shortcut {
+        sequence: "Shift+Left";
+        onActivated: videoArea.timeline.jumpToPrevKeyframe("");
+    }
+    
+    // Timeline: Auto sync here
+    Shortcut {
+        sequence: "a";
+        onActivated: videoArea.timeline.addAutoSyncPoint(videoArea.timeline.position);
+    }
+    // Timeline: Add manual sync point here
+    Shortcut {
+        sequence: "p";
+        onActivated: videoArea.timeline.addManualSyncPoint(videoArea.timeline.position);
+    }
+
     // Exit full screen mode
     Shortcut {
         sequence: "Esc";

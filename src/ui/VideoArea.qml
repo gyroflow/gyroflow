@@ -181,6 +181,10 @@ Item {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
+                // If source was detected, but gyro data is empty
+                if (camera && !contains_gyro && !contains_quats) {
+                    messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
+                }
             }
             if (root.pendingGyroflowData) {
                 loadGyroflowData(root.pendingGyroflowData);
@@ -192,6 +196,7 @@ Item {
         }
         function onKeyframes_changed() {
             Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
+            Qt.callLater(controller.update_keyframe_values, vid.timestamp);
         }
     }
     Timer {
@@ -259,7 +264,7 @@ Item {
 
                 onCurrentFrameChanged: {
                     fovChanged();
-                    controller.video_position_changed(timestamp);
+                    controller.update_keyframe_values(timestamp);
                     window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000)
                 }
                 onMetadataLoaded: (md) => {

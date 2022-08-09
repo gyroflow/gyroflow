@@ -104,6 +104,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 ## Installation
 ### Windows
 - Download `Gyroflow-windows64.zip` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `Gyroflow.exe`
+- If it shows an error about `VCRUNTIME140.dll`, [install VC redist](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 ### MacOS
 - Download `Gyroflow-mac-universal.dmg` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, run the downloaded file, and drag & drop `Gyroflow` app to the Applications folder (or anywhere you want, like on Desktop)
@@ -123,7 +124,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 Latest development version is always available here: https://gyroflow.xyz/devbuild/.
 
 ## Minimum system requirements:
-- Windows 10 64-bit (1809 or later) [Install VC redist if it doesn't run](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+- Windows 10 64-bit (1809 or later)
     - If you have Windows "N" install, go to `Settings` -> `Apps` -> `Optional features` -> `Add a feature` -> enable `Media Feature Pack`
 - macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
 - Linux:
@@ -234,7 +235,7 @@ The project also supports UI live reload, it's a super quick way of working with
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
 5. For building on Apple M1, change `ffmpeg-x64_64` -> `ffmpeg-arm64` and `x64-osx-release` -> `arm64-osx` in `__env-macos.sh`
-6. Setup the environment in terminal: `./__env-macos.sh` - I do this in VS Code built-in terminal
+6. Setup the environment in terminal: `source __env-macos.sh` or `. ./__env-macos.sh` - I do this in VS Code built-in terminal
 7. For some reason `DYLD_FALLBACK_LIBRARY_PATH` may be overwritten so export it again in terminal: `export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"` (if you have build errors, try the other one from __env-macos.sh)
 8. Compile and run: `cargo run --release`
 9. If it fails to run, do: `./_deployment/deploy-macos.sh` once

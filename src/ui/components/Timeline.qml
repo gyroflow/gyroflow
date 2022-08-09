@@ -79,6 +79,10 @@ Item {
             }
         }
     }
+    function setDisplayMode(i) {
+        chart.viewMode = i;
+        controller.update_chart(chart);
+    }
 
     function updateDurations() {
         chart.setDurationMs(controller.get_scaled_duration_ms());
@@ -88,6 +92,40 @@ Item {
 
         Qt.callLater(controller.update_chart, chart);
         Qt.callLater(controller.update_keyframes_view, keyframes);
+    }
+
+    function jumpToNextKeyframe(typ: string) {
+        const kf = keyframes.nextKeyframe(typ);
+        if (kf) {
+            const [keyframe, timestamp, name, value] = kf.split(":", 4);
+            vid.setTimestamp(timestamp / 1000);
+        }
+    }
+    function jumpToPrevKeyframe(typ: string) {
+        const kf = keyframes.prevKeyframe(typ);
+        if (kf) {
+            const [keyframe, timestamp, name, value] = kf.split(":", 4);
+            vid.setTimestamp(timestamp / 1000);
+        }
+    }
+
+    function addAutoSyncPoint(pos: real) {
+        controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
+    }
+
+    function addManualSyncPoint(pos: real) {
+        const ts = pos * root.durationMs * 1000;
+        const offset = controller.offset_at_video_timestamp(ts);
+        const final_ts = Math.round(ts - offset * 1000);
+        const final_offset = controller.offset_at_video_timestamp(final_ts)
+        controller.set_offset(final_ts, final_offset);
+        Qt.callLater(() => {
+            root.editingSyncPoint = true;
+            syncPointSlider.timestamp_us = final_ts;
+            syncPointSlider.from  = final_offset - Math.max(15, Math.abs(final_offset));
+            syncPointSlider.to    = final_offset + Math.max(15, Math.abs(final_offset));
+            syncPointSlider.value = final_offset;
+        });
     }
 
     Settings {
@@ -402,10 +440,6 @@ Item {
             property real pressedX: x;
 
             font.pixelSize: 11.5 * dpiScale;
-            function setDisplayMode(i) {
-                chart.viewMode = i;
-                controller.update_chart(chart);
-            }
             Action {
                 id: addCalibAction;
                 iconName: "plus";
@@ -420,29 +454,13 @@ Item {
                 id: syncHereAction;
                 iconName: "spinner";
                 text: qsTr("Auto sync here");
-                onTriggered: {
-                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
-                }
+                onTriggered: root.addAutoSyncPoint(root.position);
             }
             Action {
                 id: addSyncAction;
                 iconName: "plus";
                 text: qsTr("Add manual sync point here");
-                onTriggered: {
-                    const pos = root.position * root.durationMs * 1000; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width)) * root.durationMs * 1000;
-                    const offset = controller.offset_at_video_timestamp(pos);
-                    const final_pos = Math.round(pos - offset * 1000);
-                    const final_offset = controller.offset_at_video_timestamp(final_pos)
-                    controller.set_offset(final_pos, final_offset);
-                    Qt.callLater(() => {
-                        root.editingSyncPoint = true;
-                        syncPointSlider.timestamp_us = final_pos;
-                        syncPointSlider.from  = final_offset - Math.max(15, Math.abs(final_offset));
-                        syncPointSlider.to    = final_offset + Math.max(15, Math.abs(final_offset));
-                        syncPointSlider.value = final_offset;
-                    });
-                }
+                onTriggered: root.addManualSyncPoint(root.position);
             }
             Action {
                 id: guessOrientationHere;
@@ -480,16 +498,19 @@ Item {
             Action {
                 iconName: "bin;#f67575";
                 text: qsTr("Delete all sync points");
-                onTriggered: controller.clear_offsets();
+                onTriggered: {
+                    root.editingSyncPoint = false;
+                    controller.clear_offsets();
+                }
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Menu {
                 font.pixelSize: 11.5 * dpiScale;
                 title: qsTr("Chart display mode")
-                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: timelineContextMenu.setDisplayMode(0); }
-                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: timelineContextMenu.setDisplayMode(1); }
-                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: timelineContextMenu.setDisplayMode(2); }
-                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: timelineContextMenu.setDisplayMode(3); }
+                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: root.setDisplayMode(0); }
+                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: root.setDisplayMode(1); }
+                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: root.setDisplayMode(2); }
+                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: root.setDisplayMode(3); }
             }
             Component.onCompleted: {
                 if (!isCalibrator) {

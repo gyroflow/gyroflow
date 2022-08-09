@@ -82,8 +82,7 @@ impl RenderOptions {
         let re = Regex::new(r#"-([^\s"]+)\s+("[^"]+"|[^\s"]+)"#).unwrap();
 
         let mut options = ffmpeg_next::Dictionary::new();
-        let mut iter = re.captures_iter(&self.encoder_options);
-        while let Some(x) = iter.next() {
+        for x in re.captures_iter(&self.encoder_options) {
             if let Some(k) = x.get(1) {
                 if let Some(v) = x.get(2) {
                     let k = k.as_str();
@@ -866,20 +865,17 @@ impl RenderQueue {
                                                 if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
                                                     let stab2 = stab.clone();
                                                     sync.on_finished(move |arg| {
-                                                        match arg {
-                                                            Either::Left(offsets) => {
-                                                                let mut gyro = stab2.gyro.write();
-                                                                for x in offsets {
-                                                                    ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                                                                    let new_ts = ((x.0 - x.1) * 1000.0) as i64;
-                                                                    // Remove existing offsets within 100ms range
-                                                                    gyro.remove_offsets_near(new_ts, 100.0);
-                                                                    gyro.set_offset(new_ts, x.1);
-                                                                }
-                                                                stab2.keyframes.write().update_gyro(&gyro);
-                                                            },
-                                                            _=> ()
-                                                        };
+                                                        if let Either::Left(offsets) = arg {
+                                                            let mut gyro = stab2.gyro.write();
+                                                            for x in offsets {
+                                                                ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                                                                let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                                                                // Remove existing offsets within 100ms range
+                                                                gyro.remove_offsets_near(new_ts, 100.0);
+                                                                gyro.set_offset(new_ts, x.1);
+                                                            }
+                                                            stab2.keyframes.write().update_gyro(&gyro);
+                                                        }
                                                     });
 
                                                     let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
@@ -903,7 +899,7 @@ impl RenderQueue {
                                                                 frame_no += 1;
                                                                 Ok(())
                                                             });
-                                                            if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag.clone()) {
+                                                            if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
                                                                 err(("An error occured: %1".to_string(), e.to_string()));
                                                             }
                                                             sync.finished_feeding_frames();

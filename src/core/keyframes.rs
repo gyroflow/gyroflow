@@ -164,6 +164,29 @@ impl KeyframeManager {
             self.keyframes = kf;
         }
     }
+
+    pub fn next_keyframe(&self, ts: i64, typ: Option<KeyframeType>) -> Option<(KeyframeType, i64, Keyframe)> {
+        if let Some(kf) = typ {
+            let res = self.keyframes.get(&kf)?.range(ts+1..).next()?;
+            Some((kf, *res.0, *res.1))
+        } else {
+            self.keyframes
+                .iter()
+                .filter_map(|(&k, _)| self.next_keyframe(ts, Some(k)) )
+                .min_by_key(|(_nt, nts, _nk)| (nts - ts).abs())
+        }
+    }
+    pub fn prev_keyframe(&self, ts: i64, typ: Option<KeyframeType>) -> Option<(KeyframeType, i64, Keyframe)> {
+       if let Some(kf) = typ {
+            let res = self.keyframes.get(&kf)?.range(..ts).next_back()?;
+            Some((kf, *res.0, *res.1))
+        } else {
+            self.keyframes
+                .iter()
+                .filter_map(|(&k, _)| self.prev_keyframe(ts, Some(k)) )
+                .min_by_key(|(_nt, nts, _nk)| (nts - ts).abs())
+        }
+    }
 }
 
 impl FromStr for KeyframeType {
