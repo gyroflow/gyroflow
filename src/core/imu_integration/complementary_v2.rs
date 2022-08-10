@@ -16,7 +16,8 @@ const DELTA_ACCELERATION_THRESHOLD: f64 = 0.05; // Compare current to IIR result
 const GRAV_AUTOSCALE_THRESHOLD: f64 = 1.0; // apply autoscaling when steady state and acceleration within 1 m/s^2 of GRAVITY
 const ACC_FILT_TIMECONSTANT: f64 = 0.01; // slight iir filtering to clear spikes.
 const GRAV_AUTOSCALE_ALPHA: f64 = 0.005;
-const INITIAL_SETTLE_TIME: f64 = 2.0; // 2 seconds of high accel gain, correct for wrong initial accel guess
+const INITIAL_SETTLE_TIME: f64 = 5.0; // 5 seconds of high accel gain, correct for wrong initial accel guess
+const STEADY_WAIT_THRESHOLD: f64 = 0.2;
 
 pub struct ComplementaryFilterV2 {
     // Gain parameter for the complementary filter, belongs in [0, 1].
@@ -41,6 +42,7 @@ pub struct ComplementaryFilterV2 {
     // filtered acceleration
     a_filt: (f64, f64, f64),
     a_prev: (f64, f64, f64),
+    prev_gain_acc: f64,
 
     // Prev angular velocities;
     w_prev: (f64, f64, f64),
@@ -48,12 +50,14 @@ pub struct ComplementaryFilterV2 {
     // Bias in angular velocities;
     w_bias: (f64, f64, f64),
     time: f64,
+    time_steady: f64,
 }
 
 impl Default for ComplementaryFilterV2 {
     fn default() -> Self {
         Self {
-            gain_acc: 0.0005,
+            gain_acc: 0.0004,
+            prev_gain_acc: 0.0,
             gain_mag: 0.01,
             bias_alpha: 0.001,
             do_bias_estimation: true,
@@ -69,6 +73,7 @@ impl Default for ComplementaryFilterV2 {
             w_prev: (0.0, 0.0, 0.0),
             w_bias: (0.0, 0.0, 0.0),
             time: 0.0,
+            time_steady: 0.0,
         }
     }
 }
@@ -129,18 +134,9 @@ impl ComplementaryFilterV2 {
             return;
         }
 
-        // simple IIR filter to acceleration
-        let iir_alpha = 1.0 - (-dt/ACC_FILT_TIMECONSTANT).exp();
-        self.a_filt.0 = iir_alpha * ax + (1.0-iir_alpha) * self.a_filt.0;
-        self.a_filt.1 = iir_alpha * ay + (1.0-iir_alpha) * self.a_filt.1;
-        self.a_filt.2 = iir_alpha * az + (1.0-iir_alpha) * self.a_filt.2;
-        let axf = self.a_filt.0;
-        let ayf = self.a_filt.1;
-        let azf = self.a_filt.2;
-        //println!("{}: {}", ax, axf);
-        
-
+        let (axf, ayf, azf) = self.filter_acc(ax, ay, az, dt);
         self.steady_state = self.check_state(ax, ay, az, wx, wy, wz);
+        self.time_steady = if self.steady_state { self.time_steady + dt } else { 0.0 };
 
         // Bias estimation.
         if self.do_bias_estimation {
@@ -161,14 +157,7 @@ impl ComplementaryFilterV2 {
         // filtered accel for correction to avoid jittery motion
         let mut dq_acc = self.get_acc_correction(axf, ayf, azf, pred.0, pred.1, pred.2, pred.3);
 
-        // check state with unfiltered accel
-        let gain = if self.steady_state {
-            6.0 * self.gain_acc
-        } else if self.do_adaptive_gain {
-            self.get_adaptive_gain(self.gain_acc, axf, ayf, azf) * (if self.time < INITIAL_SETTLE_TIME { 4.0 } else { 1.0 })
-        } else {
-            self.gain_acc
-        };
+        let gain = self.get_adaptive_gain(self.gain_acc, axf, ayf, azf, dt);
 
         scale_quaternion(gain, &mut dq_acc.0, &mut dq_acc.1, &mut dq_acc.2, &mut dq_acc.3);
 
@@ -188,15 +177,22 @@ impl ComplementaryFilterV2 {
         if !self.initialized {
             // First time - ignore prediction:
             self.q = self.get_measurement_mag(ax, ay, az, mx, my, mz);
+            self.a_filt = (ax, ay, az);
+            self.a_prev = (ax, ay, az);
             self.initialized = true;
             return;
         }
 
+        let (axf, ayf, azf) = self.filter_acc(ax, ay, az, dt);
         self.steady_state = self.check_state(ax, ay, az, wx, wy, wz);
+        self.time_steady = if self.steady_state { self.time_steady + dt } else { 0.0 };
 
         // Bias estimation.
         if self.do_bias_estimation {
             self.update_biases(ax, ay, az, wx, wy, wz);
+        }
+        if self.do_gravity_autoscale {
+            self.autoscale_gravity(axf, ayf, azf)
         }
 
         // Prediction.
@@ -207,13 +203,8 @@ impl ComplementaryFilterV2 {
         // where qI = identity quaternion
         let mut dq_acc = self.get_acc_correction(ax, ay, az, pred.0, pred.1, pred.2, pred.3);
 
-        let gain = if self.check_state(ax, ay, az, wx, wy, wz) {
-            0.01
-        } else if self.do_adaptive_gain {
-            self.get_adaptive_gain(self.gain_acc, ax, ay, az)
-        } else {
-            self.gain_acc
-        };
+        let gain = self.get_adaptive_gain(self.gain_acc, axf, ayf, azf, dt);
+
         scale_quaternion(gain, &mut dq_acc.0, &mut dq_acc.1, &mut dq_acc.2, &mut dq_acc.3);
 
         let q_temp = quaternion_multiplication(pred.0, pred.1, pred.2, pred.3, dq_acc.0, dq_acc.1, dq_acc.2, dq_acc.3);
@@ -230,8 +221,17 @@ impl ComplementaryFilterV2 {
         normalize_quaternion(&mut self.q.0, &mut self.q.1, &mut self.q.2, &mut self.q.3);
     }
 
+    fn filter_acc(&mut self, ax: f64, ay: f64, az: f64, dt: f64) -> (f64, f64, f64) {
+        // simple IIR filter to acceleration
+        let iir_alpha = 1.0 - (-dt/ACC_FILT_TIMECONSTANT).exp();
+        self.a_filt.0 = iir_alpha * ax + (1.0-iir_alpha) * self.a_filt.0;
+        self.a_filt.1 = iir_alpha * ay + (1.0-iir_alpha) * self.a_filt.1;
+        self.a_filt.2 = iir_alpha * az + (1.0-iir_alpha) * self.a_filt.2;
+        self.a_filt.clone()
+    }
+
     fn update_biases(&mut self, _ax: f64, _ay: f64, _az: f64, wx: f64, wy: f64, wz: f64) {
-        if self.steady_state {
+        if self.time_steady > STEADY_WAIT_THRESHOLD {
             self.w_bias.0 += self.bias_alpha * (wx - self.w_bias.0);
             self.w_bias.1 += self.bias_alpha * (wy - self.w_bias.1);
             self.w_bias.2 += self.bias_alpha * (wz - self.w_bias.2);
@@ -402,14 +402,29 @@ impl ComplementaryFilterV2 {
         )
     }
 
-    fn get_adaptive_gain(&mut self, alpha: f64, ax: f64, ay: f64, az: f64) -> f64 {
-        let a_mag = (ax * ax + ay * ay + az * az).sqrt();
-        //let w_mag = (self.w_prev.0*self.w_prev.0 + self.w_prev.2*self.w_prev.2 + self.w_prev.2*self.w_prev.2).sqrt();
-        let error = (a_mag - self.gravity).abs() / self.gravity;
-        // scaling of 0.13 at error of 5% = 0.5 m/s^2
-        // scaling of 0.5 at rotation rate of 10 deg/s
-        return (-40.0*error).exp() * alpha;
-    }
+    fn get_adaptive_gain(&mut self, alpha: f64, ax: f64, ay: f64, az: f64, dt: f64) -> f64 {
+
+        if self.time_steady > STEADY_WAIT_THRESHOLD {
+            8.0 * alpha
+        } else if self.do_adaptive_gain {
+            let a_mag = (ax * ax + ay * ay + az * az).sqrt();
+            let w_mag = (self.w_prev.0*self.w_prev.0 + self.w_prev.2*self.w_prev.2 + self.w_prev.2*self.w_prev.2).sqrt();
+            let error = (a_mag - self.gravity).abs() / self.gravity;
+
+            let gain_iir_alpha = 1.0 - (-dt/0.15).exp(); // 0.15s time constant filtering for gain
+
+            // scaling of 0.13 at error of 5% = 0.5 m/s^2
+            // initial settle gain factor is constant followed by slope down to 1
+            let new_gain = (-40.0*error -1.0*w_mag).exp() * alpha * (if self.time < INITIAL_SETTLE_TIME { (15.0-self.time/INITIAL_SETTLE_TIME*14.0).max(8.0) } else { 1.0 });
+            // 1st order filter of gain when increasing
+            let gain = if new_gain < self.prev_gain_acc { new_gain } else { gain_iir_alpha * new_gain + (1.0-gain_iir_alpha) * self.prev_gain_acc };
+            self.prev_gain_acc = gain;
+            gain
+
+        } else {
+            alpha
+        }
+      }
 }
 
 
