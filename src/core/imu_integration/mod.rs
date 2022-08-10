@@ -179,7 +179,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use complementary_v2::ComplementaryFilterV2;
+use complementary::ComplementaryFilter;
 
 impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
@@ -187,7 +187,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let mut quats = BTreeMap::new();
         let sample_time_ms = duration_ms / imu_data.len() as f64;
 
-        let mut f = ComplementaryFilterV2::default();
+        let mut f = ComplementaryFilter::default();
         //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
         let mut counter = 0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
@@ -195,7 +195,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
             if let Some(g) = v.gyro.as_ref() {
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
-                let acc = Vector3::new(-a[1], a[0], a[2]);
+                let acc = Vector3::new(-a[1], a[0], a[2]).try_normalize(0.0).unwrap_or_default();
 
                 if let Some(m) = v.magn.as_ref() {
                     if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
