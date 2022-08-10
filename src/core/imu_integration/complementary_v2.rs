@@ -14,9 +14,8 @@ const ACCELERATION_THRESHOLD: f64 = 0.1;
 const DELTA_ANGULAR_VELOCITY_THRESHOLD: f64 = 0.01;
 const DELTA_ACCELERATION_THRESHOLD: f64 = 0.05; // Compare current to IIR result
 const GRAV_AUTOSCALE_THRESHOLD: f64 = 1.0; // apply autoscaling when steady state and acceleration within 1 m/s^2 of GRAVITY
-const ACC_FILT_TIMECONSTANT: f64 = 0.01; // slight iir filtering to clear spikes.
+const ACC_FILT_TIMECONSTANT: f64 = 0.1; // slight iir filtering to clear spikes.
 const GRAV_AUTOSCALE_ALPHA: f64 = 0.005;
-const INITIAL_SETTLE_TIME: f64 = 5.0; // 5 seconds of high accel gain, correct for wrong initial accel guess
 const STEADY_WAIT_THRESHOLD: f64 = 0.2;
 
 pub struct ComplementaryFilterV2 {
@@ -51,6 +50,9 @@ pub struct ComplementaryFilterV2 {
     w_bias: (f64, f64, f64),
     time: f64,
     time_steady: f64,
+
+    // initial time with higher accel gain
+    initial_settle_time: f64,
 }
 
 impl Default for ComplementaryFilterV2 {
@@ -74,6 +76,7 @@ impl Default for ComplementaryFilterV2 {
             w_bias: (0.0, 0.0, 0.0),
             time: 0.0,
             time_steady: 0.0,
+            initial_settle_time: 2.0,
         }
     }
 }
@@ -103,6 +106,10 @@ impl ComplementaryFilterV2 {
         } else {
             false
         }
+    }
+
+    pub fn set_initial_settle_time(&mut self, settle_time: f64) {
+        self.initial_settle_time = settle_time;
     }
 
     // When the filter is in the steady state, bias estimation will occur (if the parameter is enabled).
@@ -415,7 +422,7 @@ impl ComplementaryFilterV2 {
 
             // scaling of 0.13 at error of 5% = 0.5 m/s^2
             // initial settle gain factor is constant followed by slope down to 1
-            let new_gain = (-40.0*error -1.0*w_mag).exp() * alpha * (if self.time < INITIAL_SETTLE_TIME { (15.0-self.time/INITIAL_SETTLE_TIME*14.0).max(8.0) } else { 1.0 });
+            let new_gain = (-40.0*error -1.0*w_mag).exp() * alpha * (if self.time < self.initial_settle_time { (15.0-self.time/self.initial_settle_time*14.0).max(8.0) } else { 1.0 });
             // 1st order filter of gain when increasing
             let gain = if new_gain < self.prev_gain_acc { new_gain } else { gain_iir_alpha * new_gain + (1.0-gain_iir_alpha) * self.prev_gain_acc };
             self.prev_gain_acc = gain;

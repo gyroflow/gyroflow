@@ -188,6 +188,8 @@ impl GyroIntegrator for ComplementaryIntegrator {
         let sample_time_ms = duration_ms / imu_data.len() as f64;
 
         let mut f = ComplementaryFilterV2::default();
+        // Limit initial settle time for short videos
+        f.set_initial_settle_time((duration_ms / 1000.0 * 0.05).min(2.0));
         //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
         let mut counter = 0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
