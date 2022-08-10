@@ -107,8 +107,11 @@ fn entry() {
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
     engine.set_object_property("render_queue".into(), rqpinned);
-    ui_tools.borrow_mut().engine_ptr = Some(&mut engine as *mut _);
-    ui_tools.borrow().set_theme("dark".into());
+    {
+        let mut ui = ui_tools.borrow_mut();
+        ui.engine_ptr = Some(&mut engine as *mut _);
+        ui.set_theme("dark".into());
+    }
 
     // Get smoothing algorithms
     engine.set_property("smoothingAlgorithms".into(), QVariant::from(ctl.borrow().get_smoothing_algs()));

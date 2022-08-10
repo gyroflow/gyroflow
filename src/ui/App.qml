@@ -209,6 +209,13 @@ Rectangle {
                     ];
 
                     function render() {
+                        if (window.vidInfo.filename.toLowerCase().endsWith('.braw')) {
+                            messageBox(Modal.Error, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use the [OpenFX plugin].").replace(/\[(.*?)\]/, '<a href="https://github.com/gyroflow/gyroflow-ofx/releases"><font color="' + styleTextColor + '">$1</font></a>'), [
+                                { text: qsTr("Ok"), accent: true }
+                            ]);
+                            return;
+                        }
+
                         if (!controller.lens_loaded && !allowLens) {
                             messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowLens = true; renderBtn.render(); }},

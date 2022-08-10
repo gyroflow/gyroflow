@@ -17,7 +17,7 @@ cpp! {{
 #[derive(Default, QObject)]
 pub struct UITools {
     base: qt_base_class!(trait QObject),
-    set_theme: qt_method!(fn(&self, theme: String)),
+    set_theme: qt_method!(fn(&mut self, theme: String)),
     set_language: qt_method!(fn(&self, lang_id: QString)),
     get_default_language: qt_method!(fn(&self) -> QString),
     set_scaling: qt_method!(fn(&self, dpiScale: f64)),
@@ -34,6 +34,8 @@ pub struct UITools {
     taskbar: Option<ITaskbarList4>,
 
     main_window_handle: Option<isize>,
+
+    is_dark: bool,
 
     pub engine_ptr: Option<*mut QmlEngine>
 }
@@ -71,7 +73,7 @@ impl UITools {
         })
     }
 
-    pub fn set_theme(&self, theme: String) {
+    pub fn set_theme(&mut self, theme: String) {
         if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
 
@@ -93,6 +95,7 @@ impl UITools {
                     engine.set_property("styleSliderHandle"     .into(), QString::from("#454545").into());
                     engine.set_property("styleSliderBackground" .into(), QString::from("#9a9a9a").into());
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10ffffff").into());
+                    self.is_dark = true;
                 },
                 "light" => {
                     engine.set_property("style"                 .into(), QString::from("light").into());
@@ -108,9 +111,11 @@ impl UITools {
                     engine.set_property("styleSliderHandle"     .into(), QString::from("#c2c2c2").into());
                     engine.set_property("styleSliderBackground" .into(), QString::from("#cdcdcd").into());
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10000000").into());
+                    self.is_dark = false;
                 },
                 _ => { }
             }
+            self.update_dark_mode();
         }
     }
 
@@ -137,6 +142,20 @@ impl UITools {
                 if let Ok(tb) = CoCreateInstance(&TaskbarList, None, CLSCTX_ALL) {
                     self.taskbar = Some(tb);
                 }
+            }
+
+            self.update_dark_mode();
+        }
+    }
+
+    fn update_dark_mode(&self) {
+        #[cfg(target_os = "windows")]
+        if let Some(hwnd) = self.main_window_handle {
+            unsafe {
+                use windows::Win32::Foundation::*;
+                use windows::Win32::Graphics::Dwm::*;
+                let is_dark = BOOL::from(self.is_dark);
+                DwmSetWindowAttribute(HWND(hwnd), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _).expect("Failed to set dark theme!");
             }
         }
     }

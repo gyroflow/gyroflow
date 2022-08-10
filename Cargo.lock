@@ -1714,9 +1714,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.127"
+version = "0.2.129"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
+checksum = "64de3cc433455c14174d42e554d4027ee631c4d046d43e3ecc6efc4636cdc7a7"
 
 [[package]]
 name = "libloading"
@@ -1736,9 +1736,9 @@ checksum = "7fc7aa29613bd6a620df431842069224d8bc9011086b1db4c0e0cd47fa03ec9a"
 
 [[package]]
 name = "libm"
-version = "0.2.3"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da83a57f3f5ba3680950aa3cbc806fc297bc0b289d42e8942ed528ace71b8145"
+checksum = "292a948cd991e376cf75541fe5b97a1081d713c618b4f1b9500f8844e49eb565"
 
 [[package]]
 name = "libmimalloc-sys"
@@ -2824,7 +2824,7 @@ version = "0.1.0"
 source = "git+https://github.com/gyroflow/rs-sync.git?rev=681ed64#681ed64fc6c8311bc60a33788165db853c7354e3"
 dependencies = [
  "argmin",
- "libm 0.2.3",
+ "libm 0.2.5",
  "log",
  "nalgebra",
  "rand 0.8.5",
@@ -3021,7 +3021,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c48e45e5961033db030b56ad67aef22e9c908c493a6e8348c0a0f6b93433cd77"
 dependencies = [
  "approx",
- "libm 0.2.3",
+ "libm 0.2.5",
  "num-complex 0.4.2",
  "num-traits 0.2.15",
  "paste",
@@ -3209,7 +3209,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ee4595f#ee4595f30ee9f32402ce5428011dc0d7e49db9a0"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=576fdc5#576fdc507709e7d9a17d79627ec6a9b1d382e303"
 dependencies = [
  "argh",
  "byteorder",
