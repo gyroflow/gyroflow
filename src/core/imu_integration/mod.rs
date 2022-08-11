@@ -256,7 +256,11 @@ impl GyroIntegrator for VQFIntegrator {
         }
 
         // Tweak parameters here, see parameter descriptions: https://github.com/dlaidig/vqf/blob/main/vqf/cpp/vqf.hpp#L37
-        let params = VQFParams::default();
+        let params = VQFParams {
+            tau_acc: 40.0,
+            tau_mag: 40.0,
+            ..Default::default()
+        };
         offline_vqf(gyr, acc, Some(mag), num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
         for (i, v) in imu_data.iter().enumerate() {
             out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
