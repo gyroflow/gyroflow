@@ -156,7 +156,6 @@ impl ComplementaryFilterV2 {
 
         // Prediction.
         let pred = self.get_prediction(wx, wy, wz, dt);
-        //println!("{:?}", pred);
 
         // Correction (from acc):
         // q_ = q_pred * [(1-gain) * qI + gain * dq_acc]
@@ -261,7 +260,7 @@ impl ComplementaryFilterV2 {
 
     fn check_state(&mut self, ax: f64, ay: f64, az: f64, wx: f64, wy: f64, wz: f64) -> bool {
         let acc_magnitude = (ax*ax + ay*ay + az*az).sqrt();
-        //println!("{}",acc_magnitude);
+
         let acc_th = (acc_magnitude - self.gravity).abs() < ACCELERATION_THRESHOLD;
         let acc_component_steady = (ax - self.a_filt.0).abs() < DELTA_ACCELERATION_THRESHOLD ||
                                         (ay - self.a_filt.1).abs() < DELTA_ACCELERATION_THRESHOLD ||
@@ -281,7 +280,6 @@ impl ComplementaryFilterV2 {
 
         // satisfy conditions for correcting acceleration
         self.partial_steady_state = acc_component_steady && acc_delta_th && gyro_delta_th && gyro_th;
-        //println!("{} {} {} {} {}", acc_magnitude - self.gravity, ax - self.a_filt.0, ax - self.a_prev.0, wx - self.w_prev.0,wx - self.w_bias.0);
 
         // satisfy all thresholds for stationary
         acc_th && acc_component_steady && acc_delta_th && gyro_delta_th && gyro_th
@@ -411,9 +409,7 @@ impl ComplementaryFilterV2 {
 
     fn get_adaptive_gain(&mut self, alpha: f64, ax: f64, ay: f64, az: f64, dt: f64) -> f64 {
 
-        if self.time_steady > STEADY_WAIT_THRESHOLD {
-            8.0 * alpha
-        } else if self.do_adaptive_gain {
+        if self.do_adaptive_gain {
             let a_mag = (ax * ax + ay * ay + az * az).sqrt();
             let w_mag = (self.w_prev.0*self.w_prev.0 + self.w_prev.2*self.w_prev.2 + self.w_prev.2*self.w_prev.2).sqrt();
             let error = (a_mag - self.gravity).abs() / self.gravity;
@@ -422,7 +418,11 @@ impl ComplementaryFilterV2 {
 
             // scaling of 0.13 at error of 5% = 0.5 m/s^2
             // initial settle gain factor is constant followed by slope down to 1
-            let new_gain = (-40.0*error -1.0*w_mag).exp() * alpha * (if self.time < self.initial_settle_time { (15.0-self.time/self.initial_settle_time*14.0).max(8.0) } else { 1.0 });
+            let new_gain = if self.time_steady > STEADY_WAIT_THRESHOLD {
+                8.0 * alpha
+            } else {
+                (-40.0*error -1.0*w_mag).exp() * alpha * (if self.time < self.initial_settle_time { (15.0-self.time/self.initial_settle_time*14.0).max(8.0) } else { 1.0 })
+            };
             // 1st order filter of gain when increasing
             let gain = if new_gain < self.prev_gain_acc { new_gain } else { gain_iir_alpha * new_gain + (1.0-gain_iir_alpha) * self.prev_gain_acc };
             self.prev_gain_acc = gain;
