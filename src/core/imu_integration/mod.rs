@@ -179,7 +179,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use complementary_v2::ComplementaryFilterV2;
+use complementary::ComplementaryFilter;
 
 impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
@@ -197,7 +197,7 @@ impl GyroIntegrator for ComplementaryIntegrator {
             if let Some(g) = v.gyro.as_ref() {
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
-                let acc = Vector3::new(-a[1], a[0], a[2]);
+                let acc = Vector3::new(-a[1], a[0], a[2]).try_normalize(0.0).unwrap_or_default();
 
                 if let Some(m) = v.magn.as_ref() {
                     if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
