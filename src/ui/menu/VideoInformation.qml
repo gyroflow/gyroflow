@@ -101,9 +101,10 @@ MenuItem {
     function getPixelFormat(md): string {
         let pt = md["stream.video[0].codec.format_name"] || "";
         let bits = "8 bit";
-        if (pt.indexOf("p10le") > -1) { bits = "10 bit"; pt = pt.replace("p10le", ""); } // TODO detect more formats
-        if (pt.indexOf("p12le") > -1) { bits = "12 bit"; pt = pt.replace("p12le", ""); }
-        if (pt.indexOf("p16le") > -1) { bits = "16 bit"; pt = pt.replace("p16le", ""); }
+        if (pt.indexOf("10le") > -1) { bits = "10 bit"; pt = pt.replace("p10le", "").replace("10le", ""); }
+        if (pt.indexOf("12le") > -1) { bits = "12 bit"; pt = pt.replace("p12le", "").replace("12le", ""); }
+        if (pt.indexOf("14le") > -1) { bits = "14 bit"; pt = pt.replace("p14le", "").replace("14le", ""); }
+        if (pt.indexOf("16le") > -1) { bits = "16 bit"; pt = pt.replace("p16le", "").replace("16le", ""); }
         if (pt.indexOf("f32le") > -1) { bits = "32 bit float"; pt = pt.replace("f32le", ""); }
         if (pt.indexOf("f16le") > -1) { bits = "16 bit float"; pt = pt.replace("f16le", ""); }
 

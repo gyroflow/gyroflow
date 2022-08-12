@@ -179,7 +179,7 @@ impl GyroIntegrator for GyroOnlyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-use complementary::ComplementaryFilter;
+use complementary_v2::ComplementaryFilterV2;
 
 impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {

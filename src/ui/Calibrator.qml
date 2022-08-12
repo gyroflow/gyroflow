@@ -238,8 +238,8 @@ Window {
     onClosing: (close) => {
         if (anyFileLoaded && !closeConfirmationModal) {
             messageBox(Modal.NoIcon, qsTr("Are you sure you want to close the calibrator?"), [
-                { text: qsTr("Yes"), accent: true, clicked: () => calibrator_window.close() },
-                { text: qsTr("No"), clicked: () => calibrator_window.closeConfirmationModal = false },
+                { text: qsTr("Yes"), accent: true, clicked: () => { calibrator_window.close(); } },
+                { text: qsTr("No"), clicked: () => { calibrator_window.closeConfirmationModal = false; } },
             ]);
             close.accepted = false;
             closeConfirmationModal = true;
