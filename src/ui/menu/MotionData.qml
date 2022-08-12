@@ -351,8 +351,8 @@ MenuItem {
                     let ctx = getContext("2d");
                     ctx.reset();
                     const veclen = 30;
-                    const xv = Qt.vector3d(veclen,0,0)
-                    const yv = Qt.vector3d(0,veclen,0)
+                    const xv = Qt.vector3d(0,veclen,0)
+                    const yv = Qt.vector3d(-veclen,0,0)
                     const zv = Qt.vector3d(0,0,veclen)
                     const vecs = [xv, yv, zv]
                     const colors = style === "light" ? ['#cc0000', '#00cc00', '#0000cc'] : ['#ff0000', '#00ff00', '#4444ff'];
@@ -365,13 +365,11 @@ MenuItem {
                                           [cam_width, cam_height, -cam_length],
                                           [-cam_width, cam_height, -cam_length],
                                           [0,0,0]]
+                    const cam_vert_vecs = cam_vertices.map(vert => Qt.vector3d(vert[0],vert[1],vert[2]))
                     const lines = [[0,1,2,3,0],
                                    [0,4,1],
                                    [2,4,3]]
-                    let cam_vert_vecs = []
-                    for (var i = 0; i < cam_vertices.length; i++) {
-                        cam_vert_vecs.push(Qt.vector3d(cam_vertices[i][0],cam_vertices[i][1],cam_vertices[i][2]));
-                    }
+
                     const quats = controller.quats_at_timestamp(Math.round(currentTimestamp))
                     const transform = Qt.quaternion( quats[0], quats[1],  quats[2], quats[3]); // wxyz
                     const maincolor = style === "light" ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)";
