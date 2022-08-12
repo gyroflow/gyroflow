@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use nalgebra::*;
+use std::iter::zip;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
@@ -28,6 +29,7 @@ pub struct FileMetadata {
     pub raw_imu:  Option<Vec<TimeIMU>>,
     pub quaternions:  Option<TimeQuat>,
     pub gravity_vectors:  Option<TimeVec>,
+    pub image_orientations:  Option<TimeQuat>,
     pub detected_source: Option<String>,
     pub frame_readout_time: Option<f64>,
     pub frame_rate: Option<f64>,
@@ -59,9 +61,11 @@ pub struct GyroSource {
 
     pub quaternions: TimeQuat,
     pub org_quaternions: TimeQuat,
-
+    
     pub smoothed_quaternions: TimeQuat,
     pub org_smoothed_quaternions: TimeQuat,
+    
+    pub image_orientations: TimeQuat,
 
     pub gravity_vectors: Option<TimeVec>,
 
@@ -100,6 +104,7 @@ impl GyroSource {
         let mut imu_orientation = None;
         let mut quaternions = None;
         let mut gravity_vectors: Option<TimeVec> = None;
+        let mut image_orientations = None;
         let mut lens_profile = None;
         let mut frame_rate = None;
 
@@ -107,6 +112,7 @@ impl GyroSource {
         if let Some(ref samples) = input.samples {
             let mut quats = TimeQuat::new();
             let mut grav = Vec::<Vector3<f64>>::new();
+            let mut iori_map = TimeQuat::new();
             let mut iori = Vec::<Quat64>::new();
             let mut grav_is_usable = false;
             for info in samples {
@@ -173,6 +179,14 @@ impl GyroSource {
 
             if !grav_is_usable { grav.clear(); }
 
+            for ((ts, quat), iori) in zip(&quats, &iori) {
+                iori_map.insert(*ts, *iori);
+            }
+
+            if !iori_map.is_empty() {
+                image_orientations = Some(iori_map);
+            }
+
             if !quats.is_empty() {
                 if !grav.is_empty() && grav.len() == quats.len() {
 
@@ -194,6 +208,7 @@ impl GyroSource {
             imu_orientation,
             detected_source: Some(detected_source),
             quaternions,
+            image_orientations,
             gravity_vectors,
             raw_imu,
             frame_readout_time: input.frame_readout_time(),
@@ -232,6 +247,9 @@ impl GyroSource {
             self.quaternions = quats.clone();
             self.org_quaternions = self.quaternions.clone();
         }
+        if let Some(ioris) = &telemetry.image_orientations {
+            self.image_orientations = ioris.clone();
+        }
         if !self.quaternions.is_empty() {
             self.integration_method = 0;
         }
@@ -247,8 +265,9 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
-            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") {
-                    QuaternionConverter::convert(&self.org_quaternions, &self.raw_imu, self.duration_ms)
+            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && self.gravity_vectors.is_none() {
+                    log::info!("No gravity vectors - using accelerometer");
+                    QuaternionConverter::convert(&self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
                 } else {
                     self.org_quaternions.clone()
                 },
