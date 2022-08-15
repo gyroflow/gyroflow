@@ -144,7 +144,7 @@ pub struct RenderQueue {
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
-    add_file: qt_method!(fn(&mut self, url: QUrl, controller: QJSValue, options_json: String, sync_options_json: String) -> u32),
+    add_file: qt_method!(fn(&mut self, path: String, controller: QJSValue, options_json: String, sync_options_json: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
@@ -154,6 +154,9 @@ pub struct RenderQueue {
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
 
+    render_queue_json: qt_method!(fn(&self) -> QString),
+    restore_render_queue: qt_method!(fn(&mut self, json: String, controller: QJSValue, options_json: String, sync_options_json: String)),
+    
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
 
@@ -454,6 +457,28 @@ impl RenderQueue {
         self.status_changed();
     }
 
+    pub fn render_queue_json(&self) -> QString {
+        let mut all = Vec::new();
+        for v in self.queue.borrow().iter() {
+            if v.total_frames > 0 && v.status != JobStatus::Finished {
+                if let Ok(data) = serde_json::from_str(&self.get_gyroflow_data(v.job_id).to_string()) as serde_json::Result<serde_json::Value> {
+                    all.push(data);
+                }
+            }
+        }
+        QString::from(serde_json::to_string(&all).unwrap_or_default())
+    }
+
+    pub fn restore_render_queue(&mut self, json: String, controller: QJSValue, options_json: String, sync_options_json: String) {
+        if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
+            for x in val {
+                if let Ok(data) = serde_json::to_string(&x) {
+                    self.add_file(data, controller.clone(), options_json.clone(), sync_options_json.clone());
+                }
+            }
+        }
+    }
+
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
             if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default(), job.sync_options.clone()) {
@@ -631,10 +656,10 @@ impl RenderQueue {
         path.to_string_lossy().to_string()
     }
 
-    pub fn add_file(&mut self, url: QUrl, controller: QJSValue, options_json: String, sync_options_json: String) -> u32 {
+    pub fn add_file(&mut self, path: String, controller: QJSValue, options_json: String, sync_options_json: String) -> u32 {
         let job_id = fastrand::u32(..);
 
-        let path = util::url_to_path(url);
+        let is_gf_data = path.starts_with('{');
 
         let err = util::qt_queued_callback_mut(self, move |this, (msg, arg): (String, String)| {
             ::log::warn!("[add_file]: {}", arg);
@@ -737,22 +762,30 @@ impl RenderQueue {
                         Ok(())
                     };
 
-                    if path.ends_with(".gyroflow") {
-                        let video_path = || -> Option<String> {
-                            let data = std::fs::read(&path).ok()?;
-                            let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
-                            Some(obj.get("videofile")?.as_str()?.to_string())
-                        }().unwrap_or_default();
+                    if is_gf_data || path.ends_with(".gyroflow") {
+                        if !is_gf_data {
+                            let video_path = || -> Option<String> {
+                                let data = std::fs::read(&path).ok()?;
+                                let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
+                                Some(obj.get("videofile")?.as_str()?.to_string())
+                            }().unwrap_or_default();
 
-                        if video_path.is_empty() {
-                            // It's a preset
-                            if let Ok(data) = std::fs::read_to_string(&path) {
-                                apply_preset(data);
+                            if video_path.is_empty() {
+                                // It's a preset
+                                if let Ok(data) = std::fs::read_to_string(&path) {
+                                    apply_preset(data);
+                                }
+                                return;
                             }
-                            return;
                         }
 
-                        match stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false))) {
+                        let result = if is_gf_data {
+                            stab.import_gyroflow_data(path.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)))
+                        } else {
+                            stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false)))
+                        };
+
+                        match result {
                             Ok(obj) => {
                                 if let Some(out) = obj.get("output") {
                                     if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
@@ -830,7 +863,7 @@ impl RenderQueue {
                             if let Some(sync_settings) = sync_settings {
                                 if contains_gyro && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
                                     // ----------------------------------------------------------------------------
-                                    // --------------------------------- AUtosync ---------------------------------
+                                    // --------------------------------- Autosync ---------------------------------
                                     loaded((render_options.clone(), true));
                                     ask_path = false;
                                     use gyroflow_core::synchronization::AutosyncProcess;
@@ -920,7 +953,7 @@ impl RenderQueue {
                                             }
                                         }
                                     }
-                                    // --------------------------------- AUtosync ---------------------------------
+                                    // --------------------------------- Autosync ---------------------------------
                                     // ----------------------------------------------------------------------------
                                 }
                             }

@@ -210,6 +210,27 @@ Item {
         width: parent.width - 2*x;
         clip: true;
         model: render_queue.queue;
+        Component.onCompleted: {
+            const saved = window.settings.value("renderQueue");
+
+            if (saved && saved.length > 100) {
+                Qt.callLater(() => {
+                    const options = exportSettings.getExportOptionsJson();
+                    const sync_options = window.sync.getSettingsJson();
+
+                    render_queue.restore_render_queue(saved, controller, options, sync_options);
+                });
+            }
+        }
+        Connections {
+            target: render_queue;
+            function onQueue_changed() {
+                window.settings.setValue("renderQueue", render_queue.render_queue_json());
+            }
+            function onStatus_changed() {
+                window.settings.setValue("renderQueue", render_queue.render_queue_json());
+            }
+        }
         spacing: 5 * dpiScale;
         QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
         delegate: Item {
@@ -521,7 +542,7 @@ Item {
             const sync_options = window.sync.getSettingsJson();
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(url, controller, options, sync_options);
+                const job_id = render_queue.add_file(controller.url_to_path(url), controller, options, sync_options);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();
