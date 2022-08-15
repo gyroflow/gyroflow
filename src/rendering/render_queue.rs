@@ -23,6 +23,7 @@ struct RenderQueueItem {
     pub start_timestamp: u64,
     pub end_timestamp: u64,
     pub error_string: QString,
+    pub processing_progress: f64,
 
     status: JobStatus,
 }
@@ -180,7 +181,7 @@ pub struct RenderQueue {
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
-    apply_to_all: qt_method!(fn(&mut self, data: String)),
+    apply_to_all: qt_method!(fn(&mut self, data: String, sync_options_json: String)),
 
     pause_flag: Arc<AtomicBool>,
 
@@ -263,7 +264,7 @@ impl RenderQueue {
         let job_id = if self.editing_job_id > 0 {
             self.editing_job_id
         } else {
-            fastrand::u32(..) + 1
+            fastrand::u32(1..)
         };
         if self.editing_job_id > 0 {
             self.editing_job_id = 0;
@@ -273,14 +274,17 @@ impl RenderQueue {
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
             if let Ok(render_options) = serde_json::from_str(&options_json) as serde_json::Result<RenderOptions> {
-                self.add_internal(job_id, ctl.stabilizer.clone(), render_options, sync_options_json, thumbnail_url);
+                let stab = ctl.stabilizer.get_cloned();
+                self.add_internal(job_id, Arc::new(stab), render_options, sync_options_json, thumbnail_url);
             }
         }
         job_id
     }
 
     pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, sync_options_json: String, thumbnail_url: QString) {
-        let stab = Arc::new(stab.get_render_stabilizer((render_options.output_width, render_options.output_height)));
+        let size = stab.params.read().video_size;
+        stab.set_render_params(size, (render_options.output_width, render_options.output_height));
+
         let params = stab.params.read();
         let trim_ratio = render_options.trim_end - render_options.trim_start;
         let video_path = stab.video_path.read().clone();
@@ -311,6 +315,7 @@ impl RenderQueue {
                 total_frames: (params.frame_count as f64 * trim_ratio).ceil() as u64,
                 start_timestamp: 0,
                 end_timestamp: 0,
+                processing_progress: 0.0,
                 error_string: QString::default(),
                 status: JobStatus::Queued,
             });
@@ -398,7 +403,7 @@ impl RenderQueue {
         if !paused {
             let mut job_id = None;
             for v in self.queue.borrow().iter() {
-                if v.current_frame == 0 && v.total_frames > 0 && v.status == JobStatus::Queued {
+                if v.current_frame == 0 && v.total_frames > 0 && v.status == JobStatus::Queued && (v.processing_progress == 0.0 || v.processing_progress == 1.0) {
                     job_id = Some(v.job_id);
                     break;
                 }
@@ -482,6 +487,7 @@ impl RenderQueue {
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
             if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default(), job.sync_options.clone()) {
+                println!("get_gyroflow_data {}", &data);
                 return QString::from(data);
             }
         }
@@ -657,7 +663,7 @@ impl RenderQueue {
     }
 
     pub fn add_file(&mut self, path: String, controller: QJSValue, options_json: String, sync_options_json: String) -> u32 {
-        let job_id = fastrand::u32(..);
+        let job_id = fastrand::u32(1..);
 
         let is_gf_data = path.starts_with('{');
 
@@ -668,6 +674,11 @@ impl RenderQueue {
                 itm.status = JobStatus::Error;
             });
             this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
+        });
+        let processing = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+            update_model!(this, job_id, itm {
+                itm.processing_progress = progress;
+            });
         });
 
         let suffix = self.default_suffix.to_string();
@@ -737,8 +748,9 @@ impl RenderQueue {
                 let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
                     update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
                 });
+                let sync_options_json2 = sync_options_json.clone();
                 let apply_preset = util::qt_queued_callback_mut(self, move |this, preset: String| {
-                    this.apply_to_all(preset);
+                    this.apply_to_all(preset, sync_options_json2.clone());
                     this.added(job_id);
                 });
 
@@ -855,118 +867,17 @@ impl RenderQueue {
                             stab.set_size(video_size.0, video_size.1);
                             stab.set_output_size(render_options.output_width, render_options.output_height);
 
-                            let contains_gyro = !stab.gyro.read().quaternions.is_empty();
-
-                            let mut ask_path = true;
-
-                            let sync_settings = stab.lens.read().sync_settings.clone();
-                            if let Some(sync_settings) = sync_settings {
-                                if contains_gyro && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
-                                    // ----------------------------------------------------------------------------
-                                    // --------------------------------- Autosync ---------------------------------
-                                    loaded((render_options.clone(), true));
-                                    ask_path = false;
-                                    use gyroflow_core::synchronization::AutosyncProcess;
-                                    use gyroflow_core::synchronization;
-                                    use crate::rendering::VideoProcessor;
-                                    use itertools::Either;
-
-                                    if let Ok(serde_json::Value::Object(mut sync_options)) = serde_json::from_str(&sync_options_json) {
-                                        for (k, v) in sync_settings.as_object().unwrap() {
-                                            sync_options.insert(k.clone(), v.clone());
-                                        }
-
-                                        if let Some(points) = sync_options.get("max_sync_points").and_then(|v| v.as_i64()) {
-                                            let chunks = 1.0 / points as f64;
-                                            let start = chunks / 2.0;
-                                            let mut timestamps_fract: Vec<f64> = (0..points).map(|i| start + (i as f64 * chunks)).collect();
-                                            if let Some(v) = sync_options.get("custom_sync_timestamps").and_then(|v| v.as_array()) {
-                                                timestamps_fract = v.iter().filter_map(|v| v.as_f64()).filter(|v| *v <= info.duration_ms).map(|v| v / info.duration_ms).collect();
-                                            }
-
-                                            if let Ok(mut sync_params) = serde_json::from_value(serde_json::Value::Object(sync_options)) as serde_json::Result<synchronization::SyncParams> {
-
-                                                let cancel_flag = Arc::new(AtomicBool::new(false));
-                                                sync_params.initial_offset     *= 1000.0; // s to ms
-                                                sync_params.time_per_syncpoint *= 1000.0; // s to ms
-                                                sync_params.search_size        *= 1000.0; // s to ms
-
-                                                let size = stab.params.read().size;
-                                                let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
-                                                stab.set_size(sw as usize, sh as usize);
-
-                                                if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
-                                                    let stab2 = stab.clone();
-                                                    sync.on_finished(move |arg| {
-                                                        if let Either::Left(offsets) = arg {
-                                                            let mut gyro = stab2.gyro.write();
-                                                            for x in offsets {
-                                                                ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                                                                let new_ts = ((x.0 - x.1) * 1000.0) as i64;
-                                                                // Remove existing offsets within 100ms range
-                                                                gyro.remove_offsets_near(new_ts, 100.0);
-                                                                gyro.set_offset(new_ts, x.1);
-                                                            }
-                                                            stab2.keyframes.write().update_gyro(&gyro);
-                                                        }
-                                                    });
-
-                                                    let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
-                                                    let gpu_decoding = *rendering::GPU_DECODING.read();
-
-                                                    let mut frame_no = 0;
-                                                    let sync = std::rc::Rc::new(sync);
-
-                                                    match VideoProcessor::from_file(&path, gpu_decoding, 0, None) {
-                                                        Ok(mut proc) => {
-                                                            let err2 = err.clone();
-                                                            let sync2 = sync.clone();
-                                                            proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
-                                                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                                                    Ok(small_frame) => {
-                                                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
-
-                                                                        sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
-                                                                    },
-                                                                    Err(e) => {
-                                                                        err2(("An error occured: %1".to_string(), e.to_string()))
-                                                                    }
-                                                                }
-                                                                frame_no += 1;
-                                                                Ok(())
-                                                            });
-                                                            if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
-                                                                err(("An error occured: %1".to_string(), e.to_string()));
-                                                            }
-                                                            sync.finished_feeding_frames();
-                                                        }
-                                                        Err(error) => {
-                                                            dbg!(&error.to_string());
-                                                            err(("An error occured: %1".to_string(), error.to_string()));
-                                                        }
-                                                    }
-                                                } else {
-                                                    err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
-                                                }
-
-                                                stab.set_size(video_size.0, video_size.1);
-                                            }
-                                        }
-                                    }
-                                    // --------------------------------- Autosync ---------------------------------
-                                    // ----------------------------------------------------------------------------
-                                }
-                            }
-
                             stab.recompute_blocking();
 
                             // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
-                            loaded((render_options, ask_path));
+                            loaded((render_options, true));
 
                             if let Err(e) = fetch_thumb(&path, ratio) {
                                 err(("An error occured: %1".to_string(), e.to_string()));
                             }
+
+                            Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), &sync_options_json);
                         }
                     }
                 });
@@ -976,27 +887,157 @@ impl RenderQueue {
         job_id
     }
 
-    fn apply_to_all(&mut self, data: String) {
-        dbg!(&data);
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, video_size: &(usize, usize), stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options_json: &str) {
+        let (has_gyro, has_sync_points) = {
+            let gyro = stab.gyro.read();
+            (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
+        };
+
+        let sync_settings = stab.lens.read().sync_settings.clone();
+        if let Some(sync_settings) = sync_settings {
+            if has_gyro && !has_sync_points && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+                // ----------------------------------------------------------------------------
+                // --------------------------------- Autosync ---------------------------------
+                processing_cb(0.01);
+                use gyroflow_core::synchronization::AutosyncProcess;
+                use gyroflow_core::synchronization;
+                use crate::rendering::VideoProcessor;
+                use itertools::Either;
+
+                if let Ok(serde_json::Value::Object(mut sync_options)) = serde_json::from_str(sync_options_json) {
+                    for (k, v) in sync_settings.as_object().unwrap() {
+                        sync_options.insert(k.clone(), v.clone());
+                    }
+
+                    if let Some(points) = sync_options.get("max_sync_points").and_then(|v| v.as_i64()) {
+                        let chunks = 1.0 / points as f64;
+                        let start = chunks / 2.0;
+                        let mut timestamps_fract: Vec<f64> = (0..points).map(|i| start + (i as f64 * chunks)).collect();
+                        if let Some(v) = sync_options.get("custom_sync_timestamps").and_then(|v| v.as_array()) {
+                            timestamps_fract = v.iter().filter_map(|v| v.as_f64()).filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
+                        }
+
+                        if let Ok(mut sync_params) = serde_json::from_value(serde_json::Value::Object(sync_options)) as serde_json::Result<synchronization::SyncParams> {
+
+                            let cancel_flag = Arc::new(AtomicBool::new(false));
+                            sync_params.initial_offset     *= 1000.0; // s to ms
+                            sync_params.time_per_syncpoint *= 1000.0; // s to ms
+                            sync_params.search_size        *= 1000.0; // s to ms
+
+                            let every_nth_frame = sync_params.every_nth_frame.max(1);
+
+                            let size = stab.params.read().size;
+                            let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
+                            stab.set_size(sw as usize, sh as usize);
+
+                            if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
+                                let processing_cb2 = processing_cb.clone();
+                                sync.on_progress(move |percent, _ready, _total| {
+                                    processing_cb2(percent);
+                                });
+                                let stab2 = stab.clone();
+                                sync.on_finished(move |arg| {
+                                    if let Either::Left(offsets) = arg {
+                                        let mut gyro = stab2.gyro.write();
+                                        for x in offsets {
+                                            ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
+                                            let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                                            // Remove existing offsets within 100ms range
+                                            gyro.remove_offsets_near(new_ts, 100.0);
+                                            gyro.set_offset(new_ts, x.1);
+                                        }
+                                        stab2.keyframes.write().update_gyro(&gyro);
+                                    }
+                                });
+
+                                let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
+                                let gpu_decoding = *rendering::GPU_DECODING.read();
+
+                                let mut frame_no = 0;
+                                let mut abs_frame_no = 0;
+                                let sync = std::rc::Rc::new(sync);
+
+                                match VideoProcessor::from_file(&path, gpu_decoding, 0, None) {
+                                    Ok(mut proc) => {
+                                        let err2 = err.clone();
+                                        let sync2 = sync.clone();
+                                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
+                                            if abs_frame_no % every_nth_frame == 0 {
+                                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                                    Ok(small_frame) => {
+                                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+
+                                                        sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                                    },
+                                                    Err(e) => {
+                                                        err2(("An error occured: %1".to_string(), e.to_string()))
+                                                    }
+                                                }
+                                                frame_no += 1;
+                                            }
+                                            abs_frame_no += 1;
+                                            Ok(())
+                                        });
+                                        if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
+                                            err(("An error occured: %1".to_string(), e.to_string()));
+                                        }
+                                        sync.finished_feeding_frames();
+                                    }
+                                    Err(error) => {
+                                        dbg!(&error.to_string());
+                                        err(("An error occured: %1".to_string(), error.to_string()));
+                                    }
+                                }
+                            } else {
+                                err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+                            }
+
+                            stab.set_size(video_size.0, video_size.1);
+                            stab.recompute_blocking();
+                        }
+                    }
+                }
+                processing_cb(1.0);
+                // --------------------------------- Autosync ---------------------------------
+                // ----------------------------------------------------------------------------
+            }
+        }
+    }
+
+    fn apply_to_all(&mut self, data: String, sync_options_json: String) {
+        ::log::debug!("Applying preset {}", &data);
         let mut new_output_options = None;
         if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
             if let Some(output) = obj.get("output") {
                 new_output_options = Some(output.clone());
             }
         }
-        dbg!(&new_output_options);
+        let processing = util::qt_queued_callback_mut(self, |this, (progress, job_id): (f64, u32)| {
+            update_model!(this, job_id, itm {
+                itm.processing_progress = progress;
+            });
+        });
+        ::log::debug!("new_output_options: {:?}", &new_output_options);
         let data = data.as_bytes();
         let mut q = self.queue.borrow_mut();
-        for (_id, job) in self.jobs.iter_mut() {
+        for (job_id, job) in self.jobs.iter_mut() {
             if job.queue_index < q.row_count() as usize {
                 let mut itm = q[job.queue_index].clone();
                 if itm.status == JobStatus::Queued {
                     let stab = job.stab.clone();
                     let data_vec = data.to_vec();
+                    let processing2 = processing.clone();
+                    let sync_options_json = sync_options_json.clone();
+                    let job_id = *job_id;
                     core::run_threaded(move || {
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
                             ::log::error!("Failed to update queue stab data: {:?}", e);
                         }
+                        let (path, duration_ms, video_size, ) = {
+                            let params = stab.params.read();
+                            (stab.video_path.read().clone(), params.duration_ms, params.video_size)
+                        };
+                        Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, &sync_options_json);
                     });
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);

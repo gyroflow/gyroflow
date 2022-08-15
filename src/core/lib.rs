@@ -687,9 +687,8 @@ impl<T: PixelType> StabilizationManager<T> {
         self.smoothing.read().get_names()
     }
 
-    pub fn get_render_stabilizer(&self, output_size: (usize, usize)) -> StabilizationManager<T> {
-        let size = self.params.read().video_size;
-        let stab = StabilizationManager {
+    pub fn get_cloned(&self) -> StabilizationManager<T> {
+        StabilizationManager {
             params: Arc::new(RwLock::new(self.params.read().clone())),
             gyro:   Arc::new(RwLock::new(self.gyro.read().clone())),
             lens:   Arc::new(RwLock::new(self.lens.read().clone())),
@@ -698,14 +697,14 @@ impl<T: PixelType> StabilizationManager<T> {
             video_path: Arc::new(RwLock::new(self.video_path.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
             ..Default::default()
-        };
-        stab.params.write().framebuffer_inverted = false;
-        stab.set_size(size.0, size.1);
-        stab.set_output_size(output_size.0, output_size.1);
+        }
+    }
+    pub fn set_render_params(&self, size: (usize, usize), output_size: (usize, usize)) {
+        self.params.write().framebuffer_inverted = false;
+        self.set_size(size.0, size.1);
+        self.set_output_size(output_size.0, output_size.1);
 
-        stab.recompute_undistortion();
-
-        stab
+        self.recompute_undistortion();
     }
 
     pub fn clear(&self) {
@@ -1003,9 +1002,9 @@ impl<T: PixelType> StabilizationManager<T> {
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
-                if let Some(v) = obj.get("rotation")  { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
-                if let Some(v) = obj.get("acc_rotation")  { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
-                if let Some(v) = obj.get("gyro_bias") { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("rotation")     { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("acc_rotation") { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("gyro_bias")    { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
 
                 if blocking {
                     gyro.apply_transforms();
@@ -1055,9 +1054,12 @@ impl<T: PixelType> StabilizationManager<T> {
                     })();
                 }
                 if let Some(horizon_amount) = obj.get("horizon_lock_amount").and_then(|x| x.as_f64()) {
-                    if let Some(horizon_roll) = obj.get("horizon_roll").and_then(|x| x.as_f64()) {
+                    if let Some(horizon_roll) = obj.get("horizon_lock_roll").and_then(|x| x.as_f64()) {
                         smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll);
                     }
+                }
+                if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
+                    smoothing.horizon_lock.use_gravity_vectors = v;
                 }
 
                 obj.remove("adaptive_zoom_fovs");

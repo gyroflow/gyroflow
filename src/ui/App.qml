@@ -282,7 +282,7 @@ Rectangle {
                                         presetFileDialog.presetData = finalData;
                                         presetFileDialog.open2();
                                     } else { // Apply
-                                        render_queue.apply_to_all(JSON.stringify(finalData));
+                                        render_queue.apply_to_all(JSON.stringify(finalData), window.sync.getSettingsJson());
                                     }
                                 });
                             break;

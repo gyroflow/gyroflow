@@ -243,7 +243,8 @@ Item {
             property bool isError: error_string.length > 0 && !isQuestion && !isInfo;
             property bool isInfo: error_string == "uses_cpu";
             property bool isQuestion: error_string.startsWith("convert_format:") || error_string.startsWith("file_exists:");
-            property bool isInProgress: !isFinished && !isError && !isQuestion && current_frame > 0 && total_frames > 0;
+            property bool isInProgress: (!isFinished && !isError && !isQuestion && total_frames > 0) && (current_frame > 0 || isProcessing);
+            property bool isProcessing: processing_progress > 0.0 && processing_progress < 1.0;
             property string errorString: error_string;
             onProgressChanged: {
                 const times = Util.calculateTimesAndFps(progress, current_frame, start_timestamp);
@@ -450,11 +451,12 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter;
                         horizontalAlignment: Text.AlignHCenter;
                         textFormat: Text.RichText;
-                        text: `<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText})</small>`;
+                        text: isProcessing? `<b>${(processing_progress*100).toFixed(2)}%</b>` : 
+                                            `<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText})</small>`;
                     }
                     QQC.ProgressBar {
                         width: 200 * dpiScale;
-                        value: current_frame / total_frames;
+                        value: isProcessing? processing_progress : current_frame / total_frames;
                     }
                     BasicText {
                         id: time;
@@ -465,7 +467,8 @@ Item {
                         leftPadding: 0;
                         anchors.horizontalCenter: parent.horizontalCenter;
                         horizontalAlignment: Text.AlignHCenter;
-                        text: qsTr("Elapsed: %1. Remaining: %2").arg("<b>" + elapsed + "</b>").arg("<b>" + (statusBg.shown? "---" : remaining) + "</b>");
+                        text: isProcessing? qsTr("Synchronizing...")
+                                          : qsTr("Elapsed: %1. Remaining: %2").arg("<b>" + elapsed + "</b>").arg("<b>" + (statusBg.shown? "---" : remaining) + "</b>");
                     }
                 }
 
