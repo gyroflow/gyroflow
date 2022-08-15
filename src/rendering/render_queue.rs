@@ -487,7 +487,6 @@ impl RenderQueue {
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
             if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default(), job.sync_options.clone()) {
-                println!("get_gyroflow_data {}", &data);
                 return QString::from(data);
             }
         }
