@@ -18,7 +18,8 @@ impl MDKProcessor {
     pub fn from_file(path: &str) -> Self {
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
         dbg!(&path);
-        mdk.setUrl(crate::util::path_to_url(QString::from(path)));
+        let custom_decoder = String::new(); // eg. BRAW:format=rgba64le
+        mdk.setUrl(crate::util::path_to_url(QString::from(path)), QString::from(custom_decoder));
         Self {
             mdk,
             on_frame_callback: None

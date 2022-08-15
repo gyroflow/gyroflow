@@ -26,7 +26,7 @@ MenuItem {
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
-        type: "gyro";
+        type: "video";
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url: url) {

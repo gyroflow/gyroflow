@@ -226,6 +226,8 @@ pub struct Controller {
     install_external_sdk: qt_method!(fn(&self, path: QString)),
     external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
 
+    image_sequence_start: qt_property!(i32),
+
     preview_resolution: i32,
 
     cancel_flag: Arc<AtomicBool>,
@@ -250,9 +252,11 @@ impl Controller {
         self.update_offset_model();
         *self.stabilizer.video_path.write() = util::url_to_path(url.clone());
 
+        let custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
+
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            vid.setUrl(url);
+            vid.setUrl(url, custom_decoder);
         }
     }
 
@@ -343,6 +347,7 @@ impl Controller {
             let ranges = sync.get_ranges();
             let cancel_flag = self.cancel_flag.clone();
 
+            let image_sequence_start = self.image_sequence_start;
             let video_path = self.stabilizer.video_path.read().clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
@@ -356,6 +361,9 @@ impl Controller {
                     let fps = rendering::fps_to_rational(override_fps);
                     let mut dict = ffmpeg_next::Dictionary::new();
                     dict.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                    if image_sequence_start > 0 {
+                        dict.set("start_number", &format!("{}", image_sequence_start));
+                    }
                     decoder_options = Some(dict);
                 }
 

@@ -64,7 +64,7 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "braw" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "dng", "braw" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -209,7 +209,8 @@ Rectangle {
                     ];
 
                     function render() {
-                        if (window.vidInfo.filename.toLowerCase().endsWith('.braw')) {
+                        const fname = window.vidInfo.filename.toLowerCase();
+                        if (fname.endsWith('.braw') || fname.endsWith('.dng')) {
                             messageBox(Modal.Error, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use the [OpenFX plugin].").replace(/\[(.*?)\]/, '<a href="https://github.com/gyroflow/gyroflow-ofx/releases"><font color="' + styleTextColor + '">$1</font></a>'), [
                                 { text: qsTr("Ok"), accent: true }
                             ]);

@@ -198,10 +198,13 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
-    function detectImageSequence(url: url): bool {
+    function detectImageSequence(url: url) {
         const urlStr = controller.url_to_path(url);
-        if (/\d+\.(png|exr)$/i.test(urlStr)) {
-            let firstNum = urlStr.match(/(\d+)\.(png|exr)$/i);
+        if (!urlStr.includes("%0")) {
+            controller.image_sequence_start = 0;
+        }
+        if (/\d+\.(png|exr|dng)$/i.test(urlStr)) {
+            let firstNum = urlStr.match(/(\d+)\.(png|exr|dng)$/i);
             if (firstNum[1]) {
                 const ext = firstNum[2];
                 firstNum = firstNum[1];
@@ -212,6 +215,7 @@ Item {
                         return false;
                     }
                 }
+                controller.image_sequence_start = parseInt(firstNum, 10);
                 return controller.path_to_url(urlStr.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`));
             }
         }

@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/calibinit.cpp#L2078
-pub fn draw_chessboard_corners(org_width: usize, org_height: usize, w: u32, h: u32, s: usize, pixels: &mut [u8], pattern_size: (usize, usize), corners: &[(f32, f32)], found: bool) {
+pub fn draw_chessboard_corners(org_width: usize, org_height: usize, w: u32, h: u32, s: usize, pixels: &mut [u8], pattern_size: (usize, usize), corners: &[(f32, f32)], found: bool, inverted: bool) {
     const LINE_COLORS: &[(u8, u8, u8)] = &[
         (0, 0, 255),
         (0, 128, 255),
@@ -18,7 +18,10 @@ pub fn draw_chessboard_corners(org_width: usize, org_height: usize, w: u32, h: u
     if !found {
         let color = (0, 0, 255);
         for x in corners {
-            let pt = ((x.0 * ratio_w).round(), (x.1 * ratio_h).round());
+            let mut pt = ((x.0 * ratio_w).round(), (x.1 * ratio_h).round());
+            if inverted {
+                pt.1 = h as f32 - pt.1;
+            }
             line(s, pixels, (pt.0 - r, pt.1 - r), (pt.0 + r, pt.1 + r), color);
             line(s, pixels, (pt.0 - r, pt.1 + r), (pt.0 + r, pt.1 - r), color);
             circle(s, pixels, pt, r + 1.0, color);
@@ -30,7 +33,10 @@ pub fn draw_chessboard_corners(org_width: usize, org_height: usize, w: u32, h: u
             let color = LINE_COLORS[y % LINE_COLORS.len()];
             for _x in 0..pattern_size.0 {
                 let pt = corners[i];
-                let pt = ((pt.0 * ratio_w).round(), (pt.1 * ratio_h).round());
+                let mut pt = ((pt.0 * ratio_w).round(), (pt.1 * ratio_h).round());
+                if inverted {
+                    pt.1 = h as f32 - pt.1;
+                }
                 if i != 0 {
                     line(s, pixels, prev_pt, pt, color);
                 }

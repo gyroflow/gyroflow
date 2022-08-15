@@ -408,9 +408,17 @@ impl<T: PixelType> StabilizationManager<T> {
         ret
     }
 
-    pub unsafe fn fill_undistortion_data(&self, timestamp_us: i64, mat_ptr: *mut f32, mat_size: usize, params_ptr: *mut u8, params_size: usize) -> bool {
-        if self.params.read().stab_enabled {
+    pub unsafe fn fill_undistortion_data(&self, mut timestamp_us: i64, mat_ptr: *mut f32, mat_size: usize, params_ptr: *mut u8, params_size: usize) -> bool {
+        let stab_enabled = {
+            let params = self.params.read();
+            if let Some(fps_scale) = params.fps_scale {
+                timestamp_us = (timestamp_us as f64 / fps_scale).round() as i64;
+            }
+            params.stab_enabled
+        };
+        if stab_enabled {
             let mut undist = self.stabilization.write();
+
             if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
 
                 let params_count = itm.matrices.len() * 9;
@@ -474,11 +482,12 @@ impl<T: PixelType> StabilizationManager<T> {
                 #[cfg(feature = "opencv")]
                 if is_calibrator {
                     let lock = self.lens_calibrator.read();
+                    let is_inverted = self.params.read().framebuffer_inverted;
                     if let Some(ref cal) = *lock {
                         let points = cal.all_matches.read();
                         if let Some(entry) = points.get(&(frame as i32)) {
                             let (w, h, s) = size;
-                            calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true);
+                            calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true, is_inverted);
                         }
                     }
                 }
