@@ -84,8 +84,11 @@ MenuItem {
             // Twice to trigger change signal
             integrator.hasQuaternions = !contains_quats;
             integrator.hasQuaternions = contains_quats;
-            if (integrator.hasQuaternions && !is_main_video) {
-                Qt.callLater(() => integrator.currentIndex = 1);
+            if (contains_quats && !is_main_video) {
+                Qt.callLater(() => {
+                    integrator.currentIndex = 1;
+                    Qt.callLater(integrator.setMethod);
+                });
             }
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
