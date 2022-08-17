@@ -371,7 +371,8 @@ Rectangle {
         target: controller;
         function onError(text: string, arg: string, callback: string) {
             text = getReadableError(qsTr(text).arg(arg));
-            messageBox(Modal.Error, text, [ { text: qsTr("Ok"), clicked: window[callback] } ]);
+            if (text)
+                messageBox(Modal.Error, text, [ { text: qsTr("Ok"), clicked: window[callback] } ]);
         }
         function onMessage(text: string, arg: string, callback: string) {
             messageBox(Modal.Info, qsTr(text).arg(arg), [ { text: qsTr("Ok"), clicked: window[callback] } ]);
@@ -448,6 +449,32 @@ Rectangle {
 
     function getReadableError(text: string): string {
         if (text.includes("ffmpeg")) {
+            if (text.includes("Encoder not found") && text.includes("libx26") && controller.check_external_sdk("ffmpeg_gpl")) {
+                if (videoArea.externalSdkModal === null) {
+                    const licenseUrl = "https://code.videolan.org/videolan/x264/-/raw/master/COPYING";
+                    // const licenseUrl = "https://bitbucket.org/multicoreware/x265_git/raw/master/COPYING";
+                    const dlg = messageBox(Modal.Info, qsTr("This encoder requires an external library licensed as GPL.\nDo you agree with the [GPL license] and want to download the additional codec?").replace(/\[(.*?)\]/, '<a href="' + licenseUrl + '"><font color="' + styleTextColor + '">$1</font></a>'), [
+                        { text: qsTr("Yes, I agree"), accent: true, clicked: function() {
+                            dlg.btnsRow.children[0].enabled = false;
+                            controller.install_external_sdk("ffmpeg_gpl");
+                            return false;
+                        } },
+                        { text: qsTr("Cancel"), clicked: function() {
+                            videoArea.externalSdkModal = null;
+                            videoArea.externalSdkModalLoader = null;
+                        } },
+                    ]);
+                    const l = Qt.createComponent("components/LoaderOverlay.qml").createObject(dlg.mainColumn, { cancelable: false, visible: false });
+                    l.anchors.fill = undefined;
+                    l.height = 70 * dpiScale;
+                    l.pb.anchors.verticalCenterOffset = -l.height / 2 + 10 * dpiScale;
+                    l.width = Qt.binding(() => dlg.mainColumn.width);
+                    videoArea.externalSdkModal = dlg;
+                    videoArea.externalSdkModalLoader = l;
+                }
+                return "";
+            }
+
             if (text.includes("Permission denied")) return qsTr("Permission denied. Unable to create or write file.\nChange the output path or run the program as administrator.\nMake sure you have write permissions to the target directory and make sure target file is not used by any other application.");
             if (text.includes("required nvenc API version")) return qsTr("NVIDIA GPU driver is too old, GPU encoding will not work for this format.\nUpdate your NVIDIA drivers to the newest version: %1.\nIf the issue is still present after driver update, your GPU probably doesn't support GPU encoding with this format. Disable GPU encoding in this case.").arg("<a href=\"https://www.nvidia.com/download/index.aspx\">https://www.nvidia.com/download/index.aspx</a>");
 
@@ -467,7 +494,7 @@ Rectangle {
             return qsTr("GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.\nIf you have a modern device, latest GPU drivers and you think this shouldn't happen, report this on GitHub including gyroflow.log file.");
         }
         if (text.includes("hevc") && text.includes("-12912")) {
-            return qsTr("Your GPU doesn't support HEVC/x265 encoding, try to use x264 or disable GPU encoding in Export settings.");
+            return qsTr("Your GPU doesn't support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.");
         }
         if (text.includes("codec not currently supported in container")) {
             return qsTr("Make sure your output extension supports the selected codec. \".mov\" should work in most cases.") + "\n\n" + text;

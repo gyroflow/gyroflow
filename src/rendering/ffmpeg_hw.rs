@@ -181,7 +181,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                 }
             }
         } else {
-            println!("codec not found {}", x.0);
+            super::append_log(&format!("Codec not found: {:?}\n", x.0));
         }
     }
     let x = encoders.last().unwrap();

@@ -91,6 +91,8 @@ fn entry() {
     }
     MDKVideoItem::setGlobalOption("plugins", "mdk-braw");
 
+    let _ = external_sdk::cleanup();
+
     let ctl = RefCell::new(controller::Controller::new());
     let ctlpinned = unsafe { QObjectPinned::new(&ctl) };
 

@@ -23,8 +23,8 @@ MenuItem {
 
     // If changing, make sure it's in sync with render_queue.rs:get_output_path
     property var exportFormats: [
-        { "name": "x264",          "max_size": [4096, 2160], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
-        { "name": "x265",          "max_size": [8192, 4320], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+        { "name": "H.264/AVC",     "max_size": [4096, 2160], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+        { "name": "H.265/HEVC",    "max_size": [8192, 4320], "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
         { "name": "ProRes",        "max_size": [8192, 4320], "extension": ".mov",      "gpu": isOsx, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
         { "name": "DNxHD",         "max_size": [8192, 4320], "extension": ".mov",      "gpu": false, "audio": true,  "variants": [/*"DNxHD", */"DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"] },
         { "name": "EXR Sequence",  "max_size": false,        "extension": "_%05d.exr", "gpu": false, "audio": false, "variants": [] },
@@ -52,7 +52,6 @@ MenuItem {
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
     property string outCodecOptions: "";
-    property real overrideFps: 0;
     property real originalWidth: outWidth;
     property real originalHeight: outHeight;
 
@@ -71,7 +70,6 @@ MenuItem {
             use_gpu:        root.outGpu,
             audio:          root.outAudio,
             pixel_format:   "",
-            override_fps:   root.overrideFps,
 
             // Advanced
             encoder_options:       encoderOptions.text,
@@ -142,7 +140,6 @@ MenuItem {
             if (output.bitrate) root.outBitrate = output.bitrate;
             if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
             if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
-            if (output.hasOwnProperty("override_fps")) root.overrideFps = +output.override_fps || 0;
 
             // Advanced
             if (output.hasOwnProperty("encoder_options"))       encoderOptions.text         = output.encoder_options;
@@ -163,7 +160,7 @@ MenuItem {
         function updateGpuStatus() {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
-            if ((format.name == "x264" && window.vidInfo.pixelFormat.includes("10 bit"))) {
+            if ((format.name == "H.264/AVC" && window.vidInfo.pixelFormat.includes("10 bit"))) {
                 gpu.enabled2 = false;
             }
             const gpuChecked = +settings.value("exportGpu-" + exportFormats[currentIndex].name, -1);
@@ -317,7 +314,7 @@ MenuItem {
     Label {
         position: Label.LeftPosition;
         text: qsTr("Bitrate");
-        visible: outCodec === "x264" || outCodec === "x265";
+        visible: outCodec === "H.264/AVC" || outCodec === "H.265/HEVC";
 
         NumberField {
             id: bitrate;

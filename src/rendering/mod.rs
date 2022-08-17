@@ -60,7 +60,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
 
     let mut encoders = if use_gpu {
         match codec {
-            "x264" => vec![
+            "H.264/AVC" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 ("h264_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -77,7 +77,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_v4l2m2m",      true),
                 ("libx264",           false),
             ],
-            "x265" => vec![
+            "H.265/HEVC" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 ("hevc_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -104,11 +104,11 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
         }
     } else {
         match codec {
-            "x264"   => vec![("libx264", false)],
-            "x265"   => vec![("libx265", false)],
-            "ProRes" => vec![("prores_ks", false)],
-            "DNxHD"  => vec![("dnxhd", false)],
-            _        => vec![]
+            "H.264/AVC"  => vec![("libx264", false)],
+            "H.265/HEVC" => vec![("libx265", false)],
+            "ProRes"     => vec![("prores_ks", false)],
+            "DNxHD"      => vec![("dnxhd", false)],
+            _            => vec![]
         }
     };
 
@@ -126,7 +126,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress: F, video_path: &str, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
+pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone,
           F2: Fn(String) + Send + Sync + Clone
 {
@@ -162,13 +162,16 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     drop(params);
 
     let mut decoder_options = ffmpeg_next::Dictionary::new();
-    if render_options.override_fps > 0.0 {
-        let fps = fps_to_rational(render_options.override_fps);
+    if input_file.image_sequence_fps > 0.0 {
+        let fps = fps_to_rational(input_file.image_sequence_fps);
         decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+    if input_file.image_sequence_start > 0 {
+        decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
     }
 
     let gpu_decoding = *GPU_DECODING.read();
-    let mut proc = FfmpegProcessor::from_file(video_path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
+    let mut proc = FfmpegProcessor::from_file(&input_file.path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu));
@@ -244,7 +247,6 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         _ => { }
     }
 
-    //proc.video.codec_options.set("preset", "medium");
     proc.video.encoder_params.options.set("allow_sw", "1");
     proc.video.encoder_params.options.set("realtime", "0");
 
@@ -464,6 +466,11 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     proc.render(&render_options.output_path, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
+    let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
+    if re.is_match(&render_options.output_path) {
+        ::log::debug!("Removing {}", render_options.output_path);
+        let _ = std::fs::remove_file(&render_options.output_path);
+    }
     progress((1.0, render_frame_count, render_frame_count, true));
 
     Ok(())
