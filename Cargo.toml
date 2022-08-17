@@ -19,19 +19,26 @@ cstr = "0.2.10"
 cpp = "0.5.7"
 serde = "1.0.143"
 serde_json = "1.0.83"
-bytemuck = "1.11.0"
+bytemuck = "1.12.1"
 nalgebra = "0.30"
 semver = "1.0.13"
 fastrand = "1.8.0"
 itertools = "0.10.3"
 regex = "1.6.0"
 
+pollster = "0.2.5"
+futures-intrusive = "0.4.0"
+flate2 = "1.0.24"
+walkdir = "2.3.2"
+
 breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7023694" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "40b737a" }
 #qml-video-rs = { path = "../qml-video-rs" }
+
+system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "96f3637" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
