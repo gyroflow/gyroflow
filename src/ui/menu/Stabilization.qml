@@ -478,7 +478,7 @@ MenuItem {
             SliderWithField {
                 id: shutter;
                 defaultValue: 0;
-                to: 1000 / Math.max(1, window.videoArea.vid.frameRate);
+                to: 1000 / Math.max(1, window.videoArea.timeline.scaledFps);
                 width: parent.width;
                 unit: qsTr("ms");
                 precision: 2;

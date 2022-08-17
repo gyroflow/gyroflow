@@ -155,7 +155,7 @@ impl UITools {
                 use windows::Win32::Foundation::*;
                 use windows::Win32::Graphics::Dwm::*;
                 let is_dark = BOOL::from(self.is_dark);
-                DwmSetWindowAttribute(HWND(hwnd), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _).expect("Failed to set dark theme!");
+                let _ = DwmSetWindowAttribute(HWND(hwnd), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _);
             }
         }
     }
