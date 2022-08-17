@@ -35,9 +35,6 @@ use stabilization::Stabilization;
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
-pub use pollster;
-pub use futures_intrusive;
-pub use flate2;
 
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
@@ -47,6 +44,13 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 lazy_static::lazy_static! {
     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct InputFile {
+    pub path: String,
+    pub image_sequence_fps: f64,
+    pub image_sequence_start: i32
 }
 
 pub struct StabilizationManager<T: PixelType> {
@@ -68,7 +72,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
 
-    pub video_path: Arc<RwLock<String>>,
+    pub input_file: Arc<RwLock<InputFile>>,
 
     pub keyframes: Arc<RwLock<KeyframeManager>>,
 
@@ -96,7 +100,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
 
-            video_path: Arc::new(RwLock::new(String::new())),
+            input_file: Arc::new(RwLock::new(InputFile::default())),
 
             #[cfg(feature = "opencv")]
             lens_calibrator: Arc::new(RwLock::new(None)),
@@ -694,7 +698,7 @@ impl<T: PixelType> StabilizationManager<T> {
             lens:   Arc::new(RwLock::new(self.lens.read().clone())),
             keyframes:  Arc::new(RwLock::new(self.keyframes.read().clone())),
             smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
-            video_path: Arc::new(RwLock::new(self.video_path.read().clone())),
+            input_file: Arc::new(RwLock::new(self.input_file.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
             ..Default::default()
         }
@@ -711,7 +715,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.params.write().clear();
         self.invalidate_ongoing_computations();
         self.invalidate_smoothing();
-        self.video_path.write().clear();
+        *self.input_file.write() = InputFile::default();
         *self.camera_id.write() = None;
 
         *self.gyro.write() = GyroSource::new();
@@ -787,16 +791,18 @@ impl<T: PixelType> StabilizationManager<T> {
         let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
         let sync_options: serde_json::Value = serde_json::from_str(&sync_options).unwrap_or_default();
 
-        let video_path = self.video_path.read().clone();
+        let input_file = self.input_file.read().clone();
 
         let mut obj = serde_json::json!({
             "title": "Gyroflow data file",
             "version": 2,
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
-            "videofile": video_path,
+            "videofile": input_file.path,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
             "date": time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default(),
 
+            "image_sequence_start": input_file.image_sequence_start,
+            "image_sequence_fps": input_file.image_sequence_fps,
             "background_color": params.background.as_slice(),
             "background_mode":  params.background_mode as i32,
             "background_margin":          params.background_margin,
@@ -835,8 +841,8 @@ impl<T: PixelType> StabilizationManager<T> {
                 "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
-                "quaternions":        if !thin && video_path != gyro.file_path { util::compress_to_base91(&gyro.org_quaternions) } else { None },
-                "gravity_vectors":    if !thin && video_path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
+                "quaternions":        if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.org_quaternions) } else { None },
+                "gravity_vectors":    if !thin && input_file.path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
                 // "smoothed_quaternions": smooth_quats
             },
             "output": render_options,
@@ -1082,8 +1088,34 @@ impl<T: PixelType> StabilizationManager<T> {
                 self.keyframes.write().deserialize(keyframes);
             }
 
-            if !org_video_path.is_empty() {
-                *self.video_path.write() = util::path_to_str(&video_path);
+            {
+                let mut params = self.params.write();
+                if let Some(v) = obj.get("background_color").and_then(|x| x.as_array()) {
+                    if v.len() == 4 {
+                        params.background = nalgebra::Vector4::new(
+                            v[0].as_f64().unwrap_or_default() as f32,
+                            v[1].as_f64().unwrap_or_default() as f32,
+                            v[2].as_f64().unwrap_or_default() as f32,
+                            v[3].as_f64().unwrap_or_default() as f32
+                        );
+                    }
+                }
+                if let Some(v) = obj.get("background_mode").and_then(|x| x.as_i64()) { params.background_mode = stabilization_params::BackgroundMode::from(v as i32); }
+                if let Some(v) = obj.get("background_margin").and_then(|x| x.as_f64()) { params.background_margin = v; }
+                if let Some(v) = obj.get("background_margin_feather").and_then(|x| x.as_f64()) { params.background_margin_feather = v; }
+            }
+
+            {
+                let mut input_file = self.input_file.write();
+                if let Some(seq_start) = obj.get("image_sequence_start").and_then(|x| x.as_i64()) {
+                    input_file.image_sequence_start = seq_start as i32;
+                }
+                if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
+                    input_file.image_sequence_fps = seq_fps;
+                }
+                if !org_video_path.is_empty() {
+                    input_file.path = util::path_to_str(&video_path);
+                }
             }
 
             if blocking {

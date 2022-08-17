@@ -99,7 +99,7 @@ MenuItem {
                 ranges = sync.customSyncTimestamps.filter(v => v <= duration).map(v => v / duration);
             }
 
-            controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
+            controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize");
         }
         onClicked: {
             if (!controller.lens_loaded) {

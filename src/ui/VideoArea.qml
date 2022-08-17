@@ -47,6 +47,9 @@ Item {
                 // If video not loaded, try to load the associated file
                 root.pendingGyroflowData = obj;
                 loadFile(controller.path_to_url(videofile));
+                if (controller.image_sequence_fps > 0) {
+                    vid.setFrameRate(controller.image_sequence_fps);
+                }
                 return;
             }
             controller.import_gyroflow_file(obj);
@@ -88,6 +91,14 @@ Item {
                 window.advanced.loadGyroflow(obj);
                 window.sync.loadGyroflow(obj);
                 Qt.callLater(window.exportSettings.loadGyroflow, obj);
+
+                if (obj.hasOwnProperty("image_sequence_start") && +obj.image_sequence_start > 0) {
+                    controller.image_sequence_start = +obj.image_sequence_start;
+                }
+                if (obj.hasOwnProperty("image_sequence_fps") && +obj.image_sequence_fps > 0.0) {
+                    vid.setFrameRate(+obj.image_sequence_fps);
+                    controller.image_sequence_fps = +obj.image_sequence_fps;
+                }
             }
         }
         function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
@@ -102,7 +113,11 @@ Item {
                     externalSdkModalLoader = null;
                     window.isDialogOpened = false;
                     if (!error_string) {
-                        loadFile(path);
+                        if (path == "ffmpeg_gpl") {
+                            messageBox(Modal.Success, qsTr("Component was installed successfully.\nYou need to restart Gyroflow for changes to take effect.\nYour render queue and current file is saved automatically."), [ { text: qsTr("Ok") } ]);
+                        } else {
+                            loadFile(path);
+                        }
                     } else {
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
@@ -117,8 +132,6 @@ Item {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
-
-        window.exportSettings.overrideFps = 0;
 
         if (url.toString().endsWith(".gyroflow")) {
             return loadGyroflowData(url);
@@ -152,8 +165,8 @@ Item {
             const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
                 { text: qsTr("Ok"), accent: true, clicked: function() {
                     const fps = dlg.mainColumn.children[1].value;
+                    controller.image_sequence_fps = fps;
                     loadFile(newUrl);
-                    window.exportSettings.overrideFps = fps;
                     vid.setFrameRate(fps);
                 } },
                 { text: qsTr("Cancel") },
@@ -202,6 +215,7 @@ Item {
         const urlStr = controller.url_to_path(url);
         if (!urlStr.includes("%0")) {
             controller.image_sequence_start = 0;
+            controller.image_sequence_fps = 0;
         }
         if (/\d+\.(png|exr|dng)$/i.test(urlStr)) {
             let firstNum = urlStr.match(/(\d+)\.(png|exr|dng)$/i);

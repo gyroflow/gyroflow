@@ -55,7 +55,7 @@ pub struct Controller {
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
     set_of_method: qt_method!(fn(&self, v: u32)),
-    start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String, override_fps: f64)),
+    start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
@@ -227,6 +227,7 @@ pub struct Controller {
     external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
 
     image_sequence_start: qt_property!(i32),
+    image_sequence_fps: qt_property!(f64),
 
     preview_resolution: i32,
 
@@ -250,9 +251,16 @@ impl Controller {
         self.chart_data_changed();
         self.keyframes_changed();
         self.update_offset_model();
-        *self.stabilizer.video_path.write() = util::url_to_path(url.clone());
+        *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
+            path: util::url_to_path(url.clone()),
+            image_sequence_start: self.image_sequence_start,
+            image_sequence_fps: self.image_sequence_fps
+        };
 
-        let custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
+        let mut custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
+        if self.image_sequence_start > 0 {
+            custom_decoder = QString::from(format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start));
+        }
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -260,7 +268,7 @@ impl Controller {
         }
     }
 
-    fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String, override_fps: f64) {
+    fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String) {
         rendering::clear_log();
 
         let sync_params = serde_json::from_str(&sync_params) as serde_json::Result<synchronization::SyncParams>;
@@ -347,8 +355,7 @@ impl Controller {
             let ranges = sync.get_ranges();
             let cancel_flag = self.cancel_flag.clone();
 
-            let image_sequence_start = self.image_sequence_start;
-            let video_path = self.stabilizer.video_path.read().clone();
+            let input_file = self.stabilizer.input_file.read().clone();
             let (sw, sh) = (size.0 as u32, size.1 as u32);
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
@@ -356,20 +363,18 @@ impl Controller {
                 let mut frame_no = 0;
                 let mut abs_frame_no = 0;
 
-                let mut decoder_options = None;
-                if override_fps > 0.0 {
-                    let fps = rendering::fps_to_rational(override_fps);
-                    let mut dict = ffmpeg_next::Dictionary::new();
-                    dict.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
-                    if image_sequence_start > 0 {
-                        dict.set("start_number", &format!("{}", image_sequence_start));
-                    }
-                    decoder_options = Some(dict);
+                let mut decoder_options = ffmpeg_next::Dictionary::new();
+                if input_file.image_sequence_fps > 0.0 {
+                    let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
+                    decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                }
+                if input_file.image_sequence_start > 0 {
+                    decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
                 }
 
                 let sync = std::rc::Rc::new(sync);
 
-                match VideoProcessor::from_file(&video_path, gpu_decoding, 0, decoder_options) {
+                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let err2 = err.clone();
                         let sync2 = sync.clone();
@@ -613,7 +618,7 @@ impl Controller {
 
             // fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
 
-            if !self.stabilizer.video_path.read().is_empty() {
+            if !self.stabilizer.input_file.read().path.is_empty() {
                 let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
                 let ratio = vid.videoHeight as f64 / h as f64;
                 let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
@@ -776,7 +781,7 @@ impl Controller {
 
     fn export_gyroflow_file(&self, thin: bool, extended: bool, output_options: QJsonObject, sync_options: QJsonObject, override_location: QString, overwrite: bool) {
         let gf_path = if override_location.is_empty() {
-            let video_path = self.stabilizer.video_path.read().clone();
+            let video_path = self.stabilizer.input_file.read().path.clone();
             let video_path = std::path::Path::new(&video_path);
             video_path.with_extension("gyroflow").to_string_lossy().into()
         } else {
@@ -811,6 +816,13 @@ impl Controller {
 
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
                 let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
+
+                if let Some(seq_start) = obj.get("image_sequence_start").and_then(|x| x.as_i64()) {
+                    self.image_sequence_start = seq_start as i32;
+                }
+                if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
+                    self.image_sequence_fps = seq_fps;
+                }
 
                 let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path));
                 return QString::from(core::util::path_to_str(&video_path));
@@ -1061,10 +1073,10 @@ impl Controller {
             let total_read = Arc::new(AtomicUsize::new(0));
             let processed = Arc::new(AtomicUsize::new(0));
 
-            let video_path = stab.video_path.read().clone();
+            let input_file = stab.input_file.read().clone();
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match VideoProcessor::from_file(&video_path, gpu_decoding, 0, None) {
+                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, None) {
                     Ok(mut proc) => {
                         let progress = progress.clone();
                         let err2 = err.clone();

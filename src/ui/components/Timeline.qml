@@ -18,6 +18,7 @@ Item {
 
     property real durationMs: 0;
     property real orgDurationMs: 0;
+    property real scaledFps: 0;
 
     property real visibleAreaLeft: 0.0;
     property real visibleAreaRight: 1.0;
@@ -89,6 +90,7 @@ Item {
         keyframes.setDurationMs(controller.get_org_duration_ms());
         root.durationMs    = controller.get_scaled_duration_ms();
         root.orgDurationMs = controller.get_org_duration_ms();
+        root.scaledFps     = controller.get_scaled_fps();
 
         Qt.callLater(controller.update_chart, chart);
         Qt.callLater(controller.update_keyframes_view, keyframes);
@@ -110,7 +112,7 @@ Item {
     }
 
     function addAutoSyncPoint(pos: real) {
-        controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize", window.exportSettings.overrideFps);
+        controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize");
     }
 
     function addManualSyncPoint(pos: real) {
@@ -468,7 +470,7 @@ Item {
                 text: qsTr("Guess IMU orientation here");
                 onTriggered: {
                     const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation", window.exportSettings.overrideFps);
+                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation");
                 }
             }
             Action {
@@ -483,7 +485,7 @@ Item {
                                       "Are you sure you want to continue?");
                     messageBox(Modal.Warning, text, [
                         { text: qsTr("Yes"), clicked: function() {
-                            controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "estimate_rolling_shutter", window.exportSettings.overrideFps);
+                            controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "estimate_rolling_shutter");
                         }},
                         { text: qsTr("No"), accent: true },
                     ]);
