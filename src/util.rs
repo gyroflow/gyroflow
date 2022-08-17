@@ -283,6 +283,14 @@ impl std::io::Write for AndroidLog {
     fn flush(&mut self) -> std::io::Result<()> { android_log(self.buf.clone()); self.buf.clear(); Ok(()) }
 }
 
+pub fn tr(context: &str, text: &str) -> String {
+    let context = QString::from(context);
+    let text = QString::from(text);
+    cpp!(unsafe [context as "QString", text as "QString"] -> QString as "QString" {
+        return QCoreApplication::translate(qUtf8Printable(context), qUtf8Printable(text));
+    }).to_string()
+}
+
 pub fn get_version() -> String {
     let ver = env!("CARGO_PKG_VERSION");
     if option_env!("GITHUB_REF").map_or(false, |x| x.contains("tags")) {

@@ -452,15 +452,15 @@ impl RenderQueue {
     }
 
     fn system_shutdown(reboot: bool) {
-        // TODO: translation?
-        let msg = format!("Gyroflow will {} the computer in 60 seconds because all tasks are completed.", if reboot { "reboot" } else { "shut down" });
-
         #[cfg(target_os = "windows")]
-        let _ = if reboot {
-            system_shutdown::reboot_with_message(&msg, 60, false)
-        } else {
-            system_shutdown::shutdown_with_message(&msg, 60, false)
-        };
+        {
+            let msg = util::tr("App", &format!("Gyroflow will {} the computer in 60 seconds because all tasks have been completed.", if reboot { "reboot" } else { "shut down" }));
+            let _ = if reboot {
+                system_shutdown::reboot_with_message(&msg, 60, false)
+            } else {
+                system_shutdown::shutdown_with_message(&msg, 60, false)
+            };
+        }
 
         #[cfg(not(target_os = "windows"))]
         let _ = if reboot { system_shutdown::reboot() } else { system_shutdown::shutdown() };
@@ -469,7 +469,7 @@ impl RenderQueue {
     pub fn when_done_changed(&mut self, v: i32) {
         self.when_done = v;
         #[cfg(target_os = "macos")]
-        if v > 0 {
+        if v > 0 && v != 6 {
             let _ = system_shutdown::request_permission_dialog();
         }
     }
