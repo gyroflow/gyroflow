@@ -118,7 +118,8 @@ Item {
             function onError(job_id: real, text: string, arg: string, callback: string) {
                 if (job_id == render_queue.main_job_id || loader.pendingJobs[job_id]) {
                     text = getReadableError(qsTr(text).arg(arg));
-                    messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+                    if (text)
+                        messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
                 }
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
@@ -171,6 +172,10 @@ Item {
             function onEncoder_initialized(job_id: real, encoder_name: string) {
 
             }
+            function onRequest_close() {
+                main_window.closeConfirmed = true;
+                Qt.quit();
+            }
         }
 
         Button {
@@ -207,6 +212,7 @@ Item {
         anchors.top: progressRow.bottom;
         anchors.bottom: parent.bottom;
         anchors.margins: 15 * dpiScale;
+        anchors.bottomMargin: 30 * dpiScale;
         width: parent.width - 2*x;
         clip: true;
         model: render_queue.queue;
@@ -339,7 +345,6 @@ Item {
                             id: messageAreaText;
                             textFormat: Text.RichText;
                             leftPadding: 0;
-                            text: window.getReadableError(error_string).replace(/\n/g, "<br>");
                         }
                         Flow {
                             id: messageBtns;
@@ -348,6 +353,9 @@ Item {
                             width: parent.width;
                             property string errorString: error_string;
                             onErrorStringChanged: {
+                                const text = window.getReadableError(errorString).replace(/\n/g, "<br>");
+                                messageAreaText.text = text? text : qsTr("Missing required components.");
+
                                 if (errorString.startsWith("convert_format:")) {
                                     const params = errorString.split(":")[1].split(";");
                                     const supported = params[1].split(",");
@@ -451,7 +459,7 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter;
                         horizontalAlignment: Text.AlignHCenter;
                         textFormat: Text.RichText;
-                        text: isProcessing? `<b>${(processing_progress*100).toFixed(2)}%</b>` : 
+                        text: isProcessing? `<b>${(processing_progress*100).toFixed(2)}%</b>` :
                                             `<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText})</small>`;
                     }
                     QQC.ProgressBar {
@@ -549,6 +557,37 @@ Item {
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();
+        }
+    }
+
+    LinkButton {
+        anchors.left: parent.left;
+        anchors.bottom: parent.bottom;
+        anchors.margins: 5 * dpiScale;
+        leftPadding: 5 * dpiScale; rightPadding: 5 * dpiScale;
+        property int currentOption: 0;
+        property var options: [
+            qsTr("Do nothing"),
+            qsTr("Shut down the computer"),
+            qsTr("Restart the computer"),
+            qsTr("Sleep"),
+            qsTr("Hibernate"),
+            qsTr("Logout"),
+            qsTr("Close Gyroflow")
+        ];
+        text: qsTr("When rendering is finished: %1").arg(options[currentOption]).trim();
+        onClicked: pp.open();
+        onCurrentOptionChanged: render_queue.when_done = currentOption;
+        Popup {
+            id: pp;
+            model: parent.options;
+            currentIndex: parent.currentOption;
+            width: pp.maxItemWidth + 10 * dpiScale;
+            x: parent.width - width;
+            y: itemHeight;
+            itemHeight: 25 * dpiScale;
+            font.pixelSize: 11 * dpiScale;
+            onClicked: i => parent.currentOption = i;
         }
     }
 

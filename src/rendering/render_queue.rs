@@ -38,7 +38,6 @@ enum JobStatus {
 }
 struct Job {
     queue_index: usize,
-    input_file: String,
     render_options: RenderOptions,
     sync_options: String,
     cancel_flag: Arc<AtomicBool>,
@@ -59,7 +58,6 @@ pub struct RenderOptions {
     pub use_gpu: bool,
     pub audio: bool,
     pub pixel_format: String,
-    pub override_fps: f64,
 
     // Advanced
     pub encoder_options: String,
@@ -70,7 +68,7 @@ pub struct RenderOptions {
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
         let codec_info = match self.codec.as_ref() {
-            "x264" | "x265" => format!("{} {:.0} Mbps", self.codec, self.bitrate),
+            "H.264/AVC" | "H.265/HEVC" => format!("{} {:.0} Mbps", self.codec, self.bitrate),
             "DNxHD" => self.codec_options.clone(),
             "ProRes" => format!("{} {}", self.codec, self.codec_options),
             _ => self.codec.clone()
@@ -106,7 +104,6 @@ impl RenderOptions {
             if let Some(v) = obj.get("use_gpu")        .and_then(|x| x.as_bool()) { self.use_gpu = v; }
             if let Some(v) = obj.get("audio")          .and_then(|x| x.as_bool()) { self.audio = v; }
             if let Some(v) = obj.get("pixel_format")   .and_then(|x| x.as_str())  { self.pixel_format = v.to_string(); }
-            if let Some(v)  = obj.get("override_fps")   .and_then(|x| x.as_f64())  { self.override_fps = v; }
 
             // Advanced
             if let Some(v) = obj.get("encoder_options")      .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
@@ -157,7 +154,7 @@ pub struct RenderQueue {
 
     render_queue_json: qt_method!(fn(&self) -> QString),
     restore_render_queue: qt_method!(fn(&mut self, json: String, controller: QJSValue, options_json: String, sync_options_json: String)),
-    
+
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
 
@@ -186,6 +183,9 @@ pub struct RenderQueue {
     pause_flag: Arc<AtomicBool>,
 
     default_suffix: qt_property!(QString),
+
+    when_done: qt_property!(i32; WRITE when_done_changed),
+    request_close: qt_signal!(),
 
     paused_timestamp: Option<u64>
 }
@@ -287,7 +287,7 @@ impl RenderQueue {
 
         let params = stab.params.read();
         let trim_ratio = render_options.trim_end - render_options.trim_start;
-        let video_path = stab.video_path.read().clone();
+        let video_path = stab.input_file.read().path.clone();
 
         let editing = self.jobs.contains_key(&job_id);
 
@@ -323,7 +323,6 @@ impl RenderQueue {
 
         self.jobs.insert(job_id, Job {
             queue_index: 0,
-            input_file: video_path,
             render_options,
             sync_options: sync_options_json,
             cancel_flag: Default::default(),
@@ -411,6 +410,8 @@ impl RenderQueue {
             if let Some(job_id) = job_id {
                 self.render_job(job_id, false);
             } else {
+                self.post_render_action();
+
                 self.start_timestamp = 0;
                 self.progress_changed();
 
@@ -434,6 +435,42 @@ impl RenderQueue {
         self.status = QString::from("stopped");
         self.status_changed();
     }
+
+    fn post_render_action(&self) {
+        // If it was running for at least 1 minute
+        if Self::current_timestamp() - self.start_timestamp > 60000 && self.when_done > 0 {
+            match self.when_done {
+                1 => { Self::system_shutdown(false); }
+                2 => { Self::system_shutdown(true); }
+                3 => { let _ = system_shutdown::sleep(); }
+                4 => { let _ = system_shutdown::hibernate(); }
+                5 => { let _ = system_shutdown::logout(); }
+                6 => { self.request_close(); }
+                _ => { }
+            }
+        }
+    }
+    fn system_shutdown(reboot: bool) {
+        // TODO: translation?
+        let msg = format!("Gyroflow will {} the computer now because all tasks are completed.", if reboot { "reboot" } else { "shut down" });
+        if cfg!(target_os = "windows") {
+            let _ = if reboot {
+                system_shutdown::reboot_with_message(&msg, 60, false)
+            } else {
+                system_shutdown::shutdown_with_message(&msg, 60, false)
+            };
+        } else {
+            let _ = if reboot { system_shutdown::reboot() } else { system_shutdown::shutdown() };
+        }
+    }
+    pub fn when_done_changed(&mut self, v: i32) {
+        self.when_done = v;
+        #[cfg(target_os = "macos")]
+        if v > 0 {
+            let _ = system_shutdown::request_permission_dialog();
+        }
+    }
+
     pub fn cancel_job(&self, job_id: u32) {
         if let Some(job) = self.jobs.get(&job_id) {
             job.cancel_flag.store(true, SeqCst);
@@ -548,6 +585,7 @@ impl RenderQueue {
                         this.start();
                     } else {
                         this.update_status();
+                        this.post_render_action();
                     }
                 }
             });
@@ -604,7 +642,7 @@ impl RenderQueue {
             });
             let trim_ratio = job.render_options.trim_end - job.render_options.trim_start;
             let total_frame_count = stab.params.read().frame_count;
-            let video_path = job.input_file.clone();
+            let input_file = stab.input_file.read().clone();
             let render_options = job.render_options.clone();
 
             progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false));
@@ -616,7 +654,7 @@ impl RenderQueue {
             core::run_threaded(move || {
                 let mut i = 0;
                 loop {
-                    let result = rendering::render(stab.clone(), progress.clone(), &video_path, &render_options, i, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
+                    let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                     if let Err(e) = result {
                         if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
                             convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
@@ -704,7 +742,7 @@ impl RenderQueue {
                         background_margin_feather: params.background_margin_feather,
                         ..Default::default()
                     })),
-                    video_path: Arc::new(RwLock::new(path.clone())),
+                    input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), image_sequence_start: 0, image_sequence_fps: 0.0 })),
                     lens_profile_db: ctl.stabilizer.lens_profile_db.clone(),
                     ..Default::default()
                 };
@@ -1034,7 +1072,7 @@ impl RenderQueue {
                         }
                         let (path, duration_ms, video_size, ) = {
                             let params = stab.params.read();
-                            (stab.video_path.read().clone(), params.duration_ms, params.video_size)
+                            (stab.input_file.read().path.clone(), params.duration_ms, params.video_size)
                         };
                         Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, &sync_options_json);
                     });
