@@ -38,7 +38,7 @@ qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "40b737a" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "0cb04aa" }
+system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "a4b7e15" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"

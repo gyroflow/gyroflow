@@ -174,7 +174,7 @@ Item {
             }
             function onRequest_close() {
                 main_window.closeConfirmed = true;
-                Qt.quit();
+                Qt.callLater(Qt.quit);
             }
         }
 

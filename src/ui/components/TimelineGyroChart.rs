@@ -9,7 +9,7 @@ use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
 use crate::util;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct ChartData {
     pub timestamp_us: i64,
     pub values: [f64; 4]
@@ -56,7 +56,9 @@ pub struct TimelineGyroChart {
     quats: Vec<ChartData>,
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
+    org_sync_results: Vec<ChartData>,
     sync_quats: Vec<ChartData>,
+    org_sync_quats: Vec<ChartData>,
 
     gyro_max: Option<f64>,
     duration_ms: f64,
@@ -181,6 +183,7 @@ impl TimelineGyroChart {
                     });
                 }
             }
+            self.org_sync_results = self.sync_results.clone();
             Self::normalize_height(&mut self.sync_results, self.gyro_max);
 
             self.update_data();
@@ -198,6 +201,7 @@ impl TimelineGyroChart {
                     values: [q[0], q[1], q[2], q[3]]
                 });
             }
+            self.org_sync_quats = self.sync_quats.clone();
             Self::normalize_height(&mut self.sync_quats, None);
             self.update_data();
         }
@@ -265,6 +269,10 @@ impl TimelineGyroChart {
             },
             _ => { }
         }
+
+        self.sync_results = self.org_sync_results.clone();
+        Self::normalize_height(&mut self.sync_results, self.gyro_max);
+
         self.update_data();
     }
     fn get_serie_vector(vec: &[ChartData], i: usize) -> BTreeMap<i64, f64> {

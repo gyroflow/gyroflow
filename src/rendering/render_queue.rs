@@ -439,13 +439,13 @@ impl RenderQueue {
     fn post_render_action(&self) {
         // If it was running for at least 1 minute
         if Self::current_timestamp() - self.start_timestamp > 60000 && self.when_done > 0 {
+            self.request_close();
             match self.when_done {
                 1 => { Self::system_shutdown(false); }
                 2 => { Self::system_shutdown(true); }
                 3 => { let _ = system_shutdown::sleep(); }
                 4 => { let _ = system_shutdown::hibernate(); }
                 5 => { let _ = system_shutdown::logout(); }
-                6 => { self.request_close(); }
                 _ => { }
             }
         }
