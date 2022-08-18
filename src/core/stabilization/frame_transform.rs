@@ -89,9 +89,9 @@ impl FrameTransform {
             } else {
                 timestamp_ms
             };
-            let quat = quat1
-                     * params.gyro.org_quat_at_timestamp(quat_time)
-                     * params.gyro.smoothed_quat_at_timestamp(quat_time);
+            let quat = params.gyro.smoothed_quat_at_timestamp(quat_time)
+                     * quat1
+                     * params.gyro.org_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             if params.framebuffer_inverted {
@@ -170,9 +170,9 @@ impl FrameTransform {
             } else {
                 timestamp_ms
             };
-            let quat = quat1
-                     * params.gyro.org_quat_at_timestamp(quat_time)
-                     * params.gyro.smoothed_quat_at_timestamp(quat_time);
+            let quat = params.gyro.smoothed_quat_at_timestamp(quat_time)
+                     * quat1
+                     * params.gyro.org_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
