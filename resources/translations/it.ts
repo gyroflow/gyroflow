@@ -130,7 +130,7 @@ This should provide much better UI performance.</source>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="236"/>
-      <location filename="../../src/ui/App.qml" line="491"/>
+      <location filename="../../src/ui/App.qml" line="493"/>
       <source>Output file already exists, do you want to overwrite it?</source>
       <translation>Questo file esiste già, vuoi sovrascriverlo?</translation>
     </message>
@@ -227,7 +227,7 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
-      <location filename="../../src/ui/App.qml" line="462"/>
+      <location filename="../../src/ui/App.qml" line="464"/>
       <source>Cancel</source>
       <translation>Annulla</translation>
     </message>
@@ -248,19 +248,29 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
       <translation>--SOSTITUISCI_CON_IL_NOME_DELLA_TUA_LINGUA_NELLA_TUA_LINGUA--</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="456"/>
+      <location filename="../../src/ui/App.qml" line="444"/>
+      <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
+      <translation type="unfinished">Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="445"/>
+      <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
+      <translation type="unfinished">Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="458"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
       <translation type="unfinished">This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="457"/>
+      <location filename="../../src/ui/App.qml" line="459"/>
       <source>Yes, I agree</source>
       <translation type="unfinished">Yes, I agree</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="478"/>
+      <location filename="../../src/ui/App.qml" line="480"/>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
@@ -269,7 +279,7 @@ Cambia il percorso di output o esegui il programma come amministratore.
 Assicurati di avere i permessi di scrittura nella cartella di destinazione e assicurati che il file di destinazione non sia utilizzato da altre applicazioni.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="479"/>
+      <location filename="../../src/ui/App.qml" line="481"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
@@ -277,25 +287,25 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
 Se il problema persiste dopo l'aggiornamento, probabilmente la tua GPU non supporta la codifica GPU con questo formato. Disabilita la codifica GPU per questa volta.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="488"/>
+      <location filename="../../src/ui/App.qml" line="490"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
       <translation>L'encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="494"/>
+      <location filename="../../src/ui/App.qml" line="496"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
       <translation>Non è stato possibile inizializzare l&apos;encoder GPU e il rendering è fatto sulla CPU, che è molto più lenta.
 Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo non dovrebbe accadere, segnalalo su GitHub, includendo il file gyroflow.log.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="497"/>
+      <location filename="../../src/ui/App.qml" line="499"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
       <translation type="unfinished">Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="500"/>
+      <location filename="../../src/ui/App.qml" line="502"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
       <translation>Assicurati che l'estensione di uscita supporti il codec selezionato. &quot;.mov&quot; dovrebbe funzionare nella maggior parte dei casi.</translation>
     </message>
@@ -718,62 +728,67 @@ Vuoi inviare il tuo profilo?</translation>
       <translation type="unfinished">Add to favorites</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="132"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
+      <source>Favorite</source>
+      <translation type="unfinished">Favorite</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="133"/>
       <source>Search...</source>
       <translation>Cerca...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="145"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="146"/>
       <source>Open file</source>
       <translation>Apri file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="150"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="151"/>
       <source>Create new</source>
       <translation>Crea nuovo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="174"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Questo profilo lente non è ufficiale, non possiamo garantirne la correttezza. Usalo a tuo rischio.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="176"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Valuta questo profilo: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="177"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="178"/>
       <source>Thank you for rating this profile.</source>
       <translation>Grazie per aver valutato questo profilo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="206"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="207"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Il rapporto di proporzioni del profilo lente non corrisponde alle proporzioni del file. Il risultato non sarà corretto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="207"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="208"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Le dimensioni del profilo lente non corrispondono alle proporzioni del file. Il risultato non sarà corretto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="216"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="217"/>
       <source>Adjust parameters</source>
       <translation>Regola parametri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="249"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="250"/>
       <source>Pixel focal length</source>
       <translation>Lunghezza focale dei pixel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="259"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="260"/>
       <source>Focal center</source>
       <translation>Centro focale</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="269"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="270"/>
       <source>Distortion coefficients</source>
       <translation>Coefficienti di distorsione</translation>
     </message>
@@ -1077,188 +1092,193 @@ Vuoi inviare il tuo profilo?</translation>
   <context>
     <name>RenderQueue</name>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="193"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="188"/>
       <source>Pause</source>
       <translation>Pausa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="48"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="39"/>
       <source>Render queue</source>
       <translation>Renderizza coda</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="23"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="578"/>
       <source>When rendering is finished: %1</source>
       <translation type="unfinished">When rendering is finished: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="24"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="570"/>
       <source>Do nothing</source>
       <translation type="unfinished">Do nothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="25"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="571"/>
       <source>Shut down the computer</source>
       <translation type="unfinished">Shut down the computer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="26"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="572"/>
       <source>Restart the computer</source>
       <translation type="unfinished">Restart the computer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="27"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="573"/>
       <source>Sleep</source>
       <translation type="unfinished">Sleep</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="28"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="574"/>
       <source>Hibernate</source>
       <translation type="unfinished">Hibernate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="29"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="575"/>
+      <source>Logout</source>
+      <translation type="unfinished">Logout</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="576"/>
       <source>Close Gyroflow</source>
       <translation type="unfinished">Close Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="98"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="479"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="89"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="474"/>
       <source> @ %1fps</source>
       <translation> @ %1fps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="101"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="92"/>
       <source>Elapsed: %1</source>
       <translation>Trascorso: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="112"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="103"/>
       <source>Remaining: %1</source>
       <translation>Rimanente: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="131"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="152"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="122"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="143"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="142"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="133"/>
       <source>Rendering %1...</source>
       <translation>Renderizzo %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="149"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="140"/>
       <source>Rendering completed. The file was written to: %1.</source>
       <translation>Rendering completato. Il file è stato scritto in: %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="150"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="517"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="141"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="512"/>
       <source>Open rendered file</source>
       <translation>Apri file renderizzato</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="151"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="523"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="142"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="518"/>
       <source>Open file location</source>
       <translation>Apri posizione file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="167"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="372"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="158"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="367"/>
       <source>Render using CPU</source>
       <translation>Renderizza usando la CPU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="174"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="165"/>
       <source>Cancel</source>
       <translation>Annulla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="176"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="167"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
       <translation>L'encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="191"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="186"/>
       <source>Start exporting</source>
       <translation>Avvia esportazione</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="192"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="187"/>
       <source>Resume</source>
       <translation>Riprendi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="292"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="288"/>
       <source>Render now</source>
       <translation>Renderizza</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="298"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="294"/>
       <source>Edit</source>
       <translation>Modifica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="311"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="307"/>
       <source>Reset status</source>
       <translation>Reimposta stato</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="311"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="307"/>
       <source>Stop</source>
       <translation>Ferma</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="362"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="357"/>
       <source>Missing required components.</source>
       <translation type="unfinished">Missing required components.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="380"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="375"/>
       <source>Yes</source>
       <translation>Si</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="381"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="376"/>
       <source>Rename</source>
       <translation>Rinomina</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="377"/>
       <source>No</source>
       <translation>No</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="377"/>
       <source>Output file already exists.</source>
       <translation>Il file di output esiste già.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="483"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="478"/>
       <source>Synchronizing...</source>
       <translation type="unfinished">Synchronizing...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="484"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="479"/>
       <source>Elapsed: %1. Remaining: %2</source>
       <translation>Completati: %1. Rimanenti: %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="527"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="522"/>
       <source>Remove</source>
       <translation>Rimuovi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="452"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="447"/>
       <source>Save to: %1</source>
       <translation>Salva in: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="453"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="448"/>
       <source>Export settings: %1</source>
       <translation>Impostazioni di esportazione: %1</translation>
     </message>
