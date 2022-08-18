@@ -6,7 +6,7 @@ mod complementary;
 mod vqf;
 
 use std::collections::BTreeMap;
-
+use itertools::Itertools;
 use nalgebra::*;
 use super::gyro_source::{TimeIMU, Quat64, TimeQuat};
 use ahrs::{Ahrs, Madgwick, Mahony};
@@ -25,31 +25,19 @@ pub struct VQFIntegrator { }
 // const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
 const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
-impl QuaternionConverter {
-    pub fn convert(org_quaternions: &TimeQuat, imu_data: &[TimeIMU], _duration_ms: f64) -> TimeQuat {
-
-        let x_axis = nalgebra::Vector3::<f64>::x_axis();
-        let y_axis = nalgebra::Vector3::<f64>::y_axis();
-        let z_axis = nalgebra::Vector3::<f64>::z_axis();
-
-        let initial_quat = UnitQuaternion::from_axis_angle(&y_axis, std::f64::consts::FRAC_PI_2)
-                         * UnitQuaternion::from_axis_angle(&z_axis, std::f64::consts::FRAC_PI_2);
-
-        let pitch_offset = if imu_data.is_empty() {
-                UnitQuaternion::identity()
-            } else {
-                let first_imu = imu_data.first().unwrap();
-                let a = first_imu.accl.unwrap_or_default();
-                let p = -a[2].atan2(a[0]);
-
-                UnitQuaternion::from_axis_angle(&x_axis, p)
-            };
-
-        let correction = initial_quat * pitch_offset;
-
-        org_quaternions.iter().map(|(&ts, &org_q)| {
-            (ts, correction * org_q)
-        }).collect()
+impl QuaternionConverter {  
+    pub fn convert(org_quaternions: &TimeQuat, image_orientations : &TimeQuat, imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        let vqf_quats = VQFIntegrator::integrate(imu_data, duration_ms);
+        let mut boost = 20;
+        let mut ret : TimeQuat = BTreeMap::new();
+        let mut corr_sm = UnitQuaternion::identity();
+        for (&org_ts, &org_quat) in org_quaternions {
+            let n_quat = vqf_quats.range(org_ts..).next().map(|x|*x.1).unwrap_or(UnitQuaternion::identity());
+            let corr = n_quat * (org_quat * image_orientations[&org_ts].inverse()).inverse();
+            corr_sm = corr_sm.slerp(&corr, if boost > 0 { boost -= 1; 0.5 } else { 0.005 });
+            ret.insert(org_ts, corr_sm * org_quat);
+        }
+        ret
     }
 }
 

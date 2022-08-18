@@ -124,7 +124,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
-
+        
         Ok(())
     }
 
@@ -842,6 +842,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "integration_method": gyro.integration_method,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
                 "quaternions":        if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.org_quaternions) } else { None },
+                "image_orientations": if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.image_orientations) } else { None },
                 "gravity_vectors":    if !thin && input_file.path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
                 // "smoothed_quaternions": smooth_quats
             },
@@ -933,6 +934,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 if !org_gyro_path.is_empty() && org_gyro_path != org_video_path {
                     let mut raw_imu = None;
                     let mut quaternions = None;
+                    let mut image_orientations = None;
                     let mut gravity_vectors = None;
                     if is_compressed {
                         if let Some(bytes) = util::decompress_from_base91(obj.get("raw_imu").and_then(|x| x.as_str()).unwrap_or_default()) {
@@ -943,6 +945,11 @@ impl<T: PixelType> StabilizationManager<T> {
                         if let Some(bytes) = util::decompress_from_base91(obj.get("quaternions").and_then(|x| x.as_str()).unwrap_or_default()) {
                             if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
                                 quaternions = Some(data);
+                            }
+                        }
+                        if let Some(bytes) = util::decompress_from_base91(obj.get("image_orientations").and_then(|x| x.as_str()).unwrap_or_default()) {
+                            if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
+                                image_orientations = Some(data);
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("gravity_vectors").and_then(|x| x.as_str()).unwrap_or_default()) {
@@ -981,6 +988,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             detected_source: Some("Gyroflow file".to_string()),
                             quaternions,
                             gravity_vectors,
+                            image_orientations,
                             raw_imu,
                             lens_profile: None,
                             frame_readout_time: None,
@@ -1021,6 +1029,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 obj.remove("raw_imu");
                 obj.remove("quaternions");
                 obj.remove("smoothed_quaternions");
+                obj.remove("image_orientations");
                 obj.remove("gravity_vectors");
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
