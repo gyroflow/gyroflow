@@ -262,8 +262,8 @@ Item {
                     if (!contains_gyro && !contains_quats) {
                         messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
                     }
+                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
                     if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
-                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(1); // Switch to gyro view
                 }
             }
             if (root.pendingGyroflowData) {
