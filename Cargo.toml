@@ -12,7 +12,7 @@ opencl = ["gyroflow-core/use-opencl"]
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 gyroflow-core = { path = "src/core/", default-features = false }
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "c397965" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "17cbcc3" }
 
 [dependencies]
 cstr = "0.2.10"
@@ -33,12 +33,12 @@ walkdir = "2.3.2"
 
 breakpad-sys = "0.1.1"
 
-qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
-qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b0e3dc0" }
+qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
+qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "dbd3ed2" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "a4b7e15" }
+system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "4f03925" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
@@ -52,7 +52,9 @@ whoami = "1.2.1"
 tar = "0.4.38"
 
 [patch.crates-io]
-fc-blackbox = { git = 'https://github.com/AdrianEddy/fc-blackbox' }
+fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git" }
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
 version = "0.39.0"
