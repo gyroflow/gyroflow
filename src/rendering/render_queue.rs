@@ -39,7 +39,7 @@ enum JobStatus {
 struct Job {
     queue_index: usize,
     render_options: RenderOptions,
-    sync_options: String,
+    additional_data: String,
     cancel_flag: Arc<AtomicBool>,
     stab: Arc<StabilizationManager<stabilization::RGBA8>>
 }
@@ -50,8 +50,6 @@ pub struct RenderOptions {
     pub codec: String,
     pub codec_options: String,
     pub output_path: String,
-    pub trim_start: f64,
-    pub trim_end: f64,
     pub output_width: usize,
     pub output_height: usize,
     pub bitrate: f64,
@@ -96,8 +94,6 @@ impl RenderOptions {
         if let serde_json::Value::Object(obj) = obj {
             if let Some(v) = obj.get("codec")          .and_then(|x| x.as_str())  { self.codec = v.to_string(); }
             if let Some(v) = obj.get("codec_options")  .and_then(|x| x.as_str())  { self.codec_options = v.to_string(); }
-            if let Some(v)  = obj.get("trim_start")     .and_then(|x| x.as_f64())  { self.trim_start = v; }
-            if let Some(v)  = obj.get("trim_end")       .and_then(|x| x.as_f64())  { self.trim_end = v; }
             if let Some(v)  = obj.get("output_width")   .and_then(|x| x.as_u64())  { self.output_width = v as usize; }
             if let Some(v)  = obj.get("output_height")  .and_then(|x| x.as_u64())  { self.output_height = v as usize; }
             if let Some(v)  = obj.get("bitrate")        .and_then(|x| x.as_f64())  { self.bitrate = v; }
@@ -130,7 +126,7 @@ pub struct RenderQueue {
     queue: qt_property!(RefCell<SimpleListModel<RenderQueueItem>>; NOTIFY queue_changed),
     jobs: HashMap<u32, Job>,
 
-    add: qt_method!(fn(&mut self, controller: QJSValue, options_json: String, sync_options_json: String, thumbnail_url: QString) -> u32),
+    add: qt_method!(fn(&mut self, controller: QJSValue, additional_data: String, thumbnail_url: QString) -> u32),
     remove: qt_method!(fn(&mut self, job_id: u32)),
 
     start: qt_method!(fn(&mut self)),
@@ -142,7 +138,7 @@ pub struct RenderQueue {
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
-    add_file: qt_method!(fn(&mut self, path: String, controller: QJSValue, options_json: String, sync_options_json: String) -> u32),
+    add_file: qt_method!(fn(&mut self, path: String, controller: QJSValue, additional_data: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
@@ -153,7 +149,7 @@ pub struct RenderQueue {
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
 
     render_queue_json: qt_method!(fn(&self) -> QString),
-    restore_render_queue: qt_method!(fn(&mut self, json: String, controller: QJSValue, options_json: String, sync_options_json: String)),
+    restore_render_queue: qt_method!(fn(&mut self, json: String, controller: QJSValue, additional_data: String)),
 
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
@@ -178,13 +174,14 @@ pub struct RenderQueue {
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
-    apply_to_all: qt_method!(fn(&mut self, data: String, sync_options_json: String)),
+    apply_to_all: qt_method!(fn(&mut self, data: String, additional_data: String)),
 
     pause_flag: Arc<AtomicBool>,
 
     default_suffix: qt_property!(QString),
 
-    when_done: qt_property!(i32; WRITE when_done_changed),
+    when_done: qt_property!(i32; WRITE set_when_done),
+    parallel_renders: qt_property!(i32; WRITE set_parallel_renders),
     request_close: qt_signal!(),
 
     paused_timestamp: Option<u64>
@@ -260,7 +257,7 @@ impl RenderQueue {
         });
     }
 
-    pub fn add(&mut self, controller: QJSValue, options_json: String, sync_options_json: String, thumbnail_url: QString) -> u32 {
+    pub fn add(&mut self, controller: QJSValue, additional_data: String, thumbnail_url: QString) -> u32 {
         let job_id = if self.editing_job_id > 0 {
             self.editing_job_id
         } else {
@@ -273,20 +270,25 @@ impl RenderQueue {
 
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
-            if let Ok(render_options) = serde_json::from_str(&options_json) as serde_json::Result<RenderOptions> {
-                let stab = ctl.stabilizer.get_cloned();
-                self.add_internal(job_id, Arc::new(stab), render_options, sync_options_json, thumbnail_url);
+
+            if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+                if let Some(out) = obj.get("output") {
+                    if let Ok(render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                        let stab = ctl.stabilizer.get_cloned();
+                        self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
+                    }
+                }
             }
         }
         job_id
     }
 
-    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, sync_options_json: String, thumbnail_url: QString) {
+    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
         let size = stab.params.read().video_size;
         stab.set_render_params(size, (render_options.output_width, render_options.output_height));
 
         let params = stab.params.read();
-        let trim_ratio = render_options.trim_end - render_options.trim_start;
+        let trim_ratio = params.trim_end - params.trim_start;
         let video_path = stab.input_file.read().path.clone();
 
         let editing = self.jobs.contains_key(&job_id);
@@ -324,7 +326,7 @@ impl RenderQueue {
         self.jobs.insert(job_id, Job {
             queue_index: 0,
             render_options,
-            sync_options: sync_options_json,
+            additional_data,
             cancel_flag: Default::default(),
             stab: stab.clone()
         });
@@ -400,23 +402,32 @@ impl RenderQueue {
         }
 
         if !paused {
-            let mut job_id = None;
-            for v in self.queue.borrow().iter() {
-                if v.current_frame == 0 && v.total_frames > 0 && v.status == JobStatus::Queued && (v.processing_progress == 0.0 || v.processing_progress == 1.0) {
-                    job_id = Some(v.job_id);
+            loop {
+                if self.get_active_render_count() >= self.parallel_renders.max(1) as usize {
                     break;
                 }
-            }
-            if let Some(job_id) = job_id {
-                self.render_job(job_id, false);
-            } else {
-                self.post_render_action();
 
-                self.start_timestamp = 0;
-                self.progress_changed();
+                let mut job_id = None;
+                for v in self.queue.borrow().iter() {
+                    if v.current_frame == 0 && v.total_frames > 0 && v.status == JobStatus::Queued && (v.processing_progress == 0.0 || v.processing_progress == 1.0) {
+                        job_id = Some(v.job_id);
+                        break;
+                    }
+                }
+                if let Some(job_id) = job_id {
+                    self.render_job(job_id, false);
+                } else {
+                    if self.get_active_render_count() == 0 {
+                        self.post_render_action();
 
-                self.status = QString::from("stopped");
-                self.status_changed();
+                        self.start_timestamp = 0;
+                        self.progress_changed();
+
+                        self.status = QString::from("stopped");
+                        self.status_changed();
+                    }
+                    break;
+                }
             }
         }
     }
@@ -466,11 +477,21 @@ impl RenderQueue {
         let _ = if reboot { system_shutdown::reboot() } else { system_shutdown::shutdown() };
     }
 
-    pub fn when_done_changed(&mut self, v: i32) {
+    pub fn set_when_done(&mut self, v: i32) {
         self.when_done = v;
         #[cfg(target_os = "macos")]
         if v > 0 && v != 6 {
             let _ = system_shutdown::request_permission_dialog();
+        }
+    }
+    pub fn get_active_render_count(&self) -> usize {
+        self.queue.borrow().iter().filter(|v| v.total_frames > 0 && v.status == JobStatus::Rendering).count()
+    }
+    pub fn set_parallel_renders(&mut self, v: i32) {
+        self.parallel_renders = v;
+
+        if self.status.to_string() == "active" {
+            self.start();
         }
     }
 
@@ -514,11 +535,11 @@ impl RenderQueue {
         QString::from(serde_json::to_string(&all).unwrap_or_default())
     }
 
-    pub fn restore_render_queue(&mut self, json: String, controller: QJSValue, options_json: String, sync_options_json: String) {
+    pub fn restore_render_queue(&mut self, json: String, controller: QJSValue, additional_data: String) {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
                 if let Ok(data) = serde_json::to_string(&x) {
-                    self.add_file(data, controller.clone(), options_json.clone(), sync_options_json.clone());
+                    self.add_file(data, controller.clone(), additional_data.clone());
                 }
             }
         }
@@ -526,7 +547,14 @@ impl RenderQueue {
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
-            if let Ok(data) = job.stab.export_gyroflow_data(true, false, serde_json::to_string(&job.render_options).unwrap_or_default(), job.sync_options.clone()) {
+            let mut additional_data = job.additional_data.clone();
+            if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+                if let Ok(output) = serde_json::to_value(&job.render_options) {
+                    obj.insert("output".into(), output);
+                }
+                additional_data = serde_json::to_string(&obj).unwrap_or_default();
+            }
+            if let Ok(data) = job.stab.export_gyroflow_data(true, false, additional_data) {
                 return QString::from(data);
             }
         }
@@ -643,8 +671,10 @@ impl RenderQueue {
                 }
                 this.update_status();
             });
-            let trim_ratio = job.render_options.trim_end - job.render_options.trim_start;
-            let total_frame_count = stab.params.read().frame_count;
+            let params = stab.params.read();
+            let trim_ratio = params.trim_end - params.trim_start;
+            let total_frame_count = params.frame_count;
+            drop(params);
             let input_file = stab.input_file.read().clone();
             let render_options = job.render_options.clone();
 
@@ -702,7 +732,7 @@ impl RenderQueue {
         path.to_string_lossy().to_string()
     }
 
-    pub fn add_file(&mut self, path: String, controller: QJSValue, options_json: String, sync_options_json: String) -> u32 {
+    pub fn add_file(&mut self, path: String, controller: QJSValue, additional_data: String) -> u32 {
         let job_id = fastrand::u32(1..);
 
         let is_gf_data = path.starts_with('{');
@@ -725,209 +755,215 @@ impl RenderQueue {
 
         if let Some(ctl) = controller.to_qobject::<Controller>() {
             let ctl = unsafe { &mut *ctl.as_ptr() }; // ctl.borrow_mut()
-            if let Ok(mut render_options) = serde_json::from_str(&options_json) as serde_json::Result<RenderOptions> {
 
-                let (smoothing_name, smoothing_params) = {
-                    let smoothing_lock = ctl.stabilizer.smoothing.read();
-                    let smoothing = smoothing_lock.current();
-                    (smoothing.get_name(), smoothing.get_parameters_json())
-                };
-                let params = ctl.stabilizer.params.read();
-
-                let stab = StabilizationManager {
-                    params: Arc::new(RwLock::new(core::stabilization_params::StabilizationParams {
-                        fov:                    params.fov,
-                        background:             params.background,
-                        adaptive_zoom_window:   params.adaptive_zoom_window,
-                        lens_correction_amount: params.lens_correction_amount,
-                        background_mode:           params.background_mode,
-                        background_margin:         params.background_margin,
-                        background_margin_feather: params.background_margin_feather,
-                        ..Default::default()
-                    })),
-                    input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), image_sequence_start: 0, image_sequence_fps: 0.0 })),
-                    lens_profile_db: ctl.stabilizer.lens_profile_db.clone(),
-                    ..Default::default()
-                };
-
-                {
-                    let method_idx = stab.get_smoothing_algs()
-                        .iter().enumerate()
-                        .find(|(_, m)| smoothing_name == m.as_str())
-                        .map(|(idx, _)| idx)
-                        .unwrap_or_default();
-
-                    let mut smoothing = stab.smoothing.write();
-                    smoothing.set_current(method_idx);
-
-                    for param in smoothing_params.as_array().unwrap() {
-                        (|| -> Option<()> {
-                            let name = param.get("name").and_then(|x| x.as_str())?;
-                            let value = param.get("value").and_then(|x| x.as_f64())?;
-                            smoothing.current_mut().set_parameter(name, value);
-                            Some(())
-                        })();
-                    }
+            let additional_data2 = additional_data.clone();
+            let additional_data3 = additional_data.clone();
+            if let Ok(additional_data) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+                let mut sync_options = serde_json::Value::default();
+                if let Some(sync) = additional_data.get("synchronization") {
+                    sync_options = sync.clone();
                 }
+                if let Some(out) = additional_data.get("output") {
+                    if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                        let (smoothing_name, smoothing_params) = {
+                            let smoothing_lock = ctl.stabilizer.smoothing.read();
+                            let smoothing = smoothing_lock.current();
+                            (smoothing.get_name(), smoothing.get_parameters_json())
+                        };
+                        let params = ctl.stabilizer.params.read();
 
-                let stab = Arc::new(stab);
-
-                let stab2 = stab.clone();
-                let sync_options_json2 = sync_options_json.clone();
-                let loaded = util::qt_queued_callback_mut(self, move |this, (render_options, ask_path): (RenderOptions, bool)| {
-                    let out_path = render_options.output_path.clone();
-                    this.add_internal(job_id, stab2.clone(), render_options, sync_options_json2.clone(), QString::default());
-
-                    if ask_path && std::path::Path::new(&out_path).exists() {
-                        update_model!(this, job_id, itm {
-                            itm.error_string = QString::from(format!("file_exists:{}", out_path));
-                            itm.status = JobStatus::Error;
-                        });
-                    }
-                });
-                let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
-                    update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
-                });
-                let sync_options_json2 = sync_options_json.clone();
-                let apply_preset = util::qt_queued_callback_mut(self, move |this, preset: String| {
-                    this.apply_to_all(preset, sync_options_json2.clone());
-                    this.added(job_id);
-                });
-
-                core::run_threaded(move || {
-                    let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
-                        let mut fetched = false;
-                        {
-                            let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
-                            proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
-                                let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
-
-                                if !fetched {
-                                    thumb_fetched(util::image_data_to_base64(sf.plane_width(0), sf.plane_height(0), sf.stride(0) as u32, sf.data(0)));
-                                    fetched = true;
-                                }
-
-                                Ok(())
-                            });
-                            proc.start_decoder_only(vec![(0.0, 0.0)], Arc::new(AtomicBool::new(false)))?;
-                        }
-                        Ok(())
-                    };
-
-                    if is_gf_data || path.ends_with(".gyroflow") {
-                        if !is_gf_data {
-                            let video_path = || -> Option<String> {
-                                let data = std::fs::read(&path).ok()?;
-                                let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
-                                Some(obj.get("videofile")?.as_str()?.to_string())
-                            }().unwrap_or_default();
-
-                            if video_path.is_empty() {
-                                // It's a preset
-                                if let Ok(data) = std::fs::read_to_string(&path) {
-                                    apply_preset(data);
-                                }
-                                return;
-                            }
-                        }
-
-                        let result = if is_gf_data {
-                            stab.import_gyroflow_data(path.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)))
-                        } else {
-                            stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false)))
+                        let stab = StabilizationManager {
+                            params: Arc::new(RwLock::new(core::stabilization_params::StabilizationParams {
+                                fov:                    params.fov,
+                                background:             params.background,
+                                adaptive_zoom_window:   params.adaptive_zoom_window,
+                                lens_correction_amount: params.lens_correction_amount,
+                                background_mode:           params.background_mode,
+                                background_margin:         params.background_margin,
+                                background_margin_feather: params.background_margin_feather,
+                                ..Default::default()
+                            })),
+                            input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), image_sequence_start: 0, image_sequence_fps: 0.0 })),
+                            lens_profile_db: ctl.stabilizer.lens_profile_db.clone(),
+                            ..Default::default()
                         };
 
-                        match result {
-                            Ok(obj) => {
-                                if let Some(out) = obj.get("output") {
-                                    if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
-                                        loaded((render_options2, true));
-                                    }
-                                }
-                                if let Some(out) = obj.get("videofile").and_then(|x| x.as_str()) {
-                                    let ratio = {
-                                        let params = stab.params.read();
-                                        params.video_size.0 as f64 / params.video_size.1 as f64
-                                    };
+                        {
+                            let method_idx = stab.get_smoothing_algs()
+                                .iter().enumerate()
+                                .find(|(_, m)| smoothing_name == m.as_str())
+                                .map(|(idx, _)| idx)
+                                .unwrap_or_default();
 
-                                    if let Err(e) = fetch_thumb(out, ratio) {
-                                        err(("An error occured: %1".to_string(), e.to_string()));
-                                    }
-                                }
-                            },
-                            Err(e) => {
-                                err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
+                            let mut smoothing = stab.smoothing.write();
+                            smoothing.set_current(method_idx);
+
+                            for param in smoothing_params.as_array().unwrap() {
+                                (|| -> Option<()> {
+                                    let name = param.get("name").and_then(|x| x.as_str())?;
+                                    let value = param.get("value").and_then(|x| x.as_f64())?;
+                                    smoothing.current_mut().set_parameter(name, value);
+                                    Some(())
+                                })();
                             }
                         }
-                    } else if let Ok(info) = rendering::FfmpegProcessor::get_video_info(&path) {
-                        ::log::info!("Loaded {:?}", &info);
 
-                        render_options.bitrate = render_options.bitrate.max(info.bitrate);
-                        render_options.output_width = info.width as usize;
-                        render_options.output_height = info.height as usize;
-                        render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec);
-                        render_options.trim_start = 0.0;
-                        render_options.trim_end = 1.0;
+                        let stab = Arc::new(stab);
 
-                        let ratio = info.width as f64 / info.height as f64;
+                        let stab2 = stab.clone();
+                        let loaded = util::qt_queued_callback_mut(self, move |this, (render_options, ask_path): (RenderOptions, bool)| {
+                            let out_path = render_options.output_path.clone();
+                            this.add_internal(job_id, stab2.clone(), render_options, additional_data2.clone(), QString::default());
 
-                        if info.duration_ms > 0.0 && info.fps > 0.0 {
-
-                            let video_size = (info.width as usize, info.height as usize);
-
-                            if let Err(e) = stab.init_from_video_data(&path, info.duration_ms, info.fps, info.frame_count, video_size) {
-                                err(("An error occured: %1".to_string(), e.to_string()));
-                                return;
+                            if ask_path && std::path::Path::new(&out_path).exists() {
+                                update_model!(this, job_id, itm {
+                                    itm.error_string = QString::from(format!("file_exists:{}", out_path));
+                                    itm.status = JobStatus::Error;
+                                });
                             }
-                            let _ = stab.load_gyro_data(&path, |_|(), Arc::new(AtomicBool::new(false)));
-                            let camera_id = stab.camera_id.read();
+                        });
+                        let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
+                            update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
+                        });
+                        let apply_preset = util::qt_queued_callback_mut(self, move |this, preset: String| {
+                            this.apply_to_all(preset, additional_data3.clone());
+                            this.added(job_id);
+                        });
 
-                            let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
-                            if !id_str.is_empty() {
-                                let db = stab.lens_profile_db.read();
-                                if db.contains_id(&id_str) {
-                                    match stab.load_lens_profile(&id_str) {
-                                        Ok(_) => {
-                                            if let Some(fr) = stab.lens.read().frame_readout_time {
-                                                stab.params.write().frame_readout_time = fr;
+                        core::run_threaded(move || {
+                            let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
+                                let mut fetched = false;
+                                {
+                                    let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
+                                    proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
+                                        let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
+
+                                        if !fetched {
+                                            thumb_fetched(util::image_data_to_base64(sf.plane_width(0), sf.plane_height(0), sf.stride(0) as u32, sf.data(0)));
+                                            fetched = true;
+                                        }
+
+                                        Ok(())
+                                    });
+                                    proc.start_decoder_only(vec![(0.0, 0.0)], Arc::new(AtomicBool::new(false)))?;
+                                }
+                                Ok(())
+                            };
+
+                            if is_gf_data || path.ends_with(".gyroflow") {
+                                if !is_gf_data {
+                                    let video_path = || -> Option<String> {
+                                        let data = std::fs::read(&path).ok()?;
+                                        let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
+                                        Some(obj.get("videofile")?.as_str()?.to_string())
+                                    }().unwrap_or_default();
+
+                                    if video_path.is_empty() {
+                                        // It's a preset
+                                        if let Ok(data) = std::fs::read_to_string(&path) {
+                                            apply_preset(data);
+                                        }
+                                        return;
+                                    }
+                                }
+
+                                let result = if is_gf_data {
+                                    stab.import_gyroflow_data(path.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)))
+                                } else {
+                                    stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false)))
+                                };
+
+                                match result {
+                                    Ok(obj) => {
+                                        if let Some(out) = obj.get("output") {
+                                            if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                                                loaded((render_options2, true));
                                             }
                                         }
-                                        Err(e) => {
-                                            err(("An error occured: %1".to_string(), e.to_string()));
-                                            return;
+                                        if let Some(out) = obj.get("videofile").and_then(|x| x.as_str()) {
+                                            let ratio = {
+                                                let params = stab.params.read();
+                                                params.video_size.0 as f64 / params.video_size.1 as f64
+                                            };
+
+                                            if let Err(e) = fetch_thumb(out, ratio) {
+                                                err(("An error occured: %1".to_string(), e.to_string()));
+                                            }
                                         }
+                                    },
+                                    Err(e) => {
+                                        err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
                                     }
                                 }
+                            } else if let Ok(info) = rendering::FfmpegProcessor::get_video_info(&path) {
+                                ::log::info!("Loaded {:?}", &info);
+
+                                render_options.bitrate = render_options.bitrate.max(info.bitrate);
+                                render_options.output_width = info.width as usize;
+                                render_options.output_height = info.height as usize;
+                                render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec);
+
+                                let ratio = info.width as f64 / info.height as f64;
+
+                                if info.duration_ms > 0.0 && info.fps > 0.0 {
+
+                                    let video_size = (info.width as usize, info.height as usize);
+
+                                    if let Err(e) = stab.init_from_video_data(&path, info.duration_ms, info.fps, info.frame_count, video_size) {
+                                        err(("An error occured: %1".to_string(), e.to_string()));
+                                        return;
+                                    }
+                                    let _ = stab.load_gyro_data(&path, |_|(), Arc::new(AtomicBool::new(false)));
+                                    let camera_id = stab.camera_id.read();
+
+                                    let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
+                                    if !id_str.is_empty() {
+                                        let db = stab.lens_profile_db.read();
+                                        if db.contains_id(&id_str) {
+                                            match stab.load_lens_profile(&id_str) {
+                                                Ok(_) => {
+                                                    if let Some(fr) = stab.lens.read().frame_readout_time {
+                                                        stab.params.write().frame_readout_time = fr;
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if let Some(output_dim) = stab.lens.read().output_dimension.clone() {
+                                        render_options.output_width = output_dim.w;
+                                        render_options.output_height = output_dim.h;
+                                    }
+
+                                    stab.set_size(video_size.0, video_size.1);
+                                    stab.set_output_size(render_options.output_width, render_options.output_height);
+
+                                    stab.recompute_blocking();
+
+                                    // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
+
+                                    loaded((render_options, true));
+
+                                    if let Err(e) = fetch_thumb(&path, ratio) {
+                                        err(("An error occured: %1".to_string(), e.to_string()));
+                                    }
+
+                                    Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), sync_options);
+                                }
                             }
-                            if let Some(output_dim) = stab.lens.read().output_dimension.clone() {
-                                render_options.output_width = output_dim.w;
-                                render_options.output_height = output_dim.h;
-                            }
-
-                            stab.set_size(video_size.0, video_size.1);
-                            stab.set_output_size(render_options.output_width, render_options.output_height);
-
-                            stab.recompute_blocking();
-
-                            // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
-
-                            loaded((render_options, true));
-
-                            if let Err(e) = fetch_thumb(&path, ratio) {
-                                err(("An error occured: %1".to_string(), e.to_string()));
-                            }
-
-                            Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), &sync_options_json);
-                        }
+                        });
                     }
-                });
+                }
             }
         }
 
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, video_size: &(usize, usize), stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options_json: &str) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, video_size: &(usize, usize), stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
         let (has_gyro, has_sync_points) = {
             let gyro = stab.gyro.read();
             (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
@@ -944,7 +980,7 @@ impl RenderQueue {
                 use crate::rendering::VideoProcessor;
                 use itertools::Either;
 
-                if let Ok(serde_json::Value::Object(mut sync_options)) = serde_json::from_str(sync_options_json) {
+                if let serde_json::Value::Object(mut sync_options) = sync_options {
                     for (k, v) in sync_settings.as_object().unwrap() {
                         sync_options.insert(k.clone(), v.clone());
                     }
@@ -1044,7 +1080,7 @@ impl RenderQueue {
         }
     }
 
-    fn apply_to_all(&mut self, data: String, sync_options_json: String) {
+    fn apply_to_all(&mut self, data: String, additional_data: String) {
         ::log::debug!("Applying preset {}", &data);
         let mut new_output_options = None;
         if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
@@ -1067,7 +1103,12 @@ impl RenderQueue {
                     let stab = job.stab.clone();
                     let data_vec = data.to_vec();
                     let processing2 = processing.clone();
-                    let sync_options_json = sync_options_json.clone();
+                    let mut sync_options = serde_json::Value::default();
+                    if let Ok(additional_data) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+                        if let Some(sync) = additional_data.get("synchronization") {
+                            sync_options = sync.clone();
+                        }
+                    }
                     let job_id = *job_id;
                     core::run_threaded(move || {
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
@@ -1077,7 +1118,7 @@ impl RenderQueue {
                             let params = stab.params.read();
                             (stab.input_file.read().path.clone(), params.duration_ms, params.video_size)
                         };
-                        Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, &sync_options_json);
+                        Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
                     });
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);

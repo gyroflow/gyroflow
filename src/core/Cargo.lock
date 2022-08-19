@@ -1084,9 +1084,9 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "iana-time-zone"
-version = "0.1.45"
+version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef5528d9c2817db4e10cc78f8d4c8228906e5854f389ff6b076cee3572a09d35"
+checksum = "ad2bfd338099682614d3ee3fe0cd72e0b6a41ca6a87f6a74a3bd593c91650501"
 dependencies = [
  "android_system_properties",
  "core-foundation-sys",
@@ -2396,7 +2396,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.1.9"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=df8c1c9#df8c1c9e1ad7876379d9ea7accbcab66e434e0e3"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=4471497#4471497852f9ed63a1a0e6c502b553e5535e3af2"
 dependencies = [
  "argh",
  "byteorder",
@@ -2404,6 +2404,7 @@ dependencies = [
  "csv",
  "fc-blackbox",
  "human-sort",
+ "log",
  "memchr",
  "mp4parse",
  "once_cell",

@@ -26,7 +26,7 @@ pub trait SmoothingAlgorithm: DynClone {
 
     fn get_checksum(&self) -> u64;
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat;
+    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat;
 }
 clone_trait_object!(SmoothingAlgorithm);
 

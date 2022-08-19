@@ -35,7 +35,7 @@ breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["log"] }
 qttypes     = { version = "*", git = "https://github.com/AdrianEddy/qmetaobject-rs.git", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "40b737a" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b0e3dc0" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "a4b7e15" }

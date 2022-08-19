@@ -62,8 +62,6 @@ MenuItem {
             codec:          root.outCodec,
             codec_options:  root.outCodecOptions,
             output_path:    window.outputFile,
-            trim_start:     window.videoArea.trimStart,
-            trim_end:       window.videoArea.trimEnd,
             output_width:   root.outWidth,
             output_height:  root.outHeight,
             bitrate:        root.outBitrate,
@@ -78,7 +76,6 @@ MenuItem {
             pad_with_black:        padWithBlack.checked,
         };
     }
-    function getExportOptionsJson() { return JSON.stringify(getExportOptions()); }
 
     property bool disableUpdate: false;
     function notifySizeChanged() {

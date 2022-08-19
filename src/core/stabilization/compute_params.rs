@@ -52,8 +52,8 @@ impl ComputeParams {
     pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>, full_gyro: bool) -> Self {
         let params = mgr.params.read();
 
-        let mut camera_matrix = mgr.lens.write().get_camera_matrix(params.size, params.video_size);
         let lens = mgr.lens.read();
+        let mut camera_matrix = lens.get_camera_matrix(params.size, params.video_size);
         let distortion_coeffs = lens.get_distortion_coeffs();
         let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();

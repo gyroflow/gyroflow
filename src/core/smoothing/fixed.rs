@@ -72,7 +72,7 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&mut self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat {
+    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         fn quat_for_rpy(roll: f64, pitch: f64, yaw: f64) -> Quat64 {

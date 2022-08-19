@@ -242,7 +242,7 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
-                            const job_id = render_queue.add(controller, exportSettings.getExportOptionsJson(), sync.getSettingsJson(), controller.image_to_b64(result.image));
+                            const job_id = render_queue.add(controller, window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
                                 videoArea.queue.shown = true;
@@ -272,7 +272,7 @@ Rectangle {
                                 const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
                                 el.opened = true;
                                 el.onApply.connect((obj) => {
-                                    const allData = JSON.parse(controller.export_gyroflow_data(true, false, exportSettings.getExportOptions(), sync.getSettings()));
+                                    const allData = JSON.parse(controller.export_gyroflow_data(true, false, window.getAdditionalProjectData()));
                                     const finalData = el.getFilteredObject(allData, obj);
 
                                     if (finalData.hasOwnProperty("output") && finalData.output.output_path) {
@@ -282,14 +282,14 @@ Rectangle {
                                         presetFileDialog.presetData = finalData;
                                         presetFileDialog.open2();
                                     } else { // Apply
-                                        render_queue.apply_to_all(JSON.stringify(finalData), window.sync.getSettingsJson());
+                                        render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson());
                                     }
                                 });
                             break;
                             case 3: // Export project file (including processed gyro data)
                             case 4: // Export project file (including gyro data)
                             case 5: // Export project file
-                                controller.export_gyroflow_file(/*thin*/index == 5, /*ext*/index == 3, exportSettings.getExportOptions(), sync.getSettings(), "", false);
+                                controller.export_gyroflow_file(/*thin*/index == 5, /*ext*/index == 3, window.getAdditionalProjectData(), "", false);
                             break;
                         }
                     }
@@ -394,7 +394,7 @@ Rectangle {
         function onGyroflow_exists(path: string, thin: bool, extended: bool) {
             messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
                 { text: qsTr("Overwrite"), "accent": true, clicked: () => {
-                    controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), sync.getSettings(), path, true);
+                    controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), path, true);
                 } },
                 { text: qsTr("Rename"), clicked: () => {
                     let output = path;
@@ -403,7 +403,7 @@ Rectangle {
                         output = path.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
                         if (i > 1000) break;
                     }
-                    controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), sync.getSettings(), output, true);
+                    controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), output, true);
                 } },
                 { text: qsTr("Choose a different location"), clicked: () => {
                     gfFileDialog.thin = thin;
@@ -423,7 +423,7 @@ Rectangle {
         type: "output-project";
         property bool thin: true;
         property bool extended: true;
-        onAccepted: controller.export_gyroflow_file(thin, extended, exportSettings.getExportOptions(), sync.getSettings(), controller.url_to_path(selectedFile), true);
+        onAccepted: controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), controller.url_to_path(selectedFile), true);
     }
     FileDialog {
         id: presetFileDialog;
@@ -524,4 +524,15 @@ Rectangle {
         }
         ui_tools.set_progress(progress);
     }
+
+    function getAdditionalProjectData(): object {
+        return {
+            "output": exportSettings.getExportOptions(),
+            "synchronization": sync.getSettings(),
+
+            "muted": window.videoArea.vid.muted,
+            "playback_speed": window.videoArea.vid.playbackRate
+        };
+    }
+    function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
 }

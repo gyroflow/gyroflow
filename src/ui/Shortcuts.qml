@@ -165,7 +165,7 @@ Item {
         sequence: "Shift+Left";
         onActivated: videoArea.timeline.jumpToPrevKeyframe("");
     }
-    
+
     // Timeline: Auto sync here
     Shortcut {
         sequence: "a";

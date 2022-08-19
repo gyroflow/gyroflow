@@ -65,6 +65,25 @@ impl<V> MapClosest<V> for BTreeMap<i64, V> {
         }
     }
 }
+pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
+    use serde_json::Value;
+    match (a, b) {
+        (Value::Object(ref mut a), &Value::Object(ref b)) => {
+            for (k, v) in b {
+                merge_json(a.entry(k).or_insert(Value::Null), v);
+            }
+        }
+        (Value::Array(ref mut a), &Value::Array(ref b)) => {
+            a.extend(b.clone());
+        }
+        (Value::Array(ref mut a), &Value::Object(ref b)) => {
+            a.extend([Value::Object(b.clone())]);
+        }
+        (a, b) => {
+            *a = b.clone();
+        }
+    }
+}
 
 /*
 pub fn rename_calib_videos() {

@@ -245,7 +245,7 @@ impl VQF {
         self.state.last_acc_corr_angular_rate = (acc_earth[2]).acos()/self.coeffs.acc_ts;
 
         // bias estimation
-        
+
         if self.params.motion_bias_est_enabled || self.params.rest_bias_est_enabled {
             let bias_clip = self.params.bias_clip*DEG2RAD;
 
@@ -477,7 +477,7 @@ impl VQF {
     pub fn update_batch(&mut self, gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize, out6d: Option<&mut Vec<f64>>,
                     out9d: Option<&mut Vec<f64>>, out_delta: Option<&mut Vec<f64>>, out_bias: Option<&mut Vec<f64>>, out_bias_sigma: Option<&mut Vec<f64>>,
                     out_rest: Option<&mut Vec<bool>>, out_mag_dist: Option<&mut Vec<bool>>) {
-        
+
         let has_mag = mag.is_some();
         let mag_vec = if has_mag { mag.unwrap() } else { Vec::new() };
         let do_out6d = out6d.is_some();
@@ -499,7 +499,7 @@ impl VQF {
         let do_out_bias_sigma = out_bias_sigma.is_some();
         let mut out_bias_sigma_vec = &mut Vec::new();
         if do_out_bias_sigma { out_bias_sigma_vec = out_bias_sigma.unwrap(); }
-        
+
         let do_out_rest = out_rest.is_some();
         let mut out_rest_vec = &mut Vec::new();
         if do_out_rest { out_rest_vec = out_rest.unwrap(); }
@@ -507,11 +507,11 @@ impl VQF {
         let do_out_mag_dist = out_mag_dist.is_some();
         let mut out_mag_dist_vec = &mut Vec::new();
         if do_out_mag_dist { out_mag_dist_vec = out_mag_dist.unwrap() };
-    
+
         for i in 0..n {
             let g: [f64; 3] = gyr[3*i..3*i+3].try_into().unwrap();
-            let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap(); 
-            if has_mag {            
+            let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap();
+            if has_mag {
                 let m: [f64; 3] = mag_vec[3*i..3*i+3].try_into().unwrap();
                 self.update(g, a, Some(m));
             } else {
@@ -538,7 +538,7 @@ impl VQF {
             if do_out_mag_dist {
                 out_mag_dist_vec[i] = self.state.mag_dist_detected.clone();
             }
-        } 
+        }
     }
 
     // Returns the angular velocity strapdown integration quaternion
@@ -563,7 +563,7 @@ impl VQF {
 
     // Returns the current gyroscope bias estimate and the uncertainty.
     pub fn get_bias_estimate(&self) -> ([f64; 3], f64) {
-        
+
         // use largest absolute row sum as upper bound estimate for largest eigenvalue (Gershgorin circle theorem)
         // and clip output to biasSigmaInit
         let sum1 = self.state.bias_p[0].abs() + self.state.bias_p[1].abs() + self.state.bias_p[2].abs();
@@ -628,11 +628,11 @@ impl VQF {
         self.params.tau_acc = tau_acc;
         let mut new_b = [0.0; 3];
         let mut new_a = [0.0; 2];
-    
+
         VQF::filter_coeffs(self.params.tau_acc, self.coeffs.acc_ts, &mut new_b, &mut new_a);
-        VQF::filter_adapt_state_for_coeff_change(&self.state.last_acc_lp, 3, self.coeffs.acc_lp_b, 
+        VQF::filter_adapt_state_for_coeff_change(&self.state.last_acc_lp, 3, self.coeffs.acc_lp_b,
                                                  self.coeffs.acc_lp_a, new_b, new_a, &mut self.state.acc_lp_state);
-    
+
         // For R and biasLP, the last value is not saved in the state.
         // Since b0 is small (at reasonable settings), the last output is close to state[0].
         let mut r = [0.0; 9];
@@ -645,9 +645,9 @@ impl VQF {
         for i in 0..2 {
             bias_lp[i] = self.state.motion_bias_est_bias_lp_state[2*i];
         }
-        VQF::filter_adapt_state_for_coeff_change(&bias_lp, 2, self.coeffs.acc_lp_b, self.coeffs.acc_lp_a, new_b, 
+        VQF::filter_adapt_state_for_coeff_change(&bias_lp, 2, self.coeffs.acc_lp_b, self.coeffs.acc_lp_a, new_b,
                                                 new_a, &mut self.state.motion_bias_est_bias_lp_state);
-    
+
         self.coeffs.acc_lp_b = new_b;
         self.coeffs.acc_lp_a = new_a;
     }
@@ -734,18 +734,18 @@ impl VQF {
         VQF::quat_set_to_identity(&mut self.state.gyr_quat);
         VQF::quat_set_to_identity(&mut self.state.acc_quat);
         self.state.delta = 0.0;
-    
+
         self.state.rest_detected = false;
         self.state.mag_dist_detected = true;
-    
+
         self.state.last_acc_lp = [0.0; 3];
         self.state.acc_lp_state = [NAN; 6];
         self.state.last_acc_corr_angular_rate = 0.0;
-    
+
         self.state.k_mag_init = 1.0;
         self.state.last_mag_dis_angle = 0.0;
         self.state.last_mag_corr_angular_rate = 0.0;
-    
+
         self.state.bias = [0.0; 3];
         self.state.bias_p = VQF::matrix3_set_to_scaled_identity(self.coeffs.bias_p0);
 
@@ -760,7 +760,7 @@ impl VQF {
         self.state.rest_acc_lp_state = [NAN; 6];
         self.state.rest_last_mag_lp = [0.0; 3];
         self.state.rest_mag_lp_state = [NAN; 6];
-    
+
         self.state.mag_ref_norm = 0.0;
         self.state.mag_ref_dip = 0.0;
         self.state.mag_undisturbed_t = 0.0;
@@ -905,7 +905,7 @@ impl VQF {
     // Performs filter step for vector-valued signal with averaging-based initialization.
     pub fn filter_vec(x: &[f64], n: usize, tau: f64, ts: f64, b: [f64; 3],
                      a: [f64; 2], state: &mut [f64], out: &mut [f64]) {
-    
+
         assert!(n>=2);
 
         // to avoid depending on a single sample, average the first samples (for duration tau)
@@ -1005,22 +1005,22 @@ impl VQF {
         VQF::filter_coeffs(self.params.tau_acc, self.coeffs.acc_ts, &mut self.coeffs.acc_lp_b, &mut self.coeffs.acc_lp_a);
 
         self.coeffs.k_mag = VQF::gain_from_tau(self.params.tau_mag, self.coeffs.mag_ts);
-    
+
         self.coeffs.bias_p0 = square(self.params.bias_sigma_init*100.0);
         // the system noise increases the variance from 0 to (0.1 °/s)^2 in biasForgettingTime seconds
         self.coeffs.bias_v = square(0.1*100.0)*self.coeffs.acc_ts/self.params.bias_forgetting_time;
-    
+
         let p_motion = square(self.params.bias_sigma_motion*100.0);
         self.coeffs.bias_motion_w = square(p_motion) / self.coeffs.bias_v + p_motion;
         self.coeffs.bias_vertical_w = self.coeffs.bias_motion_w / self.params.bias_vertical_forgetting_factor.max(1e-10);
 
         let p_rest = square(self.params.bias_sigma_rest*100.0);
         self.coeffs.bias_rest_w = square(p_rest) / self.coeffs.bias_v + p_rest;
-    
+
         VQF::filter_coeffs(self.params.rest_filter_tau, self.coeffs.gyr_ts, &mut self.coeffs.rest_gyr_lp_b, &mut self.coeffs.rest_gyr_lp_a);
         VQF::filter_coeffs(self.params.rest_filter_tau, self.coeffs.acc_ts, &mut self.coeffs.rest_acc_lp_b, &mut self.coeffs.rest_acc_lp_a);
         VQF::filter_coeffs(self.params.rest_filter_tau, self.coeffs.mag_ts, &mut self.coeffs.rest_mag_lp_b, &mut self.coeffs.rest_mag_lp_a);
-    
+
         self.coeffs.k_mag_ref = VQF::gain_from_tau(self.params.mag_ref_tau, self.coeffs.mag_ts);
         if self.params.mag_current_tau > 0.0 {
             VQF::filter_coeffs(self.params.mag_current_tau, self.coeffs.mag_ts, &mut self.coeffs.mag_norm_dip_lp_b, &mut self.coeffs.mag_norm_dip_lp_a);
@@ -1028,7 +1028,7 @@ impl VQF {
             self.coeffs.mag_norm_dip_lp_b = [NAN; 3];
             self.coeffs.mag_norm_dip_lp_a = [NAN; 2];
         }
-    
+
         self.reset_state();
     }
 }
@@ -1101,7 +1101,7 @@ fn acc_correction(quat3d: &Vec<f64>, acc_i: &Vec<f64>, n: usize, quat6d: &mut Ve
         acc_quat = VQF::quat_multiply(acc_corr_quat, acc_quat);
         VQF::normalize(&mut acc_quat, 4);
 
-        // calculate output quaternion 
+        // calculate output quaternion
         let qtemp = VQF::quat_multiply(acc_quat, quat3d[4*i..4*i+4].try_into().unwrap());
         quat6d.splice(4*i..4*i+4, (&qtemp).iter().cloned());
     }
@@ -1208,7 +1208,7 @@ pub fn offline_vqf(gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize
     let do_out_bias_sigma = out_bias_sigma.is_some();
     let mut bias_sigma = &mut vec![0f64; n];
     if do_out_bias_sigma { bias_sigma = out_bias_sigma.unwrap(); }
-    
+
     let do_out_rest = out_rest.is_some();
     let mut rest = &mut vec![false; n];
     if do_out_rest { rest = out_rest.unwrap(); }
@@ -1224,7 +1224,7 @@ pub fn offline_vqf(gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize
 
     for i in 0..n {
         let g: [f64; 3] = gyr[3*i..3*i+3].try_into().unwrap();
-        let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap(); 
+        let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap();
         if has_mag {
             let m: [f64; 3] = mag_vec[3*i..3*i+3].try_into().unwrap();
             vqf.update(g, a, Some(m));
@@ -1242,7 +1242,7 @@ pub fn offline_vqf(gyr: Vec<f64>, acc: Vec<f64>, mag: Option<Vec<f64>>, n: usize
     vqf.reset_state();
     for i in (0..n).rev() {
         let temp_gyr = [-gyr[3*i], -gyr[3*i+1], -gyr[3*i+2]];
-        let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap(); 
+        let a: [f64; 3] = acc[3*i..3*i+3].try_into().unwrap();
         if has_mag {
             let m: [f64; 3] = mag_vec[3*i..3*i+3].try_into().unwrap();
             vqf.update(temp_gyr, a, Some(m));

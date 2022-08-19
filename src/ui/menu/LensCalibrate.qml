@@ -81,7 +81,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             shutter.value = Math.abs(frame_readout_time);
             shutterCb.checked = Math.abs(frame_readout_time) > 0;
             bottomToTop.checked = frame_readout_time < 0;

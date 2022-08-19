@@ -61,13 +61,14 @@ pub struct GyroSource {
 
     pub quaternions: TimeQuat,
     pub org_quaternions: TimeQuat,
-    
+
     pub smoothed_quaternions: TimeQuat,
     pub org_smoothed_quaternions: TimeQuat,
-    
+
     pub image_orientations: TimeQuat,
 
     pub gravity_vectors: Option<TimeVec>,
+    use_gravity_vectors: bool, // copy from HorizonLock struct
 
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
@@ -83,8 +84,16 @@ impl GyroSource {
     pub fn new() -> Self {
         Self {
             integration_method: 1,
+            use_gravity_vectors: true,
             ..Default::default()
         }
+    }
+    pub fn set_use_gravity_vectors(&mut self, v: bool) {
+        if self.use_gravity_vectors != v && self.gravity_vectors.is_some() {
+            self.use_gravity_vectors = v;
+            self.integrate();
+        }
+        self.use_gravity_vectors = v;
     }
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.fps = stabilization_params.get_scaled_fps();
@@ -179,7 +188,7 @@ impl GyroSource {
 
             if !grav_is_usable { grav.clear(); }
 
-            for ((ts, quat), iori) in zip(&quats, &iori) {
+            for ((ts, _quat), iori) in zip(&quats, &iori) {
                 iori_map.insert(*ts, *iori);
             }
 
@@ -265,22 +274,23 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
-            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && self.gravity_vectors.is_none() {
+            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && (self.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
                     QuaternionConverter::convert(&self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
                 } else {
                     self.org_quaternions.clone()
                 },
             1 => self.quaternions = ComplementaryIntegrator::integrate(&self.raw_imu, self.duration_ms),
-            2 => self.quaternions = MadgwickIntegrator::integrate(&self.raw_imu, self.duration_ms),
-            3 => self.quaternions = MahonyIntegrator::integrate(&self.raw_imu, self.duration_ms),
-            4 => self.quaternions = GyroOnlyIntegrator::integrate(&self.raw_imu, self.duration_ms),
-            5 => self.quaternions = VQFIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            2 => self.quaternions = VQFIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            3 => self.quaternions = SimpleGyroIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            4 => self.quaternions = SimpleGyroAccelIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            5 => self.quaternions = MahonyIntegrator::integrate(&self.raw_imu, self.duration_ms),
+            6 => self.quaternions = MadgwickIntegrator::integrate(&self.raw_imu, self.duration_ms),
             _ => log::error!("Unknown integrator")
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &mut dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
+    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
         if true {
             self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.integration_method, keyframes);
             self.smoothed_quaternions = alg.smooth(&self.smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
@@ -288,7 +298,7 @@ impl GyroSource {
             self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
             self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.integration_method, keyframes);
         }
-        
+
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
         self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
 
@@ -297,7 +307,6 @@ impl GyroSource {
             *sq.1 = sq.1.inverse() * q.1;
         }
     }
-
 
     pub fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {
         if offset_ms.is_finite() && !offset_ms.is_nan() {

@@ -6,7 +6,6 @@ mod complementary;
 mod vqf;
 
 use std::collections::BTreeMap;
-use itertools::Itertools;
 use nalgebra::*;
 use super::gyro_source::{TimeIMU, Quat64, TimeQuat};
 use ahrs::{Ahrs, Madgwick, Mahony};
@@ -16,18 +15,19 @@ pub trait GyroIntegrator {
 }
 
 pub struct QuaternionConverter { }
-pub struct MadgwickIntegrator { }
-pub struct GyroOnlyIntegrator { }
-pub struct MahonyIntegrator { }
 pub struct ComplementaryIntegrator { }
 pub struct VQFIntegrator { }
+pub struct SimpleGyroIntegrator { }
+pub struct SimpleGyroAccelIntegrator { }
+pub struct MahonyIntegrator { }
+pub struct MadgwickIntegrator { }
 
 // const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
 const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
-impl QuaternionConverter {  
+impl QuaternionConverter {
     pub fn convert(org_quaternions: &TimeQuat, image_orientations : &TimeQuat, imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
-        let vqf_quats = VQFIntegrator::integrate(imu_data, duration_ms);
+        let vqf_quats = ComplementaryIntegrator::integrate(imu_data, duration_ms);
         let mut boost = 20;
         let mut ret : TimeQuat = BTreeMap::new();
         let mut corr_sm = UnitQuaternion::identity();
@@ -45,38 +45,169 @@ impl QuaternionConverter {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-impl GyroIntegrator for MadgwickIntegrator {
+use complementary_v2::ComplementaryFilterV2;
+
+impl GyroIntegrator for ComplementaryIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
         if imu_data.is_empty() { return BTreeMap::new(); }
-
         let mut quats = BTreeMap::new();
-        let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
-        let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
+        let sample_time_ms = duration_ms / imu_data.len() as f64;
 
-        let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.02, init_pos);
-        let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
+        let mut f = ComplementaryFilterV2::default();
+        // Limit initial settle time for short videos
+        f.set_initial_settle_time((duration_ms / 1000.0 * 0.05).min(2.0));
+        //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
+        let mut counter = 0;
+        let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
-                let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
-                let accl = Vector3::new(-a[1], a[0], a[2]);
-
-                *ahrs.sample_period_mut() = (v.timestamp_ms - prev_time) / 1000.0;
+                let acc = Vector3::new(-a[1], a[0], a[2]);
+                // log::info!("acc norm: {}", acc.norm());
 
                 if let Some(m) = v.magn.as_ref() {
-                    let magn = Vector3::new(-m[1], m[0], m[2]);
-
-                    match ahrs.update(&gyro, &accl, &magn) {
-                        Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
+                    if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
+                        f.update_mag(acc[0], acc[1], acc[2],
+                            -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
+                            magn[0], magn[1], magn[2],
+                            (v.timestamp_ms - prev_time) / 1000.0);
                     }
                 } else {
-                    match ahrs.update_imu(&gyro, &accl) {
-                        Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
-                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
+                    counter += 1;
+                    if counter % 20 == 0 {
+                        //println!("{:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}", v.timestamp_ms, acc[0], acc[1], acc[2], -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD);
                     }
+                    f.update(acc[0], acc[1], acc[2],
+                        -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
+                        (v.timestamp_ms - prev_time) / 1000.0);
                 }
+                let x = f.get_orientation();
+                quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x.0, Vector3::new(x.1, x.2, x.3))));
+
+                prev_time = v.timestamp_ms;
+            }
+        }
+
+        quats
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+impl GyroIntegrator for VQFIntegrator {
+    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        if imu_data.is_empty() { return BTreeMap::new(); }
+        let mut out_quats = BTreeMap::new();
+        let sample_time = duration_ms / (imu_data.len() * 1000) as f64;
+
+        let num_samples = imu_data.len();
+
+        let mut gyr = Vec::with_capacity(num_samples*3);
+        let mut acc = Vec::with_capacity(num_samples*3);
+        let mut mag = Vec::with_capacity(num_samples*3);
+        let mut quat = Vec::with_capacity(num_samples*4);
+        for v in imu_data {
+            let g = v.gyro.unwrap_or_default();
+            // zero mag or acc (default) is ignored by VQF
+            let a = v.accl.unwrap_or_default();
+            let m = v.magn.unwrap_or_default();
+            gyr.extend([-g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD]);
+            acc.extend([-a[1], a[0], a[2]]);
+            mag.extend([-m[1], m[0], m[2]]);
+            quat.extend([1.0, 0.0, 0.0, 0.0]);
+        }
+
+        // Tweak parameters here, see parameter descriptions: https://github.com/dlaidig/vqf/blob/main/vqf/cpp/vqf.hpp#L37
+        let params = vqf::VQFParams {
+            tau_acc: 40.0,
+            tau_mag: 40.0,
+            ..Default::default()
+        };
+        vqf::offline_vqf(gyr, acc, Some(mag), num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
+        for (i, v) in imu_data.iter().enumerate() {
+            out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
+        }
+        out_quats
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+impl GyroIntegrator for SimpleGyroIntegrator {
+    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        if imu_data.is_empty() { return BTreeMap::new(); }
+        let mut quats = BTreeMap::new();
+        let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
+
+        let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
+        let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
+
+        for v in imu_data {
+            if let Some(g) = v.gyro.as_ref() {
+                let omega = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
+
+                // calculate rotation quaternion
+                let dt = (v.timestamp_ms - prev_time) / 1000.0;
+                let delta_q = UnitQuaternion::from_scaled_axis(omega * dt);
+
+                // rotate orientation by this quaternion
+                orientation = Quat64::from_quaternion(orientation.quaternion() * delta_q.quaternion());
+
+                quats.insert((v.timestamp_ms * 1000.0) as i64, orientation);
+
+                prev_time = v.timestamp_ms;
+            }
+        }
+
+        quats
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+impl GyroIntegrator for SimpleGyroAccelIntegrator {
+    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        if imu_data.is_empty() { return BTreeMap::new(); }
+        let mut quats = BTreeMap::new();
+        let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
+
+        let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
+        let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
+        let start_time = prev_time;
+
+        for v in imu_data {
+            if let Some(g) = v.gyro.as_ref() {
+                let mut omega = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
+
+                let a = v.accl.unwrap_or_default();
+                let acc = Vector3::new(-a[1], a[0], a[2]).try_normalize(0.0).unwrap_or_default();
+                let g = acc.norm();
+                if (0.9..1.1).contains(&g) {
+                    let acc_world_vec = orientation * acc;
+                    let correction_world = acc_world_vec.cross(&Vector3::new(0.0, 0.0, 1.0));
+
+                    // high weight for first 1.5s to "lock" it
+                    let weight = if v.timestamp_ms - start_time < 15000.0 { 10.0 } else { 0.6 };
+                    let correction_body = weight * (orientation.conjugate() *correction_world);
+                    omega += correction_body;
+                }
+
+                // calculate rotation quaternion
+                let dt = (v.timestamp_ms - prev_time) / 1000.0;
+                let delta_q = UnitQuaternion::from_scaled_axis(omega * dt);
+
+                // rotate orientation by this quaternion
+                orientation = Quat64::from_quaternion(orientation.quaternion() * delta_q.quaternion());
+
+                quats.insert((v.timestamp_ms * 1000.0) as i64, orientation);
+
                 prev_time = v.timestamp_ms;
             }
         }
@@ -133,126 +264,42 @@ impl GyroIntegrator for MahonyIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-impl GyroIntegrator for GyroOnlyIntegrator {
+impl GyroIntegrator for MadgwickIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
         if imu_data.is_empty() { return BTreeMap::new(); }
+
         let mut quats = BTreeMap::new();
-        let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
+        let init_pos = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
+        let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
 
-        let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
-        let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
-
+        let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.02, init_pos);
+        let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
-                let omega = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
-
-                // calculate rotation quaternion
-                let dt = (v.timestamp_ms - prev_time) / 1000.0;
-                let delta_q = UnitQuaternion::from_scaled_axis(omega * dt);
-
-                // rotate orientation by this quaternion
-                orientation = Quat64::from_quaternion(orientation.quaternion() * delta_q.quaternion());
-
-                quats.insert((v.timestamp_ms * 1000.0) as i64, orientation);
-
-                prev_time = v.timestamp_ms;
-            }
-        }
-
-        quats
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-use complementary_v2::ComplementaryFilterV2;
-
-impl GyroIntegrator for ComplementaryIntegrator {
-    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
-        if imu_data.is_empty() { return BTreeMap::new(); }
-        let mut quats = BTreeMap::new();
-        let sample_time_ms = duration_ms / imu_data.len() as f64;
-
-        let mut f = ComplementaryFilterV2::default();
-        // Limit initial settle time for short videos
-        f.set_initial_settle_time((duration_ms / 1000.0 * 0.05).min(2.0));
-        //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
-        let mut counter = 0;
-        let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
-        for v in imu_data {
-            if let Some(g) = v.gyro.as_ref() {
+                let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
-                let acc = Vector3::new(-a[1], a[0], a[2]);
+                let accl = Vector3::new(-a[1], a[0], a[2]);
+
+                *ahrs.sample_period_mut() = (v.timestamp_ms - prev_time) / 1000.0;
 
                 if let Some(m) = v.magn.as_ref() {
-                    if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
-                        f.update_mag(acc[0], acc[1], acc[2],
-                            -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
-                            magn[0], magn[1], magn[2],
-                            (v.timestamp_ms - prev_time) / 1000.0);
+                    let magn = Vector3::new(-m[1], m[0], m[2]);
+
+                    match ahrs.update(&gyro, &accl, &magn) {
+                        Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}] Magn: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2], magn[0], magn[1], magn[2])
                     }
                 } else {
-                    counter += 1;
-                    if counter % 20 == 0 {
-                        //println!("{:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}", v.timestamp_ms, acc[0], acc[1], acc[2], -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD);
+                    match ahrs.update_imu(&gyro, &accl) {
+                        Ok(quat) => { quats.insert((v.timestamp_ms * 1000.0) as i64, *quat); },
+                        Err(e) => log::warn!("Invalid data! {} Gyro: [{}, {}, {}] Accel: [{}, {}, {}]", e, gyro[0], gyro[1], gyro[2], accl[0], accl[1], accl[2])
                     }
-                    f.update(acc[0], acc[1], acc[2],
-                        -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
-                        (v.timestamp_ms - prev_time) / 1000.0);
                 }
-                let x = f.get_orientation();
-                quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(x.0, Vector3::new(x.1, x.2, x.3))));
-                
                 prev_time = v.timestamp_ms;
             }
         }
 
         quats
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-use vqf::{ offline_vqf, VQFParams };
-
-impl GyroIntegrator for VQFIntegrator {
-    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
-        if imu_data.is_empty() { return BTreeMap::new(); }
-        let mut out_quats = BTreeMap::new();
-        let sample_time = duration_ms / (imu_data.len() * 1000) as f64;
-
-        let num_samples = imu_data.len();
-
-        let mut gyr = Vec::with_capacity(num_samples*3);
-        let mut acc = Vec::with_capacity(num_samples*3);
-        let mut mag = Vec::with_capacity(num_samples*3);
-        let mut quat = Vec::with_capacity(num_samples*4);
-        for v in imu_data {
-            let g = v.gyro.unwrap_or_default();
-            // zero mag or acc (default) is ignored by VQF
-            let a = v.accl.unwrap_or_default();
-            let m = v.magn.unwrap_or_default();
-            gyr.extend([-g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD]);
-            acc.extend([-a[1], a[0], a[2]]);
-            mag.extend([-m[1], m[0], m[2]]);
-            quat.extend([1.0, 0.0, 0.0, 0.0]);
-        }
-
-        // Tweak parameters here, see parameter descriptions: https://github.com/dlaidig/vqf/blob/main/vqf/cpp/vqf.hpp#L37
-        let params = VQFParams {
-            tau_acc: 40.0,
-            tau_mag: 40.0,
-            ..Default::default()
-        };
-        offline_vqf(gyr, acc, Some(mag), num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
-        for (i, v) in imu_data.iter().enumerate() {
-            out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
-        }
-        out_quats
     }
 }

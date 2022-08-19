@@ -124,7 +124,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
-        
+
         Ok(())
     }
 
@@ -275,10 +275,10 @@ impl<T: PixelType> StabilizationManager<T> {
         let mut gyro = self.gyro.write();
         let params = self.params.read();
         let keyframes = self.keyframes.read().clone();
-        let mut smoothing = self.smoothing.write();
+        let smoothing = self.smoothing.read();
         let horizon_lock = smoothing.horizon_lock.clone();
 
-        gyro.recompute_smoothness(smoothing.current_mut().as_mut(), horizon_lock, &params, &keyframes);
+        gyro.recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params, &keyframes);
     }
 
     pub fn recompute_undistortion(&self) {
@@ -679,6 +679,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_use_gravity_vectors(&self, v: bool) {
         self.smoothing.write().horizon_lock.use_gravity_vectors = v;
+        self.gyro.write().set_use_gravity_vectors(v);
         self.invalidate_smoothing();
     }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
@@ -755,13 +756,13 @@ impl<T: PixelType> StabilizationManager<T> {
         });
     }
 
-    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, output_options: String, sync_options: String) -> std::io::Result<()> {
-        let data = self.export_gyroflow_data(thin, extended, output_options, sync_options)?;
+    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, additional_data: String) -> std::io::Result<()> {
+        let data = self.export_gyroflow_data(thin, extended, additional_data)?;
         std::fs::write(filepath, data)?;
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, output_options: String, sync_options: String) -> std::io::Result<String> {
+    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: String) -> std::io::Result<String> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -787,9 +788,6 @@ impl<T: PixelType> StabilizationManager<T> {
 
             (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll, smoothing_lock.horizon_lock.use_gravity_vectors)
         };
-
-        let render_options: serde_json::Value = serde_json::from_str(&output_options).unwrap_or_default();
-        let sync_options: serde_json::Value = serde_json::from_str(&sync_options).unwrap_or_default();
 
         let input_file = self.input_file.read().clone();
 
@@ -846,8 +844,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "gravity_vectors":    if !thin && input_file.path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
                 // "smoothed_quaternions": smooth_quats
             },
-            "output": render_options,
-            "synchronization": sync_options,
+
             "offsets": gyro.get_offsets(), // timestamp, offset value
             "keyframes": self.keyframes.read().serialize(),
 
@@ -857,6 +854,9 @@ impl<T: PixelType> StabilizationManager<T> {
             // "frame_orientation": {}, // timestamp, original frame quaternion
             // "stab_transform":    {} // timestamp, final quaternion
         });
+
+        util::merge_json(&mut obj, &serde_json::from_str(&additional_data).unwrap_or_default());
+
         if extended {
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
                 if let Some(q) = util::compress_to_base91(&gyro.quaternions) {
@@ -1020,12 +1020,6 @@ impl<T: PixelType> StabilizationManager<T> {
                 if let Some(v) = obj.get("acc_rotation") { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
 
-                if blocking {
-                    gyro.apply_transforms();
-                    gyro.integrate();
-                }
-                self.smoothing.write().update_quats_checksum(&gyro.quaternions);
-
                 obj.remove("raw_imu");
                 obj.remove("quaternions");
                 obj.remove("smoothed_quaternions");
@@ -1075,6 +1069,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 }
                 if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
                     smoothing.horizon_lock.use_gravity_vectors = v;
+                    self.gyro.write().set_use_gravity_vectors(v);
                 }
 
                 obj.remove("adaptive_zoom_fovs");
@@ -1095,6 +1090,14 @@ impl<T: PixelType> StabilizationManager<T> {
 
             if let Some(keyframes) = obj.get("keyframes") {
                 self.keyframes.write().deserialize(keyframes);
+            }
+
+            if let Some(start) = obj.get("trim_start").and_then(|x| x.as_f64()) {
+                if let Some(end) = obj.get("trim_end").and_then(|x| x.as_f64()) {
+                    let mut params = self.params.write();
+                    params.trim_start = start;
+                    params.trim_end = end;
+                }
             }
 
             {
@@ -1128,6 +1131,13 @@ impl<T: PixelType> StabilizationManager<T> {
             }
 
             if blocking {
+                {
+                    let mut gyro = self.gyro.write();
+                    gyro.apply_transforms();
+                    gyro.integrate();
+                    self.smoothing.write().update_quats_checksum(&gyro.quaternions);
+                }
+
                 if let Some(output_size) = output_size {
                     if output_size.0 > 0 && output_size.1 > 0 {
                         self.set_size(output_size.0, output_size.1);

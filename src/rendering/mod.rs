@@ -134,7 +134,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     let params = stab.params.read();
     let trim_ratio = if !render_options.pad_with_black && !render_options.preserve_other_tracks {
-        render_options.trim_end - render_options.trim_start
+        params.trim_end - params.trim_start
     } else {
         1.0
     };
@@ -158,6 +158,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     } else {
         ffmpeg_video::ProcessingOrder::PreConversion
     };
+
+    let (trim_start, trim_end) = (params.trim_start, params.trim_end);
 
     drop(params);
 
@@ -183,8 +185,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
     if !render_options.pad_with_black && !render_options.preserve_other_tracks {
-        if render_options.trim_start > 0.0 { proc.start_ms = Some(render_options.trim_start * duration_ms); }
-        if render_options.trim_end   < 1.0 { proc.end_ms   = Some(render_options.trim_end   * duration_ms); }
+        if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
+        if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
     }
 
     match proc.video_codec.as_deref() {
@@ -293,8 +295,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
         let fill_with_background = render_options.pad_with_black &&
-            (timestamp_us < (render_options.trim_start * duration_ms * 1000.0).round() as i64 ||
-             timestamp_us > (render_options.trim_end   * duration_ms * 1000.0).round() as i64);
+            (timestamp_us < (trim_start * duration_ms * 1000.0).round() as i64 ||
+             timestamp_us > (trim_end   * duration_ms * 1000.0).round() as i64);
 
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
@@ -646,8 +648,6 @@ pub fn test() {
             codec: "ProRes".into(),
             codec_options: "Standard".into(),
             output_path: format!("{}_stab.mov", vid),
-            trim_start: 0.0,
-            trim_end: 0.02,
             output_width: video_size.0,
             output_height: video_size.1,
             bitrate: 100.0,

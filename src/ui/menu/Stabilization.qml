@@ -168,7 +168,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
-        QT_TRANSLATE_NOOP("Stabilization", "Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
@@ -176,7 +175,7 @@ MenuItem {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             if (Math.abs(+frame_readout_time) > 0) {
                 root.setFrameReadoutTime(frame_readout_time);
             } else {
@@ -360,7 +359,7 @@ MenuItem {
             width: parent.width;
             wrapMode: Text.WordWrap;
             textFormat: Text.StyledText;
-            text: qsTr("Requires accurate orientation determination. Try with Complementary, Mahony, or Madgwick integration method.");
+            text: qsTr("If the horizon is not locked well, try a different integration method in the \"Motion data\" section.");
         }
     }
 

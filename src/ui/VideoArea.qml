@@ -99,6 +99,21 @@ Item {
                     vid.setFrameRate(+obj.image_sequence_fps);
                     controller.image_sequence_fps = +obj.image_sequence_fps;
                 }
+                if (obj.hasOwnProperty("playback_speed")) {
+                    let i = 0;
+                    const speed = +obj.playback_speed;
+                    for (const x of playbackRateCb.model) {
+                        const rate = +x.replace("x", "");
+                        if (Math.abs(rate - speed) < 0.01) {
+                            playbackRateCb.currentIndex = i;
+                            break;
+                        }
+                        ++i;
+                    }
+                }
+                if (obj.hasOwnProperty("muted")) {
+                    videoArea.vid.muted = !!obj.muted;
+                }
             }
         }
         function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
@@ -238,13 +253,17 @@ Item {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
                 // If source was detected, but gyro data is empty
-                if (camera && !contains_gyro && !contains_quats) {
-                    messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
+                if (camera) {
+                    if (!contains_gyro && !contains_quats) {
+                        messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
+                    }
+                    if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
+                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(1); // Switch to gyro view
                 }
             }
             if (root.pendingGyroflowData) {
@@ -599,6 +618,7 @@ Item {
                 }
 
                 ComboBox {
+                    id: playbackRateCb;
                     model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x"];
                     width: 60 * dpiScale;
                     currentIndex: 3;

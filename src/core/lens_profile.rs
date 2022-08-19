@@ -208,13 +208,15 @@ impl LensProfile {
             None
         }
     }
-    pub fn get_camera_matrix(&mut self, size: (usize, usize), video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
+    pub fn get_camera_matrix(&self, size: (usize, usize), _video_size: (usize, usize)) -> nalgebra::Matrix3<f64> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mat = self.get_camera_matrix_internal().unwrap();
 
-            if self.optimal_fov.is_none() && self.num_images > 3 {
-                self.optimal_fov = Some(self.calculate_optimal_fov(video_size));
-            }
+            // TODO: this didn't really work, try to figure it out and re-enable
+            // if self.optimal_fov.is_none() && self.num_images > 3 {
+            //     self.optimal_fov = Some(self.calculate_optimal_fov(video_size));
+            //     log::debug!("Optimal lens FOV: {:?} ({:?})", self.optimal_fov, video_size);
+            // }
 
             mat
         } else {

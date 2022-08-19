@@ -58,7 +58,9 @@ Modal {
             "Advanced": ["encoder_options", "keyframe_distance", "preserve_other_tracks", "pad_with_black"],
         },
         "Advanced": {
-            "Background": ["background_color", "background_mode", "background_margin", "background_margin_feather"]
+            "Background":           ["background_color", "background_mode", "background_margin", "background_margin_feather"],
+            "Playback speed":       ["playback_speed"],
+            "Playback mute status": ["muted"]
         }
     }];
 
@@ -116,6 +118,8 @@ Modal {
             QT_TR_NOOP("Advanced");
         QT_TR_NOOP("Advanced");
             QT_TR_NOOP("Background");
+            QT_TR_NOOP("Playback speed");
+            QT_TR_NOOP("Playback mute status");
     }
 
     Item { width: 1; height: 10 * dpiScale; }
@@ -204,11 +208,6 @@ Modal {
                     }
                 }
             });
-            if (finalObj.hasOwnProperty("trim_start") && finalObj.trim_start) {
-                if (!finalObj.output) finalObj.output = { };
-                finalObj.output.trim_start = finalObj.trim_start;
-                finalObj.output.trim_end = finalObj.trim_end;
-            }
             root.apply(finalObj);
         }
         root.opened = false;
@@ -217,7 +216,7 @@ Modal {
     buttons: [isPreset? qsTr("Save") : qsTr("Apply"), qsTr("Cancel")];
     accentButton: 0;
 
-    function copyObj(from, by, to) {
+    function copyObj(from: object, by: object, to: object) {
         for (const key in by) {
             if (typeof by[key] === "boolean") {
                 if (by[key]) {
@@ -229,7 +228,7 @@ Modal {
             }
         }
     }
-    function getFilteredObject(source, desc) {
+    function getFilteredObject(source: object, desc: object): object {
         let finalData = { version: 2 };
         copyObj(source, desc, finalData);
         // Cleanup empty objects

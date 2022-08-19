@@ -75,7 +75,7 @@ MenuItem {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
             root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
@@ -325,7 +325,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
-            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"] :  ["Complementary", "Madgwick", "Mahony", "Gyroflow", "VQF"];
+            model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "VQF", "Simple gyro", "Simple gyro + accel", "Mahony", "Madgwick" ] :  ["Complementary", "VQF", "Simple gyro", "Simple gyro + accel", "Mahony", "Madgwick"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
@@ -387,7 +387,7 @@ MenuItem {
                         ctx.fill();
                         ctx.stroke();
                     }
-                    
+
                     for (let i = 0; i < 3; i++) {
                         ctx.beginPath();
                         ctx.moveTo(width/6, height/2);

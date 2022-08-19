@@ -3,6 +3,7 @@
 
 import QtQuick
 import QtQuick.Controls as QQC
+import Qt.labs.settings
 
 import "components/"
 import "Util.js" as Util;
@@ -221,10 +222,7 @@ Item {
 
             if (saved && saved.length > 100) {
                 Qt.callLater(() => {
-                    const options = exportSettings.getExportOptionsJson();
-                    const sync_options = window.sync.getSettingsJson();
-
-                    render_queue.restore_render_queue(saved, controller, options, sync_options);
+                    render_queue.restore_render_queue(saved, controller, window.getAdditionalProjectDataJson());
                 });
             }
         }
@@ -549,11 +547,10 @@ Item {
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
         onLoadFiles: (urls) => {
-            const options = exportSettings.getExportOptionsJson();
-            const sync_options = window.sync.getSettingsJson();
+            const additional = window.getAdditionalProjectDataJson();
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(controller.url_to_path(url), controller, options, sync_options);
+                const job_id = render_queue.add_file(controller.url_to_path(url), controller, additional);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();
@@ -567,28 +564,52 @@ Item {
         leftPadding: 5 * dpiScale; rightPadding: 5 * dpiScale;
         property int currentOption: 0;
         property var options: [
-            qsTr("Do nothing"),
-            qsTr("Shut down the computer"),
-            qsTr("Restart the computer"),
-            qsTr("Sleep"),
-            qsTr("Hibernate"),
-            qsTr("Logout"),
-            qsTr("Close Gyroflow")
+            QT_TRANSLATE_NOOP("Popup", "Do nothing"),
+            QT_TRANSLATE_NOOP("Popup", "Shut down the computer"),
+            QT_TRANSLATE_NOOP("Popup", "Restart the computer"),
+            QT_TRANSLATE_NOOP("Popup", "Sleep"),
+            QT_TRANSLATE_NOOP("Popup", "Hibernate"),
+            QT_TRANSLATE_NOOP("Popup", "Logout"),
+            QT_TRANSLATE_NOOP("Popup", "Close Gyroflow")
         ];
         text: qsTr("When rendering is finished: %1").arg(options[currentOption]).trim();
-        onClicked: pp.open();
+        onClicked: p0.open();
         onCurrentOptionChanged: render_queue.when_done = currentOption;
         Popup {
-            id: pp;
+            id: p0;
             model: parent.options;
             currentIndex: parent.currentOption;
-            width: pp.maxItemWidth + 10 * dpiScale;
+            width: maxItemWidth + 10 * dpiScale;
             x: parent.width - width;
             y: itemHeight;
             itemHeight: 25 * dpiScale;
             font.pixelSize: 11 * dpiScale;
             onClicked: i => parent.currentOption = i;
         }
+    }
+    LinkButton {
+        id: parallelRenders;
+        anchors.right: parent.right;
+        anchors.bottom: parent.bottom;
+        anchors.margins: 5 * dpiScale;
+        leftPadding: 5 * dpiScale; rightPadding: 5 * dpiScale;
+        property int currentOption: 0;
+        property var options: ["1", "2", "3", "4", "5", "6"];
+        text: qsTr("Number of parallel renders: %1").arg(options[currentOption]).trim();
+        onClicked: p1.open();
+        onCurrentOptionChanged: render_queue.parallel_renders = +options[currentOption];
+        Popup {
+            id: p1;
+            model: parent.options;
+            currentIndex: parent.currentOption;
+            width: maxItemWidth + 10 * dpiScale;
+            x: parent.width - width;
+            y: itemHeight;
+            itemHeight: 25 * dpiScale;
+            font.pixelSize: 11 * dpiScale;
+            onClicked: i => parent.currentOption = i;
+        }
+        Settings { property alias parallelRenders: parallelRenders.currentOption; }
     }
 
     LoaderOverlay {

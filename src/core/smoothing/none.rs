@@ -15,5 +15,5 @@ impl SmoothingAlgorithm for None {
     fn set_parameter(&mut self, _name: &str, _val: f64) { }
 
     fn get_checksum(&self) -> u64 { 0 }
-    fn smooth(&mut self, quats: &TimeQuat, _duration: f64, _: &StabilizationParams, _: &KeyframeManager) -> TimeQuat { quats.clone() }
+    fn smooth(&self, quats: &TimeQuat, _duration: f64, _: &StabilizationParams, _: &KeyframeManager) -> TimeQuat { quats.clone() }
 }

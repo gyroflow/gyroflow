@@ -65,7 +65,7 @@ pub struct Controller {
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
     realtime_fps_loaded: qt_signal!(fps: f64),
 
@@ -178,8 +178,8 @@ pub struct Controller {
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
-    export_gyroflow_file: qt_method!(fn(&self, thin: bool, extended: bool, output_options: QJsonObject, sync_options: QJsonObject, override_location: QString, overwrite: bool)),
-    export_gyroflow_data: qt_method!(fn(&self, thin: bool, extended: bool, output_options: QJsonObject, sync_options: QJsonObject) -> QString),
+    export_gyroflow_file: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool)),
+    export_gyroflow_data: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -492,7 +492,7 @@ impl Controller {
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, f64, QString)| {
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
 
@@ -502,7 +502,7 @@ impl Controller {
 
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7);
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8);
 
                 stab2.invalidate_ongoing_computations();
                 stab2.invalidate_smoothing();
@@ -561,6 +561,7 @@ impl Controller {
                     let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
                     let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or_else(|| "XYZ".into());
                     let has_gyro = !gyro.quaternions.is_empty();
+                    let has_raw_gyro = !gyro.raw_imu.is_empty();
                     let has_quats = !gyro.org_quaternions.is_empty();
                     drop(gyro);
 
@@ -589,7 +590,7 @@ impl Controller {
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
 
-                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_quats, frame_readout_time, QString::from(camera_id)));
+                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id)));
                 });
             }
         }
@@ -651,7 +652,7 @@ impl Controller {
                 gyro.integrate();
                 stab.smoothing.write().update_quats_checksum(&gyro.quaternions);
             }
-            stab.recompute_smoothness();
+            stab.invalidate_smoothing();
             finished(());
         });
     }
@@ -779,7 +780,7 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow_file(&self, thin: bool, extended: bool, output_options: QJsonObject, sync_options: QJsonObject, override_location: QString, overwrite: bool) {
+    fn export_gyroflow_file(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool) {
         let gf_path = if override_location.is_empty() {
             let video_path = self.stabilizer.input_file.read().path.clone();
             let video_path = std::path::Path::new(&video_path);
@@ -791,7 +792,7 @@ impl Controller {
         if !overwrite && std::path::Path::new(&gf_path).exists() {
             self.gyroflow_exists(QString::from(gf_path), thin, extended);
         } else {
-            match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, output_options.to_json().to_string(), sync_options.to_json().to_string()) {
+            match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, additional_data.to_json().to_string()) {
                 Ok(_) => {
                     self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
                 },
@@ -805,8 +806,8 @@ impl Controller {
         }
     }
 
-    fn export_gyroflow_data(&self, thin: bool, extended: bool, output_options: QJsonObject, sync_options: QJsonObject) -> QString {
-        QString::from(self.stabilizer.export_gyroflow_data(thin, extended, output_options.to_json().to_string(), sync_options.to_json().to_string()).unwrap_or_default())
+    fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString {
+        QString::from(self.stabilizer.export_gyroflow_data(thin, extended, additional_data.to_json().to_string()).unwrap_or_default())
     }
 
     fn get_videopath_from_gyroflow_file(&mut self, url: QUrl) -> QString {
