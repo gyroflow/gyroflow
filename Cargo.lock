@@ -487,7 +487,7 @@ checksum = "fff857943da45f546682664a79488be82e69e43c1a7a2307679ab9afb3a66d2e"
 [[package]]
 name = "cl-sys"
 version = "0.4.2"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "libc",
 ]
@@ -962,7 +962,7 @@ dependencies = [
 [[package]]
 name = "fc-blackbox"
 version = "0.2.0"
-source = "git+https://github.com/AdrianEddy/fc-blackbox.git#4e9e4e6c95e7bb98efc5e0186bd37937755e450f"
+source = "git+https://github.com/AdrianEddy/fc-blackbox.git?rev=4e9e4e6#4e9e4e6c95e7bb98efc5e0186bd37937755e450f"
 dependencies = [
  "chrono",
  "integer-encoding",
@@ -1978,7 +1978,7 @@ dependencies = [
 [[package]]
 name = "ocl"
 version = "0.19.3"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "futures",
  "nodrop",
@@ -1991,7 +1991,7 @@ dependencies = [
 [[package]]
 name = "ocl-core"
 version = "0.11.2"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "bitflags",
  "cl-sys",
@@ -2006,7 +2006,7 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "num-traits 0.2.15",
 ]
@@ -2294,7 +2294,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=6411d54#6411d54361e95a130e7a63537313c26b57c9323d"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2308,7 +2308,7 @@ dependencies = [
 [[package]]
 name = "qmetaobject_impl"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=6411d54#6411d54361e95a130e7a63537313c26b57c9323d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2331,7 +2331,7 @@ dependencies = [
 [[package]]
 name = "qttypes"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git#769069cc7dbbcccb5a09824b6c1baff1bfad61d8"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=6411d54#6411d54361e95a130e7a63537313c26b57c9323d"
 dependencies = [
  "cpp",
  "cpp_build",

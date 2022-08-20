@@ -357,7 +357,7 @@ dependencies = [
 [[package]]
 name = "cl-sys"
 version = "0.4.2"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "libc",
 ]
@@ -1527,7 +1527,7 @@ dependencies = [
 [[package]]
 name = "ocl"
 version = "0.19.3"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "futures",
  "nodrop",
@@ -1540,7 +1540,7 @@ dependencies = [
 [[package]]
 name = "ocl-core"
 version = "0.11.2"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "bitflags",
  "cl-sys",
@@ -1555,7 +1555,7 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/ocl.git#829c8ed673944a0b44bb389a0404b98c84545845"
+source = "git+https://github.com/AdrianEddy/ocl.git?rev=74c9335#74c9335b37af6bea14fff9981255e9996f377831"
 dependencies = [
  "num-traits 0.2.15",
 ]

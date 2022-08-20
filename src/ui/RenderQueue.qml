@@ -572,7 +572,7 @@ Item {
             QT_TRANSLATE_NOOP("Popup", "Logout"),
             QT_TRANSLATE_NOOP("Popup", "Close Gyroflow")
         ];
-        text: qsTr("When rendering is finished: %1").arg(options[currentOption]).trim();
+        text: qsTr("When rendering is finished: %1").arg(qsTranslate("Popup", options[currentOption])).trim();
         onClicked: p0.open();
         onCurrentOptionChanged: render_queue.when_done = currentOption;
         Popup {

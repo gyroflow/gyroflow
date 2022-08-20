@@ -52,9 +52,9 @@ whoami = "1.2.1"
 tar = "0.4.38"
 
 [patch.crates-io]
-fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git" }
-qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git" }
-qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git" }
+fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git", rev = "4e9e4e6" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
 version = "0.39.0"
