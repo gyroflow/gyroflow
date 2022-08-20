@@ -716,8 +716,13 @@ impl RenderQueue {
         }
     }
 
-    fn get_output_path(suffix: &str, path: &str, codec: &str) -> String {
+    fn get_output_path(suffix: &str, path: &str, codec: &str, ui_output_path: &str) -> String {
         let mut path = std::path::Path::new(path).with_extension("");
+
+        if !ui_output_path.is_empty() {
+            // Prefer output path of the currently opened file
+            path = std::path::Path::new(ui_output_path).to_path_buf();
+        }
 
         let ext = match codec {
             "ProRes"        => ".mov",
@@ -729,7 +734,7 @@ impl RenderQueue {
 
         path.set_file_name(format!("{}{}{}", path.file_name().map(|v| v.to_string_lossy()).unwrap_or_default(), suffix, ext));
 
-        path.to_string_lossy().to_string()
+        path.to_string_lossy().replace('\\', "/")
     }
 
     pub fn add_file(&mut self, path: String, controller: QJSValue, additional_data: String) -> u32 {
@@ -901,7 +906,7 @@ impl RenderQueue {
                                 render_options.bitrate = render_options.bitrate.max(info.bitrate);
                                 render_options.output_width = info.width as usize;
                                 render_options.output_height = info.height as usize;
-                                render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec);
+                                render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec, &render_options.output_path);
 
                                 let ratio = info.width as f64 / info.height as f64;
 
@@ -953,6 +958,8 @@ impl RenderQueue {
 
                                     Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), sync_options);
                                 }
+                            } else {
+                                err(("An error occured: %1".to_string(), "Unable to read the video file.".to_string()));
                             }
                         });
                     }
