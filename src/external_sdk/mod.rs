@@ -47,10 +47,17 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                 });
                 let gz = GzDecoder::new(br);
                 let mut archive = tar::Archive::new(gz);
-                for file in archive.entries()? {
+                'files: for file in archive.entries()? {
                     let mut file = file.unwrap();
                     let mut final_path = out_dir.clone();
-                    final_path.push(file.path()?);
+                    for part in file.path()?.components() {
+                        use std::path::Component;
+                        match part {
+                            Component::Prefix(..) | Component::RootDir | Component::CurDir => continue,
+                            Component::ParentDir => continue 'files,
+                            Component::Normal(part) => final_path.push(part),
+                        }
+                    }
                     if final_path.exists() {
                         let _ = std::fs::remove_file(&final_path);
                         if final_path.exists() {
