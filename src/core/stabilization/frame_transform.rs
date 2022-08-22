@@ -118,7 +118,7 @@ impl FrameTransform {
             matrix_count:  matrices.len() as i32,
             f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
-            k:             [params.distortion_coeffs[0] as f32, params.distortion_coeffs[1] as f32, params.distortion_coeffs[2] as f32, params.distortion_coeffs[3] as f32],
+            k:             params.distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
             fov:           fov as f32,
             r_limit:       params.radial_distortion_limit as f32,
             lens_correction_amount:   lens_correction_amount as f32,
@@ -139,7 +139,7 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 4], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-fn undistort_point(pos: vec2<f32>, k: vec4<f32>, amount: f32) -> vec2<f32> {
+fn undistort_point(pos: vec2<f32>, k: array<f32, 12>, amount: f32) -> vec2<f32> {
     let theta_d = min(max(length(pos), -1.5707963267948966), 1.5707963267948966); // PI/2
 
     var converged = false;
@@ -15,10 +15,10 @@ fn undistort_point(pos: vec2<f32>, k: vec4<f32>, amount: f32) -> vec2<f32> {
             let theta4 = theta2*theta2;
             let theta6 = theta4*theta2;
             let theta8 = theta6*theta2;
-            let k0_theta2 = k.x * theta2;
-            let k1_theta4 = k.y * theta4;
-            let k2_theta6 = k.z * theta6;
-            let k3_theta8 = k.w * theta8;
+            let k0_theta2 = k[0] * theta2;
+            let k1_theta4 = k[1] * theta4;
+            let k2_theta6 = k[2] * theta6;
+            let k3_theta8 = k[3] * theta8;
             // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
             let theta_fix = (theta * (1.0 + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
                             /
@@ -46,7 +46,7 @@ fn undistort_point(pos: vec2<f32>, k: vec4<f32>, amount: f32) -> vec2<f32> {
     return vec2<f32>(0.0, 0.0);
 }
 
-fn distort_point(pos: vec2<f32>, k: vec4<f32>) -> vec2<f32> {
+fn distort_point(pos: vec2<f32>, k: array<f32, 12>) -> vec2<f32> {
     let r = length(pos);
 
     let theta = atan(r);
@@ -55,7 +55,7 @@ fn distort_point(pos: vec2<f32>, k: vec4<f32>) -> vec2<f32> {
     let theta6 = theta4*theta2;
     let theta8 = theta4*theta4;
 
-    let theta_d = theta * (1.0 + dot(k, vec4<f32>(theta2, theta4, theta6, theta8)));
+    let theta_d = theta * (1.0 + vec4<f32>(theta2 * k[0], theta4 * k[1], theta6 * k[2], theta8 * k[3]));
 
     var scale: f32 = 1.0;
     if (r != 0.0) {

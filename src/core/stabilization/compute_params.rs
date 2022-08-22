@@ -27,7 +27,7 @@ pub struct ComputeParams {
     pub video_height: usize,
     pub video_rotation: f64,
     pub camera_matrix: Matrix3<f64>,
-    pub distortion_coeffs: [f64; 4],
+    pub distortion_coeffs: [f64; 12],
     pub radial_distortion_limit: f64,
     pub lens_correction_amount: f64,
     pub background_mode: crate::stabilization_params::BackgroundMode,
@@ -55,7 +55,6 @@ impl ComputeParams {
         let lens = mgr.lens.read();
         let mut camera_matrix = lens.get_camera_matrix(params.size, params.video_size);
         let distortion_coeffs = lens.get_distortion_coeffs();
-        let distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
 
         let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {

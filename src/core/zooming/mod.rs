@@ -80,11 +80,8 @@ pub fn get_checksum(zoom: &Box<dyn ZoomingAlgorithm>) -> u64 {
     let compute_params = zoom.compute_params();
 
     let mut hasher = DefaultHasher::new();
-    if compute_params.distortion_coeffs.len() >= 4 {
-        hasher.write_u64(compute_params.distortion_coeffs[0].to_bits());
-        hasher.write_u64(compute_params.distortion_coeffs[1].to_bits());
-        hasher.write_u64(compute_params.distortion_coeffs[2].to_bits());
-        hasher.write_u64(compute_params.distortion_coeffs[3].to_bits());
+    for x in compute_params.distortion_coeffs {
+        hasher.write_u64(x.to_bits());
     }
 
     hasher.write_usize(compute_params.video_width);

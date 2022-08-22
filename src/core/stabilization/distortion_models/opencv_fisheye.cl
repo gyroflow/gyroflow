@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-float2 undistort_point(float2 pos, float4 k, float amount) {
+float2 undistort_point(float2 pos, float k[12], float amount) {
     float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
 
     bool converged = false;
@@ -15,10 +15,10 @@ float2 undistort_point(float2 pos, float4 k, float amount) {
             float theta4 = theta2*theta2;
             float theta6 = theta4*theta2;
             float theta8 = theta6*theta2;
-            float k0_theta2 = k.x * theta2;
-            float k1_theta4 = k.y * theta4;
-            float k2_theta6 = k.z * theta6;
-            float k3_theta8 = k.w * theta8;
+            float k0_theta2 = k[0] * theta2;
+            float k1_theta4 = k[1] * theta4;
+            float k2_theta6 = k[2] * theta6;
+            float k3_theta8 = k[3] * theta8;
             // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
             float theta_fix = (theta * (1.0f + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
                               /
@@ -46,7 +46,7 @@ float2 undistort_point(float2 pos, float4 k, float amount) {
     return (float2)(0.0f, 0.0f);
 }
 
-float2 distort_point(float2 pos, float4 k) {
+float2 distort_point(float2 pos, float k[12]) {
     float r = length(pos);
 
     float theta = atan(r);
@@ -55,9 +55,9 @@ float2 distort_point(float2 pos, float4 k) {
           theta6 = theta4*theta2,
           theta8 = theta4*theta4;
 
-    float theta_d = theta * (1.0 + dot(k, (float4)(theta2, theta4, theta6, theta8)));
+    float theta_d = theta * (1.0f + theta2 * k[0] + theta4 * k[1] + theta6 * k[2] + theta8 * k[3]);
 
-    float scale = r == 0? 1.0 : theta_d / r;
+    float scale = r == 0.0f? 1.0f : theta_d / r;
 
     return pos * scale;
 }

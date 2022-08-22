@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-fn undistort_point(pos_param: vec2<f32>, kk: vec4<f32>, amount: f32) -> vec2<f32> {
-    let k: array<f32, 12> = array<f32, 3>(kk.x, kk.y, kk.z, kk.w, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // TODO: allow more coefficients than 4?
-
+fn undistort_point(pos_param: vec2<f32>, k: array<f32, 12>, amount: f32) -> vec2<f32> {
     var pos = pos_param;
 
     let start_pos = pos;
@@ -29,9 +27,7 @@ fn undistort_point(pos_param: vec2<f32>, kk: vec4<f32>, amount: f32) -> vec2<f32
     );
 }
 
-fn distort_point(pos: vec2<f32>, kk: vec4<f32>) -> vec2<f32> {
-    let k: array<f32, 12> = array<f32, 12>(kk.x, kk.y, kk.z, kk.w, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // TODO: allow more coefficients than 4?
-
+fn distort_point(pos: vec2<f32>, k: array<f32, 12>) -> vec2<f32> {
     let r2 = pos.x * pos.x + pos.y * pos.y;
     let r4 = r2 * r2;
     let r6 = r4 * r2;

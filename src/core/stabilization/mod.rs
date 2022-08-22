@@ -56,7 +56,7 @@ pub struct KernelParams {
     pub background:    [f32; 4], // 16
     pub f:             [f32; 2], // 8  - focal length in pixels
     pub c:             [f32; 2], // 16 - lens center
-    pub k:             [f32; 4], // 16 - distortion coefficients
+    pub k:             [f32; 12], // 16,16,16 - distortion coefficients
     pub fov:           f32, // 4
     pub r_limit:       f32, // 8
     pub lens_correction_amount:   f32, // 12

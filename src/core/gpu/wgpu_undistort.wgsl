@@ -17,7 +17,7 @@ struct KernelParams {
     background:    vec4<f32>, // 16
     f:             vec2<f32>, // 8 - focal length in pixels
     c:             vec2<f32>, // 16 - lens center
-    k:             vec4<f32>, // 16 - distortion coefficients
+    k:             array<f32, 12>, // 16,16,16 - distortion coefficients
     fov:           f32, // 4
     r_limit:       f32, // 8
     lens_correction_amount:   f32, // 12

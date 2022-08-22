@@ -49,11 +49,7 @@ pub struct LensProfile {
 
     pub asymmetrical: bool,
 
-    pub use_opencv_fisheye: bool,
     pub fisheye_params: CameraParams,
-
-    pub use_opencv_standard: bool,
-    pub calib_params: CameraParams,
 
     pub identifier: String,
 
@@ -66,6 +62,8 @@ pub struct LensProfile {
 
     pub sync_settings: Option<serde_json::Value>,
 
+    pub distortion_model_id: i32,
+
     #[serde(skip)]
     pub filename: String,
 
@@ -74,8 +72,6 @@ pub struct LensProfile {
 
     #[serde(skip)]
     pub is_copy: bool,
-
-    pub distortion_model_id: i32
 }
 
 impl LensProfile {
@@ -102,7 +98,6 @@ impl LensProfile {
         if self.input_horizontal_stretch <= 0.01 { self.input_horizontal_stretch = 1.0; }
         if self.input_vertical_stretch   <= 0.01 { self.input_vertical_stretch   = 1.0; }
 
-        self.use_opencv_fisheye = true;
         self.calib_dimension = Dimensions { w: cal.width, h: cal.height };
         self.orig_dimension  = Dimensions { w: cal.width, h: cal.height };
         self.num_images = cal.used_points.len();
@@ -229,12 +224,18 @@ impl LensProfile {
             mat
         }
     }
-    pub fn get_distortion_coeffs(&self) -> nalgebra::Vector4<f64> {
-        if self.fisheye_params.distortion_coeffs.len() != 4 {
+    pub fn get_distortion_coeffs(&self) -> [f64; 12] {
+        if self.fisheye_params.distortion_coeffs.len() < 4 {
             // Default coefficients
-            return nalgebra::Vector4::new(0.25, 0.05, 0.5, -0.5);
+            return [0.25, 0.05, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
         }
-        nalgebra::Vector4::from_row_slice(&self.fisheye_params.distortion_coeffs)
+        let mut ret = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+        for (i, x) in self.fisheye_params.distortion_coeffs.iter().enumerate() {
+            if i < 12 {
+                ret[i] = *x;
+            }
+        }
+        ret
     }
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
@@ -361,8 +362,7 @@ impl LensProfile {
         params.video_output_width = params.output_width;     params.video_output_height = params.output_height;
         params.video_width        = params.width;            params.video_height        = params.height;
         params.camera_matrix = self.get_camera_matrix_internal().unwrap_or_else(|| nalgebra::Matrix3::identity());
-        let distortion_coeffs = self.get_distortion_coeffs();
-        params.distortion_coeffs = [distortion_coeffs[0], distortion_coeffs[1], distortion_coeffs[2], distortion_coeffs[3]];
+        params.distortion_coeffs = self.get_distortion_coeffs();
 
         let zoom = zooming::from_compute_params(params);
         zoom.compute(&[0.0], &KeyframeManager::new()).first().map(|x| x.0).unwrap_or(1.0)

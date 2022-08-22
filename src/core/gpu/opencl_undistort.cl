@@ -27,7 +27,7 @@ typedef struct {
     float4 background; // 16
     float2 f;          // 8  - focal length in pixels
     float2 c;          // 16 - lens center
-    float4 k;          // 16 - distortion coefficients
+    float k[12];       // 16, 16, 16 - distortion coefficients
     float fov;         // 4
     float r_limit;     // 8
     float lens_correction_amount;    // 12

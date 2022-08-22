@@ -27,7 +27,7 @@ layout(std140, binding = 2) uniform KernelParams {
     vec4 background;    // 16
     vec2 f;             // 8  - focal length in pixels
     vec2 c;             // 16 - lens center
-    vec4 k;             // 16 - distortion coefficients
+    vec4 k1, k2, k3;    // 16, 16, 16 - distortion coefficients
     float fov;          // 4
     float r_limit;      // 8
     float lens_correction_amount;   // 12
@@ -48,7 +48,7 @@ float get_param(float row, float idx) {
     return texture(texParams, vec2(idx / 8.0, row / float(params.height - 1))).r;
 }
 
-vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_limit) {
+vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k1, vec4 k2, vec4 k3, float r_limit) {
     float _x = (float(pos.x) * get_param(idx, 0)) + (float(pos.y) * get_param(idx, 1)) + get_param(idx, 2) + params.translation3d.x;
     float _y = (float(pos.x) * get_param(idx, 3)) + (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + params.translation3d.y;
     float _w = (float(pos.x) * get_param(idx, 6)) + (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + params.translation3d.z;
@@ -59,7 +59,7 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k, float r_lim
         if (r_limit > 0.0 && r > r_limit) {
             return vec2(-99999.0, -99999.0);
         }
-        vec2 uv = f * distort_point(pos, k) + c;
+        vec2 uv = f * distort_point(pos, k1, k2, k3) + c;
 
         if (bool(params.flags & 2)) { // GoPro Superview
             vec2 size = vec2(params.width, params.height);
@@ -88,7 +88,7 @@ void main() {
     float sy = texPos.y;
     if (params.matrix_count > 1) {
         float idx = params.matrix_count / 2.0; // Use middle matrix
-        vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k, params.r_limit);
+        vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k1, params.k2, params.k3, params.r_limit);
         if (uv.x > -99998.0) {
             sy = min(params.height, max(0, floor(0.5 + uv.y)));
         }
@@ -110,14 +110,14 @@ void main() {
         }
 
         texPos = (texPos - out_c) / out_f;
-        texPos = undistort_point(texPos, params.k, params.lens_correction_amount);
+        texPos = undistort_point(texPos, params.k1, params.k2, params.k3, params.lens_correction_amount);
         texPos = out_f * texPos + out_c;
     }
     ///////////////////////////////////////////////////////////////////
 
     float idx = min(sy + 2.0, params.matrix_count - 1.0);
 
-    vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k, params.r_limit);
+    vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k1, params.k2, params.k3, params.r_limit);
     if (uv.x > -99998.0) {
         if (params.background_mode == 1) { // edge repeat
             uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
