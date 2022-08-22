@@ -1095,37 +1095,37 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="567"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>何もしない</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="568"/>
       <source>Shut down the computer</source>
-      <translation type="unfinished">Shut down the computer</translation>
+      <translation>コンピューターをシャットダウンする</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="569"/>
       <source>Restart the computer</source>
-      <translation type="unfinished">Restart the computer</translation>
+      <translation>コンピューターを再起動する</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="570"/>
       <source>Sleep</source>
-      <translation type="unfinished">Sleep</translation>
+      <translation>スリープ</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="571"/>
       <source>Hibernate</source>
-      <translation type="unfinished">Hibernate</translation>
+      <translation>休止</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="572"/>
       <source>Logout</source>
-      <translation type="unfinished">Logout</translation>
+      <translation>ログアウト</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="573"/>
       <source>Close Gyroflow</source>
-      <translation type="unfinished">Close Gyroflow</translation>
+      <translation>ジャイロフローを終了</translation>
     </message>
   </context>
   <context>
@@ -1280,7 +1280,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="598"/>
       <source>Number of parallel renders: %1</source>
-      <translation type="unfinished">Number of parallel renders: %1</translation>
+      <translation>並列レンダリング数: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="445"/>
@@ -1461,12 +1461,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>再生速度</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <source>Playback mute status</source>
-      <translation type="unfinished">Playback mute status</translation>
+      <translation>再生のミュート状態</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
@@ -1616,7 +1616,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation type="unfinished">If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</translation>
+      <translation>水平線がうまくロックされていない場合は、[Motion data] セクションで別の統合方法を試してください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>

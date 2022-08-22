@@ -17,8 +17,8 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "1
 [dependencies]
 cstr = "0.2.10"
 cpp = "0.5.7"
-serde = "1.0.143"
-serde_json = "1.0.83"
+serde = "1.0.144"
+serde_json = "1.0.85"
 bytemuck = "1.12.1"
 nalgebra = "0.30"
 semver = "1.0.13"

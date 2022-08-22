@@ -1092,37 +1092,37 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="567"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>Hiçbir şey yapma</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="568"/>
       <source>Shut down the computer</source>
-      <translation type="unfinished">Shut down the computer</translation>
+      <translation>Bilgisayarı kapat</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="569"/>
       <source>Restart the computer</source>
-      <translation type="unfinished">Restart the computer</translation>
+      <translation>Yeniden başlat</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="570"/>
       <source>Sleep</source>
-      <translation type="unfinished">Sleep</translation>
+      <translation>Uykuya geç</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="571"/>
       <source>Hibernate</source>
-      <translation type="unfinished">Hibernate</translation>
+      <translation>Hazırda beklet</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="572"/>
       <source>Logout</source>
-      <translation type="unfinished">Logout</translation>
+      <translation>Oturumu kapat</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="573"/>
       <source>Close Gyroflow</source>
-      <translation type="unfinished">Close Gyroflow</translation>
+      <translation>Gyroflow'u kapat</translation>
     </message>
   </context>
   <context>
@@ -1276,7 +1276,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="598"/>
       <source>Number of parallel renders: %1</source>
-      <translation type="unfinished">Number of parallel renders: %1</translation>
+      <translation>Paralel render işlemi sayısı: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="445"/>
@@ -1457,12 +1457,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>Playback hızı</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <source>Playback mute status</source>
-      <translation type="unfinished">Playback mute status</translation>
+      <translation>Playback ses durumu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
@@ -1612,7 +1612,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation type="unfinished">If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</translation>
+      <translation>Ufuk çizgisi iyice kilitlenmemişse, &quot;Hareket verisi&quot; kısmında farklı bir entegrasyon metodu deneyin.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>

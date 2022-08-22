@@ -89,7 +89,7 @@ Verspricht eine bessere Leistung der Benutzeroberfläche.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="265"/>
       <source>Default file suffix</source>
-      <translation>Standard Dateisuffix</translation>
+      <translation>Standard Dateianhang</translation>
     </message>
   </context>
   <context>
@@ -262,7 +262,7 @@ Es wird empfohlen, die Projektdatei zu exportieren und das [OpenFX-Plugin] zu ve
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
       <translation>Dieser Encoder benötigt eine unter GPL lizenzierte externe Bibliothek.
-Sind Sie mit der [GPL-Lizenz] einverstanden und möchten den zusätzlichen Codec herunterladen?</translation>
+ [GPL-Lizenz] akzeptieren und den zusätzlichen Codec herunterladen?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="459"/>
@@ -304,7 +304,7 @@ Wenn dies ein modernes System mit aktuellen Treibern ist, das GPU-encoding unter
     <message>
       <location filename="../../src/ui/App.qml" line="499"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation>Die GPU unterstützt kein H.265/HEVC Encoding, verwenden Sie stattdessen H.264/AVC oder deaktivieren Sie GPU Encoding in den Exporteinstellungen.</translation>
+      <translation>Die GPU unterstützt H.265/HEVC Encoding nicht, verwende stattdessen H.264/AVC oder deaktiviere GPU Encoding in den Exporteinstellungen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="502"/>
@@ -722,7 +722,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
       <source>Preset</source>
-      <translation>Voreinstellung</translation>
+      <translation>Vorlage</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
@@ -886,12 +886,12 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="228"/>
       <source>Separate accelerometer rotation</source>
-      <translation>Separate Drehung des Beschleunigungssensors</translation>
+      <translation>Separate Drehung Beschleunigungssensors</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="236"/>
       <source>Accelerometer rotation</source>
-      <translation>Drehung des Beschleunigungssensors</translation>
+      <translation>Drehung Beschleunigungssensors</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="273"/>
@@ -954,7 +954,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="128"/>
       <source>Enable keyframing</source>
-      <translation>Aktiviere Schlüsselbilder</translation>
+      <translation>Aktiviere Keyframing</translation>
     </message>
   </context>
   <context>
@@ -1093,7 +1093,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="567"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>Keine Aktion</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="568"/>
@@ -1141,7 +1141,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="575"/>
       <source>When rendering is finished: %1</source>
-      <translation>Wenn Rendering fertig ist: %1</translation>
+      <translation>Wenn das Rendern beendet ist: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="90"/>
@@ -1238,7 +1238,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="355"/>
       <source>Missing required components.</source>
-      <translation>Benötigte Komponenten fehlen.</translation>
+      <translation>Erforderliche Komponenten fehlen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="373"/>
@@ -1278,7 +1278,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="598"/>
       <source>Number of parallel renders: %1</source>
-      <translation type="unfinished">Number of parallel renders: %1</translation>
+      <translation>Anzahl paralleler Render: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="445"/>
@@ -1459,12 +1459,12 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>Wiedergabe-Geschwindigkeit</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <source>Playback mute status</source>
-      <translation type="unfinished">Playback mute status</translation>
+      <translation>Stummschalt-Status</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
@@ -1614,7 +1614,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation type="unfinished">If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</translation>
+      <translation>Sollte die Horizont-Bindung driften, versuche eine der anderen Integrations-Methoden im Bereich " Bewegungs-Daten"</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>
@@ -1741,7 +1741,7 @@ Da sich die Berechnungszeit verdoppelt, sollte diese Option nur anfangs für ein
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
-      <translation>Berechne zuerst ursprünglichen Versatz (verwendet „essential matrix“-Methode), verfeinere dann mit langsamer aber genauerer „rs sync“-Methode.</translation>
+      <translation>Starte die Berechnung des anfänglichen Zeit-Versatzes mithilfe der "essential matrix" Methode und verfeinere weiter mit der sehr genauen aber langsamen "rs-sync" Methode.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
@@ -1987,12 +1987,12 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="250"/>
       <source>Ease in</source>
-      <translation>Ease In</translation>
+      <translation>Sanft einleiten</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="257"/>
       <source>Ease out</source>
-      <translation>Ease Out</translation>
+      <translation>Sanft ausleiten</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="275"/>
@@ -2012,12 +2012,12 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="278"/>
       <source>Zooming center offset X</source>
-      <translation>Zoom-Zentrum Versatz X</translation>
+      <translation>Zoom-Versatz zu Zentrum X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="279"/>
       <source>Zooming center offset Y</source>
-      <translation>Zoom-Zentrum Versatz Y</translation>
+      <translation>Zoom-Versatz zu Zentrum Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="280"/>
@@ -2032,7 +2032,7 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="282"/>
       <source>Horizon lock amount</source>
-      <translation>Menge Horizont-Bindung</translation>
+      <translation>Horizont-Bindungsstärke</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="283"/>
@@ -2042,7 +2042,7 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Lens correction strength</source>
-      <translation>Stärke der Linsenkorrektur</translation>
+      <translation>Linsenkorrektur-Stärke</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="285"/>
@@ -2062,17 +2062,17 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="288"/>
       <source>Smoothness pitch</source>
-      <translation>Glättung auf Nick/Pitch</translation>
+      <translation>Glättung Nick/Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="289"/>
       <source>Smoothness roll</source>
-      <translation>Glättung auf Roll</translation>
+      <translation>Glättung Roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <source>Smoothness yaw</source>
-      <translation>Grlättung auf Gier/Yaw</translation>
+      <translation>Glättung Gier/Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="470"/>
@@ -2266,28 +2266,28 @@ Bitte Bildrate in FPS angeben: </translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="124"/>
       <source>Downloading %1 (%2)</source>
-      <translation>Herunterladen von %1 (%2)</translation>
+      <translation>Herunterladen %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="132"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
-      <translation>Komponente wurde erfolgreich installiert.
-Gyroflow muss neu gestartet werden, damit die Änderungen wirksam werden.
-Die Warteschlange und die aktuelle Datei werden automatisch gespeichert.</translation>
+      <translation>Die Komponente wurde erfolgreich installiert.
+Gyroflow muss jetzt neu gestartet werden, um die Änderungen zu übernehmen.
+Deine Warteschlange und die aktuelle Datei werden automatisch gespeichert.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="156"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
-      <translation>Dieses Format benötigt eine externe SDK. Soll diese jetzt heruntergeladen werden?</translation>
+      <translation>Dieses Format setzt ein externes SDK voraus. SDK jetzt herunterladen?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="263"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
-      <translation>Dateiformat wurde erkannt, aber keine Bewegungsdaten gefunden.
-Wahrscheinlich zeichnet die Kamera im verwendeten Aufnahmemodus keine Bewegungsdaten auf.</translation>
+      <translation>Das Dateiformat wurde erkannt, aber es wurden keine Bewegungsdaten gefunden.
+Möglicherweise zeichnet die Kamera im gewählten Aufnahme-Modus keine Bewegungsdaten auf.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="418"/>
