@@ -17,7 +17,7 @@ struct KernelParams {
     background:    vec4<f32>, // 16
     f:             vec2<f32>, // 8 - focal length in pixels
     c:             vec2<f32>, // 16 - lens center
-    k:             array<f32, 12>, // 16,16,16 - distortion coefficients
+    k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>, // 16,16,16 - distortion coefficients
     fov:           f32, // 4
     r_limit:       f32, // 8
     lens_correction_amount:   f32, // 12
@@ -93,7 +93,7 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     return sum;
 }
 
-fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: vec4<f32>) -> vec2<f32> {
+fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
     let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
     let _y = (pos.x * matrices[idx + 3u]) + (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + params.translation3d.y;
     let _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
@@ -104,7 +104,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k: v
         if (params.r_limit > 0.0 && r > params.r_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
-        var uv = f * distort_point(pos, k) + c;
+        var uv = f * distort_point(pos, k1, k2, k3) + c;
 
         if (bool(params.flags & 2)) { // GoPro Superview
             let size = vec2<f32>(f32(params.width), f32(params.height));
@@ -147,7 +147,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     var sy = u32(position.y);
     if (params.matrix_count > 1) {
         let idx: u32 = u32((params.matrix_count / 2) * 9); // Use middle matrix
-        let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k);
+        let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
         if (uv.x > -99998.0) {
             sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
         }
@@ -169,14 +169,14 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
         }
 
         out_pos = (out_pos - out_c) / out_f;
-        out_pos = undistort_point(out_pos, params.k, params.lens_correction_amount);
+        out_pos = undistort_point(out_pos, params.k1, params.k2, params.k3, params.lens_correction_amount);
         out_pos = out_f * out_pos + out_c;
     }
     ///////////////////////////////////////////////////////////////////
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 9u;
 
-    var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k);
+    var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
     if (uv.x > -99998.0) {
         let width_f = f32(params.width);
         let height_f = f32(params.height);

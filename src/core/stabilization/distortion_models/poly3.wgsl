@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-fn undistort_point(pos: vec2<f32>, k: array<f32, 12>, amount: f32) -> vec2<f32> {
+fn undistort_point(pos: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>, amount: f32) -> vec2<f32> {
     let NEWTON_EPS = 0.00001;
 
-    let inv_k1 = (1.0 / k[0]);
+    let inv_k1 = (1.0 / k1.x);
 
     let rd = length(pos);
     if (rd == 0.0) { return vec2<f32>(0.0, 0.0); }
@@ -43,7 +43,7 @@ fn undistort_point(pos: vec2<f32>, k: array<f32, 12>, amount: f32) -> vec2<f32> 
     return pos * ru;
 }
 
-fn distort_point(pos: vec2<f32>, k: array<f32, 12>) -> vec2<f32> {
-    let poly2 = k[0] * (pos.x * pos.x + pos.y * pos.y) + 1.0;
+fn distort_point(pos: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
+    let poly2 = k1.x * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }
