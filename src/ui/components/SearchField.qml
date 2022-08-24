@@ -15,10 +15,10 @@ TextField {
     Popup {
         id: popup;
         model: root.model;
-        width: parent.width * 1.1;
         y: parent.height + 2 * dpiScale;
         font.pixelSize: 12 * dpiScale;
         itemHeight: 25 * dpiScale;
+        width: Math.max(parent.width * 1.5, Math.min(window.width * 0.8, maxItemWidth + 10 * dpiScale));
         property var indexMapping: [];
         onClicked: (index) => {
             root.selected(model[index], indexMapping[index]);
@@ -56,7 +56,7 @@ TextField {
 
         let i = 0;
         for (const x of root.model) {
-            const test = x.toLowerCase();
+            const test = x[0].toLowerCase();
             let add = true;
             for (const word of words) {
                 if (test.indexOf(word) < 0) {
@@ -75,14 +75,19 @@ TextField {
 
         if (!m.length) popup.close();
 
+        popup.maxItemWidth = 0;
+        popup.model = [];
         popup.model = m;
         popup.indexMapping = indexMapping;
         popup.currentIndex = -1;
-        // Trigger reposition
-        popup.topMargin = 1;
-        popup.topMargin = 0;
     }
-    Keys.onDownPressed: popup.highlightedIndex = Math.min(popup.model.length - 1, popup.highlightedIndex + 1);
+    Keys.onDownPressed: {
+        if (!popup.opened) {
+            popup.open();
+        } else {
+            popup.highlightedIndex = Math.min(popup.model.length - 1, popup.highlightedIndex + 1);
+        }
+    }
     Keys.onUpPressed: popup.highlightedIndex = Math.max(0, popup.highlightedIndex - 1);
     onAccepted: {
         if (popup.opened) {

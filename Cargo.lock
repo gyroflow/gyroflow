@@ -1250,6 +1250,7 @@ dependencies = [
  "system_shutdown",
  "tar",
  "ureq",
+ "url",
  "walkdir",
  "whoami",
  "windows",

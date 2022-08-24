@@ -279,7 +279,13 @@ MenuItem {
         onClicked: {
             messageBox(Modal.Warning, qsTr("Are you sure you want to clear all settings and restore the defaults?"), [
                 { text: qsTr("Yes"), clicked: () => {
+                    // Preserve lens profile favorites
+                    const lenses = window.settings.value("lensProfileFavorites");
+
                     controller.clear_settings();
+
+                    if (lenses) window.settings.setValue("lensProfileFavorites", lenses);
+
                     messageBox(Modal.Info, qsTr("Settings cleared, please restart Gyroflow for the changes to take effect."), [
                         { text: qsTr("Exit"), accent: true, clicked: Qt.quit},
                         { text: qsTr("Cancel") },

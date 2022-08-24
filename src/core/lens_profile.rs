@@ -72,6 +72,12 @@ pub struct LensProfile {
 
     #[serde(skip)]
     pub is_copy: bool,
+
+    #[serde(skip)]
+    pub rating: Option<f64>,
+
+    #[serde(skip)]
+    pub checksum: Option<String>,
 }
 
 impl LensProfile {

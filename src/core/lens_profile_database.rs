@@ -61,7 +61,7 @@ impl LensProfileDatabase {
             match LensProfile::from_json(data) {
                 Ok(mut v) => {
                     v.filename = f_name.to_string();
-                    for profile in v.get_all_matching_profiles() {
+                    for mut profile in v.get_all_matching_profiles() {
                         let key = if !profile.identifier.is_empty() {
                             profile.identifier.clone()
                         } else {
@@ -72,6 +72,7 @@ impl LensProfileDatabase {
                                 log::warn!("Lens profile already present: {}, filename: {} from {}", key, f_name, self.map.get(&key).unwrap().filename);
                             }
                         } else {
+                            profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.get_json().unwrap_or_default().as_bytes())));
                             self.map.insert(key, profile);
                         }
                     }
@@ -105,7 +106,8 @@ impl LensProfileDatabase {
         self.loaded = true;
     }
 
-    pub fn get_all_names(&self) -> Vec<(String, String)> {
+    pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
+        // (name, filename, crc32, official, rating, aspect_ratio*1000)
         let mut set = HashSet::with_capacity(self.map.len());
         let mut ret = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
@@ -114,7 +116,7 @@ impl LensProfileDatabase {
                     let mut name = v.get_display_name();
                     let mut new_name = name.clone();
                     if set.contains(&new_name) {
-                        if let Some((kk, vv)) = ret.iter_mut().find(|(k, _)| *k == new_name) {
+                        if let Some((kk, vv, _, _, _, _)) = ret.iter_mut().find(|(k, _, _, _, _, _)| *k == new_name) {
                             set.remove(kk);
                             *kk = format!("{} by {}", *kk, self.map[vv].calibrated_by);
                             set.insert(kk.clone());
@@ -128,7 +130,8 @@ impl LensProfileDatabase {
                         i += 1;
                     }
                     set.insert(new_name.clone());
-                    ret.push((new_name, k.clone()));
+                    let aspect_ratio = ((v.calib_dimension.w as f64 / v.calib_dimension.h.max(1) as f64) * 1000.0).round() as i32;
+                    ret.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio));
                 }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
@@ -136,6 +139,28 @@ impl LensProfileDatabase {
         }
         ret.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
         ret
+    }
+
+    pub fn set_profile_ratings(&mut self, json: &str) {
+        if let Ok(serde_json::Value::Object(v)) = serde_json::from_str(json) as serde_json::Result<serde_json::Value> {
+            let final_ratings: HashMap<String, f64> = v.into_iter().filter_map(|(k, arr)| {
+                if let serde_json::Value::Array(arr) = arr {
+                    if arr.len() == 3 {
+                        let _good = arr[0].as_i64().unwrap_or_default();
+                        let _bad = arr[1].as_i64().unwrap_or_default();
+                        let final_rating = arr[2].as_f64().unwrap_or_default();
+                        return Some((k, final_rating));
+                    }
+                }
+                None
+            }).collect();
+
+            for (_, v) in self.map.iter_mut() {
+                if let Some(crc) = &v.checksum {
+                    v.rating = final_ratings.get(crc).copied();
+                }
+            }
+        }
     }
 
     pub fn contains_id(&self, id: &str) -> bool {

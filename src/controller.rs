@@ -86,10 +86,10 @@ pub struct Controller {
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
 
-    load_profiles: qt_method!(fn(&self)),
+    load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(profiles: QVariantList),
     fetch_profiles_from_github: qt_method!(fn(&self)),
-    lens_profiles_updated: qt_signal!(),
+    lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -183,7 +183,8 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
-    rate_profile: qt_method!(fn(&self, name: QString, is_good: bool)),
+    rate_profile: qt_method!(fn(&self, name: QString, json: QString, is_good: bool)),
+    request_profile_ratings: qt_method!(fn(&self)),
 
     set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
     set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
@@ -1257,17 +1258,33 @@ impl Controller {
         }
     }
 
-    fn load_profiles(&self) {
+    fn load_profiles(&self, reload_from_disk: bool) {
         let loaded = util::qt_queued_callback_mut(self, |this, all_names: QVariantList| {
             this.all_profiles_loaded(all_names)
         });
         let db = self.stabilizer.lens_profile_db.clone();
         core::run_threaded(move || {
-            let mut db = db.write();
-            db.load_all();
-            // db.list_all_metadata();
-            // db.process_adjusted_metadata();
-            let all_names = db.get_all_names().into_iter().map(|(name, file)| QVariantList::from_iter([QString::from(name), QString::from(file)].into_iter())).collect();
+            if reload_from_disk {
+                let mut new_db = core::lens_profile_database::LensProfileDatabase::default();
+                new_db.load_all();
+                // new_db.list_all_metadata();
+                // new_db.process_adjusted_metadata();
+
+                *db.write() = new_db;
+            }
+
+            let all_names = db.read().get_all_info().into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {
+                let mut list = QVariantList::from_iter([
+                    QString::from(name),
+                    QString::from(file),
+                    QString::from(crc)
+                ].into_iter());
+                list.push(official.into());
+                list.push(rating.into());
+                list.push(aspect_ratio.into());
+                list
+            }).collect();
+
             loaded(all_names);
         });
     }
@@ -1281,7 +1298,7 @@ impl Controller {
         use crate::core::lens_profile_database::LensProfileDatabase;
 
         let update = util::qt_queued_callback_mut(self, |this, _| {
-            this.lens_profiles_updated();
+            this.lens_profiles_updated(true);
         });
 
         core::run_threaded(move || {
@@ -1318,10 +1335,25 @@ impl Controller {
         });
     }
 
-    fn rate_profile(&self, name: QString, is_good: bool) {
+    fn rate_profile(&self, name: QString, json: QString, is_good: bool) {
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::post(&format!("https://api.gyroflow.xyz/rate?good={}", is_good)).set("Content-Type", "application/json; charset=utf-8").send_string(&name.to_string()).map(|x| x.into_string()) {
+            let mut url = url::Url::parse(&format!("https://api.gyroflow.xyz/rate?good={}", is_good)).unwrap();
+            url.query_pairs_mut().append_pair("filename", &name.to_string());
+
+            if let Ok(Ok(body)) = ureq::request_url("POST", &url).set("Content-Type", "application/json; charset=utf-8").send_string(&json.to_string()).map(|x| x.into_string()) {
                 ::log::debug!("Lens profile rated: {}", body.as_str());
+            }
+        });
+    }
+    fn request_profile_ratings(&self) {
+        let update = util::qt_queued_callback_mut(self, |this, _| {
+            this.lens_profiles_updated(false);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        core::run_threaded(move || {
+            if let Ok(Ok(body)) = ureq::get("https://api.gyroflow.xyz/rate?get_ratings=1").call().map(|x| x.into_string()) {
+                db.write().set_profile_ratings(body.as_str());
+                update(());
             }
         });
     }

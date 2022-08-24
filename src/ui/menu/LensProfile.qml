@@ -21,6 +21,7 @@ MenuItem {
     property var lensProfilesList: [];
     property var distortionCoeffs: [];
     property string profileName;
+    property string profileOriginalJson;
 
     FileDialog {
         id: fileDialog;
@@ -40,7 +41,7 @@ MenuItem {
 
     Component.onCompleted: {
         controller.fetch_profiles_from_github();
-        controller.load_profiles();
+        controller.load_profiles(true);
 
         QT_TRANSLATE_NOOP("TableList", "Camera");
         QT_TRANSLATE_NOOP("TableList", "Lens");
@@ -52,20 +53,24 @@ MenuItem {
     Timer {
         id: profilesUpdateTimer;
         interval: 1000;
-        onTriggered: controller.load_profiles();
+        property bool fromDisk: true;
+        onTriggered: controller.load_profiles(fromDisk);
     }
     Connections {
         target: controller;
-        function onAll_profiles_loaded(profiles) {
+        function onAll_profiles_loaded(profiles: list) {
+            if (!lensProfilesList.length) { // If it's the first load
+                controller.request_profile_ratings();
+            }
+
+            // Each item is [name, filename, crc32, official, rating, aspect_ratio*1000]
             lensProfilesList = profiles;
 
-            let list = [];
-            for (const x of lensProfilesList) {
-                list.push(x[0])
-            }
-            search.model = list;
+            search.model = lensProfilesList;
+            root.loadFavorites();
         }
-        function onLens_profiles_updated() {
+        function onLens_profiles_updated(fromDisk: bool) {
+            profilesUpdateTimer.fromDisk = fromDisk;
             profilesUpdateTimer.start();
         }
         function onLens_profile_loaded(json_str: string, filepath: string) {
@@ -84,6 +89,7 @@ MenuItem {
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
+                    root.profileOriginalJson = json_str;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -122,15 +128,33 @@ MenuItem {
         }
     }
 
+    property int currentVideoAspectRatio: Math.round((root.videoWidth / Math.max(1, root.videoHeight)) * 1000);
+
+    property var favorites: ({});
+    function loadFavorites() {
+        const list = window.settings.value("lensProfileFavorites") || "";
+        let fav = {};
+        for (const x of list.split(",")) {
+            fav[x] = 1;
+        }
+        favorites = fav;
+    }
+    function updateFavorites() {
+        window.settings.setValue("lensProfileFavorites", Object.keys(favorites).join(","));
+    }
+
     SearchField {
         id: search;
         placeholderText: qsTr("Search...");
         height: 25 * dpiScale;
         width: parent.width;
-        popup.width: width * 1.7;
         topPadding: 5 * dpiScale;
         onSelected: (text, index) => {
             controller.load_lens_profile(lensProfilesList[index][1]);
+        }
+        popup.lv.delegate: LensProfileSearchDelegate {
+            popup: search.popup;
+            profilesMenu: root;
         }
     }
     Row {
@@ -179,8 +203,7 @@ MenuItem {
         Connections {
             target: officialInfo.t;
             function onLinkActivated(link: url) {
-                const str = root.profileName + "|" + root.distortionCoeffs.join("|");
-                controller.rate_profile(str, link === "#good");
+                controller.rate_profile(root.profileName, root.profileOriginalJson, link === "#good");
                 officialInfo.thankYou = true;
                 officialInfo.canRate = false;
                 tyTimer.start();
@@ -292,4 +315,32 @@ MenuItem {
         extensions: fileDialog.extensions;
         onLoadFile: (url) => root.loadFile(url);
     }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Maintenance functions ----------------------
+    // -------------------------------------------------------------------
+    /*
+    property int fileno: 0;
+    property var files: [
+        ... // dir /b | clip
+    ];
+    Shortcut {
+        sequences: ["F1"];
+        onActivated: {
+            root.fileno = Math.abs(++fileno % files.length);
+            controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
+        }
+    }
+    Shortcut {
+        sequences: ["F2"];
+        onActivated: {
+            root.fileno = Math.abs(--fileno % files.length);
+            controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
+        }
+    }
+    Shortcut {
+        sequences: ["Delete"];
+        onActivated: console.log("del \"" + root.files[root.fileno] + "\"");
+    }
+    */
 }
