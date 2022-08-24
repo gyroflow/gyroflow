@@ -95,37 +95,37 @@ Dette burde give en hurtigere brugergrænseflade.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Reset all settings to default</source>
-      <translation type="unfinished">Reset all settings to default</translation>
+      <translation>Nulstil alle indstillinger til standard</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="280"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Er du sikker på, at du vil rydde alle indstillinger og gendanne standardindstillingerne?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="281"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="283"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="289"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Indstillinger ryddet, genstart Gyroflow for at ændringerne kan træde i kraft.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="284"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>Exit</source>
-      <translation type="unfinished">Exit</translation>
+      <translation>Luk</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="285"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Annuller</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="288"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="294"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Nej</translation>
     </message>
   </context>
   <context>
@@ -442,132 +442,132 @@ Hvis du har en moderne enhed, seneste GPU drivere, og du tror, at dette ikke bø
       <translation>Eksporter indstillinger</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="196"/>
+      <location filename="../../src/ui/menu/Export.qml" line="195"/>
       <source>Output size</source>
       <translation>Opløsning af resultat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="202"/>
+      <location filename="../../src/ui/menu/Export.qml" line="201"/>
       <source>Width</source>
       <translation>Bredde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="221"/>
+      <location filename="../../src/ui/menu/Export.qml" line="220"/>
       <source>Height</source>
       <translation>Højde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="254"/>
+      <location filename="../../src/ui/menu/Export.qml" line="253"/>
       <source>Lock aspect ratio</source>
       <translation>Lås aspektforhold</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="266"/>
+      <location filename="../../src/ui/menu/Export.qml" line="265"/>
       <source>Output size preset</source>
       <translation>Forudindstilling af outputstørrelse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="282"/>
+      <location filename="../../src/ui/menu/Export.qml" line="281"/>
       <source>Original (%1 x %2)</source>
       <translation>Original (%1 x %2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="302"/>
+      <location filename="../../src/ui/menu/Export.qml" line="301"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>Denne opløsning understøttes ikke af det valgte format.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="303"/>
+      <location filename="../../src/ui/menu/Export.qml" line="302"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>Maksimal understøttet opløsning er %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="309"/>
+      <location filename="../../src/ui/menu/Export.qml" line="308"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>Opløsningen skal være delelig med 2.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="314"/>
+      <location filename="../../src/ui/menu/Export.qml" line="313"/>
       <source>Bitrate</source>
       <translation>Bitrate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="321"/>
+      <location filename="../../src/ui/menu/Export.qml" line="320"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="328"/>
+      <location filename="../../src/ui/menu/Export.qml" line="327"/>
       <source>Use GPU encoding</source>
       <translation>Anvend GPU til indkodning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="337"/>
+      <location filename="../../src/ui/menu/Export.qml" line="336"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>Brugen af GPU til indkodning resulterer typisk i lavere kvalitet sammenlignet med software, men er væsentligt hurtigere.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="338"/>
+      <location filename="../../src/ui/menu/Export.qml" line="337"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>De kræver en højere bitrate for at give et resultat med en tilsvarende kvalitet, eller et resultat med lavere kvalitet ved den samme bitrate.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="339"/>
+      <location filename="../../src/ui/menu/Export.qml" line="338"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>Afmarkér denne indstilling for maksimal kvalitet.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="341"/>
+      <location filename="../../src/ui/menu/Export.qml" line="340"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>GPU acceleration er ikke tilgængelig med dette videoformat.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="345"/>
+      <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Export audio</source>
       <translation>Eksportér lyd</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="354"/>
+      <location filename="../../src/ui/menu/Export.qml" line="353"/>
       <source>Custom encoder options</source>
       <translation>Tilpassede encoder indstillinger</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="377"/>
+      <location filename="../../src/ui/menu/Export.qml" line="376"/>
       <source>Show available options</source>
       <translation>Vis tilgængelige valgmuligheder</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="380"/>
+      <location filename="../../src/ui/menu/Export.qml" line="379"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="387"/>
+      <location filename="../../src/ui/menu/Export.qml" line="386"/>
       <source>Keyframe distance</source>
       <translation>Keyframe distance</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="396"/>
+      <location filename="../../src/ui/menu/Export.qml" line="395"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="401"/>
+      <location filename="../../src/ui/menu/Export.qml" line="400"/>
       <source>Preserve other tracks</source>
       <translation>Bevar andre spor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="403"/>
+      <location filename="../../src/ui/menu/Export.qml" line="402"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
       <translation>Dette deaktiverer beskæring, og du skal bruge .mov som filendelse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="408"/>
+      <location filename="../../src/ui/menu/Export.qml" line="407"/>
       <source>Use black frames outside trim range and keep original file duration</source>
       <translation>Brug sorte rammer uden for beskæring og behold den oprindelig videolængde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="415"/>
+      <location filename="../../src/ui/menu/Export.qml" line="414"/>
       <source>Device for rendering</source>
       <translation>Enhed til behandling</translation>
     </message>
@@ -736,99 +736,87 @@ Vil du indsende din profil?</translation>
       <translation>Linseprofil</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="29"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="30"/>
       <source>Choose a lens profile</source>
       <translation>Vælg en linseprofil</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="30"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="31"/>
       <source>Lens profiles</source>
       <translation>Linseprofiler</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
-      <source>Official</source>
-      <translation>Officiel</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="53"/>
-      <source>Rating: %1</source>
-      <translation>Bedømmelse: %1</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
-      <source>Preset</source>
-      <translation>Forudindstilling</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
-      <source>Add to favorites</source>
-      <translation>Tilføj til favoritter</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
-      <source>Favorite</source>
-      <translation>Favorit</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="133"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="148"/>
       <source>Search...</source>
       <translation>Søg...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="146"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="164"/>
       <source>Open file</source>
       <translation>Åbn fil</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="151"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="169"/>
       <source>Create new</source>
       <translation>Opret ny</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="193"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Denne linseprofil er uofficiel, vi kan ikke garantere dets korrekthed. Bruges på egen risiko.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="176"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="194"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Bedøm denne profil: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="178"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="196"/>
       <source>Thank you for rating this profile.</source>
       <translation>Tak for din bedømmelse af denne profil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="207"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="224"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Aspektforhold af linseprofilen er ikke i overenstemmelse med videofilen. Resultatet vil ikke være korrekt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="208"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="225"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Opløsning af linseprofilen er ikke i overenstemmelse med videofilen. Resultatet vil muligvis ikke være korrekt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="217"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
       <source>Adjust parameters</source>
       <translation>Justér parametre</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="250"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="267"/>
       <source>Pixel focal length</source>
       <translation>Pixel brændvidde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="260"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="277"/>
       <source>Focal center</source>
       <translation>Fokal centrum af billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="270"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="287"/>
       <source>Distortion coefficients</source>
       <translation>Forvrængningskoefficienter</translation>
+    </message>
+  </context>
+  <context>
+    <name>LensProfileSearchDelegate</name>
+    <message>
+      <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
+      <source>preset</source>
+      <translation type="unfinished">preset</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
+      <source>official</source>
+      <translation type="unfinished">official</translation>
     </message>
   </context>
   <context>
@@ -874,12 +862,12 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Video file is not loaded.</source>
-      <translation type="unfinished">Video file is not loaded.</translation>
+      <translation>Videofilen er ikke indlæst.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ok</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="123"/>
@@ -1087,52 +1075,52 @@ Vil du indsende din profil?</translation>
       <translation>Ingen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
       <source>No smoothing</source>
       <translation>Ingen udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
       <source>Default</source>
       <translation>Standard</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="158"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
       <source>Plain 3D</source>
       <translation>Enkelt 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="159"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="158"/>
       <source>Fixed camera</source>
       <translation>Fastlåst kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>No zooming</source>
       <translation>Ingen zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>Dynamic zooming</source>
       <translation>Dynamisk zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>Static zoom</source>
       <translation>Statisk zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="242"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Using essential matrix</source>
       <translation>Brug af essentiel matrix</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="242"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>Using visual features</source>
       <translation>Brug visuelle elementer i analyse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="242"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1513,17 +1501,22 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
       <translation>Afspilning lydløs status</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="200"/>
+      <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
+      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Save</source>
       <translation>Gem</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Apply</source>
       <translation>Anvend</translation>
     </message>
     <message>
-      <location filename="../../src/ui/SettingsSelector.qml" line="216"/>
+      <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Cancel</source>
       <translation>Annuller</translation>
     </message>
@@ -1549,176 +1542,176 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
       <translation>Stabilisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="161"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="160"/>
       <source>Pitch smoothness</source>
       <translation>Pitch udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="162"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="161"/>
       <source>Yaw smoothness</source>
       <translation>Yaw udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="163"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="162"/>
       <source>Roll smoothness</source>
       <translation>Roll udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="163"/>
       <source>Smoothness</source>
       <translation>Udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Per axis</source>
       <translation>Pr. akse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
       <source>Max smoothness</source>
       <translation>Maks. udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="167"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
       <source>Max smoothness at high velocity</source>
       <translation>Maks udjævning ved høj hastighed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="168"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="167"/>
       <source>Second smoothing pass</source>
       <translation>Sekundær udjævning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="169"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="168"/>
       <source>Yaw angle correction</source>
       <translation>Korrektion af yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="169"/>
       <source>Pitch angle correction</source>
       <translation>Korrektion af pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="337"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="336"/>
       <source>Roll angle correction</source>
       <translation>Korrektion af roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="172"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
       <source>Yaw angle</source>
       <translation>Yaw vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="173"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="172"/>
       <source>Pitch angle</source>
       <translation>Pitch vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="174"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="173"/>
       <source>Roll angle</source>
       <translation>Roll vinkel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>FOV er større end 1.0, sorte kanter kan opstå</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="198"/>
       <source>FOV</source>
       <translation>Synsfelt/FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="313"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="312"/>
       <source>Lock horizon</source>
       <translation>Lås horisonten</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="318"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="317"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Lås mængde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="326"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="459"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="325"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="345"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="344"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="353"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="352"/>
       <source>Use gravity vectors</source>
       <translation>Brug tyngdekraftsvektorer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="363"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Hvis horisonten ikke er låst godt, så prøv en anden integrationsmetode i afsnittet &quot;Bevægelsesdata&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Maks rotation: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="389"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Max zoom: %1</source>
       <translation>Maks zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="412"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="411"/>
       <source>Zooming speed</source>
       <translation>Zoom hastighed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="420"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="419"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
       <source>Zooming center offset</source>
       <translation>Zoom center forskydning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="450"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="449"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="470"/>
       <source>Rolling shutter correction</source>
       <translation>Rolling shutter korrektion</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="477"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="476"/>
       <source>Frame readout time</source>
       <translation>Udlæsningstid for billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="483"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="482"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="495"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="494"/>
       <source>Bottom to top</source>
       <translation>Bund til top</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="502"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="501"/>
       <source>Lens correction strength</source>
       <translation>Korrektionsstyrke for forvrængning</translation>
     </message>
@@ -1731,103 +1724,103 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
       <translation>Synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="82"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="80"/>
       <source>Auto sync</source>
       <translation>Automatisk synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="86"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="84"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Ingen bevægelsesdata indlæst, kan ikke synkroniseres.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="108"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Linseprofil er ikke indlæst, synkronisering vil sandsynligvis give forkerte resultater. Er du sikker på, at du vil fortsætte?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="109"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="107"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="112"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="110"/>
       <source>No</source>
       <translation>Nej</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="123"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="121"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Denne fil bruger synkroniserede bevægelsesdata, yderligere synkroniseringspunkter er ikke nødvendige og kan give et dårligere resultat.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="129"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="127"/>
       <source>Rough gyro offset</source>
       <translation>Omtrentlig forskydning af gyro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="137"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="161"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="135"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="159"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="146"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="144"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Analyser både positive og negative forskydninger.
 Dette fordobler beregningstiden, så brug kun dette for det oprindelige punkt og deaktiver når du kender forskydningen.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="152"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="150"/>
       <source>Sync search size</source>
       <translation>Søgestørrelse for synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="172"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
       <translation>Beregn omtrent forskydning først (ved hjælp af essentiel matrix metode), derefter forfin med langsommere, men mere præcis rs-sync metode.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
       <source>Max sync points</source>
       <translation>Maks antal synkroniseringspunkter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
       <source>Analyze every n-th frame</source>
       <translation>Analyser hvert n-te billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="206"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
       <source>Time to analyze per sync point</source>
       <translation>Tidsperiode analyseret pr. synkroniseringspunkt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="221"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZE metoden kan være mere nøjagtig, men er betydeligt langsommere end OpenCV. Brug kun, hvis OpenCV ikke producerer gode resultater</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="225"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
       <source>Optical flow method</source>
       <translation>Optisk flow metode</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="238"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="236"/>
       <source>Offset calculation method</source>
       <translation>Metode til beregning af forskydning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="245"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Beregn kamera-transformations-matrix fra optisk flow for at få kameraets rotationsvinkler.
 Prøv derefter at matche disse vinkler med gyroskopvinkler.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="248"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="246"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1836,29 +1829,29 @@ Beregn derefter længderne af de optiske flowlinjer.
 Resulterende offset er den, hvor linjer var korteste, hvilket betyder at videoen bevægede sig mindst visuelt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="249"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Synkroniseringsalgoritme med rolling shutter.
 Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="256"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
       <source>Low pass filter</source>
       <translation>Lavpasled</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="261"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="274"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
       <source>Show detected features</source>
       <translation>Vis analyseret optiske punkter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="280"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
       <source>Show optical flow</source>
       <translation>Vis optisk flow</translation>
     </message>
@@ -1882,22 +1875,22 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
       <translation>Detekteret kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="45"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="46"/>
       <source>Camera</source>
       <translation>Kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="46"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="47"/>
       <source>Lens</source>
       <translation>Objektiv</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="47"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
       <source>Setting</source>
       <translation>Indstilling</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Dimensions</source>
       <translation>Dimensioner</translation>
@@ -1924,7 +1917,7 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
       <source>Additional info</source>
       <translation>Yderligere information</translation>
     </message>
@@ -1940,7 +1933,7 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="51"/>
       <source>Calibrated by</source>
       <translation>Kalibreret af</translation>
     </message>
@@ -2330,7 +2323,7 @@ Din renderkø og nuværende fil gemmes automatisk.</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="146"/>
       <source>Merging files to %1 (%2)</source>
-      <translation type="unfinished">Merging files to %1 (%2)</translation>
+      <translation>Sammenfletter filer til %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
@@ -2340,7 +2333,7 @@ Din renderkø og nuværende fil gemmes automatisk.</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="207"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
-      <translation type="unfinished">Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</translation>
+      <translation>Splittet optagelse er detekteret, ønsker du automatisk at flette filerne (%1) sammen til et fuldt klip?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="334"/>
@@ -2353,8 +2346,8 @@ Kameraet har sandsynligvis ikke optaget bevægelsesdata i denne særlige optagel
       <location filename="../../src/ui/VideoArea.qml" line="341"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
-      <translation type="unfinished">Motion data sampling rate is too low (%1 Hz).
-50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
+      <translation>Frekvensen af bevægelsesdata er for lav (%1 Hz).
+50 Hz er absolut minimum og vi anbefaler mindst 200 Hz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="492"/>
