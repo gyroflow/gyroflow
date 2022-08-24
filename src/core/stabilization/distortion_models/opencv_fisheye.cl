@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-float2 undistort_point(float2 pos, float k[12], float amount) {
+float2 undistort_point(float2 pos, __global float k[12], float amount) {
     float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
 
     bool converged = false;
@@ -46,7 +46,7 @@ float2 undistort_point(float2 pos, float k[12], float amount) {
     return (float2)(0.0f, 0.0f);
 }
 
-float2 distort_point(float2 pos, float k[12]) {
+float2 distort_point(float2 pos, __global float k[12]) {
     float r = length(pos);
 
     float theta = atan(r);

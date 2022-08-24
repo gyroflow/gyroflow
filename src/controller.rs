@@ -65,7 +65,7 @@ pub struct Controller {
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString, sample_rate: f64),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
     realtime_fps_loaded: qt_signal!(fps: f64),
 
@@ -196,9 +196,12 @@ pub struct Controller {
     is_superview: qt_property!(bool; WRITE set_is_superview),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
+    file_size: qt_method!(fn(&self, path: QString) -> u64),
+    video_duration: qt_method!(fn(&self, path: QString) -> f64),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
+    clear_settings: qt_method!(fn(&self)),
 
     url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
     path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
@@ -225,6 +228,9 @@ pub struct Controller {
     check_external_sdk: qt_method!(fn(&self, path: QString) -> bool),
     install_external_sdk: qt_method!(fn(&self, path: QString)),
     external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
+
+    mp4_merge: qt_method!(fn(&self, file_list: QStringList)),
+    mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
@@ -492,7 +498,7 @@ impl Controller {
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString)| {
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString, f64)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
 
@@ -502,7 +508,7 @@ impl Controller {
 
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8);
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8, params.9);
 
                 stab2.invalidate_ongoing_computations();
                 stab2.invalidate_smoothing();
@@ -563,6 +569,7 @@ impl Controller {
                     let has_gyro = !gyro.quaternions.is_empty();
                     let has_raw_gyro = !gyro.raw_imu.is_empty();
                     let has_quats = !gyro.org_quaternions.is_empty();
+                    let sample_rate = gyro.get_sample_rate();
                     drop(gyro);
 
                     if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
@@ -590,7 +597,7 @@ impl Controller {
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
 
-                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id)));
+                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id), sample_rate));
                 });
             }
         }
@@ -1412,12 +1419,37 @@ impl Controller {
         crate::external_sdk::install(&path_str, progress);
     }
 
+    fn mp4_merge(&self, file_list: QStringList) {
+        let file_list: Vec<String> = file_list.into_iter().map(|x| x.to_string() ).collect();
+        ::log::debug!("Merging files: {:?}", &file_list);
+        if file_list.len() < 2 {
+            self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
+            return;
+        }
+        let p = std::path::Path::new(file_list.first().unwrap());
+        let output_file = p.with_file_name(format!("{}_joined.mp4", p.file_name().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
+        let out = output_file.clone();
+        let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string): (f64, String)| {
+            this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
+        });
+        core::run_threaded(move || {
+            let res = mp4_merge::join_files(&file_list, output_file, |p| progress((p.min(0.9999), String::default())));
+            match res {
+                Ok(_) => progress((1.0, String::default())),
+                Err(e) => progress((1.0, e.to_string()))
+            }
+        });
+    }
+
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
+    fn file_size(&self, path: QString) -> u64 { std::fs::metadata(&path.to_string()).map(|x| x.len()).unwrap_or_default() }
+    fn video_duration(&self, path: QString) -> f64 { gyroflow_core::util::get_video_metadata(&path.to_string()).map(|x| x.3).unwrap_or_default() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
     fn url_to_path(&self, url: QUrl) -> QString { QString::from(util::url_to_path(url)) }
     fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
+    fn clear_settings(&self) { util::clear_settings() }
 }

@@ -104,6 +104,7 @@ cpp! {{
     #include <QStandardPaths>
     #include <QBuffer>
     #include <QImage>
+    #include <QSettings>
 }}
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
@@ -302,6 +303,9 @@ pub fn get_version() -> String {
     } else {
         ver.to_string()
     }
+}
+pub fn clear_settings() {
+    cpp!(unsafe [] { QSettings().clear(); })
 }
 
 pub fn image_data_to_base64(w: u32, h: u32, s: u32, data: &[u8]) -> QString {

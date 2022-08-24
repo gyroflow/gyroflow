@@ -37,6 +37,17 @@ Rectangle {
         destroy(1000);
     }
 
+    property var loader: null;
+    function addLoader(): LoaderOverlay {
+        const l = Qt.createComponent("LoaderOverlay.qml").createObject(mainColumn, { cancelable: false, visible: false });
+        l.anchors.fill = undefined;
+        l.height = Qt.binding(() => l.col.height + 30 * dpiScale);
+        l.pb.anchors.verticalCenterOffset = Qt.binding(() => -l.height / 2 + 10 * dpiScale);
+        l.width = Qt.binding(() => mainColumn.width);
+        root.loader = l;
+        return l;
+    }
+
     anchors.fill: parent;
     color: "#80000000";
     opacity: pp.opacity;

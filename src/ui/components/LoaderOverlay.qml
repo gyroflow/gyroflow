@@ -14,6 +14,7 @@ Item {
     Ease on opacity { duration: 1000; }
     property string text;
     property alias t: t;
+    property alias col: col;
     property bool cancelable: true;
     property bool canceled: false;
     property real startTime: 0;
@@ -68,7 +69,7 @@ Item {
     QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.active && (parent.progress == -1 || root.canceled); running: visible; }
 
     Column {
-        id: c;
+        id: col;
         anchors.top: pb.visible? pb.bottom : bi.bottom;
         anchors.topMargin: 8 * dpiScale;
         width: parent.width;
@@ -81,6 +82,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter;
             topPadding: 8 * dpiScale;
             bottomPadding: 5 * dpiScale;
+            wrapMode: Text.WordWrap;
         }
         BasicText {
             id: time;

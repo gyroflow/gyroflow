@@ -46,7 +46,7 @@ Item {
             if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
                 // If video not loaded, try to load the associated file
                 root.pendingGyroflowData = obj;
-                loadFile(controller.path_to_url(videofile));
+                loadFile(controller.path_to_url(videofile), false);
                 if (controller.image_sequence_fps > 0) {
                     vid.setFrameRate(controller.image_sequence_fps);
                 }
@@ -66,7 +66,7 @@ Item {
                     // If video not loaded, try to load the associated file
                     root.pendingGyroflowData = obj;
                     const editing_id = render_queue.editing_job_id;
-                    loadFile(controller.path_to_url(videofile));
+                    loadFile(controller.path_to_url(videofile), false);
                     render_queue.editing_job_id = editing_id;
                     return;
                 }
@@ -117,22 +117,39 @@ Item {
             }
         }
         function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
-            if (externalSdkModalLoader !== null) {
-                externalSdkModalLoader.visible = percent < 1;
-                externalSdkModalLoader.active = percent < 1;
-                externalSdkModalLoader.progress = percent;
-                externalSdkModalLoader.text = qsTr("Downloading %1 (%2)").arg(sdk_name);
+            if (externalSdkModal !== null && externalSdkModal.loader !== null) {
+                externalSdkModal.loader.visible = percent < 1;
+                externalSdkModal.loader.active = percent < 1;
+                externalSdkModal.loader.progress = percent;
+                externalSdkModal.loader.text = qsTr("Downloading %1 (%2)").arg(sdk_name);
                 if (percent >= 1) {
                     externalSdkModal.close();
                     externalSdkModal = null;
-                    externalSdkModalLoader = null;
                     window.isDialogOpened = false;
                     if (!error_string) {
                         if (path == "ffmpeg_gpl") {
                             messageBox(Modal.Success, qsTr("Component was installed successfully.\nYou need to restart Gyroflow for changes to take effect.\nYour render queue and current file is saved automatically."), [ { text: qsTr("Ok") } ]);
                         } else {
-                            loadFile(path);
+                            loadFile(path, false);
                         }
+                    } else {
+                        messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
+                    }
+                }
+            }
+        }
+        function onMp4_merge_progress(percent: real, error_string: string, path: string) {
+            if (externalSdkModal !== null && externalSdkModal.loader !== null) {
+                externalSdkModal.loader.visible = percent < 1;
+                externalSdkModal.loader.active = percent < 1;
+                externalSdkModal.loader.progress = percent;
+                externalSdkModal.loader.text = qsTr("Merging files to %1 (%2)").arg("<b>" + path + "</b>");
+                if (percent >= 1) {
+                    externalSdkModal.close();
+                    externalSdkModal = null;
+                    window.isDialogOpened = false;
+                    if (!error_string) {
+                        loadFile(controller.path_to_url(path), true);
                     } else {
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
@@ -141,9 +158,8 @@ Item {
         }
     }
     property Modal externalSdkModal: null;
-    property LoaderOverlay externalSdkModalLoader: null;
 
-    function loadFile(url: url) {
+    function loadFile(url: url, skip_detection: bool) {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -161,34 +177,48 @@ Item {
                 } },
                 { text: qsTr("Cancel"), clicked: function() {
                     externalSdkModal = null;
-                    externalSdkModalLoader = null;
                 } },
             ]);
-            const l = Qt.createComponent("components/LoaderOverlay.qml").createObject(dlg.mainColumn, { cancelable: false, visible: false });
-            l.anchors.fill = undefined;
-            l.height = 70 * dpiScale;
-            l.pb.anchors.verticalCenterOffset = -l.height / 2 + 10 * dpiScale;
-            l.width = Qt.binding(() => dlg.mainColumn.width);
             externalSdkModal = dlg;
-            externalSdkModalLoader = l;
+            dlg.addLoader();
             return;
         }
 
         root.loadedFileUrl = url;
-        let newUrl;
-        if (newUrl = detectImageSequence(url)) {
-            const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
-                { text: qsTr("Ok"), accent: true, clicked: function() {
-                    const fps = dlg.mainColumn.children[1].value;
-                    controller.image_sequence_fps = fps;
-                    loadFile(newUrl);
-                    vid.setFrameRate(fps);
-                } },
-                { text: qsTr("Cancel") },
-            ]);
-            const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: 30.0 });
-            nf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
-            return;
+        if (!skip_detection) {
+            let newUrl;
+            if (newUrl = detectImageSequence(url)) {
+                const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
+                    { text: qsTr("Ok"), accent: true, clicked: function() {
+                        const fps = dlg.mainColumn.children[1].value;
+                        controller.image_sequence_fps = fps;
+                        loadFile(newUrl, true);
+                        vid.setFrameRate(fps);
+                    } },
+                    { text: qsTr("Cancel") },
+                ]);
+                const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: 30.0 });
+                nf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
+                return;
+            }
+            let sequenceList;
+            if (sequenceList = detectVideoSequence(url)) {
+                const list = "<b>" + sequenceList.map(x => x.split('/').pop()).join(", ") + "</b>";
+                const dlg = messageBox(Modal.Info, qsTr("Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?").arg(list), [
+                    { text: qsTr("Yes"), accent: true, clicked: function() {
+                        dlg.btnsRow.children[0].enabled = false;
+                        controller.mp4_merge(sequenceList);
+                        return false;
+                    } },
+                    { text: qsTr("No"), clicked: function() {
+                        externalSdkModal = null;
+                        loadFile(url, true);
+                    } },
+                ])
+                externalSdkModal = dlg;
+                dlg.addLoader();
+                return;
+            }
         }
         window.stab.fovSlider.value = 1.0;
         vid.loaded = false;
@@ -212,7 +242,7 @@ Item {
                 const gfFilename = gfFile.replace(/\\/g, "/").split("/").pop();
                 messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [
                     { text: qsTr("Yes"), clicked: function() {
-                        Qt.callLater(() => loadFile(gfUrl));
+                        Qt.callLater(() => loadFile(gfUrl, true));
                     } },
                     { text: qsTr("No"), accent: true },
                 ]);
@@ -237,15 +267,56 @@ Item {
             if (firstNum[1]) {
                 const ext = firstNum[2];
                 firstNum = firstNum[1];
-                for (let i = +firstNum + 1; i < +firstNum + 5; ++i) { // At least 5 frames
+                const firstNumNum = parseInt(firstNum, 10);
+                for (let i = firstNumNum + 1; i < firstNumNum + 5; ++i) { // At least 5 frames
                     const newNum = i.toString().padStart(firstNum.length, '0');
                     const newPath = urlStr.replace(firstNum + "." + ext, newNum + "." + ext);
                     if (!controller.file_exists(newPath)) {
                         return false;
                     }
                 }
-                controller.image_sequence_start = parseInt(firstNum, 10);
+                controller.image_sequence_start = firstNumNum;
                 return controller.path_to_url(urlStr.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`));
+            }
+        }
+        return false;
+    }
+    function detectVideoSequence(url: url) {
+        const urlStr = controller.url_to_path(url);
+
+        // url pattern, new path function, additional condition
+        const patterns = [
+            // GoPro
+            [/(G[XH](01).+\.MP4)$/i, function(match, i) {
+                return match.substring(0, 2) + i.toString().padStart(2, '0') + match.substring(4);
+            }],
+            // DJI Action
+            [/(DJI_\d+_(\d+)\.MP4)$/i, function(match, i) {
+                return match.substring(0, 9) + i.toString().padStart(3, '0') + match.substring(12);
+            }],
+            // DJI, by duration
+            [/(DJI_(\d+)\.MP4)$/i, function(match, i) {
+                return match.substring(0, 4) + i.toString().padStart(4, '0') + ".MP4";
+            }, function(newPath, list) {
+                // DJI splits the files after 6 minutes
+                return !list.length || (controller.video_duration(list[list.length - 1]) > 358 && controller.video_duration(newPath) < 358)
+            }],
+        ];
+        for (const x of patterns) {
+            let match = urlStr.match(x[0]);
+            if (match && match[1]) {
+                let list = [];
+                const firstNum = parseInt(match[2], 10);
+                for (let i = firstNum; i < firstNum + 20; ++i) { // Try 20 parts
+                    const newPath = urlStr.replace(match[1], x[1](match[1], i));
+                    if (controller.file_exists(newPath) && (x[2]? x[2](newPath, list) : true)) {
+                        list.push(newPath);
+                    } else {
+                        break;
+                    }
+                }
+                if (list.length > 1)
+                    return list;
             }
         }
         return false;
@@ -253,7 +324,7 @@ Item {
 
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
@@ -265,6 +336,9 @@ Item {
                     if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
                     if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
                 }
+            }
+            if (sample_rate > 0.0 && sample_rate < 50) {
+                messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
             }
             if (root.pendingGyroflowData) {
                 loadGyroflowData(root.pendingGyroflowData);
@@ -477,7 +551,7 @@ Item {
                 if (isCalibrator) {
                     calibrator_window.loadFile(drop.urls[0]);
                 } else {
-                    root.loadFile(drop.urls[0])
+                    root.loadFile(drop.urls[0], false)
                 }
             }
         }

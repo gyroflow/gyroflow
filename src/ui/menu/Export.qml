@@ -160,7 +160,7 @@ MenuItem {
             if ((format.name == "H.264/AVC" && window.vidInfo.pixelFormat.includes("10 bit"))) {
                 gpu.enabled2 = false;
             }
-            const gpuChecked = +settings.value("exportGpu-" + exportFormats[currentIndex].name, -1);
+            const gpuChecked = +settings.value("exportGpu-" + exportFormats[currentIndex].name.replace('/', '_'), -1);
             if (gpuChecked == -1) {
                 gpu.preventSave = true;
                 gpu.checked = gpu.enabled2;
@@ -170,7 +170,7 @@ MenuItem {
             }
 
             encoderOptions.preventSave = true;
-            encoderOptions.text = settings.value("encoderOptions-" + exportFormats[currentIndex].name, "");
+            encoderOptions.text = settings.value("encoderOptions-" + exportFormats[currentIndex].name.replace('/', '_'), "");
             encoderOptions.preventSave = false;
         }
         onCurrentIndexChanged: {
@@ -328,7 +328,7 @@ MenuItem {
         checked: true;
         onCheckedChanged: {
             if (!preventSave)
-                settings.setValue("exportGpu-" + exportFormats[codec.currentIndex].name, checked? 1 : 0);
+                settings.setValue("exportGpu-" + exportFormats[codec.currentIndex].name.replace('/', '_'), checked? 1 : 0);
         }
         property bool preventSave: false;
         property bool enabled2: true;

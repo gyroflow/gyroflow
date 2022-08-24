@@ -173,6 +173,6 @@ MenuItem {
         anchors.topMargin: 35 * dpiScale;
         anchors.bottomMargin: -35 * dpiScale;
         extensions: fileDialog.extensions;
-        onLoadFile: (path) => window.videoArea.loadFile(path)
+        onLoadFile: (path) => window.videoArea.loadFile(path, false)
     }
 }

@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "4471497" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "4b8ff98" }
 ahrs = { version = "0.5.0", features = ["field_access"] }
 
 #rs-sync = { path = "../../../rs-sync" }
@@ -67,7 +67,7 @@ walkdir = "2.3.2"
 
 log = "0.4.17"
 
-ocl = { git = "https://github.com/AdrianEddy/ocl.git", rev = "74c9335", optional = true }
+ocl = { version = "0.19.4", optional = true }
 
 #cpp = "0.5.6"
 #[build-dependencies]

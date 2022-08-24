@@ -510,6 +510,20 @@ impl GyroSource {
         }
     }
 
+    pub fn get_sample_rate(&self) -> f64 {
+        if self.org_raw_imu.len() > 2 {
+            let duration_ms = self.org_raw_imu.last().unwrap().timestamp_ms - self.org_raw_imu.first().unwrap().timestamp_ms;
+            self.org_raw_imu.len() as f64 / (duration_ms / 1000.0)
+        } else if self.org_quaternions.len() > 2 {
+            let first = *self.org_quaternions.iter().next().unwrap().0 as f64 / 1000.0;
+            let last = *self.org_quaternions.iter().next_back().unwrap().0 as f64 / 1000.0;
+            let duration_ms = last - first;
+            self.org_quaternions.len() as f64 / (duration_ms / 1000.0)
+        } else {
+            0.0
+        }
+    }
+
     pub fn find_bias(&self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
         let ts_start = timestamp_start - self.offset_at_video_timestamp(timestamp_start);
         let ts_stop = timestamp_stop - self.offset_at_video_timestamp(timestamp_stop);

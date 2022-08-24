@@ -69,7 +69,7 @@ Rectangle {
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
         type: "video";
-        onAccepted: videoArea.loadFile(selectedFile);
+        onAccepted: videoArea.loadFile(selectedFile, false);
     }
 
     Item {
@@ -463,16 +463,10 @@ Rectangle {
                         } },
                         { text: qsTr("Cancel"), clicked: function() {
                             videoArea.externalSdkModal = null;
-                            videoArea.externalSdkModalLoader = null;
                         } },
                     ]);
-                    const l = Qt.createComponent("components/LoaderOverlay.qml").createObject(dlg.mainColumn, { cancelable: false, visible: false });
-                    l.anchors.fill = undefined;
-                    l.height = 70 * dpiScale;
-                    l.pb.anchors.verticalCenterOffset = -l.height / 2 + 10 * dpiScale;
-                    l.width = Qt.binding(() => dlg.mainColumn.width);
                     videoArea.externalSdkModal = dlg;
-                    videoArea.externalSdkModalLoader = l;
+                    dlg.addLoader();
                 }
                 return "";
             }

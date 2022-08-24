@@ -258,10 +258,10 @@ impl LensProfile {
                             *val = (*val as f64 * ratio).round() as usize;
                             if pad && *val % 2 != 0 { *val -= 1; }
                         };
-                        scale(&mut cpy.calib_dimension.w, false);
-                        scale(&mut cpy.calib_dimension.h, false);
-                        scale(&mut cpy.orig_dimension.w, false);
-                        scale(&mut cpy.orig_dimension.h, false);
+                        scale(&mut cpy.calib_dimension.w, true);
+                        scale(&mut cpy.calib_dimension.h, true);
+                        scale(&mut cpy.orig_dimension.w, true);
+                        scale(&mut cpy.orig_dimension.h, true);
                         if cpy.fisheye_params.camera_matrix.len() > 1 {
                             cpy.fisheye_params.camera_matrix[0][0] *= ratio;
                             cpy.fisheye_params.camera_matrix[0][2] *= ratio;

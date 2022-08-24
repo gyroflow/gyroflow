@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-float2 undistort_point(float2 pos, float k[12], float amount) {
+float2 undistort_point(float2 pos, __global float k[12], float amount) {
     float NEWTON_EPS = 0.00001;
 
     float inv_k1 = (1.0 / k[0]);
@@ -43,7 +43,7 @@ float2 undistort_point(float2 pos, float k[12], float amount) {
     return pos * ru;
 }
 
-float2 distort_point(float2 pos, float k[12]) {
+float2 distort_point(float2 pos, __global float k[12]) {
     float poly2 = k[0] * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }

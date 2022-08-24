@@ -271,4 +271,22 @@ MenuItem {
             onTextChanged: render_queue.default_suffix = text;
         }
     }
+    Item { width: 1; height: 10 * dpiScale; }
+    LinkButton {
+        text: qsTr("Reset all settings to default");
+        textColor: "#f67575"
+        anchors.horizontalCenter: parent.horizontalCenter;
+        onClicked: {
+            messageBox(Modal.Warning, qsTr("Are you sure you want to clear all settings and restore the defaults?"), [
+                { text: qsTr("Yes"), clicked: () => {
+                    controller.clear_settings();
+                    messageBox(Modal.Info, qsTr("Settings cleared, please restart Gyroflow for the changes to take effect."), [
+                        { text: qsTr("Exit"), accent: true, clicked: Qt.quit},
+                        { text: qsTr("Cancel") },
+                    ]);
+                }},
+                { text: qsTr("No"), accent: true },
+            ]);
+        }
+    }
 }

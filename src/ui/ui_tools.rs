@@ -147,6 +147,7 @@ impl UITools {
         self.update_dark_mode(hwnd);
     }
 
+    #[allow(unused_mut, unused_variables)]
     fn update_dark_mode(&self, mut hwnd: isize) {
         #[cfg(target_os = "windows")]
         unsafe {

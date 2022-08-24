@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-float2 undistort_point(float2 pos, float k[12], float amount) {
+float2 undistort_point(float2 pos, __global float k[12], float amount) {
     float2 start_pos = pos;
 
     // compensate distortion iteratively
@@ -25,7 +25,7 @@ float2 undistort_point(float2 pos, float k[12], float amount) {
     );
 }
 
-float2 distort_point(float2 pos, float k[12]) {
+float2 distort_point(float2 pos, __global float k[12]) {
     float r2 = pos.x * pos.x + pos.y * pos.y;
     float r4 = r2 * r2;
     float r6 = r4 * r2;
