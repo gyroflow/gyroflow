@@ -38,6 +38,12 @@ impl CameraIdentifier {
             ..Default::default()
         };
 
+        if id.brand.to_ascii_lowercase() == "runcam" { id.lens_info = "default".into(); }
+
+        if !id.brand.is_empty() {
+            id.model = id.model.to_string().replace(&id.brand, "").trim().to_string();
+        }
+
         match brand.as_str() {
             "GoPro" => {
                 if let Some(ref samples) = input.samples {
@@ -129,14 +135,28 @@ impl CameraIdentifier {
                     }
                 }
             }
-            _ => { }
-        }
-
-        if !id.brand.is_empty() {
-            id.model = id.model.to_string().replace(&id.brand, "").trim().to_string();
+            _ => {
+                if let Some(ref samples) = input.samples {
+                    for info in samples {
+                        if let Some(ref tag_map) = info.tag_map {
+                            if let Some(map) = tag_map.get(&GroupId::Default) {
+                                if let Some(v) = map.get_t(TagId::Metadata) as Option<&serde_json::Value> {
+                                    log::debug!("Camera ID Brand: {}, Model: {}, Metadata: {:?}", id.brand, id.model, v);
+                                    if let Some(lens_info) = v.get("lens_info").and_then(|v| v.as_str()) {
+                                        id.lens_info = lens_info.to_string();
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         id.identifier = id.get_identifier();
+
+        log::info!("Camera identifier string: {}", id.identifier);
 
         Ok(id)
     }
@@ -148,7 +168,7 @@ impl CameraIdentifier {
         id = id.replace(' ', "");
         id = id.replace("--", "-");
         id = id.replace("--", "-");
-        let x: &[_] =  &['-', ' '];
+        let x: &[_] = &['-', ' '];
         id.trim_matches(x).to_lowercase()
     }
 
