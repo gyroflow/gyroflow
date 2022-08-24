@@ -9,8 +9,9 @@ TextField {
     id: root;
     property var model: [];
     property alias popup: popup;
+    property var profilesMenu: null;
 
-    signal selected(var text, int index);
+    signal selected(var item);
 
     Popup {
         id: popup;
@@ -19,9 +20,8 @@ TextField {
         font.pixelSize: 12 * dpiScale;
         itemHeight: 25 * dpiScale;
         width: Math.max(parent.width * 1.5, Math.min(window.width * 0.8, maxItemWidth + 10 * dpiScale));
-        property var indexMapping: [];
         onClicked: (index) => {
-            root.selected(model[index], indexMapping[index]);
+            root.selected(model[index]);
             popup.close();
             root.text = "";
         }
@@ -52,7 +52,6 @@ TextField {
         if (!popup.opened) popup.open();
 
         let m = [];
-        let indexMapping = [];
 
         let i = 0;
         for (const x of root.model) {
@@ -67,18 +66,26 @@ TextField {
 
             if (add) {
                 m.push(x);
-                indexMapping.push(i);
             }
 
             ++i;
         }
 
         if (!m.length) popup.close();
+        else {
+            m.sort((a, b) => {
+                const aPriority = a[1].endsWith(".gyroflow") || root.profilesMenu.favorites[a[2]];
+                const bPriority = b[1].endsWith(".gyroflow") || root.profilesMenu.favorites[b[2]];
+                if (aPriority && bPriority) return a[0].localeCompare(b[0]);
+                if (aPriority) return -1;
+                if (bPriority) return 1;
+                return a[0].localeCompare(b[0]);
+            });
+        }
 
         popup.maxItemWidth = 0;
         popup.model = [];
         popup.model = m;
-        popup.indexMapping = indexMapping;
         popup.currentIndex = -1;
     }
     Keys.onDownPressed: {
@@ -91,7 +98,7 @@ TextField {
     Keys.onUpPressed: popup.highlightedIndex = Math.max(0, popup.highlightedIndex - 1);
     onAccepted: {
         if (popup.opened) {
-            root.selected(popup.model[popup.highlightedIndex], popup.indexMapping[popup.highlightedIndex]);
+            root.selected(popup.model[popup.highlightedIndex]);
             popup.close();
             root.text = "";
         }

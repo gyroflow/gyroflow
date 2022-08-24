@@ -58,6 +58,14 @@ impl LensProfileDatabase {
         let _time = std::time::Instant::now();
 
         let mut load = |data: &str, f_name: &str| {
+            if f_name.ends_with(".gyroflow") {
+                let mut profile = LensProfile::default();
+                profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
+                profile.filename = f_name.to_string();
+                profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.filename.as_bytes())));
+                self.map.insert(f_name.to_string(), profile);
+                return;
+            }
             match LensProfile::from_json(data) {
                 Ok(mut v) => {
                     v.filename = f_name.to_string();
@@ -84,7 +92,7 @@ impl LensProfileDatabase {
         };
 
         #[cfg(target_os = "android")]
-        for entry in LENS_PROFILES_STATIC.find("**/*.json").unwrap() {
+        for entry in LENS_PROFILES_STATIC.find("**/*").unwrap() {
             if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
                 load(data, &entry.path().display().to_string());
             }
@@ -94,7 +102,7 @@ impl LensProfileDatabase {
         WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                if f_name.ends_with(".json") {
+                if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                     if let Ok(data) = std::fs::read_to_string(&f_name) {
                         load(&data, &f_name);
                     }
@@ -111,7 +119,9 @@ impl LensProfileDatabase {
         let mut set = HashSet::with_capacity(self.map.len());
         let mut ret = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
-            if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
+            if v.filename.ends_with(".gyroflow") {
+                ret.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0));
+            } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
                     let mut name = v.get_display_name();
                     let mut new_name = name.clone();

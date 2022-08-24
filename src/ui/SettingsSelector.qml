@@ -195,6 +195,15 @@ Modal {
         }
     }
 
+    BasicText {
+        visible: root.isPreset;
+        text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.");
+        color: styleTextColor;
+        textFormat: Text.MarkdownText;
+    }
+
+    Item { width: 1; height: 10 * dpiScale; }
+
     onClicked: (index) => {
         if (index == 0) { // Save/Apply
             let finalObj = { };

@@ -149,8 +149,14 @@ MenuItem {
         height: 25 * dpiScale;
         width: parent.width;
         topPadding: 5 * dpiScale;
-        onSelected: (text, index) => {
-            controller.load_lens_profile(lensProfilesList[index][1]);
+        profilesMenu: root;
+        onSelected: (item) => {
+            const fname = item[1];
+            if (fname.endsWith(".gyroflow")) {
+                window.videoArea.loadFile(controller.path_to_url(fname), true);
+            } else {
+                controller.load_lens_profile(fname);
+            }
         }
         popup.lv.delegate: LensProfileSearchDelegate {
             popup: search.popup;
