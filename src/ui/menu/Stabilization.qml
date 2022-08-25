@@ -503,7 +503,7 @@ MenuItem {
             id: correctionAmount;
             from: 0.0;
             to: 100.0;
-            value: 100.0;
+            value: 1.0;
             unit: "%";
             defaultValue: 100.0;
             precision: 0;
