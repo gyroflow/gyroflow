@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use itertools::Either;
+use itertools::{Either, Itertools};
 use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
@@ -62,6 +62,7 @@ pub struct Controller {
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
     orientation_guessed: qt_signal!(orientation: QString),
+    get_optimal_sync_points: qt_method!(fn(&mut self, target_sync_points : usize) -> QString),
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
@@ -437,6 +438,15 @@ impl Controller {
             let bias = self.stabilizer.gyro.read().find_bias(ranges_ms[0].0, ranges_ms[0].1);
             self.bias_estimated(bias.0, bias.1, bias.2);
         }
+    }
+
+    fn get_optimal_sync_points (&mut self, target_sync_points : usize) -> QString {
+        let dur_ms = self.stabilizer.params.read().duration_ms;
+        let trim_start = self.stabilizer.params.read().trim_start * dur_ms / 1000.0;
+        let trim_end = self.stabilizer.params.read().trim_end * dur_ms / 1000.0;
+        let mut optsync = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read());
+        let s : String = optsync.run(target_sync_points, trim_start, trim_end).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
+        QString::from(s)
     }
 
     fn update_chart(&mut self, chart: QJSValue) {

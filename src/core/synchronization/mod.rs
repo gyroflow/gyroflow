@@ -30,6 +30,7 @@ mod opencv_dis;
 mod akaze;
 mod find_offset;
 mod find_offset_rssync;
+pub mod optimsync;
 // mod cpp_wrapper;
 mod find_offset_visually;
 mod autosync;
