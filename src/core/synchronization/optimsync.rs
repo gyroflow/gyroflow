@@ -168,9 +168,18 @@ impl OptimSync {
             }
         }
 
-        let prop = (target_sync_points as f64 / sync_points.len() as f64).min(1.0);
+        let mut selected_sync_points = Vec::<f64>::new();
         let mut rng = rand::thread_rng();
-        sync_points.retain_mut(|_x| rng.gen_bool(prop));
+        for i in 0..target_sync_points {
+            if sync_points.is_empty() { break; }
+            let rnd = rng.gen_range(trim_start_s * 1000.0..trim_end_s * 1000.0);
+            let mut p = sync_points.partition_point(|x| x < &rnd).min(sync_points.len() - 1);
+            if (sync_points[(p as i64-1).max(0) as usize] - rnd).abs() < (sync_points[p] - rnd) {
+                p -= 1;
+            }
+            selected_sync_points.push(sync_points[p]);
+            sync_points.remove(p);
+        }
 
         // use inline_python::python;
         // python! {
@@ -190,8 +199,8 @@ impl OptimSync {
         //     fig.set_size_inches(10, 5)
         //     plt.show()
         // }
-
-        sync_points
+        selected_sync_points.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        selected_sync_points
     }
 }
 
