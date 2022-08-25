@@ -751,57 +751,57 @@ Vil du indsende din profil?</translation>
       <translation>Søg...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="170"/>
       <source>Open file</source>
       <translation>Åbn fil</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="169"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>Create new</source>
       <translation>Opret ny</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Denne linseprofil er uofficiel, vi kan ikke garantere dets korrekthed. Bruges på egen risiko.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="194"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Bedøm denne profil: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="196"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Thank you for rating this profile.</source>
       <translation>Tak for din bedømmelse af denne profil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="224"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Aspektforhold af linseprofilen er ikke i overenstemmelse med videofilen. Resultatet vil ikke være korrekt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="225"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="231"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Opløsning af linseprofilen er ikke i overenstemmelse med videofilen. Resultatet vil muligvis ikke være korrekt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="240"/>
       <source>Adjust parameters</source>
       <translation>Justér parametre</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="267"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="273"/>
       <source>Pixel focal length</source>
       <translation>Pixel brændvidde</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="277"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="283"/>
       <source>Focal center</source>
       <translation>Fokal centrum af billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="287"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="293"/>
       <source>Distortion coefficients</source>
       <translation>Forvrængningskoefficienter</translation>
     </message>
@@ -811,12 +811,12 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>forudindstilling</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>officiel</translation>
     </message>
   </context>
   <context>
@@ -1110,17 +1110,17 @@ Vil du indsende din profil?</translation>
       <translation>Statisk zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using essential matrix</source>
       <translation>Brug af essentiel matrix</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using visual features</source>
       <translation>Brug visuelle elementer i analyse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1503,7 +1503,7 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="200"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+      <translation>Tip: Du kan have dine forudindstillinger i linseprofilens søgefelt, hvis du gemmer din forudindstilling (`.gyroflow` fil) i `camera_presets` mappen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
@@ -1724,103 +1724,108 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
       <translation>Synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="80"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="83"/>
       <source>Auto sync</source>
       <translation>Automatisk synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="84"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Ingen bevægelsesdata indlæst, kan ikke synkroniseres.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="114"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Linseprofil er ikke indlæst, synkronisering vil sandsynligvis give forkerte resultater. Er du sikker på, at du vil fortsætte?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="107"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="115"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="110"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="118"/>
       <source>No</source>
       <translation>Nej</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="121"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <source>Experimental automatic sync point selection.</source>
+      <translation>Eksperimentel automatisk valg af synkroniseringspunkter.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Denne fil bruger synkroniserede bevægelsesdata, yderligere synkroniseringspunkter er ikke nødvendige og kan give et dårligere resultat.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="127"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
       <source>Rough gyro offset</source>
       <translation>Omtrentlig forskydning af gyro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="135"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="159"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="153"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="231"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="144"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="162"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Analyser både positive og negative forskydninger.
 Dette fordobler beregningstiden, så brug kun dette for det oprindelige punkt og deaktiver når du kender forskydningen.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="150"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="168"/>
       <source>Sync search size</source>
       <translation>Søgestørrelse for synkronisering</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="188"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
       <translation>Beregn omtrent forskydning først (ved hjælp af essentiel matrix metode), derefter forfin med langsommere, men mere præcis rs-sync metode.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
       <source>Max sync points</source>
       <translation>Maks antal synkroniseringspunkter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="209"/>
       <source>Analyze every n-th frame</source>
       <translation>Analyser hvert n-te billede</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="222"/>
       <source>Time to analyze per sync point</source>
       <translation>Tidsperiode analyseret pr. synkroniseringspunkt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="237"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZE metoden kan være mere nøjagtig, men er betydeligt langsommere end OpenCV. Brug kun, hvis OpenCV ikke producerer gode resultater</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
       <source>Optical flow method</source>
       <translation>Optisk flow metode</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="236"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
       <source>Offset calculation method</source>
       <translation>Metode til beregning af forskydning</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="245"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="263"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Beregn kamera-transformations-matrix fra optisk flow for at få kameraets rotationsvinkler.
 Prøv derefter at matche disse vinkler med gyroskopvinkler.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="246"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="264"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1829,29 +1834,29 @@ Beregn derefter længderne af de optiske flowlinjer.
 Resulterende offset er den, hvor linjer var korteste, hvilket betyder at videoen bevægede sig mindst visuelt.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="265"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Synkroniseringsalgoritme med rolling shutter.
 Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
       <source>Low pass filter</source>
       <translation>Lavpasled</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="277"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="290"/>
       <source>Show detected features</source>
       <translation>Vis analyseret optiske punkter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="296"/>
       <source>Show optical flow</source>
       <translation>Vis optisk flow</translation>
     </message>

@@ -41,7 +41,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="136"/>
       <source>UI scaling</source>
-      <translation>Escalado UI</translation>
+      <translation>Escalado IU</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="150"/>
@@ -333,7 +333,7 @@ Do you want to convert to a different supported pixel format or keep the origina
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
       <translation>El codificador GPU no pudo inicializarse y el renderizado se hará mediante CPU, que es mucho más lento.
-Si tiene un dispositivo moderno, los controladores GPU actualizados y cree que esto debería suceder, comuníquelo en GitHub incluyendo el archivo gyroflow.log.</translation>
+Si tiene un dispositivo moderno, los controladores GPU actualizados y cree que esto debería suceder, reportelo en GitHub incluyendo el archivo gyroflow.log.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="493"/>
@@ -467,7 +467,7 @@ Si tiene un dispositivo moderno, los controladores GPU actualizados y cree que e
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="281"/>
       <source>Original (%1 x %2)</source>
-      <translation type="unfinished">Original (%1 x %2)</translation>
+      <translation>Original (%1 x %2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="301"/>
@@ -698,7 +698,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="453"/>
       <source>Lens is asymmetrical</source>
-      <translation type="unfinished">Lens is asymmetrical</translation>
+      <translation>La lente es asimétrica</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="460"/>
@@ -749,57 +749,57 @@ Do you want to submit your profile?</source>
       <translation>Buscar...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="170"/>
       <source>Open file</source>
       <translation>Abrir archivo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="169"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>Create new</source>
       <translation>Crear nuevo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Este perfil de lente no es oficial, no podemos garantizar su nivel de corrección. Úsalo bajo tu propio riesgo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="194"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Valore este perfil: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="196"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Thank you for rating this profile.</source>
       <translation>Gracias por puntuar este perfil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="224"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>La relación de aspecto del perfil de lente no coincide con la relación de aspecto del fichero. El resultado no se verá correctamente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="225"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="231"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Las dimensiones del perfil de lente no coinciden con las dimensiones del fichero. El resultado puede no verse correctamente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="240"/>
       <source>Adjust parameters</source>
       <translation>Parámetros de ajuste</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="267"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="273"/>
       <source>Pixel focal length</source>
       <translation>Longitud focal de píxel </translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="277"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="283"/>
       <source>Focal center</source>
       <translation>Centro focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="287"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="293"/>
       <source>Distortion coefficients</source>
       <translation>Coeficientes de distorsión</translation>
     </message>
@@ -809,12 +809,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>preajuste</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>oficial</translation>
     </message>
   </context>
   <context>
@@ -986,7 +986,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="128"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Activar fotogramas clave</translation>
     </message>
   </context>
   <context>
@@ -1108,17 +1108,17 @@ Do you want to submit your profile?</source>
       <translation>Zoom estático </translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using essential matrix</source>
       <translation>Usar matriz esencial </translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using visual features</source>
       <translation>Usar características visuales</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1394,7 +1394,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Keyframes</source>
-      <translation type="unfinished">Keyframes</translation>
+      <translation>Fotogramas clave</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
@@ -1501,7 +1501,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="200"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+      <translation>Sugerencia: Puedes tener tus preajustes en el cuadro de búsqueda del perfil de lente si guardas tu preajuste (archivo `.gyroflow`) en el directorio `camera_presets`.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
@@ -1529,7 +1529,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="99"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Activar fotogramas clave</translation>
     </message>
   </context>
   <context>
@@ -1572,7 +1572,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Máxima suavidad a alta velocidad</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="167"/>
@@ -1722,102 +1722,107 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="80"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="83"/>
       <source>Auto sync</source>
       <translation>Sincronización automática</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="84"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Sin información de movimiento, no se puede sincronizar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="114"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Perfil de lente sin cargar, la sincronización dará resultados erróneos. ¿Seguro que quieres continuar?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="107"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="115"/>
       <source>Yes</source>
       <translation>Si</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="110"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="118"/>
       <source>No</source>
       <translation>No</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="121"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <source>Experimental automatic sync point selection.</source>
+      <translation>Selección automática de puntos de sincronización experimental.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Este fichero utiliza datos de movimiento sincronizados, no son necesario puntos de sincronización adicional y pueden hacer el resultado verse peor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="127"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
       <source>Rough gyro offset</source>
       <translation>Desfase giroscópico aproximado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="135"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="159"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="153"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="231"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="144"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="162"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Analizar desplazamiento positivo y negativo.
 Esto duplica el tiempo de cálculo, marcar sólo para el punto inicial y desmarque una vez calculado el desplazamiento.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="150"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="168"/>
       <source>Sync search size</source>
       <translation>Tamaño de búsqueda de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="188"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
       <translation>Calcular primero el desplazamiento inicial (utilizando el método de la matriz esencial). Refinar luego usando un método de sincronización más lento pero más preciso.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
       <source>Max sync points</source>
       <translation>Máximo de puntos de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="209"/>
       <source>Analyze every n-th frame</source>
       <translation>Analizar cada x fotograma</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="222"/>
       <source>Time to analyze per sync point</source>
       <translation>Tiempo a analizar por punto de sincronización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="237"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>El método AKAZE puede ser más preciso, pero es significativamente más lento que OpenCV. Úselo solo si OpenCV no produce buenos resultados</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
       <source>Optical flow method</source>
       <translation>Método de flujo óptico</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="236"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
       <source>Offset calculation method</source>
       <translation>Método de cálculo de compensación</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="245"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="263"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Calcula la matriz de transformación de cámara del flujo óptico para obtener los grados de rotación de la cámara. Después intenta sincronizar estos resultados con los datos del giroscopio.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="246"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="264"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1826,29 +1831,29 @@ Luego, calcula la longitud de las líneas del flujo óptico.
 La compensación resultante es la que aparece con las líneas más cortas, que es donde menos se mueve el vídeo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="265"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Algoritmo de sincronización entre el giroscopio y el barrido del obturador.
 Asegúrese de que el valor de barrido del obturador es el adecuado antes de sincronizar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
       <source>Low pass filter</source>
       <translation>Filtro de paso bajo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="277"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="290"/>
       <source>Show detected features</source>
       <translation>Mostrar características detectadas</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="296"/>
       <source>Show optical flow</source>
       <translation>Mostrar flujo óptico</translation>
     </message>
@@ -2017,97 +2022,97 @@ Esta característica es experimental, los resultados pueden no ser correctos del
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="244"/>
       <source>Delete</source>
-      <translation type="unfinished">Delete</translation>
+      <translation>Eliminar</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="250"/>
       <source>Ease in</source>
-      <translation type="unfinished">Ease in</translation>
+      <translation>Ease In</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="257"/>
       <source>Ease out</source>
-      <translation type="unfinished">Ease out</translation>
+      <translation>Ease Out</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="275"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="276"/>
       <source>Video rotation</source>
-      <translation type="unfinished">Video rotation</translation>
+      <translation>Rotación de vídeo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="277"/>
       <source>Zooming speed</source>
-      <translation type="unfinished">Zooming speed</translation>
+      <translation>Velocidad de Zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="278"/>
       <source>Zooming center offset X</source>
-      <translation type="unfinished">Zooming center offset X</translation>
+      <translation>Desplazamiento X del centro de zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="279"/>
       <source>Zooming center offset Y</source>
-      <translation type="unfinished">Zooming center offset Y</translation>
+      <translation>Desplazamiento Y del centro de zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="280"/>
       <source>Background margin</source>
-      <translation type="unfinished">Background margin</translation>
+      <translation>Margen de fondo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="281"/>
       <source>Background feather</source>
-      <translation type="unfinished">Background feather</translation>
+      <translation>Pluma de fondo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="282"/>
       <source>Horizon lock amount</source>
-      <translation type="unfinished">Horizon lock amount</translation>
+      <translation>Cantidad de bloqueo del horizonte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="283"/>
       <source>Horizon lock roll correction</source>
-      <translation type="unfinished">Horizon lock roll correction</translation>
+      <translation>Correcion de balanceo de bloqueo de horizonte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Intensidad de corrección de lente</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="285"/>
       <source>Max smoothness</source>
-      <translation type="unfinished">Max smoothness</translation>
+      <translation>Suavizado máximo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="286"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Máxima suavidad a alta velocidad</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="287"/>
       <source>Smoothness</source>
-      <translation type="unfinished">Smoothness</translation>
+      <translation>Suavizado</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="288"/>
       <source>Smoothness pitch</source>
-      <translation type="unfinished">Smoothness pitch</translation>
+      <translation>Suavizado de Cabeceo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="289"/>
       <source>Smoothness roll</source>
-      <translation type="unfinished">Smoothness roll</translation>
+      <translation>Suavizado de alaveo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <source>Smoothness yaw</source>
-      <translation type="unfinished">Smoothness yaw</translation>
+      <translation>Suavizado de guiñada</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="470"/>

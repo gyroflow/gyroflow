@@ -748,57 +748,57 @@ Do you want to submit your profile?</source>
       <translation>Mencari...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="170"/>
       <source>Open file</source>
       <translation>Membuka file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="169"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>Create new</source>
       <translation>Membuat baru</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Profil lensa ini unofficial, kami tidak menjamin ketepatannya. Gunakan dengan resiko anda sendiri.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="194"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Nilai profile ini: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="196"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Thank you for rating this profile.</source>
       <translation>Terima kasih telah menilai profile ini.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="224"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Aspek rasio pada profil lensa tidak cocok dengan aspek rasio file anda. Hasil akan terlihat tidak benar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="225"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="231"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Dimensi pada profil lensa tidak cocok dengan dimensi file anda. Hasil akan terlihat tidak benar.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="240"/>
       <source>Adjust parameters</source>
       <translation>Menyesuaikan parameter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="267"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="273"/>
       <source>Pixel focal length</source>
       <translation>Piksel focal length</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="277"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="283"/>
       <source>Focal center</source>
       <translation>Focal center</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="287"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="293"/>
       <source>Distortion coefficients</source>
       <translation>Koefisien distorsi</translation>
     </message>
@@ -1107,17 +1107,17 @@ Do you want to submit your profile?</source>
       <translation>Perbesar statis</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using essential matrix</source>
       <translation>Menggunakan matriks esensial</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using visual features</source>
       <translation>Menggunakan fitur visual</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1720,103 +1720,108 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Sinkronisasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="80"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="83"/>
       <source>Auto sync</source>
       <translation>Sinkronisasi otomatis</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="84"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Tidak ada data motion yang dimuat, tidak dapat disinkronkan.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="114"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Profil lensa tidak dimuat, sinkronisasi kemungkinan besar akan memberikan hasil yang salah. Apakah anda yakin ingin melanjutkan?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="107"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="115"/>
       <source>Yes</source>
       <translation>Ya</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="110"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="118"/>
       <source>No</source>
       <translation>Tidak</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="121"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <source>Experimental automatic sync point selection.</source>
+      <translation type="unfinished">Experimental automatic sync point selection.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>File ini menggunakan data motion yang disinkronkan, titik sinkronisasi tambahan tidak diperlukan yang dapat membuat output terlihat lebih buruk.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="127"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
       <source>Rough gyro offset</source>
       <translation>Offset gyro kasar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="135"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="159"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="153"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="231"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="144"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="162"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Analisis offset positif dan negatif.
 Ini menggandakan waktu perhitungan, jadi periksa ini hanya untuk titik awal dan hapus centang setelah Anda mengetahui jumlah offsetnya.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="150"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="168"/>
       <source>Sync search size</source>
       <translation>Sinkronkan ukuran pencarian</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="188"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
       <translation>Hitung offset awal terlebih dahulu (menggunakan metode matriks esensial), lalu sempurnakan menggunakan metode rs-sync yang lebih lambat namun lebih akurat.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
       <source>Max sync points</source>
       <translation>Titik sinkronisasi maksimum</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="209"/>
       <source>Analyze every n-th frame</source>
       <translation>Menganalisa setiap n-th frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="222"/>
       <source>Time to analyze per sync point</source>
       <translation>Waktu untuk menganalisis per titik sinkronisasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="237"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>Metode AKAZE mungkin lebih akurat tetapi jauh lebih lambat daripada OpenCV. Gunakan hanya jika OpenCV tidak menghasilkan hasil yang baik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
       <source>Optical flow method</source>
       <translation>Metode Optical flow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="236"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
       <source>Offset calculation method</source>
       <translation>Metode kalkulasi offset</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="245"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="263"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Hitung matriks transformasi kamera dari optical flow untuk mendapatkan sudut rotasi kamera.
 Kemudian cocokkan sudut ini dengan sudut gyroscope.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="246"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="264"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1825,29 +1830,29 @@ Kemudian hitung panjang garis optical flow.
 Offset yang dihasilkan adalah yang memiliki garis terpendek, yang berarti video bergerak paling sedikit secara visual.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="265"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Rolling shutter video ke algoritma sinkronisasi gyro.
 Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
       <source>Low pass filter</source>
       <translation>Filter Low pass</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="277"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="290"/>
       <source>Show detected features</source>
       <translation>Tampilkan fitur yang terdeteksi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="296"/>
       <source>Show optical flow</source>
       <translation>Tampilkan optical flow</translation>
     </message>

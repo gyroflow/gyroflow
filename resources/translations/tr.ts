@@ -95,37 +95,37 @@ Bu seçenek çok daha iyi bir arayüz performansı sunmalı.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Reset all settings to default</source>
-      <translation type="unfinished">Reset all settings to default</translation>
+      <translation>Her ayarı default'a döndür</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="280"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Tüm ayarları silip default'a döndürmek istediğinize emin misiniz?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="281"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Evet</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="289"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Ayarlar silindi, değişikliklerin devreye girmesi için Gyroflow'u yeniden başlatın.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>Exit</source>
-      <translation type="unfinished">Exit</translation>
+      <translation>Çık</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>İptal et</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="294"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Hayır</translation>
     </message>
   </context>
   <context>
@@ -749,57 +749,57 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <translation>Ara...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="170"/>
       <source>Open file</source>
       <translation>Dosya aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="169"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>Create new</source>
       <translation>Yeni oluştur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Bu lens profili bizim tarafımızdan sağlanmış değil, doğruluğunu garanti edemeyiz. Kullanımından doğan riskler size aittir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="194"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Bu profili değerlendirin: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="196"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Thank you for rating this profile.</source>
       <translation>Bu profili değerlendirdiğiniz için teşekkür ederiz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="224"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Lens profili açıklık oranı dosyanın açıklık oranıyla uyumsuz. Sonuç doğru gözükmeyecek.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="225"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="231"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Lens profili ölçüleri dosyanın ölçüleri ile uyumsuz. Sonuç doğru gözükmeyebilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="240"/>
       <source>Adjust parameters</source>
       <translation>Parametreleri ayarla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="267"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="273"/>
       <source>Pixel focal length</source>
       <translation>Piksel odak uzunluğu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="277"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="283"/>
       <source>Focal center</source>
       <translation>Odak merkezi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="287"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="293"/>
       <source>Distortion coefficients</source>
       <translation>Bozulma sabitleri</translation>
     </message>
@@ -809,12 +809,12 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>ön ayar</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>resmi</translation>
     </message>
   </context>
   <context>
@@ -860,12 +860,12 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Video file is not loaded.</source>
-      <translation type="unfinished">Video file is not loaded.</translation>
+      <translation>Video dosyası yüklü değil.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Tamam</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="123"/>
@@ -1108,17 +1108,17 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <translation>Statik zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using essential matrix</source>
       <translation>Temel matris kullanılıyor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>Using visual features</source>
       <translation>Görsel özellikler kullanılıyor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="240"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>rs-sync</source>
       <translation>rs-sync</translation>
     </message>
@@ -1500,7 +1500,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="200"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+      <translation>İpucu: Önayar dosyanızı (`.gyroflow`), `camera_presets` konumuna kaydederseniz, önayarlarınızı lens profili arama kutusunda bulundurabilirsiniz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
@@ -1721,102 +1721,107 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Senkronizasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="80"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="83"/>
       <source>Auto sync</source>
       <translation>Oto senkronizasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="84"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>No motion data loaded, cannot sync.</source>
       <translation>Hareket verisi yüklenmedi, senkronizasyon yapılamıyor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="106"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="114"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
       <translation>Lens profili yüklenmedi, senkronizasyon kuvvetle muhtemel hatalı sonuç verecek. Devam etmek istediğinize emin misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="107"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="115"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="110"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="118"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="121"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
+      <source>Experimental automatic sync point selection.</source>
+      <translation>Deneysel otomatik senkronizasyon noktası seçimi.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
       <translation>Bu dosya senkronize edilmiş hareket verisi kullanmakta, ek senkronizasyon noktalarına gerek yok; dahası, ek noktalar çıktının daha kötü gözükmesine sebep olabilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="127"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="145"/>
       <source>Rough gyro offset</source>
       <translation>Kaba gyro ötelemesi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="135"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="159"/>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="153"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="231"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="144"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="162"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
       <translation>Hem pozitif hem negatif ötelemeyi analiz et.
 Bu seçenek hesaplama süresini ikiye katlar. Dolayısıyla, bu seçeneği sadece başlangıç noktası için aktif edin ve ötelemeyi öğrendiğinizde seçimi kaldırın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="150"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="168"/>
       <source>Sync search size</source>
       <translation>Senkronizasyon arama boyutu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="188"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
       <translation>Önce birincil ötelemeyi hesapla (Essential Matrix metodu kullanarak); sonra, daha yavaş ama daha isabetli olan rs-sync metoduyla ince ayarlamayı yap.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="193"/>
       <source>Max sync points</source>
       <translation>Maksimum senkronizasyon noktaları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="209"/>
       <source>Analyze every n-th frame</source>
       <translation>Her n. frame'i analiz et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="222"/>
       <source>Time to analyze per sync point</source>
       <translation>Her bir senkronizasyon noktasını analiz etme süresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="237"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
       <translation>AKAZE metodu daha isabetli olabilir fakat OpenCV'den çok daha yavaş çalışır. Yalnızca OpenCV güzel sonuç vermediğinde kullanın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="241"/>
       <source>Optical flow method</source>
       <translation>Optik akış metodu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="236"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
       <source>Offset calculation method</source>
       <translation>Öteleme hesaplama metodu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="245"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="263"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
       <translation>Kameranın rotasyon açılarını elde etmek için optik akıştan kamera transformasyon matrisini hesaplayın. Sonra, bu açıları gyro açıları ile eşleştirmeye çalışın.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="246"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="264"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
@@ -1825,29 +1830,29 @@ Sonra, optik akış çizgi uzunluklarını hesaplayın.
 Elde ettiğiniz öteleme değeri, çizgilerin en kısa olduğu; yani videodaki hareketin en az olduğu ötelemedir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="247"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="265"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>Jöle etkili video - gyro senkronizasyonu algoritması. 
 Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin olun.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="254"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
       <source>Low pass filter</source>
       <translation>Alçak geçiş filtresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="277"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="272"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="290"/>
       <source>Show detected features</source>
       <translation>Tespit edilmiş özellikleri göster</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
+      <location filename="../../src/ui/menu/Synchronization.qml" line="296"/>
       <source>Show optical flow</source>
       <translation>Optik akışı göster</translation>
     </message>
@@ -2317,7 +2322,7 @@ Render sıranız ve güncel dosyanız otomatik olarak kaydedildi.</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="146"/>
       <source>Merging files to %1 (%2)</source>
-      <translation type="unfinished">Merging files to %1 (%2)</translation>
+      <translation>Dosyalar birleştiriliyor %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
@@ -2327,7 +2332,7 @@ Render sıranız ve güncel dosyanız otomatik olarak kaydedildi.</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="207"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
-      <translation type="unfinished">Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</translation>
+      <translation>Ayrık kayıt tespit edildi, tek bir tam klip oluşturmak için dosyaları (%1) otomatik olarak bir araya getirmek ister misiniz?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="334"/>
@@ -2340,8 +2345,8 @@ Muhtemelen kameranız bu çekim modunda hareket verisi kaydetmiyor.</translation
       <location filename="../../src/ui/VideoArea.qml" line="341"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
-      <translation type="unfinished">Motion data sampling rate is too low (%1 Hz).
-50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
+      <translation>Hareket verisi örnekleme hızı çok düşük (%1 Hz).
+50 Hz mutlak alt limittir ve tavsiyemiz en az 200 Hz'tir.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="492"/>
