@@ -1,0 +1,66 @@
+{
+  "name": "Runcam_ThumbPro_default_4k30_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Elvin",
+  "camera_brand": "Runcam",
+  "camera_model": "ThumbPro",
+  "lens_model": "default",
+  "camera_setting": "4k30",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 17.98,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 36,
+  "fps": 25.0,
+  "official": true,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0440301131914669,
+    "camera_matrix": [
+      [
+        2148.122180862684,
+        0.0,
+        1879.163862708578
+      ],
+      [
+        0.0,
+        2153.4401897877237,
+        1057.1388989602656
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05490115228196298,
+      -0.02562795521728562,
+      0.016105860783862308,
+      -0.007988063949250087
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-thumbpro-default-3840x2160@25000",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-24",
+  "compatible_settings": [
+    { "width": 3840, "height": 2160, "identifier": "runcam-thumbpro-default-3840x2160@29970", "fps": 29.970},
+    { "width": 3840, "height": 2160, "identifier": "runcam-thumbpro-wide-3840x2160@30000", "fps": 30.000}
+  ],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -38,8 +38,11 @@ impl CameraIdentifier {
             ..Default::default()
         };
 
-        if id.brand.to_ascii_lowercase() == "runcam" { id.lens_info = "default".into(); }
-
+        match id.brand.to_ascii_lowercase().as_str() {
+            "runcam" | "caddx" => id.lens_info = "default".into(),
+            _ => {}
+        }
+        
         if !id.brand.is_empty() {
             id.model = id.model.to_string().replace(&id.brand, "").trim().to_string();
         }
