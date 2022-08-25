@@ -83,23 +83,28 @@ MenuItem {
         enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
         function doSync() {
-            const points = maxSyncPoints.value;
+            let sync_points = null;
 
-            const trimmed = videoArea.trimEnd - videoArea.trimStart;
-
-            const chunks = trimmed / points;
-            const start = videoArea.trimStart + (chunks / 2);
-            let ranges = [];
-            for (let i = 0; i < points; ++i) {
-                const pos = start + (i*chunks);
-                ranges.push(pos);
+            if (experimental_auto_sync_points.checked) {
+                sync_points = controller.get_optimal_sync_points(maxSyncPoints.value);
+            } else {
+                const points = maxSyncPoints.value;
+                const trimmed = videoArea.trimEnd - videoArea.trimStart;
+                const chunks = trimmed / points;
+                const start = videoArea.trimStart + (chunks / 2);
+            
+                let ranges = [];
+                for (let i = 0; i < points; ++i) {
+                    const pos = start + (i*chunks);
+                    ranges.push(pos);
+                }
+                if (sync.customSyncTimestamps.length > 0) {
+                    const duration = window.videoArea.timeline.durationMs;
+                    ranges = sync.customSyncTimestamps.filter(v => v <= duration).map(v => v / duration);
+                }
+                sync_points = ranges.join(";");
             }
-            if (sync.customSyncTimestamps.length > 0) {
-                const duration = window.videoArea.timeline.durationMs;
-                ranges = sync.customSyncTimestamps.filter(v => v <= duration).map(v => v / duration);
-            }
-
-            controller.start_autosync(ranges.join(";"), sync.getSettingsJson(), "synchronize");
+            controller.start_autosync(sync_points, sync.getSettingsJson(), "synchronize");
         }
         onClicked: {
             if (!controller.lens_loaded) {
@@ -112,6 +117,16 @@ MenuItem {
             } else {
                 doSync();
             }
+        }
+
+        CheckBox {
+            id: experimental_auto_sync_points;
+            anchors.left: autosync.right;
+            anchors.leftMargin: 5 * dpiScale;
+            anchors.verticalCenter: parent.verticalCenter;
+            contentItem.visible: false;
+            scale: 0.7;
+            tooltip: qsTr("Experimental automatic sync point selection.");
         }
     }
 
