@@ -1,43 +1,43 @@
 {
-  "name": "Insta360_GO 2_Linear_EIS_720p_9by16_1440x2560-50.00fps",
+  "name": "Insta360_GO 2_Narrow_EIS_2.5k_16by9_2560x1440-50.00fps",
   "note": "EIS",
   "calibrated_by": "Eddy",
   "camera_brand": "Insta360",
   "camera_model": "GO 2",
-  "lens_model": "Linear",
+  "lens_model": "Narrow",
   "camera_setting": "",
   "calib_dimension": {
-    "w": 1440,
-    "h": 2560
+    "w": 2560,
+    "h": 1440
   },
   "orig_dimension": {
-    "w": 1440,
-    "h": 2560
+    "w": 2560,
+    "h": 1440
   },
   "output_dimension": {
-    "w": 1440,
-    "h": 2560
+    "w": 2560,
+    "h": 1440
   },
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 30,
+  "num_images": 26,
   "fps": 50.0,
   "official": true,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 1.0814260078398987,
+    "RMS_error": 0.7286036423099445,
     "camera_matrix": [
       [
-        1081.8633580911003,
+        1484.7484166056358,
         0.0,
-        720.4647619017007
+        1280.6375844022425
       ],
       [
         0.0,
-        1089.1252535064066,
-        1287.1904684148346
+        1471.6512954029254,
+        718.6699719471765
       ],
       [
         0.0,
@@ -46,17 +46,17 @@
       ]
     ],
     "distortion_coeffs": [
-      0.39611224617302637,
-      -0.07382842468859514,
-      0.3505753422247104,
-      -0.07158388932698709
+      0.4177972615395351,
+      -0.21706827338627072,
+      0.7179661149745642,
+      -0.3132909487688277
     ],
     "radial_distortion_limit": null
   },
-  "identifier": "insta360-go2-linear-1440x2560@50000-eis",
+  "identifier": "insta360-go2-narrow-2560x1440@50000-eis",
   "calibrator_version": "1.1.0",
   "date": "2022-08-25",
-  "compatible_settings": [{ "identifier": "caddx-peanut-linear-1440x2560@50000-eis" }],
+  "compatible_settings": [{ "identifier": "caddx-peanut-narrow-2560x1440@50000-eis" }],
   "is_superview": false,
   "sync_settings": null,
   "distortion_model_id": 0

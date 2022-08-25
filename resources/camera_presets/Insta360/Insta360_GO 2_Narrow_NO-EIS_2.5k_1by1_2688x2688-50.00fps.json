@@ -1,10 +1,10 @@
 {
-  "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
+  "name": "Insta360_GO 2_Narrow_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
   "note": "Pro Video NO-EIS",
   "calibrated_by": "Eddy",
   "camera_brand": "Insta360",
   "camera_model": "GO 2",
-  "lens_model": "Wide",
+  "lens_model": "Narrow",
   "camera_setting": "",
   "calib_dimension": {
     "w": 2688,
@@ -22,22 +22,22 @@
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 30,
+  "num_images": 29,
   "fps": 50.0,
   "official": true,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.7654005257777353,
+    "RMS_error": 0.6637257826156381,
     "camera_matrix": [
       [
-        1335.582853414325,
+        1329.5765477734649,
         0.0,
-        1369.728594144299
+        1366.2690474731446
       ],
       [
         0.0,
-        1336.7247062120703,
-        1326.83120060538
+        1332.0166090972566,
+        1330.087699869273
       ],
       [
         0.0,
@@ -46,17 +46,17 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.05258379340894934,
-      -0.01477518087550517,
-      0.009127455443997559,
-      -0.007126533482434655
+      -0.05420723881128873,
+      -0.008950847836602278,
+      0.0034284842999428612,
+      -0.0041931063239268275
     ],
     "radial_distortion_limit": 3.7
   },
-  "identifier": "insta360-go2-wide-2688x2688@50000-no-eis",
+  "identifier": "insta360-go2-narrow-2688x2688@50000-no-eis",
   "calibrator_version": "1.1.0",
   "date": "2022-08-25",
-  "compatible_settings": [{ "identifier": "caddx-peanut-wide-2688x2688@50000-no-eis" }],
+  "compatible_settings": [{ "identifier": "caddx-peanut-narrow-2688x2688@50000-no-eis" }],
   "is_superview": false,
   "sync_settings": {
     "initial_offset": 0,

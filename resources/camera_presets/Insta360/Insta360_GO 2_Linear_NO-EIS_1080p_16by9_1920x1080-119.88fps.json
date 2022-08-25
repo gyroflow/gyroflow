@@ -1,43 +1,43 @@
 {
-  "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
-  "note": "Pro Video NO-EIS",
+  "name": "Insta360_GO 2_Linear_NO-EIS_1080p_16by9_1920x1080-119.88fps",
+  "note": "NO-EIS",
   "calibrated_by": "Eddy",
   "camera_brand": "Insta360",
   "camera_model": "GO 2",
-  "lens_model": "Wide",
+  "lens_model": "Linear",
   "camera_setting": "",
   "calib_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 1920,
+    "h": 1080
   },
   "orig_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 1920,
+    "h": 1080
   },
   "output_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 1920,
+    "h": 1080
   },
-  "frame_readout_time": 16.88,
+  "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 30,
-  "fps": 50.0,
+  "num_images": 13,
+  "fps": 119.88,
   "official": true,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.7654005257777353,
+    "RMS_error": 0.2539869324337579,
     "camera_matrix": [
       [
-        1335.582853414325,
+        1104.4886899886317,
         0.0,
-        1369.728594144299
+        980.8900539392204
       ],
       [
         0.0,
-        1336.7247062120703,
-        1326.83120060538
+        1103.5666360716502,
+        526.1906243166417
       ],
       [
         0.0,
@@ -46,17 +46,17 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.05258379340894934,
-      -0.01477518087550517,
-      0.009127455443997559,
-      -0.007126533482434655
+      -0.03515226217022558,
+      -0.08102618478892346,
+      0.12755371462609813,
+      -0.07580179448789884
     ],
-    "radial_distortion_limit": 3.7
+    "radial_distortion_limit": 1.9858156028368796
   },
-  "identifier": "insta360-go2-wide-2688x2688@50000-no-eis",
+  "identifier": "insta360-go2-linear-1920x1080@119880-no-eis",
   "calibrator_version": "1.1.0",
   "date": "2022-08-25",
-  "compatible_settings": [{ "identifier": "caddx-peanut-wide-2688x2688@50000-no-eis" }],
+  "compatible_settings": [{ "identifier": "caddx-peanut-linear-1920x1080@119880-no-eis" }],
   "is_superview": false,
   "sync_settings": {
     "initial_offset": 0,

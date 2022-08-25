@@ -1,5 +1,5 @@
 {
-  "name": "Insta360_GO 2_Wide_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
+  "name": "Insta360_GO 2_Wide_NO-EIS_2.7k_1by1_2880x2880-24.00fps",
   "note": "Pro Video NO-EIS",
   "calibrated_by": "Eddy",
   "camera_brand": "Insta360",
@@ -7,37 +7,37 @@
   "lens_model": "Wide",
   "camera_setting": "",
   "calib_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 2880,
+    "h": 2880
   },
   "orig_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 2880,
+    "h": 2880
   },
   "output_dimension": {
-    "w": 2688,
-    "h": 2688
+    "w": 2880,
+    "h": 2880
   },
-  "frame_readout_time": 16.88,
+  "frame_readout_time": 23.52,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
   "num_images": 30,
-  "fps": 50.0,
+  "fps": 24.0,
   "official": true,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.7654005257777353,
+    "RMS_error": 0.7193538868850007,
     "camera_matrix": [
       [
-        1335.582853414325,
+        1324.1682185269722,
         0.0,
-        1369.728594144299
+        1462.180159217464
       ],
       [
         0.0,
-        1336.7247062120703,
-        1326.83120060538
+        1325.3899095731983,
+        1430.043565359549
       ],
       [
         0.0,
@@ -46,17 +46,17 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.05258379340894934,
-      -0.01477518087550517,
-      0.009127455443997559,
-      -0.007126533482434655
+      -0.04645180949132897,
+      -0.017262671465405926,
+      0.011745056222025735,
+      -0.008127501515826006
     ],
     "radial_distortion_limit": 3.7
   },
-  "identifier": "insta360-go2-wide-2688x2688@50000-no-eis",
+  "identifier": "insta360-go2-wide-2880x2880@24000-no-eis",
   "calibrator_version": "1.1.0",
   "date": "2022-08-25",
-  "compatible_settings": [{ "identifier": "caddx-peanut-wide-2688x2688@50000-no-eis" }],
+  "compatible_settings": [{ "identifier": "caddx-peanut-wide-2880x2880@24000-no-eis" }],
   "is_superview": false,
   "sync_settings": {
     "initial_offset": 0,

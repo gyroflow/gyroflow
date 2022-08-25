@@ -1,7 +1,7 @@
 {
   "name": "Insta360_GO 2_Pov_NO-EIS_2.5k_1by1_2688x2688-50.00fps",
-  "note": "NO-EIS",
-  "calibrated_by": "Jcofee",
+  "note": "Pro Video NO-EIS",
+  "calibrated_by": "Eddy",
   "camera_brand": "Insta360",
   "camera_model": "GO 2",
   "lens_model": "Pov",
@@ -18,25 +18,26 @@
     "w": 2688,
     "h": 2688
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 16.88,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 15,
+  "input_vertical_stretch": 1.0,
+  "num_images": 30,
   "fps": 50.0,
-  "official": false,
-  "use_opencv_fisheye": true,
+  "official": true,
+  "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 1.009731400906975,
+    "RMS_error": 0.6642618160608177,
     "camera_matrix": [
       [
-        1296.184109126167,
+        1327.4531941499963,
         0.0,
-        1353.0020961607197
+        1368.5406676979674
       ],
       [
         0.0,
-        1296.5432246104583,
-        1352.1668616621168
+        1327.9800914777604,
+        1330.5416044576918
       ],
       [
         0.0,
@@ -45,22 +46,26 @@
       ]
     ],
     "distortion_coeffs": [
-      -0.029508087790944475,
-      -0.022345888879976836,
-      0.010621677833793574,
-      -0.006543169932454319
+      -0.04966469722851003,
+      -0.020347232364734836,
+      0.01639165487860161,
+      -0.0092101678777642
     ],
-    "radial_distortion_limit": null
-  },
-  "use_opencv_standard": false,
-  "calib_params": {
-    "RMS_error": 0.0,
-    "camera_matrix": [],
-    "distortion_coeffs": [],
-    "radial_distortion_limit": null
+    "radial_distortion_limit": 3.7
   },
   "identifier": "insta360-go2-pov-2688x2688@50000-no-eis",
-  "calibrator_version": "1.0.0-rc1",
-  "date": "2022-02-07",
-  "compatible_settings": []
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-25",
+  "compatible_settings": [{ "identifier": "caddx-peanut-pov-2688x2688@50000-no-eis" }],
+  "is_superview": false,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.6,
+    "max_sync_points": 3,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
+  "distortion_model_id": 0
 }
