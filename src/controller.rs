@@ -440,13 +440,16 @@ impl Controller {
         }
     }
 
-    fn get_optimal_sync_points (&mut self, target_sync_points: usize) -> QString {
+    fn get_optimal_sync_points(&mut self, target_sync_points: usize) -> QString {
         let dur_ms = self.stabilizer.params.read().duration_ms;
         let trim_start = self.stabilizer.params.read().trim_start * dur_ms / 1000.0;
         let trim_end = self.stabilizer.params.read().trim_end * dur_ms / 1000.0;
-        let mut optsync = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read());
-        let s: String = optsync.run(target_sync_points, trim_start, trim_end).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
-        QString::from(s)
+        if let Some(mut optsync) = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read()) {
+            let s: String = optsync.run(target_sync_points, trim_start, trim_end).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
+            QString::from(s)
+        } else {
+            QString::default()
+        }
     }
 
     fn update_chart(&mut self, chart: QJSValue) {
@@ -1277,6 +1280,7 @@ impl Controller {
             if reload_from_disk {
                 let mut new_db = core::lens_profile_database::LensProfileDatabase::default();
                 new_db.load_all();
+                // Important! Disable `fetch_profiles_from_github` before running these functions
                 // new_db.list_all_metadata();
                 // new_db.process_adjusted_metadata();
 

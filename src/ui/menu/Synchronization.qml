@@ -21,6 +21,7 @@ MenuItem {
         property alias timePerSyncpoint: timePerSyncpoint.value;
         property alias sync_lpf: lpf.value;
         property alias checkNegativeInitialOffset: checkNegativeInitialOffset.checked;
+        property alias experimentalAutoSyncPoints: experimentalAutoSyncPoints.checked;
         // property alias syncMethod: syncMethod.currentIndex;
         // property alias offsetMethod: offsetMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
@@ -46,6 +47,7 @@ MenuItem {
             if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
             if (o.hasOwnProperty("custom_sync_timestamps")) sync.customSyncTimestamps       = o.custom_sync_timestamps;
+            if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.experimental_auto_sync_points;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
     }
@@ -70,7 +72,8 @@ MenuItem {
             "every_nth_frame":    everyNthFrame.value,
             "time_per_syncpoint": timePerSyncpoint.value,
             "of_method":          syncMethod.currentIndex,
-            "offset_method":      offsetMethod.currentIndex
+            "offset_method":      offsetMethod.currentIndex,
+            "auto_sync_points":   experimentalAutoSyncPoints.checked,
         };
     }
     function getSettingsJson() { return JSON.stringify(getSettings()); }
@@ -83,18 +86,19 @@ MenuItem {
         enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
         function doSync() {
+            const maxPoints = maxSyncPoints.value;
             let sync_points = null;
 
-            if (experimental_auto_sync_points.checked) {
-                sync_points = controller.get_optimal_sync_points(maxSyncPoints.value);
-            } else {
-                const points = maxSyncPoints.value;
+            if (experimentalAutoSyncPoints.checked) {
+                sync_points = controller.get_optimal_sync_points(maxPoints);
+            }
+            if (!sync_points) {
                 const trimmed = videoArea.trimEnd - videoArea.trimStart;
-                const chunks = trimmed / points;
+                const chunks = trimmed / maxPoints;
                 const start = videoArea.trimStart + (chunks / 2);
-            
+
                 let ranges = [];
-                for (let i = 0; i < points; ++i) {
+                for (let i = 0; i < maxPoints; ++i) {
                     const pos = start + (i*chunks);
                     ranges.push(pos);
                 }
@@ -120,7 +124,7 @@ MenuItem {
         }
 
         CheckBox {
-            id: experimental_auto_sync_points;
+            id: experimentalAutoSyncPoints;
             anchors.left: autosync.right;
             anchors.leftMargin: 5 * dpiScale;
             anchors.verticalCenter: parent.verticalCenter;

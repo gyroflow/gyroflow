@@ -28,9 +28,8 @@ fn blackman(width: usize) -> Vec<f32> {
 }
 
 impl OptimSync {
-    pub fn new(gyro: &GyroSource) -> OptimSync {
-        let duration_ms =
-            gyro.raw_imu.last().unwrap().timestamp_ms - gyro.raw_imu.first().unwrap().timestamp_ms;
+    pub fn new(gyro: &GyroSource) -> Option<OptimSync> {
+        let duration_ms = gyro.raw_imu.last()?.timestamp_ms - gyro.raw_imu.first()?.timestamp_ms;
         let samples_total = gyro.raw_imu.iter().filter(|x| x.gyro.is_some()).count();
         let avg_sr = samples_total as f64 / duration_ms * 1000.0;
 
@@ -44,10 +43,10 @@ impl OptimSync {
             let left = &gyro.raw_imu[i_l];
             let right = &gyro.raw_imu[i_r];
             if i_l == i_r {
-                return Vector3::from_column_slice(&left.gyro.unwrap());
+                return Vector3::from_column_slice(&left.gyro.unwrap_or_default());
             }
-            (Vector3::from_column_slice(&left.gyro.unwrap()) * (right.timestamp_ms - ts)
-                + Vector3::from_column_slice(&right.gyro.unwrap()) * (ts - left.timestamp_ms))
+            (Vector3::from_column_slice(&left.gyro.unwrap_or_default()) * (right.timestamp_ms - ts)
+                + Vector3::from_column_slice(&right.gyro.unwrap_or_default()) * (ts - left.timestamp_ms))
                 / (right.timestamp_ms - left.timestamp_ms)
         };
 
@@ -59,10 +58,10 @@ impl OptimSync {
             }
         }
 
-        OptimSync {
+        Some(OptimSync {
             sample_rate: avg_sr,
             gyro: gyr,
-        }
+        })
     }
 
     pub fn run(
@@ -201,7 +200,7 @@ impl OptimSync {
         //     fig.set_size_inches(10, 5)
         //     plt.show()
         // }
-        selected_sync_points.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        selected_sync_points.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
         selected_sync_points
     }
 }

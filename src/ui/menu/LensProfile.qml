@@ -331,14 +331,14 @@ MenuItem {
         ... // dir /b | clip
     ];
     Shortcut {
-        sequences: ["F1"];
+        sequences: ["F2"];
         onActivated: {
             root.fileno = Math.abs(++fileno % files.length);
             controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
         }
     }
     Shortcut {
-        sequences: ["F2"];
+        sequences: ["F1"];
         onActivated: {
             root.fileno = Math.abs(--fileno % files.length);
             controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
