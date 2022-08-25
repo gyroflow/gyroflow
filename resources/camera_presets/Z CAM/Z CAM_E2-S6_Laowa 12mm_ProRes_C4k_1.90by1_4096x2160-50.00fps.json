@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-S6_Laowa 12mm_ProRes_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "ProRes",
+  "calibrated_by": "Marc Zacharoff",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Laowa 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.6834412756327723,
+    "camera_matrix": [
+      [
+        3328.773312212117,
+        0.0,
+        2152.2804006475203
+      ],
+      [
+        0.0,
+        3327.1256840076476,
+        1056.6278358207178
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3282928376486911,
+      0.04179868081616164,
+      0.2737822508057175,
+      -0.0032237224783662334
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

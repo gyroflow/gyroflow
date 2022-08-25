@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Ursa Mini 12k_DZO 20-55_17:9DCI 12:1_4k_1.85by1_3996x2160-29.97fps",
+  "note": "20mm",
+  "calibrated_by": "OCTO",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Ursa Mini 12k",
+  "lens_model": "DZO 20-55",
+  "camera_setting": "17:9DCI 12:1",
+  "calib_dimension": {
+    "w": 3996,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3996,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3996,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.19670362062589392,
+    "camera_matrix": [
+      [
+        2994.061503985557,
+        0.0,
+        1984.5124746111928
+      ],
+      [
+        0.0,
+        2926.0437020973827,
+        1052.9131598489914
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1634608819893299,
+      0.13066921271173632,
+      -0.03613434830141189,
+      0.35767325564164354
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

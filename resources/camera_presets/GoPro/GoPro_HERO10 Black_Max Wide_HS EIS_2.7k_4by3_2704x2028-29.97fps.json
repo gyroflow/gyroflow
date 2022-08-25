@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO10 Black_Max Wide_HS EIS_2.7k_4by3_2704x2028-29.97fps",
+  "note": "HS EIS",
+  "calibrated_by": "Giheun",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO10 Black",
+  "lens_model": "Max Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.306321340909182,
+    "camera_matrix": [
+      [
+        1121.0296201109784,
+        0.0,
+        1370.681476688574
+      ],
+      [
+        0.0,
+        1119.0662743198172,
+        1019.3329040325704
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16917617311726085,
+      -0.214736333929994,
+      0.20580147406264415,
+      -0.07791319521185373
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero10black-maxwide-2704x2028@29970-hseis",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

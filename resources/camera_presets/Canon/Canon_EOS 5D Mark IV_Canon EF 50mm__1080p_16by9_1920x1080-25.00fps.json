@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 5D Mark IV_Canon EF 50mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Редьки Молекула",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 5D Mark IV",
+  "lens_model": "Canon EF 50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.28074900206757875,
+    "camera_matrix": [
+      [
+        4954.370113897937,
+        0.0,
+        949.1049861422912
+      ],
+      [
+        0.0,
+        4957.395864866216,
+        482.72839399413346
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2090946536366211,
+      25.945112771885857,
+      -1008.9422235213964,
+      11727.920765442708
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "DJI_FPV Air Unit_2.1 mm, f/2.1__480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Stefano Toscano",
+  "camera_brand": "DJI",
+  "camera_model": "FPV Air Unit",
+  "lens_model": "2.1 mm, f/2.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4846664171789892,
+    "camera_matrix": [
+      [
+        446.6154939741723,
+        0.0,
+        482.45027934110954
+      ],
+      [
+        0.0,
+        446.8730940361744,
+        364.3820133604467
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.023159495400918176,
+      0.011755015455141156,
+      -0.00794775246963634,
+      0.0021108268189099152
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Mi 10_Wide lens__4k_16by9_3840x2160-29.98fps",
+  "note": "",
+  "calibrated_by": "Jonathan Ziebart",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10",
+  "lens_model": "Wide lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 29.977451,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8554306254510118,
+    "camera_matrix": [
+      [
+        1719.549046174909,
+        0.0,
+        1922.0768357600984
+      ],
+      [
+        0.0,
+        1716.5741303443074,
+        1110.3015977025557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2580440034340884,
+      0.5490907947882359,
+      -0.5308970680030893,
+      0.04278124154105786
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

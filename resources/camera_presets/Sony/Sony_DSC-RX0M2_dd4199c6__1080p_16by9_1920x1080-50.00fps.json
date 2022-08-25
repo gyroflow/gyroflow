@@ -1,0 +1,69 @@
+{
+  "name": "Sony_DSC-RX0M2_dd4199c6__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "rhyme林浩",
+  "camera_brand": "Sony",
+  "camera_model": "DSC-RX0M2",
+  "lens_model": "dd4199c6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9375665644888952,
+    "camera_matrix": [
+      [
+        1495.2757064146526,
+        0.0,
+        973.1728677675476
+      ],
+      [
+        0.0,
+        1494.91786944429,
+        548.9620945683359
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3058671569556654,
+      0.3291170319210646,
+      0.5737134953206013,
+      -2.8615080135397273
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-dsc-rx0m2-dd4199c6-1920x1080@50000",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Leica M0.8 24mm F1.4__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Benoit Finck",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Leica M0.8 24mm F1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.34950580887465443,
+    "camera_matrix": [
+      [
+        2250.0361724997447,
+        0.0,
+        1939.62981843436
+      ],
+      [
+        0.0,
+        2255.7897312205964,
+        1046.784598132448
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23928849326836424,
+      0.3571514996992569,
+      -1.00567428145787,
+      2.0472489303279673
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

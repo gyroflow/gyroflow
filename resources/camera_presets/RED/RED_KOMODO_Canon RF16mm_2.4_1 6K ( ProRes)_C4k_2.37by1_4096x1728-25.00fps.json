@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Canon RF16mm_2.4:1 6K ( ProRes)_C4k_2.37by1_4096x1728-25.00fps",
+  "note": "",
+  "calibrated_by": "Radovan Leitman",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Canon RF16mm",
+  "camera_setting": "2.4:1 6K ( ProRes)",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 17,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2220506673182711,
+    "camera_matrix": [
+      [
+        2492.8668751266123,
+        0.0,
+        2051.2824377728425
+      ],
+      [
+        0.0,
+        2493.333038055214,
+        873.8347718755289
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15423396296234573,
+      0.08967466727346401,
+      -0.06127021332359256,
+      0.07112032134286828
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

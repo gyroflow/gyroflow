@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5_RF 50mm f1.8_4kHQ_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Kyeong Heum Um",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "RF 50mm f1.8",
+  "camera_setting": "4kHQ",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7478060611589793,
+    "camera_matrix": [
+      [
+        6084.840338697569,
+        0.0,
+        2046.155678755972
+      ],
+      [
+        0.0,
+        6083.718271519577,
+        1003.496654849603
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4578531276438476,
+      -3.5296341598456933,
+      43.85858296040958,
+      -194.1902494735313
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

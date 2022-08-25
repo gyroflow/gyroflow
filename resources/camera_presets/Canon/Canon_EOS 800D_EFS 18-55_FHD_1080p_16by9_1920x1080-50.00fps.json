@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 800D_EFS 18-55_FHD_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Josue",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 800D",
+  "lens_model": "EFS 18-55",
+  "camera_setting": "FHD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": -11.690821256038648,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4639170147922548,
+    "camera_matrix": [
+      [
+        2275.593209535826,
+        0.0,
+        965.4025209650245
+      ],
+      [
+        0.0,
+        2274.0203524002036,
+        584.4271791305774
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15023365770110372,
+      0.16805721573318952,
+      0.8148164110300946,
+      -3.756965796840008
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Niceboy_VEGA x PLAY___1080p_16by9_1920x1080-59.21fps",
+  "note": "",
+  "calibrated_by": "Zenny",
+  "camera_brand": "Niceboy",
+  "camera_model": "VEGA x PLAY",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.210136,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3625578323410093,
+    "camera_matrix": [
+      [
+        1394.754849413887,
+        0.0,
+        937.5584148157916
+      ],
+      [
+        0.0,
+        1412.4756725594586,
+        548.570211644371
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.13079671860517228,
+      0.03347995828708844,
+      -0.053785818579235554,
+      0.043575714879822605
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

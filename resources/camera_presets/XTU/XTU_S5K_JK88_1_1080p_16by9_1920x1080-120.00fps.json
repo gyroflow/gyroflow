@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S5K_JK88_1_1080p_16by9_1920x1080-120.00fps",
+  "note": "",
+  "calibrated_by": "XTU",
+  "camera_brand": "XTU",
+  "camera_model": "S5K",
+  "lens_model": "JK88",
+  "camera_setting": "1",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 120.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3251581293327009,
+    "camera_matrix": [
+      [
+        922.3865118589972,
+        0.0,
+        962.6790874012082
+      ],
+      [
+        0.0,
+        922.142508904106,
+        552.3781838522514
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.003190515174343648,
+      -0.004426906490590601,
+      0.005267827356055883,
+      -0.0021089926817513148
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5mm F2 Blue Ring_WDR_C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Alyx FPV",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5mm F2 Blue Ring",
+  "camera_setting": "WDR",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5510937603937925,
+    "camera_matrix": [
+      [
+        1702.3750819587758,
+        0.0,
+        2017.597749940826
+      ],
+      [
+        0.0,
+        1698.4837732675844,
+        1074.1093315956266
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3619590223886101,
+      -0.02027936022535707,
+      0.1754219326797413,
+      -0.017353902327241974
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

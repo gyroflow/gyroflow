@@ -59,7 +59,7 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "insta360-oner-wide68-3840x2160@59940-no-eis",
+  "identifier": "",
   "calibrator_version": "1.0.0-rc5",
   "date": "2022-04-12",
   "compatible_settings": []

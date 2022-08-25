@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO___1080p_4by3_1920x1440-29.97fps",
+  "note": "",
+  "calibrated_by": "Emanuel Guerreiro",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3045947123967163,
+    "camera_matrix": [
+      [
+        845.4721398922584,
+        0.0,
+        960.0491322781344
+      ],
+      [
+        0.0,
+        844.6342813058607,
+        708.9050210213218
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05112151141724678,
+      0.014508934343190545,
+      -0.008095194774476027,
+      0.001685907093122911
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

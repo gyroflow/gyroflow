@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_Galaxy A52s_Ultra Wide__1080p_16by9_1920x1080-28.90fps",
+  "note": "",
+  "calibrated_by": "Nc Masters",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy A52s",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 28.898716,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.43959931554865944,
+    "camera_matrix": [
+      [
+        756.4836270811653,
+        0.0,
+        946.3562759556092
+      ],
+      [
+        0.0,
+        756.9559384353407,
+        530.3735844589371
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25532761970944434,
+      0.4935620794221301,
+      -0.6121932254336754,
+      0.37947103204443183
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

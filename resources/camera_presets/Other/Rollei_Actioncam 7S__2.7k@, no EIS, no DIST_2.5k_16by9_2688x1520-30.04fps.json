@@ -1,0 +1,69 @@
+{
+  "name": "Rollei_Actioncam 7S__2.7k@, no EIS, no DIST_2.5k_16by9_2688x1520-30.04fps",
+  "note": "",
+  "calibrated_by": "Tanis Webb",
+  "camera_brand": "Rollei",
+  "camera_model": "Actioncam 7S",
+  "lens_model": "",
+  "camera_setting": "2.7k@, no EIS, no DIST",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.036287,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49107391590558497,
+    "camera_matrix": [
+      [
+        1578.8909699448584,
+        0.0,
+        1357.0050664597056
+      ],
+      [
+        0.0,
+        1578.840127699015,
+        803.0231875310916
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.019150693821957773,
+      -0.04440471607400257,
+      0.16444337833771694,
+      -0.1708107109262961
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

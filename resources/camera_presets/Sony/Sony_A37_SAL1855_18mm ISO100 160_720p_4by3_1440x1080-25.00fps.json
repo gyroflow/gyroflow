@@ -1,0 +1,69 @@
+{
+  "name": "Sony_A37_SAL1855_18mm ISO100 1/60_720p_4by3_1440x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "HOSUFPV",
+  "camera_brand": "Sony",
+  "camera_model": "A37",
+  "lens_model": "SAL1855",
+  "camera_setting": "18mm ISO100 1/60",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4593217694050112,
+    "camera_matrix": [
+      [
+        1371.3859656798654,
+        0.0,
+        716.3729638061538
+      ],
+      [
+        0.0,
+        1830.5522471200295,
+        542.7585505622251
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25867199717159367,
+      -0.4952390284261685,
+      4.756028646395822,
+      -13.264341774165594
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

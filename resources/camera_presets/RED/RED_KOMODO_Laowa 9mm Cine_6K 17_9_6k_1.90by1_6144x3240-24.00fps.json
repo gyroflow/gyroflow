@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Laowa 9mm Cine_6K 17:9_6k_1.90by1_6144x3240-24.00fps",
+  "note": "R3D",
+  "calibrated_by": "Noah Waldner",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 9mm Cine",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2533995796972279,
+    "camera_matrix": [
+      [
+        2120.768451118135,
+        0.0,
+        3076.7243564995047
+      ],
+      [
+        0.0,
+        2121.968045311423,
+        1610.7121145174715
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3494824391171181,
+      0.10350345651489928,
+      -0.012348621504646991,
+      0.09623300531267204
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-03",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

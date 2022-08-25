@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5c_RF16 2.8_RAW_8k_1.90by1_8192x4320-29.97fps",
+  "note": "Distorted",
+  "calibrated_by": "guns120",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "RF16 2.8",
+  "camera_setting": "RAW",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": 15.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8779378886584713,
+    "camera_matrix": [
+      [
+        3829.393961435384,
+        0.0,
+        4106.097522345738
+      ],
+      [
+        0.0,
+        3828.9637636108782,
+        2166.39038722499
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1661002121858864,
+      -0.009102356146311417,
+      0.1968768014990352,
+      -0.16168089918642603
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

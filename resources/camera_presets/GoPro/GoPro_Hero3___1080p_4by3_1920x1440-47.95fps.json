@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_Hero3___1080p_4by3_1920x1440-47.95fps",
+  "note": "",
+  "calibrated_by": "user",
+  "camera_brand": "GoPro",
+  "camera_model": "Hero3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 47.952049,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.33632223818154533,
+    "camera_matrix": [
+      [
+        858.9729133737469,
+        0.0,
+        922.8860493232868
+      ],
+      [
+        0.0,
+        857.8502984410834,
+        685.7064530753681
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.026438610508989737,
+      0.07177832020082961,
+      0.026031274156731968,
+      -0.038554331716387134
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

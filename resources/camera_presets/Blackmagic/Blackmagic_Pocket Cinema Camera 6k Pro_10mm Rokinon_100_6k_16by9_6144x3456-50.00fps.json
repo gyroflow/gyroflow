@@ -1,0 +1,71 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k Pro_10mm Rokinon_100_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "Svanur Gabriele",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k Pro",
+  "lens_model": "10mm Rokinon",
+  "camera_setting": "100",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.4434788608808766,
+    "camera_matrix": [
+      [
+        3369.38381282992,
+        0.0,
+        3095.509414025261
+      ],
+      [
+        0.0,
+        3361.6064819032695,
+        1790.5866252402411
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2721223061531949,
+      0.3258465673075711,
+      -0.07546108507332926,
+      -0.10928977340124936
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

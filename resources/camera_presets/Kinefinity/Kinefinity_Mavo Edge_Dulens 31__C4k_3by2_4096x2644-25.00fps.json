@@ -1,0 +1,69 @@
+{
+  "name": "Kinefinity_Mavo Edge_Dulens 31__C4k_3by2_4096x2644-25.00fps",
+  "note": "",
+  "calibrated_by": "潘航",
+  "camera_brand": "Kinefinity",
+  "camera_model": "Mavo Edge",
+  "lens_model": "Dulens 31",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2644
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2644
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2644
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9297093592055627,
+    "camera_matrix": [
+      [
+        4341.070623202545,
+        0.0,
+        2053.202703257064
+      ],
+      [
+        0.0,
+        4345.800062304761,
+        1286.9359752819012
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4879176589034013,
+      -2.993757128722464,
+      23.4221952580412,
+      -46.9274918106728
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Laowa 9mm f/2.8 Zero-D__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Marcelo Clare",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Laowa 9mm f/2.8 Zero-D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4641264618471655,
+    "camera_matrix": [
+      [
+        1515.5189198972844,
+        0.0,
+        1899.792665841684
+      ],
+      [
+        0.0,
+        1515.1963179340378,
+        1076.4870970934287
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33965632590088557,
+      0.13051018001473524,
+      -0.01935063690762044,
+      0.1094585864796969
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_SIGMA 30MM F1.4 ND__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Leo Lian",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "SIGMA 30MM F1.4 ND",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 40.99,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9579156950514096,
+    "camera_matrix": [
+      [
+        5352.334027570306,
+        0.0,
+        2006.0958776236596
+      ],
+      [
+        0.0,
+        5370.079584358957,
+        1064.2611433308946
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25678920938806804,
+      1.3032281466963065,
+      13.846366143829965,
+      -132.34381545462543
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-4f510e34-3840x2160@23976",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

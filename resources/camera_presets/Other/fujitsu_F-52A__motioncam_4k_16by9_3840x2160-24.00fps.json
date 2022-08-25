@@ -1,0 +1,69 @@
+{
+  "name": "fujitsu_F-52A_広角_motioncam_4k_16by9_3840x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "koji nakano",
+  "camera_brand": "fujitsu",
+  "camera_model": "F-52A",
+  "lens_model": "広角",
+  "camera_setting": "motioncam",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.2608698346385023,
+    "camera_matrix": [
+      [
+        2315.261977591811,
+        0.0,
+        1917.4830785403776
+      ],
+      [
+        0.0,
+        2315.587589986462,
+        1096.68018518154
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.378992157630007,
+      0.4937441138472273,
+      -1.7847972572693092,
+      1.5413080505521564
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

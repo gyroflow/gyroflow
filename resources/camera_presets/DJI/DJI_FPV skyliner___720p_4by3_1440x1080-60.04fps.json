@@ -1,0 +1,69 @@
+{
+  "name": "DJI_FPV skyliner___720p_4by3_1440x1080-60.04fps",
+  "note": "",
+  "calibrated_by": "family",
+  "camera_brand": "DJI",
+  "camera_model": "FPV skyliner",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.040001,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.28179439628326386,
+    "camera_matrix": [
+      [
+        677.037986717414,
+        0.0,
+        711.7556257746202
+      ],
+      [
+        0.0,
+        676.7895461500498,
+        527.6920108929868
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.019219902610613168,
+      0.01592157265033555,
+      -0.016922697679445934,
+      0.007664697654760711
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

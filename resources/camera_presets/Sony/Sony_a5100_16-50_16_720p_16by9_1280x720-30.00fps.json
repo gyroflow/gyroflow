@@ -1,0 +1,69 @@
+{
+  "name": "Sony_5100_16-50_16_720p_16by9_1280x720-30.00fps",
+  "note": "16.9",
+  "calibrated_by": "fpv singh",
+  "camera_brand": "Sony",
+  "camera_model": "5100",
+  "lens_model": "16-50",
+  "camera_setting": "16",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3999280849196304,
+    "camera_matrix": [
+      [
+        864.9814906245293,
+        0.0,
+        645.5335013383873
+      ],
+      [
+        0.0,
+        863.8591930722944,
+        365.34554569570855
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30050346858950316,
+      0.06604620171760318,
+      0.34826399785257933,
+      -0.2856206402446448
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6100_Sigma 18-50 2.8__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "cs p",
+  "camera_brand": "Sony",
+  "camera_model": "a6100",
+  "lens_model": "Sigma 18-50 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2605511848688354,
+    "camera_matrix": [
+      [
+        1497.4378522354746,
+        0.0,
+        964.5068268275768
+      ],
+      [
+        0.0,
+        1497.6746425003366,
+        524.5199775019921
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31866469749557974,
+      -0.10688263013719848,
+      2.1619362301341263,
+      -3.541505336909802
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

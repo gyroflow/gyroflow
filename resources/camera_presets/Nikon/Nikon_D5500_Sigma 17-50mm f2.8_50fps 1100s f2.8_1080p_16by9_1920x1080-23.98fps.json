@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D5500_Sigma 17-50mm f2.8_50fps 1/100s f2.8_1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Giuseppe Pappalardo",
+  "camera_brand": "Nikon",
+  "camera_model": "D5500",
+  "lens_model": "Sigma 17-50mm f2.8",
+  "camera_setting": "50fps 1/100s f2.8",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49931144401904937,
+    "camera_matrix": [
+      [
+        1385.3831352166144,
+        0.0,
+        964.5268630881814
+      ],
+      [
+        0.0,
+        1395.418402269624,
+        541.3096801817303
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13577630640742946,
+      0.5526436656255006,
+      -1.7755499266017398,
+      2.6044458638169847
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-08-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

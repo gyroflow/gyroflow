@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_Canon 16-35mm @20mm_Slog3cine_4k_16by9_3840x2160-23.98fps",
+  "note": "Slog3cine",
+  "calibrated_by": "Mauro",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Canon 16-35mm @20mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6935747050837983,
+    "camera_matrix": [
+      [
+        2183.9978521256826,
+        0.0,
+        1923.3478231213992
+      ],
+      [
+        0.0,
+        2182.951426952207,
+        1087.1543421219226
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2085362540324707,
+      0.5551411030878485,
+      -1.0358374777485166,
+      1.125013740293124
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-20.00mm-3840x2160@23976",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

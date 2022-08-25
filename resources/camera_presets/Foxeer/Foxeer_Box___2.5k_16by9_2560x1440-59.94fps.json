@@ -1,0 +1,69 @@
+{
+  "name": "Foxeer_Box___2.5k_16by9_2560x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "dave littleford",
+  "camera_brand": "Foxeer",
+  "camera_model": "Box",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5329125084387761,
+    "camera_matrix": [
+      [
+        1215.8751030337098,
+        0.0,
+        1316.1578154568922
+      ],
+      [
+        0.0,
+        1215.1523898842331,
+        764.2085522767642
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05062289799508165,
+      -0.008630057395718323,
+      0.018167808217410503,
+      -0.009502898990743072
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-20",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

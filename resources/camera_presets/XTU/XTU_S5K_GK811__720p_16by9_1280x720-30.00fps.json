@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S5K_GK811__720p_16by9_1280x720-30.00fps",
+  "note": "",
+  "calibrated_by": "XTU",
+  "camera_brand": "XTU",
+  "camera_model": "S5K",
+  "lens_model": "GK811",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3406515621155342,
+    "camera_matrix": [
+      [
+        612.627545820941,
+        0.0,
+        619.5309649379716
+      ],
+      [
+        0.0,
+        612.8723948155704,
+        359.73237401883915
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.004798359250080195,
+      -0.004808581798085866,
+      0.0028963515508302696,
+      -0.0008590513469679112
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

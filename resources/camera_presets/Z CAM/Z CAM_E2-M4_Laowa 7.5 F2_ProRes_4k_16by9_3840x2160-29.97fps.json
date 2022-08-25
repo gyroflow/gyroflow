@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5 F2_ProRes_4k_16by9_3840x2160-29.97fps",
+  "note": "ProRes",
+  "calibrated_by": "이재혁",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5 F2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.3194404469975143,
+    "camera_matrix": [
+      [
+        1226.3570495097613,
+        0.0,
+        1942.883776496188
+      ],
+      [
+        0.0,
+        1226.911294784525,
+        1189.9723096840864
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3517482448637731,
+      0.3469266859224647,
+      -0.26664664917817765,
+      0.20709154865117765
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

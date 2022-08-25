@@ -1,0 +1,69 @@
+{
+  "name": "Rollei_AC 625___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Erik",
+  "camera_brand": "Rollei",
+  "camera_model": "AC 625",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7327322188984502,
+    "camera_matrix": [
+      [
+        1296.2526167095973,
+        0.0,
+        926.62349731028
+      ],
+      [
+        0.0,
+        1290.3375948364207,
+        569.2814522838584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07220584132312055,
+      -0.21710186708057216,
+      0.3902051008815027,
+      -0.2328732527356915
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

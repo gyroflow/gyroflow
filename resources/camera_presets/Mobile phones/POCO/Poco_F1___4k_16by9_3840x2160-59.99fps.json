@@ -1,0 +1,69 @@
+{
+  "name": "Poco_F1___4k_16by9_3840x2160-59.99fps",
+  "note": "",
+  "calibrated_by": "Sander",
+  "camera_brand": "Poco",
+  "camera_model": "F1",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.992992,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5248022317720638,
+    "camera_matrix": [
+      [
+        2705.4008834982856,
+        0.0,
+        1915.861860207692
+      ],
+      [
+        0.0,
+        2703.4315968449105,
+        1091.6437753139846
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5660438860776704,
+      -1.279384970992662,
+      3.216185608146641,
+      -2.5272167036994677
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

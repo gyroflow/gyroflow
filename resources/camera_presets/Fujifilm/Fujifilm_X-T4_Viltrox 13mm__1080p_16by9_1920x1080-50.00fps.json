@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T4_Viltrox 13mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Александр Сенатов",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "Viltrox 13mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 183,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3563637376540083,
+    "camera_matrix": [
+      [
+        1096.136988383373,
+        0.0,
+        962.574983414435
+      ],
+      [
+        0.0,
+        1095.6649116938463,
+        539.3470132049127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26936221844092906,
+      0.2545838207230264,
+      -0.2363259384629208,
+      0.358765428517265
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

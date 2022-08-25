@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_GH5_30mm Macro_45_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "BadBolt",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "30mm Macro",
+  "camera_setting": "45",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7662750593474286,
+    "camera_matrix": [
+      [
+        6979.872231634589,
+        0.0,
+        1873.838408408556
+      ],
+      [
+        0.0,
+        6966.803276417147,
+        1129.7496582850288
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2572855376497573,
+      3.2793331474662604,
+      -22.174443112287264,
+      -117.7478977492925
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

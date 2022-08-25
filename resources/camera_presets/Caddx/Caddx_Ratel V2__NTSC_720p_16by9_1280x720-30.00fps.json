@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Ratel V2__NTSC_720p_16by9_1280x720-30.00fps",
+  "note": "",
+  "calibrated_by": "Stephen Ogborne",
+  "camera_brand": "Caddx",
+  "camera_model": "Ratel V2",
+  "lens_model": "",
+  "camera_setting": "NTSC",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.464764054525333,
+    "camera_matrix": [
+      [
+        552.9676619073659,
+        0.0,
+        606.7244852707634
+      ],
+      [
+        0.0,
+        392.3725198468129,
+        394.07199555640966
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.022716287419487023,
+      0.01347514598090074,
+      -0.01957448267486071,
+      0.009900573524493007
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

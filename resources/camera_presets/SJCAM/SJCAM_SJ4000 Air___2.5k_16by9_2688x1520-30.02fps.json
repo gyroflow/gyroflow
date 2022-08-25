@@ -1,0 +1,69 @@
+{
+  "name": "SJCAM_SJ4000 Air___2.5k_16by9_2688x1520-30.02fps",
+  "note": "",
+  "calibrated_by": "Владислав Леонов",
+  "camera_brand": "SJCAM",
+  "camera_model": "SJ4000 Air",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.019936,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.511191866302251,
+    "camera_matrix": [
+      [
+        1672.1666625721716,
+        0.0,
+        1448.7259721048156
+      ],
+      [
+        0.0,
+        1679.7652661584589,
+        717.9232755464818
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.11230786743589544,
+      0.003439737621624805,
+      0.003836582319827559,
+      -0.003775324091363605
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

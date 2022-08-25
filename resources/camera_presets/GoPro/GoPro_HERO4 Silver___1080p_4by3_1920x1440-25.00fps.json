@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO4 Silver___1080p_4by3_1920x1440-25.00fps",
+  "note": "",
+  "calibrated_by": "Frederik Vermeulen",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Silver",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6609353230503776,
+    "camera_matrix": [
+      [
+        850.532548324452,
+        0.0,
+        960.3428162196876
+      ],
+      [
+        0.0,
+        848.5227393663502,
+        698.9712242302251
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.055934167547308546,
+      0.006895760726318337,
+      -0.005208516865614155,
+      0.000919740669432816
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

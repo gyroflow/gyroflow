@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_7.5 F2__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "이재혁",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "7.5 F2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.3878200220313004,
+    "camera_matrix": [
+      [
+        1392.012794412478,
+        0.0,
+        1864.6982779590803
+      ],
+      [
+        0.0,
+        1391.4647739252669,
+        1175.629353741681
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4069989351051633,
+      0.07321549921739899,
+      0.42455999277164314,
+      -0.41398043305363064
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

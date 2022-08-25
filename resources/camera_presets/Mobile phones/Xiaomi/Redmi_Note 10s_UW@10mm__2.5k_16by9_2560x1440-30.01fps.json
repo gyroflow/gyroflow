@@ -1,0 +1,69 @@
+{
+  "name": "Redmi_Note 10s_UW@10mm__2.5k_16by9_2560x1440-30.01fps",
+  "note": "",
+  "calibrated_by": "Sergey",
+  "camera_brand": "Redmi",
+  "camera_model": "Note 10s",
+  "lens_model": "UW@10mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 30.011864,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27772676186419987,
+    "camera_matrix": [
+      [
+        1149.8899704665405,
+        0.0,
+        1267.6598034078072
+      ],
+      [
+        0.0,
+        1150.3925515328654,
+        725.770571820463
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3319862484016724,
+      -0.3065922790133042,
+      1.2230171900524431,
+      -0.878477316736509
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

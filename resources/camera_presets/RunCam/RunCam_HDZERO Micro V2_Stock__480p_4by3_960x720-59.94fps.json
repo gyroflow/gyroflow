@@ -1,0 +1,70 @@
+{
+  "name": "RunCam_HDZERO Micro V2_Stock__480p_4by3_960x720-59.94fps",
+  "note": "",
+  "calibrated_by": "Ondrej Slachta",
+  "camera_brand": "RunCam",
+  "camera_model": "HDZERO Micro V2",
+  "lens_model": "Stock",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 15.0,
+  "input_horizontal_stretch": 0.75,
+  "input_vertical_stretch": 1.0,
+  "num_images": 39,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.37212387186374984,
+    "camera_matrix": [
+      [
+        501.9088152902458,
+        0.0,
+        505.2943116513901
+      ],
+      [
+        0.0,
+        501.71629340631506,
+        360.6659234042634
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07678652123511338,
+      0.013195867557987444,
+      -0.020739042244512177,
+      0.008701343859860117
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

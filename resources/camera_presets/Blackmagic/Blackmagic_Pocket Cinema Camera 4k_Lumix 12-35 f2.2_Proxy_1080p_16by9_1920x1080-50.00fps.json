@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Lumix 12-35 f2.2_Proxy_1080p_16by9_1920x1080-50.00fps",
+  "note": "Proxy",
+  "calibrated_by": "Darren Varney",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Lumix 12-35 f2.2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27189583681402124,
+    "camera_matrix": [
+      [
+        1243.3469202004358,
+        0.0,
+        963.627033052164
+      ],
+      [
+        0.0,
+        1242.7811043410245,
+        512.5533022051708
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12766064230049406,
+      -0.1625871280963822,
+      1.1214337302407689,
+      -1.3930644558396614
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

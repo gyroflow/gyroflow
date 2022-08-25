@@ -1,0 +1,69 @@
+{
+  "name": "Dogcam_Bullet R+_135__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Jay Greeny",
+  "camera_brand": "Dogcam",
+  "camera_model": "Bullet R+",
+  "lens_model": "135",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.969999,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.774729751630639,
+    "camera_matrix": [
+      [
+        1578.0664325249677,
+        0.0,
+        954.452137644469
+      ],
+      [
+        0.0,
+        1585.186027089706,
+        549.7781967040885
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.08487658660249119,
+      -0.4974372356802859,
+      3.228790825339893,
+      -4.784323688509459
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

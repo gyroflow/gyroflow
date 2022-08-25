@@ -1,0 +1,69 @@
+{
+  "name": "Sigma_fp_Canon FD 50mm F1.8__1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Dominik Lange",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Canon FD 50mm F1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 20.12882447665056,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.28945277925676244,
+    "camera_matrix": [
+      [
+        2890.7250982002993,
+        0.0,
+        936.1699586306718
+      ],
+      [
+        0.0,
+        2886.0511098522234,
+        549.4893012531165
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22368069191688936,
+      -1.0410915763504236,
+      15.778810282567113,
+      -100.16281107817836
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Morecam_M9_JK05_1_4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "morecam",
+  "camera_brand": "Morecam",
+  "camera_model": "M9",
+  "lens_model": "JK05",
+  "camera_setting": "1",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7270808001401128,
+    "camera_matrix": [
+      [
+        2361.2766216138,
+        0.0,
+        1985.8259062288269
+      ],
+      [
+        0.0,
+        1739.581113454542,
+        1061.7564960849106
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05040467158436641,
+      -0.00881027497790393,
+      0.022848729171535187,
+      -0.012217732708522257
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

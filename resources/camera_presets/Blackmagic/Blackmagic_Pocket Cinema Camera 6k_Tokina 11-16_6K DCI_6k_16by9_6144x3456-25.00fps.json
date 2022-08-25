@@ -1,0 +1,71 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Tokina 11-16_6K DCI_6k_16by9_6144x3456-25.00fps",
+  "note": "@ 16mm",
+  "calibrated_by": "Tomasz Szypryt",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Tokina 11-16",
+  "camera_setting": "6K DCI",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": 19.73,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.47169355389679224,
+    "camera_matrix": [
+      [
+        4228.1445488156205,
+        0.0,
+        3158.025307710398
+      ],
+      [
+        0.0,
+        4228.041502342735,
+        1650.4215038976995
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3769401536687114,
+      -0.24119498860307975,
+      1.2842763874239704,
+      -1.5755865229775097
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_lumix g7_kit lens_cine like D_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "la gran estrella",
+  "camera_brand": "Panasonic",
+  "camera_model": "lumix g7",
+  "lens_model": "kit lens",
+  "camera_setting": "cine like D",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5259191276109808,
+    "camera_matrix": [
+      [
+        3748.1370674491545,
+        0.0,
+        1890.6759369017293
+      ],
+      [
+        0.0,
+        3749.051688475783,
+        1053.5559269702246
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27916564372210595,
+      0.4806242895601389,
+      -1.2268229586659678,
+      1.898386093377865
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

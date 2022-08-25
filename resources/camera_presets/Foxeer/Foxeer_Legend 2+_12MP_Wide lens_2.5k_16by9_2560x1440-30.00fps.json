@@ -1,0 +1,69 @@
+{
+  "name": "Foxeer_Legend 2+_12MP_Wide lens_2.5k_16by9_2560x1440-30.00fps",
+  "note": "SFine",
+  "calibrated_by": "Giuseppe",
+  "camera_brand": "Foxeer",
+  "camera_model": "Legend 2+",
+  "lens_model": "12MP",
+  "camera_setting": "Wide lens",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 54,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6093974795769775,
+    "camera_matrix": [
+      [
+        1298.6089369775118,
+        0.0,
+        1306.682733068569
+      ],
+      [
+        0.0,
+        1296.9035941007676,
+        711.8909754473414
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04777776893236351,
+      0.006919360661920983,
+      -0.00471194441140434,
+      0.0003918947198988018
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

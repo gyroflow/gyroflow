@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_11 Ultra_xiaomi 11 ultra_normal_1080p_16by9_1920x1080-60.03fps",
+  "note": "",
+  "calibrated_by": "Charles",
+  "camera_brand": "Xiaomi",
+  "camera_model": "11 Ultra",
+  "lens_model": "xiaomi 11 ultra",
+  "camera_setting": "normal",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.034256,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3937187817525929,
+    "camera_matrix": [
+      [
+        1663.9997636389242,
+        0.0,
+        960.682199152614
+      ],
+      [
+        0.0,
+        1662.5694200386606,
+        530.0953035992065
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34571232722140055,
+      -0.4764958311724865,
+      6.4517510091931785,
+      -20.097394850576283
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-28",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

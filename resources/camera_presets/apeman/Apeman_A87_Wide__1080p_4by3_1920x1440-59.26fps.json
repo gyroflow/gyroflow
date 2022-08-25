@@ -1,0 +1,69 @@
+{
+  "name": "Apeman_A87_Wide__1080p_4by3_1920x1440-59.26fps",
+  "note": "",
+  "calibrated_by": "Shubham Saboo",
+  "camera_brand": "Apeman",
+  "camera_model": "A87",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.259258,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0462766545141065,
+    "camera_matrix": [
+      [
+        1125.632682232345,
+        0.0,
+        916.1357106345438
+      ],
+      [
+        0.0,
+        1126.526875828042,
+        681.8341205790601
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04544714280566997,
+      -0.005451785663031533,
+      0.011652731310456356,
+      -0.010279220957506266
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

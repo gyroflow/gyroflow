@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Yi_Stock_auto_720p_16by9_1280x720-59.94fps",
+  "note": "",
+  "calibrated_by": "alex",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "Stock",
+  "camera_setting": "auto",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.1363693440825062,
+    "camera_matrix": [
+      [
+        557.079285458893,
+        0.0,
+        658.7423352216989
+      ],
+      [
+        0.0,
+        559.1552530482121,
+        492.62279800750736
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4445864442755786,
+      0.04621966648453142,
+      0.2728115069735085,
+      -0.003432424605492803
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

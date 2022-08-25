@@ -1,0 +1,69 @@
+{
+  "name": "Redmi_Note 8 Pro_Middle_OpenCamera_720p_4by3_1440x1080-29.61fps",
+  "note": "",
+  "calibrated_by": "Theo",
+  "camera_brand": "Redmi",
+  "camera_model": "Note 8 Pro",
+  "lens_model": "Middle",
+  "camera_setting": "OpenCamera",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.605263,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.49374261977765144,
+    "camera_matrix": [
+      [
+        1095.2963164211762,
+        0.0,
+        709.1917588334131
+      ],
+      [
+        0.0,
+        1096.5047852317507,
+        532.3608276008888
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.41718950856205345,
+      0.14483591308791294,
+      -0.5669646381379803,
+      1.074143493369906
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

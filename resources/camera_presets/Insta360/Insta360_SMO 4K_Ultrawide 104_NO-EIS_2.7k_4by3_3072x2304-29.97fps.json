@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_SMO 4K_Ultrawide 104_NO-EIS_2.7k_4by3_3072x2304-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Artem Sushchev",
+  "camera_brand": "Insta360",
+  "camera_model": "SMO 4K",
+  "lens_model": "Ultrawide 104",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3072,
+    "h": 2304
+  },
+  "orig_dimension": {
+    "w": 3072,
+    "h": 2304
+  },
+  "output_dimension": {
+    "w": 3072,
+    "h": 1728
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.31813338776397826,
+    "camera_matrix": [
+      [
+        1467.0521763366323,
+        0.0,
+        1517.54990706203
+      ],
+      [
+        0.0,
+        1471.227974607339,
+        1131.8248845632518
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.00826244019087531,
+      -0.008775690206231947,
+      0.008570341356646787,
+      -0.004120562097299365
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide104-3072x2304@29970-no-eis",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-20",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

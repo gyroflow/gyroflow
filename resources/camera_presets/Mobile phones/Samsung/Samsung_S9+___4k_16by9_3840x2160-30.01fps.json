@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_S9+___4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "Gigabyte",
+  "camera_brand": "Samsung",
+  "camera_model": "S9+",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.011768,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9766283653271716,
+    "camera_matrix": [
+      [
+        3568.1458219992724,
+        0.0,
+        1902.1521143319317
+      ],
+      [
+        0.0,
+        3567.6181266201033,
+        1004.5451455506818
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7495152088145898,
+      -2.603266502465132,
+      6.7197455151132734,
+      -3.382108516669448
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

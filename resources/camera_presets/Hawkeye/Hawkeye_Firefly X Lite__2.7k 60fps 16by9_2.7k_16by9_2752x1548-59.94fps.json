@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly X Lite__2.7k 60fps 16by9_2.7k_16by9_2752x1548-59.94fps",
+  "note": "2.7k 60fps 16by9",
+  "calibrated_by": "Kelemen Peter",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2752,
+    "h": 1548
+  },
+  "orig_dimension": {
+    "w": 2752,
+    "h": 1548
+  },
+  "output_dimension": {
+    "w": 2752,
+    "h": 1548
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8035569767888727,
+    "camera_matrix": [
+      [
+        1711.511488702255,
+        0.0,
+        1338.7900784412004
+      ],
+      [
+        0.0,
+        1710.1943150183454,
+        794.2088452057059
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.07042248415676701,
+      -0.017226945323200123,
+      -0.021796606628680437,
+      0.034737913192053625
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

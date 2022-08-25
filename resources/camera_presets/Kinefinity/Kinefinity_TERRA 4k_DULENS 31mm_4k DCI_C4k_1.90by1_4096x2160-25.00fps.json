@@ -1,0 +1,69 @@
+{
+  "name": "Kinefinity_TERRA 4k_DULENS 31mm_4k DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "BenCoope",
+  "camera_brand": "Kinefinity",
+  "camera_model": "TERRA 4k",
+  "lens_model": "DULENS 31mm",
+  "camera_setting": "4k DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2569965545127517,
+    "camera_matrix": [
+      [
+        5164.373958746737,
+        0.0,
+        2123.477648913172
+      ],
+      [
+        0.0,
+        5163.492982054841,
+        1090.6695254638698
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18999011879688013,
+      0.631695477387115,
+      -1.792050465472662,
+      3.865310684987509
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

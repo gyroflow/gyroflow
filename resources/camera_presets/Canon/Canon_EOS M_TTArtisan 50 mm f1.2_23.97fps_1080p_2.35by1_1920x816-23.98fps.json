@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_TTArtisan 50 mm f1.2_23.97fps_1080p_2.35by1_1920x816-23.98fps",
+  "note": "",
+  "calibrated_by": "amit kattal",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "TTArtisan 50 mm f1.2",
+  "camera_setting": "23.97fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 816
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 816
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 816
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.98,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.39723762745269714,
+    "camera_matrix": [
+      [
+        4598.162019045677,
+        0.0,
+        988.5146470889214
+      ],
+      [
+        0.0,
+        4599.651582373289,
+        482.2829440528116
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.23167437278006803,
+      26.69532800747039,
+      -920.7823902887058,
+      10145.64538947268
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

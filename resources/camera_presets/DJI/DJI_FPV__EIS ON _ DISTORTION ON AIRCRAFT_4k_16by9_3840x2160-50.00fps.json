@@ -1,0 +1,69 @@
+{
+  "name": "DJI_FPV__EIS ON | DISTORTION ON AIRCRAFT_4k_16by9_3840x2160-50.00fps",
+  "note": "EIS ON | DISTORTION ON AIRCRAFT",
+  "calibrated_by": "DRONOZAUR",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.38340377393185365,
+    "camera_matrix": [
+      [
+        1957.7148200169704,
+        0.0,
+        1921.3709439101797
+      ],
+      [
+        0.0,
+        1955.7972794727816,
+        1088.67692681412
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34856371936566105,
+      0.11009487329019704,
+      0.0971951460233137,
+      0.0013740523600215956
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-20",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

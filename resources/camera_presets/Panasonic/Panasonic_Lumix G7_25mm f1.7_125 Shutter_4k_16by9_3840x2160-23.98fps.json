@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix G7_25mm f1.7_1/25 Shutter_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "JustTechGuyThings",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix G7",
+  "lens_model": "25mm f1.7",
+  "camera_setting": "1/25 Shutter",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5748186340218252,
+    "camera_matrix": [
+      [
+        6362.060212288018,
+        0.0,
+        1952.2821813108696
+      ],
+      [
+        0.0,
+        6385.080858925122,
+        1031.6301576039966
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3609441377254962,
+      -2.606395959033576,
+      50.54084769353684,
+      -292.7398389128575
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

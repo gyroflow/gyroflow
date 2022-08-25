@@ -1,0 +1,69 @@
+{
+  "name": "Sony_HDR-CX625_Sony Lines G 1.8/1.9-57_ST_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "GB",
+  "camera_brand": "Sony",
+  "camera_model": "HDR-CX625",
+  "lens_model": "Sony Lines G 1.8/1.9-57",
+  "camera_setting": "ST",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5673759018092965,
+    "camera_matrix": [
+      [
+        1443.437258494734,
+        0.0,
+        959.6205672650524
+      ],
+      [
+        0.0,
+        1440.5029797040818,
+        578.1546224399137
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34310293014451804,
+      -0.13559248682253425,
+      1.6113420124575266,
+      -2.42337927515766
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

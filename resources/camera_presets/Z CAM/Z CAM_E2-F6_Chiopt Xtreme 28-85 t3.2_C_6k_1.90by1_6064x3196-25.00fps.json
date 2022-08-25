@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-F6_Chiopt Xtreme 28-85 t3.2_C_6k_1.90by1_6064x3196-25.00fps",
+  "note": "@28mm",
+  "calibrated_by": "Robert Schneider",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Chiopt Xtreme 28-85 t3.2",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 6064,
+    "h": 3196
+  },
+  "orig_dimension": {
+    "w": 6064,
+    "h": 3196
+  },
+  "output_dimension": {
+    "w": 6064,
+    "h": 3196
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8152780462939843,
+    "camera_matrix": [
+      [
+        4716.052324069002,
+        0.0,
+        3061.1225151888098
+      ],
+      [
+        0.0,
+        4715.364576154753,
+        1600.187119279599
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16971064900881422,
+      0.1137163509330034,
+      -0.031379619276993814,
+      0.4824023416310176
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

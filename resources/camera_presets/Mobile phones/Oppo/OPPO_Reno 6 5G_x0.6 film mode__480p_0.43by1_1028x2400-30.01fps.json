@@ -1,0 +1,69 @@
+{
+  "name": "OPPO_Reno 6 5G_x0.6 film mode__480p_0.43by1_1028x2400-30.01fps",
+  "note": "",
+  "calibrated_by": "Principale",
+  "camera_brand": "OPPO",
+  "camera_model": "Reno 6 5G",
+  "lens_model": "x0.6 film mode",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1028,
+    "h": 2400
+  },
+  "orig_dimension": {
+    "w": 1028,
+    "h": 2400
+  },
+  "output_dimension": {
+    "w": 1028,
+    "h": 2400
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.00725,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.29707298339327537,
+    "camera_matrix": [
+      [
+        1111.005835078901,
+        0.0,
+        501.5063037809029
+      ],
+      [
+        0.0,
+        1101.2150477720595,
+        1188.41239295301
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3207823273147469,
+      0.13322418784178863,
+      0.19779585130767177,
+      -0.09913876925173788
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-28",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

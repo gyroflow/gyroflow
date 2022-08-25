@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_Tamron 10-24__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Pierre",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Tamron 10-24",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 3,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.21920603135360975,
+    "camera_matrix": [
+      [
+        1390.299998076418,
+        0.0,
+        1862.714860634018
+      ],
+      [
+        0.0,
+        1389.8416127669625,
+        1103.9843368406791
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26198961149018823,
+      0.21243112923008473,
+      -0.11236046222959847,
+      0.031200379872806577
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-31",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

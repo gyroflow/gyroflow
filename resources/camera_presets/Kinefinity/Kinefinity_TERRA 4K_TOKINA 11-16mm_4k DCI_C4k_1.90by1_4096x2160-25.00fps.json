@@ -1,0 +1,69 @@
+{
+  "name": "Kinefinity_TERRA 4K_TOKINA 11-16mm_4k DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "11mm",
+  "calibrated_by": "Ben Coope",
+  "camera_brand": "Kinefinity",
+  "camera_model": "TERRA 4K",
+  "lens_model": "TOKINA 11-16mm",
+  "camera_setting": "4k DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.25050921638103824,
+    "camera_matrix": [
+      [
+        1778.134735475906,
+        0.0,
+        2101.177763807857
+      ],
+      [
+        0.0,
+        1778.0382472058236,
+        1124.5668202003956
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33195274643234135,
+      0.07846071214076097,
+      0.04978755864619092,
+      -0.005561866160173234
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

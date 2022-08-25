@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M50 Mark II_Kit 15-45mm IS STM_24mm_1080p_16by9_1920x1080-50.00fps",
+  "note": "24mm",
+  "calibrated_by": "Alexey Proschenko",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M50 Mark II",
+  "lens_model": "Kit 15-45mm IS STM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 10.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3101493342057846,
+    "camera_matrix": [
+      [
+        2086.6356490615563,
+        0.0,
+        975.8465945268324
+      ],
+      [
+        0.0,
+        2086.623577161859,
+        520.5594800154665
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30751275811308876,
+      0.233200746394863,
+      1.2263305610018669,
+      -2.5597294347300665
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

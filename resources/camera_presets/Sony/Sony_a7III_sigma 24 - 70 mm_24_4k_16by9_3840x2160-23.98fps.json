@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_sigma 24 - 70 mm_24_4k_16by9_3840x2160-23.98fps",
+  "note": "shot 24mm",
+  "calibrated_by": "Filmed By RawhSounds",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "sigma 24 - 70 mm",
+  "camera_setting": "24",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4731113836031816,
+    "camera_matrix": [
+      [
+        2647.6040177661644,
+        0.0,
+        1919.045457275118
+      ],
+      [
+        0.0,
+        2650.989436029477,
+        1067.3013708432036
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14825179165619395,
+      0.13151844213258448,
+      0.05575868076378731,
+      0.31072074748893547
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_NX500_Samsung 45mm 1.8 Prime_Moded_2.5k_16by9_2560x1440-29.97fps",
+  "note": "",
+  "calibrated_by": "Addison",
+  "camera_brand": "Samsung",
+  "camera_model": "NX500",
+  "lens_model": "Samsung 45mm 1.8 Prime",
+  "camera_setting": "Moded",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2671844297507439,
+    "camera_matrix": [
+      [
+        6551.923089723165,
+        0.0,
+        1350.1154056571845
+      ],
+      [
+        0.0,
+        6546.919216185252,
+        533.3983786205087
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.37607265621698777,
+      -1.9005716209946024,
+      49.7033735131276,
+      -390.5118469550292
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-28",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

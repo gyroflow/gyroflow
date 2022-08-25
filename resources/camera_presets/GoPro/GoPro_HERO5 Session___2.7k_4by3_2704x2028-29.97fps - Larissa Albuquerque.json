@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO5 Session___2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "Larissa Albuquerque",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6092609671725038,
+    "camera_matrix": [
+      [
+        1185.0326494307494,
+        0.0,
+        1354.4688843682777
+      ],
+      [
+        0.0,
+        1184.526808330732,
+        1022.8858201129508
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10902641299928796,
+      -0.03480424514215948,
+      0.00285257748725493,
+      0.0007029227340656218
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

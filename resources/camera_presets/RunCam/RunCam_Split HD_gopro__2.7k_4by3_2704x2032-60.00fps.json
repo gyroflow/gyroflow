@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Split HD_gopro__2.7k_4by3_2704x2032-60.00fps",
+  "note": "",
+  "calibrated_by": "jaanus",
+  "camera_brand": "RunCam",
+  "camera_model": "Split HD",
+  "lens_model": "gopro",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7008570800795866,
+    "camera_matrix": [
+      [
+        1408.984641912912,
+        0.0,
+        1394.3182161188815
+      ],
+      [
+        0.0,
+        1415.2126069422798,
+        1052.1879383533608
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03596451190191626,
+      0.12223648043361796,
+      -0.26391050901320406,
+      0.200096328992064
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-08-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

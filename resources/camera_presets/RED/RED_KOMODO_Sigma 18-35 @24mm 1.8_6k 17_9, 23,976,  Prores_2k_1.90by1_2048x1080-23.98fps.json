@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Sigma 18-35 @24mm 1.8_6k 17:9, 23,976,  Prores_2k_1.90by1_2048x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Linas Lang",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Sigma 18-35 @24mm 1.8",
+  "camera_setting": "6k 17:9, 23,976,  Prores",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1682585020261414,
+    "camera_matrix": [
+      [
+        1840.4860745600429,
+        0.0,
+        1027.4673496971182
+      ],
+      [
+        0.0,
+        1839.8956601226628,
+        545.1250075299483
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30284874227016756,
+      0.2894943725313897,
+      0.13059060435848455,
+      0.17613965281922808
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

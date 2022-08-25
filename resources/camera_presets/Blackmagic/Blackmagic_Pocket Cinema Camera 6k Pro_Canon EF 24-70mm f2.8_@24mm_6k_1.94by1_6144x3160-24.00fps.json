@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k Pro_Canon EF 24-70mm f2.8_@24mm_6k_1.94by1_6144x3160-24.00fps",
+  "note": "@24mm",
+  "calibrated_by": "SANLEGA",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k Pro",
+  "lens_model": "Canon EF 24-70mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3160
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3160
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8277581938356002,
+    "camera_matrix": [
+      [
+        5811.087182508824,
+        0.0,
+        3085.3901030417137
+      ],
+      [
+        0.0,
+        5818.262498404777,
+        1550.1711619730795
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19786947891304724,
+      0.5099956187517928,
+      -5.643622154976253,
+      21.17572201123273
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

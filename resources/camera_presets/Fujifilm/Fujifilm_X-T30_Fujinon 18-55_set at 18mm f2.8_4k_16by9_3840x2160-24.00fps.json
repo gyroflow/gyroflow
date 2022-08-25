@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T30_Fujinon 18-55_set at 18mm f2.8_4k_16by9_3840x2160-24.00fps",
+  "note": "set at 18mm f2.8",
+  "calibrated_by": "Aman Bolla",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T30",
+  "lens_model": "Fujinon 18-55",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4421093685965723,
+    "camera_matrix": [
+      [
+        2972.8548917020134,
+        0.0,
+        1894.2095532368244
+      ],
+      [
+        0.0,
+        2977.848627023565,
+        1024.014285103034
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.234292167900518,
+      0.7747670923736583,
+      -2.21943737717916,
+      3.138860337906736
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

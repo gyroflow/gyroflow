@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Panasonic Leica 10-25_ProRes HQ Ultra HD_4k_16by9_3840x2160-30.00fps",
+  "note": "10mm with crop x2 = 20mm",
+  "calibrated_by": "user",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Panasonic Leica 10-25",
+  "camera_setting": "ProRes HQ Ultra HD",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.390549213667763,
+    "camera_matrix": [
+      [
+        2306.3726582832855,
+        0.0,
+        1988.2588711001356
+      ],
+      [
+        0.0,
+        2305.671703243613,
+        1070.8147642194604
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19204038121300032,
+      0.11905776562684696,
+      -0.07696017875772755,
+      0.10748232419152225
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

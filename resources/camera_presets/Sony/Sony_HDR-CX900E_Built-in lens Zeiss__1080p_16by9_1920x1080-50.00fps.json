@@ -1,0 +1,69 @@
+{
+  "name": "Sony_HDR-CX900E_Built-in lens Zeiss__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Matteo Rizzotti",
+  "camera_brand": "Sony",
+  "camera_model": "HDR-CX900E",
+  "lens_model": "Built-in lens Zeiss",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2864034670336816,
+    "camera_matrix": [
+      [
+        1569.7184947977817,
+        0.0,
+        974.2419456328817
+      ],
+      [
+        0.0,
+        1568.5379081792953,
+        539.3125766460754
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30466396197263873,
+      0.5519312361667998,
+      -2.252553646153772,
+      4.072839181127041
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D7000_AF-S Nikkor 18-105mm 1*3.5-5.6 ED_high Quality_1080p_16by9_1920x1080-23.98fps",
+  "note": "18mm",
+  "calibrated_by": "Max",
+  "camera_brand": "Nikon",
+  "camera_model": "D7000",
+  "lens_model": "AF-S Nikkor 18-105mm 1*3.5-5.6 ED",
+  "camera_setting": "high Quality",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36705730365999056,
+    "camera_matrix": [
+      [
+        1434.1800909399972,
+        0.0,
+        956.1976004124516
+      ],
+      [
+        0.0,
+        1412.3486245695808,
+        531.5483913754255
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17018327316743856,
+      0.022978111107578095,
+      0.2863070459454374,
+      0.037876485671288734
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

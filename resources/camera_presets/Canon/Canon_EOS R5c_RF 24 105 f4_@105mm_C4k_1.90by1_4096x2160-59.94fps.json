@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5c_RF 24 105 f4_@105mm_C4k_1.90by1_4096x2160-59.94fps",
+  "note": "fullframe",
+  "calibrated_by": "guns120",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "RF 24 105 f4",
+  "camera_setting": "@105mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 16.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8223863046751027,
+    "camera_matrix": [
+      [
+        12185.282658440665,
+        0.0,
+        2079.5674987828047
+      ],
+      [
+        0.0,
+        12208.329518197586,
+        1096.4165779385205
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.451871976265109,
+      -1.2380683798169476,
+      -1104.8632615191602,
+      58975.79817012377
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "HUAWEI_MATEPAD11___1080p_16by9_1920x1080-29.86fps",
+  "note": "",
+  "calibrated_by": "Arako",
+  "camera_brand": "HUAWEI",
+  "camera_model": "MATEPAD11",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.857655,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.25154952083056176,
+    "camera_matrix": [
+      [
+        1513.421433472005,
+        0.0,
+        968.2772808702524
+      ],
+      [
+        0.0,
+        1514.1379240406277,
+        543.9518997051653
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5268901472440115,
+      -0.7243509316625658,
+      1.763653791620042,
+      -1.317204663574799
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

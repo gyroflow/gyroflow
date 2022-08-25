@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S3pro_GK554__4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "YUTU",
+  "camera_brand": "XTU",
+  "camera_model": "S3pro",
+  "lens_model": "GK554",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5744061094127434,
+    "camera_matrix": [
+      [
+        2117.03247876862,
+        0.0,
+        1864.040682260234
+      ],
+      [
+        0.0,
+        2116.941439430665,
+        981.14528943697
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03570109905189187,
+      -0.04086151303886976,
+      0.060574986870198175,
+      -0.02814257879706767
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

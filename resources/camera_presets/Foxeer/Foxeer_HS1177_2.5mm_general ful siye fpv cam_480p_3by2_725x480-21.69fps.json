@@ -1,0 +1,69 @@
+{
+  "name": "Foxeer_HS1177_2.5mm_general ful siye fpv cam_480p_3by2_725x480-21.69fps",
+  "note": "general ful siye fpv cam",
+  "calibrated_by": "KM|fpv",
+  "camera_brand": "Foxeer",
+  "camera_model": "HS1177",
+  "lens_model": "2.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 725,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 725,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.133,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 21.690121,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5909765594614316,
+    "camera_matrix": [
+      [
+        560.8155245963663,
+        0.0,
+        346.4325208607575
+      ],
+      [
+        0.0,
+        529.0942125511925,
+        306.69946750879643
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.395005211273747,
+      0.3771253712971771,
+      -0.12573021516480518,
+      -0.2442268790090625
+    ],
+    "radial_distortion_limit": 9.69
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

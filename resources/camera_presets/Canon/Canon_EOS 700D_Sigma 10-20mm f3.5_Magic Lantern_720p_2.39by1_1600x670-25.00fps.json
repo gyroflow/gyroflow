@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 700D_Sigma 10-20mm f3.5_Magic Lantern_720p_2.39by1_1600x670-25.00fps",
+  "note": "",
+  "calibrated_by": "HarveyPC",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 700D",
+  "lens_model": "Sigma 10-20mm f3.5",
+  "camera_setting": "Magic Lantern",
+  "calib_dimension": {
+    "w": 1600,
+    "h": 670
+  },
+  "orig_dimension": {
+    "w": 1600,
+    "h": 670
+  },
+  "output_dimension": {
+    "w": 1600,
+    "h": 670
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1614461762480386,
+    "camera_matrix": [
+      [
+        799.8768337818229,
+        0.0,
+        802.1405899477787
+      ],
+      [
+        0.0,
+        798.6699899081169,
+        352.39017877365256
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2553551511015411,
+      0.27143740143510736,
+      -0.24069531276103864,
+      0.16368374649380238
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

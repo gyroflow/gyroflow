@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2c_Laowa 7.5mm__C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Trần Tài",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2c",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7300276038117506,
+    "camera_matrix": [
+      [
+        2062.535826507391,
+        0.0,
+        2100.135160147116
+      ],
+      [
+        0.0,
+        2064.852082716926,
+        1112.1206555145905
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29219714739558705,
+      0.13556262610962652,
+      0.014293812596988972,
+      0.00047234549265483
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_Galaxy Note 10+_Main camera_1x Camera_4k_16by9_3840x2160-30.00fps",
+  "note": "Video Stabilization Off",
+  "calibrated_by": "Jackmin",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy Note 10+",
+  "lens_model": "Main camera",
+  "camera_setting": "1x Camera",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 50,
+  "fps": 30.003685,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.022302632600926,
+    "camera_matrix": [
+      [
+        2957.988538753773,
+        0.0,
+        1877.0806159050708
+      ],
+      [
+        0.0,
+        2958.953167278293,
+        1051.4318913457937
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7827970726008392,
+      -2.970044134474094,
+      9.036563956472191,
+      -8.588462603233339
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

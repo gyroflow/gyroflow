@@ -1,0 +1,71 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k Pro_Laowa 12mm Zero D_BRAW_6k_16by9_6144x3456-30.00fps",
+  "note": "6k BRAW converted to 6k pro res",
+  "calibrated_by": "shane Pennicuik",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k Pro",
+  "lens_model": "Laowa 12mm Zero D",
+  "camera_setting": "BRAW",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7295271992401648,
+    "camera_matrix": [
+      [
+        3351.3554391230837,
+        0.0,
+        3112.3246284452466
+      ],
+      [
+        0.0,
+        3348.9475471527985,
+        1727.0134844010115
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3153109585670853,
+      0.1314481222375977,
+      0.14940275283335774,
+      -0.0869546924427168
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

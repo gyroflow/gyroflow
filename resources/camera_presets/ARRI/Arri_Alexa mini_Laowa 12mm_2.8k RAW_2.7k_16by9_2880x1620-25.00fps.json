@@ -1,0 +1,69 @@
+{
+  "name": "Arri_Alexa mini_Laowa 12mm_2.8k RAW_2.7k_16by9_2880x1620-25.00fps",
+  "note": "",
+  "calibrated_by": "Vadim smarchenko",
+  "camera_brand": "Arri",
+  "camera_model": "Alexa mini",
+  "lens_model": "Laowa 12mm",
+  "camera_setting": "2.8k RAW",
+  "calib_dimension": {
+    "w": 2880,
+    "h": 1620
+  },
+  "orig_dimension": {
+    "w": 2880,
+    "h": 1620
+  },
+  "output_dimension": {
+    "w": 2880,
+    "h": 1620
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.34618750236614554,
+    "camera_matrix": [
+      [
+        1539.4748030168369,
+        0.0,
+        1427.8018764422436
+      ],
+      [
+        0.0,
+        1542.5232971974026,
+        815.9314398272085
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3062908691098064,
+      0.17506130983735005,
+      0.04028059660626182,
+      -0.017133772377854677
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6600_Sigma 16-28mm F2.8_@16mm_4k_16by9_3840x2160-23.98fps",
+  "note": "@16mm",
+  "calibrated_by": "Andreas Vanhoutte",
+  "camera_brand": "Sony",
+  "camera_model": "a6600",
+  "lens_model": "Sigma 16-28mm F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36547500689294254,
+    "camera_matrix": [
+      [
+        2678.3515936469835,
+        0.0,
+        1913.4061164781256
+      ],
+      [
+        0.0,
+        2678.4889496810797,
+        1074.831335529092
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26767980132226193,
+      0.5438922397955195,
+      -0.9916877414525602,
+      1.0468459732285484
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

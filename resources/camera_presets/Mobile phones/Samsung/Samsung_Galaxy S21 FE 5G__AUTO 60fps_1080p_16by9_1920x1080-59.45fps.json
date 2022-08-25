@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_Galaxy S21 FE 5G__AUTO 60fps_1080p_16by9_1920x1080-59.45fps",
+  "note": "",
+  "calibrated_by": "Johann Friesen",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S21 FE 5G",
+  "lens_model": "",
+  "camera_setting": "AUTO 60fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.446716,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.34346505139793115,
+    "camera_matrix": [
+      [
+        1419.21791582927,
+        0.0,
+        932.566955541302
+      ],
+      [
+        0.0,
+        1418.5482732795426,
+        519.094751841098
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33642303352292535,
+      0.2210575942976548,
+      0.0014616638684808111,
+      -0.2817000799771412
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

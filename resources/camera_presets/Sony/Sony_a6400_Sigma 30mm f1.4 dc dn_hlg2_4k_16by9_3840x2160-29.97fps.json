@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6400_Sigma 30mm f1.4 dc dn_hlg2_4k_16by9_3840x2160-29.97fps",
+  "note": "4k 30fps",
+  "calibrated_by": "Ahsan Habib anik",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Sigma 30mm f1.4 dc dn",
+  "camera_setting": "hlg2",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6733121089500124,
+    "camera_matrix": [
+      [
+        6074.909881547777,
+        0.0,
+        1638.3066535192816
+      ],
+      [
+        0.0,
+        6085.9947363017145,
+        1251.4787483530913
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15129187858450974,
+      1.972544492261734,
+      -20.068441528751972,
+      71.68431599858008
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

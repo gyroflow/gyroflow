@@ -1,0 +1,69 @@
+{
+  "name": "Sony_Xperia 5 II_24mm_CinemaDNG_4k_16by9_3840x2160-24.00fps",
+  "note": "CinemaDNG",
+  "calibrated_by": "Eilie Hallak",
+  "camera_brand": "Sony",
+  "camera_model": "Xperia 5 II",
+  "lens_model": "24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2563987581433686,
+    "camera_matrix": [
+      [
+        2837.8008058220003,
+        0.0,
+        1912.4316056462524
+      ],
+      [
+        0.0,
+        2838.224143007283,
+        1061.6934751500446
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3782111969216565,
+      0.13349100337887082,
+      1.30417784792531,
+      -3.849672163585673
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_EF-M 22MM_f2.0_2.5k_2.35by1_2520x1072-23.98fps",
+  "note": "MAGIC LANTERN RAW 2.5K FRTP 2.35:1",
+  "calibrated_by": "Azim Abd Razak",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "EF-M 22MM",
+  "camera_setting": "f2.0",
+  "calib_dimension": {
+    "w": 2520,
+    "h": 1072
+  },
+  "orig_dimension": {
+    "w": 2520,
+    "h": 1072
+  },
+  "output_dimension": {
+    "w": 2520,
+    "h": 1072
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.754706084420138,
+    "camera_matrix": [
+      [
+        5809.3428410317165,
+        0.0,
+        1346.56489478364
+      ],
+      [
+        0.0,
+        5800.706891447223,
+        416.17680442050175
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30262600924074606,
+      -9.207262979724854,
+      421.6096346017157,
+      -5394.105937238175
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

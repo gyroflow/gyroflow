@@ -1,0 +1,69 @@
+{
+  "name": "Akaso_V50 X___4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "Alejandro Rauseo",
+  "camera_brand": "Akaso",
+  "camera_model": "V50 X",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 30.007502,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.6303189587474338,
+    "camera_matrix": [
+      [
+        2181.1420218248595,
+        0.0,
+        1789.4267509573694
+      ],
+      [
+        0.0,
+        2175.5077899676216,
+        1105.2632386643843
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.009347385824755692,
+      -0.01831522335111196,
+      0.0033652712764765677,
+      -0.0014213778896853449
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

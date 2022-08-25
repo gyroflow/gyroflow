@@ -1,0 +1,69 @@
+{
+  "name": "Sony_RXO II_Moondog Labs Anamorphic 1.33_Squeeze video first before running w/GyroFlow_4k_16by9_3840x2160-29.97fps",
+  "note": "Squeeze video first before running w/GyroFlow",
+  "calibrated_by": "StaticMotion",
+  "camera_brand": "Sony",
+  "camera_model": "RXO II",
+  "lens_model": "Moondog Labs Anamorphic 1.33",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.2956080968264865,
+    "camera_matrix": [
+      [
+        2750.548633113163,
+        0.0,
+        2005.912745897782
+      ],
+      [
+        0.0,
+        2726.0646372857855,
+        1124.667856793685
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24007538956343724,
+      -0.8761120060972057,
+      3.601575854564549,
+      -4.64520410405585
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

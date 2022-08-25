@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_Go_Unknown_NO-EIS_2.7k_1by1_2720x2720-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Sebastián Sombra",
+  "camera_brand": "Insta360",
+  "camera_model": "Go",
+  "lens_model": "Unknown",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 2720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.43327924590892974,
+    "camera_matrix": [
+      [
+        928.1203367038069,
+        0.0,
+        1357.5295415770004
+      ],
+      [
+        0.0,
+        929.3244044170729,
+        1371.0090355841544
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.007686770123979296,
+      0.4438281309668537,
+      -1.0932281539796973,
+      0.9360944181008184
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go-unknown-2720x2720@25000-no-eis",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

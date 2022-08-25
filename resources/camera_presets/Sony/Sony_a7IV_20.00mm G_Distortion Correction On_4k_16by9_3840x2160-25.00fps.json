@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_20.00mm G_Distortion Correction On_4k_16by9_3840x2160-25.00fps",
+  "note": "Distortion Correction On",
+  "calibrated_by": "Berend Blom",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "20.00mm G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.1996179872358987,
+    "camera_matrix": [
+      [
+        2370.427408171666,
+        0.0,
+        1920.8104861453048
+      ],
+      [
+        0.0,
+        2369.1790917240223,
+        1075.0103190134678
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3257871930824862,
+      0.10655109788311538,
+      0.20079885139422532,
+      -0.15968244965406422
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-20.00mm-3840x2160@25000",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

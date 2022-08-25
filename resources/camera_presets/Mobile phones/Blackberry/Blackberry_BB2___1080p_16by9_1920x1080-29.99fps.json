@@ -1,0 +1,69 @@
+{
+  "name": "Blackberry_BB2___1080p_16by9_1920x1080-29.99fps",
+  "note": "",
+  "calibrated_by": "lgnap",
+  "camera_brand": "Blackberry",
+  "camera_model": "BB2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.985796,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5628544192112718,
+    "camera_matrix": [
+      [
+        1006.5903587786364,
+        0.0,
+        1004.3862021525364
+      ],
+      [
+        0.0,
+        1004.4266700449152,
+        474.4373658598509
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3837927412695903,
+      0.3253509509672298,
+      -0.7464692222552234,
+      0.7270459323684321
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-15",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

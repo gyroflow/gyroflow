@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_OneRS_4k BOOST LENS_SLOMO_2.7k_16by9_2720x1530-100.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "StefanMe StefanMe",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "4k BOOST LENS",
+  "camera_setting": "SLOMO",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 1530
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 1530
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 1530
+  },
+  "frame_readout_time": 8.04,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 100.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5536455494121123,
+    "camera_matrix": [
+      [
+        1599.3904389455045,
+        0.0,
+        1349.0710840020852
+      ],
+      [
+        0.0,
+        1598.5394556970623,
+        750.142771605058
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10152329858445892,
+      -0.13149034682386165,
+      0.1569545175332876,
+      -0.07544757051342715
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-ultrawide84-2720x1530@100000-no-eis",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

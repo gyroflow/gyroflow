@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 750D_EFS 24mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 750D",
+  "lens_model": "EFS 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3873987104486774,
+    "camera_matrix": [
+      [
+        2091.0040157290373,
+        0.0,
+        992.6112724439062
+      ],
+      [
+        0.0,
+        2090.862897600082,
+        551.5607188813935
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2478806408923567,
+      -0.527473849423082,
+      5.181377725572385,
+      -11.980557823332404
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

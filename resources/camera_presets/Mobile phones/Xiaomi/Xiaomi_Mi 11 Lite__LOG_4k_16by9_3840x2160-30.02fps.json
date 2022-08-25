@@ -1,0 +1,71 @@
+{
+  "name": "Xiaomi_Mi 11 Lite__LOG_4k_16by9_3840x2160-30.02fps",
+  "note": "",
+  "calibrated_by": "Stigla",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 11 Lite",
+  "lens_model": "",
+  "camera_setting": "LOG",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.022539,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8852431079901949,
+    "camera_matrix": [
+      [
+        2812.2829623438956,
+        0.0,
+        1931.2656761041624
+      ],
+      [
+        0.0,
+        2746.031110765431,
+        1055.023299670799
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4620468470819467,
+      -0.8320332621984418,
+      3.468719976053264,
+      -4.007556302401226
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

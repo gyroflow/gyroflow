@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Olympus 45mm_4k DCI_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Luigi Massimo Nuzzaci",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Olympus 45mm",
+  "camera_setting": "4k DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6785037658665019,
+    "camera_matrix": [
+      [
+        17644.42395883767,
+        0.0,
+        2120.6075640427252
+      ],
+      [
+        0.0,
+        17477.740043486545,
+        -263.11876881901793
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.8761122479814757,
+      157.39774602889526,
+      -7399.259337664618,
+      128810.84491150184
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

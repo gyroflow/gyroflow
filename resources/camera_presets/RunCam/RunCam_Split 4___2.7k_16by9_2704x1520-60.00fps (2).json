@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Split 4___2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Nonchira",
+  "camera_brand": "RunCam",
+  "camera_model": "Split 4",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.955669024388027,
+    "camera_matrix": [
+      [
+        1322.458908103352,
+        0.0,
+        1336.2308796190366
+      ],
+      [
+        0.0,
+        1193.062502000883,
+        773.8740229779747
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.16437868344045684,
+      0.45544049353540467,
+      -0.16018871616525282,
+      0.0035148246871931823
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

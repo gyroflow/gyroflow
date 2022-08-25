@@ -59,7 +59,7 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "insta360-oner-ultrawide110-4352x2448@29970-no-eis",
+  "identifier": "",
   "calibrator_version": "1.0.0-rc2",
   "date": "2022-02-10",
   "compatible_settings": []

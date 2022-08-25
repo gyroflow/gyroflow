@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_FE 2.8/24-70 GM_prores raw (no lens comp)_C4k_16by9_4264x2408-59.94fps",
+  "note": "53mm @59.94fps",
+  "calibrated_by": "Vladimir Kostenko",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "FE 2.8/24-70 GM",
+  "camera_setting": "prores raw (no lens comp)",
+  "calib_dimension": {
+    "w": 4264,
+    "h": 2408
+  },
+  "orig_dimension": {
+    "w": 4264,
+    "h": 2408
+  },
+  "output_dimension": {
+    "w": 4264,
+    "h": 2408
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3226394218291787,
+    "camera_matrix": [
+      [
+        5997.6129827115365,
+        0.0,
+        2146.0550645465228
+      ],
+      [
+        0.0,
+        5994.268036985989,
+        1162.6232635602073
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.46937186944622505,
+      -0.1302486783474364,
+      9.757403461592643,
+      -37.31445616161301
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

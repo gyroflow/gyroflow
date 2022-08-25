@@ -1,0 +1,69 @@
+{
+  "name": "Holy Stone_HS510___2.5k_16by9_2560x1440-25.03fps",
+  "note": "",
+  "calibrated_by": "Bret Rowlinson",
+  "camera_brand": "Holy Stone",
+  "camera_model": "HS510",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.026836,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 2.087550588736787,
+    "camera_matrix": [
+      [
+        1923.0535104197536,
+        0.0,
+        1443.557924641232
+      ],
+      [
+        0.0,
+        1922.2444205267795,
+        834.7617537018974
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06525739576402328,
+      -0.21556750322504295,
+      0.3386906244860243,
+      -0.25286793374742406
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

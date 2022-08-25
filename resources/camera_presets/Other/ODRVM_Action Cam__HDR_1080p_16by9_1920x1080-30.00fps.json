@@ -1,0 +1,69 @@
+{
+  "name": "ODRVM_Action Cam__HDR_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "daryl slack",
+  "camera_brand": "ODRVM",
+  "camera_model": "Action Cam",
+  "lens_model": "",
+  "camera_setting": "HDR",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2953444969152177,
+    "camera_matrix": [
+      [
+        988.188332816566,
+        0.0,
+        943.623178335848
+      ],
+      [
+        0.0,
+        988.6732811970452,
+        527.2676248733552
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.043522537108859984,
+      0.049106768074801785,
+      -0.051278151842194426,
+      0.015053465350559934
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

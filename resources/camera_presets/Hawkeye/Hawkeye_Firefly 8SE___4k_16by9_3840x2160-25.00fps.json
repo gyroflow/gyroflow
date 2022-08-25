@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly 8SE___4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Z",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly 8SE",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 3.0317012421068905,
+    "camera_matrix": [
+      [
+        2555.935958134848,
+        0.0,
+        1922.263031926897
+      ],
+      [
+        0.0,
+        2551.452014619672,
+        1105.2053858570837
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16452854028706695,
+      0.22488221681475357,
+      -0.26618984686805763,
+      0.6350753321969894
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

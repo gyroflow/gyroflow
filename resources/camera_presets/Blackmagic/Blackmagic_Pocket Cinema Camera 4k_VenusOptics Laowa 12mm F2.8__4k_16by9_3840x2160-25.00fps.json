@@ -1,0 +1,70 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_VenusOptics Laowa 12mm F/2.8__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Oleg Stelmakh",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "VenusOptics Laowa 12mm F/2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 16.2,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8517480052995305,
+    "camera_matrix": [
+      [
+        1662.361298760653,
+        0.0,
+        1896.471106537116
+      ],
+      [
+        0.0,
+        1662.3365765490064,
+        1113.6001545903212
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.338955506714882,
+      0.060360683387751905,
+      0.05590798694380901,
+      0.03379428929133825
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

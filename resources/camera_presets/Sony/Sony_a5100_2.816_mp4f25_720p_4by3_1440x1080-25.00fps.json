@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a5100_2.8/16_mp4f25_720p_4by3_1440x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "fpvsingh",
+  "camera_brand": "Sony",
+  "camera_model": "a5100",
+  "lens_model": "2.8/16",
+  "camera_setting": "mp4f25",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 2,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2269942656755118,
+    "camera_matrix": [
+      [
+        752.4918096113422,
+        0.0,
+        793.9136942797281
+      ],
+      [
+        0.0,
+        997.046510955664,
+        553.9418800850233
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3007696727150241,
+      0.09671278339246052,
+      0.23838024691075488,
+      0.014774231580048343
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

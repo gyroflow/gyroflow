@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 6D_35mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Jaasim Mulla",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6D",
+  "lens_model": "35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.5642454353930426,
+    "camera_matrix": [
+      [
+        1861.1904479561608,
+        0.0,
+        888.0744131690653
+      ],
+      [
+        0.0,
+        1867.4436375100229,
+        612.8570504661891
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15547533636459843,
+      0.43189544924103057,
+      -0.039527536049933226,
+      -3.525252305198416
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-08-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

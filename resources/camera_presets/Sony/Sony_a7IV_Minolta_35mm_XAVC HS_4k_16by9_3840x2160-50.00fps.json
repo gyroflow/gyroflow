@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_Minolta_35mm_XAVC HS_4k_16by9_3840x2160-50.00fps",
+  "note": "S-35_Crop",
+  "calibrated_by": "Ulrich Plank",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Minolta_35mm",
+  "camera_setting": "XAVC HS",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8933200021070044,
+    "camera_matrix": [
+      [
+        5734.803026760158,
+        0.0,
+        1959.420562735718
+      ],
+      [
+        0.0,
+        5735.652375255319,
+        1057.041822678855
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1766497248961534,
+      2.3558518337526784,
+      -30.36983430924915,
+      151.08228240102352
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

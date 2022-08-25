@@ -1,0 +1,69 @@
+{
+  "name": "Gadnic_Extreme 13___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Thiago",
+  "camera_brand": "Gadnic",
+  "camera_model": "Extreme 13",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 30,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4864584035793905,
+    "camera_matrix": [
+      [
+        1402.0116640664926,
+        0.0,
+        974.109867097776
+      ],
+      [
+        0.0,
+        1348.5022326757442,
+        530.3333540588369
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1104408987241313,
+      0.012708763248487796,
+      -0.019183855543284993,
+      0.08136774424411063
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-31",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

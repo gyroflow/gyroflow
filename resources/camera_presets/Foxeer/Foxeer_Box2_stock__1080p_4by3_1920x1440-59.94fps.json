@@ -1,0 +1,71 @@
+{
+  "name": "Foxeer_Box2_stock__1080p_4by3_1920x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "Danilo S.",
+  "camera_brand": "Foxeer",
+  "camera_model": "Box2",
+  "lens_model": "stock",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.937641,
+  "official": false,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6760542659555618,
+    "camera_matrix": [
+      [
+        1096.0409908832924,
+        0.0,
+        934.8114096045408
+      ],
+      [
+        0.0,
+        1095.149134771468,
+        655.0357009327599
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06478355675515687,
+      -0.014990983862578426,
+      0.04401644493937605,
+      -0.03191732297595781
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "REALME_GT MASTER_64MP MAIN_Px60FPS_1080p_16by9_1920x1080-59.26fps",
+  "note": "EIS-OFF!",
+  "calibrated_by": "FishballFPV",
+  "camera_brand": "REALME",
+  "camera_model": "GT MASTER",
+  "lens_model": "64MP MAIN",
+  "camera_setting": "Px60FPS",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.262081,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5493240736145378,
+    "camera_matrix": [
+      [
+        1826.1812445974856,
+        0.0,
+        949.7327829964024
+      ],
+      [
+        0.0,
+        1824.5860007513245,
+        554.2147985022565
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.37704996912818184,
+      -0.14628809081534805,
+      5.579519765899173,
+      -18.089683112729485
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

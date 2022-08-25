@@ -1,0 +1,69 @@
+{
+  "name": "Mobius_Maxi 4K_Wide_EIS on_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Herwig HÖFLE",
+  "camera_brand": "Mobius",
+  "camera_model": "Maxi 4K",
+  "lens_model": "Wide",
+  "camera_setting": "EIS on",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.2674408091023417,
+    "camera_matrix": [
+      [
+        1158.716305284712,
+        0.0,
+        959.2556402810156
+      ],
+      [
+        0.0,
+        1156.0039844940736,
+        538.4616031144149
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33630812771186397,
+      0.11072873691658268,
+      0.1925748325362607,
+      -0.2286727207681407
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

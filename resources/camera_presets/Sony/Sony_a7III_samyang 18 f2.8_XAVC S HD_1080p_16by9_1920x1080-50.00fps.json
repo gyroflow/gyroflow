@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_samyang 18 f2.8_XAVC S HD_1080p_16by9_1920x1080-50.00fps",
+  "note": "sony a7iii",
+  "calibrated_by": "Hatem Saed",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "samyang 18 f2.8",
+  "camera_setting": "XAVC S HD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.27490500249416167,
+    "camera_matrix": [
+      [
+        1004.4975159515656,
+        0.0,
+        959.7126477953132
+      ],
+      [
+        0.0,
+        1003.4681071179908,
+        530.5056361800931
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28082691224213024,
+      0.04881332399602895,
+      0.22728659354419475,
+      -0.0856685285477172
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

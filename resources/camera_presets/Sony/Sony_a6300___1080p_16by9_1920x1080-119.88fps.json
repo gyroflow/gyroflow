@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6300___1080p_16by9_1920x1080-119.88fps",
+  "note": "",
+  "calibrated_by": "T-MOTOR",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4225513633643119,
+    "camera_matrix": [
+      [
+        2490.19245820038,
+        0.0,
+        955.7581126964694
+      ],
+      [
+        0.0,
+        2492.314341006898,
+        541.6137817402046
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.46724622058652726,
+      -3.340734804306834,
+      35.95911706104049,
+      -128.79998046833893
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

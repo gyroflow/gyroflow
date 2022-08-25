@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_efm 15-45_5k_C4k_2.35by1_4320x1836-23.98fps",
+  "note": "23.98 fps",
+  "calibrated_by": "amit kattal",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "efm 15-45",
+  "camera_setting": "5k",
+  "calib_dimension": {
+    "w": 4320,
+    "h": 1836
+  },
+  "orig_dimension": {
+    "w": 4320,
+    "h": 1836
+  },
+  "output_dimension": {
+    "w": 4320,
+    "h": 1836
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.98,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8937095882841778,
+    "camera_matrix": [
+      [
+        3623.602247189101,
+        0.0,
+        2188.813320868216
+      ],
+      [
+        0.0,
+        3627.5893409976447,
+        494.0892133547773
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1944285412631088,
+      0.13337908641469218,
+      0.2043562975446449,
+      -0.3236298029288832
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

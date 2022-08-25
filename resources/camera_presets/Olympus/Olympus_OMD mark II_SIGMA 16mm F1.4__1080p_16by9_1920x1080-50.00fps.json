@@ -1,0 +1,69 @@
+{
+  "name": "Olympus_OMD mark II_SIGMA 16mm F1.4__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Krystian",
+  "camera_brand": "Olympus",
+  "camera_model": "OMD mark II",
+  "lens_model": "SIGMA 16mm F1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5330070791203099,
+    "camera_matrix": [
+      [
+        2004.4594723601513,
+        0.0,
+        979.0262911875772
+      ],
+      [
+        0.0,
+        1999.4409590100515,
+        527.8090852408081
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3437384624987346,
+      0.37677842567811287,
+      -1.606243233811767,
+      4.770172198929652
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

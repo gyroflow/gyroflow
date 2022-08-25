@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 600D_Sigma 30mm 1.4ART__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Denny",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 600D",
+  "lens_model": "Sigma 30mm 1.4ART",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.929445931111791,
+    "camera_matrix": [
+      [
+        2686.6375819528594,
+        0.0,
+        960.2100446954274
+      ],
+      [
+        0.0,
+        2689.9593104011387,
+        552.9600542439993
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15450533124620017,
+      0.5368841702964727,
+      2.0808019475019126,
+      -32.33576198136807
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-06-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

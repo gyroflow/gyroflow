@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R6_Canon EF 1.8_1/50 F8_4k_16by9_3840x2160-25.00fps",
+  "note": "1/50 F8",
+  "calibrated_by": "Anna i Miguel",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R6",
+  "lens_model": "Canon EF 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.6427588218111998,
+    "camera_matrix": [
+      [
+        5858.269004768489,
+        0.0,
+        2123.2862033375354
+      ],
+      [
+        0.0,
+        5828.533863500381,
+        1065.9557386156491
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26145928790007206,
+      -0.19794675522900473,
+      0.28147393978354224,
+      8.423299390816451
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

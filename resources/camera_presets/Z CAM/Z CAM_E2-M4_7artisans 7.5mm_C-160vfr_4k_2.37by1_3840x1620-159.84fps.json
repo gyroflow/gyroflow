@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_7artisans 7.5mm_C-160vfr_4k_2.37by1_3840x1620-159.84fps",
+  "note": "",
+  "calibrated_by": "Sam Cook",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "7artisans 7.5mm",
+  "camera_setting": "C-160vfr",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 159.840164,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3287754819057498,
+    "camera_matrix": [
+      [
+        1810.1179770592105,
+        0.0,
+        1897.782113321173
+      ],
+      [
+        0.0,
+        1808.693629482479,
+        791.7060433712062
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.007165989961325042,
+      0.011131143772066584,
+      -0.011830316742851763,
+      0.004684230513015711
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

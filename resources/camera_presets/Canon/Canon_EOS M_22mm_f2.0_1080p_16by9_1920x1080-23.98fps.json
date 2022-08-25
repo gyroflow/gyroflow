@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_22mm_f2.0_1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Andrew Breese",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "22mm",
+  "camera_setting": "f2.0",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.30744153489907977,
+    "camera_matrix": [
+      [
+        1836.223541037676,
+        0.0,
+        976.1067991249896
+      ],
+      [
+        0.0,
+        1837.1387257332756,
+        551.1421568133669
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29102228819883186,
+      0.45538410618354647,
+      -0.6382539098701018,
+      0.024003024821716235
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "SJCAM_c100+ Horizontal___480p_9by16_1088x1920-30.00fps",
+  "note": "",
+  "calibrated_by": "Panda DLor",
+  "camera_brand": "SJCAM",
+  "camera_model": "c100+ Horizontal",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1088,
+    "h": 1920
+  },
+  "orig_dimension": {
+    "w": 1088,
+    "h": 1920
+  },
+  "output_dimension": {
+    "w": 1088,
+    "h": 1920
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.5864276976386622,
+    "camera_matrix": [
+      [
+        22839.91416007931,
+        0.0,
+        621.8210880946855
+      ],
+      [
+        0.0,
+        23166.95890123801,
+        995.0176048170626
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -38.07267436051448,
+      6062.643144087595,
+      -4753000.912614965,
+      1762442272.834571
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

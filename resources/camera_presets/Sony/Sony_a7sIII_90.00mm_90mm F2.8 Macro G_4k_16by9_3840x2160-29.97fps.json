@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_90.00mm_90mm F2.8 Macro G_4k_16by9_3840x2160-29.97fps",
+  "note": "90mm F2.8 Macro G",
+  "calibrated_by": "Nella Shen",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "90.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.16441741024411258,
+    "camera_matrix": [
+      [
+        10240.48274503953,
+        0.0,
+        1933.311305143283
+      ],
+      [
+        0.0,
+        10243.373249442757,
+        1038.431865687192
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15719576911793354,
+      1.5185306316150702,
+      -53.83090578021475,
+      635.3962436712874
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-90.00mm-3840x2160@29970",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

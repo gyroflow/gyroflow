@@ -1,0 +1,66 @@
+{
+  "name": "GoPro_HERO5 Session_Amplo_Com Estabilização_1080p_16by9_1920x1080-59.94fps",
+  "note": "Com Estabilização",
+  "calibrated_by": "Fabricio",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Amplo",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.36646246840069285,
+    "camera_matrix": [
+      [
+        962.3788839311924,
+        0.0,
+        950.4760729510856
+      ],
+      [
+        0.0,
+        970.1201449222766,
+        546.8339069308181
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1151134165437194,
+      -0.04857977914680173,
+      0.019200168821079992,
+      -0.006078296370092654
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-07-19",
+  "compatible_settings": []
+}

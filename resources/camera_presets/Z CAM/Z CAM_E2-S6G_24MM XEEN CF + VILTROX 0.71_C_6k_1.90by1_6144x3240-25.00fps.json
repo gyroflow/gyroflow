@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-S6G_24MM XEEN CF + VILTROX 0.71_C_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "SHIKIJO",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6G",
+  "lens_model": "24MM XEEN CF + VILTROX 0.71",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5378256950185746,
+    "camera_matrix": [
+      [
+        5143.577101635937,
+        0.0,
+        3059.38257506681
+      ],
+      [
+        0.0,
+        5144.2889837677885,
+        1633.3476782926018
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2178946536166965,
+      0.03593770209376471,
+      0.5890468566762722,
+      -0.787971515332404
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D-750_Nikon 24-120 F4__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Trevor Lyons",
+  "camera_brand": "Nikon",
+  "camera_model": "D-750",
+  "lens_model": "Nikon 24-120 F4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3129097278992991,
+    "camera_matrix": [
+      [
+        1254.4479324958038,
+        0.0,
+        952.3009796026208
+      ],
+      [
+        0.0,
+        1254.052962912018,
+        539.7888465608527
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19087700427286644,
+      0.07002860504929752,
+      0.1682373391924233,
+      -0.10117403023106356
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

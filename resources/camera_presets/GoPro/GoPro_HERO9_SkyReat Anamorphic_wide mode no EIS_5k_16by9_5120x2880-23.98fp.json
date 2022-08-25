@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO9_SkyReat Anamorphic_wide mode no EIS_5k_16by9_5120x2880-23.98fps",
+  "note": "Stretched by 1.21 in post, gyroflow output stretched by 1.33",
+  "calibrated_by": "Addison",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO9",
+  "lens_model": "SkyReat Anamorphic",
+  "camera_setting": "wide mode no EIS",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 2880
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 2880
+  },
+  "output_dimension": {
+    "w": 6809,
+    "h": 2880
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.8697182720358905,
+    "camera_matrix": [
+      [
+        2043.879498880604,
+        0.0,
+        2547.3559065582945
+      ],
+      [
+        0.0,
+        2349.799221644396,
+        1444.710675695661
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.006864274809244093,
+      0.024639496063407144,
+      -0.029880758079902408,
+      0.0008756210958810411
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

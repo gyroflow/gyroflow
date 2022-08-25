@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6500_sigma 30mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "IBAI",
+  "camera_brand": "Sony",
+  "camera_model": "a6500",
+  "lens_model": "sigma 30mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.154385131379248,
+    "camera_matrix": [
+      [
+        5386.099535642129,
+        0.0,
+        1834.335793290013
+      ],
+      [
+        0.0,
+        5370.887554295346,
+        1137.844250573074
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1672803796335306,
+      1.3756865347436746,
+      -7.911708765079804,
+      -30.442524733855176
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sigma_fp_Vivitar 135mm F2.8__1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Dominik Lange",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Vivitar 135mm F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 10.466988727858292,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 47,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2797606940246677,
+    "camera_matrix": [
+      [
+        8422.751640514736,
+        0.0,
+        1044.2719026010166
+      ],
+      [
+        0.0,
+        8394.380490123074,
+        773.3998103078482
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4804753304868946,
+      2.3263653149607495,
+      12.512891066931155,
+      -5020.607794336504
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

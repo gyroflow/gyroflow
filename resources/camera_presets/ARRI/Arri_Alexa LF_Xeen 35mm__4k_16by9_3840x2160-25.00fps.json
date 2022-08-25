@@ -1,0 +1,69 @@
+{
+  "name": "Arri_Alexa LF_Xeen 35mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Robert Grundnig",
+  "camera_brand": "Arri",
+  "camera_model": "Alexa LF",
+  "lens_model": "Xeen 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.34054712264348175,
+    "camera_matrix": [
+      [
+        4548.211798898431,
+        0.0,
+        1939.0623895604672
+      ],
+      [
+        0.0,
+        4547.38530108543,
+        1048.3316183616914
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24204629490604457,
+      -0.005008936647432065,
+      1.121659798082592,
+      -3.580995979790337
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}
