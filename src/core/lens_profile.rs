@@ -179,6 +179,7 @@ impl LensProfile {
         else if self.calib_dimension.w >= 2700 { "2.7k" }
         else if self.calib_dimension.w >= 2500 { "2.5k" }
         else if self.calib_dimension.w >= 2000 { "2k" }
+        else if self.calib_dimension.w == 1920 && self.calib_dimension.h == 1440 { "1440p" }
         else if self.calib_dimension.w >= 1920 { "1080p" }
         else if self.calib_dimension.w >= 1280 { "720p" }
         else if self.calib_dimension.w >= 640  { "480p" }

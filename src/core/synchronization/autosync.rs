@@ -82,6 +82,20 @@ impl AutosyncProcess {
         // Make sure we apply full correction for autosync
         comp_params.lens_correction_amount = 1.0;
 
+        let thread_pool = rayon::ThreadPoolBuilder::new()
+            .thread_name(move |i| format!("Sync {}", i))
+            .stack_size(10 * 1024 * 1024) // 10 MB
+            .panic_handler(move |e| {
+                if let Some(s) = e.downcast_ref::<&str>() {
+                    log::error!("Sync thread panic! {}", s);
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    log::error!("Sync thread panic! {}", s);
+                } else {
+                    log::error!("Sync thread panic! {:?}", e);
+                }
+            })
+            .build().unwrap();
+
         Ok(Self {
             frame_count,
             org_fps,
@@ -98,7 +112,7 @@ impl AutosyncProcess {
             finished_cb: None,
             progress_cb: None,
             cancel_flag,
-            thread_pool: rayon::ThreadPoolBuilder::new().build().unwrap()
+            thread_pool
         })
     }
 
