@@ -1,0 +1,71 @@
+{
+  "name": "Caddx_Walnut_NO-LDC_NO-EIS_4k60_4k_16by9_3840x2160-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Elvin",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "NO-LDC",
+  "camera_setting": "4k60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 14.75,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 18,
+  "fps": 59.94006,
+  "official": true,
+  "asymmetrical": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.7159252587876415,
+    "camera_matrix": [
+      [
+        1781.7141905280525,
+        0.0,
+        1935.409158573849
+      ],
+      [
+        0.0,
+        1780.5950041177603,
+        1045.814067408912
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0574335887439904,
+      0.011706413601077903,
+      -0.0028490339890642315,
+      0.0008268709161027415
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "caddx-walnutcam-default-3840x2160@59940",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}
