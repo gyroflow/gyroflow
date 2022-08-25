@@ -51,19 +51,17 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 
 ## Features
 - Real time preview, params adjustments and all calculations
-- GPU processing and rendering
-- Fully multi-threaded
+- GPU processing and rendering, all algorithms fully multi-threaded
 - Rolling shutter correction
 - Supports already stabilized GoPro videos (captured with Hypersmooth enabled) (Hero 8 and up)
 - Supports and renders 10-bit videos (up to 16-bit 4:4:4:4 for regular codecs and 32-bit float for OpenEXR - works directly on YUV data to keep maximum quality)
 - Customizable lens correction strength
 - Render queue
 - Keyframes
+- Ability to create custom settings presets
+- [OpenFX plugin](https://github.com/gyroflow/gyroflow-ofx) (eg. for DaVinci Resolve), which allows you to apply stabilization in video editor without any transcoding
 - Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
 - Visual display of smoothed quaternions
-- Real time offset adjustments
-- Two optical flow methods
-- Two offsets calculation methods
 - Modern responsive user interface with Dark and Light theme
 - Adaptive zoom (dynamic cropping)
 - Support for image sequences (PNG, OpenEXR, CinemaDNG)
@@ -79,7 +77,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Fully zero-copy GPU preview rendering (working but experimental)
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be used to create OpenFX and Adobe plugins (on the TODO list)
 - Automatic updates of lens profile database
-- Built-in lens profiles for GoPro HERO 6, 8, 9 and 10 in all shooting modes
+- Built-in official lens profiles for GoPro: HERO 6, 7, 8, 9, 10; RunCam: Thumb, ThumbPro, 5 Orange; Insta360: GO 2 in all shooting modes
 
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
