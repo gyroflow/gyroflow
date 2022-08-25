@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2022 Vladimir Pinchuk (https://github.com/VladimirP1)
+
 use crate::gyro_source::GyroSource;
 use itertools::izip;
 use nalgebra::{ComplexField, Vector3};
@@ -5,7 +8,6 @@ use rand::Rng;
 use rustfft::{num_complex::Complex, FftPlanner};
 use std::f32::consts::PI;
 use std::iter::zip;
-
 pub struct OptimSync {
     sample_rate: f64,
     gyro: [Vec<f64>; 3],
@@ -170,7 +172,7 @@ impl OptimSync {
 
         let mut selected_sync_points = Vec::<f64>::new();
         let mut rng = rand::thread_rng();
-        for i in 0..target_sync_points {
+        for _ in 0..target_sync_points {
             if sync_points.is_empty() { break; }
             let rnd = rng.gen_range(trim_start_s * 1000.0..trim_end_s * 1000.0);
             let mut p = sync_points.partition_point(|x| x < &rnd).min(sync_points.len() - 1);

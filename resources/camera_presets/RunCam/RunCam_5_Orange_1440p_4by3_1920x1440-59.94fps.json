@@ -1,0 +1,121 @@
+{
+  "name": "RunCam_5 Orange_1440p_4by3_1920x1440-59.94fps",
+  "note": "",
+  "calibrated_by": "Eddy",
+  "camera_brand": "RunCam",
+  "camera_model": "5 Orange",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 10.26,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 29,
+  "fps": 59.94,
+  "official": true,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 0.4629262785325191,
+    "camera_matrix": [
+      [
+        1040.7005965374058,
+        0.0,
+        991.1041309647196
+      ],
+      [
+        0.0,
+        1041.300662459348,
+        684.2373734843869
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0368135490745245,
+      -0.016446306988848428,
+      0.009235635134729721,
+      -0.00809616358315327
+    ],
+    "radial_distortion_limit": 3.429951690821256
+  },
+  "identifier": "runcam-rc5-or-wide-1920x1440@59940",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 1.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true,
+    "custom_sync_timestamps": [
+      12800,
+      29466,
+      30500,
+      46666,
+      62833,
+      63866,
+      80033,
+      96200,
+      97233,
+      113400,
+      129566,
+      130600,
+      146766,
+      162933,
+      163966,
+      180133,
+      196300,
+      197333,
+      213500,
+      229666,
+      230700,
+      246866,
+      263033,
+      264066,
+      280233,
+      296400,
+      297433,
+      313600,
+      329766,
+      330800,
+      346966,
+      363133,
+      364166,
+      380333,
+      396500,
+      397533,
+      413700,
+      429866,
+      430900,
+      447066,
+      463233,
+      464266,
+      480433,
+      496600,
+      497633,
+      513800,
+      529966,
+      531000
+    ]
+  },
+  "distortion_model_id": 0
+}

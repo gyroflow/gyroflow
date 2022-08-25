@@ -55,7 +55,7 @@
   },
   "identifier": "runcam-thumb-wide-1920x1080@60000",
   "compatible_settings": [
-    { "width": 1920, "height": 1080, "identifier": "runcam-thumb-wide-1920x1080@59940", "fps": 59.94 },
+    { "width": 1920, "height": 1080, "identifier": "runcam-thumb-wide-1920x1080@50000", "fps": 50.00 },
     { "width": 1920, "height": 1080, "identifier": "runcam-thumb-wide-1920x1080@30000", "fps": 30.00 }
   ],
   "calibrator_version": "1.1.0",
