@@ -23,7 +23,7 @@ Row {
     property bool preventChange: false;
 
     property real value: defaultValue;
-    
+
     property Menu contextMenu: defaultContextMenu;
 
     onValueChanged: {

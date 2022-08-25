@@ -39,10 +39,10 @@ impl CameraIdentifier {
         };
 
         match id.brand.to_ascii_lowercase().as_str() {
-            "runcam" | "caddx" => id.lens_info = "default".into(),
-            _ => {}
+            "runcam" | "caddx" => id.lens_info = "wide".into(),
+            _ => { }
         }
-        
+
         if !id.brand.is_empty() {
             id.model = id.model.to_string().replace(&id.brand, "").trim().to_string();
         }

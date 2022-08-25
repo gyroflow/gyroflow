@@ -1,10 +1,10 @@
 {
-  "name": "Runcam_ThumbPro_default_2.7k60_2.7k_16by9_2704x1520-60.00fps",
+  "name": "RunCam_ThumbPro_wide_2.7k60_2.7k_16by9_2704x1520-60.00fps",
   "note": "",
   "calibrated_by": "Elvin",
-  "camera_brand": "Runcam",
+  "camera_brand": "RunCam",
   "camera_model": "ThumbPro",
-  "lens_model": "default",
+  "lens_model": "wide",
   "camera_setting": "2.7k60",
   "calib_dimension": {
     "w": 2704,
@@ -57,9 +57,17 @@
   "calibrator_version": "1.1.0",
   "date": "2022-08-23",
   "compatible_settings": [
-    { "width": 2704, "height": 1520, "identifier": "runcam-thumbpro-default-2704x1520@59940", "fps": 59.94}
+    { "width": 2704, "height": 1520, "identifier": "runcam-thumbpro-wide-2704x1520@59940", "fps": 59.94}
   ],
   "is_superview": false,
-  "sync_settings": null,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 1.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
   "distortion_model_id": 0
 }

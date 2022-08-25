@@ -26,7 +26,6 @@
   "fps": 59.94006,
   "official": true,
   "asymmetrical": false,
-  "use_opencv_fisheye": true,
   "fisheye_params": {
     "RMS_error": 0.7159252587876415,
     "camera_matrix": [
@@ -54,18 +53,19 @@
     ],
     "radial_distortion_limit": null
   },
-  "use_opencv_standard": false,
-  "calib_params": {
-    "RMS_error": 0.0,
-    "camera_matrix": [],
-    "distortion_coeffs": [],
-    "radial_distortion_limit": null
-  },
-  "identifier": "caddx-walnutcam-default-3840x2160@59940",
+  "identifier": "caddx-walnutcam-wide-3840x2160@59940",
   "calibrator_version": "1.1.0",
   "date": "2022-08-18",
   "compatible_settings": [],
   "is_superview": false,
-  "sync_settings": null,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 1.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
   "distortion_model_id": 0
 }

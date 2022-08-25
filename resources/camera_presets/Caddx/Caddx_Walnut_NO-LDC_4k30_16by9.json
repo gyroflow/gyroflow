@@ -61,11 +61,19 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "caddx-walnutcam-default-3840x2160@29970",
+  "identifier": "caddx-walnutcam-wide-3840x2160@29970",
   "calibrator_version": "1.1.0",
   "date": "2022-08-18",
   "compatible_settings": [],
   "is_superview": false,
-  "sync_settings": null,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 1.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
   "distortion_model_id": 0
 }

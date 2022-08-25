@@ -1,10 +1,10 @@
 {
-  "name": "Runcam_ThumbPro_default_1080p60_1080p_16by9_1920x1080-59.94fps",
+  "name": "RunCam_ThumbPro_wide_1080p60_1080p_16by9_1920x1080-59.94fps",
   "note": "",
   "calibrated_by": "Elvin",
-  "camera_brand": "Runcam",
+  "camera_brand": "RunCam",
   "camera_model": "ThumbPro",
-  "lens_model": "default",
+  "lens_model": "wide",
   "camera_setting": "1080p60-120",
   "calib_dimension": {
     "w": 1920,
@@ -53,16 +53,22 @@
     ],
     "radial_distortion_limit": null
   },
-  "identifier": "runcam-thumbpro-default-1920x1080@59940",
+  "identifier": "runcam-thumbpro-wide-1920x1080@59940",
   "calibrator_version": "1.1.0",
   "date": "2022-08-25",
   "compatible_settings": [
-    { "width": 1920, "height": 1080, "identifier": "runcam-thumbpro-default-1920x1080@60000", "fps": 60.0, "frame_readout_time": 15.21},
     { "width": 1920, "height": 1080, "identifier": "runcam-thumbpro-wide-1920x1080@60000", "fps": 60.0, "frame_readout_time": 15.21},
-    { "width": 1920, "height": 1080, "identifier": "runcam-thumbpro-default-1920x1080@120000", "fps": 120.0, "frame_readout_time": 5.25},
     { "width": 1920, "height": 1080, "identifier": "runcam-thumbpro-wide-1920x1080@120000", "fps": 120.0, "frame_readout_time": 5.25}
   ],
   "is_superview": false,
-  "sync_settings": null,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 1.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
   "distortion_model_id": 0
 }
