@@ -82,18 +82,18 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
 - [x] Sony (a1, a7c, a7r IV, a7 IV, a7s III, a9 II, FX3, FX6, FX9, RX0 II, RX100 VII, ZV1, ZV-E10)
-- [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2)
-- [x] Betaflight blackbox (CSV and binary)
+- [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2, Caddx Peanut)
+- [x] DJI Avata
+- [x] Blackmagic RAW (*.braw)
+- [x] RED RAW (*.r3d)
+- [x] Betaflight blackbox (*.bfl, *.bbl, *.csv)
+- [x] ArduPilot logs (*.bin, *.log)
+- [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/logging/gcsv/)
+- [x] iOS apps: [`Sensor Logger`](https://apps.apple.com/us/app/sensor-logger/id1531582925), [`G-Field Recorder`](https://apps.apple.com/at/app/g-field-recorder/id1154585693), [`Gyro`](https://apps.apple.com/us/app/gyro-record-device-motion-data/id1161532981)
+- [x] Android apps: [`Sensor Logger`](https://play.google.com/store/apps/details?id=com.kelvin.sensorapp&hl=de_AT&gl=US), [`Sensor Record`](https://play.google.com/store/apps/details?id=de.martingolpashin.sensor_record)
 - [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR, Runcam Thumb, Mobius Maxi 4K)
 - [x] Hawkeye Firefly X Lite CSV
 - [x] WitMotion (WT901SDCL binary and *.txt)
-- [x] iOS apps: `Sensor Logger`, [`G-Field Recorder`](https://apps.apple.com/at/app/g-field-recorder/id1154585693), [`Gyro`](https://apps.apple.com/us/app/gyro-record-device-motion-data/id1161532981)
-- [x] Android apps: [`Sensor Logger`](https://play.google.com/store/apps/details?id=com.kelvin.sensorapp&hl=de_AT&gl=US), [`Sensor Record`](https://play.google.com/store/apps/details?id=de.martingolpashin.sensor_record)
-- [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/logging/gcsv/)
-- [x] ArduPilot logs (*.bin, *.log)
-- [x] Blackmagic RAW (*.braw)
-- [x] RED RAW (*.r3d)
-- [x] DJI Avata
 
 ### Info for cameras not on the list
 

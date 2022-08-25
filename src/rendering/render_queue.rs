@@ -717,11 +717,19 @@ impl RenderQueue {
     }
 
     fn get_output_path(suffix: &str, path: &str, codec: &str, ui_output_path: &str) -> String {
-        let mut path = std::path::Path::new(path).with_extension("");
+        use std::path::Path;
+
+        let mut path = Path::new(path).with_extension("");
 
         if !ui_output_path.is_empty() {
             // Prefer output path of the currently opened file
-            path = std::path::Path::new(ui_output_path).to_path_buf();
+            let org_filename = path.file_name().map(|x| x.to_owned()).unwrap_or_default();
+            path = Path::new(ui_output_path).to_path_buf();
+            if path.is_dir() || ui_output_path.ends_with('/') || ui_output_path.ends_with('\\') {
+                path.push(&org_filename);
+            } else {
+                path = path.with_file_name(&org_filename);
+            }
         }
 
         let ext = match codec {
