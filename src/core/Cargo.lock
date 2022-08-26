@@ -873,7 +873,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -2254,7 +2254,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=30f6f23#30f6f2330421053ffae71728f27a4c716daa2731"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=472060d#472060d86e2e68f6591a34c5088adb9c3bc5c076"
 dependencies = [
  "argh",
  "byteorder",

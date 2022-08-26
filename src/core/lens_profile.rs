@@ -289,6 +289,15 @@ impl LensProfile {
                         cpy.fps = fps;
                     }
                 }
+                if x.contains_key("sync_settings") {
+                    if let Some(obj) = x.get("sync_settings") {
+                        if let Some(ref mut ss) = cpy.sync_settings {
+                            crate::util::merge_json(ss, obj);
+                        } else {
+                            cpy.sync_settings = Some(obj.clone());
+                        }
+                    }
+                }
                 if x.contains_key("identifier") {
                     cpy.identifier = x["identifier"].as_str().unwrap_or_default().to_string();
                 }

@@ -1217,7 +1217,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "breakpad-sys",
  "bytemuck",
@@ -1259,7 +1259,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "ahrs",
  "akaze",
@@ -2864,9 +2864,9 @@ checksum = "2fd0db749597d91ff862fd1d55ea87f7855a744a8425a64695b6fca237d1dad1"
 
 [[package]]
 name = "socket2"
-version = "0.4.4"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66d72b759436ae32898a2af0a14218dbf55efde3feeb170eb623637db85ee1e0"
+checksum = "10c98bba371b9b22a71a9414e420f92ddeb2369239af08200816169d5e2dd7aa"
 dependencies = [
  "libc",
  "winapi",
@@ -2950,7 +2950,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=30f6f23#30f6f2330421053ffae71728f27a4c716daa2731"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=472060d#472060d86e2e68f6591a34c5088adb9c3bc5c076"
 dependencies = [
  "argh",
  "byteorder",

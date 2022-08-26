@@ -100,32 +100,32 @@ This should provide much better UI performance.</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="280"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Ви дійсно бажаєте скинути всі налаштування на стандартні?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="281"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Так</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="289"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Параметри очищені, будь ласка, перезапустіть Gyroflow, щоб зміни набрали сили.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>Exit</source>
-      <translation type="unfinished">Exit</translation>
+      <translation>Вийти</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Скасувати</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="294"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Ні</translation>
     </message>
   </context>
   <context>
@@ -228,8 +228,8 @@ This should provide much better UI performance.</source>
       <location filename="../../src/ui/App.qml" line="214"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use the [OpenFX plugin].</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use the [OpenFX plugin].</translation>
+      <translation>Цей формат недоступний для рендерингу.
+Рекомендований робочий процес — це експорт файлу проекту і використання [OpenFX плагіна].</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="384"/>
@@ -286,24 +286,24 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     <message>
       <location filename="../../src/ui/App.qml" line="444"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Gyroflow вимкне комп'ютер через 60 секунд, тому що всі завдання були завершені.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="445"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Gyroflow буде перезавантажений через 60 секунд, тому що всі завдання були завершені.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="458"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
-      <translation type="unfinished">This encoder requires an external library licensed as GPL.
-Do you agree with the [GPL license] and want to download the additional codec?</translation>
+      <translation>Цей енкодер вимагає ліцензійну бібліотеку GPL.
+Ви погоджуєтесь з [ліцензією GPL] і хочете завантажити додатковий кодек?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="459"/>
       <source>Yes, I agree</source>
-      <translation type="unfinished">Yes, I agree</translation>
+      <translation>Я погоджуюся</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="474"/>

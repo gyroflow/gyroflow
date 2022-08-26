@@ -1747,7 +1747,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
       <source>Experimental automatic sync point selection.</source>
-      <translation type="unfinished">Experimental automatic sync point selection.</translation>
+      <translation>Selezione di punti di sincronizzazione automatica sperimentale.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>

@@ -1752,7 +1752,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="132"/>
       <source>Experimental automatic sync point selection.</source>
-      <translation type="unfinished">Experimental automatic sync point selection.</translation>
+      <translation>自動同期ポイント選択（実験）</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="139"/>

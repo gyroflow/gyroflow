@@ -80,52 +80,52 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Enhet for videobehandling</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="231"/>
       <source>CPU only</source>
-      <translation type="unfinished">CPU only</translation>
+      <translation>Kun CPU</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="265"/>
       <source>Default file suffix</source>
-      <translation type="unfinished">Default file suffix</translation>
+      <translation>Forvalgt filendelse</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Reset all settings to default</source>
-      <translation type="unfinished">Reset all settings to default</translation>
+      <translation>Tilbakestill alle innstillinger til standardverdier</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="280"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Er du sikker på at du ønsker å tilbakestille alle innstillinger og gjenopprette standardverdiene?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="281"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ja</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="289"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Innstillingene er tilbakestilt, vennligst restart Gyroflow for at endringene skal tre i kraft.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>Exit</source>
-      <translation type="unfinished">Exit</translation>
+      <translation>Avslutt</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="294"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Nei</translation>
     </message>
   </context>
   <context>
@@ -200,7 +200,7 @@ Dette gir vanligvis mye bedre ytelse av brukergrensesnittet.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="187"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Lagre</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="221"/>
@@ -249,23 +249,23 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     <message>
       <location filename="../../src/ui/App.qml" line="395"/>
       <source>`.gyroflow` file already exists, what do you want to do?</source>
-      <translation type="unfinished">`.gyroflow` file already exists, what do you want to do?</translation>
+      <translation>`.gyroflow`-filen finnes allerede, hva vil du gjøre?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="396"/>
       <source>Overwrite</source>
-      <translation type="unfinished">Overwrite</translation>
+      <translation>Overskriv</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="408"/>
       <source>Choose a different location</source>
-      <translation type="unfinished">Choose a different location</translation>
+      <translation>Velg en annen filplassering</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <location filename="../../src/ui/App.qml" line="464"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="441"/>
@@ -286,12 +286,12 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     <message>
       <location filename="../../src/ui/App.qml" line="444"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Gyroflow vil slå av datamaskinen om 60 sekunder fordi alle oppgaver er fullført.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="445"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Gyroflow vil starte datamaskinen på nytt om 60 sekunder fordi alle oppgaver er fullført.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="458"/>
@@ -303,7 +303,7 @@ Do you agree with the [GPL license] and want to download the additional codec?</
     <message>
       <location filename="../../src/ui/App.qml" line="459"/>
       <source>Yes, I agree</source>
-      <translation type="unfinished">Yes, I agree</translation>
+      <translation>Ja, jeg godtar</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="474"/>
@@ -340,7 +340,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="493"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</translation>
+      <translation>Din GPU støtter ikke H.265/HEVC enkoding, prøv å bruke H.264/AVC eller deaktiver GPU enkoding i eksport innstillinger.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="496"/>
@@ -418,7 +418,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="227"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyserer %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="240"/>
@@ -464,12 +464,12 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="265"/>
       <source>Output size preset</source>
-      <translation type="unfinished">Output size preset</translation>
+      <translation>Forhåndsinnstilling for oppløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="281"/>
       <source>Original (%1 x %2)</source>
-      <translation type="unfinished">Original (%1 x %2)</translation>
+      <translation>Original (%1 x %2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="301"/>
@@ -529,37 +529,37 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="353"/>
       <source>Custom encoder options</source>
-      <translation type="unfinished">Custom encoder options</translation>
+      <translation>Egendefinerte innstillinger for enkoder</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="376"/>
       <source>Show available options</source>
-      <translation type="unfinished">Show available options</translation>
+      <translation>Vis tilgjengelige valgmuligheter</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="379"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ok</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="386"/>
       <source>Keyframe distance</source>
-      <translation type="unfinished">Keyframe distance</translation>
+      <translation>Keyframe distanse</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="395"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>s</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="400"/>
       <source>Preserve other tracks</source>
-      <translation type="unfinished">Preserve other tracks</translation>
+      <translation>Bevar andre spor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="402"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation type="unfinished">This disables trim range and you need to use the .mov output file extension</translation>
+      <translation>Dette deaktiverer beskjæring og du må bruke filtypen .mov</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="407"/>
@@ -569,7 +569,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="414"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Enhet for rendring</translation>
     </message>
   </context>
   <context>
@@ -700,7 +700,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="453"/>
       <source>Lens is asymmetrical</source>
-      <translation type="unfinished">Lens is asymmetrical</translation>
+      <translation>Linsen er asymmetrisk</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="460"/>
@@ -811,12 +811,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>forhåndsinnstilling</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>offisiell</translation>
     </message>
   </context>
   <context>
@@ -824,7 +824,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="92"/>
       <source> @ %1fps</source>
-      <translation type="unfinished"> @ %1fps</translation>
+      <translation> @ %1fps</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="93"/>
@@ -839,7 +839,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="127"/>
       <source>Hide</source>
-      <translation type="unfinished">Hide</translation>
+      <translation>Skjul</translation>
     </message>
   </context>
   <context>
@@ -862,12 +862,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Video file is not loaded.</source>
-      <translation type="unfinished">Video file is not loaded.</translation>
+      <translation>Videofilen er ikke lastet inn.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ok</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="123"/>
@@ -920,32 +920,32 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="232"/>
       <source>Separate accelerometer rotation</source>
-      <translation type="unfinished">Separate accelerometer rotation</translation>
+      <translation>Separat akselerometerrotasjon</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="240"/>
       <source>Accelerometer rotation</source>
-      <translation type="unfinished">Accelerometer rotation</translation>
+      <translation>Accelerometer rotasjon</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="277"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Gyro bias</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="288"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="296"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="304"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="314"/>
@@ -975,7 +975,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="346"/>
       <source>Orientation indicator</source>
-      <translation type="unfinished">Orientation indicator</translation>
+      <translation>Orienteringsindikator</translation>
     </message>
   </context>
   <context>
@@ -983,12 +983,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="121"/>
       <source>Reset value</source>
-      <translation type="unfinished">Reset value</translation>
+      <translation>Nullstill verdi</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="128"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Aktiver keyframing</translation>
     </message>
   </context>
   <context>
@@ -996,22 +996,22 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="203"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Eksportér</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="203"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Lagre</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="203"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Legg til i rendre-kø</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="204"/>
       <source>Create settings preset</source>
-      <translation type="unfinished">Create settings preset</translation>
+      <translation>Opprett forhåndsinnstilling</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="205"/>
@@ -1026,12 +1026,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="207"/>
       <source>Export project file (including gyro data)</source>
-      <translation type="unfinished">Export project file (including gyro data)</translation>
+      <translation>Eksporter prosjektfil (gyro data inkludert)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="208"/>
       <source>Export project file</source>
-      <translation type="unfinished">Export project file</translation>
+      <translation>Eksporter prosjektfil</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="43"/>
@@ -1122,42 +1122,42 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="258"/>
       <source>rs-sync</source>
-      <translation type="unfinished">rs-sync</translation>
+      <translation>rs-sync</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="567"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>Ikke gjør noe</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="568"/>
       <source>Shut down the computer</source>
-      <translation type="unfinished">Shut down the computer</translation>
+      <translation>Slå av datamaskinen</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="569"/>
       <source>Restart the computer</source>
-      <translation type="unfinished">Restart the computer</translation>
+      <translation>Start datamaskinen på nytt</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="570"/>
       <source>Sleep</source>
-      <translation type="unfinished">Sleep</translation>
+      <translation>Hvilemodus</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="571"/>
       <source>Hibernate</source>
-      <translation type="unfinished">Hibernate</translation>
+      <translation>Dvale</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="572"/>
       <source>Logout</source>
-      <translation type="unfinished">Logout</translation>
+      <translation>Logg ut</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="573"/>
       <source>Close Gyroflow</source>
-      <translation type="unfinished">Close Gyroflow</translation>
+      <translation>Lukk Gyroflow</translation>
     </message>
   </context>
   <context>
@@ -1165,12 +1165,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="189"/>
       <source>Pause</source>
-      <translation type="unfinished">Pause</translation>
+      <translation>Pause</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="40"/>
       <source>Render queue</source>
-      <translation type="unfinished">Render queue</translation>
+      <translation>Render kø</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="575"/>
@@ -1186,12 +1186,12 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="93"/>
       <source>Elapsed: %1</source>
-      <translation type="unfinished">Elapsed: %1</translation>
+      <translation>Gått: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="104"/>
       <source>Remaining: %1</source>
-      <translation type="unfinished">Remaining: %1</translation>
+      <translation>Gjenstår: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="123"/>
@@ -1252,12 +1252,12 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="286"/>
       <source>Render now</source>
-      <translation type="unfinished">Render now</translation>
+      <translation>Rendre nå</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="292"/>
       <source>Edit</source>
-      <translation type="unfinished">Edit</translation>
+      <translation>Rediger</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="305"/>
@@ -1267,37 +1267,37 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="305"/>
       <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
+      <translation>Stopp</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="355"/>
       <source>Missing required components.</source>
-      <translation type="unfinished">Missing required components.</translation>
+      <translation>Mangler nødvendige komponenter.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="373"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ja</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="374"/>
       <source>Rename</source>
-      <translation type="unfinished">Rename</translation>
+      <translation>Endre navn</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="375"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Nei</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="375"/>
       <source>Output file already exists.</source>
-      <translation type="unfinished">Output file already exists.</translation>
+      <translation>Filen finnes allerede.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="476"/>
       <source>Synchronizing...</source>
-      <translation type="unfinished">Synchronizing...</translation>
+      <translation>Synkroniserer...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="477"/>
@@ -1312,17 +1312,17 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="598"/>
       <source>Number of parallel renders: %1</source>
-      <translation type="unfinished">Number of parallel renders: %1</translation>
+      <translation>Antall parallelle renderinger: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="445"/>
       <source>Save to: %1</source>
-      <translation type="unfinished">Save to: %1</translation>
+      <translation>Lagre til: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="446"/>
       <source>Export settings: %1</source>
-      <translation type="unfinished">Export settings: %1</translation>
+      <translation>Eksport innstillinger: %1</translation>
     </message>
   </context>
   <context>
@@ -1340,48 +1340,48 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="88"/>
       <source>Video</source>
-      <translation type="unfinished">Video</translation>
+      <translation>Video</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="89"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Rotation</source>
-      <translation type="unfinished">Rotation</translation>
+      <translation>Rotasjon</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Frame rate</source>
-      <translation type="unfinished">Frame rate</translation>
+      <translation>Bildefrekvens</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <source>Lens profile</source>
-      <translation type="unfinished">Lens profile</translation>
+      <translation>Linseprofil</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Motion data</source>
-      <translation type="unfinished">Motion data</translation>
+      <translation>Bevegelsesdata</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>Low pass filter</source>
-      <translation type="unfinished">Low pass filter</translation>
+      <translation>Lavpassfilter</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Gyro bias</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>IMU orientation</source>
-      <translation type="unfinished">IMU orientation</translation>
+      <translation>IMU retning</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Integreringsmetode</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
@@ -1396,37 +1396,37 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Keyframes</source>
-      <translation type="unfinished">Keyframes</translation>
+      <translation>Keyframes</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Synkronisering</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Ca gyro offset</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>Sync search size</source>
-      <translation type="unfinished">Sync search size</translation>
+      <translation>Søkestørrelse for synkronisering</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Maks antall synkroniseringspunkter</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Stabilization</source>
-      <translation type="unfinished">Stabilization</translation>
+      <translation>Stabilisering</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -1436,7 +1436,7 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Horizon lock</source>
-      <translation type="unfinished">Horizon lock</translation>
+      <translation>Lås horisont</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
@@ -1446,7 +1446,7 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
@@ -1456,44 +1456,44 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Export settings</source>
-      <translation type="unfinished">Export settings</translation>
+      <translation>Eksportinnstillinger</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
       <source>Codec</source>
-      <translation type="unfinished">Codec</translation>
+      <translation>Kodek</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Audio</source>
-      <translation type="unfinished">Audio</translation>
+      <translation>Lyd</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Output path</source>
-      <translation type="unfinished">Output path</translation>
+      <translation>Lagre til</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="117"/>
       <source>Output size</source>
-      <translation type="unfinished">Output size</translation>
+      <translation>Oppløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="118"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="119"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Avansert</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="120"/>
       <source>Background</source>
-      <translation type="unfinished">Background</translation>
+      <translation>Bakgrunn</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>Avspillingshastighet</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
@@ -1508,17 +1508,17 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Lagre</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Bruk</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
   </context>
   <context>
@@ -1531,7 +1531,7 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="99"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Aktiver keyframing</translation>
     </message>
   </context>
   <context>
@@ -1574,7 +1574,7 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Maks smoothness ved høy hastighet</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="167"/>
@@ -1683,12 +1683,12 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="449"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="470"/>
@@ -1929,7 +1929,7 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
       <source>Default output size</source>
-      <translation>Standard utgangsstørrelse</translation>
+      <translation>Standard oppløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
@@ -2026,7 +2026,7 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="244"/>
       <source>Delete</source>
-      <translation type="unfinished">Delete</translation>
+      <translation>Slett</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="250"/>
@@ -2041,17 +2041,17 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="275"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="276"/>
       <source>Video rotation</source>
-      <translation type="unfinished">Video rotation</translation>
+      <translation>Videorotasjon</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="277"/>
       <source>Zooming speed</source>
-      <translation type="unfinished">Zooming speed</translation>
+      <translation>Zoom hastighet</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="278"/>
@@ -2091,17 +2091,17 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="285"/>
       <source>Max smoothness</source>
-      <translation type="unfinished">Max smoothness</translation>
+      <translation>Maks smoothness</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="286"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Maks smoothness ved høy hastighet</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="287"/>
       <source>Smoothness</source>
-      <translation type="unfinished">Smoothness</translation>
+      <translation>Smoothness</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="288"/>
@@ -2121,7 +2121,7 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="470"/>
       <source>Guess IMU orientation here</source>
-      <translation type="unfinished">Guess IMU orientation here</translation>
+      <translation>Gjett IMU orientering her</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="497"/>
@@ -2166,7 +2166,7 @@ Er du sikker på at du vil fortsette?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="738"/>
       <source>Control+Shift+Scroll</source>
-      <translation type="unfinished">Control+Shift+Scroll</translation>
+      <translation>Control+Shift+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="739"/>
@@ -2309,12 +2309,12 @@ Please provide frame rate: </translation>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <location filename="../../src/ui/VideoArea.qml" line="198"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Avbryt</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="124"/>
       <source>Downloading %1 (%2)</source>
-      <translation type="unfinished">Downloading %1 (%2)</translation>
+      <translation>Laster ned %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="131"/>
@@ -2328,12 +2328,12 @@ Your render queue and current file is saved automatically.</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="146"/>
       <source>Merging files to %1 (%2)</source>
-      <translation type="unfinished">Merging files to %1 (%2)</translation>
+      <translation>Slår sammen filer til %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
-      <translation type="unfinished">This format requires an external SDK. Do you want to download it now?</translation>
+      <translation>Dette formatet krever en ekstern SDK. Vil du laste den ned nå?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="207"/>
@@ -2372,12 +2372,12 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="591"/>
       <source>Analyzing %1...</source>
-      <translation type="unfinished">Analyzing %1...</translation>
+      <translation>Analyserer %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="600"/>
       <source>Loading gyro data %1...</source>
-      <translation type="unfinished">Loading gyro data %1...</translation>
+      <translation>Laster gyro data %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="649"/>
