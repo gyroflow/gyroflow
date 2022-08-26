@@ -140,7 +140,11 @@ impl LensProfileDatabase {
                         i += 1;
                     }
                     set.insert(new_name.clone());
-                    let aspect_ratio = ((v.calib_dimension.w as f64 / v.calib_dimension.h.max(1) as f64) * 1000.0).round() as i32;
+
+                    let hstretch = if v.input_horizontal_stretch > 0.01 { v.input_horizontal_stretch } else { 1.0 };
+                    let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
+
+                    let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
                     ret.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio));
                 }
             } else {

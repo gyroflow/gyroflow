@@ -19,7 +19,7 @@
     "h": 2160
   },
   "frame_readout_time": 17.98,
-  "gyro_lpf": null,
+  "gyro_lpf": 70.0,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
   "num_images": 36,
