@@ -28,13 +28,13 @@ const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 impl QuaternionConverter {
     pub fn convert(org_quaternions: &TimeQuat, image_orientations : &TimeQuat, imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
         let vqf_quats = ComplementaryIntegrator::integrate(imu_data, duration_ms);
-        let mut boost = 20;
+        let mut boost = 1;
         let mut ret : TimeQuat = BTreeMap::new();
         let mut corr_sm = UnitQuaternion::identity();
         for (&org_ts, &org_quat) in org_quaternions {
             let n_quat = vqf_quats.range(org_ts..).next().map(|x|*x.1).unwrap_or(UnitQuaternion::identity());
             let corr = n_quat * (org_quat * image_orientations[&org_ts].inverse()).inverse();
-            corr_sm = corr_sm.slerp(&corr, if boost > 0 { boost -= 1; 0.5 } else { 0.005 });
+            corr_sm = corr_sm.slerp(&corr, if boost > 0 { boost -= 1; 1.0 } else { 0.005 });
             ret.insert(org_ts, corr_sm * org_quat);
         }
         ret
