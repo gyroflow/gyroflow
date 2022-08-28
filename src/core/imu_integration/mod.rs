@@ -33,7 +33,8 @@ impl QuaternionConverter {
         let mut corr_sm = UnitQuaternion::identity();
         for (&org_ts, &org_quat) in org_quaternions {
             let n_quat = vqf_quats.range(org_ts..).next().map(|x|*x.1).unwrap_or(UnitQuaternion::identity());
-            let corr = n_quat * (org_quat * image_orientations[&org_ts].inverse()).inverse();
+            let io_quat = image_orientations.range(org_ts..).next().map(|x|*x.1).unwrap_or(UnitQuaternion::identity());
+            let corr = n_quat * (org_quat * io_quat.inverse()).inverse();
             corr_sm = corr_sm.slerp(&corr, if boost > 0 { boost -= 1; 1.0 } else { 0.005 });
             ret.insert(org_ts, corr_sm * org_quat);
         }
