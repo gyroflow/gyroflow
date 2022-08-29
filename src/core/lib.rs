@@ -433,9 +433,8 @@ impl<T: PixelType> StabilizationManager<T> {
                     let src_ptr2 = bytemuck::bytes_of(&itm.kernel_params).as_ptr();
                     std::ptr::copy_nonoverlapping(src_ptr2, params_ptr, params_size);
 
-                    drop(itm);
+                    self.current_fov_10000.store((itm.fov * 10000.0) as u64, SeqCst);
 
-                    self.current_fov_10000.store((undist.current_fov * 10000.0) as u64, SeqCst);
                     return true;
                 }
             }
