@@ -113,7 +113,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Download `Gyroflow-linux64.tar.gz` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `./Gyroflow` in the terminal.
 - If that doesn't work, you can try the `Gyroflow-linux64.AppImage`, but the .tar.gz one is preferred.
 - Make sure you have latest graphics drivers installed
-- Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0libc++-dev vdpau-va-driver libvulkan1`
+- Possibly needed packages: `sudo apt install libva2 libvdpau1 libasound2 libxkbcommon0 libpulse0 libc++-dev vdpau-va-driver libvulkan1`
 - GPU specific packages:
     - NVIDIA: `nvidia-opencl-icd nvidia-vdpau-driver nvidia-egl-icd nvidia-vulkan-icd libnvcuvid1 libnvidia-encode1`
     - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
