@@ -256,6 +256,31 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
+    function loadMultipleFiles(urls: object, skip_detection: bool) {
+        if (urls.length == 1) {
+            root.loadFile(urls[0], skip_detection);
+        } else if (urls.length > 1) {
+            let dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
+                { text: qsTr("Add to render queue"), clicked: function() {
+                    queue.dt.loadFiles(urls);
+                    queue.shown = true;
+                } },
+                { text: qsTr("Merge them into one video"), clicked: function() {
+                    dlg.btnsRow.children[0].enabled = false;
+                    dlg.btnsRow.children[1].enabled = false;
+                    dlg.btnsRow.children[2].enabled = false;
+                    controller.mp4_merge(urls.map(x => controller.url_to_path(x)));
+                    return false;
+                } },
+                { text: qsTr("Open the first file"), clicked: function() {
+                    root.loadFile(urls[0], skip_detection);
+                } },
+                { text: qsTr("Cancel") },
+            ]);
+            externalSdkModal = dlg;
+            dlg.addLoader();
+        }
+    }
     function detectImageSequence(url: url) {
         const urlStr = controller.url_to_path(url);
         if (!urlStr.includes("%0")) {
@@ -551,7 +576,7 @@ Item {
                 if (isCalibrator) {
                     calibrator_window.loadFile(drop.urls[0]);
                 } else {
-                    root.loadFile(drop.urls[0], false)
+                    root.loadMultipleFiles(drop.urls, false);
                 }
             }
         }

@@ -11,6 +11,7 @@ import "Util.js" as Util;
 Item {
     id: root;
 
+    property alias dt: dt;
     property bool shown: false;
     opacity: shown? 1 : 0;
     visible: opacity > 0;
@@ -542,6 +543,7 @@ Item {
     }
 
     DropTarget {
+        id: dt;
         color: styleBackground2;
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;

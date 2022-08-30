@@ -31,6 +31,7 @@ futures-intrusive = "0.4.0"
 flate2 = "1.0.24"
 walkdir = "2.3.2"
 mp4-merge = "0.1.1"
+human-sort = "0.2.2"
 
 breakpad-sys = "0.1.1"
 

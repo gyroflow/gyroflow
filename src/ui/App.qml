@@ -69,7 +69,8 @@ Rectangle {
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
         type: "video";
-        onAccepted: videoArea.loadFile(selectedFile, false);
+        fileMode: FileDialog.OpenFiles;
+        onAccepted: videoArea.loadMultipleFiles(selectedFiles, false);
     }
 
     Item {

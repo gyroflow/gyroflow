@@ -1466,7 +1466,9 @@ impl Controller {
     }
 
     fn mp4_merge(&self, file_list: QStringList) {
-        let file_list: Vec<String> = file_list.into_iter().map(|x| x.to_string() ).collect();
+        let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
+        file_list.sort_by(|a, b| human_sort::compare(a, b));
+
         ::log::debug!("Merging files: {:?}", &file_list);
         if file_list.len() < 2 {
             self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
