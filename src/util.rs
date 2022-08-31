@@ -192,11 +192,11 @@ pub fn init_logging() {
 }
 
 pub fn install_crash_handler() -> std::io::Result<()> {
+    let cur_dir = std::env::current_dir()?;
+    let os_str = cur_dir.as_os_str();
+
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
-        let cur_dir = std::env::current_dir()?;
-        let os_str = cur_dir.as_os_str();
-
         let path: Vec<breakpad_sys::PathChar> = {
             #[cfg(windows)]
             {

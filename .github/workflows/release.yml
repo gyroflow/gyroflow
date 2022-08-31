@@ -60,6 +60,13 @@ jobs:
         with:
           key: gf5
 
+      - name: Dependencies cache
+        id: extcache
+        uses: actions/cache@v3
+        with:
+          path: '${{ github.workspace }}/ext/'
+          key: ${{ runner.os }}-gf-ext
+
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
 
@@ -71,14 +78,15 @@ jobs:
           vulkan-use-cache: true
 
       - uses: lukka/get-cmake@latest
-      - uses: lukka/run-vcpkg@v10
+      - uses: lukka/run-vcpkg@latest
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: 314018fef43c7e3a52a3e46599313b70ace3977a
+          vcpkgGitCommitId: f688b2e29676bfa3a02ead4b7096c589f8af8180
+          doNotCache: true
 
       # Download and install OpenCV
       - name: Install OpenCV and curl
-        if: ${{ matrix.targets.os != 'ubuntu-latest' }}
+        if: ${{ matrix.targets.os != 'ubuntu-latest' && steps.extcache.outputs.cache-hit != 'true' }}
         run: |
           vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg }}"
           vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg2 }}"
@@ -86,41 +94,28 @@ jobs:
           vcpkg install "opencl:${{ matrix.targets.vcpkg }}"
 
       # Download and install Qt
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ext/Qt
-          key: QtCache-${{ runner.os }}-6.3.1
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           version: 6.3.1
           dir: ${{ github.workspace }}/ext/
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cached: ${{ steps.extcache.outputs.cache-hit }}
 
       # Install LLVM
-      - name: Cache LLVM and Clang
-        if: ${{ matrix.targets.os == 'windows-2022' }}
-        id: cache-llvm
-        uses: actions/cache@v2
-        with:
-          path: ${{ runner.temp }}/llvm
-          key: llvm-13.0
       - name: Install LLVM and Clang
         if: ${{ matrix.targets.os == 'windows-2022' }}
         uses: KyleMayes/install-llvm-action@v1.5.0
         with:
           version: "13.0"
-          directory: ${{ runner.temp }}/llvm
-          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+          directory: ${{ github.workspace }}/ext/llvm
+          cached: ${{ steps.extcache.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         if: ${{ matrix.targets.os == 'windows-2022' }}
 
       # Download ffmpeg
       - name: Download ffmpeg
-        if: ${{ matrix.targets.os == 'windows-2022' }}
+        if: ${{ matrix.targets.os == 'windows-2022' && steps.extcache.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/ext/
           curl -L ${{ matrix.targets.ffmpeg_url }} -o ffmpeg.7z
