@@ -6,8 +6,8 @@ $Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-5.1-windows-desktop-vs2022-gpl-lite"
 $Env:Path += ";$Env:FFMPEG_DIR\bin"
 
 # OpenCV
-$Env:OPENCV_LINK_LIBS = "opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs,opencv_objdetect"
-$Env:OPENCV_LINK_LIBS += ",opencv_dnn,opencv_ml,opencv_highgui,opencv_videoio" # needed for debug build
+$Env:OPENCV_LINK_LIBS = "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4"
+$Env:OPENCV_LINK_LIBS += ",opencv_dnn4,opencv_ml4,opencv_highgui4,opencv_videoio4" # needed for debug build
 $Env:OPENCV_LINK_PATHS = "$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\lib"
 $Env:OPENCV_INCLUDE_PATHS = "$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\include"
 $Env:Path = ";$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\bin;$Env:Path"

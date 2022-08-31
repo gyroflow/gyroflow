@@ -23,7 +23,7 @@ if [ "$1" == "build-docker" ]; then
         export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
 
         export PATH=\"$QT_DIR/bin:\$PATH\"
-        export OPENCV_LINK_LIBS=\"opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann\"
+        export OPENCV_LINK_LIBS=\"opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4\"
         cd $PROJECT_DIR
         echo \$FFMPEG_DIR
         ls -l \$FFMPEG_DIR

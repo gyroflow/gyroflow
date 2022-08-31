@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PROJECT_DIR=$(cd "$(dirname "$0")"; pwd -P)
-export OPENCV_LINK_LIBS="opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann"
+export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
 
 ARCH=x64_64
 ARCH_VCPKG=x64-osx-release

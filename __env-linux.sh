@@ -7,7 +7,7 @@ export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/x64-linux-release/lib
 export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/x64-linux-release/include/
 
 export PATH="$PROJECT_DIR/ext/6.3.1/gcc_64/bin:$FFMPEG_DIR/bin/amd64:$PATH"
-export OPENCV_LINK_LIBS="opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core"
+export OPENCV_LINK_LIBS="opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_core4"
 
 export LD_LIBRARY_PATH="$PROJECT_DIR/target/release:$PROJECT_DIR/ext/6.3.1/gcc_64/lib:$FFMPEG_DIR/lib:$FFMPEG_DIR/lib/amd64"
 

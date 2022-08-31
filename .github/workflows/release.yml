@@ -143,7 +143,7 @@ jobs:
         env:
           CARGO_TARGET_DIR: ./target
           FFMPEG_DIR: ${{ github.workspace }}/ext/${{ matrix.targets.ffmpeg_name }}
-          OPENCV_LINK_LIBS: opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_imgcodecs
+          OPENCV_LINK_LIBS: opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4
           OPENCV_LINK_PATHS: ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/lib
           OPENCV_INCLUDE_PATHS: ${{ github.workspace }}/ext/vcpkg/installed/${{ matrix.targets.vcpkg }}/include
         uses: actions-rs/cargo@v1

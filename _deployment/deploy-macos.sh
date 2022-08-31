@@ -12,7 +12,7 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     pushd $PROJECT_DIR
 
     export PATH="$PROJECT_DIR/ext/6.3.1/macos/bin:$PATH"
-    export OPENCV_LINK_LIBS="opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann"
+    export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
 
     #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
     export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"

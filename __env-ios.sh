@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PROJECT_DIR=$(cd "$(dirname "$0")"; pwd -P)
-export OPENCV_LINK_LIBS="opencv_core,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann"
+export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
 
 export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64-ios
 export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/lib
