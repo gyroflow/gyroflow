@@ -260,7 +260,8 @@ Item {
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
-            let dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
+            const paths = urls.map(x => controller.url_to_path(x));
+            const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
                 { text: qsTr("Add to render queue"), clicked: function() {
                     queue.dt.loadFiles(urls);
                     queue.shown = true;
@@ -269,7 +270,7 @@ Item {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
-                    controller.mp4_merge(urls.map(x => controller.url_to_path(x)));
+                    controller.mp4_merge(paths);
                     return false;
                 } },
                 { text: qsTr("Open the first file"), clicked: function() {
