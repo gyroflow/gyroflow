@@ -78,7 +78,7 @@ jobs:
           vulkan-use-cache: true
 
       - uses: lukka/get-cmake@latest
-      - uses: lukka/run-vcpkg@latest
+      - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: f688b2e29676bfa3a02ead4b7096c589f8af8180
