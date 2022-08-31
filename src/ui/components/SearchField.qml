@@ -74,11 +74,18 @@ TextField {
         if (!m.length) popup.close();
         else {
             m.sort((a, b) => {
+                // Is preset or favorited
                 const aPriority = a[1].endsWith(".gyroflow") || root.profilesMenu.favorites[a[2]];
                 const bPriority = b[1].endsWith(".gyroflow") || root.profilesMenu.favorites[b[2]];
-                if (aPriority && bPriority) return a[0].localeCompare(b[0]);
-                if (aPriority) return -1;
-                if (bPriority) return 1;
+                if (aPriority && !bPriority) return -1;
+                if (bPriority && !aPriority) return 1;
+
+                // Check aspect match
+                const aPriority2 = a[5] != 0 && profilesMenu.currentVideoAspectRatio == a[5];
+                const bPriority2 = b[5] != 0 && profilesMenu.currentVideoAspectRatio == b[5];
+                if (aPriority2 && !bPriority2) return -1;
+                if (bPriority2 && !aPriority2) return 1;
+
                 return a[0].localeCompare(b[0]);
             });
         }
