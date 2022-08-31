@@ -223,7 +223,7 @@ Item {
 
             if (saved && saved.length > 100) {
                 Qt.callLater(() => {
-                    render_queue.restore_render_queue(saved, controller, window.getAdditionalProjectDataJson());
+                    render_queue.restore_render_queue(saved, window.getAdditionalProjectDataJson());
                 });
             }
         }
@@ -552,7 +552,7 @@ Item {
             const additional = window.getAdditionalProjectDataJson();
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(controller.url_to_path(url), controller, additional);
+                const job_id = render_queue.add_file(controller.url_to_path(url), additional);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();

@@ -99,7 +99,7 @@ fn entry() {
     let ui_tools = RefCell::new(UITools::default());
     let ui_tools_pinned = unsafe { QObjectPinned::new(&ui_tools) };
 
-    let rq = RefCell::new(rendering::render_queue::RenderQueue::new());
+    let rq = RefCell::new(rendering::render_queue::RenderQueue::new(ctl.borrow().stabilizer.clone()));
     let rqpinned = unsafe { QObjectPinned::new(&rq) };
 
     let mut engine = QmlEngine::new();

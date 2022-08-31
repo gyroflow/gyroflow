@@ -243,7 +243,7 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
-                            const job_id = render_queue.add(controller, window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
+                            const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
                                 videoArea.queue.shown = true;
