@@ -256,7 +256,7 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
-    function loadMultipleFiles(urls: object, skip_detection: bool) {
+    function loadMultipleFiles(urls: list, skip_detection: bool) {
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
