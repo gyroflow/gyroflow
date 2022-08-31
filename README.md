@@ -233,11 +233,10 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Install Xcode command line tools: `xcode-select --install`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
-5. For building on Apple M1, change `ffmpeg-x64_64` -> `ffmpeg-arm64` and `x64-osx-release` -> `arm64-osx` in `__env-macos.sh`
-6. Setup the environment in terminal: `source __env-macos.sh` or `. ./__env-macos.sh` - I do this in VS Code built-in terminal
-7. For some reason `DYLD_FALLBACK_LIBRARY_PATH` may be overwritten so export it again in terminal: `export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"` (if you have build errors, try the other one from __env-macos.sh)
-8. Compile and run: `cargo run --release`
-9. If it fails to run, do: `./_deployment/deploy-macos.sh` once
+5. Setup the environment in terminal: `source __env-macos.sh` or `. ./__env-macos.sh` - I do this in VS Code built-in terminal
+6. For some reason `DYLD_FALLBACK_LIBRARY_PATH` may be overwritten so export it again in terminal: `export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"` (if you have build errors, try the other one from __env-macos.sh)
+7. Compile and run: `cargo run --release`
+8. If it fails to run, do: `./_deployment/deploy-macos.sh` once
 
 ### Building on Linux
 1. Get latest stable Rust language from: https://rustup.rs/
@@ -255,6 +254,16 @@ The project also supports UI live reload, it's a super quick way of working with
 6. Patch `C:\Users\you\.cargo\registry\src\github.com-1ecc6299db9ec823\opencv-0.61.3\build.rs`: Change `if cfg!(target_env = "msvc")` to `if std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc"`
 7. Update paths in `_deployment/build-android.ps1`
 8. Run `.\_deployment\build-android.ps1` in Powershell
+
+### Building for iOS
+1. iOS is not well supported yet, work in progress
+2. Get latest stable Rust language from: https://rustup.rs/
+3. Install Xcode command line tools: `xcode-select --install`
+4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+5. Install dependencies: `cd gyroflow/ext && ./install-deps-ios.sh`
+6. Setup the environment in terminal: `source __env-ios.sh` or `. ./__env-ios.sh` - I do this in VS Code built-in terminal
+7. Compile and run: `cargo build --target aarch64-apple-ios --release`
+8. Rest of the steps not figured out yet. Now need to package the app, create .ipa and sign it
 
 ### Profiling on Windows
 1. Install and run `Visual Studio Community Edition`

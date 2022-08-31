@@ -451,30 +451,34 @@ impl RenderQueue {
         // If it was running for at least 1 minute
         if Self::current_timestamp() - self.start_timestamp > 60000 && self.when_done > 0 {
             self.request_close();
-            match self.when_done {
-                1 => { Self::system_shutdown(false); }
-                2 => { Self::system_shutdown(true); }
-                3 => { let _ = system_shutdown::sleep(); }
-                4 => { let _ = system_shutdown::hibernate(); }
-                5 => { let _ = system_shutdown::logout(); }
-                _ => { }
+
+            #[cfg(not(any(target_os = "ios", target_os = "android")))]
+            {
+                fn system_shutdown(reboot: bool) {
+                    #[cfg(target_os = "windows")]
+                    {
+                        let msg = util::tr("App", &format!("Gyroflow will {} the computer in 60 seconds because all tasks have been completed.", if reboot { "reboot" } else { "shut down" }));
+                        let _ = if reboot {
+                            system_shutdown::reboot_with_message(&msg, 60, false)
+                        } else {
+                            system_shutdown::shutdown_with_message(&msg, 60, false)
+                        };
+                    }
+
+                    #[cfg(not(target_os = "windows"))]
+                    let _ = if reboot { system_shutdown::reboot() } else { system_shutdown::shutdown() };
+                }
+
+                match self.when_done {
+                    1 => { system_shutdown(false); }
+                    2 => { system_shutdown(true); }
+                    3 => { let _ = system_shutdown::sleep(); }
+                    4 => { let _ = system_shutdown::hibernate(); }
+                    5 => { let _ = system_shutdown::logout(); }
+                    _ => { }
+                }
             }
         }
-    }
-
-    fn system_shutdown(reboot: bool) {
-        #[cfg(target_os = "windows")]
-        {
-            let msg = util::tr("App", &format!("Gyroflow will {} the computer in 60 seconds because all tasks have been completed.", if reboot { "reboot" } else { "shut down" }));
-            let _ = if reboot {
-                system_shutdown::reboot_with_message(&msg, 60, false)
-            } else {
-                system_shutdown::shutdown_with_message(&msg, 60, false)
-            };
-        }
-
-        #[cfg(not(target_os = "windows"))]
-        let _ = if reboot { system_shutdown::reboot() } else { system_shutdown::shutdown() };
     }
 
     pub fn set_when_done(&mut self, v: i32) {

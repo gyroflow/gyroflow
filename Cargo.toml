@@ -6,13 +6,18 @@ edition = "2021"
 build = "build.rs"
 
 [features]
-default = ["opencv", "opencl"]
-opencv = ["gyroflow-core/use-opencv"]
+default = ["opencv"]
 opencl = ["gyroflow-core/use-opencl"]
+opencv = ["gyroflow-core/use-opencv"]
 
-[target.'cfg(not(target_os = "android"))'.dependencies]
-gyroflow-core = { path = "src/core/", default-features = false }
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "17cbcc3" }
+system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "4f03925" }
+breakpad-sys = "0.1.1"
+
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 
 [dependencies]
 cstr = "0.2.10"
@@ -30,17 +35,13 @@ pollster = "0.2.5"
 futures-intrusive = "0.4.0"
 flate2 = "1.0.24"
 walkdir = "2.3.2"
-mp4-merge = "0.1.1"
+mp4-merge = "0.1.2"
 human-sort = "0.2.2"
-
-breakpad-sys = "0.1.1"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "dbd3ed2" }
 #qml-video-rs = { path = "../qml-video-rs" }
-
-system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "4f03925" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
@@ -100,7 +101,6 @@ target_sdk_version = 29
 name = "android.permission.WRITE_EXTERNAL_STORAGE"
 
 [target.'cfg(target_os = "android")'.dependencies]
-gyroflow-core = { path = "src/core/", features = ["use-opencv"], default-features = false }
 # ndk = { version = "*", features = ["trace"] }
 # ndk-glue = { version = "*", features = ["logger"] }
 ndk-sys = { version = "0.4.0" }

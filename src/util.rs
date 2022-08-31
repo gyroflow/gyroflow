@@ -192,49 +192,52 @@ pub fn init_logging() {
 }
 
 pub fn install_crash_handler() -> std::io::Result<()> {
-    let cur_dir = std::env::current_dir()?;
-    let os_str = cur_dir.as_os_str();
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        let cur_dir = std::env::current_dir()?;
+        let os_str = cur_dir.as_os_str();
 
-    let path: Vec<breakpad_sys::PathChar> = {
-        #[cfg(windows)]
-        {
-            use std::os::windows::ffi::OsStrExt;
-            os_str.encode_wide().collect()
+        let path: Vec<breakpad_sys::PathChar> = {
+            #[cfg(windows)]
+            {
+                use std::os::windows::ffi::OsStrExt;
+                os_str.encode_wide().collect()
+            }
+            #[cfg(unix)]
+            {
+                use std::os::unix::ffi::OsStrExt;
+                Vec::from(os_str.as_bytes())
+            }
+        };
+
+        unsafe {
+            extern "C" fn callback(path: *const breakpad_sys::PathChar, path_len: usize, _ctx: *mut std::ffi::c_void) {
+                let path_slice = unsafe { std::slice::from_raw_parts(path, path_len) };
+
+                let path = {
+                    #[cfg(windows)]
+                    {
+                        use std::os::windows::ffi::OsStringExt;
+                        std::path::PathBuf::from(std::ffi::OsString::from_wide(path_slice))
+                    }
+                    #[cfg(unix)]
+                    {
+                        use std::os::unix::ffi::OsStrExt;
+                        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(path_slice).to_owned())
+                    }
+                };
+
+                println!("Crashdump written to {}", path.display());
+            }
+
+            breakpad_sys::attach_exception_handler(
+                path.as_ptr(),
+                path.len(),
+                callback,
+                std::ptr::null_mut(),
+                breakpad_sys::INSTALL_BOTH_HANDLERS,
+            );
         }
-        #[cfg(unix)]
-        {
-            use std::os::unix::ffi::OsStrExt;
-            Vec::from(os_str.as_bytes())
-        }
-    };
-
-    unsafe {
-        extern "C" fn callback(path: *const breakpad_sys::PathChar, path_len: usize, _ctx: *mut std::ffi::c_void) {
-            let path_slice = unsafe { std::slice::from_raw_parts(path, path_len) };
-
-            let path = {
-                #[cfg(windows)]
-                {
-                    use std::os::windows::ffi::OsStringExt;
-                    std::path::PathBuf::from(std::ffi::OsString::from_wide(path_slice))
-                }
-                #[cfg(unix)]
-                {
-                    use std::os::unix::ffi::OsStrExt;
-                    std::path::PathBuf::from(std::ffi::OsStr::from_bytes(path_slice).to_owned())
-                }
-            };
-
-            println!("Crashdump written to {}", path.display());
-        }
-
-        breakpad_sys::attach_exception_handler(
-            path.as_ptr(),
-            path.len(),
-            callback,
-            std::ptr::null_mut(),
-            breakpad_sys::INSTALL_BOTH_HANDLERS,
-        );
     }
 
     // Upload crash dumps

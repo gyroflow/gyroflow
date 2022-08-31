@@ -144,7 +144,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
     let mut pixel_format = render_options.pixel_format.clone();
 
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
 
     let duration_ms = params.duration_ms;

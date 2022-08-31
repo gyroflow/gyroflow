@@ -83,7 +83,128 @@ fn main() {
         config.flag(f);
     }
 
-    if cfg!(target_os = "macos") {
+    if std::env::var("CARGO_CFG_TARGET_OS").unwrap() == "ios" {
+        println!("cargo:rustc-link-arg={}/objects-Release/Quick_resources_2/.rcc/qrc_scenegraph_shaders.cpp.o", qt_library_path);
+        println!("cargo:rustc-link-arg={}/objects-Release/QuickShapesPrivate_resources_2/.rcc/qrc_qtquickshapes.cpp.o", qt_library_path);
+        println!("cargo:rustc-link-lib=z");
+        println!("cargo:rustc-link-lib=bz2");
+        println!("cargo:rustc-link-lib=xml2");
+        println!("cargo:rustc-link-arg=-fapple-link-rtlib");
+        println!("cargo:rustc-link-lib=framework=AVFoundation");
+        println!("cargo:rustc-link-lib=framework=CoreGraphics");
+        println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        println!("cargo:rustc-link-lib=framework=VideoToolbox");
+        println!("cargo:rustc-link-lib=framework=QuartzCore");
+        println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=Security");
+        println!("cargo:rustc-link-lib=framework=CoreMedia");
+        println!("cargo:rustc-link-lib=framework=CoreAudio");
+        println!("cargo:rustc-link-lib=framework=CoreVideo");
+        println!("cargo:rustc-link-lib=framework=CoreText");
+        println!("cargo:rustc-link-lib=framework=CoreServices");
+        println!("cargo:rustc-link-lib=framework=CoreFoundation");
+        println!("cargo:rustc-link-lib=framework=SystemConfiguration");
+        println!("cargo:rustc-link-lib=framework=ImageIO");
+        println!("cargo:rustc-link-lib=framework=UIKit");
+        println!("cargo:rustc-link-lib=framework=OpenGLES");
+
+        let libs = [
+            "Qt6BundledFreetype",
+            "Qt6BundledHarfbuzz",
+            "Qt6BundledLibjpeg",
+            "Qt6BundledLibpng",
+            "Qt6BundledPcre2",
+            "Qt6Core",
+            "Qt6Gui",
+            "Qt6LabsFolderListModel",
+            "Qt6LabsQmlModels",
+            "Qt6LabsSettings",
+            "Qt6Network",
+            "Qt6OpenGL",
+            "Qt6Qml",
+            "Qt6QmlCompiler",
+            "Qt6QmlCore",
+            "Qt6QmlLocalStorage",
+            "Qt6QmlModels",
+            "Qt6QmlWorkerScript",
+            "Qt6QmlXmlListModel",
+            "Qt6Quick",
+            "Qt6QuickControls2",
+            "Qt6QuickControls2Impl",
+            "Qt6QuickDialogs2",
+            "Qt6QuickDialogs2QuickImpl",
+            "Qt6QuickDialogs2Utils",
+            "Qt6QuickLayouts",
+            "Qt6QuickParticles",
+            "Qt6QuickShapes",
+            "Qt6QuickTemplates2",
+            "Qt6Sql",
+            "Qt6Svg",
+
+            "qsvgicon",
+            "qsvg",
+            "qsqlite",
+            "qios",
+            "qmlfolderlistmodelplugin",
+            "qmlsettingsplugin",
+            "qmlplugin",
+            "modelsplugin",
+            "workerscriptplugin",
+            "qmlxmllistmodelplugin",
+            "qtquickcontrols2basicstyleimplplugin",
+            "qtquickcontrols2basicstyleplugin",
+            "qtquickcontrols2implplugin",
+            "qtquickcontrols2plugin",
+            "qtquickcontrols2materialstyleimplplugin",
+            "qtquickcontrols2materialstyleplugin",
+            "qtquickdialogsplugin",
+            "qtquickdialogs2quickimplplugin",
+            "qquicklayoutsplugin",
+            "qtquick2plugin",
+            "qmllocalstorageplugin",
+            "qtquickcontrols2nativestyleplugin",
+            "particlesplugin",
+            "qmlshapesplugin",
+            "qtquicktemplates2plugin",
+            "quicktoolingplugin",
+            "quickwindowplugin",
+        ];
+        let folders = [
+            "plugins/iconengines/",
+            "plugins/imageformats/",
+            "plugins/sqldrivers/",
+            "plugins/platforms/",
+            "qml/Qt/labs/folderlistmodel/",
+            "qml/Qt/labs/settings/",
+            "qml/QtQml/",
+            "qml/QtQml/Models/",
+            "qml/QtQml/WorkerScript/",
+            "qml/QtQml/XmlListModel/",
+            "qml/QtQuick/",
+            "qml/QtQuick/Controls/",
+            "qml/QtQuick/Controls/Basic/",
+            "qml/QtQuick/Controls/Basic/impl/",
+            "qml/QtQuick/Controls/impl/",
+            "qml/QtQuick/Controls/Material/",
+            "qml/QtQuick/Controls/Material/impl/",
+            "qml/QtQuick/Dialogs/",
+            "qml/QtQuick/Dialogs/quickimpl/",
+            "qml/QtQuick/Layouts/",
+            "qml/QtQuick/LocalStorage/",
+            "qml/QtQuick/NativeStyle/",
+            "qml/QtQuick/Particles/",
+            "qml/QtQuick/Shapes/",
+            "qml/QtQuick/Templates/",
+            "qml/QtQuick/tooling/",
+            "qml/QtQuick/Window/",
+        ];
+        for x in folders {
+            println!("cargo:rustc-link-search={}/../{}", qt_library_path, x);
+        }
+        for x in libs {
+            println!("cargo:rustc-link-lib=static:+whole-archive={}", x);
+        }
+    } else if std::env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");
         println!("cargo:rustc-link-lib=xml2");
@@ -134,7 +255,7 @@ fn main() {
             config.include(format!("{}/installed/arm64-android/include", std::env::var("VCPKG_ROOT").unwrap()));
             config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
         },
-        "macos" => {
+        "macos" | "ios" => {
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-lib=static:+whole-archive=x264");
             println!("cargo:rustc-link-lib=static:+whole-archive=x265");
