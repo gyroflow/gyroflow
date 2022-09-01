@@ -8,10 +8,11 @@ ARCH_VCPKG=x64-osx-release
 if [ $(uname -m) = "arm64" ]; then
     ARCH=arm64
     ARCH_VCPKG=arm64-osx
+    export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
 fi
 
 export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-$ARCH
-export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/lib
+export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/lib,$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/lib/manual-link/opencv4_thirdparty
 export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/include/
 
 export PATH="$PROJECT_DIR/ext/6.3.1/macos/bin:$PATH"
