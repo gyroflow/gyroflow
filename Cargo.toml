@@ -37,6 +37,7 @@ flate2 = "1.0.24"
 walkdir = "2.3.2"
 mp4-merge = "0.1.2"
 human-sort = "0.2.2"
+argh = "0.1.8"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}

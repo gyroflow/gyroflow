@@ -135,12 +135,13 @@ MenuItem {
         const list = window.settings.value("lensProfileFavorites") || "";
         let fav = {};
         for (const x of list.split(",")) {
-            fav[x] = 1;
+            if (x)
+                fav[x] = 1;
         }
         favorites = fav;
     }
     function updateFavorites() {
-        window.settings.setValue("lensProfileFavorites", Object.keys(favorites).join(","));
+        window.settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
     SearchField {

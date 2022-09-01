@@ -1213,6 +1213,7 @@ dependencies = [
 name = "gyroflow"
 version = "1.2.0"
 dependencies = [
+ "argh",
  "breakpad-sys",
  "bytemuck",
  "cc",

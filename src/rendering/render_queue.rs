@@ -11,8 +11,8 @@ use std::collections::HashMap;
 use parking_lot::RwLock;
 use regex::Regex;
 
-#[derive(Default, Clone, SimpleListItem)]
-struct RenderQueueItem {
+#[derive(Default, Clone, SimpleListItem, Debug)]
+pub struct RenderQueueItem {
     pub job_id: u32,
     pub input_file: QString,
     pub output_path: QString,
@@ -25,11 +25,14 @@ struct RenderQueueItem {
     pub error_string: QString,
     pub processing_progress: f64,
 
-    status: JobStatus,
+    status: JobStatus
+}
+impl RenderQueueItem {
+    pub fn get_status(&self) -> &JobStatus { &self.status }
 }
 
-#[derive(Default, Clone, PartialEq)]
-enum JobStatus {
+#[derive(Default, Clone, Debug, PartialEq)]
+pub enum JobStatus {
     #[default]
     Queued,
     Rendering,
@@ -44,7 +47,7 @@ struct Job {
     stab: Arc<StabilizationManager<stabilization::RGBA8>>
 }
 
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct RenderOptions {
     pub codec: String,
@@ -123,7 +126,7 @@ impl RenderOptions {
 pub struct RenderQueue {
     base: qt_base_class!(trait QObject),
 
-    queue: qt_property!(RefCell<SimpleListModel<RenderQueueItem>>; NOTIFY queue_changed),
+    pub queue: qt_property!(RefCell<SimpleListModel<RenderQueueItem>>; NOTIFY queue_changed),
     jobs: HashMap<u32, Job>,
 
     add: qt_method!(fn(&mut self, additional_data: String, thumbnail_url: QString) -> u32),
@@ -154,22 +157,23 @@ pub struct RenderQueue {
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
 
-    start_timestamp: qt_property!(u64; NOTIFY progress_changed),
-    end_timestamp: qt_property!(u64; NOTIFY progress_changed),
+    pub start_timestamp: qt_property!(u64; NOTIFY progress_changed),
+    pub end_timestamp: qt_property!(u64; NOTIFY progress_changed),
     current_frame: qt_property!(u64; READ get_current_frame NOTIFY progress_changed),
     total_frames: qt_property!(u64; READ get_total_frames NOTIFY queue_changed),
-    status: qt_property!(QString; NOTIFY status_changed),
+    pub status: qt_property!(QString; NOTIFY status_changed),
 
-    progress_changed: qt_signal!(),
-    queue_changed: qt_signal!(),
-    status_changed: qt_signal!(),
+    pub progress_changed: qt_signal!(),
+    pub queue_changed: qt_signal!(),
+    pub status_changed: qt_signal!(),
 
-    render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool),
-    encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
+    pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool),
+    pub encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
-    convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
-    error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
-    added: qt_signal!(job_id: u32),
+    pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
+    pub error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
+    pub added: qt_signal!(job_id: u32),
+    pub processing_done: qt_signal!(job_id: u32),
 
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
@@ -178,11 +182,13 @@ pub struct RenderQueue {
 
     pause_flag: Arc<AtomicBool>,
 
-    default_suffix: qt_property!(QString),
+    pub default_suffix: qt_property!(QString),
 
     when_done: qt_property!(i32; WRITE set_when_done),
     parallel_renders: qt_property!(i32; WRITE set_parallel_renders),
-    request_close: qt_signal!(),
+    pub request_close: qt_signal!(),
+
+    pub queue_finished: qt_signal!(),
 
     paused_timestamp: Option<u64>,
 
@@ -215,6 +221,11 @@ impl RenderQueue {
             ..Default::default()
         }
     }
+
+    pub fn get_stab_for_job(&self, job_id: u32) -> Option<Arc<StabilizationManager<stabilization::RGBA8>>> {
+        Some(self.jobs.get(&job_id)?.stab.clone())
+    }
+
     pub fn get_total_frames(&self) -> u64 {
         self.queue.borrow().iter().map(|v| v.total_frames).sum()
     }
@@ -270,7 +281,6 @@ impl RenderQueue {
             self.editing_job_id = 0;
             self.queue_changed();
         }
-
 
         if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             if let Some(out) = obj.get("output") {
@@ -419,6 +429,7 @@ impl RenderQueue {
                 } else {
                     if self.get_active_render_count() == 0 {
                         self.post_render_action();
+                        self.queue_finished();
 
                         self.start_timestamp = 0;
                         self.progress_changed();
@@ -490,6 +501,9 @@ impl RenderQueue {
     }
     pub fn get_active_render_count(&self) -> usize {
         self.queue.borrow().iter().filter(|v| v.total_frames > 0 && v.status == JobStatus::Rendering).count()
+    }
+    pub fn get_pending_count(&self) -> usize {
+        self.queue.borrow().iter().filter(|v| v.total_frames > 0 && v.status == JobStatus::Queued).count()
     }
     pub fn set_parallel_renders(&mut self, v: i32) {
         self.parallel_renders = v;
@@ -767,6 +781,9 @@ impl RenderQueue {
                 itm.processing_progress = progress;
             });
         });
+        let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
+            this.processing_done(job_id);
+        });
 
         let suffix = self.default_suffix.to_string();
 
@@ -832,10 +849,12 @@ impl RenderQueue {
                         this.add_internal(job_id, stab2.clone(), render_options, additional_data2.clone(), QString::default());
 
                         if ask_path && std::path::Path::new(&out_path).exists() {
+                            let msg = QString::from(format!("file_exists:{}", out_path));
                             update_model!(this, job_id, itm {
-                                itm.error_string = QString::from(format!("file_exists:{}", out_path));
+                                itm.error_string = msg.clone();
                                 itm.status = JobStatus::Error;
                             });
+                            this.error(job_id, msg, QString::default(), QString::default());
                         }
                     });
                     let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
@@ -906,6 +925,7 @@ impl RenderQueue {
                                             err(("An error occured: %1".to_string(), e.to_string()));
                                         }
                                     }
+                                    processing_done(());
                                 },
                                 Err(e) => {
                                     err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
@@ -968,6 +988,8 @@ impl RenderQueue {
                                 }
 
                                 Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), sync_options);
+
+                                processing_done(());
                             }
                         } else {
                             err(("An error occured: %1".to_string(), "Unable to read the video file.".to_string()));
@@ -1110,6 +1132,9 @@ impl RenderQueue {
                 itm.processing_progress = progress;
             });
         });
+        let processing_done = util::qt_queued_callback_mut(self, |this, job_id: u32| {
+            this.processing_done(job_id);
+        });
         ::log::debug!("new_output_options: {:?}", &new_output_options);
         let data = data.as_bytes();
         let mut q = self.queue.borrow_mut();
@@ -1127,6 +1152,7 @@ impl RenderQueue {
                         }
                     }
                     let job_id = *job_id;
+                    let processing_done = processing_done.clone();
                     core::run_threaded(move || {
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
                             ::log::error!("Failed to update queue stab data: {:?}", e);
@@ -1136,6 +1162,7 @@ impl RenderQueue {
                             (stab.input_file.read().path.clone(), params.duration_ms, params.video_size)
                         };
                         Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
+                        processing_done(job_id);
                     });
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);

@@ -14,6 +14,7 @@ pub mod util;
 pub mod controller;
 pub mod rendering;
 pub mod external_sdk;
+mod cli;
 mod resources;
 #[cfg(not(compiled_qml))]
 mod resources_qml;
@@ -47,6 +48,16 @@ fn entry() {
     let _ = util::install_crash_handler();
     util::init_logging();
 
+    cpp!(unsafe [] {
+        qApp->setOrganizationName("Gyroflow");
+        qApp->setOrganizationDomain("gyroflow.xyz");
+        qApp->setApplicationName("Gyroflow");
+    });
+
+    if cli::run() {
+        return;
+    }
+
     crate::resources::rsrc();
     #[cfg(not(compiled_qml))]
     crate::resources_qml::rsrc_qml();
@@ -55,22 +66,12 @@ fn entry() {
     qml_register_type::<TimelineGyroChart>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineGyroChart"));
     qml_register_type::<TimelineKeyframesView>(cstr::cstr!("Gyroflow"), 1, 0, cstr::cstr!("TimelineKeyframesView"));
 
-    // let _time = std::time::Instant::now();
-    // rendering::set_gpu_type_from_name("Apple M1");
-    // rendering::test();
-    // println!("Done in {:.3}ms", _time.elapsed().as_micros() as f64 / 1000.0);
-    // return;
-
     let icons_path = if ui_live_reload {
         QString::from(format!("{}/resources/icons/", env!("CARGO_MANIFEST_DIR")))
     } else {
         QString::from(":/resources/icons/")
     };
     cpp!(unsafe [icons_path as "QString"] {
-        QGuiApplication::setOrganizationName("Gyroflow");
-        QGuiApplication::setOrganizationDomain("gyroflow.xyz");
-        QGuiApplication::setApplicationName("Gyroflow");
-
         QQuickStyle::setStyle("Material");
         QIcon::setThemeName(QStringLiteral("Gyroflow"));
         QIcon::setThemeSearchPaths(QStringList() << icons_path);
@@ -82,14 +83,14 @@ fn entry() {
     //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
     // }
 
-    if cfg!(target_os = "android") || cfg!(target_os = "ios") {
+    if cfg!(any(target_os = "android", target_os = "ios")) {
         MDKVideoItem::setGlobalOption("MDK_KEY", "B75BC812C266C3E2D967840494C8866773E4E5FC596729F7D9895BFB2DB3B9AE2515F306FBF29BF20290E1093E9A5B5796B778F866F5F631831\
             0431F1E34810348A437EDC2663C1D26987BFB6B37799871E4E984201D0790A0FB349D41DCCEAE15E8C6B790A89ADA30C4B6EB323303B0603B3A2BBF50C294456F377CA8FEF103");
     } else {
         MDKVideoItem::setGlobalOption("MDK_KEY", "47FA7B212D5FF2F649A245E6D8DC2D88BAB67C208282CB3E2DEB95B9B4F9EC575102303FB92448ED49454E027A31B48ED08824EB904B58F693AD\
             B52FA63A4008B80584DE2D5F0D09B65DBA192723D277B8B67447FBF0A4584184E2659155D95CFBEB08626CBE3C94416B2FC50B1FA1201AA7381CE3E85DF3F3BF9BCB59677808");
+        MDKVideoItem::setGlobalOption("plugins", "mdk-braw");
     }
-    MDKVideoItem::setGlobalOption("plugins", "mdk-braw");
 
     let _ = external_sdk::cleanup();
 
