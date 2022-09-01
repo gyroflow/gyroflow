@@ -174,6 +174,7 @@ pub struct RenderQueue {
     pub error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
     pub added: qt_signal!(job_id: u32),
     pub processing_done: qt_signal!(job_id: u32),
+    pub processing_progress: qt_signal!(job_id: u32, progress: f64),
 
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
@@ -780,6 +781,7 @@ impl RenderQueue {
             update_model!(this, job_id, itm {
                 itm.processing_progress = progress;
             });
+            this.processing_progress(job_id, progress);
         });
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
             this.processing_done(job_id);
@@ -1119,7 +1121,7 @@ impl RenderQueue {
         }
     }
 
-    fn apply_to_all(&mut self, data: String, additional_data: String) {
+    pub fn apply_to_all(&mut self, data: String, additional_data: String) {
         ::log::debug!("Applying preset {}", &data);
         let mut new_output_options = None;
         if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
@@ -1131,6 +1133,7 @@ impl RenderQueue {
             update_model!(this, job_id, itm {
                 itm.processing_progress = progress;
             });
+            this.processing_progress(job_id, progress);
         });
         let processing_done = util::qt_queued_callback_mut(self, |this, job_id: u32| {
             this.processing_done(job_id);

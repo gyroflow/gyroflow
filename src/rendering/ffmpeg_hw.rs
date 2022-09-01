@@ -171,8 +171,8 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                             dev.min_size = ((*constraints).min_width as i32, (*constraints).min_height as i32);
                             dev.max_size = ((*constraints).max_width as i32, (*constraints).max_height as i32);
 
-                            dbg!(&dev.hw_formats);
-                            dbg!(&dev.sw_formats);
+                            log::debug!("HW formats: {:?}", &dev.hw_formats);
+                            log::debug!("SW formats: {:?}", &dev.sw_formats);
 
                             ffi::av_hwframe_constraints_free(&mut constraints);
                         }
