@@ -26,7 +26,6 @@ if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     cargo build --target x86_64-apple-darwin --profile deploy
     strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
 
-    export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64
     export OPENCV_LINK_PATHS=$OPENCV_DIR/arm64-osx/lib
     export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/arm64-osx/include/

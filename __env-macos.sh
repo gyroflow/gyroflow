@@ -8,7 +8,6 @@ ARCH_VCPKG=x64-osx-release
 if [ $(uname -m) = "arm64" ]; then
     ARCH=arm64
     ARCH_VCPKG=arm64-osx
-    export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
 fi
 
 export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-$ARCH
