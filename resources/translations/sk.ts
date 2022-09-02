@@ -2343,22 +2343,22 @@ Fronta na renderovanie a aktuálny súbor budú uložené automaticky.</translat
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="263"/>
       <source>You have opened multiple files. What do you want to do?</source>
-      <translation type="unfinished">You have opened multiple files. What do you want to do?</translation>
+      <translation>Otvoril si viacero súborov. Čo s nimi chceš spraviť?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="264"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Pridať do fronty na render</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="268"/>
       <source>Merge them into one video</source>
-      <translation type="unfinished">Merge them into one video</translation>
+      <translation>Spojiť ich do jedného video súboru</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>
       <source>Open the first file</source>
-      <translation type="unfinished">Open the first file</translation>
+      <translation>Otvoriť iba prvé video</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="359"/>

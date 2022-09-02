@@ -2344,22 +2344,22 @@ Your render queue and current file is saved automatically.</source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="263"/>
       <source>You have opened multiple files. What do you want to do?</source>
-      <translation type="unfinished">You have opened multiple files. What do you want to do?</translation>
+      <translation>您已打开多个文件。您想要做什么？</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="264"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>添加到渲染队列</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="268"/>
       <source>Merge them into one video</source>
-      <translation type="unfinished">Merge them into one video</translation>
+      <translation>将它们合并为一个视频</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>
       <source>Open the first file</source>
-      <translation type="unfinished">Open the first file</translation>
+      <translation>打开第一个文件</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="359"/>
