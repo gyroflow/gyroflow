@@ -75,7 +75,15 @@ pub fn run() -> bool {
             .with_key("eta", |state: &ProgressState, w: &mut dyn std::fmt::Write| write!(w, "ETA {:.1}s", state.eta().as_secs_f64()).unwrap())
             .progress_chars("#>-");
 
-        let pbh = m.add(ProgressBar::new(1)); pbh.set_style(ProgressStyle::with_template("{spinner:.green} {msg}:").unwrap()); pbh.set_message("Queue"); pbh.enable_steady_tick(std::time::Duration::from_millis(100));
+        // let spinner = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+        // let spinner = ["◜","◠","◝","◞","◡","◟"];
+        let spinner = [
+            "⢀⠀","⡀⠀","⠄⠀","⢂⠀","⡂⠀","⠅⠀","⢃⠀","⡃⠀","⠍⠀","⢋⠀","⡋⠀","⠍⠁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⢈⠩","⡀⢙","⠄⡙","⢂⠩","⡂⢘","⠅⡘",
+            "⢃⠨","⡃⢐","⠍⡐","⢋⠠","⡋⢀","⠍⡁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⠈⠩","⠀⢙","⠀⡙","⠀⠩","⠀⢘","⠀⡘","⠀⠨","⠀⢐","⠀⡐","⠀⠠","⠀⢀","⠀⡀"
+        ];
+
+        let pbh0 = m.add(ProgressBar::new(1)); pbh0.set_style(ProgressStyle::with_template("{msg}").unwrap()); pbh0.set_message(" ");
+        let pbh = m.add(ProgressBar::new(1)); pbh.set_style(ProgressStyle::with_template("{spinner:.green} {msg}:").unwrap().tick_strings(&spinner)); pbh.set_message("Queue"); pbh.enable_steady_tick(std::time::Duration::from_millis(70));
 
         log::set_max_level(log::LevelFilter::Info);
 
