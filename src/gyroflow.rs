@@ -43,7 +43,12 @@ fn entry() {
     let ui_live_reload = false;
 
     #[cfg(target_os = "windows")]
-    unsafe { windows::Win32::System::Console::AttachConsole(windows::Win32::System::Console::ATTACH_PARENT_PROCESS); }
+    unsafe {
+        use windows::Win32::System::Console::*;
+        if !AttachConsole(ATTACH_PARENT_PROCESS).as_bool() && std::env::args().len() > 1 {
+            AllocConsole();
+        }
+    }
 
     let _ = util::install_crash_handler();
     util::init_logging();

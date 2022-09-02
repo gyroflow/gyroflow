@@ -34,12 +34,7 @@ struct Opts {
     #[argh(option, short = 'j', default = "1")]
     parallel_renders: i32,
 
-    /// when done:
-    /// 1 - shut down;
-    /// 2 - reboot;
-    /// 3 - sleep;
-    /// 4 - hibernate;
-    /// 5 - logout
+    /// when done: 1 - shut down; 2 - reboot; 3 - sleep; 4 - hibernate; 5 - logout
     #[argh(option, short = 'd', default = "0")]
     when_done: i32,
 
@@ -67,7 +62,7 @@ pub fn run() -> bool {
 
         let m = MultiProgress::new();
         m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
-        let sty = ProgressStyle::with_template("{elapsed_precise} [{bar:60.cyan/blue}] {pos:>7}/{len:7} {eta:11} {prefix:.magenta}\x1B[1m{msg}\x1B[0m")
+        let sty = ProgressStyle::with_template("{elapsed_precise} [{bar:50.cyan/blue}] {pos:>7}/{len:7} {eta:11} {prefix:.magenta}\x1B[1m{msg}\x1B[0m")
             .unwrap()
             .with_key("eta", |state: &ProgressState, w: &mut dyn std::fmt::Write| write!(w, "ETA {:.1}s", state.eta().as_secs_f64()).unwrap())
             .progress_chars("#>-");
@@ -200,8 +195,10 @@ pub fn run() -> bool {
 
                 if !lens_profiles.is_empty() {
                     // Apply lens profile
+                    let file = lens_profiles.first().unwrap();
+                    log::info!("Loading lens profile {}", file);
                     let stab = q.get_stab_for_job(*job_id).unwrap();
-                    stab.load_lens_profile(lens_profiles.first().unwrap()).expect("Loading lens profile");
+                    stab.load_lens_profile(file).expect("Loading lens profile");
                     stab.recompute_blocking();
                 }
 
@@ -214,7 +211,10 @@ pub fn run() -> bool {
 
                     // Apply presets
                     for preset in presets.drain(..) {
-                        q.apply_to_all(preset, additional_data.to_string());
+                        if let Ok(data) = std::fs::read_to_string(&preset) {
+                            log::info!("Applying preset {}", preset);
+                            q.apply_to_all(data, additional_data.to_string());
+                        }
                     }
 
                     qmetaobject::single_shot(std::time::Duration::from_millis(500), move || {
@@ -246,7 +246,7 @@ pub fn run() -> bool {
     false
 }
 
-fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>) { // -> Videos/projects, lens profiles, presets(content)
+fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>) { // -> Videos/projects, lens profiles, presets
     let mut videos = Vec::new();
     let mut lens_profiles = Vec::new();
     let mut presets = Vec::new();
@@ -261,9 +261,7 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
             }().unwrap_or_default();
 
             if video_path.is_empty() { // It's a preset
-                if let Ok(data) = std::fs::read_to_string(&file) {
-                    presets.push(data);
-                }
+                presets.push(file.clone());
             } else {
                 videos.push(file.clone());
             }
