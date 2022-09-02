@@ -1138,6 +1138,9 @@ impl RenderQueue {
         let processing_done = util::qt_queued_callback_mut(self, |this, job_id: u32| {
             this.processing_done(job_id);
         });
+        let err = util::qt_queued_callback_mut(self, move |this, (job_id, msg): (u32, String)| {
+            this.error(job_id, QString::from(msg), QString::default(), QString::default());
+        });
         ::log::debug!("new_output_options: {:?}", &new_output_options);
         let data = data.as_bytes();
         let mut q = self.queue.borrow_mut();
@@ -1155,6 +1158,17 @@ impl RenderQueue {
                         }
                     }
                     let job_id = *job_id;
+                    if let Some(ref new_output_options) = new_output_options {
+                        job.render_options.update_from_json(new_output_options);
+                        itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
+                        itm.output_path = QString::from(job.render_options.output_path.as_str());
+                        if std::path::Path::new(&job.render_options.output_path).exists() {
+                            let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
+                            itm.error_string = msg.clone();
+                            itm.status = JobStatus::Error;
+                            err((job_id, msg.to_string()));
+                        }
+                    }
                     let processing_done = processing_done.clone();
                     core::run_threaded(move || {
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
@@ -1167,11 +1181,6 @@ impl RenderQueue {
                         Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
                         processing_done(job_id);
                     });
-                    if let Some(ref new_output_options) = new_output_options {
-                        job.render_options.update_from_json(new_output_options);
-                        itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
-                        itm.output_path = QString::from(job.render_options.output_path.as_str());
-                    }
 
                     q.change_line(job.queue_index, itm);
                 }

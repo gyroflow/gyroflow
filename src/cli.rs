@@ -16,6 +16,11 @@ use indicatif::{ProgressBar, MultiProgress, ProgressState, ProgressStyle};
 cpp! {{
     #include <QCoreApplication>
 }}
+macro_rules! connect {
+    ($obj_ptr:ident, $obj_borrowed:ident, $signal:ident, $cb:expr) => {
+        qmetaobject::connect($obj_ptr, $obj_borrowed.$signal.to_cpp_representation(&*$obj_borrowed), $cb);
+    };
+}
 
 /** Gyroflow v1.2.0
 Video stabilization using gyroscope data
@@ -70,7 +75,7 @@ pub fn run() -> bool {
 
         let m = MultiProgress::new();
         m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
-        let sty = ProgressStyle::with_template("{elapsed_precise} [{bar:50.cyan/blue}] {pos:>7}/{len:7} {eta:11} {prefix:.magenta}\x1B[1m{msg}\x1B[0m")
+        let sty = ProgressStyle::with_template("[{bar:50.cyan/blue}] {pos:>5}/{len:5} {eta:11} {prefix:.magenta}\x1B[37;1m{msg}\x1B[0m")
             .unwrap()
             .with_key("eta", |state: &ProgressState, w: &mut dyn std::fmt::Write| write!(w, "ETA {:.1}s", state.eta().as_secs_f64()).unwrap())
             .progress_chars("#>-");
@@ -83,11 +88,11 @@ pub fn run() -> bool {
         ];
 
         let pbh0 = m.add(ProgressBar::new(1)); pbh0.set_style(ProgressStyle::with_template("{msg}").unwrap()); pbh0.set_message(" ");
-        let pbh = m.add(ProgressBar::new(1)); pbh.set_style(ProgressStyle::with_template("{spinner:.green} {msg}:").unwrap().tick_strings(&spinner)); pbh.set_message("Queue"); pbh.enable_steady_tick(std::time::Duration::from_millis(70));
+        let pbh = m.add(ProgressBar::new(1)); pbh.set_style(ProgressStyle::with_template("{spinner:.green} {msg:73} Elapsed: {elapsed_precise}").unwrap().tick_strings(&spinner)); pbh.set_message("Queue"); pbh.enable_steady_tick(std::time::Duration::from_millis(70));
 
         log::set_max_level(log::LevelFilter::Info);
 
-        let _time = Instant::now();
+        let time = Instant::now();
         let mut queue_printed = false;
 
         let stab = Arc::new(StabilizationManager::<stabilization::RGBA8>::default());
@@ -112,35 +117,27 @@ pub fn run() -> bool {
         let mut jobs_added = HashSet::new();
         let mut pbs = HashMap::<u32, ProgressBar>::new();
 
-        let obj = RefCell::new(queue);
-        let obj_ptr = unsafe { qmetaobject::QObjectPinned::new(&obj).get_or_create_cpp_object() };
+        let queue = RefCell::new(queue);
+        let queue_ptr = unsafe { qmetaobject::QObjectPinned::new(&queue).get_or_create_cpp_object() };
         unsafe {
-            qmetaobject::connect(obj_ptr, obj.borrow().status_changed.to_cpp_representation(&*obj.borrow()), || {
-                let q = &mut *obj.as_ptr();
+            let q = queue.borrow();
+            connect!(queue_ptr, q, status_changed, || {
+                let queue = &mut *queue.as_ptr();
                 // log::info!("Status: {}", q.status.to_string());
 
-                if q.status.to_string() == "stopped" && q.get_pending_count() == 0 && q.get_active_render_count() == 0 {
+                if queue.status.to_string() == "stopped" && queue.get_pending_count() == 0 && queue.get_active_render_count() == 0 {
                     cpp!(unsafe [] { qApp->quit(); });
                 }
             });
-            // qmetaobject::connect(obj_ptr, obj.borrow().progress_changed.to_cpp_representation(&*obj.borrow()), || {
-            //     let q = &mut *obj.as_ptr();
-            //     let c = q.get_current_frame();
-            //     let t = q.get_total_frames();
-            //     println!("\rRendering {:.2}% ({c}/{t})", c as f64 / t as f64 * 100.0);
-            //     std::io::stdout().flush().unwrap();
-            // });
-            qmetaobject::connect(obj_ptr, obj.borrow().render_progress.to_cpp_representation(&*obj.borrow()), |job_id: &u32, _progress: &f64, current_frame: &usize, total_frames: &usize, _finished: &bool| {
-                //let q = obj.borrow();
-
+            connect!(queue_ptr, q, render_progress, |job_id: &u32, _progress: &f64, current_frame: &usize, total_frames: &usize, _finished: &bool| {
                 let pb = pbs.get(job_id).unwrap();
                 if *current_frame >= *total_frames {
                     pb.set_message(format!("\x1B[1;32m{}\x1B[0m", pb.message()));
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
                 } else if *current_frame > 0 && m.is_hidden() {
-                    let q = &mut *obj.as_ptr();
-                    pbh.set_message("Rendering");
-                    let qi = q.queue.borrow();
+                    pbh.set_message("Rendering:");
+                    let queue = &mut *queue.as_ptr();
+                    let qi = queue.queue.borrow();
 
                     if !queue_printed {
                         log::info!("Queue:");
@@ -162,11 +159,11 @@ pub fn run() -> bool {
                 pb.set_length(*total_frames as u64);
                 pb.set_position(*current_frame as u64);
             });
-            qmetaobject::connect(obj_ptr, obj.borrow().processing_progress.to_cpp_representation(&*obj.borrow()), |job_id: &u32, progress: &f64| {
+            connect!(queue_ptr, q, processing_progress, |job_id: &u32, progress: &f64| {
                 let mut any_other_in_progress = false;
                 {
-                    let q = &mut *obj.as_ptr();
-                    let qi = q.queue.borrow();
+                    let queue = &mut *queue.as_ptr();
+                    let qi = queue.queue.borrow();
                     for item in qi.iter() {
                         if item.job_id != *job_id && item.processing_progress > 0.0 && item.processing_progress < 1.0 {
                             any_other_in_progress = true;
@@ -178,7 +175,7 @@ pub fn run() -> bool {
                 if *progress == 1.0 && !m.is_hidden() && !any_other_in_progress {
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
                 } else if *progress > 0.01 && *progress < 1.0 && m.is_hidden() {
-                    pbh.set_message("Synchronizing");
+                    pbh.set_message("Synchronizing:");
                     m.set_draw_target(indicatif::ProgressDrawTarget::stdout());
                 }
 
@@ -188,42 +185,36 @@ pub fn run() -> bool {
                     pb.set_position((*progress * 100.0).round() as u64);
                 }
             });
-            // qmetaobject::connect(obj_ptr, obj.borrow().queue_changed.to_cpp_representation(&*obj.borrow()), || {
-            //     log::info!("Current queue:");
-            //     let q = &mut *obj.as_ptr();
-            //     let qi = q.queue.borrow();
-            //     for item in qi.iter() {
-            //         log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
-            //     }
-            // });
-            qmetaobject::connect(obj_ptr, obj.borrow().convert_format.to_cpp_representation(&*obj.borrow()), |job_id: &u32, format: &QString, supported: &QString| {
+            connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString| {
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
-            qmetaobject::connect(obj_ptr, obj.borrow().error.to_cpp_representation(&*obj.borrow()), |job_id: &u32, text: &QString, arg: &QString, callback: &QString| {
-                if opts.overwrite && text.to_string().starts_with("file_exists") {
-                    let q = &mut *obj.as_ptr();
-                    q.reset_job(*job_id);
+            connect!(queue_ptr, q, error, |job_id: &u32, text: &QString, arg: &QString, _callback: &QString| {
+                if opts.overwrite && text.to_string().starts_with("file_exists:") {
+                    let queue = &mut *queue.as_ptr();
+                    queue.reset_job(*job_id);
+                    log::warn!("[{:08x}] File exists, overwriting: {}", job_id, text.to_string().strip_prefix("file_exists:").unwrap());
+                    return;
                 }
-                log::error!("[{:08x}] Error: {}, callback: {}", job_id, text.to_string().replace("%1", &arg.to_string()), callback.to_string());
+                log::error!("[{:08x}] Error: {}", job_id, text.to_string().replace("%1", &arg.to_string()));
             });
-            qmetaobject::connect(obj_ptr, obj.borrow().added.to_cpp_representation(&*obj.borrow()), |job_id: &u32| {
-                let q = &mut *obj.as_ptr();
-                let fname = std::path::Path::new(&q.get_job_output_path(*job_id).to_string()).file_name().map(|x| x.to_string_lossy().to_string()).unwrap();
+            connect!(queue_ptr, q, added, |job_id: &u32| {
+                let queue = &mut *queue.as_ptr();
+                let fname = std::path::Path::new(&queue.get_job_output_path(*job_id).to_string()).file_name().map(|x| x.to_string_lossy().to_string()).unwrap();
                 //log::info!("[{:08x}] Job added: {}", job_id, q.get_job_output_path(*job_id));
                 let pb = m.add(ProgressBar::new(1));
                 pb.set_style(sty.clone());
                 pb.set_message(fname);
                 pbs.insert(*job_id, pb);
             });
-            qmetaobject::connect(obj_ptr, obj.borrow().processing_done.to_cpp_representation(&*obj.borrow()), |job_id: &u32| {
-                let q = &mut *obj.as_ptr();
+            connect!(queue_ptr, q, processing_done, |job_id: &u32| {
+                let queue = &mut *queue.as_ptr();
                 // log::info!("[{:08x}] Processing done", job_id);
 
                 if !lens_profiles.is_empty() {
                     // Apply lens profile
                     let file = lens_profiles.first().unwrap();
                     log::info!("Loading lens profile {}", file);
-                    let stab = q.get_stab_for_job(*job_id).unwrap();
+                    let stab = queue.get_stab_for_job(*job_id).unwrap();
                     stab.load_lens_profile(file).expect("Loading lens profile");
                     stab.recompute_blocking();
                 }
@@ -239,21 +230,20 @@ pub fn run() -> bool {
                     for preset in presets.drain(..) {
                         if let Ok(data) = std::fs::read_to_string(&preset) {
                             log::info!("Applying preset {}", preset);
-                            q.apply_to_all(data, additional_data.to_string());
+                            queue.apply_to_all(data, additional_data.to_string());
                         }
                     }
 
                     qmetaobject::single_shot(std::time::Duration::from_millis(500), move || {
-                        q.start(); // Start the rendering queue
+                        queue.start(); // Start the rendering queue
                     });
                 }
             });
         }
-
         {
-            let mut q = obj.borrow_mut();
+            let mut queue = queue.borrow_mut();
             for file in &videos {
-                let job_id = q.add_file(file.clone(), additional_data.to_string());
+                let job_id = queue.add_file(file.clone(), additional_data.to_string());
                 jobs_added.insert(job_id);
             }
         }
@@ -264,7 +254,7 @@ pub fn run() -> bool {
             QCoreApplication(argc, nullptr).exec();
         });
 
-        log::info!("Done in {:.3}s", _time.elapsed().as_millis() as f64 / 1000.0);
+        log::info!("Done in {:.3}s", time.elapsed().as_millis() as f64 / 1000.0);
 
         return true;
     }
