@@ -14,7 +14,7 @@ telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git",
 ahrs = { version = "0.5.0", features = ["field_access"] }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "c9ed1dd" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "9231eb0" }
 
 mimalloc = { version = "0.1.29", default-features = false }
 nalgebra = { version = "0.30", features = ["serde-serialize"] }

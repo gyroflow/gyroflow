@@ -117,9 +117,9 @@ checksum = "47253b98986dafc7a3e1cf3259194f1f47ac61abb57a57f46ec09e48d004ecda"
 
 [[package]]
 name = "argmin"
-version = "0.7.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5698c8cd3510117a4e6b96749a8061ba7dce1a19578ce4ecdb12dd36d94a7f8d"
+checksum = "b92d550a445ac6bfbe0cd4c5ce368600ac28fc4f5b712f105a8d18821c99a5bf"
 dependencies = [
  "anyhow",
  "argmin-math",
@@ -133,12 +133,13 @@ dependencies = [
 
 [[package]]
 name = "argmin-math"
-version = "0.2.0"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c25fced4f63dd004343ce1f3f13cd6583bc61df409fa11c6c49cda02e8c64af1"
+checksum = "895db29c12aeeac001553325dc7325b27441dd10b448909e61d38f7cbeec9b89"
 dependencies = [
  "anyhow",
  "cfg-if",
+ "nalgebra",
  "num-complex",
  "num-integer",
  "num-traits 0.2.15",
@@ -1938,7 +1939,7 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=c9ed1dd#c9ed1dde0f09cfbadc0c746c514223a1b8bdc275"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=9231eb0#9231eb071e5b37146f27a9c55a19aef22bd17424"
 dependencies = [
  "argmin",
  "argmin-math",
