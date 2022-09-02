@@ -59,6 +59,14 @@ pub fn run() -> bool {
             log::error!("More than one lens profile!");
             return true;
         }
+        if videos.is_empty() {
+            log::error!("No videos provided!");
+            return true;
+        }
+
+        log::info!("Videos: {:?}", videos);
+        if !lens_profiles.is_empty() { log::info!("Lens profiles: {:?}", lens_profiles); }
+        if !presets.is_empty() { log::info!("Presets: {:?}", presets); }
 
         let m = MultiProgress::new();
         m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
@@ -72,6 +80,7 @@ pub fn run() -> bool {
         log::set_max_level(log::LevelFilter::Info);
 
         let _time = Instant::now();
+        let mut queue_printed = false;
 
         let stab = Arc::new(StabilizationManager::<stabilization::RGBA8>::default());
         stab.lens_profile_db.write().load_all();
@@ -121,9 +130,18 @@ pub fn run() -> bool {
                     pb.set_message(format!("\x1B[1;32m{}\x1B[0m", pb.message()));
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
                 } else if *current_frame > 0 && m.is_hidden() {
-                    pbh.set_message("Rendering");
                     let q = &mut *obj.as_ptr();
+                    pbh.set_message("Rendering");
                     let qi = q.queue.borrow();
+
+                    if !queue_printed {
+                        log::info!("Queue:");
+                        for item in qi.iter() {
+                            log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
+                        }
+                        queue_printed = true;
+                    }
+
                     for item in qi.iter() {
                         if let Some(pb2) = pbs.get(&item.job_id) {
                             pb2.set_position(item.current_frame);
@@ -162,14 +180,14 @@ pub fn run() -> bool {
                     pb.set_position((*progress * 100.0).round() as u64);
                 }
             });
-            qmetaobject::connect(obj_ptr, obj.borrow().queue_changed.to_cpp_representation(&*obj.borrow()), || {
-                log::info!("Current queue:");
-                let q = &mut *obj.as_ptr();
-                let qi = q.queue.borrow();
-                for item in qi.iter() {
-                    log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
-                }
-            });
+            // qmetaobject::connect(obj_ptr, obj.borrow().queue_changed.to_cpp_representation(&*obj.borrow()), || {
+            //     log::info!("Current queue:");
+            //     let q = &mut *obj.as_ptr();
+            //     let qi = q.queue.borrow();
+            //     for item in qi.iter() {
+            //         log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
+            //     }
+            // });
             qmetaobject::connect(obj_ptr, obj.borrow().convert_format.to_cpp_representation(&*obj.borrow()), |job_id: &u32, format: &QString, supported: &QString| {
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
@@ -226,7 +244,7 @@ pub fn run() -> bool {
 
         {
             let mut q = obj.borrow_mut();
-            for file in &opts.input {
+            for file in &videos {
                 let job_id = q.add_file(file.clone(), additional_data.to_string());
                 jobs_added.insert(job_id);
             }
@@ -303,7 +321,13 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serd
     ];
 
     // Default settings - project file will override this
-    stab.set_adaptive_zoom(settings.get("adaptiveZoom").unwrap_or(&"4".into()).parse::<f64>().unwrap());
+
+    match settings.get("croppingMode").unwrap_or(&"1".into()).parse::<u32>() {
+        Ok(0) => stab.set_adaptive_zoom(0.0), // No zooming
+        Ok(1) => stab.set_adaptive_zoom(settings.get("adaptiveZoom").unwrap_or(&"4".into()).parse::<f64>().unwrap()),
+        Ok(2) => stab.set_adaptive_zoom(-1.0), // Static zoom
+        _ => { }
+    }
     stab.set_lens_correction_amount(settings.get("correctionAmount").unwrap_or(&"1".into()).parse::<f64>().unwrap());
     let smoothing_method = settings.get("smoothingMethod").unwrap_or(&"1".into()).parse::<usize>().unwrap();
     let smoothing_method_prefix = format!("smoothing-{}-", smoothing_method);
@@ -313,6 +337,9 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serd
             stab.set_smoothing_param(k.strip_prefix(&smoothing_method_prefix).unwrap(), v.parse::<f64>().unwrap());
         }
     }
+
+    // TODO: set more params from `settings`
+
     if let Some(gdec) = settings.get("gpudecode").and_then(|x| x.parse::<bool>().ok()) {
         *rendering::GPU_DECODING.write() = gdec;
     }

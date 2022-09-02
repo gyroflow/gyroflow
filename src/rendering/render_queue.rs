@@ -870,7 +870,7 @@ impl RenderQueue {
                     core::run_threaded(move || {
                         let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
-                            {
+                            if std::env::args().len() == 1 { // Don't fetch thumbs in the CLI
                                 let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
