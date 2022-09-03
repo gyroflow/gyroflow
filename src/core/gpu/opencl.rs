@@ -202,9 +202,9 @@ impl OclWrapper {
     pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 
-        if self.src.len() != pixels.len()           { crate::d!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
-        if self.dst.len() != out_pixels.len()       { crate::d!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
-        if self.buf_matrices.len() < matrices.len() { crate::d!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
+        if self.src.len() != pixels.len()           { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
+        if self.dst.len() != out_pixels.len()       { log::error!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
+        if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
 
         self.src.write(pixels as &[u8]).enq()?;
 
