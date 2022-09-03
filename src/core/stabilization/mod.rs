@@ -89,7 +89,7 @@ pub struct Stabilization<T: PixelType> {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
-    backend_initialized: bool,
+    backend_initialized: Option<(usize, usize, usize,   usize, usize, usize,   usize, usize)>, // (in_w, in_h, in_s,  out_w, out_h, out_s,  in_bytes, out_bytes)
 
     pub gpu_list: Vec<String>,
 
@@ -132,8 +132,8 @@ impl<T: PixelType> Stabilization<T> {
         self.background = bg;
 
         #[cfg(feature = "use-opencl")]
-        if self.cl  .is_some() { self.backend_initialized = false; }
-        if self.wgpu.is_some() { self.backend_initialized = false; }
+        if self.cl  .is_some() { self.backend_initialized = None; }
+        if self.wgpu.is_some() { self.backend_initialized = None; }
 
         self.size = size;
         self.output_size = output_size;
@@ -168,12 +168,12 @@ impl<T: PixelType> Stabilization<T> {
             #[cfg(feature = "use-opencl")]
             { self.cl = None; }
             self.wgpu = None;
-            self.backend_initialized = true;
+            self.backend_initialized = Some(Default::default());
             return true;
         }
         if let Some(name) = self.gpu_list.get(i as usize) {
             if name.starts_with("[OpenCL]") {
-                self.backend_initialized = false;
+                self.backend_initialized = None;
                 #[cfg(feature = "use-opencl")]
                 match opencl::OclWrapper::set_device(i as usize) {
                     Ok(_) => { return true; },
@@ -182,7 +182,7 @@ impl<T: PixelType> Stabilization<T> {
                     }
                 }
             } else if name.starts_with("[wgpu]") {
-                self.backend_initialized = false;
+                self.backend_initialized = None;
                 let first_ind = self.gpu_list.iter().enumerate().find(|(_, m)| m.starts_with("[wgpu]")).map(|(idx, _)| idx).unwrap_or(0);
                 let wgpu_ind = i - first_ind as isize;
                 if wgpu_ind >= 0 {
@@ -198,8 +198,13 @@ impl<T: PixelType> Stabilization<T> {
         return false;
     }
 
-    pub fn init_backends(&mut self, timestamp_us: i64) {
-        if !self.backend_initialized {
+    pub fn init_backends(&mut self, timestamp_us: i64, size: (usize, usize, usize), output_size: (usize, usize, usize), in_len: usize, out_len: usize) {
+        let tuple = (
+            size.0, size.1, size.2,
+            output_size.0, output_size.1, output_size.2,
+            in_len, out_len
+        );
+        if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != tuple {
             let mut gpu_initialized = false;
             if let Some(itm) = self.stab_data.get(&timestamp_us) {
                 let params = itm.kernel_params;
@@ -207,7 +212,7 @@ impl<T: PixelType> Stabilization<T> {
                 #[cfg(feature = "use-opencl")]
                 if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
                     let cl = std::panic::catch_unwind(|| {
-                        opencl::OclWrapper::new(&params, T::ocl_names(), self.compute_params.distortion_model.opencl_functions())
+                        opencl::OclWrapper::new(&params, T::ocl_names(), self.compute_params.distortion_model.opencl_functions(), size, output_size, in_len, out_len)
                     });
                     match cl {
                         Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; },
@@ -225,7 +230,7 @@ impl<T: PixelType> Stabilization<T> {
                 }
                 if !gpu_initialized && T::wgpu_format().is_some() && std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
                     let wgpu = std::panic::catch_unwind(|| {
-                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), self.compute_params.distortion_model.wgsl_functions())
+                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), self.compute_params.distortion_model.wgsl_functions(), size, output_size, in_len, out_len)
                     });
                     match wgpu {
                         Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); },
@@ -242,7 +247,7 @@ impl<T: PixelType> Stabilization<T> {
                     }
                 }
 
-                self.backend_initialized = true;
+                self.backend_initialized = Some(tuple);
             }
         }
     }
@@ -251,7 +256,7 @@ impl<T: PixelType> Stabilization<T> {
         if self.size != size || self.output_size != output_size || size.1 < 4 || output_size.1 < 4 { return false; }
 
         self.ensure_stab_data_at_timestamp(timestamp_us);
-        self.init_backends(timestamp_us);
+        self.init_backends(timestamp_us, size, output_size, pixels.len(), out_pixels.len());
 
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             self.current_fov = itm.fov;

@@ -87,11 +87,11 @@ macro_rules! wrap_simple_method {
             self.request_recompute();
         }
     };
-    ($name:ident, $($param:ident:$type:ty),*; recompute; $extra_call:ident) => {
+    ($name:ident, $($param:ident:$type:ty),*; recompute$(; $extra_call:ident)*) => {
         fn $name(&mut self, $($param:$type,)*) {
             self.stabilizer.$name($($param,)*);
             self.request_recompute();
-            self.$extra_call();
+            $( self.$extra_call(); )*
         }
     };
 }

@@ -395,6 +395,7 @@ MenuItem {
             onCheckedChanged: {
                 const v = checked? lpf.value : 0;
                 controller.set_imu_lpf(v);
+                Qt.callLater(controller.recompute_gyro);
                 calib.calibrationInfo.gyro_lpf = v;
             }
             NumberField {
@@ -407,6 +408,7 @@ MenuItem {
                 onValueChanged: {
                     const v = lpfcb.checked? value : 0;
                     controller.set_imu_lpf(v);
+                    Qt.callLater(controller.recompute_gyro);
                     calib.calibrationInfo.gyro_lpf = v;
                 }
             }

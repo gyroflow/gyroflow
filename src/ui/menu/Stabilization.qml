@@ -350,7 +350,7 @@ MenuItem {
         CheckBox {
             id: useGravityVectors;
             text: qsTr("Use gravity vectors");
-            checked: true;
+            checked: false;
             visible: controller.has_gravity_vectors;
             onCheckedChanged: Qt.callLater(updateHorizonLock);
         }

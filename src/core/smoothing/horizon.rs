@@ -29,7 +29,6 @@ pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> Unit
 #[derive(Clone)]
 pub struct HorizonLock {
     pub lock_enabled: bool,
-    pub use_gravity_vectors: bool,
     pub horizonlockpercent: f64,
     pub horizonroll: f64,
 }
@@ -37,7 +36,6 @@ pub struct HorizonLock {
 impl Default for HorizonLock {
     fn default() -> Self { Self {
         lock_enabled: false,
-        use_gravity_vectors: true,
         horizonlockpercent: 100.0,
         horizonroll: 0.0,
     } }
@@ -56,13 +54,13 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lock(&self, quats: &TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, _int_method: usize, keyframes: &KeyframeManager) -> TimeQuat {
+    pub fn lock(&self, quats: &TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, keyframes: &KeyframeManager) -> TimeQuat {
         if self.lock_enabled {
             if let Some(gvec) = grav {
-                if !gvec.is_empty() && self.use_gravity_vectors {
+                if !gvec.is_empty() && use_grav {
                     let z_axis = nalgebra::Vector3::<f64>::z_axis();
                     let y_axis = nalgebra::Vector3::<f64>::y_axis();
-                    //let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
+                    // let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
 
                     return quats.iter().map(|(ts, smoothed_ori)| {
                             let gv = Self::interpolate_gravity_vector(&gvec, *ts).unwrap_or(*y_axis);
@@ -70,15 +68,15 @@ impl HorizonLock {
 
                             // Correct for angle difference between original and smoothed orientation
                             let correction = ori.inverse() * smoothed_ori.to_rotation_matrix();
-                            let angle_corr = (-correction[(0,1)]).simd_atan2(correction[(0,0)]);
+                            let angle_corr = (-correction[(0, 1)]).simd_atan2(correction[(0, 0)]);
 
                             let timestamp_ms = *ts as f64 / 1000.0;
                             let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll);
                             let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
-                            //let gv_corrected = corr.inverse() * correction * corr * gv; // Alternative matrix approach
-                            //let locked_ori =  smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, gv_corrected[0].simd_atan2(gv_corrected[1]) + horizonroll * std::f64::consts::PI / 180.0);
-                            let locked_ori =  smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, -angle_corr + gv[0].simd_atan2(gv[1]) + horizonroll * std::f64::consts::PI / 180.0);
+                            // let gv_corrected = corr.inverse() * correction * corr * gv; // Alternative matrix approach
+                            // let locked_ori = smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, gv_corrected[0].simd_atan2(gv_corrected[1]) + horizonroll * std::f64::consts::PI / 180.0);
+                            let locked_ori = smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, -angle_corr + gv[0].simd_atan2(gv[1]) + horizonroll * std::f64::consts::PI / 180.0);
                             (*ts, UnitQuaternion::from_rotation_matrix(&locked_ori).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0))
                         }).collect();
                 }

@@ -18,8 +18,6 @@ MenuItem {
     property alias orientationIndicator: orientationIndicator;
     property string filename: "";
 
-    property var pendingOffsets: ({});
-
     FileDialog {
         id: fileDialog;
         property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d" ];
@@ -30,7 +28,6 @@ MenuItem {
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url: url) {
-        root.pendingOffsets = { };
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -44,10 +41,6 @@ MenuItem {
     function loadGyroflow(obj) {
         const gyro = obj.gyro_source || { };
         if (gyro && Object.keys(gyro).length > 0) {
-            if (gyro.filepath && (gyro.filepath != obj.videofile) && controller.file_exists(gyro.filepath)) {
-                loadFile(controller.path_to_url(gyro.filepath));
-                root.pendingOffsets = obj.offsets; // because loading gyro data will clear offsets
-            }
             if (gyro.rotation && gyro.rotation.length == 3) {
                 p.value = gyro.rotation[0];
                 r.value = gyro.rotation[1];
@@ -89,24 +82,16 @@ MenuItem {
             integrator.hasQuaternions = !contains_quats;
             integrator.hasQuaternions = contains_quats;
             if (contains_quats && !is_main_video) {
-                Qt.callLater(() => {
-                    integrator.currentIndex = 1;
-                    Qt.callLater(integrator.setMethod);
-                });
+                integrator.currentIndex = 1;
+                integrateTimer.start();
             }
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
+            Qt.callLater(controller.recompute_gyro);
 
             window.videoArea.timeline.updateDurations();
-
-            if (root.pendingOffsets) {
-                for (const ts in root.pendingOffsets) {
-                    controller.set_offset(ts, root.pendingOffsets[ts]);
-                }
-                root.pendingOffsets = {};
-            }
         }
         function onBias_estimated(biasX: real, biasY: real, biasZ: real) {
             gyrobias.checked = true;
@@ -141,7 +126,10 @@ MenuItem {
     CheckBoxWithContent {
         id: lpfcb;
         text: qsTr("Low pass filter");
-        onCheckedChanged: controller.set_imu_lpf(checked? lpf.value : 0);
+        onCheckedChanged: {
+            controller.set_imu_lpf(checked? lpf.value : 0);
+            Qt.callLater(controller.recompute_gyro);
+        }
 
         NumberField {
             id: lpf;
@@ -153,6 +141,7 @@ MenuItem {
             tooltip: qsTr("Lower cutoff frequency means more filtering");
             onValueChanged: {
                 controller.set_imu_lpf(lpfcb.checked? value : 0);
+                Qt.callLater(controller.recompute_gyro);
             }
         }
     }
@@ -165,6 +154,7 @@ MenuItem {
             onCheckedChanged: update_rotation();
             function update_rotation() {
                 controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
+                Qt.callLater(controller.recompute_gyro);
             }
 
             Flow {
@@ -241,6 +231,7 @@ MenuItem {
         onCheckedChanged: update_rotation();
         function update_rotation() {
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
+            Qt.callLater(controller.recompute_gyro);
         }
 
         Flow {
@@ -277,7 +268,8 @@ MenuItem {
         text: qsTr("Gyro bias");
         onCheckedChanged: update_bias();
         function update_bias() {
-            Qt.callLater(controller.set_imu_bias, gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0);
+            controller.set_imu_bias(gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0);
+            Qt.callLater(controller.recompute_gyro);
         }
 
         Flow {
@@ -319,7 +311,7 @@ MenuItem {
             text: "XYZ";
             validator: RegularExpressionValidator { regularExpression: /[XYZxyz]{3}/; }
             tooltip: qsTr("Uppercase is positive, lowercase is negative. eg. zYX");
-            onTextChanged: if (acceptableInput) controller.set_imu_orientation(text);
+            onTextChanged: if (acceptableInput) { controller.set_imu_orientation(text); Qt.callLater(controller.recompute_gyro); }
         }
     }
     Label {
@@ -336,8 +328,13 @@ MenuItem {
             function setMethod() {
                 controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
             }
-            onCurrentIndexChanged: Qt.callLater(integrator.setMethod);
-            onHasQuaternionsChanged: Qt.callLater(integrator.setMethod);
+            onCurrentIndexChanged: integrateTimer.start();
+            onHasQuaternionsChanged: integrateTimer.start();
+            Timer {
+                id: integrateTimer;
+                interval: 300;
+                onTriggered: Qt.callLater(integrator.setMethod);
+            }
         }
     }
 

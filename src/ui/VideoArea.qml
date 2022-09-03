@@ -40,18 +40,46 @@ Item {
     function loadGyroflowData(obj) {
         root.pendingGyroflowData = null;
 
+        if (controller.loading_gyro_in_progress) {
+            root.pendingGyroflowData = obj;
+            controller.cancel_current_operation();
+            // we'll get called again from telemetry_loaded
+            return;
+        }
+
+        let paths = null;
+
+        if (obj.toString().startsWith("file")) { // obj is url
+            paths = controller.get_paths_from_gyroflow_file(obj);
+        } else {
+            paths = [
+                obj.videofile,
+                obj.gyro_source?.filepath || ""
+            ];
+        }
+
+        const isCorrectVideoLoaded = paths[0] && vidInfo.filename == Util.getFilename(paths[0]);
+        const isCorrectGyroLoaded  = paths[1] && window.motionData.filename == Util.getFilename(paths[1]);
+        console.log("Video path:", paths[0], "(" + (isCorrectVideoLoaded? "loaded" : "not loaded") + ")", "Gyro path:", paths[1], "(" + (isCorrectGyroLoaded? "loaded" : "not loaded") + ")");
+
+        if (!isCorrectVideoLoaded) {
+            root.pendingGyroflowData = obj;
+            console.log("Loading video file", paths[0]);
+            loadFile(controller.path_to_url(paths[0]), false);
+            if (controller.image_sequence_fps > 0) {
+                vid.setFrameRate(controller.image_sequence_fps);
+            }
+            return;
+        }
+        if (!isCorrectGyroLoaded && controller.file_exists(paths[1])) {
+            root.pendingGyroflowData = obj;
+            console.log("Loading gyro file", paths[1]);
+            controller.load_telemetry(controller.path_to_url(paths[1]), paths[0] == paths[1], window.videoArea.vid, window.videoArea.timeline.getChart(), window.videoArea.timeline.getKeyframesView());
+            return;
+        }
+
         if (obj.toString().startsWith("file")) {
             // obj is url
-            const videofile = controller.get_videopath_from_gyroflow_file(obj);
-            if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
-                // If video not loaded, try to load the associated file
-                root.pendingGyroflowData = obj;
-                loadFile(controller.path_to_url(videofile), false);
-                if (controller.image_sequence_fps > 0) {
-                    vid.setFrameRate(controller.image_sequence_fps);
-                }
-                return;
-            }
             controller.import_gyroflow_file(obj);
         } else {
             controller.import_gyroflow_data(JSON.stringify(obj));
@@ -61,15 +89,6 @@ Item {
         target: controller;
         function onGyroflow_file_loaded(obj) {
             if (obj && +obj.version > 0) {
-                const videofile = obj.videofile;
-                if (videofile && (!vidInfo.filename || vidInfo.filename != Util.getFilename(videofile))) {
-                    // If video not loaded, try to load the associated file
-                    root.pendingGyroflowData = obj;
-                    const editing_id = render_queue.editing_job_id;
-                    loadFile(controller.path_to_url(videofile), false);
-                    render_queue.editing_job_id = editing_id;
-                    return;
-                }
                 const info = obj.video_info || { };
                 if (info && Object.keys(info).length > 0) {
                     if (info.hasOwnProperty("vfr_fps") && Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
@@ -367,9 +386,10 @@ Item {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
             }
             if (root.pendingGyroflowData) {
-                loadGyroflowData(root.pendingGyroflowData);
+                Qt.callLater(loadGyroflowData, root.pendingGyroflowData);
+            } else {
+                Qt.callLater(controller.recompute_threaded);
             }
-            Qt.callLater(controller.recompute_threaded);
         }
         function onChart_data_changed() {
             chartUpdateTimer.start();
@@ -453,7 +473,14 @@ Item {
                     vidInfo.loader = false;
                     timeline.resetTrim();
 
-                    controller.load_telemetry(vid.url, true, vid, timeline.getChart(), timeline.getKeyframesView());
+                    controller.video_file_loaded(vid.url, vid);
+                    window.motionData.filename = "";
+
+                    if (root.pendingGyroflowData) {
+                        Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData);
+                    } else {
+                        controller.load_telemetry(vid.url, true, vid, timeline.getChart(), timeline.getKeyframesView());
+                    }
                     vidInfo.loadFromVideoMetadata(md);
                     window.sync.customSyncTimestamps = [];
                     // for (var i in md) console.info(i, md[i]);
@@ -589,8 +616,9 @@ Item {
             onCancel: {
                 if (render_queue.main_job_id > 0) {
                     render_queue.cancel_job(render_queue.main_job_id);
+                } else {
+                    controller.cancel_current_operation();
                 }
-                controller.cancel_current_operation();
             }
             onHide: {
                 render_queue.main_job_id = 0;

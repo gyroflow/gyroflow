@@ -601,30 +601,27 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn set_imu_lpf(&self, lpf: f64) {
-        self.gyro.write().set_lowpass_filter(lpf);
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        self.gyro.write().imu_lpf = lpf;
     }
     pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.gyro.write().set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        self.gyro.write().imu_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
     }
     pub fn set_acc_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.gyro.write().set_acc_rotation(pitch_deg, roll_deg, yaw_deg);
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        self.gyro.write().acc_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
     }
     pub fn set_imu_orientation(&self, orientation: String) {
-        let mut gyro = self.gyro.write();
-        let mut smoothing = self.smoothing.write();
-        gyro.set_imu_orientation(orientation);
-        smoothing.update_quats_checksum(&gyro.quaternions);
+        self.gyro.write().imu_orientation = Some(orientation);
+    }
+    pub fn set_imu_bias(&self, bx: f64, by: f64, bz: f64) {
+        self.gyro.write().gyro_bias = Some([bx, by, bz]);
+    }
+    pub fn recompute_gyro(&self) {
+        self.gyro.write().apply_transforms();
+        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
         self.pose_estimator.lowpass_filter(lpf, params.fps);
-    }
-    pub fn set_imu_bias(&self, bx: f64, by: f64, bz: f64) {
-        self.gyro.write().set_bias(bx, by, bz);
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
     }
 
     pub fn set_lens_param(&self, param: &str, value: f64) {
@@ -677,7 +674,6 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_smoothing();
     }
     pub fn set_use_gravity_vectors(&self, v: bool) {
-        self.smoothing.write().horizon_lock.use_gravity_vectors = v;
         self.gyro.write().set_use_gravity_vectors(v);
         self.invalidate_smoothing();
     }
@@ -765,7 +761,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
-        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll, use_gravity_vectors) = {
+        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll) = {
             let smoothing_lock = self.smoothing.read();
             let smoothing = smoothing_lock.current();
 
@@ -785,7 +781,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 horizon_amount = 0.0;
             }
 
-            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll, smoothing_lock.horizon_lock.use_gravity_vectors)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll)
         };
 
         let input_file = self.input_file.read().clone();
@@ -827,7 +823,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
-                "use_gravity_vectors":    use_gravity_vectors,
+                "use_gravity_vectors":    gyro.use_gravity_vectors,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,
@@ -997,12 +993,12 @@ impl<T: PixelType> StabilizationManager<T> {
 
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
-                    } else if gyro_path.exists() {
+                    } else if gyro_path.exists() && blocking {
                         if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
-                } else if gyro_path.exists() {
+                } else if gyro_path.exists() && blocking {
                     if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
@@ -1015,6 +1011,7 @@ impl<T: PixelType> StabilizationManager<T> {
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
+                if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_orientation = Some(v.to_string()); }
                 if let Some(v) = obj.get("rotation")     { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("acc_rotation") { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
@@ -1067,7 +1064,6 @@ impl<T: PixelType> StabilizationManager<T> {
                     }
                 }
                 if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
-                    smoothing.horizon_lock.use_gravity_vectors = v;
                     self.gyro.write().set_use_gravity_vectors(v);
                 }
 
@@ -1130,12 +1126,7 @@ impl<T: PixelType> StabilizationManager<T> {
             }
 
             if blocking {
-                {
-                    let mut gyro = self.gyro.write();
-                    gyro.apply_transforms();
-                    gyro.integrate();
-                    self.smoothing.write().update_quats_checksum(&gyro.quaternions);
-                }
+                self.recompute_gyro();
 
                 if let Some(output_size) = output_size {
                     if output_size.0 > 0 && output_size.1 > 0 {

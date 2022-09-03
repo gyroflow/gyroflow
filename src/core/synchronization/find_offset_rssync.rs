@@ -162,7 +162,8 @@ impl FindOffsetsRssync<'_> {
         ];
 
         possible_orientations.iter().map(|orient| {
-            clone_source.set_imu_orientation(orient.to_string());
+            clone_source.imu_orientation = Some(orient.to_string());
+            clone_source.apply_transforms();
 
             set_quats(&mut self.sync, &clone_source.quaternions);
 

@@ -135,7 +135,7 @@ impl OclWrapper {
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str, _size: (usize, usize, usize), _output_size: (usize, usize, usize), in_len: usize, out_len: usize) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
 
         let context_initialized = CONTEXT.read().is_some();
@@ -162,10 +162,10 @@ impl OclWrapper {
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 
-            let source_buffer = Buffer::builder().queue(queue.clone()).len(params.stride*params.height)
+            let source_buffer = Buffer::builder().queue(queue.clone()).len(in_len)
                 .flags(MemFlags::new().read_only().host_write_only()).build()?;
 
-            let dest_buffer = Buffer::builder().queue(queue.clone()).len(params.output_stride*params.output_height)
+            let dest_buffer = Buffer::builder().queue(queue.clone()).len(out_len)
                 .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
 
             let buf_params = Buffer::builder().queue(queue.clone()).len(std::mem::size_of::<KernelParams>())
@@ -202,9 +202,9 @@ impl OclWrapper {
     pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 
-        if self.src.len() != pixels.len()           { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
-        if self.dst.len() != out_pixels.len()       { log::error!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
-        if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
+        if self.src.len() != pixels.len()           { crate::d!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
+        if self.dst.len() != out_pixels.len()       { crate::d!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
+        if self.buf_matrices.len() < matrices.len() { crate::d!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
 
         self.src.write(pixels as &[u8]).enq()?;
 

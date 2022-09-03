@@ -68,7 +68,7 @@ pub struct GyroSource {
     pub image_orientations: TimeQuat,
 
     pub gravity_vectors: Option<TimeVec>,
-    use_gravity_vectors: bool, // copy from HorizonLock struct
+    pub use_gravity_vectors: bool,
 
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
@@ -84,12 +84,12 @@ impl GyroSource {
     pub fn new() -> Self {
         Self {
             integration_method: 1,
-            use_gravity_vectors: true,
+            use_gravity_vectors: false,
             ..Default::default()
         }
     }
     pub fn set_use_gravity_vectors(&mut self, v: bool) {
-        if self.use_gravity_vectors != v && self.gravity_vectors.is_some() {
+        if self.use_gravity_vectors != v {
             self.use_gravity_vectors = v;
             self.integrate();
         }
@@ -259,7 +259,7 @@ impl GyroSource {
         if let Some(ioris) = &telemetry.image_orientations {
             self.image_orientations = ioris.clone();
         }
-        if !self.quaternions.is_empty() {
+        if !self.org_quaternions.is_empty() {
             self.integration_method = 0;
         }
 
@@ -293,12 +293,12 @@ impl GyroSource {
     pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
         if true {
             // Lock horizon, then smooth
-            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.integration_method, keyframes);
+            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes);
             self.smoothed_quaternions = alg.smooth(&self.smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
         } else {
             // Smooth, then lock horizon
             self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
-            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.integration_method, keyframes);
+            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes);
         }
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
@@ -343,47 +343,6 @@ impl GyroSource {
         self.offsets_adjusted = self.offsets.iter().map(|(k, v)| (*k + (*v * 1000.0).round() as i64, *v)).collect::<BTreeMap<i64, f64>>();
     }
 
-    pub fn set_lowpass_filter(&mut self, freq: f64) {
-        self.imu_lpf = freq;
-        self.apply_transforms();
-    }
-    pub fn set_imu_orientation(&mut self, orientation: String) {
-        self.imu_orientation = Some(orientation);
-        self.apply_transforms();
-    }
-    pub fn set_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.imu_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-        if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
-            self.imu_rotation = Some(Rotation3::from_euler_angles(
-                yaw_deg * DEG2RAD,
-                pitch_deg * DEG2RAD,
-                roll_deg * DEG2RAD
-            ));
-        } else {
-            self.imu_rotation = None;
-        }
-        self.apply_transforms();
-    }
-    pub fn set_acc_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.acc_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
-        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-        if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
-            self.acc_rotation = Some(Rotation3::from_euler_angles(
-                yaw_deg * DEG2RAD,
-                pitch_deg * DEG2RAD,
-                roll_deg * DEG2RAD
-            ));
-        } else {
-            self.acc_rotation = None;
-        }
-        self.apply_transforms();
-    }
-    pub fn set_bias(&mut self, bx: f64, by: f64, bz: f64) {
-        self.gyro_bias = Some([bx, by, bz]);
-        self.apply_transforms();
-    }
-
     pub fn apply_transforms(&mut self) {
         self.raw_imu = self.org_raw_imu.clone();
         if self.imu_lpf > 0.0 && !self.org_raw_imu.is_empty() && self.duration_ms > 0.0 {
@@ -423,6 +382,29 @@ impl GyroSource {
             }
         }
         // Rotate
+        const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
+        if let Some([pitch_deg, roll_deg, yaw_deg]) = self.imu_rotation_angles {
+            if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
+                self.imu_rotation = Some(Rotation3::from_euler_angles(
+                    yaw_deg * DEG2RAD,
+                    pitch_deg * DEG2RAD,
+                    roll_deg * DEG2RAD
+                ));
+            } else {
+                self.imu_rotation = None;
+            }
+        }
+        if let Some([pitch_deg, roll_deg, yaw_deg]) = self.acc_rotation_angles {
+            if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
+                self.acc_rotation = Some(Rotation3::from_euler_angles(
+                    yaw_deg * DEG2RAD,
+                    pitch_deg * DEG2RAD,
+                    roll_deg * DEG2RAD
+                ));
+            } else {
+                self.acc_rotation = None;
+            }
+        }
         if self.imu_rotation.is_some() || self.acc_rotation.is_some() {
             let rotate = |inp: &[f64; 3], rot: Rotation3<f64>| -> [f64; 3] {
                 let rotated = rot.transform_vector(&Vector3::new(inp[0], inp[1], inp[2]));
@@ -505,6 +487,7 @@ impl GyroSource {
             offsets:              self.offsets.clone(),
             offsets_adjusted:     self.offsets_adjusted.clone(),
             gravity_vectors:      self.gravity_vectors.clone(),
+            use_gravity_vectors:  self.use_gravity_vectors,
             integration_method:   self.integration_method,
             ..Default::default()
         }

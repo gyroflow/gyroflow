@@ -48,6 +48,7 @@ pub struct Controller {
     init_player: qt_method!(fn(&self, player: QJSValue)),
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
+    video_file_loaded: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: String)),
     load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
@@ -98,6 +99,7 @@ pub struct Controller {
     set_acc_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
     set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
+    recompute_gyro: qt_method!(fn(&self)),
 
     override_video_fps: qt_method!(fn(&self, fps: f64)),
     get_org_duration_ms: qt_method!(fn(&self) -> f64),
@@ -175,7 +177,7 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    get_videopath_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QString),
+    get_paths_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QStringList),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
@@ -441,7 +443,7 @@ impl Controller {
     }
 
     fn get_optimal_sync_points(&mut self, target_sync_points: usize) -> QString {
-        let dur_ms = self.stabilizer.params.read().duration_ms;
+        let dur_ms = self.stabilizer.params.read().get_scaled_duration_ms();
         let trim_start = self.stabilizer.params.read().trim_start * dur_ms / 1000.0;
         let trim_end = self.stabilizer.params.read().trim_end * dur_ms / 1000.0;
         if let Some(mut optsync) = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read()) {
@@ -480,6 +482,27 @@ impl Controller {
             this.offsets_updated();
             this.chart_data_changed();
         })(());
+    }
+
+    fn video_file_loaded(&mut self, url: QUrl, player: QJSValue) {
+        let s = util::url_to_path(url);
+        let stab = self.stabilizer.clone();
+
+        if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
+            let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
+            let duration_ms = vid.duration;
+            let fps = vid.frameRate;
+            let frame_count = vid.frameCount as usize;
+            let video_size = (vid.videoWidth as usize, vid.videoHeight as usize);
+
+            self.set_preview_resolution(self.preview_resolution, player);
+
+            if duration_ms > 0.0 && fps > 0.0 {
+                if let Ok(_) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
+                    stab.set_output_size(video_size.0, video_size.1);
+                }
+            }
+        }
     }
 
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue) {
@@ -580,9 +603,9 @@ impl Controller {
                     let gyro = stab.gyro.read();
                     let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
                     let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or_else(|| "XYZ".into());
-                    let has_gyro = !gyro.quaternions.is_empty();
-                    let has_raw_gyro = !gyro.raw_imu.is_empty();
+                    let has_raw_gyro = !gyro.org_raw_imu.is_empty();
                     let has_quats = !gyro.org_quaternions.is_empty();
+                    let has_gyro = has_raw_gyro || has_quats;
                     let sample_rate = gyro.get_sample_rate();
                     drop(gyro);
 
@@ -664,6 +687,11 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
+
+        if stab.gyro.read().integration_method == index {
+            return;
+        }
+
         core::run_threaded(move || {
             {
                 stab.invalidate_ongoing_computations();
@@ -831,7 +859,8 @@ impl Controller {
         QString::from(self.stabilizer.export_gyroflow_data(thin, extended, additional_data.to_json().to_string()).unwrap_or_default())
     }
 
-    fn get_videopath_from_gyroflow_file(&mut self, url: QUrl) -> QString {
+    fn get_paths_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
+        let mut ret = vec![QString::default(); 2];
         let path = util::url_to_path(url);
         if let Ok(data) = std::fs::read(&path) {
             let path = std::path::Path::new(&path).to_path_buf();
@@ -845,12 +874,22 @@ impl Controller {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     self.image_sequence_fps = seq_fps;
                 }
+                if !org_video_path.is_empty() {
+                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path.clone()));
+                    ret[0] = QString::from(core::util::path_to_str(&video_path));
+                }
 
-                let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path));
-                return QString::from(core::util::path_to_str(&video_path));
+                if let Some(serde_json::Value::Object(gyro)) = obj.get("gyro_source") {
+                    let gyro_path = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
+
+                    if !gyro_path.is_empty() {
+                        let gyro_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&gyro_path, Some(path));
+                        ret[1] = QString::from(core::util::path_to_str(&gyro_path));
+                    }
+                }
             }
         }
-        QString::default()
+        QStringList::from_iter(ret.into_iter())
     }
     fn import_gyroflow_file(&mut self, url: QUrl) {
         let path = util::url_to_path(url);
@@ -969,6 +1008,7 @@ impl Controller {
     wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
+    wrap_simple_method!(recompute_gyro,; recompute; chart_data_changed);
 
     fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }

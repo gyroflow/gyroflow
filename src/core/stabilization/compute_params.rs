@@ -117,3 +117,52 @@ impl ComputeParams {
         }
     }
 }
+
+impl std::fmt::Debug for ComputeParams {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ComputeParams")
+         .field("gyro.imu_orientation", &self.gyro.imu_orientation)
+         .field("gyro.imu_rotation", &self.gyro.imu_rotation_angles)
+         .field("gyro.acc_rotation", &self.gyro.acc_rotation_angles)
+         .field("gyro.duration_ms", &self.gyro.duration_ms)
+         .field("gyro.fps", &self.gyro.fps)
+         .field("gyro.imu_lpf", &self.gyro.imu_lpf)
+         .field("gyro.gyro_bias", &self.gyro.gyro_bias)
+         .field("gyro.integration_method", &self.gyro.integration_method)
+         .field("fovs.len", &self.fovs.len())
+         .field("keyframed", &self.keyframes.get_all_keys())
+
+         .field("frame_count",          &self.frame_count)
+         .field("fov_scale",            &self.fov_scale)
+         .field("lens_fov_adjustment",  &self.lens_fov_adjustment)
+         .field("width",                &self.width)
+         .field("height",               &self.height)
+         .field("output_width",         &self.output_width)
+         .field("output_height",        &self.output_height)
+         .field("video_output_width",   &self.video_output_width)
+         .field("video_output_height",  &self.video_output_height)
+         .field("video_width",          &self.video_width)
+         .field("video_height",         &self.video_height)
+         .field("video_rotation",       &self.video_rotation)
+         .field("camera_matrix",        &self.camera_matrix)
+         .field("distortion_coeffs",    &self.distortion_coeffs)
+         .field("radial_distortion_limit",   &self.radial_distortion_limit)
+         .field("lens_correction_amount",    &self.lens_correction_amount)
+         .field("background_mode",           &self.background_mode)
+         .field("background_margin",         &self.background_margin)
+         .field("background_margin_feather", &self.background_margin_feather)
+         .field("frame_readout_time",        &self.frame_readout_time)
+         .field("trim_start",                &self.trim_start)
+         .field("trim_end",                  &self.trim_end)
+         .field("scaled_fps",                &self.scaled_fps)
+         .field("input_horizontal_stretch",  &self.input_horizontal_stretch)
+         .field("input_vertical_stretch",    &self.input_vertical_stretch)
+         .field("adaptive_zoom_window",      &self.adaptive_zoom_window)
+         .field("adaptive_zoom_center_offset", &self.adaptive_zoom_center_offset)
+         .field("is_superview",              &self.is_superview)
+         .field("framebuffer_inverted",      &self.framebuffer_inverted)
+         .field("zooming_debug_points",      &self.zooming_debug_points)
+         .field("distortion_model",          &self.distortion_model.id())
+         .finish()
+    }
+}
