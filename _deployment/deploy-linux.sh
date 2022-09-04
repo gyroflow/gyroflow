@@ -5,6 +5,7 @@
 : "${QT_DIR:=$PROJECT_DIR/ext/6.3.1/gcc_64}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-5.1-linux-clang-gpl-lite}"
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
+: "${VULKAN_SDK:=$PROJECT_DIR/VULKAN_SDK}"
 
 if [ "$1" == "build-docker" ]; then
     sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -v $HOME/.cargo:/root/.cargo debian:10 bash -c "
@@ -18,6 +19,7 @@ if [ "$1" == "build-docker" ]; then
         curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
         source \$HOME/.cargo/env
         export FFMPEG_DIR=$FFMPEG_DIR
+        export VULKAN_SDK=$VULKAN_SDK
         export GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER
         export OPENCV_LINK_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/lib
         export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
