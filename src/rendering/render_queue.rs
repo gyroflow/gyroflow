@@ -191,6 +191,8 @@ pub struct RenderQueue {
 
     pub queue_finished: qt_signal!(),
 
+    pub export_project: u32,
+
     paused_timestamp: Option<u64>,
 
     stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>,
@@ -702,6 +704,29 @@ impl RenderQueue {
             job.cancel_flag.store(false, SeqCst);
             let cancel_flag = job.cancel_flag.clone();
             let pause_flag = self.pause_flag.clone();
+
+            if self.export_project > 0 {
+                let mut additional_data = job.additional_data.clone();
+                if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+                    if let Ok(output) = serde_json::to_value(&job.render_options) {
+                        obj.insert("output".into(), output);
+                    }
+                    additional_data = serde_json::to_string(&obj).unwrap_or_default();
+                }
+                let path = std::path::Path::new(&render_options.output_path.replace(&self.default_suffix.to_string(), "")).with_extension("gyroflow");
+                let result = match self.export_project {
+                    1 => job.stab.export_gyroflow_file(&path, true, false, additional_data),
+                    2 => job.stab.export_gyroflow_file(&path, false, false, additional_data),
+                    3 => job.stab.export_gyroflow_file(&path, false, true, additional_data),
+                    _ => { Err(std::io::Error::new(std::io::ErrorKind::Other, "Unknown option")) }
+                };
+                if let Err(e) = result {
+                    err((e.to_string(), String::new()));
+                } else {
+                    progress((1.0, 1, 1, true));
+                }
+                return;
+            }
 
             core::run_threaded(move || {
                 let mut i = 0;

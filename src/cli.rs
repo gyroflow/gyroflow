@@ -46,6 +46,14 @@ struct Opts {
     /// output parameters, eg. "{{ 'codec': 'H.265/HEVC', 'bitrate': 150, 'use_gpu': true, 'audio': true }}"
     #[argh(option, short = 'p')]
     out_params: Option<String>,
+
+    /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data
+    #[argh(option, default = "0")]
+    export_project: u32,
+
+    /// preset content directly (instead of a file), eg. "{{ 'version': 2, 'stabilization': {{ 'fov': 1.5 }} }}"
+    #[argh(option)]
+    preset: Option<String>,
 }
 
 pub fn run() -> bool {
@@ -53,6 +61,11 @@ pub fn run() -> bool {
         let opts: Opts = argh::from_env();
 
         let (videos, mut lens_profiles, mut presets) = detect_types(&opts.input);
+        if let Some(preset) = opts.preset {
+            if !preset.is_empty() {
+                presets.push(preset.clone());
+            }
+        }
 
         for file in videos.iter().chain(lens_profiles.iter()) {
             if !std::path::Path::new(&file).exists() {
@@ -113,6 +126,10 @@ pub fn run() -> bool {
 
         queue.set_parallel_renders(opts.parallel_renders.max(1));
         queue.set_when_done(opts.when_done);
+
+        if opts.export_project > 0 {
+            queue.export_project = opts.export_project;
+        }
 
         let mut jobs_added = HashSet::new();
         let mut pbs = HashMap::<u32, ProgressBar>::new();
@@ -354,7 +371,7 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serd
             // "output_width":   3840,
             // "output_height":  2160,
             // "bitrate":        150,
-            "use_gpu":        settings.get(&format!("exportGpu-{}", codec)).unwrap_or(&"true".into()).parse::<bool>().unwrap(),
+            "use_gpu":        settings.get(&format!("exportGpu-{}", codec)).unwrap_or(&"1".into()).parse::<u32>().unwrap() > 0,
             "audio":          settings.get("exportAudio").unwrap_or(&"true".into()).parse::<bool>().unwrap(),
             "pixel_format":   "",
 
