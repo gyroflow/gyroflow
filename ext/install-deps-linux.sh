@@ -29,6 +29,7 @@ if [ "$1" == "docker" ]; then
     sudo apt-get install -y debian-keyring debian-archive-keyring
     sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
     sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
+    sudo apt-get install -y libvulkan-dev
     sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
 
     # workaround AppImage issues with Docker
@@ -41,7 +42,7 @@ if [ "$1" == "docker" ]; then
 fi
 
 
-if [ ! -d "ffmpeg-5.1-linux-clang-gpl-lite4" ]; then
+if [ ! -d "ffmpeg-5.1-linux-clang-gpl-lite" ]; then
     # Download and extract ffmpeg
     curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-5.1-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
     7z x -aoa ffmpeg.tar.xz

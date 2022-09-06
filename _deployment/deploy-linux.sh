@@ -23,6 +23,9 @@ if [ "$1" == "build-docker" ]; then
         export GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER
         export OPENCV_LINK_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/lib
         export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
+        ls -l $VULKAN_SDK/
+        ls -l $VULKAN_SDK/Include
+        ls -l /usr/include/vulkan
 
         export PATH=\"$QT_DIR/bin:\$PATH\"
         export OPENCV_LINK_LIBS=\"opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4\"

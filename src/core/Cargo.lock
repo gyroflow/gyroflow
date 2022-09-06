@@ -2158,8 +2158,8 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "telemetry-parser"
-version = "0.2.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=c4c15af#c4c15afefd803ae4edf66abd701fae3b3436b87d"
+version = "0.2.6"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=c03021e#c03021eb7920c007fe86a682c98d22714ff1d643"
 dependencies = [
  "argh",
  "byteorder",
