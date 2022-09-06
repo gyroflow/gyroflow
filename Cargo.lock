@@ -1760,9 +1760,9 @@ dependencies = [
 
 [[package]]
 name = "mp4-merge"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a70dc0533d59747f95b6fe4bac5c6e992589d1b40b72d90164f3dbf2e5e070b"
+checksum = "0003b0712e29703f524e4838b4837b609ab6a47dbbf3530cb0f5fe258e52f6a9"
 dependencies = [
  "byteorder",
  "log",
@@ -2895,7 +2895,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=818787a#818787aa1777cafae1bdb5354c15ea2f57135584"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=c4c15af#c4c15afefd803ae4edf66abd701fae3b3436b87d"
 dependencies = [
  "argh",
  "byteorder",
