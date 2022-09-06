@@ -169,6 +169,7 @@ Currently *Gyroflow* is available in:
 * **Indonesian** (by Aloysius Puspandono)
 * **Italian** (by Rosario Casciello)
 * **Japanese** (by 井上康)
+* **Korean** (by EP45)
 * **Norwegian** (by [MiniGod](https://github.com/MiniGod) and [alexagv](https://github.com/alexagv))
 * **Polish** (by [AdrianEddy](https://github.com/AdrianEddy))
 * **Portuguese Brazilian** (by KallelGaNewk)

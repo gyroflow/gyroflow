@@ -245,11 +245,10 @@ pub fn run() -> bool {
 
                     // Apply presets
                     for preset in presets.drain(..) {
+                        log::info!("Applying preset {}", preset);
                         if preset.starts_with('{') {
-                            log::info!("Applying preset {}", preset);
                             queue.apply_to_all(preset, additional_data.to_string());
                         } else if let Ok(data) = std::fs::read_to_string(&preset) {
-                            log::info!("Applying preset {}", preset);
                             queue.apply_to_all(data, additional_data.to_string());
                         }
                     }

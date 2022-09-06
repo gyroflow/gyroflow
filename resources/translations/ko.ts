@@ -1,132 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US" language="id">
+<TS version="2.1" sourcelanguage="en_US" language="ko">
   <context>
     <name>Advanced</name>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="10"/>
       <source>Advanced</source>
-      <translation>Tingkat Lanjutan</translation>
+      <translation>고급</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="39"/>
       <source>Preview resolution</source>
-      <translation>Resolusi pratinjau</translation>
+      <translation>미리 보기 해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="62"/>
       <source>Background mode</source>
-      <translation>Mode background</translation>
+      <translation>배경 모드</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="76"/>
       <source>Margin</source>
-      <translation>Selisih</translation>
+      <translation>주변부</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="91"/>
       <source>Feather</source>
-      <translation>Lembut</translation>
+      <translation>페더링</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="109"/>
       <source>Render background</source>
-      <translation>Render di latar belakang</translation>
+      <translation>배경색</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="120"/>
       <source>Theme</source>
-      <translation>Tema</translation>
+      <translation>테마</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="136"/>
       <source>UI scaling</source>
-      <translation>Penskalaan UI</translation>
+      <translation>UI 배율</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="150"/>
       <source>Language</source>
-      <translation>Bahasa</translation>
+      <translation>언어</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="197"/>
       <source>Safe area guide</source>
-      <translation>Panduan safe area</translation>
+      <translation>안전 영역 가이드</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="198"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
-      <translation>Ketika FOV &gt; 1, perlihatkan kotak
-simulasi FOV = 1 pada video preview.
-Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada rendering.</translation>
+      <translation>FOV &gt; 1인 경우, FOV = 1인 직사각형을 미리 보기 영상 위에 표시합니다. 시각적인 표시이며, 렌더링 출력에 영향을 미치지 않습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="204"/>
       <source>Experimental zero-copy GPU preview</source>
-      <translation>Zero-copy GPU preview eksperimen</translation>
+      <translation>실험적인 zero-copy GPU 미리 보기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="205"/>
       <source>Render and undistort the preview video entirely on the GPU.
 This should provide much better UI performance.</source>
-      <translation>Render dan hilangkan distorsi pada seluruh preview video di GPU.
-Ini akan membuat performa UI lebih baik.</translation>
+      <translation>미리 보기 영상의 렌더링과 왜곡 보정을 전적으로 GPU에서 수행합니다.
+원활한 UI 성능을 제공할 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="211"/>
       <source>Use GPU decoding</source>
-      <translation>Pakai GPU decoding</translation>
+      <translation>GPU 디코딩 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Device for video processing</source>
-      <translation>Alat prosesing video</translation>
+      <translation>영상 처리에 사용할 장치</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="231"/>
       <source>CPU only</source>
-      <translation>Pakai CPU saja</translation>
+      <translation>CPU 단독</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="265"/>
       <source>Default file suffix</source>
-      <translation>Suffix file default</translation>
+      <translation>기본 파일 접미사</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Reset all settings to default</source>
-      <translation>Atur ulang semua pengaturan ke default</translation>
+      <translation>모든 설정을 기본값으로 초기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="280"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation>Apakah anda yakin ingin menyetel ulang semua setelan dan mengembalikannya ke default?</translation>
+      <translation>모든 설정을 기본값으로 초기화할까요?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="281"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="289"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation>Pengaturan telah dihapus, silahkan mulai ulang Gyroflow agar perubahan diterapkan.</translation>
+      <translation>설정을 초기화했습니다. 변경 사항을 적용하려면 Gyroflow를 다시 시작하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>Exit</source>
-      <translation>Keluar</translation>
+      <translation>종료</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Cancel</source>
-      <translation>Batal</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="294"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
   </context>
   <context>
@@ -134,7 +132,7 @@ Ini akan membuat performa UI lebih baik.</translation>
     <message>
       <location filename="../../src/ui/components/AdvancedSection.qml" line="14"/>
       <source>Advanced</source>
-      <translation>Tingkat lanjutan</translation>
+      <translation>고급</translation>
     </message>
   </context>
   <context>
@@ -142,208 +140,211 @@ Ini akan membuat performa UI lebih baik.</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="69"/>
       <source>Choose a video file</source>
-      <translation>Pilih file video</translation>
+      <translation>영상 파일 선택하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="70"/>
       <location filename="../../src/ui/App.qml" line="173"/>
       <source>Video files</source>
-      <translation>File video</translation>
+      <translation>영상 파일</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="145"/>
       <source>Output path:</source>
-      <translation>Lokasi penyimpanan:</translation>
+      <translation>출력 위치:</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="188"/>
       <source>Export</source>
-      <translation>Ekspor</translation>
+      <translation>내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="188"/>
       <source>Add to render queue</source>
-      <translation>Tambahkan ke antrian render</translation>
+      <translation>렌더링 대기열에 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="237"/>
       <location filename="../../src/ui/App.qml" line="488"/>
       <source>Output file already exists, do you want to overwrite it?</source>
-      <translation>File ini sudah ada. Apakah anda mau menimpa ulang file ini?</translation>
+      <translation>동일한 이름의 파일이 있습니다. 덮어쓸까요?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="223"/>
       <location filename="../../src/ui/App.qml" line="231"/>
       <location filename="../../src/ui/App.qml" line="238"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="239"/>
       <location filename="../../src/ui/App.qml" line="400"/>
       <source>Rename</source>
-      <translation>Ubah nama</translation>
+      <translation>이름 바꾸기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="224"/>
       <location filename="../../src/ui/App.qml" line="232"/>
       <location filename="../../src/ui/App.qml" line="240"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="172"/>
       <location filename="../../src/ui/App.qml" line="422"/>
       <location filename="../../src/ui/App.qml" line="432"/>
       <source>Select file destination</source>
-      <translation>Pilih tujuan file</translation>
+      <translation>파일을 저장할 위치 선택</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="188"/>
       <source>Save</source>
-      <translation>Simpan</translation>
+      <translation>저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="222"/>
       <source>Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation>Profil lensa tidak dimuat, hasil Anda akan salah. Apakah Anda yakin ingin merender file ini?</translation>
+      <translation>렌즈 프로필이 로드되지 않아 결과가 올바르지 않을 수 있습니다. 파일을 렌더링하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="230"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation>Tidak ada titik sinkronisasi, hasil Anda akan salah. Apakah Anda yakin ingin merender file ini?</translation>
+      <translation>동기 지점이 없어 결과가 올바르지 않을 수 있습니다. 파일을 렌더링하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="308"/>
       <source>Render queue</source>
-      <translation>Antrian render</translation>
+      <translation>렌더링 대기열</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="216"/>
       <location filename="../../src/ui/App.qml" line="376"/>
       <location filename="../../src/ui/App.qml" line="379"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="215"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use the [OpenFX plugin].</source>
-      <translation>Format ini tidak tersedia untuk rendering.
-Alur kerja yang disarankan adalah mengekspor file project dan menggunakan [plugin OpenFX].</translation>
+      <translation>이 형식으로 렌더링할 수 없습니다.
+권장되는 작업 방법은 프로젝트 파일을 내보내어 [OpenFX 플러그인]을 사용하는 것입니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="385"/>
       <source>There&apos;s a newer version available: %1.</source>
-      <translation>Ada versi terbaru: %1.</translation>
+      <translation>새로운 버전이 있습니다: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="386"/>
       <source>Download</source>
-      <translation>Unduh</translation>
+      <translation>다운로드</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="386"/>
       <source>Close</source>
-      <translation>Tutup</translation>
+      <translation>닫기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="396"/>
       <source>`.gyroflow` file already exists, what do you want to do?</source>
-      <translation>file `.gyroflow` sudah ada, apa yang akan kamu lakukan?</translation>
+      <translation>이미 `.gyroflow` 파일이 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="397"/>
       <source>Overwrite</source>
-      <translation>Menimpa</translation>
+      <translation>덮어쓰기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="409"/>
       <source>Choose a different location</source>
-      <translation>Pilih lokasi lainnya</translation>
+      <translation>다른 위치 선택하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="415"/>
       <location filename="../../src/ui/App.qml" line="465"/>
       <source>Cancel</source>
-      <translation>Batalkan</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="442"/>
       <source>An error occured: %1</source>
-      <translation>Telah terjadi kesalahan: %1</translation>
+      <translation>오류가 발생했습니다: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Gyroflow file exported to %1.</source>
-      <translation>File Gyroflow di ekspor ke %1.</translation>
+      <translation>Gyroflow 파일을 %1 위치로 내보냈습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="444"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
-      <translation>Bahasa Indonesia</translation>
+      <translation>한국어</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="445"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
-      <translation>Gyroflow akan mematikan komputer dalam 60 detik karena semua tugas telah selesai.</translation>
+      <translation>Gyroflow의 모든 작업이 완료되어 60초 뒤에 컴퓨터를 종료합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="446"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
-      <translation>Gyroflow akan mem-boot ulang komputer dalam 60 detik karena semua tugas telah selesai.</translation>
+      <translation>Gyroflow의 모든 작업이 완료되어 60초 뒤에 컴퓨터를 다시 시작합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="459"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
-      <translation>Encoder ini memerlukan library eksternal yang dilisensikan sebagai GPL.
-Apakah Anda setuju dengan [lisensi GPL] dan ingin mengunduh codec tambahan?</translation>
+      <translation>이 인코더는 GPL 라이선스를 따르는 외부 라이브러리가 필요합니다.
+[GPL 라이선스]에 동의하며, 추가 코덱을 다운로드하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="460"/>
       <source>Yes, I agree</source>
-      <translation>Ya, Saya setuju</translation>
+      <translation>예, 동의합니다</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="475"/>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
-      <translation>Izin ditolak. Tidak dapat membuat atau menulis file. Ubah jalur keluaran atau jalankan program sebagai administrator.
-Pastikan Anda memiliki izin menulis ke direktori target dan pastikan file target tidak digunakan oleh aplikasi lain.</translation>
+      <translation>파일을 만들거나 쓸 권한이 없습니다.
+출력 위치를 변경하거나 프로그램을 관리자 권한으로 실행하세요.
+대상 위치에 쓰기 권한이 있는지, 다른 프로그램이 대상 파일을 사용 중인지 확인하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="476"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
-      <translation>Driver GPU NVIDIA terlalu lama, GPU encoding tidak akan berfungsi untuk format ini.
-Perbarui driver NVIDIA Anda ke versi terbaru: %1. Jika masalah masih ada setelah pembaruan driver, GPU Anda mungkin tidak mendukung GPU encoding dengan format ini. Nonaktifkan GPU encoding dalam kasus ini.</translation>
+      <translation>NVIDIA GPU 드라이버가 구 버전입니다. 이 형식으로 GPU 인코딩을 할 수 없습니다.
+NVIDIA 드라이버를 최신 버전으로 업데이트하세요: %1.
+드라이버 업데이트 이후에도 문제가 지속된다면, 설치된 GPU가 이 형식으로의 GPU 인코딩을 지원하지 않는 것일 수 있습니다. 이 경우 GPU 인코딩을 비활성화하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="485"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>GPU accelerated encoder tidak mendukung untuk piksel format ini (%1). Apakah anda ingin mengganti piksel format yg bs di support, atau tetap menggunakan ini dan render menggunakan CPU?</translation>
+      <translation>GPU 가속 인코더가 이 픽셀 형식을 지원하지 않습니다 (%1).
+지원되는 다른 픽셀 형식으로 변환하시겠습니까, 아니면 그대로 CPU에서 렌더링하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="491"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
-      <translation>Encoder GPU gagal diinisialisasi dan rendering dilakukan pada CPU, yang jauh lebih lambat.
-Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal ini tidak terjadi, laporkan ini di GitHub termasuk file gyroflow.log.</translation>
+      <translation>GPU 인코더 초기화에 실패하여 더 느린 CPU에서 렌더링합니다.
+최신 시스템과 드라이버에서도 문제가 발생한다면, gyroflow.log 파일과 함께 GitHub에 보고해주세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="494"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation>GPU Anda tidak mendukung encoding H.265/HEVC, coba gunakan H.264/AVC atau nonaktifkan encoding GPU di setelan Ekspor.</translation>
+      <translation>설치된 GPU가 H.265/HEVC 인코딩을 지원하지 않습니다. H.264/AVC를 사용하거나 내보내기 설정에서 GPU 인코딩을 비활성화하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="497"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation>Pastikan ekstensi output Anda mendukung codec yang dipilih. &quot;.mov&quot; biasanya aman untuk kebanyakan kasus.</translation>
+      <translation>출력할 확장자가 선택한 코덱을 지원하는지 확인하세요. &quot;.mov&quot;는 대부분의 경우 지원합니다.</translation>
     </message>
   </context>
   <context>
@@ -351,7 +352,7 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/CalibrationTarget.qml" line="19"/>
       <source>Calibration target</source>
-      <translation>Target untuk kalibrasi</translation>
+      <translation>교정 대상</translation>
     </message>
   </context>
   <context>
@@ -359,69 +360,69 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="29"/>
       <source>Lens calibrator</source>
-      <translation>Kalibrasi lensa</translation>
+      <translation>렌즈 교정 도구</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="46"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="75"/>
       <source>Choose a video file</source>
-      <translation>Pilih file video</translation>
+      <translation>영상 파일 선택하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="76"/>
       <source>Video files</source>
-      <translation>File video</translation>
+      <translation>영상 파일</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="81"/>
       <source>You selected multiple files. Do you want to process them automatically and export lens profiles?</source>
-      <translation>Anda memilih beberapa file. Apakah anda ingin memproses semuanya dan mengekspor profile lensa?</translation>
+      <translation>복수의 파일을 선택했습니다. 자동으로 처리하여 렌즈 프로필을 내보낼까요?</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="82"/>
       <location filename="../../src/ui/Calibrator.qml" line="241"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="83"/>
       <location filename="../../src/ui/Calibrator.qml" line="242"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="198"/>
       <source>or</source>
-      <translation>atau</translation>
+      <translation>아니면</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="201"/>
       <source>Open calibration target</source>
-      <translation>Membuka target kalibrasi</translation>
+      <translation>교정 패턴 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="207"/>
       <source>How to calibrate lens?</source>
-      <translation>Bagaimana cara mengkalibrasi lensa?</translation>
+      <translation>렌즈 교정은 어떻게 하나요?</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="224"/>
       <source>%1 good frames</source>
-      <translation>%1 frame bagus</translation>
+      <translation>%1개의 좋은 프레임</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="227"/>
       <source>Analyzing %1...</source>
-      <translation>Menganalisa %1...</translation>
+      <translation>분석 중 %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="240"/>
       <source>Are you sure you want to close the calibrator?</source>
-      <translation>Anda yakin ingin menutup kalibrator?</translation>
+      <translation>교정 도구를 종료하시겠습니까?</translation>
     </message>
   </context>
   <context>
@@ -429,7 +430,7 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/components/DropTarget.qml" line="20"/>
       <source>Drop file here</source>
-      <translation>Letakan berkas di sini</translation>
+      <translation>여기에 파일을 놓으세요</translation>
     </message>
   </context>
   <context>
@@ -437,57 +438,57 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="13"/>
       <source>Export settings</source>
-      <translation>Pengaturan ekspor</translation>
+      <translation>내보내기 설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="195"/>
       <source>Output size</source>
-      <translation>Size Output</translation>
+      <translation>출력 해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="201"/>
       <source>Width</source>
-      <translation>Lebar</translation>
+      <translation>너비</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="220"/>
       <source>Height</source>
-      <translation>Tinggi</translation>
+      <translation>높이</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="253"/>
       <source>Lock aspect ratio</source>
-      <translation>Kunci Aspek Rasio</translation>
+      <translation>종횡비 고정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="265"/>
       <source>Output size preset</source>
-      <translation>Preset size output</translation>
+      <translation>출력 해상도 프리셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="281"/>
       <source>Original (%1 x %2)</source>
-      <translation>Original (%1 x %2)</translation>
+      <translation>원본 (%1 x %2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="301"/>
       <source>This resolution is not supported by the selected codec.</source>
-      <translation>Resolusi ini tidak di support oleh codec yang dipilih.</translation>
+      <translation>이 해상도는 선택한 코덱에서 지원되지 않습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="302"/>
       <source>Maximum supported resolution is %1.</source>
-      <translation>Maksimum resolusi yang dapat di support adalah %1.</translation>
+      <translation>최대 지원 해상도는 %1 입니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="308"/>
       <source>Resolution must be divisible by 2.</source>
-      <translation>Resolusi harus bisa dibagi 2.</translation>
+      <translation>해상도는 짝수여야 합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="313"/>
       <source>Bitrate</source>
-      <translation>Kecepatan bit(bitrate)</translation>
+      <translation>비트 전송률</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="320"/>
@@ -497,77 +498,77 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="327"/>
       <source>Use GPU encoding</source>
-      <translation>Pakai encoding GPU</translation>
+      <translation>GPU 인코딩 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="336"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
-      <translation>GPU encoder biasanya menghasilkan output dengan kualitas lebih rendah dibanding software encoder, tapi jauh lebih cepat.</translation>
+      <translation>GPU 인코더는 일반적으로 소프트웨어 인코더보다 품질이 낮지만 훨씬 빠릅니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="337"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
-      <translation>Gunakan bitrate yang lebih tinggi untuk menghasilkan output dengan kualitas yang sama, atau gunakan bitrate yang sama untuk menghasilkan output dengan kualitas lebih rendah.</translation>
+      <translation>시각적으로 동일한 품질을 얻으려면 더 높은 비트 전송률이 필요합니다. 비트 전송률이 동일하면 출력 화질이 열화됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="338"/>
       <source>Uncheck this option for maximum possible quality.</source>
-      <translation>Hapus centang untuk memilih kualitas yang maksimal.</translation>
+      <translation>가능한 최상의 품질을 얻으려면 이 옵션을 해제합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="340"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
-      <translation>GPU acceleration tidak tersedia untuk format piksel video ini.</translation>
+      <translation>이 영상의 픽셀 형식은 GPU 가속을 지원하지 않습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Export audio</source>
-      <translation>Ekspor audio</translation>
+      <translation>음성 내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="353"/>
       <source>Custom encoder options</source>
-      <translation>Opsi pengkodean khusus</translation>
+      <translation>사용자 지정 인코더 옵션</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="376"/>
       <source>Show available options</source>
-      <translation>Pilihan yang tersedia</translation>
+      <translation>사용 가능한 옵션 보이기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="379"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="386"/>
       <source>Keyframe distance</source>
-      <translation>Jarak keyframe</translation>
+      <translation>키프레임 간격</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="395"/>
       <source>s</source>
-      <translation>s</translation>
+      <translation>초</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="400"/>
       <source>Preserve other tracks</source>
-      <translation>Pertahankan trek lainnya</translation>
+      <translation>여타 기존 트랙 유지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="402"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation>Ini menonaktifkan rentang trim dan Anda perlu menggunakan ekstensi file keluaran .mov</translation>
+      <translation>이 옵션을 선택하면 잘라내기 범위가 비활성화되며 .mov 확장자를 사용해야 합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="407"/>
       <source>Use black frames outside trim range and keep original file duration</source>
-      <translation>Gunakan bingkai hitam di luar rentang trim dan pertahankan durasi file asli</translation>
+      <translation>잘라내기 범위 밖은 검게 처리하고 원본 파일 길이 유지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="414"/>
       <source>Device for rendering</source>
-      <translation>Alat untuk merender</translation>
+      <translation>렌더링에 사용할 장치</translation>
     </message>
   </context>
   <context>
@@ -575,69 +576,70 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="12"/>
       <source>Calibration</source>
-      <translation>Kalibrasi</translation>
+      <translation>교정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="150"/>
       <source>Reprojection error</source>
-      <translation>Proyeksi ulang gagal</translation>
+      <translation>재투영 오류</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="162"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
-      <translation>Untuk kalibrasi lensa yang terbaik, isi angka ini dibawah 5, idealnya dibawah 1.</translation>
+      <translation>렌즈 교정을 적절히 한 경우 이 값이 5 미만이며, 이상적인 값은 1 미만입니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="166"/>
       <source>Auto calibrate</source>
-      <translation>Kalibrasi otomatis</translation>
+      <translation>자동 교정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="177"/>
       <source>Max calibration points</source>
-      <translation>Titik kalibrasi maximum</translation>
+      <translation>최대 교정 지점 수</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="129"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="293"/>
       <source>Export lens profile</source>
-      <translation>Ekspor profil lensa</translation>
+      <translation>렌즈 프로필 내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="130"/>
       <source>Lens profiles</source>
-      <translation>Profil lensa</translation>
+      <translation>렌즈 프로필</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="134"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
-      <translation>Dengan mengupload profil lensa anda ke database, anda setuju untuk di publikasi dan didistribusikan dengan Gyroflow dibawah ketentuan GPLv3. Apakah anda akan submit profil anda?</translation>
+      <translation>당신은 렌즈 프로필을 데이터베이스에 업로드함으로써, GPLv3 약관에 따라 렌즈 프로필을 Gyroflow와 함께 게시(publish) 및 배포(distribute)하는 것에 동의합니다.
+프로필을 제출하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="135"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="136"/>
       <source>No</source>
-      <translation>No</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="238"/>
       <source>Invalid format</source>
-      <translation>Format tidak valid</translation>
+      <translation>유효하지 않은 형식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="238"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="306"/>
       <source>Upload lens profile to the database</source>
-      <translation>Upload profil lensa ke dalam database</translation>
+      <translation>렌즈 프로필을 데이터베이스에 업로드하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="312"/>
@@ -647,12 +649,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="324"/>
       <source>Analyze every n-th frame</source>
-      <translation>Menganalisa setiap n-th frame</translation>
+      <translation>n번째 프레임마다 분석</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="336"/>
       <source>Sharpness limit</source>
-      <translation>Batas ketajaman</translation>
+      <translation>선명도 상한</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="345"/>
@@ -662,22 +664,22 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
       <source>Input horizontal stretch</source>
-      <translation>Masukkan peregangan horizontal</translation>
+      <translation>수평 배율 입력</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="367"/>
       <source>Input vertical stretch</source>
-      <translation>Masukkan peregangan vertikal</translation>
+      <translation>수직 배율 입력</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="382"/>
       <source>Iterations</source>
-      <translation>Pengulangan</translation>
+      <translation>반복 횟수</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="394"/>
       <source>Low pass filter</source>
-      <translation>Filter Low pass</translation>
+      <translation>로우패스 필터</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="402"/>
@@ -687,32 +689,32 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="416"/>
       <source>Preview resolution</source>
-      <translation>Resolusi layar preview</translation>
+      <translation>미리 보기 해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="437"/>
       <source>Radial distortion limit</source>
-      <translation>Batas distorsi radial</translation>
+      <translation>방사왜곡 제한</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="453"/>
       <source>Lens is asymmetrical</source>
-      <translation>Lensa tidak simetris</translation>
+      <translation>비대칭 렌즈</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="460"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
-      <translation>Pola papan catur polos (versi sebelumnya tanpa titik di tengah)</translation>
+      <translation>일반 체스판 패턴 (중앙 점 없는 이전 버전)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="252"/>
       <source>Rolling shutter correction</source>
-      <translation>Koreksi Rolling shutter</translation>
+      <translation>롤링 셔터 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="260"/>
       <source>Frame readout time</source>
-      <translation>Waktu pembacaan frame</translation>
+      <translation>프레임 리드아웃 시간</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="266"/>
@@ -722,7 +724,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
       <source>Bottom to top</source>
-      <translation>Bawah ke Atas</translation>
+      <translation>하단에서 상단까지</translation>
     </message>
   </context>
   <context>
@@ -730,77 +732,77 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="11"/>
       <source>Lens profile</source>
-      <translation>Profil lensa</translation>
+      <translation>렌즈 프로필</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="30"/>
       <source>Choose a lens profile</source>
-      <translation>Pilih profil lensa</translation>
+      <translation>렌즈 프로필 선택하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="31"/>
       <source>Lens profiles</source>
-      <translation>Profil lensa</translation>
+      <translation>렌즈 프로필</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="148"/>
       <source>Search...</source>
-      <translation>Mencari...</translation>
+      <translation>찾아보기...</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="170"/>
       <source>Open file</source>
-      <translation>Membuka file</translation>
+      <translation>파일 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="175"/>
       <source>Create new</source>
-      <translation>Membuat baru</translation>
+      <translation>새 항목</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
-      <translation>Profil lensa ini unofficial, kami tidak menjamin ketepatannya. Gunakan dengan resiko anda sendiri.</translation>
+      <translation>이 렌즈 프로필은 비공식적이며 정확도가 떨어질 수 있습니다. 자신의 책임하에 사용하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="200"/>
       <source>Rate this profile: [Good] | [Bad]</source>
-      <translation>Nilai profile ini: [Good] | [Bad]</translation>
+      <translation>이 프로필 평가: [Good] | [Bad]</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Thank you for rating this profile.</source>
-      <translation>Terima kasih telah menilai profile ini.</translation>
+      <translation>평가해 주셔서 감사합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
-      <translation>Aspek rasio pada profil lensa tidak cocok dengan aspek rasio file anda. Hasil akan terlihat tidak benar.</translation>
+      <translation>렌즈 프로필의 종횡비가 파일과 일치하지 않습니다. 결과가 올바르지 않을 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="231"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
-      <translation>Dimensi pada profil lensa tidak cocok dengan dimensi file anda. Hasil akan terlihat tidak benar.</translation>
+      <translation>렌즈 프로필의 해상도가 파일과 일치하지 않습니다. 결과가 올바르지 않을 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="240"/>
       <source>Adjust parameters</source>
-      <translation>Menyesuaikan parameter</translation>
+      <translation>매개변수 조정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="273"/>
       <source>Pixel focal length</source>
-      <translation>Piksel focal length</translation>
+      <translation>픽셀 초점 거리</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="283"/>
       <source>Focal center</source>
-      <translation>Focal center</translation>
+      <translation>초점 중앙</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="293"/>
       <source>Distortion coefficients</source>
-      <translation>Koefisien distorsi</translation>
+      <translation>왜곡 계수</translation>
     </message>
   </context>
   <context>
@@ -808,12 +810,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation>prasetel</translation>
+      <translation>프리셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation>resmi</translation>
+      <translation>공식</translation>
     </message>
   </context>
   <context>
@@ -826,17 +828,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="93"/>
       <source>Elapsed: %1. Remaining: %2</source>
-      <translation>Sudah: %1. Tersisa:%2</translation>
+      <translation>경과: %1. 남은 시간: %2</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="107"/>
       <source>Cancel</source>
-      <translation>Batalkan</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LoaderOverlay.qml" line="127"/>
       <source>Hide</source>
-      <translation>Sembunyikan</translation>
+      <translation>숨기기</translation>
     </message>
   </context>
   <context>
@@ -844,37 +846,37 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="11"/>
       <source>Motion data</source>
-      <translation>Data motion</translation>
+      <translation>흔들림 데이터</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="27"/>
       <source>Choose a motion data file</source>
-      <translation>Pilih file data motion</translation>
+      <translation>흔들림 데이터 파일 선택하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="28"/>
       <source>Motion data files</source>
-      <translation>File data motion</translation>
+      <translation>흔들림 데이터 파일</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Video file is not loaded.</source>
-      <translation>File video tidak akan dimuat.</translation>
+      <translation>영상 파일 로드되지 않음.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="38"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="123"/>
       <source>Open file</source>
-      <translation>Membuka file</translation>
+      <translation>파일 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="143"/>
       <source>Low pass filter</source>
-      <translation>Filter low pass</translation>
+      <translation>로우패스 필터</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="148"/>
@@ -884,50 +886,50 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="153"/>
       <source>Lower cutoff frequency means more filtering</source>
-      <translation>Frekuensi cutoff yang lebih rendah berarti lebih banyak penyaringan</translation>
+      <translation>진동수가 낮을수록 더 강하게 필터링됨</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="164"/>
       <source>Rotation</source>
-      <translation>Rotasi</translation>
+      <translation>회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
       <location filename="../../src/ui/menu/MotionData.qml" line="251"/>
       <source>Pitch</source>
-      <translation>Pitch</translation>
+      <translation>피치</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
       <source>Pitch is camera angle up/down when using FPV blackbox data</source>
-      <translation>Pitch adalah sudut kamera atas/bawah ketika menggunakan data blackbox FPV</translation>
+      <translation>피치(Pitch)는 FPV 블랙박스 데이터에서 카메라의 위/아래(끄덕임) 각도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="183"/>
       <location filename="../../src/ui/menu/MotionData.qml" line="259"/>
       <source>Roll</source>
-      <translation>Roll</translation>
+      <translation>롤</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="191"/>
       <location filename="../../src/ui/menu/MotionData.qml" line="267"/>
       <source>Yaw</source>
-      <translation>Yaw</translation>
+      <translation>요</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="232"/>
       <source>Separate accelerometer rotation</source>
-      <translation>Rotasi akselerometer terpisah</translation>
+      <translation>가속도계 회전 방향 별도 설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="240"/>
       <source>Accelerometer rotation</source>
-      <translation>Rotasi akselerometer</translation>
+      <translation>가속도계 회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="277"/>
       <source>Gyro bias</source>
-      <translation>Bias data gyro</translation>
+      <translation>자이로 바이어스</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="288"/>
@@ -947,32 +949,32 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="314"/>
       <source>IMU orientation</source>
-      <translation>Orientasi IMU</translation>
+      <translation>IMU 방향</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="321"/>
       <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
-      <translation>Huruf besar adalah positif, huruf kecil adalah negatif. contoh. zYX</translation>
+      <translation>대문자는 양의 값, 소문자는 음의 값입니다. (예. zYX) </translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="327"/>
       <source>Integration method</source>
-      <translation>Metode integrasi</translation>
+      <translation>보정 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="335"/>
       <source>Use built-in quaternions instead of IMU data</source>
-      <translation>Menggunakan built in quaternions daripada IMU data</translation>
+      <translation>IMU 데이터 대신 내장 쿼터니언 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="335"/>
       <source>IMU integration method for calculating motion data</source>
-      <translation>Metode integrasi IMU untuk kalkulasi data motion</translation>
+      <translation>흔들림 데이터 계산에 사용할 IMU 보정 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="346"/>
       <source>Orientation indicator</source>
-      <translation>Indikator orientasi</translation>
+      <translation>방향 표시</translation>
     </message>
   </context>
   <context>
@@ -980,12 +982,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="121"/>
       <source>Reset value</source>
-      <translation>Reset Nilai</translation>
+      <translation>기본값으로 재설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="128"/>
       <source>Enable keyframing</source>
-      <translation>Aktifkan keyframing</translation>
+      <translation>키프레임 활성화</translation>
     </message>
   </context>
   <context>
@@ -993,168 +995,168 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="204"/>
       <source>Export</source>
-      <translation>Ekspor</translation>
+      <translation>내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="204"/>
       <source>Save</source>
-      <translation>Simpan</translation>
+      <translation>저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="204"/>
       <source>Add to render queue</source>
-      <translation>Tambahkan ke antrian render</translation>
+      <translation>렌더링 대기열에 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="205"/>
       <source>Create settings preset</source>
-      <translation>Buat pengaturan preset</translation>
+      <translation>설정 프리셋 만들기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="206"/>
       <source>Apply selected settings to all items in the render queue</source>
-      <translation>Terapkan pengaturan yang dipilih ke semua item dalam antrian render</translation>
+      <translation>렌더링 대기열의 모든 항목에 선택된 설정 적용하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="207"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation>Ekspor file project (termasuk data gyro)</translation>
+      <translation>프로젝트 파일 내보내기 (처리된 자이로 데이터 포함)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="208"/>
       <source>Export project file (including gyro data)</source>
-      <translation>Ekspor file project (termasuk data gyro)</translation>
+      <translation>프로젝트 파일 내보내기 (자이로 데이터 포함)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="209"/>
       <source>Export project file</source>
-      <translation>Ekspor file project</translation>
+      <translation>프로젝트 파일 내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="43"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="419"/>
       <source>Full</source>
-      <translation>Penuh</translation>
+      <translation>원본</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
       <source>Solid color</source>
-      <translation>Warna solid</translation>
+      <translation>단색</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
       <source>Repeat edge pixels</source>
-      <translation>Ulangi piksel tepi</translation>
+      <translation>가장자리 픽셀 반복</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
       <source>Mirror edge pixels</source>
-      <translation>Meniru Piksel tepi</translation>
+      <translation>가장자리 픽셀 반사</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="65"/>
       <source>Margin with feather</source>
-      <translation>Margin dengan halus</translation>
+      <translation>페더링된 주변부</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="124"/>
       <source>Light</source>
-      <translation>Terang</translation>
+      <translation>밝음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="124"/>
       <source>Dark</source>
-      <translation>Gelap</translation>
+      <translation>어두움</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="332"/>
       <source>None</source>
-      <translation>Tidak ada</translation>
+      <translation>없음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="155"/>
       <source>No smoothing</source>
-      <translation>Tidak menghaluskan</translation>
+      <translation>스무딩 없음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="156"/>
       <source>Default</source>
-      <translation>Bawaan</translation>
+      <translation>기본</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="157"/>
       <source>Plain 3D</source>
-      <translation>3D polos</translation>
+      <translation>일반 3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="158"/>
       <source>Fixed camera</source>
-      <translation>Kamera fix</translation>
+      <translation>고정된 카메라</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>No zooming</source>
-      <translation>Tidak zooming</translation>
+      <translation>확대 없음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>Dynamic zooming</source>
-      <translation>Zooming dinamis</translation>
+      <translation>동적 확대</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
       <source>Static zoom</source>
-      <translation>Perbesar statis</translation>
+      <translation>확대 값 고정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Using essential matrix</source>
-      <translation>Menggunakan matriks esensial</translation>
+      <translation>필수 행렬 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>Using visual features</source>
-      <translation>Menggunakan fitur visual</translation>
+      <translation>시각적 특징 검출 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="259"/>
       <source>rs-sync</source>
-      <translation>rs-sync</translation>
+      <translation>롤링 셔터 동기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="569"/>
       <source>Do nothing</source>
-      <translation>Biarkan saja</translation>
+      <translation>아무것도 하지 않음</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="570"/>
       <source>Shut down the computer</source>
-      <translation>Matikan komputer</translation>
+      <translation>시스템 종료</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="571"/>
       <source>Restart the computer</source>
-      <translation>Restart komputer</translation>
+      <translation>시스템 다시 시작</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="572"/>
       <source>Sleep</source>
-      <translation>Mode tidur</translation>
+      <translation>절전 모드</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="573"/>
       <source>Hibernate</source>
-      <translation>Hibernasi</translation>
+      <translation>최대 절전 모드</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="574"/>
       <source>Logout</source>
-      <translation>Logout</translation>
+      <translation>로그아웃</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="575"/>
       <source>Close Gyroflow</source>
-      <translation>Tutup Gyroflow</translation>
+      <translation>Gyroflow 종료</translation>
     </message>
   </context>
   <context>
@@ -1162,17 +1164,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="190"/>
       <source>Pause</source>
-      <translation>Pause</translation>
+      <translation>일시 중단</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="41"/>
       <source>Render queue</source>
-      <translation>Antrian render</translation>
+      <translation>렌더링 대기열</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="577"/>
       <source>When rendering is finished: %1</source>
-      <translation>Jika render sudah selesai: %1</translation>
+      <translation>렌더링 완료 시: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="91"/>
@@ -1183,142 +1185,143 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="94"/>
       <source>Elapsed: %1</source>
-      <translation>Telah berjalan: %1</translation>
+      <translation>경과: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="105"/>
       <source>Remaining: %1</source>
-      <translation>Sisa: %1</translation>
+      <translation>남은 시간: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="124"/>
       <location filename="../../src/ui/RenderQueue.qml" line="145"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Rendering %1...</source>
-      <translation>Render %1...</translation>
+      <translation>%1 렌더링 중...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="142"/>
       <source>Rendering completed. The file was written to: %1.</source>
-      <translation>Rendering selesai. File disimpan di: %1.</translation>
+      <translation>렌더링 완료. 파일이 %1에 저장되었습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
       <location filename="../../src/ui/RenderQueue.qml" line="511"/>
       <source>Open rendered file</source>
-      <translation>Membuka file hasil render</translation>
+      <translation>렌더링된 파일 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="144"/>
       <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>Open file location</source>
-      <translation>Membuka lokasi file</translation>
+      <translation>파일 위치 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="160"/>
       <location filename="../../src/ui/RenderQueue.qml" line="366"/>
       <source>Render using CPU</source>
-      <translation>Render menggunakan CPU</translation>
+      <translation>CPU 렌더링 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="167"/>
       <source>Cancel</source>
-      <translation>Batalkan</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="169"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>GPU accelerated encoder tidak mendukung untuk piksel format ini (%1). Apakah anda ingin mengganti piksel format yg bs di support, atau tetap menggunakan ini dan render menggunakan CPU?</translation>
+      <translation>GPU 가속 인코더가 이 픽셀 형식을 지원하지 않습니다 (%1).
+지원되는 다른 픽셀 형식으로 변환하시겠습니까, 아니면 그대로 CPU에서 렌더링하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="188"/>
       <source>Start exporting</source>
-      <translation>Memulai ekspor</translation>
+      <translation>내보내기 시작</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="189"/>
       <source>Resume</source>
-      <translation>Melanjutkan kembali</translation>
+      <translation>재개</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="287"/>
       <source>Render now</source>
-      <translation>Render</translation>
+      <translation>바로 렌더링하기</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="293"/>
       <source>Edit</source>
-      <translation>Edit</translation>
+      <translation>편집</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="306"/>
       <source>Reset status</source>
-      <translation>Setel ulang status</translation>
+      <translation>상태 재설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="306"/>
       <source>Stop</source>
-      <translation>Stop</translation>
+      <translation>중지</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="356"/>
       <source>Missing required components.</source>
-      <translation>Ada persyaratan yang hilang.</translation>
+      <translation>필요한 구성 요소 누락.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="374"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="375"/>
       <source>Rename</source>
-      <translation>Ubah nama</translation>
+      <translation>이름 바꾸기</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="376"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="376"/>
       <source>Output file already exists.</source>
-      <translation>File sudah ada.</translation>
+      <translation>동일한 이름의 파일이 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="477"/>
       <source>Synchronizing...</source>
-      <translation>Menyinkronisasikan...</translation>
+      <translation>동기화 중...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="478"/>
       <source>Elapsed: %1. Remaining: %2</source>
-      <translation>Sudah: %1. Tersisa:%2</translation>
+      <translation>경과: %1. 남은 시간: %2</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="521"/>
       <source>Remove</source>
-      <translation>Hapus</translation>
+      <translation>제거</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="600"/>
       <source>Number of parallel renders: %1</source>
-      <translation>Jumlah pararel render: %1</translation>
+      <translation>병렬 렌더링 수: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="446"/>
       <source>Save to: %1</source>
-      <translation>Simpan di: %1</translation>
+      <translation>저장 위치: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="447"/>
       <source>Export settings: %1</source>
-      <translation>Pengaturan ekspor:%1</translation>
+      <translation>내보내기 설정: %1</translation>
     </message>
   </context>
   <context>
@@ -1326,98 +1329,98 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="69"/>
       <source>Select settings you want to include in the preset</source>
-      <translation>Pilih pengaturan yang ingin Anda sertakan dalam preset</translation>
+      <translation>프리셋에 포함할 설정을 선택하세요</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="70"/>
       <source>Select settings you want to apply to all items in the render queue</source>
-      <translation>Pilih pengaturan yang ingin Anda terapkan ke semua item dalam antrian render</translation>
+      <translation>렌더링 대기열의 모든 항목에 적용하고자 하는 설정을 선택하세요</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="88"/>
       <source>Video</source>
-      <translation>Video</translation>
+      <translation>영상</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="89"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Rotation</source>
-      <translation>Rotasi</translation>
+      <translation>회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Frame rate</source>
-      <translation>Frame rate</translation>
+      <translation>프레임률</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <source>Lens profile</source>
-      <translation>Profil lensa</translation>
+      <translation>렌즈 프로필</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Motion data</source>
-      <translation>Data motion</translation>
+      <translation>흔들림 데이터</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>Low pass filter</source>
-      <translation>Filter Low pass</translation>
+      <translation>로우패스 필터</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Gyro bias</source>
-      <translation>Bias data gyro</translation>
+      <translation>자이로 바이어스</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>IMU orientation</source>
-      <translation>Orientasi IMU</translation>
+      <translation>IMU 방향</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Integration method</source>
-      <translation>Metode integrasi</translation>
+      <translation>보정 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>Trim range</source>
-      <translation>Jarak pemangkasan</translation>
+      <translation>잘라내기 범위</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
       <source>Offsets</source>
-      <translation>Offset</translation>
+      <translation>오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Keyframes</source>
-      <translation>Keyframes</translation>
+      <translation>키프레임</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
       <source>Synchronization</source>
-      <translation>Sinkronisasi</translation>
+      <translation>동기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Rough gyro offset</source>
-      <translation>Offset gyro kasar</translation>
+      <translation>근사 자이로 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>Sync search size</source>
-      <translation>Sinkronkan ukuran pencarian</translation>
+      <translation>동기 지점 검색 크기</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Max sync points</source>
-      <translation>Titik sinkronisasi maksimum</translation>
+      <translation>최대 동기 지점 수</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Stabilization</source>
-      <translation>Stabilisasi</translation>
+      <translation>안정화</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
@@ -1427,94 +1430,94 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
       <source>Smoothing params</source>
-      <translation>Menghaluskan params</translation>
+      <translation>스무딩 매개 변수</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Horizon lock</source>
-      <translation>Kunci horizon</translation>
+      <translation>수평 잠금</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
       <source>Rolling shutter correction</source>
-      <translation>Koreksi Rolling shutter</translation>
+      <translation>롤링 셔터 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Zooming</source>
-      <translation>Memperbesar</translation>
+      <translation>확대</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
       <source>Lens correction strength</source>
-      <translation>Kekuatan koreksi lensa</translation>
+      <translation>렌즈 보정 강도</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Export settings</source>
-      <translation>Pengaturan ekspor</translation>
+      <translation>설정 내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
       <source>Codec</source>
-      <translation>Codec</translation>
+      <translation>코덱</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Audio</source>
-      <translation>Audio</translation>
+      <translation>음성</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Output path</source>
-      <translation>Lokasi penyimpanan</translation>
+      <translation>출력 위치</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="117"/>
       <source>Output size</source>
-      <translation>Size Output</translation>
+      <translation>출력 해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="118"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="119"/>
       <source>Advanced</source>
-      <translation>Tingkat lanjutan</translation>
+      <translation>고급</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="120"/>
       <source>Background</source>
-      <translation>Background</translation>
+      <translation>배경</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Playback speed</source>
-      <translation>Kecepatan playback</translation>
+      <translation>재생 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <source>Playback mute status</source>
-      <translation>Status mute playback</translation>
+      <translation>재생 음소거 상태</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="200"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation>Petunjuk: Anda dapat memiliki prasetel Anda di kotak pencarian profil lensa, jika Anda menyimpan preset Anda (file `.gyroflow`) di direktori `camera_presets`.</translation>
+      <translation>힌트: 'camera_presets' 폴더에 프리셋 파일('.gyroflow' 파일)을 저장하면, 렌즈 프로필 검색 상자에 프리셋이 표시됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Save</source>
-      <translation>Simpan</translation>
+      <translation>저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Apply</source>
-      <translation>Terapkan</translation>
+      <translation>적용</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="225"/>
       <source>Cancel</source>
-      <translation>Batalkan</translation>
+      <translation>취소</translation>
     </message>
   </context>
   <context>
@@ -1522,12 +1525,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="90"/>
       <source>Reset value</source>
-      <translation>Reset Nilai</translation>
+      <translation>값 재설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="99"/>
       <source>Enable keyframing</source>
-      <translation>Aktifkan keyframing</translation>
+      <translation>키프레임 활성화</translation>
     </message>
   </context>
   <context>
@@ -1535,83 +1538,83 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="11"/>
       <source>Stabilization</source>
-      <translation>Stabilisasi</translation>
+      <translation>안정화</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="160"/>
       <source>Pitch smoothness</source>
-      <translation>Tingkat kehalusan Pitch</translation>
+      <translation>피치 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="161"/>
       <source>Yaw smoothness</source>
-      <translation>Tingkat kehalusan yaw</translation>
+      <translation>요 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="162"/>
       <source>Roll smoothness</source>
-      <translation>Tingkat kehalusan Roll</translation>
+      <translation>롤 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="163"/>
       <source>Smoothness</source>
-      <translation>Tingkat Kehalusan</translation>
+      <translation>평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="164"/>
       <source>Per axis</source>
-      <translation>Per sumbu</translation>
+      <translation>축별 설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="165"/>
       <source>Max smoothness</source>
-      <translation>Kehalusan maksimal</translation>
+      <translation>최대 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="166"/>
       <source>Max smoothness at high velocity</source>
-      <translation>Tingkat kehalusan pada kecepatan (velocity) tinggi</translation>
+      <translation>고속에서의 최대 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="167"/>
       <source>Second smoothing pass</source>
-      <translation>Penghalusan kedua</translation>
+      <translation>2차 스무딩 처리</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="168"/>
       <source>Yaw angle correction</source>
-      <translation>Koreksi sudut Yaw</translation>
+      <translation>요 각도 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="169"/>
       <source>Pitch angle correction</source>
-      <translation>Koreksi sudut Pitch</translation>
+      <translation>피치 각도 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="170"/>
       <location filename="../../src/ui/menu/Stabilization.qml" line="336"/>
       <source>Roll angle correction</source>
-      <translation>Koreksi sudut Roll</translation>
+      <translation>롤 각도 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="171"/>
       <source>Yaw angle</source>
-      <translation>Sudut Yaw</translation>
+      <translation>요 각도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="172"/>
       <source>Pitch angle</source>
-      <translation>Sudut Pitch</translation>
+      <translation>피치 각도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="173"/>
       <source>Roll angle</source>
-      <translation>Sudut Roll</translation>
+      <translation>롤 각도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
-      <translation>FOV lebih besar dari 1.0, anda akan melihat bingkai hitam</translation>
+      <translation>FOV가 1.0보다 큼, 검은 경계가 보일 수 있음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="198"/>
@@ -1621,13 +1624,13 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="312"/>
       <source>Lock horizon</source>
-      <translation>Kunci horizon</translation>
+      <translation>수평 잠금</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="317"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
-      <translation>Kunci nilai</translation>
+      <translation>잠금 수준</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="325"/>
@@ -1644,27 +1647,27 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="352"/>
       <source>Use gravity vectors</source>
-      <translation>Gunakan vektor gravitasi</translation>
+      <translation>중력 벡터 사용</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation>Jika horizon tidak terkunci sempurna, coba metode integrasi lainnya di bagian &quot;Motion data&quot;.</translation>
+      <translation>수평 잠금이 제대로 이루어지지 않으면, &quot;흔들림 데이터&quot; 영역에서 다른 보정 방식을 시도해 보세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
-      <translation>Rotasi maksimal: Pitch: %1, Yaw: %2, Roll: %3</translation>
+      <translation>최대 회전: 피치: %1, 요: %2, 롤: %3</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Max zoom: %1</source>
-      <translation>Perbesar maksimal: %1</translation>
+      <translation>최대 확대: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="411"/>
       <source>Zooming speed</source>
-      <translation>Kecepatan zooming</translation>
+      <translation>확대 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="419"/>
@@ -1674,7 +1677,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
       <source>Zooming center offset</source>
-      <translation>Perbesar offset tengah</translation>
+      <translation>확대 중심 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
@@ -1689,12 +1692,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="470"/>
       <source>Rolling shutter correction</source>
-      <translation>Koreksi Rolling shutter</translation>
+      <translation>롤링 셔터 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="476"/>
       <source>Frame readout time</source>
-      <translation>Waktu pembacaan frame</translation>
+      <translation>프레임 리드아웃 시간</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="482"/>
@@ -1704,12 +1707,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="494"/>
       <source>Bottom to top</source>
-      <translation>Bawah ke Atas</translation>
+      <translation>하단에서 상단까지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="501"/>
       <source>Lens correction strength</source>
-      <translation>Kekuatan koreksi lensa</translation>
+      <translation>렌즈 보정 강도</translation>
     </message>
   </context>
   <context>
@@ -1717,47 +1720,47 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="11"/>
       <source>Synchronization</source>
-      <translation>Sinkronisasi</translation>
+      <translation>동기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="83"/>
       <source>Auto sync</source>
-      <translation>Sinkronisasi otomatis</translation>
+      <translation>자동 동기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="87"/>
       <source>No motion data loaded, cannot sync.</source>
-      <translation>Tidak ada data motion yang dimuat, tidak dapat disinkronkan.</translation>
+      <translation>로드된 흔들림 데이터 없음, 동기화 불가.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="115"/>
       <source>Lens profile is not loaded, synchronization will most likely give wrong results. Are you sure you want to continue?</source>
-      <translation>Profil lensa tidak dimuat, sinkronisasi kemungkinan besar akan memberikan hasil yang salah. Apakah anda yakin ingin melanjutkan?</translation>
+      <translation>렌즈 프로필 로드되지 않음, 동기화의 결과가 올바르지 않을 수 있습니다. 계속하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="116"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="119"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="133"/>
       <source>Experimental automatic sync point selection.</source>
-      <translation>Pemilihan titik sinkronisasi otomatis eksperimental.</translation>
+      <translation>실험적인 자동 동기 지점 선택.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="140"/>
       <source>This file uses synced motion data, additional sync points are not needed and can make the output look worse.</source>
-      <translation>File ini menggunakan data motion yang disinkronkan, titik sinkronisasi tambahan tidak diperlukan yang dapat membuat output terlihat lebih buruk.</translation>
+      <translation>이 파일은 영상과 동기화된 흔들림 데이터를 사용하므로, 추가적인 동기 지점을 필요로 하지 않습니다. 동기 지점을 추가하면 결과가 더 나빠질 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="146"/>
       <source>Rough gyro offset</source>
-      <translation>Offset gyro kasar</translation>
+      <translation>근사 자이로 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="154"/>
@@ -1770,76 +1773,76 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/menu/Synchronization.qml" line="163"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
-      <translation>Analisis offset positif dan negatif.
-Ini menggandakan waktu perhitungan, jadi periksa ini hanya untuk titik awal dan hapus centang setelah Anda mengetahui jumlah offsetnya.</translation>
+      <translation>양수 및 음수 오프셋을 모두 분석합니다.
+분석 시간이 배로 늘어나므로, 초기 지점에만 체크하고 오프셋 확인 후에는 체크를 해제하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="169"/>
       <source>Sync search size</source>
-      <translation>Sinkronkan ukuran pencarian</translation>
+      <translation>동기 지점 검색 크기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="189"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
-      <translation>Hitung offset awal terlebih dahulu (menggunakan metode matriks esensial), lalu sempurnakan menggunakan metode rs-sync yang lebih lambat namun lebih akurat.</translation>
+      <translation>애벌로 오프셋을 계산하고 (필수 행렬 방식 사용), 느리지만 더 정확한 롤링 셔터 동기화 방식으로 개선합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="194"/>
       <source>Max sync points</source>
-      <translation>Titik sinkronisasi maksimum</translation>
+      <translation>최대 동기 지점 수</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="210"/>
       <source>Analyze every n-th frame</source>
-      <translation>Menganalisa setiap n-th frame</translation>
+      <translation>n번째 프레임마다 분석</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="223"/>
       <source>Time to analyze per sync point</source>
-      <translation>Waktu untuk menganalisis per titik sinkronisasi</translation>
+      <translation>동기 지점별 분석 시간</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="238"/>
       <source>The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn&apos;t produce good results</source>
-      <translation>Metode AKAZE mungkin lebih akurat tetapi jauh lebih lambat daripada OpenCV. Gunakan hanya jika OpenCV tidak menghasilkan hasil yang baik</translation>
+      <translation>AKAZE 방식은 정밀도가 높지만 OpenCV에 비해 상당히 느립니다. OpenCV로 좋은 결과가 나오지 않는 경우에 사용하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="242"/>
       <source>Optical flow method</source>
-      <translation>Metode Optical flow</translation>
+      <translation>광학 흐름 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="255"/>
       <source>Offset calculation method</source>
-      <translation>Metode kalkulasi offset</translation>
+      <translation>오프셋 계산 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="264"/>
       <source>Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.
 Then try to match these angles to gyroscope angles.</source>
-      <translation>Hitung matriks transformasi kamera dari optical flow untuk mendapatkan sudut rotasi kamera.
-Kemudian cocokkan sudut ini dengan sudut gyroscope.</translation>
+      <translation>카메라의 회전 각도를 얻기 위해 광학 흐름으로부터 카메라 변환 행렬을 계산합니다.
+그리고 얻어낸 각도를 자이로 각도와 일치시킵니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="265"/>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
-      <translation>Hilangkan distorsi titik optical flow menggunakan gyro dan kandidat offset.
-Kemudian hitung panjang garis optical flow.
-Offset yang dihasilkan adalah yang memiliki garis terpendek, yang berarti video bergerak paling sedikit secara visual.</translation>
+      <translation>자이로 및 후보의 오프셋을 사용하여 광학 흐름 지점의 왜곡을 제거합니다.
+그리고 광학 흐름 추적선의 길이를 계산합니다.
+결과 오프셋은 추적선이 가장 짧았던 부분의 오프셋입니다. 즉 영상이 시각적으로 최소로 움직인 때입니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="266"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
-      <translation>Rolling shutter video ke algoritma sinkronisasi gyro.
-Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</translation>
+      <translation>롤링 셔터가 있는 비디오를 자이로에 동기화시키는 알고리즘.
+동기화하기 전에 롤링 셔터 값이 적절한지 확인하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="273"/>
       <source>Low pass filter</source>
-      <translation>Filter Low pass</translation>
+      <translation>로우패스 필터</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="278"/>
@@ -1849,12 +1852,12 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="291"/>
       <source>Show detected features</source>
-      <translation>Tampilkan fitur yang terdeteksi</translation>
+      <translation>검출된 시각적 특징 보이기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="297"/>
       <source>Show optical flow</source>
-      <translation>Tampilkan optical flow</translation>
+      <translation>광학 흐름 보이기</translation>
     </message>
   </context>
   <context>
@@ -1863,115 +1866,115 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
       <location filename="../../src/ui/menu/MotionData.qml" line="132"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>File name</source>
-      <translation>Nama file</translation>
+      <translation>파일 이름</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="133"/>
       <source>Detected format</source>
-      <translation>Format yang terdeteksi</translation>
+      <translation>감지된 형식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="25"/>
       <source>Detected camera</source>
-      <translation>Kamera yang terdeteksi</translation>
+      <translation>감지된 카메라</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="46"/>
       <source>Camera</source>
-      <translation>Kamera</translation>
+      <translation>카메라</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="47"/>
       <source>Lens</source>
-      <translation>Lensa</translation>
+      <translation>렌즈</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
       <source>Setting</source>
-      <translation>Pengaturan</translation>
+      <translation>설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Dimensions</source>
-      <translation>Ukuran dimensi</translation>
+      <translation>해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="59"/>
       <source>Camera brand</source>
-      <translation>Merek kamera</translation>
+      <translation>카메라 브랜드</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="60"/>
       <source>Camera model</source>
-      <translation>Model kamera</translation>
+      <translation>카메라 모델</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="61"/>
       <source>Lens model</source>
-      <translation>Lensa</translation>
+      <translation>렌즈 모델</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="62"/>
       <source>Camera setting</source>
-      <translation>Pengaturan kamera</translation>
+      <translation>카메라 설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
       <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
       <source>Additional info</source>
-      <translation>Informasi tambahan</translation>
+      <translation>추가 정보</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
       <source>Default output size</source>
-      <translation>Ukuran output default</translation>
+      <translation>기본 출력 해상도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
       <source>Identifier</source>
-      <translation>Id</translation>
+      <translation>식별자</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
       <location filename="../../src/ui/menu/LensProfile.qml" line="51"/>
       <source>Calibrated by</source>
-      <translation>Di kalibrasi oleh</translation>
+      <translation>교정자 이름</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="27"/>
       <source>Duration</source>
-      <translation>Durasi</translation>
+      <translation>길이</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
       <source>Frame rate</source>
-      <translation>Frame rate</translation>
+      <translation>프레임률</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="29"/>
       <source>Codec</source>
-      <translation>Codec</translation>
+      <translation>코덱</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="30"/>
       <source>Pixel format</source>
-      <translation>Format Piksel</translation>
+      <translation>픽셀 형식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="31"/>
       <source>Audio</source>
-      <translation>Audio</translation>
+      <translation>음성</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="32"/>
       <source>Rotation</source>
-      <translation>Rotasi</translation>
+      <translation>회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="33"/>
       <source>Contains gyro</source>
-      <translation>Mengandung gyro</translation>
+      <translation>자이로 데이터 포함</translation>
     </message>
   </context>
   <context>
@@ -1979,17 +1982,17 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="458"/>
       <source>Auto sync here</source>
-      <translation>Sinkronisasi otomatis di sini</translation>
+      <translation>현재 지점 자동 동기화</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="464"/>
       <source>Add manual sync point here</source>
-      <translation>Tambahkan titik sinkronisasi manual di sini</translation>
+      <translation>현재 지점에 수동 동기 지점 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="479"/>
       <source>Estimate rolling shutter here</source>
-      <translation>Estimasi rolling shutter di sini</translation>
+      <translation>롤링 셔터 추정치</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="483"/>
@@ -1998,40 +2001,41 @@ on a part of your video with significant camera motion (ideally horizontal).
 
 This feature is experimental, the results may not be correct at all.
 Are you sure you want to continue?</source>
-      <translation>Video Anda harus sudah disinkronkan dengan benar dan Anda harus menggunakan fungsi ini pada bagian video dengan gerakan kamera yang signifikan (idealnya horizontal).
+      <translation>영상이 올바르게 동기화되어 있어야 하며,
+영상의 (이상적으로는 수평 방향의) 큰 카메라 흔들림이 있는 부분에서 이 기능을 사용해야 합니다.
 
-Fitur ini eksperimental, hasilnya mungkin tidak baik sama sekali.
-Apakah anda yakin ingin melanjutkan?</translation>
+이 기능은 실험적이며 결과가 전혀 올바르지 않을 수 있습니다.
+계속하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="487"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="490"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="448"/>
       <source>Add calibration point</source>
-      <translation>Tambahkan titik kalibrasi</translation>
+      <translation>교정 지점 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="244"/>
       <source>Delete</source>
-      <translation>Hapus</translation>
+      <translation>삭제</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="250"/>
       <source>Ease in</source>
-      <translation>Masuk perlahan</translation>
+      <translation>이즈 인(Ease in)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="257"/>
       <source>Ease out</source>
-      <translation>Keluar perlahan</translation>
+      <translation>이즈 아웃(Ease out)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="275"/>
@@ -2041,117 +2045,117 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="276"/>
       <source>Video rotation</source>
-      <translation>Rotasi video</translation>
+      <translation>영상 회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="277"/>
       <source>Zooming speed</source>
-      <translation>Kecepatan zooming</translation>
+      <translation>확대 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="278"/>
       <source>Zooming center offset X</source>
-      <translation>Perbesar offset tengah X</translation>
+      <translation>확대 중심 X축 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="279"/>
       <source>Zooming center offset Y</source>
-      <translation>Perbesar offset tengah Y</translation>
+      <translation>확대 중심 Y축 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="280"/>
       <source>Background margin</source>
-      <translation>Margin background</translation>
+      <translation>배경 여백</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="281"/>
       <source>Background feather</source>
-      <translation>Background halus</translation>
+      <translation>배경 페더링</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="282"/>
       <source>Horizon lock amount</source>
-      <translation>Jumlah kunci horizon</translation>
+      <translation>수평 잠금 수준</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="283"/>
       <source>Horizon lock roll correction</source>
-      <translation>Koreksi kunci horizon</translation>
+      <translation>수평 잠금 롤 보정</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="284"/>
       <source>Lens correction strength</source>
-      <translation>Kekuatan koreksi lensa</translation>
+      <translation>렌즈 보정 강도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="285"/>
       <source>Max smoothness</source>
-      <translation>Kehalusan maksimal</translation>
+      <translation>최대 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="286"/>
       <source>Max smoothness at high velocity</source>
-      <translation>Tingkat kehalusan pada kecepatan (velocity) tinggi</translation>
+      <translation>고속에서의 최대 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="287"/>
       <source>Smoothness</source>
-      <translation>Tingkat Kehalusan</translation>
+      <translation>평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="288"/>
       <source>Smoothness pitch</source>
-      <translation>Tingkat kehalusan pitch</translation>
+      <translation>피치 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="289"/>
       <source>Smoothness roll</source>
-      <translation>Tingkat kehalusan roll</translation>
+      <translation>롤 평활도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <source>Smoothness yaw</source>
-      <translation>Tingkat kehalusan yaw</translation>
+      <translation>요 각도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="470"/>
       <source>Guess IMU orientation here</source>
-      <translation>Menebak orientasi IMU di sini</translation>
+      <translation>IMU 방향 추측</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="497"/>
       <source>Estimate gyro bias here</source>
-      <translation>Estimasi bias data gyro disini</translation>
+      <translation>자이로 바이어스 추정치</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="502"/>
       <source>Delete all sync points</source>
-      <translation>Hapus semua titik sinkronisasi</translation>
+      <translation>모든 동기 지점 삭제</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="511"/>
       <source>Chart display mode</source>
-      <translation>Mode tampilan grafik chart</translation>
+      <translation>차트 표시 모드</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="512"/>
       <source>Gyroscope</source>
-      <translation>Gyroscope</translation>
+      <translation>자이로스코프</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="513"/>
       <source>Accelerometer</source>
-      <translation>Accelerometer</translation>
+      <translation>가속도계</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="514"/>
       <source>Magnetometer</source>
-      <translation>Magnetometer</translation>
+      <translation>자기계</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="515"/>
       <source>Quaternions</source>
-      <translation>Quaternions</translation>
+      <translation>쿼터니언</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="637"/>
@@ -2161,32 +2165,32 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="738"/>
       <source>Control+Shift+Scroll</source>
-      <translation>Control+Shift+Scroll</translation>
+      <translation>Ctrl+Shift+스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="739"/>
       <source>Command+Scroll</source>
-      <translation>Command+Scroll</translation>
+      <translation>Cmd+스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="739"/>
       <source>Ctrl+Scroll</source>
-      <translation>Ctrl+Scroll</translation>
+      <translation>Ctrl+스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="736"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
-      <translation>%1 untuk memperbesar secara horizontal, %2 untuk memperbesar secara vertikal, %3 untuk menggeser, klik dua kali untuk mengatur ulang zoom</translation>
+      <translation>%1로 수평 확대, %2로 수직 확대, %3로 타임라인 이동, 더블 클릭하여 확대 재설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="737"/>
       <source>Scroll</source>
-      <translation>Gulir</translation>
+      <translation>스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="738"/>
       <source>Alt+Scroll</source>
-      <translation>Alt+Scroll</translation>
+      <translation>Alt+스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="604"/>
@@ -2198,7 +2202,7 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="717"/>
       <source>Save</source>
-      <translation>Simpan</translation>
+      <translation>저장</translation>
     </message>
   </context>
   <context>
@@ -2206,22 +2210,22 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="84"/>
       <source>Edit offset</source>
-      <translation>Mengedit offset</translation>
+      <translation>오프셋 편집</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete sync point</source>
-      <translation>Hapus titik sinkronisasi</translation>
+      <translation>동기 지점 삭제</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="89"/>
       <source>Delete calibration point</source>
-      <translation>Hapus titik kalibrasi</translation>
+      <translation>교정 지점 삭제</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="95"/>
       <source>Zoom in</source>
-      <translation>Memperbesar</translation>
+      <translation>확대</translation>
     </message>
   </context>
   <context>
@@ -2229,27 +2233,27 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/Util.js" line="22"/>
       <source>d</source>
-      <translation>d</translation>
+      <translation>일</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="23"/>
       <source>h</source>
-      <translation>h</translation>
+      <translation>시</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="24"/>
       <source>m</source>
-      <translation>m</translation>
+      <translation>분</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="25"/>
       <source>s</source>
-      <translation>s</translation>
+      <translation>초</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="27"/>
       <source>&amp;lt; 1s</source>
-      <translation>&amp;lt; 1s</translation>
+      <translation>&amp;lt; 1초</translation>
     </message>
   </context>
   <context>
@@ -2257,30 +2261,30 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="243"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
-      <translation>Ada %1 file yang terkait dengan video ini, apakah Anda ingin memuatnya?</translation>
+      <translation>이 영상과 연결된 %1 파일이 있습니다. 로드하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="173"/>
       <location filename="../../src/ui/VideoArea.qml" line="208"/>
       <location filename="../../src/ui/VideoArea.qml" line="244"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="213"/>
       <location filename="../../src/ui/VideoArea.qml" line="247"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="437"/>
       <source>Zoom: %1</source>
-      <translation>Perbesar: %1</translation>
+      <translation>확대: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="466"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
-      <translation>Gagal memuat file yang dipilih, file tidak didukung atau tidak valid.</translation>
+      <translation>선택된 파일 로드에 실패했습니다, 지원되지 않거나 유효하지 않습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="131"/>
@@ -2291,159 +2295,159 @@ Apakah anda yakin ingin melanjutkan?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="366"/>
       <location filename="../../src/ui/VideoArea.qml" line="466"/>
       <source>Ok</source>
-      <translation>Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="191"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
-      <translation>Gambar berurutan terdeteksi.
-Silakan masukan frame rate: </translation>
+      <translation>이미지 시퀀스가 감지되었습니다.
+프레임률을 입력하세요: </translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <location filename="../../src/ui/VideoArea.qml" line="198"/>
       <location filename="../../src/ui/VideoArea.qml" line="278"/>
       <source>Cancel</source>
-      <translation>Batalkan</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="124"/>
       <source>Downloading %1 (%2)</source>
-      <translation>Mengunduh %1 (%2)</translation>
+      <translation>%1 다운로드 중 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="131"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
-      <translation>Komponen berhasil diinstal.
-Anda perlu merestart Gyroflow agar perubahan diterapkan.
-Antrian render Anda dan file saat ini disimpan secara otomatis.</translation>
+      <translation>구성 요소가 성공적으로 설치되었습니다.
+변경 사항을 적용하려면 Gyroflow를 다시 시작해야 합니다.
+렌더링 대기열과 현재 파일은 자동 저장되었습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="146"/>
       <source>Merging files to %1 (%2)</source>
-      <translation>Menggabungkan file ke %1 (%2)</translation>
+      <translation>%1(으)로 파일 병합 중 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
-      <translation>Format ini memerlukan SDK eksternal. Apakah Anda ingin mengunduhnya sekarang?</translation>
+      <translation>이 형식은 외부 SDK가 필요합니다. 다운로드하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="207"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
-      <translation>Perekaman terpisah telah terdeteksi, apakah Anda ingin menggabungkan file secara otomatis (%1) untuk membuat satu klip penuh?</translation>
+      <translation>분할된 영상이 감지되었습니다. 파일들을 (%1) 자동으로 연결하여 하나의 영상으로 만드시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="263"/>
       <source>You have opened multiple files. What do you want to do?</source>
-      <translation>Anda telah membuka banyak file. Apa yang ingin kamu lakukan?</translation>
+      <translation>여러 파일을 열었습니다. 무엇을 하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="264"/>
       <source>Add to render queue</source>
-      <translation>Tambahakan ke antrian render</translation>
+      <translation>렌더링 대기열에 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="268"/>
       <source>Merge them into one video</source>
-      <translation>Gabungkan semua menjadi satu video</translation>
+      <translation>하나의 영상으로 병합</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>
       <source>Open the first file</source>
-      <translation>Buka file dulu</translation>
+      <translation>첫 번째 파일 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="359"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
-      <translation>Format file terdeteksi, tetapi tidak ada data motion yang ditemukan.
-Kamera mungkin tidak merekam data motion dalam mode ini.</translation>
+      <translation>파일 형식이 감지되었으나, 흔들림 데이터를 찾을 수 없습니다.
+카메라가 특정 촬영 모드에서 흔들림 데이터를 기록하지 않을 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="366"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
-      <translation>Kecepatan pengambilan sampel data gerak terlalu rendah (%1 Hz).
-50 Hz adalah minimum absolut dan kami merekomendasikan setidaknya 200 Hz.</translation>
+      <translation>흔들림 데이터의 샘플링 속도가 너무 느립니다 (%1 Hz).
+못 해도 50 Hz, 최소 200 Hz를 권장합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="517"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
-      <translation>Profil lensa tidak dimuat, hasilnya tidak akan terlihat benar. Pilih profil lensa untuk kamera Anda.</translation>
+      <translation>렌즈 프로필이 로드되지 않아 결과가 올바르지 않을 수 있습니다. 카메라에 맞는 렌즈 프로필을 로드해주세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="543"/>
       <source>Loading %1...</source>
-      <translation>Memuat %1...</translation>
+      <translation>%1 로드 중...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="543"/>
       <source>Drop video file here</source>
-      <translation>Taruh file video di sini</translation>
+      <translation>여기에 영상 파일을 놓으세요</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="616"/>
       <source>Analyzing %1...</source>
-      <translation>Menganalisa %1...</translation>
+      <translation>%1 분석 중...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="625"/>
       <source>Loading gyro data %1...</source>
-      <translation>Memuat data gyro %1...</translation>
+      <translation>자이로 데이터 %1 로드 중...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="674"/>
       <source>Trim start</source>
-      <translation>Mulai edit</translation>
+      <translation>잘라내기 시작점</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="675"/>
       <source>Previous frame</source>
-      <translation>Frame Sebelumnya</translation>
+      <translation>이전 프레임</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="678"/>
       <source>Pause</source>
-      <translation>Pause</translation>
+      <translation>일시 정지</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="678"/>
       <source>Play</source>
-      <translation>Play</translation>
+      <translation>재생</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="681"/>
       <source>Next frame</source>
-      <translation>Frame Selanjutnya</translation>
+      <translation>다음 프레임</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="682"/>
       <source>Trim end</source>
-      <translation>Edit selesai</translation>
+      <translation>잘라내기 종료점</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="709"/>
       <source>Toggle stabilization</source>
-      <translation>Stabilisasi gambar</translation>
+      <translation>안정화 켜기</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="715"/>
       <source>Mute</source>
-      <translation>Bisu</translation>
+      <translation>음소거</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="715"/>
       <source>Unmute</source>
-      <translation>Bersuara</translation>
+      <translation>음소거 해제</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="732"/>
       <source>Playback speed</source>
-      <translation>Kecepatan pemutaran</translation>
+      <translation>재생 속도</translation>
     </message>
   </context>
   <context>
@@ -2451,12 +2455,12 @@ Kamera mungkin tidak merekam data motion dalam mode ini.</translation>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="11"/>
       <source>Video information</source>
-      <translation>Informasi video</translation>
+      <translation>영상 정보</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="127"/>
       <source>Open file</source>
-      <translation>Membuka file</translation>
+      <translation>파일 열기</translation>
     </message>
   </context>
   <context>
@@ -2464,17 +2468,17 @@ Kamera mungkin tidak merekam data motion dalam mode ini.</translation>
     <message>
       <location filename="../../src/ui/main_window.qml" line="68"/>
       <source>Are you sure you want to exit?</source>
-      <translation>Anda yakin ingin keluar?</translation>
+      <translation>종료하시겠습니까?</translation>
     </message>
     <message>
       <location filename="../../src/ui/main_window.qml" line="69"/>
       <source>Yes</source>
-      <translation>Ya</translation>
+      <translation>예</translation>
     </message>
     <message>
       <location filename="../../src/ui/main_window.qml" line="70"/>
       <source>No</source>
-      <translation>Tidak</translation>
+      <translation>아니요</translation>
     </message>
   </context>
 </TS>

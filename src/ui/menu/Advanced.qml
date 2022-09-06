@@ -165,6 +165,7 @@ MenuItem {
                 ["Indonesian (Bahasa Indonesia)","id"],
                 ["Italian (italiano)",           "it"],
                 ["Japanese (日本語)",             "ja"],
+                ["Korean (한국어)",              "ko"],
                 ["Norwegian (norsk)",            "no"],
                 ["Polish (polski)",              "pl"],
                 ["Portuguese - Brazilian (português brasileiro)", "pt_BR"],
