@@ -134,9 +134,6 @@ jobs:
           PROJECT_DIR: ${{ github.workspace }}
           QT_DIR: ${{ env.Qt6_DIR }}
         run: |
-          ls -l $PROJECT_DIR/VULKAN_SDK/
-          ls -l $PROJECT_DIR/_vulkan_build/
-          ls -l $VULKAN_SDK/
           chmod +x ${{ github.workspace }}/ext/install-deps-linux.sh
           chmod +x ${{ github.workspace }}/_deployment/deploy-linux.sh
           ${{ github.workspace }}/_deployment/deploy-linux.sh build-docker

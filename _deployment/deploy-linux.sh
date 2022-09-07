@@ -19,13 +19,10 @@ if [ "$1" == "build-docker" ]; then
         curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
         source \$HOME/.cargo/env
         export FFMPEG_DIR=$FFMPEG_DIR
-        export VULKAN_SDK=$PROJECT_DIR/VULKAN_SDK
+        export VULKAN_SDK=$VULKAN_SDK
         export GITHUB_RUN_NUMBER=$GITHUB_RUN_NUMBER
         export OPENCV_LINK_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/lib
         export OPENCV_INCLUDE_PATHS=\$VCPKG_ROOT/installed/x64-linux-release/include/
-        ls -l $PROJECT_DIR/VULKAN_SDK
-        ls -l $PROJECT_DIR/VULKAN_SDK/Include
-        ls -l /usr/include/vulkan
 
         export PATH=\"$QT_DIR/bin:\$PATH\"
         export OPENCV_LINK_LIBS=\"opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4\"
