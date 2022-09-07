@@ -17,6 +17,7 @@ Item {
     property alias innerItem: innerItem;
     default property alias data: col.data;
     property string iconName;
+    property bool canEnsureVisible: false;
 
     Component.onCompleted: {
         const val = window.settings.value(root.objectName + "-opened", root.opened);
@@ -25,7 +26,7 @@ Item {
 
     function ensureVisible() {
         const flick = parent.parent.parent;
-        if (opened && anim.enabled && (y + height > flick.height)) {
+        if (canEnsureVisible && opened && anim.enabled && (y + height > flick.height)) {
             flick.contentY = y;
         }
     }
@@ -42,7 +43,7 @@ Item {
     Timer {
         id: timer;
         interval: 700;
-        onTriggered: anim.enabled = false;
+        onTriggered: { anim.enabled = false; canEnsureVisible = true; }
     }
 
     QQC.Button {
@@ -93,6 +94,7 @@ Item {
         onClicked: {
             if (col.children.length > 0) {
                 root.opened = !root.opened;
+                canEnsureVisible = true;
                 window.settings.setValue(root.objectName + "-opened", root.opened);
             } else {
                 root.clicked();

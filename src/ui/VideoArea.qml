@@ -62,7 +62,7 @@ Item {
         const isCorrectGyroLoaded  = paths[1] && window.motionData.filename == Util.getFilename(paths[1]);
         console.log("Video path:", paths[0], "(" + (isCorrectVideoLoaded? "loaded" : "not loaded") + ")", "Gyro path:", paths[1], "(" + (isCorrectGyroLoaded? "loaded" : "not loaded") + ")");
 
-        if (!isCorrectVideoLoaded) {
+        if (paths[0] && !isCorrectVideoLoaded) {
             root.pendingGyroflowData = obj;
             console.log("Loading video file", paths[0]);
             loadFile(controller.path_to_url(paths[0]), false);
@@ -71,7 +71,7 @@ Item {
             }
             return;
         }
-        if (!isCorrectGyroLoaded && controller.file_exists(paths[1])) {
+        if (paths[1] && !isCorrectGyroLoaded && controller.file_exists(paths[1])) {
             root.pendingGyroflowData = obj;
             console.log("Loading gyro file", paths[1]);
             controller.load_telemetry(controller.path_to_url(paths[1]), paths[0] == paths[1], window.videoArea.vid, window.videoArea.timeline.getChart(), window.videoArea.timeline.getKeyframesView());
@@ -494,6 +494,7 @@ Item {
                         messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
                         errorShown = true;
                         dropText.loadingFile = "";
+                        root.pendingGyroflowData = null;
                     }
                 }
                 Timer {
@@ -510,6 +511,11 @@ Item {
                 backgroundColor: "#111111";
                 Component.onCompleted: {
                     controller.init_player(this);
+                    Qt.callLater(() => {
+                        if (openFileOnStart) {
+                            root.loadFile(controller.path_to_url(openFileOnStart));
+                        }
+                    });
                 }
                 Rectangle {
                     border.color: styleVideoBorderColor;

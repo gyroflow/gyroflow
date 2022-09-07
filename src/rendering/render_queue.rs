@@ -7,7 +7,7 @@ use crate::{ core, rendering, util };
 use crate::core::{ stabilization, StabilizationManager };
 use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{ HashMap, HashSet };
 use parking_lot::RwLock;
 use regex::Regex;
 
@@ -173,7 +173,7 @@ pub struct RenderQueue {
     pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
     pub error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
     pub added: qt_signal!(job_id: u32),
-    pub processing_done: qt_signal!(job_id: u32),
+    pub processing_done: qt_signal!(job_id: u32, by_preset: bool),
     pub processing_progress: qt_signal!(job_id: u32, progress: f64),
 
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
@@ -192,6 +192,8 @@ pub struct RenderQueue {
     pub queue_finished: qt_signal!(),
 
     pub export_project: u32,
+
+    pub jobs_added: HashSet<u32>,
 
     paused_timestamp: Option<u64>,
 
@@ -809,7 +811,7 @@ impl RenderQueue {
             this.processing_progress(job_id, progress);
         });
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
-            this.processing_done(job_id);
+            this.processing_done(job_id, false);
         });
 
         let suffix = self.default_suffix.to_string();
@@ -895,7 +897,7 @@ impl RenderQueue {
                     core::run_threaded(move || {
                         let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
-                            if std::env::args().len() == 1 { // Don't fetch thumbs in the CLI
+                            if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
                                 let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
@@ -1025,6 +1027,7 @@ impl RenderQueue {
                 }
             }
         }
+        self.jobs_added.insert(job_id);
 
         job_id
     }
@@ -1161,7 +1164,7 @@ impl RenderQueue {
             this.processing_progress(job_id, progress);
         });
         let processing_done = util::qt_queued_callback_mut(self, |this, job_id: u32| {
-            this.processing_done(job_id);
+            this.processing_done(job_id, true);
         });
         let err = util::qt_queued_callback_mut(self, move |this, (job_id, msg): (u32, String)| {
             this.error(job_id, QString::from(msg), QString::default(), QString::default());
@@ -1185,6 +1188,7 @@ impl RenderQueue {
                     let job_id = *job_id;
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);
+                        job.render_options.output_path = Self::get_output_path(&self.default_suffix.to_string(), &itm.input_file.to_string(), &job.render_options.codec, &job.render_options.output_path);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
                         itm.output_path = QString::from(job.render_options.output_path.as_str());
                         if std::path::Path::new(&job.render_options.output_path).exists() {

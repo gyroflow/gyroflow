@@ -40,6 +40,7 @@ Modal {
             "Rough gyro offset":          ["initial_offset", "initial_offset_inv"],
             "Sync search size":           ["search_size", "calc_initial_fast"],
             "Max sync points":            ["max_sync_points"],
+            "Do autosync":                ["do_autosync"],
             "Advanced":                   ["every_nth_frame", "time_per_syncpoint", "of_method", "offset_method", "auto_sync_points"]
         },
         "Stabilization|stabilization": {
@@ -64,7 +65,7 @@ Modal {
         }
     }];
 
-    property var defaultOff: ["trim_start", "offsets", "video_infofps_scale", "video_inforotation"];
+    property var defaultOff: ["trim_start", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync"];
 
     text: isPreset? qsTr("Select settings you want to include in the preset")
                   : qsTr("Select settings you want to apply to all items in the render queue");
@@ -102,6 +103,7 @@ Modal {
             QT_TR_NOOP("Rough gyro offset");
             QT_TR_NOOP("Sync search size");
             QT_TR_NOOP("Max sync points");
+            QT_TR_NOOP("Do autosync");
             QT_TR_NOOP("Advanced");
         QT_TR_NOOP("Stabilization");
             QT_TR_NOOP("FOV");
@@ -217,6 +219,7 @@ Modal {
                     }
                 }
             });
+
             root.apply(finalObj);
         }
         root.opened = false;

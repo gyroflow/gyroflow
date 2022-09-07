@@ -45,7 +45,7 @@ fn entry() {
     #[cfg(target_os = "windows")]
     unsafe {
         use windows::Win32::System::Console::*;
-        if !AttachConsole(ATTACH_PARENT_PROCESS).as_bool() && std::env::args().len() > 1 {
+        if !AttachConsole(ATTACH_PARENT_PROCESS).as_bool() && cli::will_run_in_console() {
             AllocConsole();
         }
     }
@@ -59,7 +59,8 @@ fn entry() {
         qApp->setApplicationName("Gyroflow");
     });
 
-    if cli::run() {
+    let mut open_file = String::new();
+    if cli::run(&mut open_file) {
         return;
     }
 
@@ -164,6 +165,9 @@ fn entry() {
 
     rendering::init().unwrap();
 
+    engine.set_property("openFileOnStart".into(), QString::from(open_file).into());
+
+    engine.set_property("defaultInitializedDevice".into(), QString::default().into());
     if let Some((name, list_name)) = core::gpu::initialize_contexts() {
         rendering::set_gpu_type_from_name(&name);
         engine.set_property("defaultInitializedDevice".into(), QString::from(list_name).into());

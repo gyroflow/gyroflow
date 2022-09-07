@@ -279,6 +279,9 @@ Rectangle {
                                     if (finalData.hasOwnProperty("output") && finalData.output.output_path) {
                                         finalData.output.output_path = Util.getFolder(finalData.output.output_path);
                                     }
+                                    if (obj.synchronization && obj.synchronization.do_autosync) {
+                                        finalData.synchronization.do_autosync = true;
+                                    }
                                     if (index == 1) { // Preset
                                         presetFileDialog.presetData = finalData;
                                         presetFileDialog.open2();

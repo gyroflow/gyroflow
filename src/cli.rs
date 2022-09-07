@@ -8,13 +8,18 @@ use std::sync::Arc;
 use std::time::Instant;
 use qmetaobject::{ QString, QStringList };
 use std::cell::RefCell;
-use std::collections::{ HashMap, HashSet };
+use std::collections::HashMap;
 use crate::rendering;
 use crate::rendering::render_queue::*;
 use indicatif::{ProgressBar, MultiProgress, ProgressState, ProgressStyle};
 
 cpp! {{
+    struct TraitObject2 { void *data; void *vtable; };
     #include <QCoreApplication>
+    #include <QFileSystemWatcher>
+    #include <QTimer>
+    #include <QDirIterator>
+    #include <QMap>
 }}
 macro_rules! connect {
     ($obj_ptr:ident, $obj_borrowed:ident, $signal:ident, $cb:expr) => {
@@ -51,19 +56,48 @@ struct Opts {
     #[argh(option, default = "0")]
     export_project: u32,
 
-    /// preset content directly (instead of a file), eg. "{{ 'version': 2, 'stabilization': {{ 'fov': 1.5 }} }}"
+    /// preset (file or content directly), eg. "{{ 'version': 2, 'stabilization': {{ 'fov': 1.5 }} }}"
     #[argh(option)]
     preset: Option<String>,
+
+    /// open file in the GUI (video or project)
+    #[argh(option)]
+    open: Option<String>,
+
+    /// watch folder for automated processing
+    #[argh(option)]
+    watch: Option<String>,
 }
 
-pub fn run() -> bool {
+pub fn will_run_in_console() -> bool {
+    if std::env::args().len() > 1 {
+        let opts: Opts = argh::from_env();
+        if let Some(open) = opts.open {
+            if !open.is_empty() {
+                return false;
+            }
+        }
+        return true;
+    }
+    false
+}
+
+pub fn run(open_file: &mut String) -> bool {
     if std::env::args().len() > 1 {
         let opts: Opts = argh::from_env();
 
         let (videos, mut lens_profiles, mut presets) = detect_types(&opts.input);
-        if let Some(preset) = opts.preset {
+        if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
+                if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
                 presets.push(preset.clone());
+            }
+        }
+
+        if let Some(open) = opts.open {
+            if !open.is_empty() {
+                *open_file = open;
+                return false;
             }
         }
 
@@ -73,18 +107,22 @@ pub fn run() -> bool {
                 return true;
             }
         }
-        if lens_profiles.len() > 1 {
-            log::error!("More than one lens profile!");
-            return true;
-        }
-        if videos.is_empty() {
-            log::error!("No videos provided!");
-            return true;
-        }
+        let mut watching = opts.watch.as_ref().map(|x| !x.is_empty()).unwrap_or_default();
 
-        log::info!("Videos: {:?}", videos);
-        if !lens_profiles.is_empty() { log::info!("Lens profiles: {:?}", lens_profiles); }
-        if !presets.is_empty() { log::info!("Presets: {:?}", presets); }
+        if !watching {
+            if lens_profiles.len() > 1 {
+                log::error!("More than one lens profile!");
+                return true;
+            }
+            if videos.is_empty() {
+                log::error!("No videos provided!");
+                return true;
+            }
+
+            log::info!("Videos: {:?}", videos);
+            if !lens_profiles.is_empty() { log::info!("Lens profiles: {:?}", lens_profiles); }
+            if !presets.is_empty() { log::info!("Presets: {:?}", presets); }
+        }
 
         let m = MultiProgress::new();
         m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
@@ -103,7 +141,7 @@ pub fn run() -> bool {
         let pbh0 = m.add(ProgressBar::new(1)); pbh0.set_style(ProgressStyle::with_template("{msg}").unwrap()); pbh0.set_message(" ");
         let pbh = m.add(ProgressBar::new(1)); pbh.set_style(ProgressStyle::with_template("{spinner:.green} {msg:73} Elapsed: {elapsed_precise}").unwrap().tick_strings(&spinner)); pbh.set_message("Queue"); pbh.enable_steady_tick(std::time::Duration::from_millis(70));
 
-        log::set_max_level(log::LevelFilter::Info);
+        log::set_max_level(log::LevelFilter::Debug);
 
         let time = Instant::now();
         let mut queue_printed = false;
@@ -117,7 +155,7 @@ pub fn run() -> bool {
         if let Some((name, _list_name)) = gyroflow_core::gpu::initialize_contexts() {
             rendering::set_gpu_type_from_name(&name);
         }
-        let mut additional_data = setup_defaults(stab);
+        let mut additional_data = setup_defaults(stab, &mut queue);
 
         if let Some(mut outp) = opts.out_params {
             outp = outp.replace('\'', "\"");
@@ -126,35 +164,60 @@ pub fn run() -> bool {
 
         queue.set_parallel_renders(opts.parallel_renders.max(1));
         queue.set_when_done(opts.when_done);
+        let suffix = format!("{}.", queue.default_suffix.to_string());
 
         if opts.export_project > 0 {
             queue.export_project = opts.export_project;
         }
 
-        let mut jobs_added = HashSet::new();
         let mut pbs = HashMap::<u32, ProgressBar>::new();
 
         let queue = RefCell::new(queue);
         let queue_ptr = unsafe { qmetaobject::QObjectPinned::new(&queue).get_or_create_cpp_object() };
+
+        if let Some(watch) = opts.watch {
+            watching = watch_folder(watch, |path| {
+                if !path.contains(&suffix) {
+                    log::info!("New file detected: {}", path);
+                    let queue = unsafe { &mut *queue.as_ptr() };
+                    let additional_data2 = additional_data.to_string();
+                    qmetaobject::single_shot(std::time::Duration::from_millis(1), move || {
+                        queue.add_file(path.clone(), additional_data2.clone());
+                    });
+                }
+            });
+        }
+
         unsafe {
             let q = queue.borrow();
             connect!(queue_ptr, q, status_changed, || {
                 let queue = &mut *queue.as_ptr();
                 // log::info!("Status: {}", q.status.to_string());
 
-                if queue.status.to_string() == "stopped" && queue.get_pending_count() == 0 && queue.get_active_render_count() == 0 {
+                if !watching && queue.status.to_string() == "stopped" && queue.get_pending_count() == 0 && queue.get_active_render_count() == 0 {
                     cpp!(unsafe [] { qApp->quit(); });
                 }
             });
             connect!(queue_ptr, q, render_progress, |job_id: &u32, _progress: &f64, current_frame: &usize, total_frames: &usize, _finished: &bool| {
                 let pb = pbs.get(job_id).unwrap();
+                let queue = &mut *queue.as_ptr();
+                let qi = queue.queue.borrow();
                 if *current_frame >= *total_frames {
-                    pb.set_message(format!("\x1B[1;32m{}\x1B[0m", pb.message()));
+                    let mut ok = true;
+                    for item in qi.iter() {
+                        if item.job_id == *job_id {
+                            ok = item.error_string.is_empty();
+                            break;
+                        }
+                    }
+                    if ok {
+                        pb.set_message(format!("\x1B[1;32m{}\x1B[0m", pb.message())); // Green
+                    } else {
+                        pb.set_message(format!("\x1B[1;31m{}\x1B[0m", pb.message())); // Red
+                    }
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
                 } else if *current_frame > 0 && m.is_hidden() {
                     pbh.set_message("Rendering:");
-                    let queue = &mut *queue.as_ptr();
-                    let qi = queue.queue.borrow();
 
                     if !queue_printed {
                         log::info!("Queue:");
@@ -223,34 +286,40 @@ pub fn run() -> bool {
                 pb.set_message(fname);
                 pbs.insert(*job_id, pb);
             });
-            connect!(queue_ptr, q, processing_done, |job_id: &u32| {
+            connect!(queue_ptr, q, processing_done, |job_id: &u32, by_preset: &bool| {
                 let queue = &mut *queue.as_ptr();
-                // log::info!("[{:08x}] Processing done", job_id);
+                log::info!("[{:08x}] Processing done", job_id);
 
-                if !lens_profiles.is_empty() {
+                if let Some(file) = lens_profiles.first() {
                     // Apply lens profile
-                    let file = lens_profiles.first().unwrap();
                     log::info!("Loading lens profile {}", file);
                     let stab = queue.get_stab_for_job(*job_id).unwrap();
                     stab.load_lens_profile(file).expect("Loading lens profile");
                     stab.recompute_blocking();
                 }
 
-                jobs_added.remove(job_id);
+                let fname = std::path::Path::new(&queue.get_job_output_path(*job_id).to_string()).file_name().map(|x| x.to_string_lossy().to_string()).unwrap();
+                pbs.get(job_id).unwrap().set_message(fname);
 
-                if jobs_added.is_empty() {
+                queue.jobs_added.remove(job_id);
+
+                if queue.jobs_added.is_empty() {
                     // All jobs added and completed processing
 
-                    lens_profiles.clear(); // Apply lens profiles only once
-
-                    // Apply presets
-                    for preset in presets.drain(..) {
-                        log::info!("Applying preset {}", preset);
-                        if preset.starts_with('{') {
-                            queue.apply_to_all(preset, additional_data.to_string());
-                        } else if let Ok(data) = std::fs::read_to_string(&preset) {
-                            queue.apply_to_all(data, additional_data.to_string());
+                    if !by_preset {
+                        // Apply presets
+                        for preset in &presets {
+                            log::info!("Applying preset {}", preset);
+                            if preset.starts_with('{') {
+                                queue.apply_to_all(preset.clone(), additional_data.to_string());
+                            } else if let Ok(data) = std::fs::read_to_string(&preset) {
+                                queue.apply_to_all(data, additional_data.to_string());
+                            }
                         }
+                    }
+                    if !watching {
+                        lens_profiles.clear(); // Apply lens profiles only once
+                        presets.clear();
                     }
 
                     qmetaobject::single_shot(std::time::Duration::from_millis(500), move || {
@@ -259,11 +328,11 @@ pub fn run() -> bool {
                 }
             });
         }
-        {
+
+        if !watching {
             let mut queue = queue.borrow_mut();
             for file in &videos {
-                let job_id = queue.add_file(file.clone(), additional_data.to_string());
-                jobs_added.insert(job_id);
+                queue.add_file(file.clone(), additional_data.to_string());
             }
         }
 
@@ -324,7 +393,7 @@ fn get_saved_settings() -> HashMap<String, String> {
     map
 }
 
-fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serde_json::Value {
+fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>, queue: &mut RenderQueue) -> serde_json::Value {
     let settings = get_saved_settings();
     dbg!(&settings);
 
@@ -359,6 +428,9 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serd
 
     if let Some(gdec) = settings.get("gpudecode").and_then(|x| x.parse::<bool>().ok()) {
         *rendering::GPU_DECODING.write() = gdec;
+    }
+    if let Some(suffix) = settings.get("defaultSuffix") {
+        queue.default_suffix = QString::from(suffix.as_str());
     }
 
     let codec = settings.get("defaultCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap().min(codecs.len() - 1);
@@ -395,5 +467,70 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>) -> serd
             "offset_method":      2,
             "auto_sync_points":   true,
         }
+    })
+}
+
+fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
+    if path.is_empty() { return false; }
+    if !std::path::Path::new(&path).exists() { log::info!("{} doesn't exist.", path); return false; }
+
+    let path = QString::from(path);
+    let func: Box<dyn FnMut(String)> = Box::new(cb);
+    let cb_ptr = Box::into_raw(func);
+    cpp!(unsafe [path as "QString", cb_ptr as "TraitObject2"] -> bool as "bool" {
+        QFileSystemWatcher *w = new QFileSystemWatcher();
+        auto existing = new QStringList();
+        auto paths = new QMap<QString, QMap<QString, qint64> >();
+        QTimer *t = new QTimer();
+        QObject::connect(t, &QTimer::timeout, [=] {
+            bool anyWatching = false;
+            for (const auto &file : paths->keys()) {
+                auto &paths2 = (*paths)[file];
+                for (const auto &path : paths2.keys()) {
+                    anyWatching = true;
+                    QFile f(path);
+                    if (f.open(QFile::ReadOnly)) {
+                        auto size = f.size();
+                        f.close();
+                        if (paths2[path] > 0 && paths2[path] == size) {
+                            rust!(Rust_Gyroflow_cli_watch [cb_ptr: *mut dyn FnMut(String) as "TraitObject2", path: QString as "QString"] {
+                                let mut cb = unsafe { Box::from_raw(cb_ptr) };
+                                cb(path.to_string());
+                                let _ = Box::into_raw(cb); // leak again so it doesn't get deleted here
+                            });
+
+                            existing->append(path);
+                            paths2.remove(path);
+                        } else {
+                            paths2[path] = size;
+                        }
+                    }
+                }
+            }
+            if (!anyWatching) {
+                t->stop();
+            }
+        });
+
+        QDirIterator it(path, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            it.next();
+            auto i = it.fileInfo();
+            if (i.isDir()) w->addPath(i.absoluteFilePath());
+            if (i.isFile()) existing->append(i.absoluteFilePath());
+        }
+        QObject::connect(w, &QFileSystemWatcher::directoryChanged, [=](const QString &file) {
+            auto &paths2 = (*paths)[file];
+            QDirIterator it(file);
+            while (it.hasNext()) {
+                it.next();
+                auto i = it.fileInfo();
+                if (i.isDir()) w->addPath(i.absoluteFilePath());
+                if (i.isFile() && !existing->contains(i.absoluteFilePath()))
+                    paths2.insert(i.absoluteFilePath(), 0);
+            }
+            t->start(1000);
+        });
+        return !w->directories().isEmpty();
     })
 }
