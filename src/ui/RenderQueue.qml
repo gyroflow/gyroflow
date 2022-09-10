@@ -221,9 +221,15 @@ Item {
         Component.onCompleted: {
             const saved = window.settings.value("renderQueue");
 
-            if (saved && saved.length > 100) {
+            if (!isCalibrator && saved && saved.length > 100) {
                 Qt.callLater(() => {
                     render_queue.restore_render_queue(saved, window.getAdditionalProjectDataJson());
+                    messageBox(Modal.Info, qsTr("You have unfinished tasks in the render queue."), [
+                        { text: qsTr("Open render queue"), accent: true, clicked: function() {
+                            videoArea.queue.shown = true;
+                        } },
+                        { text: qsTr("Ok") }
+                    ]);
                 });
             }
         }

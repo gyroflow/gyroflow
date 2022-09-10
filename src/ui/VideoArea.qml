@@ -512,9 +512,8 @@ Item {
                 Component.onCompleted: {
                     controller.init_player(this);
                     Qt.callLater(() => {
-                        if (openFileOnStart) {
+                        if (!isCalibrator && openFileOnStart) {
                             root.loadFile(controller.path_to_url(openFileOnStart));
-                            openFileOnStart = "";
                         }
                     });
                 }

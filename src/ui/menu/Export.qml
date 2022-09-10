@@ -362,7 +362,7 @@ MenuItem {
         text: qsTr("Video speed");
         SliderWithField {
             id: videoSpeed;
-            from: 0.1;
+            from: 10;
             to: 1000.0;
             value: 1.0;
             unit: "%";
@@ -404,7 +404,8 @@ MenuItem {
             anchors.right: parent.right;
             anchors.top: parent.top;
             anchors.topMargin: -30 * dpiScale;
-            anchors.rightMargin: 5 * dpiScale;
+            anchors.rightMargin: 15 * dpiScale;
+            width: 25 * dpiScale;
             contentItem.visible: false;
             scale: 0.7;
             tooltip: qsTr("Link with zooming speed");
