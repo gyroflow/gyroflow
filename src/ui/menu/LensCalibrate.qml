@@ -297,7 +297,7 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
-            fileDialog.currentFile = controller.export_lens_profile_filename(calib.calibrationInfo);
+            fileDialog.selectedFile = controller.export_lens_profile_filename(calib.calibrationInfo);
             fileDialog.open2();
         }
     }

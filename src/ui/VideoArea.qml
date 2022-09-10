@@ -514,6 +514,7 @@ Item {
                     Qt.callLater(() => {
                         if (openFileOnStart) {
                             root.loadFile(controller.path_to_url(openFileOnStart));
+                            openFileOnStart = "";
                         }
                     });
                 }

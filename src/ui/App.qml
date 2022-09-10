@@ -160,7 +160,7 @@ Rectangle {
                             font.pixelSize: 15 * dpiScale;
                             onClicked: {
                                 outputFileDialog.defaultSuffix = outputFile.text.substring(outputFile.text.length - 3);
-                                outputFileDialog.currentFile = controller.path_to_url(outputFile.text);
+                                outputFileDialog.selectedFile = controller.path_to_url(outputFile.text);
                                 outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(outputFile.text));
                                 outputFileDialog.open();
                             }

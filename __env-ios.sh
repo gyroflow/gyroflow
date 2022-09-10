@@ -7,7 +7,7 @@ export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64-ios
 export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/lib
 export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/include/
 
-export PATH="$PROJECT_DIR/ext/6.3.1/ios/bin:$PATH"
+export PATH="$PROJECT_DIR/ext/6.3.2/ios/bin:$PATH"
 
 IPHONESDK="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios="--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=15 -isysroot $IPHONESDK"

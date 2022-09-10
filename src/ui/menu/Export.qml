@@ -362,7 +362,7 @@ MenuItem {
         text: qsTr("Video speed");
         SliderWithField {
             id: videoSpeed;
-            from: 0.0;
+            from: 0.1;
             to: 1000.0;
             value: 1.0;
             unit: "%";
