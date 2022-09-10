@@ -1261,6 +1261,7 @@ dependencies = [
  "qml-video-rs",
  "qttypes",
  "regex",
+ "rustfft",
  "semver",
  "serde",
  "serde_json",

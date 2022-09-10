@@ -2,6 +2,7 @@ App 1.0 App.qml
 CalibrationTarget 1.0 CalibrationTarget.qml
 Calibrator 1.0 Calibrator.qml
 RenderQueue 1.0 RenderQueue.qml
+Statistics 1.0 Statistics.qml
 Shortcuts 1.0 Shortcuts.qml
 VideoArea 1.0 VideoArea.qml
 SettingsSelector 1.0 SettingsSelector.qml
