@@ -723,12 +723,6 @@ Item {
                 }
                 Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
                 Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); }
-                
-                LinkButton {
-                    text: qsTr("Statistics");
-                    anchors.verticalCenter: parent.verticalCenter;
-                    onClicked: root.statistics.shown = !root.statistics.shown;
-                }
             }
             Row {
                 enabled: vid.loaded;

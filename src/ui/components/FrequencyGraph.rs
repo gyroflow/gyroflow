@@ -112,7 +112,7 @@ impl FrequencyGraph {
         let nrPoints = self.series.spectrum.len();
         self.series.line.reserve(nrPoints);
 
-        let scaler = if self.logY {|x: f64|->f64 {x.log10()}} else {|x: f64|->f64 {x}};
+        let scaler = if self.logY { |x: f64| x.log10() } else { |x: f64| x };
         let rangeMax = scaler(self.max);
         let rangeMin = scaler(self.min);
 
