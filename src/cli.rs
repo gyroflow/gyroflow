@@ -482,10 +482,10 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
     let func: Box<dyn FnMut(String)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
     cpp!(unsafe [path as "QString", cb_ptr as "TraitObject2"] -> bool as "bool" {
-        QFileSystemWatcher *w = new QFileSystemWatcher();
+        auto w = new QFileSystemWatcher();
         auto existing = new QStringList();
         auto paths = new QMap<QString, QMap<QString, qint64> >();
-        QTimer *t = new QTimer();
+        auto t = new QTimer();
         QObject::connect(t, &QTimer::timeout, [=] {
             bool anyWatching = false;
             for (const auto &file : paths->keys()) {

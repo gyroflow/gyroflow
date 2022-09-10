@@ -120,6 +120,7 @@ pub struct Controller {
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+    set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool)),
 
     input_horizontal_stretch: qt_property!(f64; WRITE set_input_horizontal_stretch),
     input_vertical_stretch: qt_property!(f64; WRITE set_input_vertical_stretch),
@@ -225,6 +226,7 @@ pub struct Controller {
     remove_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64)),
     clear_keyframes_type: qt_method!(fn(&self, typ: String)),
     keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
+    is_keyframed: qt_method!(fn(&self, typ: String) -> bool),
 
     keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
     update_keyframe_values: qt_method!(fn(&self, timestamp_ms: f64)),
@@ -388,7 +390,7 @@ impl Controller {
                     Ok(mut proc) => {
                         let err2 = err.clone();
                         let sync2 = sync.clone();
-                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
+                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                             assert!(_output_frame.is_none());
 
                             if abs_frame_no % every_nth_frame == 0 {
@@ -763,7 +765,17 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, (width as usize, height as usize, stride as usize), (ow, oh, os), pixels, &mut out_pixels);
+
+                use gyroflow_core::gpu::{ BufferDescription, BufferSource };
+                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
+                    input_size: (width as usize, height as usize, stride as usize),
+                    output_size: (ow, oh, os),
+                    buffers: BufferSource::Cpu {
+                        input: pixels,
+                        output: &mut out_pixels
+                    },
+                    input_rect: None, output_rect: None
+                });
 
                 // println!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
                 if ret {
@@ -997,6 +1009,7 @@ impl Controller {
     wrap_simple_method!(set_background_mode,           v: i32; recompute);
     wrap_simple_method!(set_background_margin,         v: f64; recompute);
     wrap_simple_method!(set_background_margin_feather, v: f64; recompute);
+    wrap_simple_method!(set_video_speed,               v: f64, s: bool, z: bool; recompute);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);
@@ -1146,7 +1159,7 @@ impl Controller {
                         let total_read = total_read.clone();
                         let processed = processed.clone();
                         let cancel_flag2 = cancel_flag.clone();
-                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
+                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
                             if is_forced && total_read.load(SeqCst) > 0 {
@@ -1478,6 +1491,12 @@ impl Controller {
             }
         }
         QJSValue::default()
+    }
+    fn is_keyframed(&self, typ: String) -> bool {
+        if let Ok(typ) = KeyframeType::from_str(&typ) {
+            return self.stabilizer.is_keyframed(&typ);
+        }
+        false
     }
 
     fn update_keyframe_values(&self, mut timestamp_ms: f64) {

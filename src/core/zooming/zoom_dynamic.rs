@@ -27,11 +27,15 @@ impl ZoomingAlgorithm for ZoomDynamic {
 
         let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
 
-        if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) {
+        if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (self.compute_params.video_speed_affects_zooming && (self.compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
             // Keyframed window
             let mut max_window = 0;
             let data_per_timestamp = timestamps.iter().map(|ts| {
-                let window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(1.0);
+                let mut window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(self.window);
+                if self.compute_params.video_speed_affects_zooming {
+                    let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(self.compute_params.video_speed);
+                    window *= vid_speed;
+                }
                 let frames = self.get_frames_per_window(window);
                 if frames > max_window { max_window = frames; }
                 DataPerTimestamp {

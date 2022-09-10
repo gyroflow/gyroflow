@@ -35,6 +35,7 @@ use stabilization::Stabilization;
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
+use gpu::{ BufferDescription, BufferSource };
 
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
@@ -442,14 +443,14 @@ impl<T: PixelType> StabilizationManager<T> {
         false
     }
 
-    pub fn process_pixels(&self, mut timestamp_us: i64, size: (usize, usize, usize), output_size: (usize, usize, usize), pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
+    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut BufferDescription) -> bool {
         let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator, fov) = {
             let params = self.params.read();
             (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator, params.fov)
         };
 
-        let (width, height, stride) = size;
-        let (out_width, out_height, out_stride) = output_size;
+        let (width, height, stride) = buffers.input_size;
+        let (out_width, out_height, out_stride) = buffers.output_size;
 
         if enabled && ow == out_width && oh == out_height {
             if let Some(scale) = fps_scale {
@@ -458,68 +459,72 @@ impl<T: PixelType> StabilizationManager<T> {
             let frame = frame_at_timestamp(timestamp_us as f64 / 1000.0, fps) as usize; // used only to draw features and OF
             //////////////////////////// Draw detected features ////////////////////////////
             // TODO: maybe handle other types than RGBA8?
-            if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-                if let Some(pxs) = self.get_features_pixels(timestamp_us) {
-                    for (x, mut y, _) in pxs {
-                        if framebuffer_inverted { y = height as i32 - y; }
-                        let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                        if pixels.len() > pos + 2 {
-                            pixels[pos + 0] = 0x0c; // R
-                            pixels[pos + 1] = 0xff; // G
-                            pixels[pos + 2] = 0x00; // B
+            if let BufferSource::Cpu { input: pixels, .. } = &mut buffers.buffers {
+                if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
+                    if let Some(pxs) = self.get_features_pixels(timestamp_us) {
+                        for (x, mut y, _) in pxs {
+                            if framebuffer_inverted { y = height as i32 - y; }
+                            let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                            if pixels.len() > pos + 2 {
+                                pixels[pos + 0] = 0x0c; // R
+                                pixels[pos + 1] = 0xff; // G
+                                pixels[pos + 2] = 0x00; // B
+                            }
                         }
                     }
-                }
-                if let Some(pxs) = self.get_opticalflow_pixels(timestamp_us) {
-                    for (x, mut y, a) in pxs {
-                        if framebuffer_inverted { y = height as i32 - y; }
-                        let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                        if pixels.len() > pos + 2 {
-                            pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
-                            pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
-                            pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
+                    if let Some(pxs) = self.get_opticalflow_pixels(timestamp_us) {
+                        for (x, mut y, a) in pxs {
+                            if framebuffer_inverted { y = height as i32 - y; }
+                            let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                            if pixels.len() > pos + 2 {
+                                pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
+                                pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
+                                pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
+                            }
                         }
                     }
-                }
 
-                #[cfg(feature = "opencv")]
-                if is_calibrator {
-                    let lock = self.lens_calibrator.read();
-                    let is_inverted = self.params.read().framebuffer_inverted;
-                    if let Some(ref cal) = *lock {
-                        let points = cal.all_matches.read();
-                        if let Some(entry) = points.get(&(frame as i32)) {
-                            let (w, h, s) = size;
-                            calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true, is_inverted);
+                    #[cfg(feature = "opencv")]
+                    if is_calibrator {
+                        let lock = self.lens_calibrator.read();
+                        let is_inverted = self.params.read().framebuffer_inverted;
+                        if let Some(ref cal) = *lock {
+                            let points = cal.all_matches.read();
+                            if let Some(entry) = points.get(&(frame as i32)) {
+                                let (w, h, s) = buffers.input_size;
+                                calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true, is_inverted);
+                            }
                         }
                     }
                 }
             }
             //////////////////////////// Draw detected features ////////////////////////////
             let mut undist = self.stabilization.write();
-            let ret = undist.process_pixels(timestamp_us, size, output_size, pixels, out_pixels);
+            let ret = undist.process_pixels(timestamp_us, buffers);
             if ret {
                 //////////////////////////// Draw zooming debug pixels ////////////////////////////
                 let p = self.params.read();
                 if !p.zooming_debug_points.is_empty() {
-                    if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
-                        for i in 0..points.len() {
-                            let fov = (fov * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
-                            let mut pt = points[i];
-                            let width_ratio = width as f64 / out_width as f64;
-                            let height_ratio = height as f64 / out_height as f64;
-                            pt = (pt.0 - 0.5, pt.1 - 0.5);
-                            pt = (pt.0 / fov * width_ratio, pt.1 / fov * height_ratio);
-                            pt = (pt.0 + 0.5, pt.1 + 0.5);
-                            for xstep in -2..=2i32 {
-                                for ystep in -2..=2i32 {
-                                    let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
-                                    if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
-                                        let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                                        if out_pixels.len() > pos + 2 {
-                                            out_pixels[pos + 0] = 0xff; // R
-                                            out_pixels[pos + 1] = 0x00; // G
-                                            out_pixels[pos + 2] = 0x00; // B
+                    if let BufferSource::Cpu { output: out_pixels, .. } = &mut buffers.buffers {
+                        if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
+                            for i in 0..points.len() {
+                                let fov = (fov * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
+                                let mut pt = points[i];
+                                let width_ratio = width as f64 / out_width as f64;
+                                let height_ratio = height as f64 / out_height as f64;
+                                pt = (pt.0 - 0.5, pt.1 - 0.5);
+                                pt = (pt.0 / fov * width_ratio, pt.1 / fov * height_ratio);
+                                pt = (pt.0 + 0.5, pt.1 + 0.5);
+                                for xstep in -2..=2i32 {
+                                    for ystep in -2..=2i32 {
+                                        let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
+                                        if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
+                                            let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
+                                            if out_pixels.len() > pos + 2 {
+                                                out_pixels[pos + 0] = 0xff; // R
+                                                out_pixels[pos + 1] = 0x00; // G
+                                                out_pixels[pos + 2] = 0x00; // B
+                                            }
                                         }
                                     }
                                 }
@@ -556,6 +561,14 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
     pub fn set_input_horizontal_stretch (&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
     pub fn set_input_vertical_stretch   (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
+
+    pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool) {
+        let mut params = self.params.write();
+        params.video_speed = v;
+        params.video_speed_affects_smoothing = link_with_smoothness;
+        params.video_speed_affects_zooming = link_with_zooming;
+        self.invalidate_smoothing();
+    }
 
     pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
@@ -824,6 +837,9 @@ impl<T: PixelType> StabilizationManager<T> {
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
+                "video_speed":                   params.video_speed,
+                "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
+                "video_speed_affects_zooming":   params.video_speed_affects_zooming,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,
@@ -1029,6 +1045,10 @@ impl<T: PixelType> StabilizationManager<T> {
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
 
+                if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
+                if let Some(v) = obj.get("video_speed_affects_smoothing").and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing = v; }
+                if let Some(v) = obj.get("video_speed_affects_zooming")  .and_then(|x| x.as_bool()) { params.video_speed_affects_zooming   = v; }
+
                 if let Some(center_offs) = obj.get("adaptive_zoom_center_offset").and_then(|x| x.as_array()) {
                     params.adaptive_zoom_center_offset = (
                         center_offs.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
@@ -1161,6 +1181,9 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn keyframe_value_at_video_timestamp(&self, typ: &KeyframeType, timestamp_ms: f64) -> Option<f64> {
         self.keyframes.read().value_at_video_timestamp(typ, timestamp_ms)
+    }
+    pub fn is_keyframed(&self, typ: &KeyframeType) -> bool {
+        self.keyframes.read().is_keyframed(typ)
     }
     fn keyframes_updated(&self, typ: &KeyframeType) {
         match typ {

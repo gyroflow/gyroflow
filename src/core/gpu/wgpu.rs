@@ -6,6 +6,7 @@ use wgpu::Adapter;
 use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
 use parking_lot::RwLock;
+use crate::gpu:: { BufferDescription, BufferSource };
 use crate::stabilization::KernelParams;
 use crate::stabilization::distortion_models::GoProSuperview;
 
@@ -77,7 +78,7 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), lens_model_funcs: &str, _size: (usize, usize, usize), _output_size: (usize, usize, usize), _in_len: usize, _out_len: usize) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), lens_model_funcs: &str, _buffers: &BufferDescription) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
         if params.height < 4 || params.output_height < 4 || params.stride < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
@@ -202,31 +203,38 @@ impl WgpuWrapper {
         }
     }
 
-    pub fn undistort_image(&mut self, pixels: &mut [u8], output_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) {
+    pub fn undistort_image(&mut self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform) -> bool {
         let matrices = bytemuck::cast_slice(&itm.matrices);
 
-        if self.in_size != pixels.len() as u64         { log::error!("Buffer size mismatch! {} vs {}", self.in_size, pixels.len()); return; }
-        if self.out_size != output_pixels.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.out_size, output_pixels.len()); return; }
-        if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return; }
+        match &buffers.buffers {
+            BufferSource::Cpu { input, output } => {
+                if self.in_size  != input.len()  as u64 { log::error!("Buffer size mismatch! {} vs {}", self.in_size,  input.len()); return false; }
+                if self.out_size != output.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.out_size, output.len()); return false; }
+
+                self.queue.write_texture(
+                    self.in_pixels.as_image_copy(),
+                    bytemuck::cast_slice(input),
+                    wgpu::ImageDataLayout {
+                        offset: 0,
+                        bytes_per_row: std::num::NonZeroU32::new(itm.kernel_params.stride as u32),
+                        rows_per_image: None,
+                    },
+                    wgpu::Extent3d {
+                        width: itm.kernel_params.width as u32,
+                        height: itm.kernel_params.height as u32,
+                        depth_or_array_layers: 1,
+                    },
+                );
+            },
+            BufferSource::OpenCL { .. } => {
+                return false;
+            }
+        }
+
+        if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return false; }
 
         self.queue.write_buffer(&self.buf_matrices, 0, matrices);
-
         self.queue.write_buffer(&self.buf_params, 0, bytemuck::bytes_of(&itm.kernel_params));
-
-        self.queue.write_texture(
-            self.in_pixels.as_image_copy(),
-            bytemuck::cast_slice(&pixels),
-            wgpu::ImageDataLayout {
-                offset: 0,
-                bytes_per_row: std::num::NonZeroU32::new(itm.kernel_params.stride as u32),
-                rows_per_image: None,
-            },
-            wgpu::Extent3d {
-                width: itm.kernel_params.width as u32,
-                height: itm.kernel_params.height as u32,
-                depth_or_array_layers: 1,
-            },
-        );
 
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let view = self.out_pixels.create_view(&wgpu::TextureViewDescriptor::default());
@@ -248,60 +256,66 @@ impl WgpuWrapper {
             rpass.draw(0..6, 0..1);
         }
 
-        encoder.copy_texture_to_buffer(wgpu::ImageCopyTexture {
-            texture: &self.out_pixels,
-            mip_level: 0,
-            origin: wgpu::Origin3d::ZERO,
-            aspect: wgpu::TextureAspect::All,
-        }, wgpu::ImageCopyBuffer {
-            buffer: &self.staging_buffer,
-            layout: wgpu::ImageDataLayout {
-                offset: 0,
-                bytes_per_row: std::num::NonZeroU32::new(self.padded_out_stride),
-                rows_per_image: None,
-            },
-        }, wgpu::Extent3d {
-            width: itm.kernel_params.output_width as u32,
-            height: itm.kernel_params.output_height as u32,
-            depth_or_array_layers: 1,
-        });
+        if let BufferSource::Cpu { .. } = buffers.buffers {
+            encoder.copy_texture_to_buffer(wgpu::ImageCopyTexture {
+                texture: &self.out_pixels,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            }, wgpu::ImageCopyBuffer {
+                buffer: &self.staging_buffer,
+                layout: wgpu::ImageDataLayout {
+                    offset: 0,
+                    bytes_per_row: std::num::NonZeroU32::new(self.padded_out_stride),
+                    rows_per_image: None,
+                },
+            }, wgpu::Extent3d {
+                width: itm.kernel_params.output_width as u32,
+                height: itm.kernel_params.output_height as u32,
+                depth_or_array_layers: 1,
+            });
+        }
 
         self.queue.submit(Some(encoder.finish()));
 
-        let buffer_slice = self.staging_buffer.slice(..);
-        let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
-        buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
+        if let BufferSource::Cpu { output, .. } = &mut buffers.buffers {
+            let buffer_slice = self.staging_buffer.slice(..);
+            let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
+            buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
-        self.device.poll(wgpu::Maintain::Wait);
+            self.device.poll(wgpu::Maintain::Wait);
 
-        if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
-            let data = buffer_slice.get_mapped_range();
-            if self.padded_out_stride == itm.kernel_params.output_stride as u32 {
-                // Fast path
-                output_pixels.copy_from_slice(data.as_ref());
+            if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
+                let data = buffer_slice.get_mapped_range();
+                if self.padded_out_stride == itm.kernel_params.output_stride as u32 {
+                    // Fast path
+                    output.copy_from_slice(data.as_ref());
+                } else {
+                    // data.as_ref()
+                    //     .chunks(self.padded_out_stride as usize)
+                    //     .zip(output.chunks_mut(itm.kernel_params.output_stride as usize))
+                    //     .for_each(|(src, dest)| {
+                    //         dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
+                    //     });
+                    use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
+                    use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
+                    data.as_ref()
+                        .par_chunks(self.padded_out_stride as usize)
+                        .zip(output.par_chunks_mut(itm.kernel_params.output_stride as usize))
+                        .for_each(|(src, dest)| {
+                            dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
+                        });
+                }
+
+                // We have to make sure all mapped views are dropped before we unmap the buffer.
+                drop(data);
+                self.staging_buffer.unmap();
             } else {
-                // data.as_ref()
-                //     .chunks(self.padded_out_stride as usize)
-                //     .zip(output_pixels.chunks_mut(itm.kernel_params.output_stride as usize))
-                //     .for_each(|(src, dest)| {
-                //         dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
-                //     });
-                use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
-                use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
-                data.as_ref()
-                    .par_chunks(self.padded_out_stride as usize)
-                    .zip(output_pixels.par_chunks_mut(itm.kernel_params.output_stride as usize))
-                    .for_each(|(src, dest)| {
-                        dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
-                    });
+                // TODO change to Result
+                log::error!("failed to run compute on wgpu!");
+                return false;
             }
-
-            // We have to make sure all mapped views are dropped before we unmap the buffer.
-            drop(data);
-            self.staging_buffer.unmap();
-        } else {
-            // TODO change to Result
-            log::error!("failed to run compute on wgpu!")
         }
+        true
     }
 }

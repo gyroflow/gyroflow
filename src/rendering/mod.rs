@@ -148,6 +148,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
 
     let duration_ms = params.duration_ms;
+    let fps = params.fps;
+    let video_speed = params.video_speed;
 
     let render_duration = params.duration_ms * trim_ratio;
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
@@ -293,13 +295,43 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         Ok(())
     });
 
-    proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter| {
+    let mut prev_real_ts = 0;
+    let mut ramped_ts = 0.0;
+    let mut final_ts = 0;
+    let interval = (1_000_000.0 / fps).round() as i64;
+    let is_speed_changed = video_speed != 1.0 || stab.keyframes.read().is_keyframed(&gyroflow_core::keyframes::KeyframeType::VideoSpeed);
+    if is_speed_changed {
+        proc.audio_codec = codec::Id::None; // Audio not supported when changing speed
+    }
+
+    proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter, rate_control| {
         let fill_with_background = render_options.pad_with_black &&
             (timestamp_us < (trim_start * duration_ms * 1000.0).round() as i64 ||
              timestamp_us > (trim_end   * duration_ms * 1000.0).round() as i64);
 
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
+        }
+
+        if is_speed_changed {
+            let vid_speed = stab.keyframes.read().value_at_video_timestamp(&gyroflow_core::keyframes::KeyframeType::VideoSpeed, timestamp_us as f64 / 1000.0).unwrap_or(video_speed);
+            let current_interval = ((rate_control.out_timestamp_us - prev_real_ts) as f64) / vid_speed;
+            ramped_ts += current_interval;
+            prev_real_ts = rate_control.out_timestamp_us;
+            if ramped_ts < (final_ts as f64 + interval as f64 / 2.0) { // interval/2 because we want frame in the middle of the range, not in the end
+                rate_control.repeat_times = 0; // skip this frame
+                process_frame += 1;
+                return Ok(());
+            } else {
+                let repeat_times = current_interval / interval as f64;
+                if repeat_times >= 1.5 {
+                    // Need to duplicate the frames
+                    rate_control.repeat_times = repeat_times.round() as i64;
+                    rate_control.repeat_interval = interval;
+                }
+            }
+            rate_control.out_timestamp_us = final_ts;
+            final_ts += interval * rate_control.repeat_times;
         }
 
         let output_frame = output_frame.unwrap();
@@ -328,7 +360,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                     plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
                     plane.set_compute_params(ComputeParams::from_manager(&stab, false));
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
-                        let size        = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
+                        let input_size  = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
                         let output_size = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
@@ -339,7 +371,16 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                                 transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                             }
                         }
-                        plane.process_pixels(timestamp_us, size, output_size, buffer, out_buffer);
+                        use gyroflow_core::gpu::{ BufferDescription, BufferSource };
+                        plane.process_pixels(timestamp_us, &mut BufferDescription {
+                            input_size,
+                            output_size,
+                            buffers: BufferSource::Cpu {
+                                input: buffer,
+                                output: out_buffer
+                            },
+                            input_rect: None, output_rect: None
+                        });
                     }));
                 })*
             };
@@ -667,7 +708,7 @@ pub fn test_decode() {
     let mut proc = FfmpegProcessor::from_file("E:/clips/GoPro/rs/C0752.MP4", true).unwrap();
 
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
-    proc.on_frame(move |timestamp_us, input_frame, converter| {
+    proc.on_frame(move |timestamp_us, input_frame, converter, _rate_control| {
         let small_frame = converter.scale(input_frame, Pixel::GRAY8, 1280, 720);
         ::log::debug!("ts: {} width: {}", timestamp_us, small_frame.plane_width(0));
 

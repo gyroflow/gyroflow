@@ -53,7 +53,7 @@ impl SmoothingAlgorithm for Plain {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
+    fn smooth(&self, quats: &TimeQuat, duration: f64, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
@@ -67,10 +67,17 @@ impl SmoothingAlgorithm for Plain {
         }
 
         let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
-        if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant) {
+        if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant) || (stabilization_params.video_speed_affects_smoothing && (stabilization_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
             alpha_per_timestamp = quats.iter().map(|(ts, _)| {
                 let timestamp_ms = *ts as f64 / 1000.0;
-                (*ts, get_alpha(keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant)))
+
+                let mut val = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant);
+                if stabilization_params.video_speed_affects_smoothing {
+                    let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(stabilization_params.video_speed);
+                    val *= vid_speed;
+                }
+
+                (*ts, get_alpha(val))
             }).collect();
         }
 

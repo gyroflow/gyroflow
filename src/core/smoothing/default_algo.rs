@@ -179,7 +179,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
+    fn smooth(&self, quats: &TimeQuat, duration: f64, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const MAX_VELOCITY: f64 = 500.0;
@@ -194,10 +194,15 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();
-            if keyframes.is_keyframed(typ) {
+            if keyframes.is_keyframed(typ) || (stabilization_params.video_speed_affects_smoothing && (stabilization_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
                 ret = quats.iter().map(|(ts, _)| {
                     let timestamp_ms = *ts as f64 / 1000.0;
-                    (*ts, cb(keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def)))
+                    let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def);
+                    if stabilization_params.video_speed_affects_smoothing {
+                        let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(stabilization_params.video_speed);
+                        val *= vid_speed;
+                    }
+                    (*ts, cb(val))
                 }).collect();
             }
             ret

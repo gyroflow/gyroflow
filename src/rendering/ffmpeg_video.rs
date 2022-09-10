@@ -63,13 +63,20 @@ pub struct VideoTranscoder<'a> {
 
     pub buffers: FrameBuffers,
 
-    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) -> Result<(), FFmpegError> + 'a>>,
+    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'a>>,
     pub on_encoder_initialized: Option<Box<dyn FnMut(&encoder::video::Video) -> Result<(), FFmpegError> + 'a>>,
 
     pub first_frame_ts: Option<i64>,
 
     pub processing_order: ProcessingOrder
 }
+
+pub struct RateControl {
+    pub out_timestamp_us: i64,
+    pub repeat_times: i64,
+    pub repeat_interval: i64,
+}
+impl Default for RateControl { fn default() -> Self { Self { out_timestamp_us: 0, repeat_times: 1, repeat_interval: 0 } } }
 
 macro_rules! ffmpeg {
     ($func:stmt; $err:ident) => {
@@ -168,7 +175,8 @@ impl<'a> VideoTranscoder<'a> {
                     }
                     ts -= self.first_frame_ts.unwrap();
 
-                    let timestamp = Some(ts.rescale((1, 1000000), time_base));
+                    let mut rate_control = RateControl::default();
+                    rate_control.out_timestamp_us = ts;
 
                     let mut hw_formats = None;
                     let input_frame =
@@ -213,7 +221,7 @@ impl<'a> VideoTranscoder<'a> {
                     // Process frame
                     if self.decode_only || self.processing_order == ProcessingOrder::PreConversion {
                         if let Some(ref mut cb) = self.on_frame_callback {
-                            cb(timestamp_us, input_frame, self.buffers.output_frame_pre.as_mut(), &mut self.converter)?;
+                            cb(timestamp_us, input_frame, self.buffers.output_frame_pre.as_mut(), &mut self.converter, &mut rate_control)?;
                         }
                     }
 
@@ -291,7 +299,7 @@ impl<'a> VideoTranscoder<'a> {
                                     self.buffers.output_frame_post = Some(out_frame);
                                 }
 
-                                cb(timestamp_us, final_frame, self.buffers.output_frame_post.as_mut(), &mut self.converter)?;
+                                cb(timestamp_us, final_frame, self.buffers.output_frame_post.as_mut(), &mut self.converter, &mut rate_control)?;
 
                                 final_frame = self.buffers.output_frame_post.as_mut().unwrap();
                             }
@@ -328,32 +336,39 @@ impl<'a> VideoTranscoder<'a> {
                                 cb(self.encoder.as_ref().unwrap())?;
                             }
                         }
+
                         let encoder = self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?;
                         encoder.set_format(final_frame.format());
                         encoder.set_color_range(final_frame.color_range());
 
-                        final_frame.set_pts(timestamp);
-                        final_frame.set_kind(picture::Type::None);
+                        ts = rate_control.out_timestamp_us;
 
-                        if self.clone_frames {
-                            // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
-                            encoder.send_frame(&final_frame.clone())?;
-                        } else {
-                            encoder.send_frame(final_frame)?;
-                        }
+                        for _ in 0..rate_control.repeat_times {
+                            let timestamp = Some(ts.rescale((1, 1000000), time_base));
+                            final_frame.set_pts(timestamp);
+                            final_frame.set_kind(picture::Type::None);
 
-                        // Copy of receive_and_process_encoded_packets
-                        let ost_time_base = ost_time_bases[self.output_index.unwrap_or_default()];
-                        let octx = octx.as_mut().unwrap();
-                        let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
-                        let mut encoded = Packet::empty();
-                        while encoder.receive_packet(&mut encoded).is_ok() {
-                            encoded.set_stream(self.output_index.unwrap_or_default());
-                            encoded.rescale_ts(time_base, ost_time_base);
-                            if octx.format().name().contains("image") {
-                                encoded.write(octx)?;
+                            if self.clone_frames {
+                                // TODO: ideally this should be a buffer pool per thread, but we need to figure out which thread ffmpeg actually used for that frame
+                                encoder.send_frame(&final_frame.clone())?;
                             } else {
-                                encoded.write_interleaved(octx)?;
+                                encoder.send_frame(final_frame)?;
+                            }
+                            ts += rate_control.repeat_interval;
+
+                            // Copy of receive_and_process_encoded_packets
+                            let ost_time_base = ost_time_bases[self.output_index.unwrap_or_default()];
+                            let octx = octx.as_mut().unwrap();
+                            let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
+                            let mut encoded = Packet::empty();
+                            while encoder.receive_packet(&mut encoded).is_ok() {
+                                encoded.set_stream(self.output_index.unwrap_or_default());
+                                encoded.rescale_ts(time_base, ost_time_base);
+                                if octx.format().name().contains("image") {
+                                    encoded.write(octx)?;
+                                } else {
+                                    encoded.write_interleaved(octx)?;
+                                }
                             }
                         }
                     }

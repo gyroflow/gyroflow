@@ -50,6 +50,7 @@ Modal {
             "Rolling shutter correction": ["frame_readout_time"],
             "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset"],
             "Lens correction strength":   ["lens_correction_amount"],
+            "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming"],
         },
         "Export settings|output": {
             "Codec":       ["codec", "codec_options", "bitrate", "use_gpu"],
@@ -112,6 +113,7 @@ Modal {
             QT_TR_NOOP("Rolling shutter correction");
             QT_TR_NOOP("Zooming");
             QT_TR_NOOP("Lens correction strength");
+            QT_TR_NOOP("Video speed");
         QT_TR_NOOP("Export settings");
             QT_TR_NOOP("Codec");
             QT_TR_NOOP("Audio");

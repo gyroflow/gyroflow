@@ -38,6 +38,8 @@ MenuItem {
         property alias keyframeDistance: keyframeDistance.value;
         property alias preserveOtherTracks: preserveOtherTracks.checked;
         property alias padWithBlack: padWithBlack.checked;
+        property alias videoSpeedAffectsSmoothing: videoSpeedAffectsSmoothing.checked;
+        property alias videoSpeedAffectsZooming: videoSpeedAffectsZooming.checked;
     }
 
     property real aspectRatio: 1.0;
@@ -143,6 +145,13 @@ MenuItem {
             if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
+        }
+
+        const stab = obj.stabilization || { };
+        if (stab && Object.keys(stab).length > 0) {
+            if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
+            if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
+            if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
         }
     }
 
@@ -344,7 +353,64 @@ MenuItem {
         text: qsTr("Export audio");
         checked: true;
         property bool enabled2: true;
-        enabled: enabled2;
+        property bool enabled3: videoSpeed.value == 1.0 && !videoSpeed.isKeyframed;
+        tooltip: !enabled3? qsTr("Audio export not available when changing video speed.") : "";
+        enabled: enabled2 && enabled3;
+    }
+
+    Label {
+        text: qsTr("Video speed");
+        SliderWithField {
+            id: videoSpeed;
+            from: 0.0;
+            to: 1000.0;
+            value: 1.0;
+            unit: "%";
+            defaultValue: 100.0;
+            precision: 0;
+            width: parent.width;
+            keyframe: "VideoSpeed";
+            scaler: 100.0;
+            property bool isKeyframed: false;
+            function updateVideoSpeed() {
+                window.videoArea.vid.playbackRate = videoSpeed.value;
+                controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
+                isKeyframed = controller.is_keyframed("VideoSpeed");
+            }
+            onValueChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            Connections {
+                target: controller;
+                function onKeyframe_value_updated(keyframe: string, value: real) {
+                    if (keyframe == "VideoSpeed") {
+                        window.videoArea.vid.playbackRate = value;
+                    }
+                }
+            }
+        }
+        CheckBox {
+            id: videoSpeedAffectsSmoothing;
+            anchors.right: parent.right;
+            anchors.top: parent.top;
+            anchors.topMargin: -30 * dpiScale;
+            anchors.rightMargin: -15 * dpiScale;
+            contentItem.visible: false;
+            scale: 0.7;
+            tooltip: qsTr("Link with smoothing");
+            checked: true;
+            onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+        }
+        CheckBox {
+            id: videoSpeedAffectsZooming;
+            anchors.right: parent.right;
+            anchors.top: parent.top;
+            anchors.topMargin: -30 * dpiScale;
+            anchors.rightMargin: 5 * dpiScale;
+            contentItem.visible: false;
+            scale: 0.7;
+            tooltip: qsTr("Link with zooming speed");
+            checked: true;
+            onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+        }
     }
 
     AdvancedSection {

@@ -57,7 +57,7 @@ impl<T: PixelType> Stabilization<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-    pub fn undistort_image_cpu<const I: i32>(pixels: &mut [u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, matrices: &[[f32; 9]]) {
+    pub fn undistort_image_cpu<const I: i32>(pixels: &[u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, matrices: &[[f32; 9]]) {
         // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
         fn remap_colorrange(px: &mut Vector4<f32>, is_y: bool) {
             if is_y { *px *= 0.85882352; } // (235 - 16) / 255

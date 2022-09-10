@@ -4,6 +4,7 @@
 use ffmpeg_next::ffi;
 use ffmpeg_next::frame;
 use super::ffmpeg_video_converter::Converter;
+use super::ffmpeg_video::RateControl;
 use super::FFmpegError;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
@@ -12,7 +13,7 @@ use qmetaobject::*;
 
 pub struct MDKProcessor {
     mdk: qml_video_rs::video_item::MDKVideoItem,
-    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) -> Result<(), FFmpegError> + 'static>>,
+    pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static>>,
 }
 
 impl MDKProcessor {
@@ -25,7 +26,7 @@ impl MDKProcessor {
             on_frame_callback: None
         }
     }
-    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter) -> Result<(), FFmpegError> + 'static {
+    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static {
         self.on_frame_callback = Some(Box::new(cb));
     }
     pub fn start_decoder_only(&mut self, ranges: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
@@ -52,7 +53,7 @@ impl MDKProcessor {
                     (*ffmpeg_frame.as_mut_ptr()).buf[0] = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
                     (*ffmpeg_frame.as_mut_ptr()).data[0] = data.as_mut_ptr();
                 }
-                if let Err(e) = cb(timestamp_us, &mut ffmpeg_frame, None, &mut converter) {
+                if let Err(e) = cb(timestamp_us, &mut ffmpeg_frame, None, &mut converter, &mut RateControl::default()) {
                     ::log::error!("mdk_processor error: {:?}", e);
                     return false;
                 }

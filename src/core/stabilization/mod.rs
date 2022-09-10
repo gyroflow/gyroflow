@@ -6,7 +6,7 @@ use nalgebra::Vector4;
 
 #[cfg(feature = "use-opencl")]
 use super::gpu::opencl;
-use super::gpu::wgpu;
+use super::gpu::*;
 use super::StabilizationManager;
 
 mod compute_params;
@@ -89,7 +89,7 @@ pub struct Stabilization<T: PixelType> {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
-    backend_initialized: Option<(usize, usize, usize,   usize, usize, usize,   usize, usize)>, // (in_w, in_h, in_s,  out_w, out_h, out_s,  in_bytes, out_bytes)
+    backend_initialized: Option<(usize, usize, usize,   usize, usize, usize)>, // (in_w, in_h, in_s,  out_w, out_h, out_s)
 
     pub gpu_list: Vec<String>,
 
@@ -198,11 +198,11 @@ impl<T: PixelType> Stabilization<T> {
         return false;
     }
 
-    pub fn init_backends(&mut self, timestamp_us: i64, size: (usize, usize, usize), output_size: (usize, usize, usize), in_len: usize, out_len: usize) {
+    pub fn init_backends(&mut self, timestamp_us: i64, buffers: &BufferDescription) {
         let tuple = (
-            size.0, size.1, size.2,
-            output_size.0, output_size.1, output_size.2,
-            in_len, out_len
+            buffers.input_size.0, buffers.input_size.1, buffers.input_size.2,
+            buffers.output_size.0, buffers.output_size.1, buffers.output_size.2,
+            // TODO include rects?
         );
         if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != tuple {
             let mut gpu_initialized = false;
@@ -212,7 +212,7 @@ impl<T: PixelType> Stabilization<T> {
                 #[cfg(feature = "use-opencl")]
                 if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
                     let cl = std::panic::catch_unwind(|| {
-                        opencl::OclWrapper::new(&params, T::ocl_names(), self.compute_params.distortion_model.opencl_functions(), size, output_size, in_len, out_len)
+                        opencl::OclWrapper::new(&params, T::ocl_names(), self.compute_params.distortion_model.opencl_functions(), buffers)
                     });
                     match cl {
                         Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; },
@@ -230,7 +230,7 @@ impl<T: PixelType> Stabilization<T> {
                 }
                 if !gpu_initialized && T::wgpu_format().is_some() && std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
                     let wgpu = std::panic::catch_unwind(|| {
-                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), self.compute_params.distortion_model.wgsl_functions(), size, output_size, in_len, out_len)
+                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), self.compute_params.distortion_model.wgsl_functions(), buffers)
                     });
                     match wgpu {
                         Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); },
@@ -252,11 +252,11 @@ impl<T: PixelType> Stabilization<T> {
         }
     }
 
-    pub fn process_pixels(&mut self, timestamp_us: i64, size: (usize, usize, usize), output_size: (usize, usize, usize), pixels: &mut [u8], out_pixels: &mut [u8]) -> bool {
-        if self.size != size || self.output_size != output_size || size.1 < 4 || output_size.1 < 4 { return false; }
+    pub fn process_pixels(&mut self, timestamp_us: i64, buffers: &mut BufferDescription) -> bool {
+        if self.size != buffers.input_size || self.output_size != buffers.output_size || buffers.input_size.1 < 4 || buffers.output_size.1 < 4 { return false; }
 
         self.ensure_stab_data_at_timestamp(timestamp_us);
-        self.init_backends(timestamp_us, size, output_size, pixels.len(), out_pixels.len());
+        self.init_backends(timestamp_us, buffers);
 
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             self.current_fov = itm.fov;
@@ -264,7 +264,7 @@ impl<T: PixelType> Stabilization<T> {
             // OpenCL path
             #[cfg(feature = "use-opencl")]
             if let Some(ref mut cl) = self.cl {
-                if let Err(err) = cl.undistort_image(pixels, out_pixels, &itm) {
+                if let Err(err) = cl.undistort_image(buffers, &itm) {
                     log::error!("OpenCL error: {:?}", err);
                 } else {
                     return true;
@@ -273,18 +273,20 @@ impl<T: PixelType> Stabilization<T> {
 
             // wgpu path
             if let Some(ref mut wgpu) = self.wgpu {
-                wgpu.undistort_image(pixels, out_pixels, &itm);
+                wgpu.undistort_image(buffers, &itm);
                 return true;
             }
 
-            // CPU path
-            match self.interpolation {
-                Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
-                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
-                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(pixels, out_pixels, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
+            if let BufferSource::Cpu { input, output } = &mut buffers.buffers {
+                // CPU path
+                match self.interpolation {
+                    Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
+                    Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
+                    Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, &itm.matrices); },
+                }
+                return true;
             }
 
-            return true;
         }
         false
     }

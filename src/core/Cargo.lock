@@ -117,9 +117,9 @@ checksum = "47253b98986dafc7a3e1cf3259194f1f47ac61abb57a57f46ec09e48d004ecda"
 
 [[package]]
 name = "argmin"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b92d550a445ac6bfbe0cd4c5ce368600ac28fc4f5b712f105a8d18821c99a5bf"
+checksum = "5698c8cd3510117a4e6b96749a8061ba7dce1a19578ce4ecdb12dd36d94a7f8d"
 dependencies = [
  "anyhow",
  "argmin-math",
@@ -133,9 +133,9 @@ dependencies = [
 
 [[package]]
 name = "argmin-math"
-version = "0.1.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "895db29c12aeeac001553325dc7325b27441dd10b448909e61d38f7cbeec9b89"
+checksum = "75f2b0dada81340718682df780c9a696b090b6ef7e83c3dcc770af6de9302995"
 dependencies = [
  "anyhow",
  "cfg-if",
@@ -919,6 +919,7 @@ dependencies = [
  "time 0.3.14",
  "walkdir",
  "wgpu",
+ "win_dbg_logger",
 ]
 
 [[package]]
@@ -1665,9 +1666,9 @@ checksum = "b1de2e551fb905ac83f73f7aedf2f0cb4a0da7e35efa24a202a936269f1f18e1"
 
 [[package]]
 name = "percent-encoding"
-version = "2.1.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
+checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 
 [[package]]
 name = "pkg-config"
@@ -1939,7 +1940,7 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=9231eb0#9231eb071e5b37146f27a9c55a19aef22bd17424"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=cf5ee33#cf5ee3390533c21996d87017b99c18269cf980aa"
 dependencies = [
  "argmin",
  "argmin-math",
@@ -2507,6 +2508,15 @@ checksum = "b3aba2d1dac31ac7cae82847ac5b8be822aee8f99a4e100f279605016b185c5f"
 dependencies = [
  "bytemuck",
  "safe_arch",
+]
+
+[[package]]
+name = "win_dbg_logger"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d1b4c22244dc27534d81e2f6fc3efd6b20e50c010f177efc20b719ec759a779"
+dependencies = [
+ "log",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@
 
 use super::*;
 use super::mdk_processor::*;
+use super::ffmpeg_video::RateControl;
 use ffmpeg_next::{ frame, Dictionary };
 use std::sync::{ Arc, atomic::AtomicBool };
 
@@ -23,7 +24,7 @@ impl<'a> VideoProcessor<'a> {
         }
     }
 
-    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video_converter::Converter) -> Result<(), FFmpegError> + 'static {
+    pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut ffmpeg_video_converter::Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static {
         match &mut self.inner {
             Processor::Ffmpeg(x) => x.on_frame(cb),
             Processor::Mdk(x) => x.on_frame(cb),

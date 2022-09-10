@@ -5,6 +5,49 @@
 pub mod opencl;
 pub mod wgpu;
 
+pub struct BufferDescription<'a> {
+    pub input_size:  (usize, usize, usize), // width, height, stride
+    pub output_size: (usize, usize, usize), // width, height, stride
+
+    pub input_rect:  Option<(usize, usize, usize, usize)>, // x, y, width, height
+    pub output_rect: Option<(usize, usize, usize, usize)>, // x, y, width, height
+
+    pub buffers: BufferSource<'a>
+}
+
+pub enum BufferSource<'a> {
+    Cpu {
+        input: &'a mut [u8],
+        output: &'a mut [u8]
+    },
+    #[cfg(feature = "use-opencl")]
+    OpenCL {
+        input: ocl::ffi::cl_mem,
+        output: ocl::ffi::cl_mem,
+        queue: ocl::ffi::cl_command_queue
+    },
+    /*OpenGL {
+        input: u32, // GLuint
+        output: u32, // GLuint
+    },
+    DirectX {
+        input: u32,
+        output: u32,
+    },
+    Cuda {
+        input: u32,
+        output: u32,
+    },
+    Metal {
+        input: u32,
+        output: u32,
+    },
+    Vulkan {
+        input: u32,
+        output: u32,
+    }*/
+}
+
 pub fn initialize_contexts() -> Option<(String, String)> {
     #[cfg(feature = "use-opencl")]
     if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {

@@ -3,6 +3,8 @@
 
 use ocl::*;
 use parking_lot::RwLock;
+use std::ops::DerefMut;
+use super::*;
 use crate::stabilization::KernelParams;
 use crate::stabilization::distortion_models::GoProSuperview;
 
@@ -15,9 +17,9 @@ pub struct OclWrapper {
     buf_matrices: Buffer<f32>,
 }
 
-struct CtxWrapper {
-    device: Device,
-    context: Context,
+pub struct CtxWrapper {
+    pub device: Device,
+    pub context: Context,
 }
 
 lazy_static::lazy_static! {
@@ -135,54 +137,78 @@ impl OclWrapper {
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str, _size: (usize, usize, usize), _output_size: (usize, usize, usize), in_len: usize, out_len: usize) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), lens_model_funcs: &str, buffers: &BufferDescription) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
+
+        let mut kernel = include_str!("opencl_undistort.cl").to_string();
+        kernel.insert_str(0, GoProSuperview::opencl_functions());
+        kernel.insert_str(0, lens_model_funcs);
+        kernel = kernel.replace("DATA_CONVERTF", ocl_names.3)
+                       .replace("DATA_TYPEF", ocl_names.2)
+                       .replace("DATA_CONVERT", ocl_names.1)
+                       .replace("DATA_TYPE", ocl_names.0)
+                       .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
+                       .replace("INTERPOLATION", &format!("{}", params.interpolation));
 
         let context_initialized = CONTEXT.read().is_some();
         if !context_initialized { Self::initialize_context()?; }
-        let lock = CONTEXT.read();
-        if let Some(ref ctx) = *lock {
+        let mut lock = CONTEXT.write();
+        if let Some(ref mut ctx) = *lock {
             if ctx.device.name()?.to_ascii_lowercase().contains("core(tm)") {
                 return Err(ocl::BufferCmdError::AlreadyMapped.into());
             }
-            let queue = Queue::new(&ctx.context, ctx.device, None)?;
+            let mut ocl_queue = Queue::new(&ctx.context, ctx.device, None)?;
 
-            let mut kernel = include_str!("opencl_undistort.cl").to_string();
-            kernel.insert_str(0, GoProSuperview::opencl_functions());
-            kernel.insert_str(0, lens_model_funcs);
-            kernel = kernel.replace("DATA_CONVERTF", ocl_names.3)
-                           .replace("DATA_TYPEF", ocl_names.2)
-                           .replace("DATA_CONVERT", ocl_names.1)
-                           .replace("DATA_TYPE", ocl_names.0)
-                           .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
-                           .replace("INTERPOLATION", &format!("{}", params.interpolation));
+            let (source_buffer, dest_buffer) =
+                match &buffers.buffers {
+                    BufferSource::Cpu { input, output } => {
+                        (
+                            Buffer::builder().queue(ocl_queue.clone()).len(input.len())
+                                .flags(MemFlags::new().read_only().host_write_only()).build()?,
+
+                            Buffer::builder().queue(ocl_queue.clone()).len(output.len())
+                                .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?
+                        )
+                    },
+                    BufferSource::OpenCL { queue, .. } => {
+                        if !queue.is_null() {
+                            let queue_core = unsafe { core::CommandQueue::from_raw_copied_ptr(*queue) };
+                            let device_core = queue_core.device()?;
+                            let context_core = queue_core.context()?;
+                            *ctx.device.deref_mut() = device_core;
+                            *ctx.context.deref_mut() = context_core;
+
+                            ocl_queue = Queue::new(&ctx.context, ctx.device, None)?;
+                            *ocl_queue.deref_mut() = queue_core;
+                        }
+
+                        (
+                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.input_size.1 * buffers.input_size.2).flags(MemFlags::new().read_only().host_write_only()).build()?,
+                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.output_size.1 * buffers.output_size.2).flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?
+                        )
+                    }
+                };
 
             let program = Program::builder()
                 .src(&kernel)
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 
-            let source_buffer = Buffer::builder().queue(queue.clone()).len(in_len)
-                .flags(MemFlags::new().read_only().host_write_only()).build()?;
-
-            let dest_buffer = Buffer::builder().queue(queue.clone()).len(out_len)
-                .flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?;
-
-            let buf_params = Buffer::builder().queue(queue.clone()).len(std::mem::size_of::<KernelParams>())
+            let buf_params = Buffer::builder().queue(ocl_queue.clone()).len(std::mem::size_of::<KernelParams>())
                 .flags(MemFlags::new().read_only().host_write_only()).build()?;
 
             let max_matrix_count = 9 * params.height;
-            let buf_matrices = Buffer::<f32>::builder().queue(queue.clone()).flags(MemFlags::new().read_only()).len(max_matrix_count).build()?;
+            let buf_matrices = Buffer::<f32>::builder().queue(ocl_queue.clone()).flags(MemFlags::new().read_only()).len(max_matrix_count).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {
-                builder.program(&program).name("undistort_image").queue(queue)
-                .global_work_size((params.output_width, params.output_height))
-                .disable_arg_type_check()
-                .arg(&source_buffer)
-                .arg(&dest_buffer)
-                .arg(&buf_params)
-                .arg(&buf_matrices);
+                builder.program(&program).name("undistort_image").queue(ocl_queue)
+                    .global_work_size((params.output_width, params.output_height))
+                    .disable_arg_type_check()
+                    .arg(&source_buffer)
+                    .arg(&dest_buffer)
+                    .arg(&buf_params)
+                    .arg(&buf_matrices);
             }
 
             let kernel = builder.build()?;
@@ -199,21 +225,36 @@ impl OclWrapper {
         }
     }
 
-    pub fn undistort_image(&mut self, pixels: &mut [u8], out_pixels: &mut [u8], itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
+    pub fn undistort_image(&mut self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 
-        if self.src.len() != pixels.len()           { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), pixels.len()); return Ok(()); }
-        if self.dst.len() != out_pixels.len()       { log::error!("Buffer size mismatch! {} vs {}", self.dst.len(), out_pixels.len()); return Ok(()); }
-        if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
+        match buffers.buffers {
+            BufferSource::Cpu { ref input, ref output } => {
+                if self.src.len() != input.len()  { log::error!("Buffer size mismatch! {} vs {}", self.src.len(), input.len());  return Ok(()); }
+                if self.dst.len() != output.len() { log::error!("Buffer size mismatch! {} vs {}", self.dst.len(), output.len()); return Ok(()); }
 
-        self.src.write(pixels as &[u8]).enq()?;
+                self.src.write(input as &[u8]).enq()?;
+            },
+            BufferSource::OpenCL { input, output, .. } => {
+                unsafe {
+                    let siz = std::mem::size_of::<ocl::ffi::cl_mem>() as usize;
+                    self.kernel.set_arg_unchecked(0, core::ArgVal::from_raw(siz, &input as *const _ as *const std::ffi::c_void, true))?;
+                    self.kernel.set_arg_unchecked(1, core::ArgVal::from_raw(siz, &output as *const _ as *const std::ffi::c_void, true))?;
+                }
+            }
+        }
+
+        if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
 
         self.buf_params.write(bytemuck::bytes_of(&itm.kernel_params)).enq()?;
         self.buf_matrices.write(matrices).enq()?;
 
         unsafe { self.kernel.enq()?; }
 
-        self.dst.read(out_pixels).enq()?;
+        if let BufferSource::Cpu { output, .. } = &mut buffers.buffers {
+            self.dst.read(&mut **output).enq()?;
+        }
+
         Ok(())
     }
 }

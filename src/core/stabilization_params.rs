@@ -41,6 +41,9 @@ pub struct StabilizationParams {
     pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
+    pub video_speed: f64,
+    pub video_speed_affects_smoothing: bool,
+    pub video_speed_affects_zooming: bool,
     pub frame_count: usize,
     pub duration_ms: f64,
 
@@ -104,6 +107,9 @@ impl Default for StabilizationParams {
 
             fps: 0.0,
             fps_scale: None,
+            video_speed: 1.0,
+            video_speed_affects_smoothing: true,
+            video_speed_affects_zooming: true,
             frame_count: 0,
             duration_ms: 0.0,
         }
@@ -145,6 +151,9 @@ impl StabilizationParams {
             adaptive_zoom_window:      self.adaptive_zoom_window,
             framebuffer_inverted:      self.framebuffer_inverted,
             lens_correction_amount:    self.lens_correction_amount,
+            video_speed:               self.video_speed,
+            video_speed_affects_smoothing: self.video_speed_affects_smoothing,
+            video_speed_affects_zooming:   self.video_speed_affects_zooming,
             background_mode:           self.background_mode,
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,

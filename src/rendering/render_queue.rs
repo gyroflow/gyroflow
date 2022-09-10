@@ -899,7 +899,7 @@ impl RenderQueue {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
                                 let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
-                                proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter| {
+                                proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
                                     if !fetched {
@@ -1106,7 +1106,7 @@ impl RenderQueue {
                                     Ok(mut proc) => {
                                         let err2 = err.clone();
                                         let sync2 = sync.clone();
-                                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter| {
+                                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                             if abs_frame_no % every_nth_frame == 0 {
                                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                                     Ok(small_frame) => {
