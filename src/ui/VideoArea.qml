@@ -22,6 +22,7 @@ Item {
     property alias videoLoader: videoLoader;
     property alias stabEnabledBtn: stabEnabledBtn;
     property alias queue: queue;
+    property alias statistics: statistics;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -635,6 +636,13 @@ Item {
             id: queue;
             anchors.fill: vid.loaded? vidParent : dropRect;
             anchors.margins: 10 * dpiScale;
+            onShownChanged: statistics.shown &= !shown;
+        }
+        Statistics {
+            id: statistics;
+            anchors.fill: vid.loaded? vidParent : dropRect;
+            anchors.margins: 10 * dpiScale;
+            onShownChanged: queue.shown &= !shown;
         }
 
         Connections {

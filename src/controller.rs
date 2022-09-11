@@ -26,6 +26,7 @@ use crate::wrap_simple_method;
 use crate::rendering::VideoProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
 use crate::ui::components::TimelineKeyframesView::TimelineKeyframesView;
+use crate::ui::components::FrequencyGraph::FrequencyGraph;
 use crate::qt_gpu::qrhi_undistort;
 
 #[derive(Default, SimpleListItem)]
@@ -58,6 +59,7 @@ pub struct Controller {
     set_of_method: qt_method!(fn(&self, v: u32)),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
     update_chart: qt_method!(fn(&self, chart: QJSValue)),
+    update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
@@ -466,6 +468,61 @@ impl Controller {
             chart.setFromGyroSource(&self.stabilizer.gyro.read());
         }
     }
+
+    fn update_frequency_graph(&mut self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize) {
+        if let Some(graph) = graph.to_qobject::<FrequencyGraph>() {
+            let graph = unsafe { &mut *graph.as_ptr() }; // _self.borrow_mut();
+            
+            let gyro = &self.stabilizer.gyro.read();
+            let raw_imu = &gyro.raw_imu;
+            
+            if !raw_imu.is_empty() {
+                let dt_ms = 1000.0 / sr;
+                let center_ts = ts - gyro.offset_at_video_timestamp(ts);
+                let last_ts  = center_ts + dt_ms * (fft_size as f64)/2.0;
+                let mut sample_ts = last_ts.min(raw_imu.last().unwrap().timestamp_ms) - (fft_size as f64) * dt_ms;
+                sample_ts = sample_ts.max(0.0);
+
+                let mut prev_ts = 0.0;
+                let mut prev_val = 0.0;
+
+                let mut samples: Vec<f64> = Vec::with_capacity(fft_size);
+                for x in raw_imu {
+                    let mut val = 0.0;
+                    if idx < 3 {
+                        if let Some(g) = x.gyro.as_ref() {
+                            val = g[idx % 3];
+                        }
+                    } else {
+                        if let Some(g) = x.accl.as_ref() {
+                            val = g[idx % 3];
+                        }
+                    }
+
+                    while x.timestamp_ms > sample_ts && samples.len() < fft_size {
+                        let frac = (sample_ts - prev_ts) / (x.timestamp_ms - prev_ts);
+                        let interpolated = prev_val + (val - prev_val) * frac.clamp(0.0, 1.0);
+                        samples.push(interpolated /*+ samples.last().unwrap_or(&0.0)*/);
+                        sample_ts += dt_ms;
+                    }
+
+                    if samples.len() >= fft_size {
+                        break;
+                    }
+
+                    prev_ts = x.timestamp_ms;
+                    prev_val = val;
+                }
+
+                if samples.len() == fft_size {
+                    graph.setData(&samples, sr);
+                } else {
+                    graph.setData(&[], 0.0);
+                }
+            }
+        }
+    }
+
     fn update_keyframes_view(&mut self, view: QJSValue) {
         if let Some(view) = view.to_qobject::<TimelineKeyframesView>() {
             let view = unsafe { &mut *view.as_ptr() }; // _self.borrow_mut();

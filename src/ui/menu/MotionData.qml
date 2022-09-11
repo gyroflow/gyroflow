@@ -440,6 +440,13 @@ MenuItem {
         }
     }
 
+    LinkButton {
+        text: qsTr("Statistics");
+        anchors.horizontalCenter: parent.horizontalCenter;
+        //anchors.verticalCenter: parent.verticalCenter;
+        onClicked: window.videoArea.statistics.shown = !window.videoArea.statistics.shown;
+    }
+
     DropTarget {
         parent: root.innerItem;
         color: styleBackground2;
