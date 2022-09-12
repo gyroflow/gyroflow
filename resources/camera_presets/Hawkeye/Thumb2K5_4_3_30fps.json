@@ -1,0 +1,63 @@
+{
+  "name": "Hawkeye_Thumb___2.5k_4by3_2592x1944-30.00fps",
+  "note": "",
+  "calibrated_by": "VICTOR",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Thumb",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2592,
+    "h": 1944
+  },
+  "orig_dimension": {
+    "w": 2592,
+    "h": 1944
+  },
+  "output_dimension": {
+    "w": 2592,
+    "h": 1944
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6776084471198313,
+    "camera_matrix": [
+      [
+        1332.3946974787666,
+        0.0,
+        1294.900162440311
+      ],
+      [
+        0.0,
+        1330.6955886878527,
+        991.7282650372309
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07369811489111841,
+      0.003326882166586908,
+      -0.0056707211351226675,
+      0.0022359553785864473
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}
