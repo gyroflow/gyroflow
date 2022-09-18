@@ -285,9 +285,9 @@ Item {
                     QT_TR_NOOP("Max smoothness");
                     QT_TR_NOOP("Max smoothness at high velocity");
                     QT_TR_NOOP("Smoothness");
-                    QT_TR_NOOP("Smoothness pitch");
-                    QT_TR_NOOP("Smoothness roll");
-                    QT_TR_NOOP("Smoothness yaw");
+                    QT_TR_NOOP("Pitch smoothness");
+                    QT_TR_NOOP("Roll smoothness");
+                    QT_TR_NOOP("Yaw smoothness");
                 }
             }
         }
