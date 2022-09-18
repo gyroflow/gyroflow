@@ -37,9 +37,9 @@ define_keyframes! {
     SmoothingParamTimeConstant,  "#94ea8e", "Max smoothness",                   |v| format!("{:.2}", v),
     SmoothingParamTimeConstant2, "#89df82", "Max smoothness at high velocity",  |v| format!("{:.2}", v),
     SmoothingParamSmoothness,    "#7ced74", "Smoothness",                       |v| format!("{:.2}", v),
-    SmoothingParamPitch,         "#59c451", "Smoothness pitch",                 |v| format!("{:.2}", v),
-    SmoothingParamRoll,          "#51c485", "Smoothness roll",                  |v| format!("{:.2}", v),
-    SmoothingParamYaw,           "#88c451", "Smoothness yaw",                   |v| format!("{:.2}", v),
+    SmoothingParamPitch,         "#59c451", "Pitch smoothness",                 |v| format!("{:.2}", v),
+    SmoothingParamRoll,          "#51c485", "Roll smoothness",                  |v| format!("{:.2}", v),
+    SmoothingParamYaw,           "#88c451", "Yaw smoothness",                   |v| format!("{:.2}", v),
 
     VideoSpeed,                  "#f6e926", "Video speed",                      |v| format!("{:.1}%", v * 100.0),
 }
