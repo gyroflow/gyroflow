@@ -541,52 +541,52 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
       <translation type="unfinished">Link with smoothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="410"/>
+      <location filename="../../src/ui/menu/Export.qml" line="411"/>
       <source>Link with zooming speed</source>
       <translation type="unfinished">Link with zooming speed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="419"/>
+      <location filename="../../src/ui/menu/Export.qml" line="420"/>
       <source>Custom encoder options</source>
       <translation type="unfinished">Custom encoder options</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="442"/>
+      <location filename="../../src/ui/menu/Export.qml" line="443"/>
       <source>Show available options</source>
       <translation type="unfinished">Show available options</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="445"/>
+      <location filename="../../src/ui/menu/Export.qml" line="446"/>
       <source>Ok</source>
       <translation type="unfinished">Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="452"/>
+      <location filename="../../src/ui/menu/Export.qml" line="453"/>
       <source>Keyframe distance</source>
       <translation type="unfinished">Keyframe distance</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="461"/>
+      <location filename="../../src/ui/menu/Export.qml" line="462"/>
       <source>s</source>
       <translation type="unfinished">s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="466"/>
+      <location filename="../../src/ui/menu/Export.qml" line="467"/>
       <source>Preserve other tracks</source>
       <translation type="unfinished">Preserve other tracks</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="468"/>
+      <location filename="../../src/ui/menu/Export.qml" line="469"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
       <translation type="unfinished">This disables trim range and you need to use the .mov output file extension</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="473"/>
+      <location filename="../../src/ui/menu/Export.qml" line="474"/>
       <source>Use black frames outside trim range and keep original file duration</source>
       <translation type="unfinished">Use black frames outside trim range and keep original file duration</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="480"/>
+      <location filename="../../src/ui/menu/Export.qml" line="481"/>
       <source>Device for rendering</source>
       <translation type="unfinished">Device for rendering</translation>
     </message>
@@ -1144,37 +1144,37 @@ Quere envialo seu perfil?</translation>
       <translation type="unfinished">rs-sync</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="569"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="575"/>
       <source>Do nothing</source>
       <translation type="unfinished">Do nothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="570"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="576"/>
       <source>Shut down the computer</source>
       <translation type="unfinished">Shut down the computer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="571"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="577"/>
       <source>Restart the computer</source>
       <translation type="unfinished">Restart the computer</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="572"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="578"/>
       <source>Sleep</source>
       <translation type="unfinished">Sleep</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="573"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="579"/>
       <source>Hibernate</source>
       <translation type="unfinished">Hibernate</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="574"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="580"/>
       <source>Logout</source>
       <translation type="unfinished">Logout</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="575"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="581"/>
       <source>Close Gyroflow</source>
       <translation type="unfinished">Close Gyroflow</translation>
     </message>
@@ -1192,13 +1192,13 @@ Quere envialo seu perfil?</translation>
       <translation>Cola procesado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="577"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="583"/>
       <source>When rendering is finished: %1</source>
       <translation type="unfinished">When rendering is finished: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="91"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="473"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="479"/>
       <source> @ %1fps</source>
       <translation> @ %1fps</translation>
     </message>
@@ -1215,6 +1215,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="124"/>
       <location filename="../../src/ui/RenderQueue.qml" line="145"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="231"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
@@ -1230,19 +1231,19 @@ Quere envialo seu perfil?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="511"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>Open rendered file</source>
       <translation>Abrir ficheiro renderizado</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="144"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="517"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="523"/>
       <source>Open file location</source>
       <translation>Abrir localización do ficheiro</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="160"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="366"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="372"/>
       <source>Render using CPU</source>
       <translation>Renderizar usando CPU</translation>
     </message>
@@ -1269,77 +1270,87 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Retomar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="287"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="227"/>
+      <source>You have unfinished tasks in the render queue.</source>
+      <translation type="unfinished">You have unfinished tasks in the render queue.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="228"/>
+      <source>Open render queue</source>
+      <translation type="unfinished">Open render queue</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="293"/>
       <source>Render now</source>
       <translation>Renderizar agora</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="293"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="299"/>
       <source>Edit</source>
       <translation>Editar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="306"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Reset status</source>
       <translation>Restablecer estado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="306"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Stop</source>
       <translation>Deter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="356"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="362"/>
       <source>Missing required components.</source>
       <translation type="unfinished">Missing required components.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="374"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="380"/>
       <source>Yes</source>
       <translation>Sí</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="375"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="381"/>
       <source>Rename</source>
       <translation>Renomear</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="376"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>No</source>
       <translation>Non</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="376"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>Output file already exists.</source>
       <translation>O ficheiro de saída xa existe.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="477"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="483"/>
       <source>Synchronizing...</source>
       <translation type="unfinished">Synchronizing...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="478"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="484"/>
       <source>Elapsed: %1. Remaining: %2</source>
       <translation>Transcorrido: %1. Restante: %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="521"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="527"/>
       <source>Remove</source>
       <translation>Eliminar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="600"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="606"/>
       <source>Number of parallel renders: %1</source>
       <translation type="unfinished">Number of parallel renders: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="446"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="452"/>
       <source>Save to: %1</source>
       <translation>Gardado: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="447"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="453"/>
       <source>Export settings: %1</source>
       <translation>Exportar axustes: %1</translation>
     </message>

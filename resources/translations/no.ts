@@ -542,52 +542,52 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
       <translation type="unfinished">Link with smoothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="410"/>
+      <location filename="../../src/ui/menu/Export.qml" line="411"/>
       <source>Link with zooming speed</source>
       <translation type="unfinished">Link with zooming speed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="419"/>
+      <location filename="../../src/ui/menu/Export.qml" line="420"/>
       <source>Custom encoder options</source>
       <translation>Egendefinerte innstillinger for enkoder</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="442"/>
+      <location filename="../../src/ui/menu/Export.qml" line="443"/>
       <source>Show available options</source>
       <translation>Vis tilgjengelige valgmuligheter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="445"/>
+      <location filename="../../src/ui/menu/Export.qml" line="446"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="452"/>
+      <location filename="../../src/ui/menu/Export.qml" line="453"/>
       <source>Keyframe distance</source>
       <translation>Keyframe distanse</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="461"/>
+      <location filename="../../src/ui/menu/Export.qml" line="462"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="466"/>
+      <location filename="../../src/ui/menu/Export.qml" line="467"/>
       <source>Preserve other tracks</source>
       <translation>Bevar andre spor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="468"/>
+      <location filename="../../src/ui/menu/Export.qml" line="469"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
       <translation>Dette deaktiverer beskjæring og du må bruke filtypen .mov</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="473"/>
+      <location filename="../../src/ui/menu/Export.qml" line="474"/>
       <source>Use black frames outside trim range and keep original file duration</source>
       <translation type="unfinished">Use black frames outside trim range and keep original file duration</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="480"/>
+      <location filename="../../src/ui/menu/Export.qml" line="481"/>
       <source>Device for rendering</source>
       <translation>Enhet for rendring</translation>
     </message>
@@ -1145,37 +1145,37 @@ Vil du sende inn profilen din?</translation>
       <translation>rs-sync</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="569"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="575"/>
       <source>Do nothing</source>
       <translation>Ikke gjør noe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="570"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="576"/>
       <source>Shut down the computer</source>
       <translation>Slå av datamaskinen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="571"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="577"/>
       <source>Restart the computer</source>
       <translation>Start datamaskinen på nytt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="572"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="578"/>
       <source>Sleep</source>
       <translation>Hvilemodus</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="573"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="579"/>
       <source>Hibernate</source>
       <translation>Dvale</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="574"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="580"/>
       <source>Logout</source>
       <translation>Logg ut</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="575"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="581"/>
       <source>Close Gyroflow</source>
       <translation>Lukk Gyroflow</translation>
     </message>
@@ -1193,13 +1193,13 @@ Vil du sende inn profilen din?</translation>
       <translation>Render kø</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="577"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="583"/>
       <source>When rendering is finished: %1</source>
       <translation type="unfinished">When rendering is finished: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="91"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="473"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="479"/>
       <source> @ %1fps</source>
       <translation> @ %1fps</translation>
     </message>
@@ -1216,6 +1216,7 @@ Vil du sende inn profilen din?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="124"/>
       <location filename="../../src/ui/RenderQueue.qml" line="145"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="231"/>
       <source>Ok</source>
       <translation>OK</translation>
     </message>
@@ -1231,19 +1232,19 @@ Vil du sende inn profilen din?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="511"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>Open rendered file</source>
       <translation>Åpne renderet fil</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="144"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="517"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="523"/>
       <source>Open file location</source>
       <translation>Åpne filplassering</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="160"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="366"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="372"/>
       <source>Render using CPU</source>
       <translation>Bruk CPU enkoder</translation>
     </message>
@@ -1270,77 +1271,87 @@ Vil du konvertere til et annet støttet pikselformat eller beholde det opprinnel
       <translation>Gjenoppta</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="287"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="227"/>
+      <source>You have unfinished tasks in the render queue.</source>
+      <translation type="unfinished">You have unfinished tasks in the render queue.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="228"/>
+      <source>Open render queue</source>
+      <translation type="unfinished">Open render queue</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="293"/>
       <source>Render now</source>
       <translation>Rendre nå</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="293"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="299"/>
       <source>Edit</source>
       <translation>Rediger</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="306"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Reset status</source>
       <translation type="unfinished">Reset status</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="306"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Stop</source>
       <translation>Stopp</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="356"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="362"/>
       <source>Missing required components.</source>
       <translation>Mangler nødvendige komponenter.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="374"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="380"/>
       <source>Yes</source>
       <translation>Ja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="375"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="381"/>
       <source>Rename</source>
       <translation>Endre navn</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="376"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>No</source>
       <translation>Nei</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="376"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>Output file already exists.</source>
       <translation>Filen finnes allerede.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="477"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="483"/>
       <source>Synchronizing...</source>
       <translation>Synkroniserer...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="478"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="484"/>
       <source>Elapsed: %1. Remaining: %2</source>
       <translation>Brukt tid: %1. Gjenværende tid: %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="521"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="527"/>
       <source>Remove</source>
       <translation>Fjern</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="600"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="606"/>
       <source>Number of parallel renders: %1</source>
       <translation>Antall parallelle renderinger: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="446"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="452"/>
       <source>Save to: %1</source>
       <translation>Lagre til: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="447"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="453"/>
       <source>Export settings: %1</source>
       <translation>Eksport innstillinger: %1</translation>
     </message>
