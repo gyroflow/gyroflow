@@ -75,6 +75,7 @@ impl CameraIdentifier {
                                         "X" => id.lens_info = "Max".into(),
                                         "W" => id.lens_info = "Wide".into(),
                                         "S" => id.lens_info = "Super".into(),
+                                        "H" => id.lens_info = "Hyper".into(),
                                         "L" => id.lens_info = "Linear".into(),
                                         "N" => id.lens_info = "Narrow".into(),
                                         _ => id.lens_info = v.into()
