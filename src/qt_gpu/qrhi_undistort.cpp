@@ -120,7 +120,7 @@ public:
         return true;
     }
 
-    bool render(MDKPlayer *item, uint8_t *params, int paramsLen, uint8_t *matrices, int matricesLen, uint8_t *canvas, int canvasLen) {
+    bool render(MDKPlayer *item, uint8_t *params, uint paramsLen, uint8_t *matrices, uint matricesLen, uint8_t *canvas, uint canvasLen) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();

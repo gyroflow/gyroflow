@@ -141,7 +141,7 @@ pub struct RenderQueue {
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
-    add_file: qt_method!(fn(&mut self, path: String, additional_data: String) -> u32),
+    add_file: qt_method!(fn(&mut self, path: String, gyro_path: String, additional_data: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
@@ -562,7 +562,7 @@ impl RenderQueue {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
                 if let Ok(data) = serde_json::to_string(&x) {
-                    self.add_file(data, additional_data.clone());
+                    self.add_file(data, String::new(), additional_data.clone());
                 }
             }
         }
@@ -791,7 +791,7 @@ impl RenderQueue {
         path.to_string_lossy().replace('\\', "/")
     }
 
-    pub fn add_file(&mut self, path: String, additional_data: String) -> u32 {
+    pub fn add_file(&mut self, path: String, gyro_path: String, additional_data: String) -> u32 {
         let job_id = fastrand::u32(1..);
 
         let is_gf_data = path.starts_with('{');
@@ -978,7 +978,9 @@ impl RenderQueue {
                                     err(("An error occured: %1".to_string(), e.to_string()));
                                     return;
                                 }
-                                let _ = stab.load_gyro_data(&path, |_|(), Arc::new(AtomicBool::new(false)));
+                                let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
+                                let _ = stab.load_gyro_data(&gyro_path, |_|(), Arc::new(AtomicBool::new(false)));
+
                                 let camera_id = stab.camera_id.read();
 
                                 let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();

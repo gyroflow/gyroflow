@@ -67,6 +67,10 @@ struct Opts {
     /// watch folder for automated processing
     #[argh(option)]
     watch: Option<String>,
+
+    /// gyro file path
+    #[argh(option, short = 'g')]
+    gyro_file: Option<String>,
 }
 
 pub fn will_run_in_console() -> bool {
@@ -185,7 +189,7 @@ pub fn run(open_file: &mut String) -> bool {
                         let queue = unsafe { &mut *queue.as_ptr() };
                         let additional_data2 = additional_data.to_string();
                         qmetaobject::single_shot(std::time::Duration::from_millis(1), move || {
-                            queue.add_file(path.clone(), additional_data2.clone());
+                            queue.add_file(path.clone(), String::new(), additional_data2.clone());
                         });
                     }
                 }
@@ -335,8 +339,9 @@ pub fn run(open_file: &mut String) -> bool {
 
         if !watching {
             let mut queue = queue.borrow_mut();
+            let gyro_file = opts.gyro_file.unwrap_or_default();
             for file in &videos {
-                queue.add_file(file.clone(), additional_data.to_string());
+                queue.add_file(file.clone(), gyro_file.clone(), additional_data.to_string());
             }
         }
 
