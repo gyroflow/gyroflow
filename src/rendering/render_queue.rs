@@ -31,7 +31,7 @@ impl RenderQueueItem {
     pub fn get_status(&self) -> &JobStatus { &self.status }
 }
 
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, Eq, PartialEq)]
 pub enum JobStatus {
     #[default]
     Queued,
@@ -1102,7 +1102,7 @@ impl RenderQueue {
                                 let mut abs_frame_no = 0;
                                 let sync = std::rc::Rc::new(sync);
 
-                                match VideoProcessor::from_file(&path, gpu_decoding, 0, None) {
+                                match VideoProcessor::from_file(path, gpu_decoding, 0, None) {
                                     Ok(mut proc) => {
                                         let err2 = err.clone();
                                         let sync2 = sync.clone();

@@ -6,8 +6,12 @@ mod opencv_standard;
 mod poly3;
 mod poly5;
 mod ptlens;
+
 mod gopro_superview;
-pub use gopro_superview::GoProSuperview;
+mod gopro_hyperview;
+mod digital_stretch;
+
+use super::KernelParams;
 
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {
@@ -16,48 +20,54 @@ macro_rules! impl_models {
             $($name($class),)*
         }
         impl Default for DistortionModels {
-            fn default() -> Self { DistortionModels::OpenCVFisheye(opencv_fisheye::OpenCVFisheye { }) }
+            fn default() -> Self { Self::OpenCVFisheye(Default::default()) }
         }
         #[derive(Default, Clone)]
         pub struct DistortionModel {
             inner: DistortionModels
         }
         impl DistortionModel {
-            pub fn undistort_point<T: num_traits::Float>(&self, point: (T, T), k: &[T], amount: T) -> Option<(T, T)> {
+            pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
                 match &self.inner {
-                    $(DistortionModels::$name(x) => x.undistort_point(point, k, amount),)*
+                    $(DistortionModels::$name(x) => x.undistort_point(point, params),)*
                 }
             }
-            pub fn distort_point<T: num_traits::Float>(&self, point: (T, T), k: &[T], amount: T) -> (T, T) {
+            pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
                 match &self.inner {
-                    $(DistortionModels::$name(x) => x.distort_point(point, k, amount),)*
+                    $(DistortionModels::$name(x) => x.distort_point(point, params),)*
+                }
+            }
+            pub fn adjust_lens_profile(&self, profile: &mut crate::LensProfile) {
+                match &self.inner {
+                    $(DistortionModels::$name(x) => x.adjust_lens_profile(profile),)*
                 }
             }
 
-            pub fn id(&self)               -> i32          { match &self.inner { $(DistortionModels::$name(x) => x.id(),)* } }
-            pub fn name(&self)             -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.name(),)* } }
+            pub fn id(&self)               -> &'static str { match &self.inner { $(DistortionModels::$name(_) => <$class>::id(),)* } }
+            pub fn name(&self)             -> &'static str { match &self.inner { $(DistortionModels::$name(_) => <$class>::name(),)* } }
             pub fn opencl_functions(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.opencl_functions(),)* } }
             pub fn wgsl_functions(&self)   -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.wgsl_functions(),)* } }
-            pub fn glsl_shader_path(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.glsl_shader_path(),)* } }
 
-            pub fn from_id(id: i32) -> Self {
-                match id {
-                    0 => Self { inner: DistortionModels::OpenCVFisheye(Default::default()) },
-                    1 => Self { inner: DistortionModels::OpenCVStandard(Default::default()) },
-                    2 => Self { inner: DistortionModels::Poly3(Default::default()) },
-                    3 => Self { inner: DistortionModels::Poly5(Default::default()) },
-                    4 => Self { inner: DistortionModels::PtLens(Default::default()) },
-                    _ => DistortionModel::default()
-                }
+            pub fn from_name(id: &str) -> Self {
+                $(
+                    if <$class>::id() == id { return Self { inner: DistortionModels::$name(Default::default()) }; }
+                )*
+                DistortionModel::default()
             }
         }
     };
 }
 
 impl_models! {
+    // Physical lenses
     OpenCVFisheye  => opencv_fisheye::OpenCVFisheye,
     OpenCVStandard => opencv_standard::OpenCVStandard,
     Poly3          => poly3::Poly3,
     Poly5          => poly5::Poly5,
     PtLens         => ptlens::PtLens,
+
+    // Digital lenses (ie. post-processing)
+    GoProSuperview => gopro_superview::GoProSuperview,
+    GoProHyperview => gopro_hyperview::GoProHyperview,
+    DigitalStretch => digital_stretch::DigitalStretch,
 }

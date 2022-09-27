@@ -14,6 +14,7 @@ MenuItem {
 
     Settings {
         id: settings;
+        property alias previewPipeline: previewPipeline.currentIndex;
         property alias previewResolution: previewResolution.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
@@ -43,7 +44,7 @@ MenuItem {
             model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
-            currentIndex: 2;
+            currentIndex: 3;
             onCurrentIndexChanged: {
                 let target_height = -1; // Full
                 switch (currentIndex) {
@@ -202,17 +203,33 @@ MenuItem {
         onCheckedChanged: window.videoArea.safeArea = checked;
     }
     CheckBox {
-        //visible: Qt.platform.os != "osx";
-        text: qsTr("Experimental zero-copy GPU preview");
-        tooltip: qsTr("Render and undistort the preview video entirely on the GPU.\nThis should provide much better UI performance.");
-        checked: false;
-        onCheckedChanged: controller.set_zero_copy(window.videoArea.vid, checked);
-    }
-    CheckBox {
         id: gpudecode;
         text: qsTr("Use GPU decoding");
         checked: true;
         onCheckedChanged: controller.set_gpu_decoding(checked);
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Preview pipeline");
+
+        ComboBox {
+            id: previewPipeline;
+            model: ["Zero-copy Qt RHI", "Zero-copy OpenCL", "OpenCL/wgpu/CPU"];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            onCurrentIndexChanged: {
+                if (currentIndex != 2) {
+                    if (previewResolution.currentIndex == 3) {
+                        previewResolution.currentIndex = 0;
+                        Qt.callLater(window.exportSettings.notifySizeChanged);
+                    }
+                }
+                controller.set_preview_pipeline(currentIndex);
+                Qt.callLater(window.videoArea.vid.forceRedraw);
+            }
+            Component.onCompleted: Qt.callLater(currentIndexChanged);
+        }
     }
     Label {
         position: Label.TopPosition;
@@ -261,6 +278,13 @@ MenuItem {
                 settings.setValue("processingDevice", text);
             }
         }
+    }
+    BasicText {
+        visible: text.length > 0;
+        text: controller.processing_info;
+        width: parent.width;
+        wrapMode: Text.WordWrap;
+        font.pixelSize: 11 * dpiScale;
     }
     Label {
         position: Label.LeftPosition;

@@ -35,7 +35,8 @@ use stabilization::Stabilization;
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
-use gpu::{ BufferDescription, BufferSource };
+use gpu::BufferDescription;
+use gpu::drawing::*;
 
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
@@ -68,7 +69,6 @@ pub struct StabilizationManager<T: PixelType> {
     pub current_compute_id: Arc<AtomicU64>,
     pub smoothing_checksum: Arc<AtomicU64>,
     pub zooming_checksum: Arc<AtomicU64>,
-    pub current_fov_10000: Arc<AtomicU64>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
@@ -94,8 +94,6 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             current_compute_id: Arc::new(AtomicU64::new(0)),
             smoothing_checksum: Arc::new(AtomicU64::new(0)),
             zooming_checksum: Arc::new(AtomicU64::new(0)),
-
-            current_fov_10000: Arc::new(AtomicU64::new(0)),
 
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
@@ -177,6 +175,8 @@ impl<T: PixelType> StabilizationManager<T> {
             } else {
                 l.load_from_json_value(lens);
                 l.filename = path.to_string();
+                let db = self.lens_profile_db.read();
+                l.resolve_interpolations(&db);
             }
         }
         if let Some(ref id) = md.camera_identifier {
@@ -191,7 +191,10 @@ impl<T: PixelType> StabilizationManager<T> {
             *self.lens.write() = lens.clone();
             Ok(())
         } else {
-            self.lens.write().load_from_file(path)
+            let mut lens = self.lens.write();
+            let result = lens.load_from_file(path);
+            lens.resolve_interpolations(&db);
+            result
         }
     }
 
@@ -263,7 +266,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn recompute_adaptive_zoom(&self) {
         let params = stabilization::ComputeParams::from_manager(self, false);
-        let lens_fov_adjustment = params.lens_fov_adjustment;
+        let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let mut zoom = zooming::from_compute_params(params);
         let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
 
@@ -347,7 +350,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut stab_params = stabilization_params.write();
-                stab_params.set_fovs(params.fovs.clone(), params.lens_fov_adjustment);
+                stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                 stab_params.zooming_debug_points = zoom.get_debug_points();
             }
 
@@ -362,183 +365,114 @@ impl<T: PixelType> StabilizationManager<T> {
         compute_id
     }
 
-    pub fn get_features_pixels(&self, timestamp_us: i64) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+    pub fn get_features_pixels(&self, timestamp_us: i64, size: (usize, usize)) -> Option<Vec<(i32, i32)>> { // (x, y, alpha)
         let mut ret = None;
-        if self.params.read().show_detected_features {
-            use crate::util::MapClosest;
-            use synchronization::EstimatorItemInterface;
+        use crate::util::MapClosest;
+        use synchronization::EstimatorItemInterface;
 
-            if let Some(l) = self.pose_estimator.sync_results.try_read() {
-                if let Some(entry) = l.get_closest(&timestamp_us, 2000) { // closest within 2ms
-                    for pt in entry.item.get_features() {
-                        if ret.is_none() {
-                            // Only allocate if we actually have any points
-                            ret = Some(Vec::with_capacity(2048));
-                        }
-                        for xstep in -1..=1i32 {
-                            for ystep in -1..=1i32 {
-                                ret.as_mut().unwrap().push((pt.0 as i32 + xstep, pt.1 as i32 + ystep, 1.0));
-                            }
-                        }
+        if let Some(l) = self.pose_estimator.sync_results.try_read() {
+            if let Some(entry) = l.get_closest(&timestamp_us, 2000) { // closest within 2ms
+                let ratio = size.1 as f32 / entry.frame_size.1.max(1) as f32;
+                for pt in entry.item.get_features() {
+                    if ret.is_none() {
+                        // Only allocate if we actually have any points
+                        ret = Some(Vec::with_capacity(2048));
                     }
+                    ret.as_mut().unwrap().push(((pt.0 * ratio) as i32, (pt.1 * ratio) as i32));
                 }
             }
         }
         ret
     }
-    pub fn get_opticalflow_pixels(&self, timestamp_us: i64) -> Option<Vec<(i32, i32, f32)>> { // (x, y, alpha)
+    pub fn get_opticalflow_pixels(&self, timestamp_us: i64, num_frames: usize, size: (usize, usize)) -> Option<Vec<(i32, i32, usize)>> { // (x, y, alpha)
         let mut ret = None;
-        let (show, method) = {
-            let params = self.params.read();
-            (params.show_optical_flow, params.of_method)
-        };
-        if show {
-            let num = if method == 2 { 1 } else { 3 };
-            for i in 0..num {
-                let a = (3 - i) as f32 / 3.0;
-                if let Some(lines) = self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1, false) {
+        for i in 0..num_frames {
+            match self.pose_estimator.get_of_lines_for_timestamp(&timestamp_us, i, 1.0, 1, false) {
+                (Some(lines), Some(frame_size)) => {
+                    let ratio = size.1 as f32 / frame_size.1.max(1) as f32;
                     lines.0.1.into_iter().zip(lines.1.1.into_iter()).for_each(|(p1, p2)| {
                         if ret.is_none() {
                             // Only allocate if we actually have any points
                             ret = Some(Vec::with_capacity(2048));
                         }
-                        let line = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize));
+                        let line = line_drawing::Bresenham::new(((p1.0 * ratio) as isize, (p1.1 * ratio) as isize), ((p2.0 * ratio) as isize, (p2.1 * ratio) as isize));
                         for point in line {
-                            ret.as_mut().unwrap().push((point.0 as i32, point.1 as i32, a));
+                            ret.as_mut().unwrap().push((point.0 as i32, point.1 as i32, i));
                         }
                     });
                 }
+                _ => { }
             }
         }
         ret
     }
 
-    pub unsafe fn fill_undistortion_data(&self, mut timestamp_us: i64, mat_ptr: *mut f32, mat_size: usize, params_ptr: *mut u8, params_size: usize) -> bool {
-        let stab_enabled = {
-            let params = self.params.read();
-            if let Some(fps_scale) = params.fps_scale {
-                timestamp_us = (timestamp_us as f64 / fps_scale).round() as i64;
+    pub fn draw_overlays(&self, drawing: &mut DrawCanvas, timestamp_us: i64) {
+        drawing.clear();
+
+        if let Some(p) = self.params.try_read() {
+            let y_inverted = p.framebuffer_inverted;
+            let size = p.size;
+            let frame = frame_at_timestamp(timestamp_us as f64 / 1000.0, p.get_scaled_fps()) as usize; // used only to draw features and OF
+
+            if p.show_optical_flow {
+                let num_frames = if p.of_method == 2 { 1 } else { 3 };
+                if let Some(pxs) = self.get_opticalflow_pixels(timestamp_us, num_frames, size) {
+                    for (x, y, a) in pxs {
+                        let a = Alpha::from(a as u8);
+                        drawing.put_pixel(x, y, Color::Yellow, a, Stage::OnInput, y_inverted, 1);
+                    }
+                }
             }
-            params.stab_enabled
-        };
-        if stab_enabled {
-            let mut undist = self.stabilization.write();
-
-            if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
-
-                let params_count = itm.matrices.len() * 9;
-                if params_count <= mat_size {
-                    let src_ptr = itm.matrices.as_ptr() as *const f32;
-                    std::ptr::copy_nonoverlapping(src_ptr, mat_ptr, params_count);
-
-                    let src_ptr2 = bytemuck::bytes_of(&itm.kernel_params).as_ptr();
-                    std::ptr::copy_nonoverlapping(src_ptr2, params_ptr, params_size);
-
-                    self.current_fov_10000.store((itm.fov * 10000.0) as u64, SeqCst);
-
-                    return true;
+            if p.show_detected_features {
+                if let Some(pxs) = self.get_features_pixels(timestamp_us, size) {
+                    for (x, y) in pxs {
+                        drawing.put_pixel(x, y, Color::Green, Alpha::Alpha100, Stage::OnInput, y_inverted, 3);
+                    }
+                }
+            }
+            #[cfg(feature = "opencv")]
+            if p.is_calibrator {
+                let lock = self.lens_calibrator.read();
+                if let Some(ref cal) = *lock {
+                    let points = cal.all_matches.read();
+                    if let Some(entry) = points.get(&(frame as i32)) {
+                        calibration::drawing::draw_chessboard_corners(cal.width, cal.height, p.size.0, p.size.1, drawing, (cal.columns, cal.rows), &entry.points, true, y_inverted);
+                    }
+                }
+            }
+            if !p.zooming_debug_points.is_empty() {
+                if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
+                    for i in 0..points.len() {
+                        let fov = (p.fov * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
+                        let mut pt = points[i];
+                        let width_ratio = p.size.0 as f64 / p.output_size.0 as f64;
+                        let height_ratio = p.size.1 as f64 / p.output_size.1 as f64;
+                        pt = (pt.0 - 0.5, pt.1 - 0.5);
+                        pt = (pt.0 / fov * width_ratio, pt.1 / fov * height_ratio);
+                        pt = (pt.0 + 0.5, pt.1 + 0.5);
+                        if pt.0 >= 0.0 && pt.1 >= 0.0 {
+                            drawing.put_pixel((pt.0 * p.output_size.0 as f64) as i32, (pt.1 * p.output_size.1 as f64) as i32, Color::Red, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
+                        }
+                    }
                 }
             }
         }
-        false
     }
 
-    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut BufferDescription) -> bool {
-        let (enabled, ow, oh, framebuffer_inverted, fps, fps_scale, is_calibrator, fov) = {
-            let params = self.params.read();
-            (params.stab_enabled, params.output_size.0, params.output_size.1, params.framebuffer_inverted, params.get_scaled_fps(), params.fps_scale, params.is_calibrator, params.fov)
-        };
-
-        let (width, height, stride) = buffers.input_size;
-        let (out_width, out_height, out_stride) = buffers.output_size;
-
-        if enabled && ow == out_width && oh == out_height {
-            if let Some(scale) = fps_scale {
-                timestamp_us = (timestamp_us as f64 / scale).round() as i64;
-            }
-            let frame = frame_at_timestamp(timestamp_us as f64 / 1000.0, fps) as usize; // used only to draw features and OF
-            //////////////////////////// Draw detected features ////////////////////////////
-            // TODO: maybe handle other types than RGBA8?
-            if let BufferSource::Cpu { input: pixels, .. } = &mut buffers.buffers {
-                if T::COUNT == 4 && T::SCALAR_BYTES == 1 {
-                    if let Some(pxs) = self.get_features_pixels(timestamp_us) {
-                        for (x, mut y, _) in pxs {
-                            if framebuffer_inverted { y = height as i32 - y; }
-                            let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                            if pixels.len() > pos + 2 {
-                                pixels[pos + 0] = 0x0c; // R
-                                pixels[pos + 1] = 0xff; // G
-                                pixels[pos + 2] = 0x00; // B
-                            }
-                        }
-                    }
-                    if let Some(pxs) = self.get_opticalflow_pixels(timestamp_us) {
-                        for (x, mut y, a) in pxs {
-                            if framebuffer_inverted { y = height as i32 - y; }
-                            let pos = (y * stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                            if pixels.len() > pos + 2 {
-                                pixels[pos + 0] = (pixels[pos + 0] as f32 * (1.0 - a) + 0xfe as f32 * a) as u8; // R
-                                pixels[pos + 1] = (pixels[pos + 1] as f32 * (1.0 - a) + 0xfb as f32 * a) as u8; // G
-                                pixels[pos + 2] = (pixels[pos + 2] as f32 * (1.0 - a) + 0x47 as f32 * a) as u8; // B
-                            }
-                        }
-                    }
-
-                    #[cfg(feature = "opencv")]
-                    if is_calibrator {
-                        let lock = self.lens_calibrator.read();
-                        let is_inverted = self.params.read().framebuffer_inverted;
-                        if let Some(ref cal) = *lock {
-                            let points = cal.all_matches.read();
-                            if let Some(entry) = points.get(&(frame as i32)) {
-                                let (w, h, s) = buffers.input_size;
-                                calibration::drawing::draw_chessboard_corners(cal.width, cal.height, w as u32, h as u32, s, pixels, (cal.columns, cal.rows), &entry.points, true, is_inverted);
-                            }
-                        }
-                    }
-                }
-            }
-            //////////////////////////// Draw detected features ////////////////////////////
-            let mut undist = self.stabilization.write();
-            let ret = undist.process_pixels(timestamp_us, buffers);
-            if ret {
-                //////////////////////////// Draw zooming debug pixels ////////////////////////////
-                let p = self.params.read();
-                if !p.zooming_debug_points.is_empty() {
-                    if let BufferSource::Cpu { output: out_pixels, .. } = &mut buffers.buffers {
-                        if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us..).next() {
-                            for i in 0..points.len() {
-                                let fov = (fov * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
-                                let mut pt = points[i];
-                                let width_ratio = width as f64 / out_width as f64;
-                                let height_ratio = height as f64 / out_height as f64;
-                                pt = (pt.0 - 0.5, pt.1 - 0.5);
-                                pt = (pt.0 / fov * width_ratio, pt.1 / fov * height_ratio);
-                                pt = (pt.0 + 0.5, pt.1 + 0.5);
-                                for xstep in -2..=2i32 {
-                                    for ystep in -2..=2i32 {
-                                        let (x, y) = ((pt.0 * out_width as f64) as i32 + xstep, (pt.1 * out_height as f64) as i32 + ystep);
-                                        if x >= 0 && y >= 0 && x < out_width as i32 && y < out_height as i32 {
-                                            let pos = (y * out_stride as i32 + x * (T::COUNT * T::SCALAR_BYTES) as i32) as usize;
-                                            if out_pixels.len() > pos + 2 {
-                                                out_pixels[pos + 0] = 0xff; // R
-                                                out_pixels[pos + 1] = 0x00; // G
-                                                out_pixels[pos + 2] = 0x00; // B
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                //////////////////////////// Draw zooming debug pixels ////////////////////////////
-            }
-            self.current_fov_10000.store((undist.current_fov * 10000.0) as u64, SeqCst);
-            ret
-        } else {
-            false
+    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut BufferDescription) -> Option<stabilization::ProcessedInfo> {
+        if let Some(scale) = self.params.read().fps_scale {
+            timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }
+
+        {
+            let mut undist = self.stabilization.write();
+            self.draw_overlays(&mut undist.drawing, timestamp_us);
+            undist.ensure_ready_for_processing(timestamp_us, buffers);
+        }
+
+        let undist = self.stabilization.read();
+        undist.process_pixels(timestamp_us, buffers)
     }
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
@@ -570,18 +504,29 @@ impl<T: PixelType> StabilizationManager<T> {
         self.invalidate_smoothing();
     }
 
-    pub fn get_scaling_ratio         (&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
-    pub fn get_current_fov           (&self) -> f64 { self.current_fov_10000.load(SeqCst) as f64 / 10000.0 }
-    pub fn get_min_fov               (&self) -> f64 { self.params.read().min_fov }
+    pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
+    pub fn get_min_fov      (&self) -> f64 { self.params.read().min_fov }
 
     pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
     pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
 
-    pub fn set_is_superview(&self, v: bool) {
-        self.lens.write().is_superview = v;
+    pub fn set_digital_lens_name(&self, v: String) {
+        self.lens.write().digital_lens = Some(v.clone());
         #[cfg(feature = "opencv")]
         if let Some(ref mut calib) = *self.lens_calibrator.write() {
-            calib.is_superview = v;
+            calib.digital_lens = Some(v);
+        }
+        self.invalidate_zooming();
+    }
+    pub fn set_digital_lens_param(&self, index: usize, value: f64) {
+        let mut lens = self.lens.write();
+        if lens.digital_lens_params.is_none() {
+            lens.digital_lens_params = Some(vec![0f64; 4]);
+        }
+        lens.digital_lens_params.as_mut().unwrap()[index] = value;
+        #[cfg(feature = "opencv")]
+        if let Some(ref mut calib) = *self.lens_calibrator.write() {
+            calib.digital_lens_params = lens.digital_lens_params.clone();
         }
         self.invalidate_zooming();
     }
@@ -927,7 +872,10 @@ impl<T: PixelType> StabilizationManager<T> {
                 self.gyro.write().init_from_params(&params);
             }
             if let Some(lens) = obj.get("calibration_data") {
-                self.lens.write().load_from_json_value(&lens);
+                let mut l = self.lens.write();
+                l.load_from_json_value(&lens);
+                let db = self.lens_profile_db.read();
+                l.resolve_interpolations(&db);
             }
             obj.remove("frame_orientation");
             obj.remove("stab_transform");
@@ -1005,6 +953,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             frame_readout_time: None,
                             frame_rate: None,
                             camera_identifier: None,
+                            lens_positions: None,
                         };
 
                         let mut gyro = self.gyro.write();

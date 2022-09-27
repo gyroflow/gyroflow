@@ -4,7 +4,7 @@
 use akaze::Akaze;
 use arrsac::Arrsac;
 use bitarray::{ BitArray, Hamming };
-use nalgebra::{ Rotation3, Matrix3 };
+use nalgebra::Rotation3;
 use cv_core::{ FeatureMatch, Pose, sample_consensus::Consensus };
 use rand_xoshiro::Xoshiro256PlusPlus;
 use rand_xoshiro::rand_core::SeedableRng;
@@ -25,38 +25,33 @@ pub type Match = FeatureMatch;
 
 #[derive(Default, Clone)]
 pub struct ItemAkaze {
-    features: Vec<(f64, f64)>,
-    descriptors: Vec<Descriptor>
+    features: Vec<(f32, f32)>,
+    descriptors: Vec<Descriptor>,
+    img_size: (u32, u32)
 }
 
 // TODO: add caching checkbox to the UI
 
 impl EstimatorItemInterface for ItemAkaze {
-    fn get_features(&self) -> &Vec<(f64, f64)> {
+    fn get_features(&self) -> &Vec<(f32, f32)> {
         &self.features
     }
-    fn rescale(&mut self, ratio: f32) {
-        for (x, y) in self.features.iter_mut() {
-            *x *= ratio as f64;
-            *y *= ratio as f64;
-        }
-    }
 
-    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>> {
         if let EstimatorItem::ItemAkaze(next) = next {
             use nalgebra::{ UnitVector3, Point2 };
 
             let pts1 = &self.features;
             let pts2 = &next.features;
 
-            let pts1 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
-            let pts2 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
+            let pts1 = crate::stabilization::undistort_points_for_optical_flow(&pts1, timestamp_us, params, self.img_size);
+            let pts2 = crate::stabilization::undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, self.img_size);
 
             let matches: Vec<Match> = Self::match_descriptors(&self.descriptors, &next.descriptors).into_iter()
                 .map(|(i1, i2)| {
                     FeatureMatch(
-                        UnitVector3::new_normalize(Point2::new(pts1[i1].0, pts1[i1].1).to_homogeneous()),
-                        UnitVector3::new_normalize(Point2::new(pts2[i2].0, pts2[i2].1).to_homogeneous())
+                        UnitVector3::new_normalize(Point2::new(pts1[i1].0 as f64, pts1[i1].1 as f64).to_homogeneous()),
+                        UnitVector3::new_normalize(Point2::new(pts2[i2].0 as f64, pts2[i2].1 as f64).to_homogeneous())
                     )
                 })
                 .collect();
@@ -113,6 +108,7 @@ impl ItemAkaze {
     pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
         let mut akz = Akaze::new(0.0007);
         akz.maximum_features = 200;
+        let img_size = (img.width(), img.height());
         let (points, descriptors) = akz.extract(&image::DynamicImage::ImageLuma8(Arc::try_unwrap(img).unwrap()));
 
         /*let mut hasher = crc32fast::Hasher::new();
@@ -135,8 +131,9 @@ impl ItemAkaze {
         };*/
 
         Self {
-            features: points.into_iter().map(|x| (x.point.0 as f64, x.point.1 as f64)).collect(),
-            descriptors
+            features: points.into_iter().map(|x| x.point).collect(),
+            descriptors,
+            img_size
         }
     }
 }

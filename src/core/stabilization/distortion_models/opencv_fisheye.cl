@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-float2 undistort_point(float2 pos, __global float k[12], float amount) {
+float2 undistort_point(float2 pos, __global KernelParams *params) {
     float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
 
     bool converged = false;
@@ -15,10 +15,10 @@ float2 undistort_point(float2 pos, __global float k[12], float amount) {
             float theta4 = theta2*theta2;
             float theta6 = theta4*theta2;
             float theta8 = theta6*theta2;
-            float k0_theta2 = k[0] * theta2;
-            float k1_theta4 = k[1] * theta4;
-            float k2_theta6 = k[2] * theta6;
-            float k3_theta8 = k[3] * theta8;
+            float k0_theta2 = params->k[0] * theta2;
+            float k1_theta4 = params->k[1] * theta4;
+            float k2_theta6 = params->k[2] * theta6;
+            float k3_theta8 = params->k[3] * theta8;
             // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
             float theta_fix = (theta * (1.0f + k0_theta2 + k1_theta4 + k2_theta6 + k3_theta8) - theta_d)
                               /
@@ -38,15 +38,12 @@ float2 undistort_point(float2 pos, __global float k[12], float amount) {
     bool theta_flipped = (theta_d < 0.0f && theta > 0.0f) || (theta_d > 0.0f && theta < 0.0f);
 
     if (converged && !theta_flipped) {
-        // Apply only requested amount
-        scale = 1.0f + (scale - 1.0f) * (1.0f - amount);
-
         return pos * scale;
     }
     return (float2)(0.0f, 0.0f);
 }
 
-float2 distort_point(float2 pos, __global float k[12]) {
+float2 distort_point(float2 pos, __global KernelParams *params) {
     float r = length(pos);
 
     float theta = atan(r);
@@ -55,7 +52,7 @@ float2 distort_point(float2 pos, __global float k[12]) {
           theta6 = theta4*theta2,
           theta8 = theta4*theta4;
 
-    float theta_d = theta * (1.0f + theta2 * k[0] + theta4 * k[1] + theta6 * k[2] + theta8 * k[3]);
+    float theta_d = theta * (1.0f + theta2 * params->k[0] + theta4 * params->k[1] + theta6 * params->k[2] + theta8 * params->k[3]);
 
     float scale = r == 0.0f? 1.0f : theta_d / r;
 

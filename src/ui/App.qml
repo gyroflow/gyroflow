@@ -533,4 +533,27 @@ Rectangle {
         };
     }
     function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
+
+    /*Row {
+        id: fps;
+        property int frameCounter: 0;
+        property int fps: 0;
+        Image {
+            id: spinnerImage;
+            width: 2; height: 2;
+            source: "qrc:/resources/logo_black.svg";
+            NumberAnimation on rotation { from: 0; to: 360; duration: 800; loops: Animation.Infinite }
+            onRotationChanged: fps.frameCounter++;
+        }
+        Text { color: "red"; font.pixelSize: 18; text: fps.fps + " fps"; }
+        Timer {
+            interval: 2000;
+            repeat: true;
+            running: true;
+            onTriggered: {
+                fps.fps = fps.frameCounter / 2;
+                fps.frameCounter = 0;
+            }
+        }
+    }*/
 }

@@ -25,14 +25,17 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEs
         let mut matched_points = Vec::new();
         for ts in &keys {
             if (*from_ts..*to_ts).contains(&ts) {
-                if let Some(lines) = estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no, true) {
-                    if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {
-                        matched_points.push(lines);
-                    } else {
-                        log::warn!("Invalid point pairs {} {}", lines.0.1.len(), lines.1.1.len());
+                match estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no, true) {
+                    (Some(lines), Some(_frame_size)) => {
+                        if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {
+                            matched_points.push(lines);
+                        } else {
+                            log::warn!("Invalid point pairs {} {}", lines.0.1.len(), lines.1.1.len());
+                        }
+                    },
+                    _ => {
+                        log::warn!("No detected features for ts {}", ts);
                     }
-                } else {
-                    log::warn!("No detected features for ts {}", ts);
                 }
             }
         }
@@ -56,8 +59,8 @@ pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEs
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
-                    if p1.0 > 0.0 && p1.0 < w as f64 && p1.1 > 0.0 && p1.1 < h as f64 &&
-                       p2.0 > 0.0 && p2.0 < w as f64 && p2.1 > 0.0 && p2.1 < h as f64 {
+                    if p1.0 > 0.0 && p1.0 < w as f32 && p1.1 > 0.0 && p1.1 < h as f32 &&
+                       p2.0 > 0.0 && p2.0 < w as f32 && p2.1 > 0.0 && p2.1 < h as f32 {
                         let dist = ((p2.0 - p1.0) * (p2.0 - p1.0))
                                       + ((p2.1 - p1.1) * (p2.1 - p1.1));
                         distances.push(dist as u64);

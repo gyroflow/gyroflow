@@ -25,20 +25,63 @@ struct KernelParams {
     input_horizontal_stretch: f32, // 4
     background_margin:        f32, // 8
     background_margin_feather:f32, // 12
-    reserved1:                f32, // 16
+    canvas_scale:             f32, // 16
     reserved2:                f32, // 4
     reserved3:                f32, // 8
     translation2d:      vec2<f32>, // 16
     translation3d:      vec4<f32>, // 16
+    source_pos:         vec2<i32>, // 8
+    output_pos:         vec2<i32>, // 16
+    source_stretch:     vec2<f32>, // 8
+    output_stretch:     vec2<f32>, // 16
+    digital_lens_params:vec2<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
 @group(0) @binding(1) @fragment var<storage, read> matrices: array<f32>;
 @group(0) @binding(2) @fragment var input_tex: texture_2d<SCALAR>;
 @group(0) @binding(3) @fragment var<storage, read> coeffs: array<f32>;
+@group(0) @binding(4) @fragment var<storage, read> drawing: array<u32>;
+
+LENS_MODEL_FUNCTIONS;
 
 let INTER_BITS: u32 = 5u;
 let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
+
+fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
+    var colors: array<vec4<f32>, 9> = array<vec4<f32>, 9>(
+        vec4<f32>(0.0,   0.0,   0.0,     0.0), // None
+        vec4<f32>(255.0, 0.0,   0.0,   255.0), // Red
+        vec4<f32>(0.0,   255.0, 0.0,   255.0), // Green
+        vec4<f32>(0.0,   0.0,   255.0, 255.0), // Blue
+        vec4<f32>(254.0, 251.0, 71.0,  255.0), // Yellow
+        vec4<f32>(200.0, 200.0, 0.0,   255.0), // Yellow2
+        vec4<f32>(255.0, 0.0,   255.0, 255.0), // Magenta
+        vec4<f32>(0.0,   128.0, 255.0, 255.0), // Blue2
+        vec4<f32>(0.0,   200.0, 200.0, 255.0)  // Blue3
+    );
+    var alphas: vec4<f32> = vec4<f32>( 1.0, 0.75, 0.50, 0.25 );
+
+    let width = max(params.width, params.output_width);
+
+    let pos_byte = u32(round(floor(f32(y) / params.canvas_scale) * (f32(width) / params.canvas_scale) + floor(f32(x) / params.canvas_scale)));
+    let pos_u32 = pos_byte / 4u;
+    let u32_offset = pos_byte - (pos_u32 * 4u);
+    let data = (drawing[pos_u32] >> ((u32_offset) * 8u)) & 0xFFu;
+    var pix = in_pix;
+    if (data > 0u) {
+        let color = (data & 0xF8u) >> 3u;
+        let alpha = (data & 0x06u) >> 1u;
+        let stage = data & 1u;
+        if (((stage == 0u && isInput) || (stage == 1u && !isInput)) && color < 9u) {
+            let colorf = colors[color] / bg_scaler;
+            let alphaf = alphas[alpha];
+            pix = colorf * alphaf + pix * (1.0 - alphaf);
+            pix.w = 255.0 / bg_scaler;
+        }
+    }
+    return pix;
+}
 
 // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
 fn remap_colorrange(px: vec4<f32>, isY: bool) -> vec4<f32> {
@@ -58,7 +101,11 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
     let offset = offsets[params.interpolation >> 2u];
 
-    let uv = uv - offset;
+    var uv = uv + vec2<f32>(params.source_pos);
+    if (params.source_stretch.x > 0.0) { uv.x = uv.x * f32(params.source_stretch.x); }
+    if (params.source_stretch.y > 0.0) { uv.y = uv.y * f32(params.source_stretch.y); }
+
+    uv = uv - offset;
 
     let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
     let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));
@@ -76,6 +123,7 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
                 var pixel: vec4<f32>;
                 if (sx + xp >= 0 && sx + xp < params.width) {
                     pixel = vec4<f32>(textureLoad(input_tex, vec2<i32>(sx + xp, sy + yp), 0));
+                    pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
                     if (fix_range) {
                         pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1);
                     }
@@ -104,12 +152,10 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         if (params.r_limit > 0.0 && r > params.r_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
-        var uv = f * distort_point(pos, k1, k2, k3) + c;
+        var uv = f * distort_point(pos) + c;
 
-        if (bool(params.flags & 2)) { // GoPro Superview
-            let size = vec2<f32>(f32(params.width), f32(params.height));
-            uv = to_superview((uv / size) - 0.5);
-            uv = (uv + 0.5) * size;
+        if (bool(params.flags & 2)) { // Has digital lens
+            uv = digital_distort_point(uv);
         }
 
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
@@ -121,7 +167,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 }
 
 @vertex
-fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
+fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) @invariant vec4<f32> {
     var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
         vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0),
         vec2<f32>( 1.0,  1.0), vec2<f32>(-1.0,  1.0), vec2<f32>(-1.0, -1.0),
@@ -136,11 +182,18 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
     let bg = vec4<SCALAR>(SCALAR(params.background[0] / bg_scaler), SCALAR(params.background[1] / bg_scaler), SCALAR(params.background[2] / bg_scaler), SCALAR(params.background[3] / bg_scaler));
 
-    var out_pos = position.xy + params.translation2d;
-
     if (bool(params.flags & 4)) { // Fill with background
         return bg;
     }
+
+    var out_pos = position.xy - vec2<f32>(params.output_pos);
+    if (params.output_stretch.x > 0.0) { out_pos.x = out_pos.x * f32(params.output_stretch.x); }
+    if (params.output_stretch.y > 0.0) { out_pos.y = out_pos.y * f32(params.output_stretch.y); }
+
+    let p = out_pos;
+    out_pos = out_pos + params.translation2d;
+
+    if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return bg; }
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
@@ -161,20 +214,23 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
         let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
         let out_f = (params.f / params.fov) / factor;
 
-        if (bool(params.flags & 2)) { // Re-add GoPro Superview
-            let out_c2 = out_c * 2.0;
-            var pt2 = from_superview((out_pos / out_c2) - 0.5);
-            pt2 = (pt2 + 0.5) * out_c2;
-            out_pos = pt2 * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+        var new_out_pos = out_pos;
+
+        if (bool(params.flags & 2)) { // Has digital lens
+            new_out_pos = digital_undistort_point(new_out_pos);
         }
 
-        out_pos = (out_pos - out_c) / out_f;
-        out_pos = undistort_point(out_pos, params.k1, params.k2, params.k3, params.lens_correction_amount);
-        out_pos = out_f * out_pos + out_c;
+        new_out_pos = (new_out_pos - out_c) / out_f;
+        new_out_pos = undistort_point(new_out_pos);
+        new_out_pos = out_f * new_out_pos + out_c;
+
+        out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
     }
     ///////////////////////////////////////////////////////////////////
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 9u;
+
+    var pixel: vec4<SCALAR> = bg;
 
     var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
     if (uv.x > -99998.0) {
@@ -207,10 +263,13 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
             let c1 = sample_input_at(uv);
             let c2 = sample_input_at(pt2);
-            return vec4<SCALAR>(c1 * alpha + c2 * (1.0 - alpha));
+            pixel = vec4<SCALAR>(c1 * alpha + c2 * (1.0 - alpha));
+            pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
+            return pixel;
         }
 
-        return vec4<SCALAR>(sample_input_at(uv));
+        pixel = vec4<SCALAR>(sample_input_at(uv));
     }
-    return bg;
+    pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
+    return pixel;
 }

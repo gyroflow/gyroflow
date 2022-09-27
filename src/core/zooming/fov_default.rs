@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Marc Roeschlin
 
 use super::*;
-use crate::stabilization::undistort_points_with_rolling_shutter;
 use enterpolation::{ Curve, bspline::BSpline };
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
@@ -177,7 +176,7 @@ impl FovDefault {
             *y += margin;
         }
 
-        let undistorted_points = undistort_points_with_rolling_shutter(&distorted_points, timestamp_ms, &self.compute_params);
+        let undistorted_points = crate::stabilization::undistort_points_with_rolling_shutter(&distorted_points, timestamp_ms, &self.compute_params);
 
         undistorted_points.into_iter().map(|v| Point2D(v.0, v.1)).collect()
     }

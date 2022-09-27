@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{ Rotation3, Matrix3 };
+use nalgebra::Rotation3;
 use std::collections::BTreeMap;
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -15,26 +15,25 @@ use crate::stabilization::ComputeParams;
 
 #[derive(Clone)]
 pub struct ItemOpenCVDis {
-    features: Vec<(f64, f64)>,
+    features: Vec<(f32, f32)>,
     img: Arc<image::GrayImage>,
-    matched_points: Arc<RwLock<BTreeMap<i64, (Vec<(f64, f64)>, Vec<(f64, f64)>)>>>,
+    matched_points: Arc<RwLock<BTreeMap<i64, (Vec<(f32, f32)>, Vec<(f32, f32)>)>>>,
     timestamp_us: i64,
     size: (i32, i32)
 }
 
 impl EstimatorItemInterface for ItemOpenCVDis {
-    fn get_features(&self) -> &Vec<(f64, f64)> { &self.features }
-    fn rescale(&mut self, _ratio: f32) { }
+    fn get_features(&self) -> &Vec<(f32, f32)> { &self.features }
 
-    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
-            let pts11 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
-            let pts22 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
+            let pts11 = crate::stabilization::undistort_points_for_optical_flow(&pts1, timestamp_us, params, (self.img.width(), self.img.height()));
+            let pts22 = crate::stabilization::undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, (self.img.width(), self.img.height()));
 
-            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
-            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
+            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
 
             let a1_pts = Mat::from_slice(&pts1)?;
             let a2_pts = Mat::from_slice(&pts2)?;
@@ -84,7 +83,7 @@ impl ItemOpenCVDis {
         }
     }
 
-    fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+    fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f32, f32)>, Vec<(f32, f32)>)> {
         if let EstimatorItem::ItemOpenCVDis(next) = next {
             let (w, h) = self.size;
             if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
@@ -93,7 +92,7 @@ impl ItemOpenCVDis {
                 return Some(matched.clone());
             }
 
-            let result = || -> Result<(Vec<(f64, f64)>, Vec<(f64, f64)>), opencv::Error> {
+            let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
                 let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
 
@@ -107,8 +106,8 @@ impl ItemOpenCVDis {
                 for i in (0..a1_img.cols()).step_by(step) {
                     for j in (0..a1_img.rows()).step_by(step) {
                         let pt = of.at_2d::<Vec2f>(j, i)?;
-                        points_a.push((i as f64, j as f64));
-                        points_b.push((i as f64 + pt[0] as f64, j as f64 + pt[1] as f64));
+                        points_a.push((i as f32, j as f32));
+                        points_b.push((i as f32 + pt[0] as f32, j as f32 + pt[1] as f32));
                     }
                 }
                 Ok((points_a, points_b))

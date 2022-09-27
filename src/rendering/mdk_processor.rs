@@ -47,13 +47,13 @@ impl MDKProcessor {
                 if ffmpeg_frame.is_none() {
                     ffmpeg_frame = Some(ffmpeg_next::frame::Video::new(ffmpeg_next::format::Pixel::RGBA, width, height));
                 }
-                let mut ffmpeg_frame = ffmpeg_frame.as_mut().unwrap();
+                let ffmpeg_frame = ffmpeg_frame.as_mut().unwrap();
 
                 unsafe {
                     (*ffmpeg_frame.as_mut_ptr()).buf[0] = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
                     (*ffmpeg_frame.as_mut_ptr()).data[0] = data.as_mut_ptr();
                 }
-                if let Err(e) = cb(timestamp_us, &mut ffmpeg_frame, None, &mut converter, &mut RateControl::default()) {
+                if let Err(e) = cb(timestamp_us, ffmpeg_frame, None, &mut converter, &mut RateControl::default()) {
                     ::log::error!("mdk_processor error: {:?}", e);
                     return false;
                 }

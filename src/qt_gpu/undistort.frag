@@ -4,7 +4,7 @@
 // Adapted from OpenCV: initUndistortRectifyMap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 
-// #version 420
+#version 420
 
 layout(location = 0) in vec2 v_texcoord;
 layout(location = 0) out vec4 fragColor;
@@ -35,20 +35,58 @@ layout(std140, binding = 2) uniform KernelParams {
     float input_horizontal_stretch; // 4
     float background_margin;        // 8
     float background_margin_feather;// 12
-    float reserved1;                // 16
+    float canvas_scale;             // 16
     float reserved2;                // 4
     float reserved3;                // 8
     vec2 translation2d;             // 16
     vec4 translation3d;             // 16
+    ivec2 source_pos;               // 8
+    ivec2 output_pos;               // 16
+    vec2 source_stretch;            // 8
+    vec2 output_stretch;            // 16
+    vec4 digital_lens_params;       // 16
 } params;
 
+LENS_MODEL_FUNCTIONS;
+
 layout(binding = 3) uniform sampler2D texParams;
+layout(binding = 4) uniform sampler2D texCanvas;
+
+const vec4 colors[9] = vec4[9](
+    vec4(0.0,   0.0,   0.0,     0.0), // None
+    vec4(255.0, 0.0,   0.0,   255.0), // Red
+    vec4(0.0,   255.0, 0.0,   255.0), // Green
+    vec4(0.0,   0.0,   255.0, 255.0), // Blue
+    vec4(254.0, 251.0, 71.0,  255.0), // Yellow
+    vec4(200.0, 200.0, 0.0,   255.0), // Yellow2
+    vec4(255.0, 0.0,   255.0, 255.0), // Magenta
+    vec4(0.0,   128.0, 255.0, 255.0), // Blue2
+    vec4(0.0,   200.0, 200.0, 255.0)  // Blue3
+);
+const float alphas[4] = float[4](1.0, 0.75, 0.50, 0.25);
+void draw_pixel(inout vec4 out_pix, float x, float y, bool isInput) {
+    int width = max(params.width, params.output_width);
+    int height = max(params.height, params.output_height);
+
+    int data = int(ceil(texture(texCanvas, vec2(x / width, y / height)).r * 255.0));
+    if (data > 0) {
+        int color = (data & 0xF8) >> 3;
+        int alpha = (data & 0x06) >> 1;
+        int stage = data & 1;
+        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9) {
+            vec4 colorf = colors[color] / 255.0;
+            float alphaf = alphas[alpha];
+            out_pix = colorf * alphaf + out_pix * (1.0 - alphaf);
+            out_pix.a = 1.0;
+        }
+    }
+}
 
 float get_param(float row, float idx) {
     return texture(texParams, vec2(idx / 8.0, row / float(params.height - 1))).r;
 }
 
-vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k1, vec4 k2, vec4 k3, float r_limit) {
+vec2 rotate_and_distort(vec2 pos, float idx) {
     float _x = (float(pos.x) * get_param(idx, 0)) + (float(pos.y) * get_param(idx, 1)) + get_param(idx, 2) + params.translation3d.x;
     float _y = (float(pos.x) * get_param(idx, 3)) + (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + params.translation3d.y;
     float _w = (float(pos.x) * get_param(idx, 6)) + (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + params.translation3d.z;
@@ -56,15 +94,13 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k1, vec4 k2, v
     if (_w > 0) {
         vec2 pos = vec2(_x, _y) / _w;
         float r = length(pos);
-        if (r_limit > 0.0 && r > r_limit) {
+        if (params.r_limit > 0.0 && r > params.r_limit) {
             return vec2(-99999.0, -99999.0);
         }
-        vec2 uv = f * distort_point(pos, k1, k2, k3) + c;
+        vec2 uv = params.f * distort_point(pos) + params.c;
 
-        if (bool(params.flags & 2)) { // GoPro Superview
-            vec2 size = vec2(params.width, params.height);
-            uv = to_superview((uv / size) - 0.5);
-            uv = (uv + 0.5) * size;
+        if (bool(params.flags & 2)) { // Has digital lens
+            uv = digital_distort_point(uv);
         }
 
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
@@ -77,6 +113,7 @@ vec2 rotate_and_distort(vec2 pos, float idx, vec2 f, vec2 c, vec4 k1, vec4 k2, v
 
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
+    vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
 
     if (bool(params.flags & 4)) { // Fill with background
         fragColor = params.background / 255.0;
@@ -88,7 +125,7 @@ void main() {
     float sy = texPos.y;
     if (params.matrix_count > 1) {
         float idx = params.matrix_count / 2.0; // Use middle matrix
-        vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k1, params.k2, params.k3, params.r_limit);
+        vec2 uv = rotate_and_distort(texPos, idx);
         if (uv.x > -99998.0) {
             sy = min(params.height, max(0, floor(0.5 + uv.y)));
         }
@@ -102,22 +139,23 @@ void main() {
         vec2 out_c = vec2(params.output_width / 2.0, params.output_height / 2.0);
         vec2 out_f = (params.f / params.fov) / factor;
 
-        if (bool(params.flags & 2)) { // GoPro Superview
-            vec2 out_c2 = out_c * 2.0;
-            vec2 pt2 = from_superview((texPos / out_c2) - 0.5);
-            pt2 = (pt2 + 0.5) * out_c2;
-            texPos = pt2 * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);
+        vec2 new_out_pos = texPos;
+
+        if (bool(params.flags & 2)) { // Has digital lens
+            new_out_pos = digital_undistort_point(new_out_pos);
         }
 
-        texPos = (texPos - out_c) / out_f;
-        texPos = undistort_point(texPos, params.k1, params.k2, params.k3, params.lens_correction_amount);
-        texPos = out_f * texPos + out_c;
+        new_out_pos = (new_out_pos - out_c) / out_f;
+        new_out_pos = undistort_point(new_out_pos);
+        new_out_pos = out_f * new_out_pos + out_c;
+
+        texPos = new_out_pos * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);
     }
     ///////////////////////////////////////////////////////////////////
 
-    float idx = min(sy + 2.0, params.matrix_count - 1.0);
+    float idx = min(sy, params.matrix_count - 1.0);
 
-    vec2 uv = rotate_and_distort(texPos, idx, params.f, params.c, params.k1, params.k2, params.k3, params.r_limit);
+    vec2 uv = rotate_and_distort(texPos, idx);
     if (uv.x > -99998.0) {
         if (params.background_mode == 1) { // edge repeat
             uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
@@ -149,13 +187,19 @@ void main() {
             if (!((pt2.x >= 0 && pt2.x < params.width) && (pt2.y >= 0 && pt2.y < params.height))) {
                 fragColor = params.background / 255.0;
             }
+            draw_pixel(fragColor, uv.x, uv.y, true);
+            draw_pixel(fragColor, outPos.x, outPos.y, false);
             return;
         }
 
         if ((uv.x >= 0 && uv.x < params.width) && (uv.y >= 0 && uv.y < params.height)) {
             fragColor = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
+            draw_pixel(fragColor, uv.x, uv.y, true);
+            draw_pixel(fragColor, outPos.x, outPos.y, false);
             return;
         }
     }
+
     fragColor = params.background / 255.0;
+    draw_pixel(fragColor, outPos.x, outPos.y, false);
 }

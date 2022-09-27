@@ -7,17 +7,18 @@ use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
 use parking_lot::RwLock;
 use crate::gpu:: { BufferDescription, BufferSource };
+use crate::stabilization::ComputeParams;
 use crate::stabilization::KernelParams;
-use crate::stabilization::distortion_models::GoProSuperview;
 
 pub struct WgpuWrapper  {
-    device: wgpu::Device,
+    pub device: wgpu::Device,
     queue: wgpu::Queue,
     staging_buffer: wgpu::Buffer,
     out_pixels: wgpu::Texture,
     in_pixels: wgpu::Texture,
     buf_matrices: wgpu::Buffer,
     buf_params: wgpu::Buffer,
+    buf_drawing: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     render_pipeline: wgpu::RenderPipeline,
 
@@ -25,6 +26,7 @@ pub struct WgpuWrapper  {
     in_size: u64,
     out_size: u64,
     params_size: u64,
+    drawing_size: u64,
 }
 
 lazy_static::lazy_static! {
@@ -39,7 +41,7 @@ impl WgpuWrapper {
         adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
     }
 
-    pub fn set_device(index: usize) -> Option<()> {
+    pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
 
         let mut i = 0;
@@ -54,6 +56,15 @@ impl WgpuWrapper {
             i += 1;
         }
         None
+    }
+    pub fn get_info() -> Option<String> {
+        let lock = ADAPTER.read();
+        if let Some(ref adapter) = *lock {
+            let info = adapter.get_info();
+            Some(format!("{} ({:?})", info.name, info.backend))
+        } else {
+            None
+        }
     }
 
     pub fn initialize_context() -> Option<(String, String)> {
@@ -78,7 +89,7 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), lens_model_funcs: &str, _buffers: &BufferDescription) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, _buffers: &BufferDescription, drawing_len: usize) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
         if params.height < 4 || params.output_height < 4 || params.stride < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
@@ -95,22 +106,27 @@ impl WgpuWrapper {
                 label: None,
                 features: wgpu::Features::empty(),
                 limits: wgpu::Limits {
-                    max_storage_buffers_per_shader_stage: 4,
-                    max_storage_textures_per_shader_stage: 4,
+                    max_storage_buffers_per_shader_stage: 8,
+                    max_storage_textures_per_shader_stage: 8,
                     ..wgpu::Limits::default()
                 },
             }, None)).ok()?;
 
-            let mut shader_str = include_str!("wgpu_undistort.wgsl").to_string();
-            shader_str.insert_str(0, GoProSuperview::wgsl_functions());
-            shader_str.insert_str(0, lens_model_funcs);
-            shader_str = shader_str.replace("SCALAR", wgpu_format.1);
-            shader_str = shader_str.replace("bg_scaler", &format!("{:.6}", wgpu_format.2));
+            let mut kernel = include_str!("wgpu_undistort.wgsl").to_string();
+            //let mut kernel = std::fs::read_to_string("D:/programowanie/projekty/Rust/gyroflow/src/core/gpu/wgpu_undistort.wgsl").unwrap();
+
+            let mut lens_model_functions = compute_params.distortion_model.wgsl_functions().to_string();
+            let default_digital_lens = "fn digital_undistort_point(uv: vec2<f32>) -> vec2<f32> { return uv; }
+                                            fn digital_distort_point(uv: vec2<f32>) -> vec2<f32> { return uv; }";
+            lens_model_functions.push_str(compute_params.digital_lens.as_ref().map(|x| x.wgsl_functions()).unwrap_or(default_digital_lens));
+            kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
+            kernel = kernel.replace("SCALAR", wgpu_format.1);
+            kernel = kernel.replace("bg_scaler", &format!("{:.6}", wgpu_format.2));
             // Replace it in source to allow for loop unrolling when compiling shader
-            shader_str = shader_str.replace("params.interpolation", &format!("{}u", params.interpolation));
+            kernel = kernel.replace("params.interpolation", &format!("{}u", params.interpolation));
 
             let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-                source: wgpu::ShaderSource::Wgsl(Cow::Owned(shader_str)),
+                source: wgpu::ShaderSource::Wgsl(Cow::Owned(kernel)),
                 label: None
             });
 
@@ -122,6 +138,7 @@ impl WgpuWrapper {
             let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: staging_size as u64, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_matrices  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
 
             let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
@@ -179,7 +196,8 @@ impl WgpuWrapper {
                     wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
                     wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
                     wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) },
-                    wgpu::BindGroupEntry { binding: 3, resource: buf_coeffs.as_entire_binding() }
+                    wgpu::BindGroupEntry { binding: 3, resource: buf_coeffs.as_entire_binding() },
+                    wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
                 ],
             });
 
@@ -191,11 +209,13 @@ impl WgpuWrapper {
                 in_pixels,
                 buf_matrices,
                 buf_params,
+                buf_drawing,
                 bind_group,
                 render_pipeline,
                 in_size,
                 out_size,
                 params_size,
+                drawing_size: drawing_len as u64,
                 padded_out_stride: padded_out_stride as u32
             })
         } else {
@@ -203,7 +223,7 @@ impl WgpuWrapper {
         }
     }
 
-    pub fn undistort_image(&mut self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform) -> bool {
+    pub fn undistort_image(&self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> bool {
         let matrices = bytemuck::cast_slice(&itm.matrices);
 
         match &buffers.buffers {
@@ -228,6 +248,12 @@ impl WgpuWrapper {
             },
             BufferSource::OpenCL { .. } => {
                 return false;
+            },
+            BufferSource::DirectX { .. } => {
+                return false;
+            },
+            BufferSource::OpenGL { .. } => {
+                return false;
             }
         }
 
@@ -235,6 +261,10 @@ impl WgpuWrapper {
 
         self.queue.write_buffer(&self.buf_matrices, 0, matrices);
         self.queue.write_buffer(&self.buf_params, 0, bytemuck::bytes_of(&itm.kernel_params));
+        if !drawing_buffer.is_empty() {
+            if self.drawing_size < drawing_buffer.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.drawing_size, drawing_buffer.len()); return false; }
+            self.queue.write_buffer(&self.buf_drawing, 0, drawing_buffer);
+        }
 
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let view = self.out_pixels.create_view(&wgpu::TextureViewDescriptor::default());
@@ -317,5 +347,15 @@ impl WgpuWrapper {
             }
         }
         true
+    }
+}
+
+pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
+    match buffers.buffers {
+        BufferSource::Cpu     { .. } => true,
+        BufferSource::OpenGL  { .. } => false,
+        BufferSource::DirectX { .. } => false,
+        #[cfg(feature = "use-opencl")]
+        BufferSource::OpenCL  { .. } => false,
     }
 }

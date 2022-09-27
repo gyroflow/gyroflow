@@ -98,9 +98,8 @@ MenuItem {
                     if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
 
-                    if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") {
-                        controller.is_superview = true;
-                    }
+                    if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
+                    if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
                 }
             }
             calib.updateTable();
@@ -347,6 +346,68 @@ MenuItem {
                 // tooltip: qsTr("Chessboard sharpness for determining the quality");
             }
         }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Digital lens");
+
+            ComboBox {
+                id: digitalLens;
+                property var lenses: [
+                    ["None", ""],
+                    ["GoPro Superview", "gopro_superview"],
+                    ["GoPro Hyperview", "gopro_hyperview"]/*,
+                    ["Stretch", "digital_stretch", [
+                        { "label": QT_TR_NOOP("X"), "from": 10, "to": 200, "scale": 100, "value": 100, "unit": "%" },
+                        { "label": QT_TR_NOOP("Y"), "from": 10, "to": 200, "scale": 100, "value": 100, "unit": "%" }
+                    ]]*/
+                ];
+                model: lenses.map(x => x[0]);
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 0;
+                onCurrentIndexChanged: {
+                    controller.set_digital_lens_name(lenses[currentIndex][1]);
+                    if (lenses[currentIndex][2]) {
+                        digitalParams.model = lenses[currentIndex][2];
+                        digitalParamsCol.visible = true;
+                    } else {
+                        digitalParams.model = [];
+                        digitalParamsCol.visible = false;
+                    }
+                }
+            }
+        }
+        Column {
+            width: parent.width;
+            spacing: 5 * dpiScale;
+            id: digitalParamsCol;
+            visible: false;
+            Repeater {
+                id: digitalParams;
+                Label {
+                    position: Label.LeftPosition;
+                    text: qsTr(modelData.label);
+                    SliderWithField {
+                        from: modelData.from;
+                        to: modelData.to;
+                        value: modelData.value / modelData.scale;
+                        defaultValue: modelData.value;
+                        width: parent.width;
+                        precision: 2;
+                        unit: modelData.unit;
+                        scaler: modelData.scale;
+                        onValueChanged: {
+                            controller.set_digital_lens_param(index, value);
+                            if (!calib.calibrationInfo.digital_lens_params)
+                                calib.calibrationInfo.digital_lens_params = [];
+                            calib.calibrationInfo.digital_lens_params[index] = value;
+                        }
+                    }
+                }
+            }
+        }
+
         Label {
             position: Label.TopPosition;
             text: qsTr("Input horizontal stretch");

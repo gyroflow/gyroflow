@@ -22,6 +22,7 @@ pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
+pub type TimeFloat = BTreeMap<i64, f64>; // key is timestamp_us
 
 #[derive(Default)]
 pub struct FileMetadata {
@@ -34,7 +35,8 @@ pub struct FileMetadata {
     pub frame_readout_time: Option<f64>,
     pub frame_rate: Option<f64>,
     pub camera_identifier: Option<CameraIdentifier>,
-    pub lens_profile: Option<serde_json::Value>
+    pub lens_profile: Option<serde_json::Value>,
+    pub lens_positions: Option<TimeFloat>
 }
 
 #[derive(Default, Clone)]
@@ -69,6 +71,8 @@ pub struct GyroSource {
 
     pub gravity_vectors: Option<TimeVec>,
     pub use_gravity_vectors: bool,
+
+    pub lens_positions: Option<TimeFloat>,
 
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
@@ -116,6 +120,7 @@ impl GyroSource {
         let mut image_orientations = None;
         let mut lens_profile = None;
         let mut frame_rate = None;
+        let mut lens_positions = None;
 
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
@@ -123,6 +128,7 @@ impl GyroSource {
             let mut grav = Vec::<Vector3<f64>>::new();
             let mut iori_map = TimeQuat::new();
             let mut iori = Vec::<Quat64>::new();
+            let mut crop_score = Vec::<f64>::new();
             let mut grav_is_usable = false;
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
@@ -143,10 +149,21 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::Name) as Option<&String> {
                             lens_profile = Some(serde_json::Value::String(v.clone()));
                         }
+                        if let Some(v) = map.get_t(TagId::LensZoomNative) as Option<&f32> {
+                            if lens_positions.is_none() { lens_positions = Some(BTreeMap::new()) };
+                            lens_positions.as_mut().unwrap().insert((info.timestamp_ms * 1000.0).round() as i64, *v as f64);
+                        }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Default) {
                         if let Some(v) = map.get_t(TagId::FrameRate) as Option<&f64> {
                             frame_rate = Some(*v);
+                        }
+                    }
+                    if let Some(map) = tag_map.get(&GroupId::Custom("FovAdaptationScore".into())) {
+                        if let Some(v) = map.get_t(TagId::Data) as Option<&Vec<f32>> {
+                            for v in v {
+                                crop_score.push(*v as f64);
+                            }
                         }
                     }
                     if let Some(map) = tag_map.get(&GroupId::GravityVector) {
@@ -191,7 +208,6 @@ impl GyroSource {
             for ((ts, _quat), iori) in zip(&quats, &iori) {
                 iori_map.insert(*ts, *iori);
             }
-
             if !iori_map.is_empty() {
                 image_orientations = Some(iori_map);
             }
@@ -207,6 +223,11 @@ impl GyroSource {
 
                     gravity_vectors = Some(quats.keys().copied().zip(grav.into_iter()).collect());
                 }
+
+                if lens_positions.is_none() && !crop_score.is_empty() && crop_score.len() == quats.len() {
+                    lens_positions = Some(quats.iter().zip(crop_score.iter()).map(|((ts, _), crop)| (*ts, *crop)).collect());
+                }
+
                 quaternions = Some(quats);
             }
         }
@@ -219,6 +240,7 @@ impl GyroSource {
             quaternions,
             image_orientations,
             gravity_vectors,
+            lens_positions,
             raw_imu,
             frame_readout_time: input.frame_readout_time(),
             frame_rate,
@@ -264,6 +286,7 @@ impl GyroSource {
         }
 
         self.gravity_vectors = telemetry.gravity_vectors.clone();
+        self.lens_positions = telemetry.lens_positions.clone();
 
         if let Some(imu) = &telemetry.raw_imu {
             self.org_raw_imu = imu.clone();
@@ -487,6 +510,7 @@ impl GyroSource {
             offsets:              self.offsets.clone(),
             offsets_adjusted:     self.offsets_adjusted.clone(),
             gravity_vectors:      self.gravity_vectors.clone(),
+            lens_positions:       self.lens_positions.clone(),
             use_gravity_vectors:  self.use_gravity_vectors,
             integration_method:   self.integration_method,
             ..Default::default()

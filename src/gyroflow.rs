@@ -53,6 +53,7 @@ fn entry() {
 
     let _ = util::install_crash_handler();
     util::init_logging();
+    log_panics::init();
 
     cpp!(unsafe [] {
         qApp->setOrganizationName("Gyroflow");
@@ -91,6 +92,8 @@ fn entry() {
     //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
     // }
 
+    //crate::core::util::rename_calib_videos();
+
     if cfg!(any(target_os = "android", target_os = "ios")) {
         MDKVideoItem::setGlobalOption("MDK_KEY", "B75BC812C266C3E2D967840494C8866773E4E5FC596729F7D9895BFB2DB3B9AE2515F306FBF29BF20290E1093E9A5B5796B778F866F5F631831\
             0431F1E34810348A437EDC2663C1D26987BFB6B37799871E4E984201D0790A0FB349D41DCCEAE15E8C6B790A89ADA30C4B6EB323303B0603B3A2BBF50C294456F377CA8FEF103");
@@ -115,6 +118,7 @@ fn entry() {
     let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(util::get_version()).into());
+    engine.set_property("graphics_api".into(), util::qt_graphics_api().into());
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
     engine.set_object_property("render_queue".into(), rqpinned);

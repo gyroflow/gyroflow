@@ -87,7 +87,7 @@ pub fn cleanup() -> Result<()> {
     walkdir::WalkDir::new(out_dir).into_iter().flatten().for_each(|entry| {
         let path = entry.path();
         if let Some(fname) = path.file_name() {
-            if fname.to_str().unwrap_or(&"").starts_with("zz-remove-me-") {
+            if fname.to_str().unwrap_or("").starts_with("zz-remove-me-") {
                 let _ = std::fs::remove_file(path);
             }
         }

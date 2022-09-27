@@ -89,16 +89,18 @@ pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
 pub fn rename_calib_videos() {
     use telemetry_parser::Input;
     use walkdir::WalkDir;
-    use std::fs::File;
-    WalkDir::new("E:/clips/GoPro/calibration/").into_iter().for_each(|e| {
+    use std::sync::atomic::AtomicBool;
+    use std::sync::Arc;
+    use crate::CameraIdentifier;
+    WalkDir::new("G:/clips/calibration/GoPro/Hero11/").into_iter().for_each(|e| {
         if let Ok(entry) = e {
             let f_name = entry.path().to_string_lossy().replace('\\', "/");
             if f_name.ends_with(".MP4") {
-                let (w, h, fps) = util::get_video_metadata(&f_name).unwrap();
+                let (w, h, fps, _dur) = get_video_metadata(&f_name).unwrap();
                 let mut stream = File::open(&f_name).unwrap();
                 let filesize = stream.metadata().unwrap().len() as usize;
 
-                let input = Input::from_stream(&mut stream, filesize, &f_name).unwrap();
+                let input = Input::from_stream(&mut stream, filesize, &f_name, |_|(), Arc::new(AtomicBool::new(false))).unwrap();
 
                 let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, w as usize, h as usize, fps);
                 if let Ok(id) = camera_identifier {
@@ -111,7 +113,7 @@ pub fn rename_calib_videos() {
                             adds = format!(" - {}", add);
                             continue;
                         }
-                        std::fs::rename(std::path::Path::new(&f_name), path);
+                        let _ = std::fs::rename(std::path::Path::new(&f_name), path);
                         break;
                     }
                     println!("{}: {}", f_name, id.identifier);

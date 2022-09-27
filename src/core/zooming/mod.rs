@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Maik <myco at gmx>
 
-pub mod fov_default;
-pub mod fov_direct;
+//pub mod fov_default;
+//pub mod fov_direct;
 pub mod fov_iterative;
 
 pub mod zoom_disabled;
@@ -25,9 +25,9 @@ pub enum Mode {
 }
 
 #[derive(Default, Clone, Copy, Debug)]
-pub struct Point2D(f64, f64);
-impl Merge<f64> for Point2D {
-    fn merge(self, other: Self, factor: f64) -> Self {
+pub struct Point2D(f32, f32);
+impl Merge<f32> for Point2D {
+    fn merge(self, other: Self, factor: f32) -> Self {
         Point2D(
             self.0 * (1.0 - factor) + other.0 * factor,
             self.1 * (1.0 - factor) + other.1 * factor
@@ -80,7 +80,7 @@ pub fn get_checksum(zoom: &Box<dyn ZoomingAlgorithm>) -> u64 {
     let compute_params = zoom.compute_params();
 
     let mut hasher = DefaultHasher::new();
-    for x in compute_params.distortion_coeffs {
+    for x in &compute_params.lens.get_distortion_coeffs() {
         hasher.write_u64(x.to_bits());
     }
 

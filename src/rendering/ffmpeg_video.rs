@@ -23,7 +23,7 @@ impl Default for FrameBuffers {
     } }
 }
 
-#[derive(Default, PartialEq, Debug)]
+#[derive(Default, Eq, PartialEq, Debug)]
 pub enum ProcessingOrder {
     #[default]
     PreConversion,
@@ -175,8 +175,10 @@ impl<'a> VideoTranscoder<'a> {
                     }
                     ts -= self.first_frame_ts.unwrap();
 
-                    let mut rate_control = RateControl::default();
-                    rate_control.out_timestamp_us = ts;
+                    let mut rate_control = RateControl {
+                        out_timestamp_us: ts,
+                        ..Default::default()
+                    };
 
                     let mut hw_formats = None;
                     let input_frame =

@@ -21,7 +21,7 @@ Modal {
     { // Left column
         "Video|video_info": {
             "Rotation":   ["rotation"],
-            "Frame rate": ["fps_scale", "vfr_fps", "vfr_duration_ms"],
+            "Frame rate": ["fps_scale", "vfr_fps"],
         },
         "Lens profile": ["calibration_data"],
         "Motion data|gyro_source": {

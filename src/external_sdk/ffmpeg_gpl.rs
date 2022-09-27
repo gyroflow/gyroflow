@@ -13,7 +13,7 @@ impl FfmpegGpl {
         }
 
         // Platform not supported so don't ask for download
-        return true;
+        true
     }
 
     pub fn get_download_url() -> Option<&'static str> {

@@ -90,7 +90,7 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
                 if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
-                presets.push(preset.clone());
+                presets.push(preset);
             }
         }
 
@@ -164,7 +164,7 @@ pub fn run(open_file: &mut String) -> bool {
 
         queue.set_parallel_renders(opts.parallel_renders.max(1));
         queue.set_when_done(opts.when_done);
-        let suffix = format!("{}.", queue.default_suffix.to_string());
+        let suffix = format!("{}.", queue.default_suffix);
 
         if opts.export_project > 0 {
             queue.export_project = opts.export_project;

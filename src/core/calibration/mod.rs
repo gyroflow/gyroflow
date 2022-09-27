@@ -19,7 +19,8 @@ use std::sync::Arc;
 use nalgebra::{ Matrix3, Vector4 };
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
-use crate::stabilization::distortion_models::GoProSuperview;
+
+use crate::stabilization::distortion_models::DistortionModel;
 
 pub mod drawing;
 
@@ -55,7 +56,8 @@ pub struct LensCalibrator {
 
     pub no_marker: bool,
 
-    pub is_superview: bool,
+    pub digital_lens: Option<String>,
+    pub digital_lens_params: Option<Vec<f64>>,
     pub asymmetrical: bool,
 
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
@@ -108,7 +110,8 @@ impl LensCalibrator {
         let all_matches = self.all_matches.clone();
         let is_forced = self.forced_frames.contains(&frame);
 
-        let is_superview = self.is_superview;
+        let digital_lens = self.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x));
+        let digital_lens_params_opt = self.digital_lens_params.clone();
         let no_marker = self.no_marker;
 
         if let Some(detected) = all_matches.read().get(&frame) {
@@ -149,10 +152,32 @@ impl LensCalibrator {
                         let sharpness = opencv::calib3d::estimate_chessboard_sharpness(&inp, grid_size, &corners, 0.8, false, &mut Mat::default()).unwrap_or_default();
                         let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
                         let mut points = Vec::with_capacity(corners.rows() as usize);
+
+                        let mut digital_lens_params = [0f32; 4];
+                        if let Some(p) = digital_lens_params_opt {
+                            for (i, v) in p.iter().enumerate() {
+                                digital_lens_params[i] = *v as f32;
+                            }
+                        }
+                        // TODO more params
+                        let kernel_params = crate::stabilization::KernelParams {
+                            width : width as i32,
+                            height: height as i32,
+                            output_width: width as i32,
+                            output_height: height as i32,
+                            digital_lens_params,
+                            ..Default::default()
+                        };
+
                         for (_pos, mut pt) in corners.iter::<Point2f>()? {
-                            if is_superview {
-                                let pt2 = GoProSuperview::from_superview_calib((pt.x / width as f32, pt.y / height as f32));
-                                pt = Point2f::new(pt2.0 * width as f32, pt2.1 * height as f32);
+                            if let Some(digital) = &digital_lens {
+                                if let Some(mut pt2) = digital.undistort_point((pt.x,  pt.y), &kernel_params) {
+                                    // TODO
+                                    // Move from center to the left, because we trim the right part making it 4:3
+                                    //pt2.0 -= 0.125; // (16-4) / (9-3) / 16
+
+                                    pt = Point2f::new(pt2.0, pt2.1);
+                                }
                             }
                             points.push((pt.x * pt_scale, pt.y * pt_scale));
                         }
@@ -183,8 +208,9 @@ impl LensCalibrator {
 
         let image_points = self.image_points.read().clone();
         let mut width = self.width as i32;
-        if self.is_superview {
-            width = (width as f32 / GoProSuperview::ASPECT_SCALE).round() as i32;
+        if let Some(digital) = self.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x)) {
+            // TODO
+            //width = (width as f32 / 1.33333333).round() as i32;
         }
         let size = Size::new(width, self.height as i32);
         let objp = self.objp.clone();

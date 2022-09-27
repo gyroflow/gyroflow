@@ -1,88 +1,82 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+use gyroflow_core::stabilization::ProcessedInfo;
 use qml_video_rs::video_player::MDKPlayerWrapper;
 use std::sync::Arc;
 use crate::core::StabilizationManager;
-use crate::core::stabilization::{ KernelParams, RGBA8, distortion_models::DistortionModel };
+use crate::core::stabilization::RGBA8;
 use cpp::*;
 use qmetaobject::{ QSize, QString };
 
 cpp! {{
-    struct RustPtr { void *data; };
     #include "src/qt_gpu/qrhi_undistort.cpp"
-
     static std::unique_ptr<QtRHIUndistort> rhiUndistortion;
 }}
 
-pub fn resize_player(stab: Arc<StabilizationManager<RGBA8>>) {
-    let player = cpp!(unsafe [] -> *mut MDKPlayerWrapper as "MDKPlayerWrapper *" {
-        if (rhiUndistortion && !rhiUndistortion->m_pipeline.isNull() && rhiUndistortion->m_player) {
-            return rhiUndistortion->m_player;
-        } else {
-            return nullptr;
-        }
-    });
-    if !player.is_null() {
-        unsafe { init_player(&mut *player, stab); }
+pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager<RGBA8>>) -> Option<ProcessedInfo> {
+    let p = stab.params.read();
+    let output_size = QSize { width: p.output_size.0 as u32, height: p.output_size.1 as u32 };
+    let shader_path = {
+        let lens = stab.lens.read();
+        let distortion_model = lens.distortion_model.as_deref().unwrap_or("opencv_fisheye");
+        let digital_lens = lens.digital_lens.as_ref().map(|x| format!("_{}", x)).unwrap_or_else(|| "".into());
+
+        QString::from(format!(":/src/qt_gpu/compiled/undistort_{}{}.frag.qsb", distortion_model, digital_lens))
+    };
+
+    let mut timestamp_us = (timestamp * 1000.0).round() as i64;
+    if let Some(scale) = p.fps_scale {
+        timestamp_us = (timestamp_us as f64 / scale).round() as i64;
     }
-}
-pub fn init_player(mdkplayer: &mut MDKPlayerWrapper, stab: Arc<StabilizationManager<RGBA8>>) {
-    cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", stab as "RustPtr"] {
-        if (!mdkplayer || !mdkplayer->mdkplayer) return;
+    drop(p);
 
-        auto initCb = [mdkplayer, stab](QSize texSize, QSizeF itemSize) -> bool {
-            rhiUndistortion = std::make_unique<QtRHIUndistort>(mdkplayer);
+    {
+        let mut undist = stab.stabilization.write();
+        undist.ensure_stab_data_at_timestamp(timestamp_us, None);
+        stab.draw_overlays(&mut undist.drawing, timestamp_us);
+    }
 
-            uint32_t params_size = rust!(Rust_Controller_RenderRHIParamsSize [] -> u32 as "uint32_t" { std::mem::size_of::<KernelParams>() as u32 });
+    let undist = stab.stabilization.read();
+    if let Some(itm) = undist.get_undistortion_data(timestamp_us) {
+        let params = bytemuck::bytes_of(&itm.kernel_params);
+        let params_ptr = params.as_ptr();
+        let params_len = params.len() as u32;
+        let matrices_ptr = itm.matrices.as_ptr();
+        let matrices_len = (itm.matrices.len() * 9 * std::mem::size_of::<f32>()) as u32;
+        let canvas = undist.drawing.get_buffer();
+        let canvas_ptr = canvas.as_ptr();
+        let canvas_len = canvas.len() as u32;
 
-            QSize outputSize = rust!(Rust_Controller_InitRHI [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> QSize as "QSize" {
-                let osize = stab.params.read().output_size;
-                QSize { width: osize.0 as u32, height: osize.1 as u32 }
-            });
-            QString shaderPath = rust!(Rust_Controller_InitRHI2 [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> QString as "QString" {
-                let distortion_model = DistortionModel::from_id(stab.lens.read().distortion_model_id);
-                QString::from(distortion_model.glsl_shader_path())
-            });
-            return rhiUndistortion->init(mdkplayer->mdkplayer, texSize, itemSize, outputSize, shaderPath, params_size);
-        };
-        auto renderCb = [mdkplayer, stab](double timestamp, int32_t frame, bool /*doRender*/) -> bool {
+        let canvas_size = undist.drawing.get_size();
+        let canvas_size = QSize { width: canvas_size.0 as u32, height: canvas_size.1 as u32 };
+
+        let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", timestamp as "double", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
+            if (!mdkplayer || !mdkplayer->mdkplayer) return false;
+
+            if (!rhiUndistortion || rhiUndistortion->outSize() != output_size || rhiUndistortion->texSize() != QSize(width, height) || rhiUndistortion->shaderPath() != shader_path) {
+                rhiUndistortion.reset();
+                rhiUndistortion = std::make_unique<QtRHIUndistort>();
+                if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, canvas_size)) {
+                    qDebug() << "failed to init rhi undist";
+                    return false;
+                }
+                qDebug() << "Qt RHI initialized";
+            }
             if (!rhiUndistortion) return false;
 
-            uint32_t matrix_count = rust!(Rust_Controller_RenderRHIParams [stab: Arc<StabilizationManager<RGBA8>> as "RustPtr"] -> u32 as "uint32_t" {
-                let params = stab.params.read();
-                if params.frame_readout_time.abs() > 0.0 {
-                    params.size.1 as u32
-                } else {
-                    1
-                }
+            return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len);
+        });
+        if ok {
+            return Some(ProcessedInfo {
+                fov: itm.fov,
+                backend: "Qt RHI"
             });
-
-            if (rhiUndistortion->matrices.size() < matrix_count * 9) {
-                rhiUndistortion->matrices.resize(matrix_count * 9);
-            }
-            auto mat_ptr     = rhiUndistortion->matrices.data();
-            auto params_ptr  = rhiUndistortion->kernel_params.data();
-            auto params_size = rhiUndistortion->kernel_params.size();
-            bool ok = rust!(Rust_Controller_RenderRHI [timestamp: f64 as "double", frame: i32 as "int32_t", stab: Arc<StabilizationManager<RGBA8>> as "RustPtr", mat_ptr: *mut f32 as "float *", matrix_count: u32 as "uint32_t", params_ptr: *mut u8 as "unsigned char *", params_size: u32 as "uint32_t"] -> bool as "bool" {
-                stab.fill_undistortion_data((timestamp * 1_000_000.0) as i64, mat_ptr, matrix_count as usize * 9, params_ptr, params_size as usize)
-            });
-
-            return ok && rhiUndistortion->render(mdkplayer->mdkplayer);
-        };
-
-        auto cleanupCb = [] { rhiUndistortion.reset(); };
-
-        mdkplayer->mdkplayer->cleanupGpuCompute();
-        mdkplayer->mdkplayer->setupGpuCompute(initCb, renderCb, cleanupCb);
-    });
+        }
+    }
+    None
 }
 
-pub fn deinit_player(mdkplayer: &mut MDKPlayerWrapper) {
-    cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *"] {
-        if (!mdkplayer || !mdkplayer->mdkplayer) return;
-        rhiUndistortion.reset();
-        mdkplayer->mdkplayer->cleanupGpuCompute();
-        mdkplayer->mdkplayer->setupGpuCompute(nullptr, nullptr, nullptr);
-    });
+pub fn cleanup() {
+    cpp!(unsafe [] { rhiUndistortion.reset(); });
 }

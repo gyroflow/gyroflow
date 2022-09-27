@@ -5,6 +5,8 @@
 pub mod opencl;
 pub mod wgpu;
 
+pub mod drawing;
+
 pub struct BufferDescription<'a> {
     pub input_size:  (usize, usize, usize), // width, height, stride
     pub output_size: (usize, usize, usize), // width, height, stride
@@ -14,7 +16,6 @@ pub struct BufferDescription<'a> {
 
     pub buffers: BufferSource<'a>
 }
-
 pub enum BufferSource<'a> {
     Cpu {
         input: &'a mut [u8],
@@ -26,15 +27,18 @@ pub enum BufferSource<'a> {
         output: ocl::ffi::cl_mem,
         queue: ocl::ffi::cl_command_queue
     },
-    /*OpenGL {
+    DirectX {
+        input: *mut std::ffi::c_void, // ID3D11Texture2D*
+        output: *mut std::ffi::c_void, // ID3D11Texture2D*
+        device: *mut std::ffi::c_void, // ID3D11Device*
+        device_context: *mut std::ffi::c_void, // ID3D11DeviceContext*
+    },
+    OpenGL {
         input: u32, // GLuint
         output: u32, // GLuint
+        context: *mut std::ffi::c_void, // OpenGL context pointer
     },
-    DirectX {
-        input: u32,
-        output: u32,
-    },
-    Cuda {
+    /*Cuda {
         input: u32,
         output: u32,
     },
@@ -47,16 +51,32 @@ pub enum BufferSource<'a> {
         output: u32,
     }*/
 }
+impl<'a> BufferSource<'a> {
+    pub fn get_checksum(&self) -> u32 {
+        use std::hash::Hasher;
+        let mut hasher = crc32fast::Hasher::new();
+        match &self {
+            BufferSource::Cpu { .. } => { }
+            BufferSource::OpenCL { queue, .. } => { hasher.write_u64(*queue as u64); }
+            BufferSource::OpenGL { context, .. } => { hasher.write_u64(*context as u64); }
+            BufferSource::DirectX { device, device_context, .. } => {
+                hasher.write_u64(*device as u64);
+                hasher.write_u64(*device_context as u64);
+            }
+        }
+        hasher.finalize()
+    }
+}
 
 pub fn initialize_contexts() -> Option<(String, String)> {
     #[cfg(feature = "use-opencl")]
     if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
         let cl = std::panic::catch_unwind(|| {
-            opencl::OclWrapper::initialize_context()
+            opencl::OclWrapper::initialize_context(None)
         });
         match cl {
             Ok(Ok(names)) => { return Some(names); },
-            Ok(Err(e)) => { log::error!("OpenCL error: {:?}", e); },
+            Ok(Err(e)) => { log::error!("OpenCL error init: {:?}", e); },
             Err(e) => {
                 if let Some(s) = e.downcast_ref::<&str>() {
                     log::error!("Failed to initialize OpenCL {}", s);

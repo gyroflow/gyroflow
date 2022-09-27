@@ -5,8 +5,8 @@ use super::OpticalFlowPoints;
 use super::FrameResult;
 use super::SyncParams;
 use crate::gyro_source::{ Quat64, TimeQuat, GyroSource };
-use crate::stabilization::{ undistort_points_with_params, ComputeParams };
-use nalgebra::{ Matrix3, Vector3 };
+use crate::stabilization::{ undistort_points_for_optical_flow, ComputeParams };
+use nalgebra::Vector3;
 use rs_sync::SyncProblem;
 use std::f64::consts::PI;
 use parking_lot::RwLock;
@@ -77,13 +77,13 @@ impl FindOffsetsRssync<'_> {
 
             let mut from_ts = -1;
             let mut to_ts = 0;
-            for ((a_t, a_p), (b_t, b_p)) in range {
+            for (((a_t, a_p), (b_t, b_p)), frame_size) in range {
                 if from_ts == -1 {
                     from_ts = a_t;
                 }
                 to_ts = b_t;
-                let a = undistort_points_with_params(&a_p, Matrix3::identity(), None, None, params);
-                let b = undistort_points_with_params(&b_p, Matrix3::identity(), None, None, params);
+                let a = undistort_points_for_optical_flow(&a_p, from_ts, &params, frame_size);
+                let b = undistort_points_for_optical_flow(&b_p, to_ts,   &params, frame_size);
 
                 let mut points3d_a = Vec::new();
                 let mut points3d_b = Vec::new();
@@ -92,13 +92,13 @@ impl FindOffsetsRssync<'_> {
 
                 assert!(a.len() == b.len());
 
-                let height = params.height as f64;
+                let height = frame_size.1 as f64;
                 for (i, (ap, bp)) in a.iter().zip(b.iter()).enumerate() {
-                    let ts_a = a_t as f64 / 1000_000.0 + frame_readout_time * (a_p[i].1 / height);
-                    let ts_b = b_t as f64 / 1000_000.0 + frame_readout_time * (b_p[i].1 / height);
+                    let ts_a = a_t as f64 / 1000_000.0 + frame_readout_time * (a_p[i].1 as f64 / height);
+                    let ts_b = b_t as f64 / 1000_000.0 + frame_readout_time * (b_p[i].1 as f64 / height);
 
-                    let ap = Vector3::new(ap.0, ap.1, 1.0).normalize();
-                    let bp = Vector3::new(bp.0, bp.1, 1.0).normalize();
+                    let ap = Vector3::new(ap.0 as f64, ap.1 as f64, 1.0).normalize();
+                    let bp = Vector3::new(bp.0 as f64, bp.1 as f64, 1.0).normalize();
 
                     points3d_a.push((ap[0], ap[1], ap[2]));
                     points3d_b.push((bp[0], bp[1], bp[2]));
@@ -183,7 +183,7 @@ impl FindOffsetsRssync<'_> {
         }).reduce(|a: (String, f64), b: (String, f64)| -> (String, f64) { if a.1 < b.1 { a } else { b } })
     }
 
-    fn collect_points(sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>, ranges: &[(i64, i64)]) -> Vec<Vec<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>> {
+    fn collect_points(sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>, ranges: &[(i64, i64)]) -> Vec<Vec<(((i64, OpticalFlowPoints), (i64, OpticalFlowPoints)), (u32, u32))>> {
         let mut points = Vec::new();
         for (from_ts, to_ts) in ranges {
             let mut points_per_range = Vec::new();
@@ -192,7 +192,7 @@ impl FindOffsetsRssync<'_> {
                 for (_ts, x) in l.range(from_ts..to_ts) {
                     if let Ok(of) = x.optical_flow.try_borrow() {
                         if let Some(Some(opt_pts)) = of.get(&1) {
-                            points_per_range.push(opt_pts.clone());
+                            points_per_range.push((opt_pts.clone(), x.frame_size));
                         }
                     }
                 }

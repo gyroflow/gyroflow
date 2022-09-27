@@ -4,7 +4,6 @@
 use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
-use super::distortion_models::GoProSuperview;
 
 pub const COEFFS: [f32; 64+128+256] = [
     // Bilinear
@@ -53,11 +52,44 @@ pub const COEFFS: [f32; 64+128+256] = [
      0.998265, -0.027053,  0.009625, -0.002981
 ];
 
+const COLORS: [Vector4<f32>; 9] = [
+    Vector4::new(0.0,   0.0,   0.0,     0.0), // None
+    Vector4::new(255.0, 0.0,   0.0,   255.0), // Red
+    Vector4::new(0.0,   255.0, 0.0,   255.0), // Green
+    Vector4::new(0.0,   0.0,   255.0, 255.0), // Blue
+    Vector4::new(254.0, 251.0, 71.0,  255.0), // Yellow
+    Vector4::new(200.0, 200.0, 0.0,   255.0), // Yellow2
+    Vector4::new(255.0, 0.0,   255.0, 255.0), // Magenta
+    Vector4::new(0.0,   128.0, 255.0, 255.0), // Blue2
+    Vector4::new(0.0,   200.0, 200.0, 255.0)  // Blue3
+];
+const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
+
 impl<T: PixelType> Stabilization<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-    pub fn undistort_image_cpu<const I: i32>(pixels: &[u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, matrices: &[[f32; 9]]) {
+    pub fn undistort_image_cpu<const I: i32>(pixels: &[u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) {
+        fn draw_pixel(in_pix: Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, scale: f32, drawing: &[u8]) ->Vector4<f32> {
+            if drawing.is_empty() { return in_pix; }
+            let pos = ((y as f32 / scale).floor() * (width as f32) + (x as f32 / scale).floor()).round() as usize;
+            let mut pix = in_pix;
+            if let Some(&data) = drawing.get(pos) {
+                if data > 0 {
+                    let color = (data & 0xF8) >> 3;
+                    let alpha = (data & 0x06) >> 1;
+                    let stage = data & 1;
+                    if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < 9 {
+                        let colorf = COLORS[color as usize];
+                        let alphaf = ALPHAS[alpha as usize];
+                        pix = colorf * alphaf + pix * (1.0 - alphaf);
+                        pix.w = 255.0;
+                    }
+                }
+            }
+            return pix;
+        }
+
         // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
         fn remap_colorrange(px: &mut Vector4<f32>, is_y: bool) {
             if is_y { *px *= 0.85882352; } // (235 - 16) / 255
@@ -66,7 +98,7 @@ impl<T: PixelType> Stabilization<T> {
             px[1] += 16.0;
         }
 
-        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, r_limit: f32) -> Option<(f32, f32)> {
+        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit: f32) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
             let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
@@ -76,12 +108,13 @@ impl<T: PixelType> Stabilization<T> {
                 if params.r_limit > 0.0 && (pos.0 * pos.0 + pos.1 * pos.1) > r_limit {
                     return None;
                 }
-                let mut uv = distortion_model.distort_point(pos, &params.k, 0.0);
+                let mut uv = distortion_model.distort_point(pos, &params);
                 uv = ((uv.0 * params.f[0]) + params.c[0], (uv.1 * params.f[1]) + params.c[1]);
 
-                if (params.flags & 2) == 2 { // GoPro Superview
-                    uv = GoProSuperview::to_superview((uv.0 / params.width as f32 - 0.5, uv.1 / params.height as f32 - 0.5));
-                    uv = ((uv.0 + 0.5) * params.width as f32, (uv.1 + 0.5) * params.height as f32);
+                if (params.flags & 2) == 2 { // Has digital lens
+                    if let Some(digital) = digital_lens {
+                        uv = digital.distort_point(uv, params);
+                    }
                 }
 
                 if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
@@ -92,7 +125,7 @@ impl<T: PixelType> Stabilization<T> {
             return None;
         }
 
-        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), pixels: &[u8], params: &KernelParams, bg: &Vector4<f32>) -> Vector4<f32> {
+        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), pixels: &[u8], params: &KernelParams, bg: &Vector4<f32>, drawing: &[u8]) -> Vector4<f32> {
             let fix_range = (params.flags & 1) == 1;
 
             const INTER_BITS: usize = 5;
@@ -100,6 +133,10 @@ impl<T: PixelType> Stabilization<T> {
             let shift: i32 = (I >> 2) + 1;
             let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
             let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
+
+            let mut uv = (uv.0 + params.source_pos[0] as f32, uv.1 + params.source_pos[1] as f32);
+            if params.source_stretch[0] > 0.0 { uv.0 *= params.source_stretch[0]; }
+            if params.source_stretch[1] > 0.0 { uv.1 *= params.source_stretch[1]; }
 
             let u = uv.0 - offset;
             let v = uv.1 - offset;
@@ -123,6 +160,7 @@ impl<T: PixelType> Stabilization<T> {
                         let pixel = if sx + xp >= 0 && sx + xp < params.width {
                             let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
                             let mut src_px = PixelType::to_float(*px1);
+                            src_px = draw_pixel(src_px, sx + xp, sy + yp, true, params.width, params.canvas_scale, drawing);
                             if fix_range {
                                 remap_colorrange(&mut src_px, params.bytes_per_pixel == 1)
                             }
@@ -149,15 +187,22 @@ impl<T: PixelType> Stabilization<T> {
 
         let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
         let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-        let out_c2 = (params.output_width as f64, params.output_height as f64);
         let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
 
         out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
-                if y < params.output_height as usize && x < params.output_width as usize {
+                let mut out_pos = (x as f32 - params.output_pos[0] as f32, y as f32 - params.output_pos[1] as f32);
+                if params.output_stretch[0] > 0.0 { out_pos.0 *= params.output_stretch[0]; }
+                if params.output_stretch[1] > 0.0 { out_pos.1 *= params.output_stretch[1]; }
+
+                if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());
 
-                    let mut out_pos = (x as f32 + params.translation2d[0], y as f32 + params.translation2d[1]);
+                    let p = out_pos;
+                    let mut pixel = bg;
+
+                    out_pos.0 += params.translation2d[0];
+                    out_pos.1 += params.translation2d[1];
 
                     let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
@@ -171,7 +216,7 @@ impl<T: PixelType> Stabilization<T> {
                     let mut sy = y;
                     if params.matrix_count > 1 {
                         let idx = params.matrix_count as usize / 2;
-                        if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {
+                        if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
                             sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
                         }
                     }
@@ -180,23 +225,29 @@ impl<T: PixelType> Stabilization<T> {
                     ///////////////////////////////////////////////////////////////////
                     // Add lens distortion back
                     if params.lens_correction_amount < 1.0 {
-                        if (params.flags & 2) == 2 { // Re-add GoPro Superview
-                            let mut pt2 = GoProSuperview::from_superview((out_pos.0 as f64 / out_c2.0 - 0.5, out_pos.1 as f64 / out_c2.1 - 0.5));
-                            pt2 = ((pt2.0 + 0.5) * out_c2.0, (pt2.1 + 0.5) * out_c2.1);
-                            out_pos = (
-                                pt2.0 as f32 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
-                                pt2.1 as f32 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount)
-                            );
+                        let mut new_out_pos = out_pos;
+
+                        if (params.flags & 2) == 2 { // Has digial lens
+                            if let Some(digital) = digital_lens {
+                                if let Some(pt) = digital.undistort_point(new_out_pos, params) {
+                                    new_out_pos = pt;
+                                }
+                            }
                         }
 
-                        out_pos = ((out_pos.0 - out_c.0) / out_f.0, (out_pos.1 - out_c.1) / out_f.1);
-                        out_pos = distortion_model.undistort_point(out_pos, &params.k, params.lens_correction_amount).unwrap_or_default();
-                        out_pos = ((out_pos.0 * out_f.0) + out_c.0, (out_pos.1 * out_f.1) + out_c.1);
+                        new_out_pos = ((new_out_pos.0 - out_c.0) / out_f.0, (new_out_pos.1 - out_c.1) / out_f.1);
+                        new_out_pos = distortion_model.undistort_point(new_out_pos, &params).unwrap_or_default();
+                        new_out_pos = ((new_out_pos.0 * out_f.0) + out_c.0, (new_out_pos.1 * out_f.1) + out_c.1);
+
+                        out_pos = (
+                            new_out_pos.0 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
+                            new_out_pos.1 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount),
+                        );
                     }
                     ///////////////////////////////////////////////////////////////////
 
                     let idx = sy.min(params.matrix_count as usize - 1);
-                    if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, r_limit) {
+                    if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
                         let width_f = params.width as f32;
                         let height_f = params.height as f32;
                         match params.background_mode {
@@ -233,85 +284,116 @@ impl<T: PixelType> Stabilization<T> {
                                     pt2 = (pt2.0 * width_f, pt2.1 * height_f);
                                 }
 
-                                let c1 = sample_input_at::<I, T>(uv, pixels, params, &bg);
-                                let c2 = sample_input_at::<I, T>(pt2, pixels, params, &bg);
-                                *pix_out = PixelType::from_float(c1 * alpha + c2 * (1.0 - alpha));
+                                let c1 = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
+                                let c2 = sample_input_at::<I, T>(pt2, pixels, params, &bg, drawing);
+                                pixel = c1 * alpha + c2 * (1.0 - alpha);
+                                pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params.canvas_scale, drawing);
+                                *pix_out = PixelType::from_float(pixel);
                                 return;
                             },
                             _ => { }
                         }
 
-                        *pix_out = PixelType::from_float(sample_input_at::<I, T>(uv, pixels, params, &bg));
-                    } else {
-                        *pix_out = bg_t;
+                        pixel = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
                     }
+                    pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params.canvas_scale, drawing);
+                    *pix_out = PixelType::from_float(pixel);
                 }
             });
         });
     }
 }
 
-pub fn undistort_points_with_rolling_shutter(distorted: &[(f64, f64)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f64, f64)> {
+pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
     undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params)
 }
-pub fn undistort_points_with_params(distorted: &[(f64, f64)], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f64, f64)> {
-    let img_dim_ratio = FrameTransform::get_ratio(params);
-    let scaled_k = params.camera_matrix * img_dim_ratio;
+pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
+    let img_dim_ratio = points_dims.0 as f64 / params.video_width.max(1) as f64;//FrameTransform::get_ratio(params);
 
-    undistort_points(distorted, scaled_k, &params.distortion_coeffs, rotation, p, rot_per_point, params)
+    let (camera_matrix, distortion_coeffs, _, _, _) = FrameTransform::get_lens_data_at_timestamp(params, timestamp_us as f64 / 1000.0);
+
+    let scaled_k = camera_matrix * img_dim_ratio;
+
+    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f64, f64)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f64, f64)> {
-    let f = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
-    let c = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
-    let k = distortion_coeffs;
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f32, f32)> {
+    let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
+    let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
 
     let mut rr = rotation;
     if let Some(p) = p { // PP
         rr = p * rr;
     }
 
+    // TODO more params
+    let kernel_params = KernelParams {
+        width : params.width as i32,
+        height: params.height as i32,
+        output_width: params.output_width as i32,
+        output_height: params.output_height as i32,
+        f: [f.0, f.1],
+        c: [c.0, c.1],
+        k: distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<_>>().try_into().unwrap(),
+
+        ..Default::default()
+    };
+
     // TODO: into_par_iter?
     distorted.iter().enumerate().map(|(index, pi)| {
         let mut x = pi.0;
         let mut y = pi.1;
-        if params.input_horizontal_stretch > 0.001 { x *= params.input_horizontal_stretch; }
-        if params.input_vertical_stretch   > 0.001 { y *= params.input_vertical_stretch; }
+        if params.lens.input_horizontal_stretch > 0.001 { x *= params.lens.input_horizontal_stretch as f32; }
+        if params.lens.input_vertical_stretch   > 0.001 { y *= params.lens.input_vertical_stretch as f32; }
 
-        if params.is_superview {
-            let pt2 = GoProSuperview::from_superview((x / params.width as f64 - 0.5, y / params.height as f64 - 0.5));
-            x = (pt2.0 + 0.5) * params.width as f64;
-            y = (pt2.1 + 0.5) * params.height as f64;
+        if let Some(digital) = &params.digital_lens {
+            if let Some(pt2) = digital.undistort_point((x, y), &kernel_params) {
+                x = pt2.0;
+                y = pt2.1;
+            }
         }
 
         let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point
 
-        let rot = rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr);
+        let rot = nalgebra::convert::<nalgebra::Matrix3<f64>, nalgebra::Matrix3<f32>>(*rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr));
 
-        if let Some(mut pt) = params.distortion_model.undistort_point(pw, k, 0.0) {
+        if let Some(mut pt) = params.distortion_model.undistort_point(pw, &kernel_params) {
             // reproject
             let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
             if params.lens_correction_amount < 1.0 {
-                let mut out_c = c; // (params.output_width as f64 / 2.0, params.output_height as f64 / 2.0);
-                if params.input_horizontal_stretch > 0.001 { out_c.0 /= params.input_horizontal_stretch; }
-                if params.input_vertical_stretch   > 0.001 { out_c.1 /= params.input_vertical_stretch; }
+                let mut out_c = c; // (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+                if params.lens.input_horizontal_stretch > 0.001 { out_c.0 /= params.lens.input_horizontal_stretch as f32; }
+                if params.lens.input_vertical_stretch   > 0.001 { out_c.1 /= params.lens.input_vertical_stretch as f32; }
 
-                pt = ((pt.0 - out_c.0) / f.0, (pt.1 - out_c.1) / f.1);
-                pt = params.distortion_model.distort_point(pt, k, params.lens_correction_amount);
-                pt = ((pt.0 * f.0) + out_c.0, (pt.1 * f.1) + out_c.1);
+                let mut new_pt = pt;
+                new_pt = ((new_pt.0 - out_c.0) / f.0, (new_pt.1 - out_c.1) / f.1);
+                new_pt = params.distortion_model.distort_point(new_pt, &kernel_params);
+                new_pt = ((new_pt.0 * f.0) + out_c.0, (new_pt.1 * f.1) + out_c.1);
 
-                if params.is_superview {
-                    // TODO: This calculation is wrong but it somewhat works
-                    let size = (params.width as f64, params.height as f64);
-                    pt = (pt.0 / size.0 - 0.5, pt.1 / size.1 - 0.5);
-                    pt.0 *= 1.0 + (0.15 * (1.0 - params.lens_correction_amount));
-                    pt = ((pt.0 + 0.5) * size.0, (pt.1 + 0.5) * size.1);
+                if let Some(digital) = &params.digital_lens {
+                    new_pt = digital.distort_point(new_pt, &kernel_params);
+                    if digital.id() == "gopro_superview" || digital.id() == "gopro_hyperview"{
+                        // TODO: This calculation is wrong but it somewhat works
+                        let size = (params.width as f32, params.height as f32);
+                        new_pt = (new_pt.0 / size.0 - 0.5, new_pt.1 / size.1 - 0.5);
+                        if digital.id() == "gopro_superview" {
+                            new_pt.0 *= 0.91;
+                        } else if digital.id() == "gopro_hyperview"{
+                            new_pt.0 *= 0.81;
+                        }
+                        new_pt = ((new_pt.0 + 0.5) * size.0, (new_pt.1 + 0.5) * size.1);
+                    }
                 }
+
+                pt = (
+                    new_pt.0 * (1.0 - params.lens_correction_amount as f32) + (pt.0 * params.lens_correction_amount as f32),
+                    new_pt.1 * (1.0 - params.lens_correction_amount as f32) + (pt.1 * params.lens_correction_amount as f32),
+                );
             }
             pt
         } else {

@@ -15,6 +15,7 @@ MenuItem {
     objectName: "synchronization";
 
     Settings {
+        property alias processingResolution: processingResolution.currentIndex;
         property alias initialOffset: initialOffset.value;
         property alias syncSearchSize: syncSearchSize.value;
         property alias maxSyncPoints: maxSyncPoints.value;
@@ -231,6 +232,28 @@ MenuItem {
                 precision: 2;
                 unit: qsTr("s");
                 from: 0.01;
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Processing resolution");
+            ComboBox {
+                id: processingResolution;
+                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 3;
+                onCurrentIndexChanged: {
+                    let target_height = -1; // Full
+                    switch (currentIndex) {
+                        case 1: target_height = 2160; break;
+                        case 2: target_height = 1080; break;
+                        case 3: target_height = 720; break;
+                        case 4: target_height = 480; break;
+                    }
+
+                    controller.set_processing_resolution(target_height);
+                }
             }
         }
         InfoMessageSmall {

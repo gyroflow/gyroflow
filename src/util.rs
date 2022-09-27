@@ -56,7 +56,7 @@ pub fn url_to_path(url: QUrl) -> String {
 }
 
 pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
-    let qptr = QPointer::from(&*qobj);
+    let qptr = QPointer::from(qobj);
     qmetaobject::queued_callback(move |arg| {
         if let Some(this) = qptr.as_pinned() {
             let this = this.borrow();
@@ -65,7 +65,7 @@ pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'st
     })
 }
 pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send, F: FnMut(&mut T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
-    let qptr = QPointer::from(&*qobj);
+    let qptr = QPointer::from(qobj);
     qmetaobject::queued_callback(move |arg| {
         if let Some(this) = qptr.as_pinned() {
             let mut this = this.borrow_mut();
@@ -293,6 +293,18 @@ pub fn tr(context: &str, text: &str) -> String {
     cpp!(unsafe [context as "QString", text as "QString"] -> QString as "QString" {
         return QCoreApplication::translate(qUtf8Printable(context), qUtf8Printable(text));
     }).to_string()
+}
+
+pub fn qt_graphics_api() -> QString {
+    cpp!(unsafe [] -> QString as "QString" {
+        switch (QQuickWindow::graphicsApi()) {
+            case QSGRendererInterface::OpenGL:     return "opengl";
+            case QSGRendererInterface::Direct3D11: return "directx";
+            case QSGRendererInterface::Vulkan:     return "vulkan";
+            case QSGRendererInterface::Metal:      return "metal";
+            default: return "unknown";
+        }
+    })
 }
 
 pub fn get_version() -> String {

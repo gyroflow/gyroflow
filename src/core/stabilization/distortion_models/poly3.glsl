@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-vec2 undistort_point(vec2 pos, vec4 k1, vec4 k2, vec4 k3, float amount) {
+vec2 undistort_point(vec2 pos) {
     float NEWTON_EPS = 0.00001;
 
-    float inv_k1 = (1.0 / k1.x);
+    float inv_k1 = (1.0 / params.k1.x);
 
     float rd = length(pos);
     if (rd == 0.0) { return vec2(0.0, 0.0); }
@@ -37,13 +37,10 @@ vec2 undistort_point(vec2 pos, vec4 k1, vec4 k2, vec4 k3, float amount) {
 
     ru /= rd;
 
-    // Apply only requested amount
-    ru = 1.0 + (ru - 1.0) * (1.0 - amount);
-
     return pos * ru;
 }
 
-vec2 distort_point(vec2 pos, vec4 k1, vec4 k2, vec4 k3) {
-    float poly2 = k1.x * (pos.x * pos.x + pos.y * pos.y) + 1.0;
+vec2 distort_point(vec2 pos) {
+    float poly2 = params.k1.x * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }

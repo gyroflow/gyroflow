@@ -24,7 +24,7 @@ use parking_lot::RwLock;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
-    NVIDIA, AMD, Intel, AppleSilicon, Unknown
+    Nvidia, Amd, Intel, AppleSilicon, Unknown
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
@@ -32,24 +32,30 @@ lazy_static::lazy_static! {
 }
 pub fn set_gpu_type_from_name(name: &str) {
     let name = name.to_ascii_lowercase();
-         if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::NVIDIA; }
-    else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::AMD; }
+         if name.contains("nvidia") { *GPU_TYPE.write() = GpuType::Nvidia; }
+    else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
-    else if name.contains("Apple M") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
+    else if name.contains("apple m") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
     else {
         log::warn!("Unknown GPU {}", name);
     }
 
     let gpu_type = *GPU_TYPE.read();
-    if gpu_type == GpuType::NVIDIA {
+    if gpu_type == GpuType::Nvidia {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
     }
     #[cfg(target_os = "windows")]
-    if gpu_type == GpuType::AMD {
+    if gpu_type == GpuType::Amd {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
     }
     #[cfg(any(target_os = "macos", target_os = "ios"))]
-    ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
+    {
+        if !name.contains("apple m") {
+            // Disable GPU decoding on Intel macOS by default
+            *GPU_DECODING.write() = false;
+        }
+        ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
+    }
 
     ::log::debug!("GPU type: {:?}, from name: {}", gpu_type, name);
 }
@@ -113,14 +119,14 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     };
 
     let gpu_type = *GPU_TYPE.read();
-    if gpu_type != GpuType::NVIDIA {
-        encoders = encoders.into_iter().filter(|x| !x.0.contains("nvenc")).collect();
+    if gpu_type != GpuType::Nvidia {
+        encoders.retain(|x| !x.0.contains("nvenc"));
     }
-    if gpu_type != GpuType::AMD {
-        encoders = encoders.into_iter().filter(|x| !x.0.contains("_amf")).collect();
+    if gpu_type != GpuType::Amd {
+        encoders.retain(|x| !x.0.contains("_amf"));
     }
     if gpu_type != GpuType::Intel {
-        encoders = encoders.into_iter().filter(|x| !x.0.contains("qsv")).collect();
+        encoders.retain(|x| !x.0.contains("qsv"));
     }
     log::debug!("Possible encoders with {:?}: {:?}", gpu_type, encoders);
     encoders
@@ -365,14 +371,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
                         let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
 
-                        plane.ensure_stab_data_at_timestamp(timestamp_us);
-                        if fill_with_background {
-                            if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
-                                transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
-                            }
-                        }
                         use gyroflow_core::gpu::{ BufferDescription, BufferSource };
-                        plane.process_pixels(timestamp_us, &mut BufferDescription {
+                        let mut buffers = BufferDescription {
                             input_size,
                             output_size,
                             buffers: BufferSource::Cpu {
@@ -380,7 +380,15 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                                 output: out_buffer
                             },
                             input_rect: None, output_rect: None
-                        });
+                        };
+
+                        plane.ensure_ready_for_processing(timestamp_us, &mut buffers);
+                        if fill_with_background {
+                            if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
+                                transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
+                            }
+                        }
+                        plane.process_pixels(timestamp_us, &mut buffers);
                     }));
                 })*
             };

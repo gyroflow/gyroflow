@@ -21,13 +21,13 @@ impl FrameTransform {
         }
         frame_readout_time / 2.0
     }
-    fn get_new_k(params: &ComputeParams, fov: f64) -> Matrix3<f64> {
+    fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
         let img_dim_ratio = Self::get_ratio(params);
 
         let out_dim = (params.output_width as f64, params.output_height as f64);
         //let focal_center = (params.video_width as f64 / 2.0, params.video_height as f64 / 2.0);
 
-        let mut new_k = params.camera_matrix;
+        let mut new_k = *camera_matrix;
         new_k[(0, 0)] = new_k[(0, 0)] * img_dim_ratio / fov;
         new_k[(1, 1)] = new_k[(1, 1)] * img_dim_ratio / fov;
         new_k[(0, 2)] = /*(params.video_width  as f64 / 2.0 - focal_center.0) * img_dim_ratio / fov + */out_dim.0 / 2.0;
@@ -45,6 +45,39 @@ impl FrameTransform {
         fov
     }
 
+    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64) {
+        let mut interpolated_lens = None;
+        if let Some(lens_positions) = params.gyro.lens_positions.as_ref() {
+            use crate::util::MapClosest;
+            if let Some(val) = lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+                interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
+            }
+        }
+
+        let lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
+
+        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));
+        let distortion_coeffs = lens.get_distortion_coeffs();
+        let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
+
+        let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
+            (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
+        } else {
+            (params.video_width.max(1) as f64, params.video_height.max(1) as f64)
+        };
+
+        let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
+        let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
+
+        let lens_ratiox = (params.video_width as f64 / calib_width) * input_horizontal_stretch;
+        let lens_ratioy = (params.video_height as f64 / calib_height) * input_vertical_stretch;
+        camera_matrix[(0, 0)] *= lens_ratiox;
+        camera_matrix[(1, 1)] *= lens_ratioy;
+        camera_matrix[(0, 2)] *= lens_ratiox;
+        camera_matrix[(1, 2)] *= lens_ratioy;
+        (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch)
+    }
+
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
@@ -55,22 +88,30 @@ impl FrameTransform {
         let adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
         // ----------- Keyframes -----------
 
+        // ----------- Lens -----------
+        let (camera_matrix,
+            distortion_coeffs,
+            radial_distortion_limit,
+            input_horizontal_stretch,
+            input_vertical_stretch) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+        // ----------- Lens -----------
+
         let img_dim_ratio = Self::get_ratio(params);
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms);
         let mut ui_fov = fov / (params.width as f64 / params.output_width.max(1) as f64);
-        if params.lens_fov_adjustment > 0.0001 {
+        if let Some(adj) = params.lens.optimal_fov {
             if params.fovs.is_empty() {
-                fov *= params.lens_fov_adjustment;
+                fov *= adj;
             } else {
-                ui_fov /= params.lens_fov_adjustment;
+                ui_fov /= adj;
             }
         }
 
-        let scaled_k = params.camera_matrix * img_dim_ratio;
-        let new_k = Self::get_new_k(params, fov);
+        let scaled_k = camera_matrix * img_dim_ratio;
+        let new_k = Self::get_new_k(&params, &camera_matrix, fov);
 
         // ----------- Rolling shutter correction -----------
-        let frame_readout_time = Self::get_frame_readout_time(params, true);
+        let frame_readout_time = Self::get_frame_readout_time(&params, true);
 
         let row_readout_time = frame_readout_time / params.height as f64;
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
@@ -114,21 +155,32 @@ impl FrameTransform {
             ]
         }).collect::<Vec<[f32; 9]>>();
 
+        let mut digital_lens_params = [0f32; 4];
+        if let Some(p) = &params.digital_lens_params {
+            for (i, v) in p.iter().enumerate() {
+                digital_lens_params[i] = *v as f32;
+            }
+        }
+        let mut flags = super::KernelParamsFlags::default();
+        flags.set(super::KernelParamsFlags::HAS_DIGITAL_LENS, params.digital_lens.is_some());
+
         let kernel_params = KernelParams {
             matrix_count:  matrices.len() as i32,
             f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
-            k:             params.distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
+            k:             distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
             fov:           fov as f32,
-            r_limit:       params.radial_distortion_limit as f32,
+            r_limit:       radial_distortion_limit as f32,
             lens_correction_amount:   lens_correction_amount as f32,
-            input_vertical_stretch:   params.input_vertical_stretch as f32,
-            input_horizontal_stretch: params.input_horizontal_stretch as f32,
+            input_vertical_stretch:   input_vertical_stretch as f32,
+            input_horizontal_stretch: input_horizontal_stretch as f32,
             background_mode:          params.background_mode as i32,
             background_margin:        background_margin as f32,
             background_margin_feather:background_feather as f32,
             translation2d: [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32],
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
+            digital_lens_params,
+            flags: flags.bits(),
             ..Default::default()
         };
 
@@ -139,16 +191,18 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f64, f64)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
+        let (camera_matrix, distortion_coeffs, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+
         let img_dim_ratio = Self::get_ratio(params);
         let fov = Self::get_fov(params, 0, false, timestamp_ms);
 
-        let scaled_k = params.camera_matrix * img_dim_ratio;
-        let new_k = Self::get_new_k(params, fov);
+        let scaled_k = camera_matrix * img_dim_ratio;
+        let new_k = Self::get_new_k(params, &camera_matrix, fov);
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false);
@@ -181,6 +235,6 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        (scaled_k, params.distortion_coeffs, new_k, rotations)
+        (scaled_k, distortion_coeffs, new_k, rotations)
     }
 }

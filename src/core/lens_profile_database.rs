@@ -9,7 +9,7 @@ use std::path::PathBuf;
 #[cfg(target_os = "android")]
 static LENS_PROFILES_STATIC: include_dir::Dir = include_dir::include_dir!("$CARGO_MANIFEST_DIR/../../resources/camera_presets/");
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded: bool
@@ -109,6 +109,11 @@ impl LensProfileDatabase {
                 }
             }
         });
+
+        let copy = self.clone();
+        for (_, v) in self.map.iter_mut() {
+            v.resolve_interpolations(&copy);
+        }
 
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;

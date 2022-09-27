@@ -80,6 +80,7 @@ pub struct Controller {
     set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64)),
     set_use_gravity_vectors: qt_method!(fn(&self, v: bool)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
+    set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
     set_integration_method: qt_method!(fn(&self, index: usize)),
 
@@ -173,7 +174,6 @@ pub struct Controller {
     add_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64, no_marker: bool)),
     remove_calibration_point: qt_method!(fn(&mut self, timestamp_us: i64)),
 
-    get_current_fov: qt_method!(fn(&self) -> f64),
     quats_at_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
@@ -192,7 +192,7 @@ pub struct Controller {
     rate_profile: qt_method!(fn(&self, name: QString, json: QString, is_good: bool)),
     request_profile_ratings: qt_method!(fn(&self)),
 
-    set_zero_copy: qt_method!(fn(&self, player: QJSValue, enabled: bool)),
+    set_preview_pipeline: qt_method!(fn(&self, index: i32)),
     set_gpu_decoding: qt_method!(fn(&self, enabled: bool)),
 
     list_gpu_devices: qt_method!(fn(&self)),
@@ -200,7 +200,8 @@ pub struct Controller {
     set_rendering_gpu_type_from_name: qt_method!(fn(&self, name: String)),
     gpu_list_loaded: qt_signal!(list: QJsonArray),
 
-    is_superview: qt_property!(bool; WRITE set_is_superview),
+    set_digital_lens_name: qt_method!(fn(&self, name: String)),
+    set_digital_lens_param: qt_method!(fn(&self, index: usize, value: f64)),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     file_size: qt_method!(fn(&self, path: QString) -> u64),
@@ -244,8 +245,14 @@ pub struct Controller {
     image_sequence_fps: qt_property!(f64),
 
     preview_resolution: i32,
+    processing_resolution: i32,
+
+    current_fov: qt_property!(f64; NOTIFY processing_info_changed),
+    processing_info: qt_property!(QString; NOTIFY processing_info_changed),
+    processing_info_changed: qt_signal!(),
 
     cancel_flag: Arc<AtomicBool>,
+    preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
 
@@ -256,6 +263,7 @@ impl Controller {
     pub fn new() -> Self {
         Self {
             preview_resolution: 720,
+            processing_resolution: 720,
             ..Default::default()
         }
     }
@@ -304,8 +312,6 @@ impl Controller {
 
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
-
-        let size = self.stabilizer.params.read().size;
 
         let timestamps_fract: Vec<f64> = timestamps_fract.split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
@@ -370,7 +376,7 @@ impl Controller {
             let cancel_flag = self.cancel_flag.clone();
 
             let input_file = self.stabilizer.input_file.read().clone();
-            let (sw, sh) = (size.0 as u32, size.1 as u32);
+            let proc_height = self.processing_resolution;
             core::run_threaded(move || {
                 let gpu_decoding = *rendering::GPU_DECODING.read();
 
@@ -396,6 +402,10 @@ impl Controller {
                             assert!(_output_frame.is_none());
 
                             if abs_frame_no % every_nth_frame == 0 {
+                                let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
+                                let ratio = input_frame.height() as f64 / h as f64;
+                                let sw = (input_frame.width() as f64 / ratio).floor() as u32;
+                                let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).floor() as u32;
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
@@ -472,10 +482,10 @@ impl Controller {
     fn update_frequency_graph(&mut self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize) {
         if let Some(graph) = graph.to_qobject::<FrequencyGraph>() {
             let graph = unsafe { &mut *graph.as_ptr() }; // _self.borrow_mut();
-            
+
             let gyro = &self.stabilizer.gyro.read();
             let raw_imu = &gyro.raw_imu;
-            
+
             if !raw_imu.is_empty() {
                 let dt_ms = 1000.0 / sr;
                 let center_ts = ts - gyro.offset_at_video_timestamp(ts);
@@ -729,14 +739,19 @@ impl Controller {
                 let new_h = (vid.videoHeight as f64 / (vid.videoWidth as f64 / new_w as f64)).floor() as u32;
                 ::log::info!("surface size: {}x{}", new_w, new_h);
 
-                self.stabilizer.pose_estimator.rescale(new_w, new_h);
                 self.chart_data_changed();
 
                 vid.setSurfaceSize(new_w, new_h);
                 vid.setRotation(vid.getRotation());
-                vid.setCurrentFrame(vid.currentFrame);
+                // vid.setCurrentFrame(vid.currentFrame);
             }
         }
+    }
+
+    fn set_processing_resolution(&mut self, target_height: i32) {
+        self.processing_resolution = target_height;
+        self.stabilizer.pose_estimator.clear();
+        self.chart_data_changed();
     }
 
     fn set_integration_method(&mut self, index: usize) {
@@ -765,17 +780,8 @@ impl Controller {
         });
     }
 
-    fn set_zero_copy(&self, player: QJSValue, enabled: bool) {
-        if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
-            let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-
-            if enabled {
-                qrhi_undistort::init_player(vid.get_mdkplayer(), self.stabilizer.clone());
-            } else {
-                qrhi_undistort::deinit_player(vid.get_mdkplayer());
-            }
-            vid.setCurrentFrame(vid.currentFrame);
-        }
+    fn set_preview_pipeline(&self, index: i32) {
+        self.preview_pipeline.store(index as usize, SeqCst);
     }
 
     fn set_gpu_decoding(&self, enabled: bool) {
@@ -786,14 +792,19 @@ impl Controller {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             vid.onResize(Box::new(|_, _| { }));
+            vid.onProcessTexture(Box::new(|_, _, _, _, _, _, _, _, _| -> bool {
+                false
+            }));
             vid.onProcessPixels(Box::new(|_, _, _, _, _, _| -> (u32, u32, u32, *mut u8) {
                 (0, 0, 0, std::ptr::null_mut())
             }));
-            qrhi_undistort::deinit_player(vid.get_mdkplayer());
+            vid.readyForProcessing(Box::new(|| -> bool { false }));
+            qrhi_undistort::cleanup();
         }
     }
     fn init_player(&self, player: QJSValue) {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
+            let vid1 = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
             let bg_color = vid.getBackgroundColor().get_rgba_f();
@@ -805,25 +816,109 @@ impl Controller {
                 if current_size.0 != width as usize || current_size.1 != height as usize {
                     stab.set_size(width as usize, height as usize);
                     stab.recompute_threaded(|_|());
-
-                    qrhi_undistort::resize_player(stab.clone());
                 }
             }));
 
+            use gyroflow_core::gpu::{ BufferDescription, BufferSource };
+
             let stab = self.stabilizer.clone();
+            vid.readyForProcessing(Box::new(move || -> bool {
+                !stab.params.is_locked_exclusive() && !stab.stabilization.is_locked_exclusive()
+            }));
+            let stab = self.stabilizer.clone();
+            let preview_pipeline = self.preview_pipeline.clone();
             let out_pixels = RefCell::new(Vec::new());
+            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, info): (f64, QString)| {
+                this.current_fov = fov;
+                this.processing_info = info;
+                this.processing_info_changed();
+            });
+            let update_info2 = update_info.clone();
+            vid.onProcessTexture(Box::new(move |_frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, _ptr4| -> bool {
+                if width < 4 || height < 4 || backend_id == 0 { return false; }
+
+                if !stab.params.read().stab_enabled { return false; }
+
+                let _time = std::time::Instant::now();
+                let mut backend = String::new();
+
+                if preview_pipeline.load(SeqCst) == 0 {
+                    if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone()) {
+                        update_info2((ret.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        return true;
+                    }
+                }
+
+                if preview_pipeline.load(SeqCst) > 1 { return false; }
+
+                let mut fov = 1.0;
+                let ret = match backend_id {
+                    1 => { // OpenGL, ptr1: texture, ptr2: opengl context
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
+                            input_size: (width as usize, height as usize, width as usize * 4),
+                            output_size: (width as usize, height as usize, width as usize * 4),
+                            buffers: BufferSource::OpenGL {
+                                input: ptr1 as u32,
+                                output: ptr1 as u32,
+                                context: ptr2 as *mut std::ffi::c_void
+                            },
+                            input_rect: None,
+                            output_rect: None,
+                        });
+                        match ret {
+                            Some(bk) => { fov = bk.fov; backend = format!("OpenGL->{}", bk.backend); true },
+                            None => false
+                        }
+                    },
+                    2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
+                        false
+                    },
+                    3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
+                            input_size: (width as usize, height as usize, width as usize * 4),
+                            output_size: (width as usize, height as usize, width as usize * 4),
+                            buffers: BufferSource::DirectX {
+                                input: ptr1 as *mut std::ffi::c_void,
+                                output: ptr1 as *mut std::ffi::c_void,
+                                device: ptr2 as *mut std::ffi::c_void,
+                                device_context: ptr3 as *mut std::ffi::c_void
+                            },
+                            input_rect: None,
+                            output_rect: None,
+                        });
+                        match ret {
+                            Some(bk) => { fov = bk.fov; backend = format!("DirectX->{}", bk.backend); true },
+                            None => false
+                        }
+                    },
+                    4 => { // Vulkan, ptr1: texture, ptr2: device, ptr3: command list, ptr4: physical device
+                        false
+                    }
+                    _ => false
+                };
+                if ret {
+                    update_info2((fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                } else {
+                    update_info2((fov, QString::from("---")));
+                }
+                ret
+            }));
+
+            let stab = self.stabilizer.clone();
+            let update_info2 = update_info.clone();
             vid.onProcessPixels(Box::new(move |_frame, timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
-                // let _time = std::time::Instant::now();
+                let _time = std::time::Instant::now();
 
                 // TODO: cache in atomics instead of locking the mutex every time
-                let (ow, oh) = stab.params.read().output_size;
+                let params = stab.params.read();
+                if !params.stab_enabled { return (0, 0, 0, std::ptr::null_mut()); }
+                let (ow, oh) = params.output_size;
                 let os = ow * 4; // Assume RGBA8 - 4 bytes per pixel
+                drop(params);
 
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-
-                use gyroflow_core::gpu::{ BufferDescription, BufferSource };
                 let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
                     input_size: (width as usize, height as usize, stride as usize),
                     output_size: (ow, oh, os),
@@ -833,12 +928,15 @@ impl Controller {
                     },
                     input_rect: None, output_rect: None
                 });
-
-                // println!("Frame {:.3}, {}x{}, {:.2} MB | OpenCL {:.3}ms", timestamp_ms, width, height, pixels.len() as f32 / 1024.0 / 1024.0, _time.elapsed().as_micros() as f64 / 1000.0);
-                if ret {
-                    (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
-                } else {
-                    (0, 0, 0, std::ptr::null_mut())
+                match ret {
+                    Some(bk) => {
+                        update_info2((bk.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
+                    },
+                    None => {
+                        update_info2((1.0, QString::from("---")));
+                        (0, 0, 0, std::ptr::null_mut())
+                    }
                 }
             }));
         }
@@ -1040,7 +1138,6 @@ impl Controller {
         if self.stabilizer.set_output_size(w, h) {
             self.stabilizer.recompute_undistortion();
             self.request_recompute();
-            qrhi_undistort::resize_player(self.stabilizer.clone());
         }
     }
 
@@ -1049,7 +1146,8 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
-    wrap_simple_method!(set_is_superview,           v: bool);
+    wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
+    wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
@@ -1083,7 +1181,6 @@ impl Controller {
     fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
-    fn get_current_fov       (&self) -> f64 { self.stabilizer.get_current_fov() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
 

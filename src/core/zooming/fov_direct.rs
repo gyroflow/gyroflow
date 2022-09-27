@@ -2,7 +2,6 @@
 // Copyright © 2022 Maik <myco at gmx>
 
 use super::*;
-use crate::stabilization::undistort_points_with_rolling_shutter;
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };
@@ -42,7 +41,7 @@ impl FieldOfViewAlgorithm for FovDirect {
         let src_rect = points_around_rect(self.input_dim.0, self.input_dim.1, 15, 15);
         let polygons: Vec<Vec<(f64, f64)>> = timestamps
             .into_par_iter()
-            .map(|&ts| undistort_points_with_rolling_shutter(&src_rect, ts, &self.compute_params))
+            .map(|&ts| crate::stabilization::undistort_points_with_rolling_shutter(&src_rect, ts, &self.compute_params))
             .collect();
 
         if self.compute_params.zooming_debug_points {

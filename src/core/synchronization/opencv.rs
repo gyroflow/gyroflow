@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use nalgebra::{ Rotation3, Matrix3 };
+use nalgebra::Rotation3;
 use std::ffi::c_void;
 use std::sync::Arc;
 use opencv::core::{ Mat, Size, Point2f, TermCriteria, CV_8UC1 };
@@ -15,31 +15,25 @@ use crate::stabilization::ComputeParams;
 
 #[derive(Default, Clone)]
 pub struct ItemOpenCV {
-    features: Vec<(f64, f64)>,
+    features: Vec<(f32, f32)>,
     img: Arc<image::GrayImage>,
     size: (i32, i32)
 }
 
 impl EstimatorItemInterface for ItemOpenCV {
-    fn get_features(&self) -> &Vec<(f64, f64)> {
+    fn get_features(&self) -> &Vec<(f32, f32)> {
         &self.features
     }
-    fn rescale(&mut self, ratio: f32) {
-        for (x, y) in self.features.iter_mut() {
-            *x *= ratio as f64;
-            *y *= ratio as f64;
-        }
-    }
 
-    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>> {
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = self.get_matched_features(next)?;
 
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
-            let pts11 = crate::stabilization::undistort_points_with_params(&pts1, Matrix3::identity(), None, None, params);
-            let pts22 = crate::stabilization::undistort_points_with_params(&pts2, Matrix3::identity(), None, None, params);
+            let pts11 = crate::stabilization::undistort_points_for_optical_flow(&pts1, timestamp_us, params, (self.img.width(), self.img.height()));
+            let pts22 = crate::stabilization::undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, (self.img.width(), self.img.height()));
 
-            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
-            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x as f32, y as f32)).collect::<Vec<Point2f>>();
+            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
+            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
 
             let a1_pts = Mat::from_slice(&pts1)?;
             let a2_pts = Mat::from_slice(&pts2)?;
@@ -97,18 +91,18 @@ impl ItemOpenCV {
 
         //let pts = pts.get_mat(ACCESS_READ).unwrap().clone();
         Self {
-            features: (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x as f64, x.y as f64))}).collect(),
+            features: (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x, x.y))}).collect(),
             size: (w, h),
             img
         }
     }
 
-    fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f64, f64)>, Vec<(f64, f64)>)> {
+    fn get_matched_features(&self, next: &EstimatorItem) -> Option<(Vec<(f32, f32)>, Vec<(f32, f32)>)> {
         if let EstimatorItem::ItemOpenCV(next) = next {
             let (w, h) = self.size;
             if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
 
-            let result = || -> Result<(Vec<(f64, f64)>, Vec<(f64, f64)>), opencv::Error> {
+            let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
                 let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
 
@@ -131,8 +125,8 @@ impl ItemOpenCV {
                         let pt2 = a2_pts.at::<Point2f>(i)?;
                         if pt1.x >= 0.0 && pt1.x < w as f32 && pt1.y >= 0.0 && pt1.y < h as f32
                         && pt2.x >= 0.0 && pt2.x < w as f32 && pt2.y >= 0.0 && pt2.y < h as f32 {
-                            pts1.push((pt1.x as f64, pt1.y as f64));
-                            pts2.push((pt2.x as f64, pt2.y as f64));
+                            pts1.push((pt1.x as f32, pt1.y as f32));
+                            pts2.push((pt2.x as f32, pt2.y as f32));
                         }
                     }
                 }

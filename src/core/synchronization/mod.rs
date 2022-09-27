@@ -39,7 +39,7 @@ use crate::util::MapClosest;
 use enum_dispatch::enum_dispatch;
 
 pub type GrayImage = image::GrayImage;
-pub type OpticalFlowPoints = Vec<(f64, f64)>; // timestamp_us, points
+pub type OpticalFlowPoints = Vec<(f32, f32)>; // timestamp_us, points
 pub type OpticalFlowPair = Option<(OpticalFlowPoints, OpticalFlowPoints)>;
 pub type OpticalFlowPairWithTs = Option<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>;
 
@@ -69,12 +69,11 @@ pub enum EstimatorItem {
 
 #[enum_dispatch(EstimatorItem)]
 pub trait EstimatorItemInterface {
-    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams) -> Option<Rotation3<f64>>;
-    fn get_features(&self) -> &Vec<(f64, f64)>;
+    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>>;
+    fn get_features(&self) -> &Vec<(f32, f32)>;
 
     fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair;
 
-    fn rescale(&mut self, ratio: f32);
     fn cleanup(&mut self);
 }
 
@@ -110,14 +109,6 @@ impl PoseEstimator {
         self.estimated_quats.write().clear();
         #[cfg(feature = "use-opencv")]
         let _ = opencv::init();
-    }
-    pub fn rescale(&self, width: u32, height: u32) {
-        let mut results = self.sync_results.write();
-        for (_k, v) in results.iter_mut() {
-            let ratio = width as f32 / v.frame_size.0 as f32;
-            v.frame_size = (width, height);
-            v.item.rescale(ratio);
-        }
     }
 
     pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: usize, img: Arc<image::GrayImage>) {
@@ -179,7 +170,7 @@ impl PoseEstimator {
                         // Unlock the mutex for estimate_pose
                         drop(l);
 
-                        if let Some(rot) = curr.estimate_pose(&next, params) {
+                        if let Some(rot) = curr.estimate_pose(&next, params, *ts, *next_ts) {
                             let mut l = results.write();
                             if let Some(x) = l.get_mut(ts) {
                                 x.rotation = Some(rot);
@@ -203,12 +194,14 @@ impl PoseEstimator {
             lines.0.1.iter().zip(lines.1.1.iter()).for_each(|(p1, p2)| {
                 sum_angles += (p2.1 - p1.1).atan2(p2.0 - p1.0)
             });
-            let avg_angle = sum_angles / lines.0.1.len() as f64;
+            let avg_angle = sum_angles / lines.0.1.len() as f32;
+
+            let scale = scale as f32;
 
             let (lines0, lines1) = lines.0.1.iter().zip(lines.1.1.iter()).filter_map(|(p1, p2)| {
                 let angle = (p2.1 - p1.1).atan2(p2.0 - p1.0);
                 let diff = (angle - avg_angle).abs();
-                if diff < 30.0 * (std::f64::consts::PI / 180.0) {  // 30 degrees
+                if diff < 30.0 * (std::f32::consts::PI / 180.0) {  // 30 degrees
                     Some(((p1.0 * scale, p1.1 * scale), (p2.0 * scale, p2.1 * scale)))
                 } else {
                     None
@@ -254,7 +247,7 @@ impl PoseEstimator {
         }
     }
 
-    pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize, filter: bool) -> OpticalFlowPairWithTs {
+    pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize, filter: bool) -> (OpticalFlowPairWithTs, Option<(u32, u32)>) {
         if let Some(l) = self.sync_results.try_read() {
             if let Some(first_ts) = l.get_closest(timestamp_us, 2000).map(|v| v.timestamp_us) {
                 let mut iter = l.range(first_ts..);
@@ -262,17 +255,17 @@ impl PoseEstimator {
                 if let Some((_, curr)) = iter.next() {
                     if let Ok(of) = curr.optical_flow.try_borrow() {
                         if let Some(opt_pts) = of.get(&num_frames) {
-                            return if filter {
+                            return (if filter {
                                 Self::filter_of_lines(opt_pts, scale)
                             } else {
                                 opt_pts.clone()
-                            }
+                            }, Some(curr.frame_size));
                         }
                     }
                 }
             }
         }
-        None
+        (None, None)
     }
 
     pub fn rgba_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> GrayImage {

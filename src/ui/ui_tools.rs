@@ -138,7 +138,7 @@ impl UITools {
 
             #[cfg(target_os = "windows")]
             unsafe {
-                let _ = CoInitializeEx(std::ptr::null_mut(), COINIT_MULTITHREADED);
+                let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
                 if let Ok(tb) = CoCreateInstance(&TaskbarList, None, CLSCTX_ALL) {
                     self.taskbar = Some(tb);
                 }

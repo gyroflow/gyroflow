@@ -3,22 +3,19 @@
 
 // Adapted from LensFun: https://github.com/lensfun/lensfun/blob/e78e7be448c81256cce36a5a37ddc229616c0db7/libs/lensfun/mod-coord.cpp#L562
 
+use crate::stabilization::KernelParams;
+
 #[derive(Default, Clone)]
 pub struct Poly3 { }
 
-const NEWTON_EPS: f64 = 0.00001;
+const NEWTON_EPS: f32 = 0.00001;
 
 impl Poly3 {
-    pub fn undistort_point<T: num_traits::Float>(&self, point: (T, T), k: &[T], amount: T) -> Option<(T, T)> {
-        let t_0 = T::from(0.0f32).unwrap();
-        let t_1 = T::from(1.0f32).unwrap();
-        let t_3 = T::from(3.0f32).unwrap();
-        let t_eps = T::from(NEWTON_EPS).unwrap();
-
-        let inv_k1 = t_1 / k[0];
+    pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
+        let inv_k1 = 1.0 / params.k[0];
 
         let rd = (point.0 * point.0 + point.1 * point.1).sqrt();
-        if rd == t_0 { return None; }
+        if rd == 0.0 { return None; }
 
         let rd_div_k1 = rd * inv_k1;
 
@@ -32,7 +29,7 @@ impl Poly3 {
         let mut ru = rd;
         for i in 0..10 {
             let fru = ru * ru * ru + ru * inv_k1 - rd_div_k1;
-            if fru >= -t_eps && fru < t_eps {
+            if fru >= -NEWTON_EPS && fru < NEWTON_EPS {
                 break;
             }
             if i > 5 {
@@ -40,16 +37,13 @@ impl Poly3 {
                 return None;
             }
 
-            ru = ru - (fru / (t_3 * ru * ru + inv_k1));
+            ru = ru - (fru / (3.0 * ru * ru + inv_k1));
         }
-        if ru < t_0 {
+        if ru < 0.0 {
             return None;
         }
 
         ru = ru / rd;
-
-        // Apply only requested amount
-        ru = t_1 + (ru - t_1) * (t_1 - amount);
 
         Some((
             point.0 * ru,
@@ -57,29 +51,26 @@ impl Poly3 {
         ))
     }
 
-    pub fn distort_point<T: num_traits::Float>(&self, point: (T, T), k: &[T], amount: T) -> (T, T) {
-        let t_1 = T::from(1.0f32).unwrap();
-
-        let mut poly2 = k[0] * (point.0 * point.0 + point.1 * point.1) + t_1;
-        poly2 = t_1 + (poly2 - t_1) * (t_1 - amount);
+    pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
+        let poly2 = params.k[0] * (point.0 * point.0 + point.1 * point.1) + 1.0;
 
         (
             point.0 * poly2,
             point.1 * poly2
         )
     }
+    pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         let d = 1.0 - k[0];
         k[0] *= hugin_scaling.powi(2) / d.powi(3);
     }
 
-    pub fn id(&self) -> i32 { 2 }
-    pub fn name(&self) -> &'static str { "Poly3" }
+    pub fn id() -> &'static str { "poly3" }
+    pub fn name() -> &'static str { "Poly3" }
 
     pub fn opencl_functions(&self) -> &'static str { include_str!("poly3.cl") }
     pub fn wgsl_functions(&self)   -> &'static str { include_str!("poly3.wgsl") }
-    pub fn glsl_shader_path(&self) -> &'static str { ":/src/qt_gpu/compiled/undistort_poly3.frag.qsb" }
 }
 
 // TODO

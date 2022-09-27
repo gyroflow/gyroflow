@@ -226,8 +226,8 @@ MenuItem {
     InfoMessageSmall {
         type: lensRatio != videoRatio? InfoMessage.Error : InfoMessage.Warning;
         show: root.calibWidth > 0 && root.videoWidth > 0 && (root.calibWidth != root.videoWidth || root.calibHeight != root.videoHeight);
-        property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(5);
-        property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(5);
+        property string lensRatio: (root.calibWidth / Math.max(1, root.calibHeight)).toFixed(3);
+        property string videoRatio: (root.videoWidth / Math.max(1, root.videoHeight)).toFixed(3);
         text: lensRatio != videoRatio? qsTr("Lens profile aspect ratio doesn't match the file aspect ratio. The result will not look correct.") :
                                        qsTr("Lens profile dimensions don't match the file dimensions. The result may not look correct.");
     }

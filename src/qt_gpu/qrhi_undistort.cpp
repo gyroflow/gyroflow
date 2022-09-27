@@ -19,9 +19,6 @@ public:
     QQuickItem *qmlItem();
     QSize textureSize();
     QMatrix4x4 textureMatrix();
-
-    void setupGpuCompute(std::function<bool(QSize texSize, QSizeF itemSize)> &&initCb, std::function<bool(double, int32_t, bool)> &&renderCb, std::function<void()> &&cleanupCb);
-    void cleanupGpuCompute();
 };
 class MDKPlayerWrapper {
 public:
@@ -41,22 +38,25 @@ static quint16 quadIndexData[6] = { 0, 1, 2, 0, 2, 3 };
 
 class QtRHIUndistort {
 public:
-    QtRHIUndistort(MDKPlayerWrapper *playerWrapper): m_player(playerWrapper) { }
+    QtRHIUndistort() { }
 
-    bool init(MDKPlayer *item, QSize textureSize, QSizeF /*itemSize*/, QSize outputSize, const QString &shaderPath, int kernelParmsSize) {
+    QSize outSize() { return m_outputSize; }
+    QSize texSize() { return m_textureSize; }
+    QString shaderPath() { return m_shaderPath; }
+
+    bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, QSize canvasSize) {
         if (!item) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
 
         m_outputSize = outputSize;
+        m_textureSize = textureSize;
+        m_shaderPath = shaderPath;
 
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
         m_texIn.reset(rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedAsTransferSource));
         if (!m_texIn->create()) { qDebug() << "failed to create m_texIn"; return false; }
-
-        m_workaroundTexture.reset(rhi->newTexture(QRhiTexture::RGBA8, QSize(16, 16), 1, QRhiTexture::UsedAsTransferSource));
-        if (!m_workaroundTexture->create()) { qDebug() << "failed to create m_workaroundTexture"; return false; }
 
         m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
         if (!m_kernelParams->create()) { qDebug() << "failed to create m_kernelParams"; return false; }
@@ -64,8 +64,10 @@ public:
         m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::UsedAsTransferSource));
         if (!m_texMatrices->create()) { qDebug() << "failed to create m_texMatrices"; return false; }
 
-        matrices.resize(textureSize.height() * 9);
-        kernel_params.resize(kernelParmsSize);
+        matricesBuffer.resize(textureSize.height() * 9 * sizeof(float));
+
+        m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::UsedAsTransferSource));
+        if (!m_texCanvas->create()) { qDebug() << "failed to create m_texCanvas"; return false; }
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
         if (!m_vertexBuffer->create()) { qDebug() << "failed to create m_vertexBuffer"; return false; }
@@ -83,6 +85,9 @@ public:
         m_drawingSampler.reset(rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
         if (!m_drawingSampler->create()) { qDebug() << "failed to create m_drawingSampler"; return false; }
 
+        m_canvasSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
+        if (!m_canvasSampler->create()) { qDebug() << "failed to create m_canvasSampler"; return false; }
+
         m_matricesSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
         if (!m_matricesSampler->create()) { qDebug() << "failed to create m_matricesSampler"; return false; }
 
@@ -92,6 +97,7 @@ public:
             QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_texIn.get(), m_drawingSampler.get()),
             QRhiShaderResourceBinding::uniformBuffer (2, QRhiShaderResourceBinding::FragmentStage, m_kernelParams.get()),
             QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texMatrices.get(), m_matricesSampler.get()),
+            QRhiShaderResourceBinding::sampledTexture(4, QRhiShaderResourceBinding::FragmentStage, m_texCanvas.get(), m_canvasSampler.get()),
         });
         if (!m_srb->create()) { qDebug() << "failed to create m_srb"; return false; }
 
@@ -114,10 +120,13 @@ public:
         return true;
     }
 
-    bool render(MDKPlayer *item) {
+    bool render(MDKPlayer *item, uint8_t *params, int paramsLen, uint8_t *matrices, int matricesLen, uint8_t *canvas, int canvasLen) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
+
+        if (matricesBuffer.size() < matricesLen) { matricesBuffer.resize(matricesLen); }
+        if (matricesLen > 0) memcpy(matricesBuffer.data(), matrices, matricesLen);
 
         const QSize size = item->textureSize();
         QRhiCommandBuffer *cb = context->currentFrameCommandBuffer();
@@ -129,20 +138,17 @@ public:
             m_initialUpdates = nullptr;
         }
 
-        if (item->qmlWindow()->rendererInterface()->graphicsApi() == QSGRendererInterface::Direct3D11Rhi) {
-            // Workaround for the synchronization issue
-            // Reading a dummy texture causes the outstanding draw operations to flush
-            if (!m_readbackResult) m_readbackResult.reset(new QRhiReadbackResult());
-            u->readBackTexture({ m_workaroundTexture.get() }, m_readbackResult.get());
-        }
-
         u->copyTexture(m_texIn.get(), item->rhiTexture(), {});
 
-        u->updateDynamicBuffer(m_kernelParams.get(), 0, kernel_params.size(), kernel_params.data());
+        u->updateDynamicBuffer(m_kernelParams.get(), 0, paramsLen, params);
 
-        QRhiTextureSubresourceUploadDescription desc1(matrices.data(), matrices.size() * sizeof(float));
-
+        QRhiTextureSubresourceUploadDescription desc1(matricesBuffer.data(), matricesBuffer.size());
         u->uploadTexture(m_texMatrices.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc1) }));
+
+        if (canvasLen > 0) {
+            QRhiTextureSubresourceUploadDescription desc2(canvas, canvasLen);
+            u->uploadTexture(m_texCanvas.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc2) }));
+        }
 
         QMatrix4x4 mvp = item->textureMatrix();
         mvp.scale(2.0f);
@@ -163,8 +169,7 @@ public:
         return true;
     }
 
-    std::vector<unsigned char> kernel_params;
-    std::vector<float> matrices;
+    std::vector<uint8_t> matricesBuffer;
 
     QShader getShader(const QString &name) {
         QFile f(name);
@@ -174,17 +179,18 @@ public:
     }
 
     QScopedPointer<QRhiTexture> m_texIn;
-    QScopedPointer<QRhiTexture> m_workaroundTexture;
     QScopedPointer<QRhiTexture> m_texMatrices;
+    QScopedPointer<QRhiTexture> m_texCanvas;
     QScopedPointer<QRhiBuffer> m_kernelParams;
 
     QSize m_outputSize;
-
-    MDKPlayerWrapper *m_player{nullptr};
+    QSize m_textureSize;
+    QString m_shaderPath;
 
     QScopedPointer<QRhiBuffer> m_vertexBuffer;
     QScopedPointer<QRhiBuffer> m_indexBuffer;
     QScopedPointer<QRhiBuffer> m_drawingUniform;
+    QScopedPointer<QRhiSampler> m_canvasSampler;
     QScopedPointer<QRhiSampler> m_drawingSampler;
     QScopedPointer<QRhiSampler> m_matricesSampler;
     QScopedPointer<QRhiShaderResourceBindings> m_srb;

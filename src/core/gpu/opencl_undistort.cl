@@ -35,11 +35,16 @@ typedef struct {
     float input_horizontal_stretch;  // 4
     float background_margin;         // 8
     float background_margin_feather; // 12
-    float reserved1;                 // 16
+    float canvas_scale;              // 16
     float reserved2;                 // 4
     float reserved3;                 // 8
     float2 translation2d;            // 16
     float4 translation3d;            // 16
+    int2 source_pos;                 // 8
+    int2 output_pos;                 // 16
+    float2 source_stretch;           // 8
+    float2 output_stretch;           // 16
+    float4 digital_lens_params;      // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -95,14 +100,53 @@ __constant float coeffs[256] = {
 };
 #endif
 
+__constant float4 colors[9] = {
+    (float4)(0.0f,   0.0f,   0.0f,     0.0f), // None
+    (float4)(255.0f, 0.0f,   0.0f,   255.0f), // Red
+    (float4)(0.0f,   255.0f, 0.0f,   255.0f), // Green
+    (float4)(0.0f,   0.0f,   255.0f, 255.0f), // Blue
+    (float4)(254.0f, 251.0f, 71.0f,  255.0f), // Yellow
+    (float4)(200.0f, 200.0f, 0.0f,   255.0f), // Yellow2
+    (float4)(255.0f, 0.0f,   255.0f, 255.0f), // Magenta
+    (float4)(0.0f,   128.0f, 255.0f, 255.0f), // Blue2
+    (float4)(0.0f,   200.0f, 200.0f, 255.0f)  // Blue3
+};
+__constant float alphas[4] = { 1.0f, 0.75f, 0.50f, 0.25f };
+void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, float scale, __global const uchar *drawing) {
+    int pos = (int)round(floor((float)y / scale) * (width / scale) + floor((float)x / scale));
+    uchar data = drawing[pos];
+    if (data > 0) {
+        uchar color = (data & 0xF8) >> 3;
+        uchar alpha = (data & 0x06) >> 1;
+        uchar stage = data & 1;
+        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9) {
+            float4 colorf4 = colors[color];
+            DATA_TYPEF colorf = *(DATA_TYPEF *)&colorf4;
+
+            float4 alphaf4 = (float4)alphas[alpha];
+            alphaf4.a = 1.0;
+            DATA_TYPEF alphaf = *(DATA_TYPEF *)&alphaf4;
+
+            *out_pix = DATA_CONVERT(colorf * alphaf + DATA_CONVERTF(*out_pix) * (1.0f - alphaf));
+        }
+    }
+}
+
 // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
 DATA_TYPEF remap_colorrange(DATA_TYPEF px, bool isY) {
     if (isY) { return 16.0f + (px * 0.85882352f); } // (235 - 16) / 255
     else     { return 16.0f + (px * 0.87843137f); } // (240 - 16) / 255
 }
 
-DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, DATA_TYPEF bg) {
+LENS_MODEL_FUNCTIONS;
+
+DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = params->flags & 1;
+
+    uv.x += params->source_pos.x;
+    uv.y += params->source_pos.y;
+    if (params->source_stretch.x > 0.0f) uv.x = (int)round((float)uv.x * params->source_stretch.x);
+    if (params->source_stretch.y > 0.0f) uv.y = (int)round((float)uv.y * params->source_stretch.y);
 
     uv -= S_OFFSET;
 
@@ -127,7 +171,9 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
             #pragma unroll
             for (int xp = 0; xp < INTERPOLATION; ++xp) {
                 if (sx + xp >= 0 && sx + xp < params->width) {
-                    DATA_TYPEF srcpx = DATA_CONVERTF(*(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp]);
+                    DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp];
+                    draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params->canvas_scale, drawing);
+                    DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
                     if (fix_range) {
                         srcpx = remap_colorrange(srcpx, PIXEL_BYTES == 1);
                     }
@@ -156,12 +202,10 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         if (params->r_limit > 0.0f && r > params->r_limit) {
             return (float2)(-99999.0f, -99999.0f);
         }
-        float2 uv = params->f * distort_point(pos, params->k) + params->c;
+        float2 uv = params->f * distort_point(pos, params) + params->c;
 
-        if (params->flags & 2) { // GoPro Superview
-            float2 size = (float2)(params->width, params->height);
-            uv = to_superview((uv / size) - 0.5f);
-            uv = (uv + 0.5f) * size;
+        if (params->flags & 2) { // Has digital lens
+            uv = digital_distort_point(uv, params);
         }
 
         if (params->input_horizontal_stretch > 0.001f) { uv.x /= params->input_horizontal_stretch; }
@@ -175,18 +219,25 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 // Adapted from OpenCV: initUndistortRectifyMap + remap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices) {
+__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices, __global const uchar *drawing) {
     int x = get_global_id(0);
     int y = get_global_id(1);
+    int buf_x = x;
+    int buf_y = y;
 
     __global KernelParams *params = (__global KernelParams *)params_buf;
+
+    x -= params->output_pos.x;
+    y -= params->output_pos.y;
+    if (params->output_stretch.x > 0.0f) x = (int)round((float)x * params->output_stretch.x);
+    if (params->output_stretch.y > 0.0f) y = (int)round((float)y * params->output_stretch.y);
 
     DATA_TYPEF bg = *(__global DATA_TYPEF *)&params->background;
 
     if (matrices == 0 || params->width < 1) return;
 
     if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
-        __global DATA_TYPE *out_pix = &dstptr[x * PIXEL_BYTES + y * params->output_stride];
+        __global DATA_TYPE *out_pix = &dstptr[buf_x * PIXEL_BYTES + buf_y * params->output_stride];
 
         if (params->flags & 4) { // Fill with background
             *out_pix = DATA_CONVERT(bg);
@@ -209,23 +260,25 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
         ///////////////////////////////////////////////////////////////////
         // Add lens distortion back
-        if (params->lens_correction_amount < 1.0) {
+        if (params->lens_correction_amount < 1.0f) {
             float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
             float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
             float2 out_f = (params->f / params->fov) / factor;
 
-            if (params->flags & 2) { // Re-add GoPro Superview
-                float2 out_c2 = out_c * 2.0f;
-                float2 pt2 = from_superview((out_pos / out_c2) - 0.5f);
-                pt2 = (pt2 + 0.5f) * out_c2;
-                out_pos = pt2 * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
-            }
+            float2 new_out_pos = out_pos;
 
-            out_pos = (out_pos - out_c) / out_f;
-            out_pos = undistort_point(out_pos, params->k, params->lens_correction_amount);
-            out_pos = out_f * out_pos + out_c;
+            if (params->flags & 2) { // Has digital lens
+                new_out_pos = digital_undistort_point(new_out_pos, params);
+            }
+            new_out_pos = (new_out_pos - out_c) / out_f;
+            new_out_pos = undistort_point(new_out_pos, params);
+            new_out_pos = out_f * new_out_pos + out_c;
+
+            out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
         }
         ///////////////////////////////////////////////////////////////////
+
+        DATA_TYPE final_pix;
 
         int idx = min(sy, params->matrix_count - 1) * 9;
         float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
@@ -258,16 +311,20 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                         pt2 *= (float2)(widthf, heightf);
                     }
 
-                    DATA_TYPEF c1 = sample_input_at(uv,  srcptr, params, bg);
-                    DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, bg);
-                    *out_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
+                    DATA_TYPEF c1 = sample_input_at(uv,  srcptr, params, drawing, bg);
+                    DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, drawing, bg);
+                    final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
+                    draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params->canvas_scale, drawing);
+                    *out_pix = final_pix;
                     return;
                 } break;
             }
 
-            *out_pix = DATA_CONVERT(sample_input_at(uv, srcptr, params, bg));
+            final_pix = DATA_CONVERT(sample_input_at(uv, srcptr, params, drawing, bg));
         } else {
-            *out_pix = DATA_CONVERT(bg);
+            final_pix = DATA_CONVERT(bg);
         }
+        draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params->canvas_scale, drawing);
+        *out_pix = final_pix;
     }
 }
