@@ -1,0 +1,60 @@
+{
+  "name": "GoPro_HERO11 Black_Wide_8by7",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO11 Black",
+  "lens_model": "Wide",
+  "calib_dimension":  { "w": 5312, "h": 4648 },
+  "orig_dimension":   { "w": 5312, "h": 4648 },
+  "output_dimension": { "w": 5312, "h": 2988 },
+  "num_images": 25,
+  "fps": 29.97,
+  "official": true,
+  "fisheye_params": {
+    "RMS_error": 0.9634211910573345,
+    "camera_matrix": [
+      [ 2357.117118952398, 0.0,                2676.846267472544 ],
+      [ 0.0,               2356.1435657849593, 2319.609149363389 ],
+      [ 0.0,               0.0,                1.0 ]
+    ],
+    "distortion_coeffs": [
+      0.03139553973504779,
+      0.05974110122697331,
+      -0.043366819910340776,
+      0.009924139209409393
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero11black-wide-5312x4648@29970-no-eis",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-18",
+  "compatible_settings": [
+    { "width": 3840, "height": 3360, "identifier": "gopro-hero11black-wide-3840x3360@59940-no-eis", "fps": 59.940 },
+    { "width": 3840, "height": 3360, "identifier": "gopro-hero11black-wide-3840x3360@59940-hseis",  "fps": 59.940, "crop": 0.918 },
+    { "width": 3840, "height": 3360, "identifier": "gopro-hero11black-wide-3840x3360@50000-no-eis", "fps": 50.000 },
+    { "width": 3840, "height": 3360, "identifier": "gopro-hero11black-wide-3840x3360@50000-hseis",  "fps": 50.000, "crop": 0.918 },
+    { "width": 5312, "height": 4648, "identifier": "gopro-hero11black-wide-5312x4648@29970-hseis",  "fps": 29.970, "crop": 0.918 },
+    { "width": 5312, "height": 4648, "identifier": "gopro-hero11black-wide-5312x4648@25000-no-eis", "fps": 25.000 },
+    { "width": 5312, "height": 4648, "identifier": "gopro-hero11black-wide-5312x4648@25000-hseis",  "fps": 25.000, "crop": 0.918 },
+    { "width": 5312, "height": 4648, "identifier": "gopro-hero11black-wide-5312x4648@23976-no-eis", "fps": 23.976 },
+    { "width": 5312, "height": 4648, "identifier": "gopro-hero11black-wide-5312x4648@23976-hseis",  "fps": 23.976, "crop": 0.918 },
+
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@50000-no-eis", "fps": 50.000, "digital_lens": "gopro_hyperview" },
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@59940-no-eis", "fps": 59.940, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@23976-no-eis", "fps": 23.976, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@25000-no-eis", "fps": 25.000, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@29970-no-eis", "fps": 23.976, "digital_lens": "gopro_hyperview" },
+
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@50000-hseis", "fps": 50.000, "crop": 0.928, "digital_lens": "gopro_hyperview" },
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@59940-hseis", "fps": 59.940, "crop": 0.928, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@23976-hseis", "fps": 23.976, "crop": 0.928, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@25000-hseis", "fps": 25.000, "crop": 0.928, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@29970-hseis", "fps": 23.976, "crop": 0.928, "digital_lens": "gopro_hyperview" },
+
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@50000-hsboost", "fps": 50.000, "crop": 0.745, "digital_lens": "gopro_hyperview" },
+    { "width": 3840, "height": 2160, "identifier": "gopro-hero11black-hyper-3840x2160@59940-hsboost", "fps": 59.940, "crop": 0.745, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@23976-hsboost", "fps": 23.976, "crop": 0.745, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@25000-hsboost", "fps": 25.000, "crop": 0.745, "digital_lens": "gopro_hyperview" },
+    { "width": 5312, "height": 2988, "identifier": "gopro-hero11black-hyper-5312x2988@29970-hsboost", "fps": 23.976, "crop": 0.745, "digital_lens": "gopro_hyperview" }
+  ]
+}

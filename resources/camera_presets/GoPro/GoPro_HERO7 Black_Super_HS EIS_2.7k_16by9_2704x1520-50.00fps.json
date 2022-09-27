@@ -73,6 +73,5 @@
   "calibrator_version": "1.0.1",
   "date": "2022-05-24",
   "compatible_settings": [],
-  "is_superview": true,
-  "distortion_model_id": 0
+  "digital_lens": "gopro_superview"
 }
