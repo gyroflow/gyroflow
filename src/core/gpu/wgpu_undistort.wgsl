@@ -34,7 +34,7 @@ struct KernelParams {
     output_pos:         vec2<i32>, // 16
     source_stretch:     vec2<f32>, // 8
     output_stretch:     vec2<f32>, // 16
-    digital_lens_params:vec2<f32>, // 16
+    digital_lens_params:vec4<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
