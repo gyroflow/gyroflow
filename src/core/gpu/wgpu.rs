@@ -106,8 +106,8 @@ impl WgpuWrapper {
                 label: None,
                 features: wgpu::Features::empty(),
                 limits: wgpu::Limits {
-                    max_storage_buffers_per_shader_stage: 8,
-                    max_storage_textures_per_shader_stage: 8,
+                    max_storage_buffers_per_shader_stage: 4,
+                    max_storage_textures_per_shader_stage: 4,
                     ..wgpu::Limits::default()
                 },
             }, None)).ok()?;
@@ -157,12 +157,28 @@ impl WgpuWrapper {
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
                 format: wgpu_format.0,
-                usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::TEXTURE_BINDING,
+            });
+
+            let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
+                    wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
+                    wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Texture { sample_type: wgpu::TextureSampleType::Float { filterable: true }, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false }, count: None },
+                    wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
+                    wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
+                ],
+                label: None,
+            });
+            let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: None,
+                bind_group_layouts: &[&bind_group_layout],
+                push_constant_ranges: &[],
             });
 
             let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: None,
-                layout: None,
+                layout: Some(&pipeline_layout),
                 vertex: wgpu::VertexState {
                     module: &shader,
                     entry_point: "undistort_vertex",
@@ -173,13 +189,14 @@ impl WgpuWrapper {
                     entry_point: "undistort_fragment",
                     targets: &[Some(wgpu::ColorTargetState {
                         format: wgpu_format.0,
-                        blend: None,
-                        write_mask: wgpu::ColorWrites::ALL,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::default(),
                     })],
                 }),
                 primitive: wgpu::PrimitiveState {
-                    topology: wgpu::PrimitiveTopology::TriangleList,
-                    ..Default::default()
+                    topology: wgpu::PrimitiveTopology::TriangleStrip,
+                    // strip_index_format: Some(wgpu::IndexFormat::Uint16),
+                    ..wgpu::PrimitiveState::default()
                 },
                 multiview: None,
                 depth_stencil: None,
@@ -188,7 +205,7 @@ impl WgpuWrapper {
 
             let view = in_pixels.create_view(&wgpu::TextureViewDescriptor::default());
 
-            let bind_group_layout = render_pipeline.get_bind_group_layout(0);
+            //let bind_group_layout = render_pipeline.get_bind_group_layout(0);
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: None,
                 layout: &bind_group_layout,
@@ -246,6 +263,7 @@ impl WgpuWrapper {
                     },
                 );
             },
+            #[cfg(feature = "use-opencl")]
             BufferSource::OpenCL { .. } => {
                 return false;
             },

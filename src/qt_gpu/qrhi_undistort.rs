@@ -51,7 +51,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
         let canvas_size = undist.drawing.get_size();
         let canvas_size = QSize { width: canvas_size.0 as u32, height: canvas_size.1 as u32 };
 
-        let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", timestamp as "double", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
+        let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
             if (!mdkplayer || !mdkplayer->mdkplayer) return false;
 
             if (!rhiUndistortion || rhiUndistortion->outSize() != output_size || rhiUndistortion->texSize() != QSize(width, height) || rhiUndistortion->shaderPath() != shader_path) {

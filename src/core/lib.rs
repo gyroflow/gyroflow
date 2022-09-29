@@ -461,6 +461,10 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut BufferDescription) -> Option<stabilization::ProcessedInfo> {
+        if let gpu::BufferSource::Cpu { input, output } = &buffers.buffers {
+            if input.is_empty() || output.is_empty() { return None; }
+        }
+
         if let Some(scale) = self.params.read().fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }

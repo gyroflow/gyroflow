@@ -70,8 +70,10 @@ fn main() {
     let qt_library_path = env::var("DEP_QT_LIBRARY_PATH").unwrap();
     let qt_version      = env::var("DEP_QT_VERSION").unwrap();
 
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
+
     if let Ok(out_dir) = env::var("OUT_DIR") {
-        if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") {
+        if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") || target_os == "android" || target_os == "ios" {
             compile_qml("src/ui/", &qt_include_path, &qt_library_path);
             println!("cargo:rustc-cfg=compiled_qml");
         }
@@ -83,7 +85,7 @@ fn main() {
         config.flag(f);
     }
 
-    if std::env::var("CARGO_CFG_TARGET_OS").unwrap() == "ios" {
+    if target_os == "ios" {
         println!("cargo:rustc-link-arg={}/objects-Release/Quick_resources_2/.rcc/qrc_scenegraph_shaders.cpp.o", qt_library_path);
         println!("cargo:rustc-link-arg={}/objects-Release/QuickShapesPrivate_resources_2/.rcc/qrc_qtquickshapes.cpp.o", qt_library_path);
         println!("cargo:rustc-link-lib=z");
@@ -204,7 +206,7 @@ fn main() {
         for x in libs {
             println!("cargo:rustc-link-lib=static:+whole-archive={}", x);
         }
-    } else if std::env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
+    } else if target_os == "macos" {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");
         println!("cargo:rustc-link-lib=xml2");
@@ -246,7 +248,6 @@ fn main() {
     private_include("QtQuick");
     private_include("QtQml");
 
-    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
     match target_os.as_str() {
         "android" => {
             println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());

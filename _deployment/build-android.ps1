@@ -1,13 +1,14 @@
 $PROJECT_DIR="$PSScriptRoot\.."
 
-$QT_LIBS = "$PROJECT_DIR\ext\6.3.2\android_arm64_v8a\lib"
-$Env:Path += ";$PROJECT_DIR\ext\6.3.2\android_arm64_v8a\bin"
-$Env:Path += ";$PROJECT_DIR\ext\6.3.2\mingw_64\bin\"
+$BUILD_PROFILE = "deploy"
+$QT_LIBS = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\lib"
+$Env:Path += ";$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin"
+$Env:Path += ";$PROJECT_DIR\ext\6.3.1\mingw_64\bin\"
 $Env:Path += ";$PROJECT_DIR\ext\llvm-13-win64\bin"
-$Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk-bundle"
+$Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk\android-ndk-r23c"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
-$Env:QMAKE = "$PROJECT_DIR\ext\6.3.2\android_arm64_v8a\bin\qmake.bat"
+$Env:QMAKE = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin\qmake.bat"
 $Env:FFMPEG_DIR = "$PROJECT_DIR\ext\ffmpeg-5.1-android-gpl-lite"
 $Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-13-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"
@@ -28,14 +29,20 @@ Copy-Item -Path "$QT_LIBS\libQt6Quick_arm64-v8a.so"          -Destination "$QT_L
 Copy-Item -Path "$QT_LIBS\libQt6Qml_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Qml.so"            -ErrorAction SilentlyContinue
 Copy-Item -Path "$QT_LIBS\libQt6QuickControls2_arm64-v8a.so" -Destination "$QT_LIBS\libQt6QuickControls2.so" -ErrorAction SilentlyContinue
 
-cargo apk build --release
+# Replace [[bin]] with [lib]
+[System.IO.File]::WriteAllText("$PROJECT_DIR\Cargo.toml", [System.IO.File]::ReadAllText("$PROJECT_DIR\Cargo.toml").Replace("[[bin]]", "[lib]`ncrate-type = [""cdylib""]"))
+
+cargo apk build --profile $BUILD_PROFILE
+
+# Restore [[bin]]
+[System.IO.File]::WriteAllText("$PROJECT_DIR\Cargo.toml", [System.IO.File]::ReadAllText("$PROJECT_DIR\Cargo.toml").Replace("[lib]`ncrate-type = [""cdylib""]", "[[bin]]"))
 
 mkdir "$PROJECT_DIR\target\android-build" -ErrorAction SilentlyContinue
 mkdir "$PROJECT_DIR\target\android-build\libs" -ErrorAction SilentlyContinue
-Copy-Item -Path "$PROJECT_DIR\target\release\apk\lib\*" -Destination "$PROJECT_DIR\target\android-build\libs\" -Recurse -Force
+Copy-Item -Path "$PROJECT_DIR\target\$BUILD_PROFILE\apk\lib\*" -Destination "$PROJECT_DIR\target\android-build\libs\" -Recurse -Force
 Copy-Item -Path "$PROJECT_DIR\_deployment\android\src" -Destination "$PROJECT_DIR\target\android-build\" -Recurse -Force
-Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\release\libffmpeg.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
-Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\release\libqtav-mediacodec.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
+# Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\$BUILD_PROFILE\libffmpeg.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
+# Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\$BUILD_PROFILE\libqtav-mediacodec.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
 Move-Item -Path "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
 $qtlibs = @(
@@ -99,7 +106,7 @@ foreach ($x in $qtlibs) {
 $androiddeploy = @"
 {
    "description": "",
-   "qt": "$PROJECT_DIR_UNIX/ext/6.3.2/android_arm64_v8a",
+   "qt": "$PROJECT_DIR_UNIX/ext/6.3.1/android_arm64_v8a",
    "sdk": "$SDK_REPLACED",
    "sdkBuildToolsRevision": "30.0.3",
    "ndk": "$NDK_REPLACED",
@@ -110,8 +117,8 @@ $androiddeploy = @"
    "android-min-sdk-version": "23",
    "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
    "android-target-sdk-version": "29",
-   "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/6.3.2/mingw_64/bin/qmlimportscanner",
-   "rcc-binary": "$PROJECT_DIR_UNIX/ext/6.3.2/mingw_64/bin/rcc",
+   "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/6.3.1/mingw_64/bin/qmlimportscanner",
+   "rcc-binary": "$PROJECT_DIR_UNIX/ext/6.3.1/mingw_64/bin/rcc",
    "qml-root-path": "$PROJECT_DIR_UNIX/src",
    "stdcpp-path": "$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib",
    "qrcFiles": "",

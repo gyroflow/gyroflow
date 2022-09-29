@@ -193,10 +193,10 @@ pub fn init_logging() {
 
 pub fn install_crash_handler() -> std::io::Result<()> {
     let cur_dir = std::env::current_dir()?;
-    let os_str = cur_dir.as_os_str();
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
+        let os_str = cur_dir.as_os_str();
         let path: Vec<breakpad_sys::PathChar> = {
             #[cfg(windows)]
             {
@@ -265,7 +265,7 @@ pub fn android_log(v: String) {
     let tag = CStr::from_bytes_with_nul(b"Gyroflow\0").unwrap();
     if let Ok(msg) = CString::new(v) {
         unsafe {
-            ndk_sys::__android_log_write(ndk_sys::android_LogPriority_ANDROID_LOG_DEBUG as std::os::raw::c_int, tag.as_ptr(), msg.as_ptr());
+            ndk_sys::__android_log_write(ndk_sys::android_LogPriority::ANDROID_LOG_DEBUG.0 as std::os::raw::c_int, tag.as_ptr(), msg.as_ptr());
         }
     }
 }

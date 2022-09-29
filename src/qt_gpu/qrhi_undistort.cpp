@@ -13,8 +13,8 @@ class MDKPlayer {
 public:
     QSGDefaultRenderContext *rhiContext();
     QRhiTexture *rhiTexture();
-    QRhiTextureRenderTarget *rhiRenderTarget();
-    QRhiRenderPassDescriptor *rhiRenderPassDescriptor();
+    // QRhiTextureRenderTarget *rhiRenderTarget();
+    // QRhiRenderPassDescriptor *rhiRenderPassDescriptor();
     QQuickWindow *qmlWindow();
     QQuickItem *qmlItem();
     QSize textureSize();
@@ -55,18 +55,27 @@ public:
 
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
-        m_texIn.reset(rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::UsedAsTransferSource));
+        m_texIn.reset(rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
         if (!m_texIn->create()) { qDebug() << "failed to create m_texIn"; return false; }
+
+        m_rt.reset(rhi->newTextureRenderTarget({ QRhiColorAttachment(m_texIn.get()) }));
+        if (!m_rt) { qDebug() << "failed to get new m_rt"; return false; }
+
+        m_rtRp.reset(m_rt->newCompatibleRenderPassDescriptor());
+        if (!m_rtRp) { qDebug() << "failed to create m_rtRp"; return false; }
+
+        m_rt->setRenderPassDescriptor(m_rtRp.get());
+        if (!m_rt->create()) { qDebug() << "failed to create m_rt"; return false; }
 
         m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
         if (!m_kernelParams->create()) { qDebug() << "failed to create m_kernelParams"; return false; }
 
-        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::UsedAsTransferSource));
+        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::Flags()));
         if (!m_texMatrices->create()) { qDebug() << "failed to create m_texMatrices"; return false; }
 
         matricesBuffer.resize(textureSize.height() * 9 * sizeof(float));
 
-        m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::UsedAsTransferSource));
+        m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
         if (!m_texCanvas->create()) { qDebug() << "failed to create m_texCanvas"; return false; }
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
@@ -94,7 +103,7 @@ public:
         m_srb.reset(rhi->newShaderResourceBindings());
         m_srb->setBindings({
             QRhiShaderResourceBinding::uniformBuffer (0, QRhiShaderResourceBinding::FragmentStage | QRhiShaderResourceBinding::VertexStage, m_drawingUniform.get()),
-            QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_texIn.get(), m_drawingSampler.get()),
+            QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, item->rhiTexture(), m_drawingSampler.get()),
             QRhiShaderResourceBinding::uniformBuffer (2, QRhiShaderResourceBinding::FragmentStage, m_kernelParams.get()),
             QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texMatrices.get(), m_matricesSampler.get()),
             QRhiShaderResourceBinding::sampledTexture(4, QRhiShaderResourceBinding::FragmentStage, m_texCanvas.get(), m_canvasSampler.get()),
@@ -114,7 +123,7 @@ public:
         });
         m_pipeline->setVertexInputLayout(inputLayout);
         m_pipeline->setShaderResourceBindings(m_srb.get());
-        m_pipeline->setRenderPassDescriptor(item->rhiRenderPassDescriptor());
+        m_pipeline->setRenderPassDescriptor(m_rtRp.get());
         if (!m_pipeline->create()) { qDebug() << "failed to create m_pipeline"; return false; }
 
         return true;
@@ -138,8 +147,6 @@ public:
             m_initialUpdates = nullptr;
         }
 
-        u->copyTexture(m_texIn.get(), item->rhiTexture(), {});
-
         u->updateDynamicBuffer(m_kernelParams.get(), 0, paramsLen, params);
 
         QRhiTextureSubresourceUploadDescription desc1(matricesBuffer.data(), matricesBuffer.size());
@@ -154,10 +161,7 @@ public:
         mvp.scale(2.0f);
         u->updateDynamicBuffer(m_drawingUniform.get(), 0, 64, mvp.constData());
 
-        cb->resourceUpdate(u);
-        u = rhi->nextResourceUpdateBatch();
-
-        cb->beginPass(item->rhiRenderTarget(), QColor(Qt::black), { 1.0f, 0 }, u);
+        cb->beginPass(m_rt.get(), QColor(Qt::black), { 1.0f, 0 }, u);
         cb->setGraphicsPipeline(m_pipeline.get());
         cb->setViewport({ 0, 0, float(size.width()), float(size.height()) });
         cb->setShaderResources();
@@ -165,6 +169,10 @@ public:
         cb->setVertexInput(0, 1, &vbufBinding, m_indexBuffer.get(), 0, QRhiCommandBuffer::IndexUInt16);
         cb->drawIndexed(6);
         cb->endPass();
+
+        u = rhi->nextResourceUpdateBatch();
+        u->copyTexture(item->rhiTexture(), m_texIn.get(), {});
+        cb->resourceUpdate(u);
 
         return true;
     }
@@ -195,6 +203,9 @@ public:
     QScopedPointer<QRhiSampler> m_matricesSampler;
     QScopedPointer<QRhiShaderResourceBindings> m_srb;
     QScopedPointer<QRhiGraphicsPipeline> m_pipeline;
+
+    QScopedPointer<QRhiTextureRenderTarget> m_rt;
+    QScopedPointer<QRhiRenderPassDescriptor> m_rtRp;
 
     QScopedPointer<QRhiReadbackResult> m_readbackResult;
 

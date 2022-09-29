@@ -115,7 +115,8 @@ fn entry() {
     let rqpinned = unsafe { QObjectPinned::new(&rq) };
 
     let mut engine = QmlEngine::new();
-    let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
+    let mut dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
+    if cfg!(target_os = "android") { dpi *= 0.8; }
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(util::get_version()).into());
     engine.set_property("graphics_api".into(), util::qt_graphics_api().into());

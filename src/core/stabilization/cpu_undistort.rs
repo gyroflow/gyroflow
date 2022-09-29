@@ -151,7 +151,7 @@ impl<T: PixelType> Stabilization<T> {
             let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
 
             let mut sum = Vector4::from_element(0.0);
-            let mut src_index = (sy * params.stride + sx * params.bytes_per_pixel) as isize;
+            let mut src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
 
             for yp in 0..I {
                 if sy + yp >= 0 && sy + yp < params.height {

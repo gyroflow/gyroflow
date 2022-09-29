@@ -102,8 +102,8 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let offset = offsets[params.interpolation >> 2u];
 
     var uv = uv + vec2<f32>(params.source_pos);
-    if (params.source_stretch.x > 0.0) { uv.x = uv.x * f32(params.source_stretch.x); }
-    if (params.source_stretch.y > 0.0) { uv.y = uv.y * f32(params.source_stretch.y); }
+    if (params.source_stretch.x > 0.0) { uv.x = uv.x * params.source_stretch.x; }
+    if (params.source_stretch.y > 0.0) { uv.y = uv.y * params.source_stretch.y; }
 
     uv = uv - offset;
 
@@ -180,15 +180,15 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
 @fragment
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
-    let bg = vec4<SCALAR>(SCALAR(params.background[0] / bg_scaler), SCALAR(params.background[1] / bg_scaler), SCALAR(params.background[2] / bg_scaler), SCALAR(params.background[3] / bg_scaler));
+    let bg = vec4<SCALAR>(params.background.x / bg_scaler, params.background.y / bg_scaler, params.background.z / bg_scaler, params.background.w / bg_scaler);
 
     if (bool(params.flags & 4)) { // Fill with background
         return bg;
     }
 
     var out_pos = position.xy - vec2<f32>(params.output_pos);
-    if (params.output_stretch.x > 0.0) { out_pos.x = out_pos.x * f32(params.output_stretch.x); }
-    if (params.output_stretch.y > 0.0) { out_pos.y = out_pos.y * f32(params.output_stretch.y); }
+    if (params.output_stretch.x > 0.0) { out_pos.x = out_pos.x * params.output_stretch.x; }
+    if (params.output_stretch.y > 0.0) { out_pos.y = out_pos.y * params.output_stretch.y; }
 
     let p = out_pos;
     out_pos = out_pos + params.translation2d;

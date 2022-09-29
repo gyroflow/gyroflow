@@ -251,10 +251,8 @@ The project also supports UI live reload, it's a super quick way of working with
 2. Install Qt for Android: `aqt install-qt windows android 6.3.2 android_arm64_v8a` and `aqt install-qt windows desktop 6.3.2 win64_mingw`
 3. Install `cargo-apk`: `cargo install --git https://github.com/rust-windowing/android-ndk-rs.git cargo-apk`
 4. Add a Rust target: `rustup target add aarch64-linux-android`
-5. Update `Cargo.toml` to comment out `[[[bin]]` section and uncomment `[lib]` section
-6. Patch `C:\Users\you\.cargo\registry\src\github.com-1ecc6299db9ec823\opencv-0.61.3\build.rs`: Change `if cfg!(target_env = "msvc")` to `if std::env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc"`
-7. Update paths in `_deployment/build-android.ps1`
-8. Run `.\_deployment\build-android.ps1` in Powershell
+5. Update paths in `_deployment/build-android.ps1`
+6. Run `.\_deployment\build-android.ps1` in Powershell
 
 ### Building for iOS
 1. iOS is not well supported yet, work in progress

@@ -269,7 +269,7 @@ impl OclWrapper {
             let flags = MemFlags::new().read_only().host_write_only();
 
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
-            let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len).build()?;
+            let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
 
             let mut builder = Kernel::builder();

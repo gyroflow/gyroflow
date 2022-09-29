@@ -57,6 +57,7 @@ impl<'a> BufferSource<'a> {
         let mut hasher = crc32fast::Hasher::new();
         match &self {
             BufferSource::Cpu { .. } => { }
+            #[cfg(feature = "use-opencl")]
             BufferSource::OpenCL { queue, .. } => { hasher.write_u64(*queue as u64); }
             BufferSource::OpenGL { context, .. } => { hasher.write_u64(*context as u64); }
             BufferSource::DirectX { device, device_context, .. } => {
