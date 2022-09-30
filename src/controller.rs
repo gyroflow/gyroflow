@@ -799,7 +799,6 @@ impl Controller {
                 (0, 0, 0, std::ptr::null_mut())
             }));
             vid.readyForProcessing(Box::new(|| -> bool { false }));
-            qrhi_undistort::cleanup();
         }
     }
     fn init_player(&self, player: QJSValue) {

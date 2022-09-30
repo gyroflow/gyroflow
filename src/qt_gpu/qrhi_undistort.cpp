@@ -9,6 +9,8 @@
 #include <private/qsgdefaultrendercontext_p.h>
 #include <private/qshader_p.h>
 
+#define qDebug2(func) QMessageLogger(__FILE__, __LINE__, func).debug(QLoggingCategory("Qt RHI"))
+
 class MDKPlayer {
 public:
     QSGDefaultRenderContext *rhiContext();
@@ -60,49 +62,49 @@ public:
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
         m_texIn.reset(rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
-        if (!m_texIn->create()) { qDebug() << "failed to create m_texIn"; return false; }
+        if (!m_texIn->create()) { qDebug2("init") << "failed to create m_texIn"; return false; }
 
         m_rt.reset(rhi->newTextureRenderTarget({ QRhiColorAttachment(m_texIn.get()) }));
-        if (!m_rt) { qDebug() << "failed to get new m_rt"; return false; }
+        if (!m_rt) { qDebug2("init") << "failed to get new m_rt"; return false; }
 
         m_rtRp.reset(m_rt->newCompatibleRenderPassDescriptor());
-        if (!m_rtRp) { qDebug() << "failed to create m_rtRp"; return false; }
+        if (!m_rtRp) { qDebug2("init") << "failed to create m_rtRp"; return false; }
 
         m_rt->setRenderPassDescriptor(m_rtRp.get());
-        if (!m_rt->create()) { qDebug() << "failed to create m_rt"; return false; }
+        if (!m_rt->create()) { qDebug2("init") << "failed to create m_rt"; return false; }
 
         m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
-        if (!m_kernelParams->create()) { qDebug() << "failed to create m_kernelParams"; return false; }
+        if (!m_kernelParams->create()) { qDebug2("init") << "failed to create m_kernelParams"; return false; }
 
         m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::Flags()));
-        if (!m_texMatrices->create()) { qDebug() << "failed to create m_texMatrices"; return false; }
+        if (!m_texMatrices->create()) { qDebug2("init") << "failed to create m_texMatrices"; return false; }
 
         matricesBuffer.resize(textureSize.height() * 9 * sizeof(float));
 
         m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
-        if (!m_texCanvas->create()) { qDebug() << "failed to create m_texCanvas"; return false; }
+        if (!m_texCanvas->create()) { qDebug2("init") << "failed to create m_texCanvas"; return false; }
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
-        if (!m_vertexBuffer->create()) { qDebug() << "failed to create m_vertexBuffer"; return false; }
+        if (!m_vertexBuffer->create()) { qDebug2("init") << "failed to create m_vertexBuffer"; return false; }
         m_initialUpdates->uploadStaticBuffer(m_vertexBuffer.get(), quadVertexData);
 
         m_indexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::IndexBuffer, sizeof(quadIndexData)));
-        if (!m_indexBuffer->create()) { qDebug() << "failed to create m_indexBuffer"; return false; }
+        if (!m_indexBuffer->create()) { qDebug2("init") << "failed to create m_indexBuffer"; return false; }
         m_initialUpdates->uploadStaticBuffer(m_indexBuffer.get(), quadIndexData);
 
         m_drawingUniform.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, 64 + 4));
-        if (!m_drawingUniform->create()) { qDebug() << "failed to create m_drawingUniform"; return false; }
+        if (!m_drawingUniform->create()) { qDebug2("init") << "failed to create m_drawingUniform"; return false; }
         qint32 flip = rhi->isYUpInFramebuffer();
         m_initialUpdates->updateDynamicBuffer(m_drawingUniform.get(), 64, 4, &flip);
 
         m_drawingSampler.reset(rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
-        if (!m_drawingSampler->create()) { qDebug() << "failed to create m_drawingSampler"; return false; }
+        if (!m_drawingSampler->create()) { qDebug2("init") << "failed to create m_drawingSampler"; return false; }
 
         m_canvasSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
-        if (!m_canvasSampler->create()) { qDebug() << "failed to create m_canvasSampler"; return false; }
+        if (!m_canvasSampler->create()) { qDebug2("init") << "failed to create m_canvasSampler"; return false; }
 
         m_matricesSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
-        if (!m_matricesSampler->create()) { qDebug() << "failed to create m_matricesSampler"; return false; }
+        if (!m_matricesSampler->create()) { qDebug2("init") << "failed to create m_matricesSampler"; return false; }
 
         m_srb.reset(rhi->newShaderResourceBindings());
         m_srb->setBindings({
@@ -112,7 +114,7 @@ public:
             QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texMatrices.get(), m_matricesSampler.get()),
             QRhiShaderResourceBinding::sampledTexture(4, QRhiShaderResourceBinding::FragmentStage, m_texCanvas.get(), m_canvasSampler.get()),
         });
-        if (!m_srb->create()) { qDebug() << "failed to create m_srb"; return false; }
+        if (!m_srb->create()) { qDebug2("init") << "failed to create m_srb"; return false; }
 
         m_pipeline.reset(rhi->newGraphicsPipeline());
         m_pipeline->setShaderStages({
@@ -128,7 +130,7 @@ public:
         m_pipeline->setVertexInputLayout(inputLayout);
         m_pipeline->setShaderResourceBindings(m_srb.get());
         m_pipeline->setRenderPassDescriptor(m_rtRp.get());
-        if (!m_pipeline->create()) { qDebug() << "failed to create m_pipeline"; return false; }
+        if (!m_pipeline->create()) { qDebug2("init") << "failed to create m_pipeline"; return false; }
 
         return true;
     }

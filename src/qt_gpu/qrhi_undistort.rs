@@ -53,7 +53,9 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
         let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
             if (!mdkplayer || !mdkplayer->mdkplayer) return false;
 
-            if (!QFile::exists(shader_path)) { qDebug() << shader_path << "doesn't exist"; return false; }
+            if (!QFile::exists(shader_path)) { qDebug2("render") << shader_path << "doesn't exist"; return false; }
+
+            if (output_size.width() < 4 || output_size.height() < 4) return false;
 
             auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
 
@@ -61,10 +63,10 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
                 delete rhiUndistortion;
                 rhiUndistortion = new QtRHIUndistort();
                 if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, canvas_size)) {
-                    qDebug() << "failed to init rhi undist";
+                    qDebug2("render") << "Failed to initialize";
                     return false;
                 }
-                qDebug() << "Qt RHI initialized";
+                qDebug2("render") << "Initialized" << QSize(width, height) << "->" << output_size << shader_path << rhiUndistortion;
                 mdkplayer->mdkplayer->setUserData(static_cast<void *>(rhiUndistortion));
                 mdkplayer->mdkplayer->setUserDataDestructor([](void *ptr) {
                     delete static_cast<QtRHIUndistort *>(ptr);
@@ -82,8 +84,4 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
         }
     }
     None
-}
-
-pub fn cleanup() {
-    // cpp!(unsafe [] { rhiUndistortion.reset(); });
 }

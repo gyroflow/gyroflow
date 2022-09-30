@@ -184,6 +184,7 @@ MenuItem {
                     calibratorWnd = Qt.createComponent("../Calibrator.qml").createObject(main_window)
                     calibratorWnd.show();
                     calibratorWnd.closing.connect(function(e) {
+                        calibratorWnd.destroy();
                         calibratorWnd = null;
                     })
                 }
