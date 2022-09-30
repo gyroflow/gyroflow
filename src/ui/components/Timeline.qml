@@ -604,7 +604,7 @@ Item {
         }
 
         Repeater {
-            model: controller.offsets_model;
+            model: controller? controller.offsets_model : [];
 
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;
@@ -636,7 +636,7 @@ Item {
         }
         Repeater {
             visible: isCalibrator;
-            model: isCalibrator? controller.calib_model : [];
+            model: isCalibrator && controller? controller.calib_model : [];
 
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;

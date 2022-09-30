@@ -19,6 +19,10 @@ public:
     QQuickItem *qmlItem();
     QSize textureSize();
     QMatrix4x4 textureMatrix();
+
+    void *userData() const;
+    void setUserData(void *);
+    void setUserDataDestructor(std::function<void(void *)> &&cb);
 };
 class MDKPlayerWrapper {
 public:

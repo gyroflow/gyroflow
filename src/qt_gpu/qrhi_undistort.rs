@@ -11,7 +11,6 @@ use qmetaobject::{ QSize, QString };
 
 cpp! {{
     #include "src/qt_gpu/qrhi_undistort.cpp"
-    static std::unique_ptr<QtRHIUndistort> rhiUndistortion;
 }}
 
 pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager<RGBA8>>) -> Option<ProcessedInfo> {
@@ -54,14 +53,22 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
         let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
             if (!mdkplayer || !mdkplayer->mdkplayer) return false;
 
+            if (!QFile::exists(shader_path)) { qDebug() << shader_path << "doesn't exist"; return false; }
+
+            auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
+
             if (!rhiUndistortion || rhiUndistortion->outSize() != output_size || rhiUndistortion->texSize() != QSize(width, height) || rhiUndistortion->shaderPath() != shader_path) {
-                rhiUndistortion.reset();
-                rhiUndistortion = std::make_unique<QtRHIUndistort>();
+                delete rhiUndistortion;
+                rhiUndistortion = new QtRHIUndistort();
                 if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, canvas_size)) {
                     qDebug() << "failed to init rhi undist";
                     return false;
                 }
                 qDebug() << "Qt RHI initialized";
+                mdkplayer->mdkplayer->setUserData(static_cast<void *>(rhiUndistortion));
+                mdkplayer->mdkplayer->setUserDataDestructor([](void *ptr) {
+                    delete static_cast<QtRHIUndistort *>(ptr);
+                });
             }
             if (!rhiUndistortion) return false;
 
@@ -78,5 +85,5 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
 }
 
 pub fn cleanup() {
-    cpp!(unsafe [] { rhiUndistortion.reset(); });
+    // cpp!(unsafe [] { rhiUndistortion.reset(); });
 }

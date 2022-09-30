@@ -43,7 +43,7 @@ rustfft = "6.0.1"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "822150a", default-features = false }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "72f2f86" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }

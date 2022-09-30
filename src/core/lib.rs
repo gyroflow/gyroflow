@@ -515,10 +515,10 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
 
     pub fn set_digital_lens_name(&self, v: String) {
-        self.lens.write().digital_lens = Some(v.clone());
+        self.lens.write().digital_lens =  if !v.is_empty() { Some(v.clone()) } else { None };
         #[cfg(feature = "opencv")]
         if let Some(ref mut calib) = *self.lens_calibrator.write() {
-            calib.digital_lens = Some(v);
+            calib.digital_lens = if !v.is_empty() { Some(v) } else { None };
         }
         self.invalidate_zooming();
     }
