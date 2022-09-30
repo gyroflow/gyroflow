@@ -14,6 +14,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     config.include(&format!("{}/QtQml", qt_include_path));
     if cfg!(target_os = "macos") {
         config.include(format!("{}/QtCore.framework/Headers/", qt_library_path));
+        config.include(format!("{}/QtQml.framework/Headers/", qt_library_path));
     }
     for f in std::env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
