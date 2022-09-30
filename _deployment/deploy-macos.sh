@@ -2,7 +2,7 @@
 
 : "${PROJECT_DIR:=$(cd "$(dirname "$0")"; cd .. ; pwd -P)}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
-: "${QT_DIR:=$PROJECT_DIR/ext/6.3.2/macos}"
+: "${QT_DIR:=$PROJECT_DIR/ext/6.4.0/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-5.1-macOS-gpl-lite}"
 
@@ -11,12 +11,12 @@ rm -rf "$PROJECT_DIR/_deployment/_binaries/mac"
 if [ "$1" == "build-universal" ] || [ "$1" == "deploy-universal" ]; then
     pushd $PROJECT_DIR
 
-    export PATH="$PROJECT_DIR/ext/6.3.2/macos/bin:$PATH"
+    export PATH="$PROJECT_DIR/ext/6.4.0/macos/bin:$PATH"
     export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
 
     #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
     export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
-    #export LD_LIBRARY_PATH="$PROJECT_DIR/ext/6.3.2/macos/lib"
+    #export LD_LIBRARY_PATH="$PROJECT_DIR/ext/6.4.0/macos/lib"
     export MACOSX_DEPLOYMENT_TARGET="10.11"
 
     export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64

@@ -15,7 +15,7 @@ export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-$ARCH
 export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/lib,$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/lib/manual-link/opencv4_thirdparty
 export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/$ARCH_VCPKG/include/
 
-export PATH="$PROJECT_DIR/ext/6.3.2/macos/bin:$PATH"
+export PATH="$PROJECT_DIR/ext/6.4.0/macos/bin:$PATH"
 
 #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
 export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
