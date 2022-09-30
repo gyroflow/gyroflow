@@ -1689,7 +1689,7 @@ impl Controller {
             return;
         }
         let p = std::path::Path::new(file_list.first().unwrap());
-        let output_file = p.with_file_name(format!("{}_joined.mp4", p.file_name().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
+        let output_file = p.with_file_name(format!("{}_joined.{}", p.file_stem().unwrap().to_str().unwrap(), p.extension().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
         let out = output_file.clone();
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string): (f64, String)| {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
