@@ -35,9 +35,9 @@ Item {
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
 
-    function redrawChart() { chart.update(); keyframes.update(); }
+    function redrawChart() { chart.update(); keyframes.item.update(); }
     function getChart(): TimelineGyroChart { return chart; }
-    function getKeyframesView(): TimelineKeyframesView { return keyframes; }
+    function getKeyframesView(): TimelineKeyframesView { return keyframes.item; }
 
     function getTimestampUs(): real {
         return vid.timestamp * 1000;
@@ -87,7 +87,7 @@ Item {
 
     function updateDurations() {
         chart.setDurationMs(controller.get_scaled_duration_ms());
-        keyframes.setDurationMs(controller.get_org_duration_ms());
+        keyframes.item.setDurationMs(controller.get_org_duration_ms());
         root.durationMs    = controller.get_scaled_duration_ms();
         root.orgDurationMs = controller.get_org_duration_ms();
         root.scaledFps     = controller.get_scaled_fps();
@@ -97,14 +97,14 @@ Item {
     }
 
     function jumpToNextKeyframe(typ: string) {
-        const kf = keyframes.nextKeyframe(typ);
+        const kf = keyframes.item.nextKeyframe(typ);
         if (kf) {
             const [keyframe, timestamp, name, value] = kf.split(":", 4);
             vid.setTimestamp(timestamp / 1000);
         }
     }
     function jumpToPrevKeyframe(typ: string) {
-        const kf = keyframes.prevKeyframe(typ);
+        const kf = keyframes.item.prevKeyframe(typ);
         if (kf) {
             const [keyframe, timestamp, name, value] = kf.split(":", 4);
             vid.setTimestamp(timestamp / 1000);
@@ -193,101 +193,108 @@ Item {
                     a7.checked = chart.getAxisVisible(7);
                 }
             }
-            TimelineKeyframesView {
-                id: keyframes;
-                videoTimestamp: vid.timestamp;
-                visibleAreaLeft: root.visibleAreaLeft;
-                visibleAreaRight: root.visibleAreaRight;
-                anchors.fill: parent;
-                anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
-                anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
-                function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
-                    const pt = ma.mapToItem(keyframes, x, y);
-                    const kf = keyframes.keyframeAtXY(pt.x, pt.y);
-                    if (kf) {
-                        const [keyframe, timestamp, name, value] = kf.split(":", 4);
-                        if (pressed && (pressedButtons & Qt.RightButton)) {
-                            keyframeContextMenu.pressedKeyframe = keyframe;
-                            keyframeContextMenu.pressedKeyframeTs = timestamp;
-                            keyframeContextMenu.updateEasingMenu();
-                            keyframeContextMenu.popup();
-                            return true;
-                        }
-                        if (pressed && (pressedButtons & Qt.LeftButton)) {
-                            vid.setTimestamp(timestamp / 1000);
-                            return true;
-                        }
-                        ma.cursorShape = Qt.PointingHandCursor;
-                        if (!kftt.visible) {
-                            kftt.x       = pt.x + 10 * dpiScale;
-                            kftt.offsetY = pt.y + 10 * dpiScale + kftt.height;
-                            kftt.text = qsTr(name) + " - " + value;
-                            kftt.visible = true;
-                        }
-                    } else {
-                        ma.cursorShape = Qt.ArrowCursor;
-                        if (kftt.visible)
-                            kftt.visible = false;
-                    }
-                    return false;
-                }
-                ToolTip { id: kftt; z: 5; }
-                Menu {
-                    id: keyframeContextMenu;
-                    property string pressedKeyframe: "";
-                    property real pressedKeyframeTs: 0;
-                    z: 6;
 
-                    font.pixelSize: 11.5 * dpiScale;
-                    Action {
-                        iconName: "bin;#f67575";
-                        text: qsTr("Delete");
-                        onTriggered: controller.remove_keyframe(keyframeContextMenu.pressedKeyframe, keyframeContextMenu.pressedKeyframeTs);
+            Loader {
+                id: keyframes;
+                asynchronous: true;
+                anchors.fill: parent;
+                sourceComponent: Component {
+                    TimelineKeyframesView {
+                        id: keyframesInner;
+                        videoTimestamp: vid.timestamp;
+                        visibleAreaLeft: root.visibleAreaLeft;
+                        visibleAreaRight: root.visibleAreaRight;
+                        anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                        anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                        function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
+                            const pt = ma.mapToItem(keyframesInner, x, y);
+                            const kf = keyframesInner.keyframeAtXY(pt.x, pt.y);
+                            if (kf) {
+                                const [keyframe, timestamp, name, value] = kf.split(":", 4);
+                                if (pressed && (pressedButtons & Qt.RightButton)) {
+                                    keyframeContextMenu.pressedKeyframe = keyframe;
+                                    keyframeContextMenu.pressedKeyframeTs = timestamp;
+                                    keyframeContextMenu.updateEasingMenu();
+                                    keyframeContextMenu.popup();
+                                    return true;
+                                }
+                                if (pressed && (pressedButtons & Qt.LeftButton)) {
+                                    vid.setTimestamp(timestamp / 1000);
+                                    return true;
+                                }
+                                ma.cursorShape = Qt.PointingHandCursor;
+                                if (!kftt.visible) {
+                                    kftt.x       = pt.x + 10 * dpiScale;
+                                    kftt.offsetY = pt.y + 10 * dpiScale + kftt.height;
+                                    kftt.text = qsTr(name) + " - " + value;
+                                    kftt.visible = true;
+                                }
+                            } else {
+                                ma.cursorShape = Qt.ArrowCursor;
+                                if (kftt.visible)
+                                    kftt.visible = false;
+                            }
+                            return false;
+                        }
+                        ToolTip { id: kftt; z: 5; }
+                        Menu {
+                            id: keyframeContextMenu;
+                            property string pressedKeyframe: "";
+                            property real pressedKeyframeTs: 0;
+                            z: 6;
+
+                            font.pixelSize: 11.5 * dpiScale;
+                            Action {
+                                iconName: "bin;#f67575";
+                                text: qsTr("Delete");
+                                onTriggered: controller.remove_keyframe(keyframeContextMenu.pressedKeyframe, keyframeContextMenu.pressedKeyframeTs);
+                            }
+                            Action {
+                                id: easeIn;
+                                iconName: "ease_in";
+                                text: qsTr("Ease in");
+                                checkable: true;
+                                onTriggered: keyframeContextMenu.updateEasing();
+                            }
+                            Action {
+                                id: easeOut;
+                                iconName: "ease_out";
+                                text: qsTr("Ease out");
+                                checkable: true;
+                                onTriggered: keyframeContextMenu.updateEasing();
+                            }
+                            function updateEasingMenu() {
+                                let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
+                                easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
+                                easeOut.checked = e == "EaseOut" || e == "EaseInOut";
+                            }
+                            function updateEasing() {
+                                let e = "NoEasing";
+                                if (easeIn.checked) e = "EaseIn";
+                                if (easeOut.checked) e = "EaseOut";
+                                if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                                controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
+                            }
+                        }
+                        Component.onCompleted: {
+                            QT_TR_NOOP("FOV");
+                            QT_TR_NOOP("Video rotation");
+                            QT_TR_NOOP("Zooming speed");
+                            QT_TR_NOOP("Zooming center offset X");
+                            QT_TR_NOOP("Zooming center offset Y");
+                            QT_TR_NOOP("Background margin");
+                            QT_TR_NOOP("Background feather");
+                            QT_TR_NOOP("Horizon lock amount");
+                            QT_TR_NOOP("Horizon lock roll correction");
+                            QT_TR_NOOP("Lens correction strength");
+                            QT_TR_NOOP("Max smoothness");
+                            QT_TR_NOOP("Max smoothness at high velocity");
+                            QT_TR_NOOP("Smoothness");
+                            QT_TR_NOOP("Pitch smoothness");
+                            QT_TR_NOOP("Roll smoothness");
+                            QT_TR_NOOP("Yaw smoothness");
+                        }
                     }
-                    Action {
-                        id: easeIn;
-                        iconName: "ease_in";
-                        text: qsTr("Ease in");
-                        checkable: true;
-                        onTriggered: keyframeContextMenu.updateEasing();
-                    }
-                    Action {
-                        id: easeOut;
-                        iconName: "ease_out";
-                        text: qsTr("Ease out");
-                        checkable: true;
-                        onTriggered: keyframeContextMenu.updateEasing();
-                    }
-                    function updateEasingMenu() {
-                        let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
-                        easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
-                        easeOut.checked = e == "EaseOut" || e == "EaseInOut";
-                    }
-                    function updateEasing() {
-                        let e = "NoEasing";
-                        if (easeIn.checked) e = "EaseIn";
-                        if (easeOut.checked) e = "EaseOut";
-                        if (easeIn.checked && easeOut.checked) e = "EaseInOut";
-                        controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
-                    }
-                }
-                Component.onCompleted: {
-                    QT_TR_NOOP("FOV");
-                    QT_TR_NOOP("Video rotation");
-                    QT_TR_NOOP("Zooming speed");
-                    QT_TR_NOOP("Zooming center offset X");
-                    QT_TR_NOOP("Zooming center offset Y");
-                    QT_TR_NOOP("Background margin");
-                    QT_TR_NOOP("Background feather");
-                    QT_TR_NOOP("Horizon lock amount");
-                    QT_TR_NOOP("Horizon lock roll correction");
-                    QT_TR_NOOP("Lens correction strength");
-                    QT_TR_NOOP("Max smoothness");
-                    QT_TR_NOOP("Max smoothness at high velocity");
-                    QT_TR_NOOP("Smoothness");
-                    QT_TR_NOOP("Pitch smoothness");
-                    QT_TR_NOOP("Roll smoothness");
-                    QT_TR_NOOP("Yaw smoothness");
                 }
             }
         }
@@ -381,10 +388,11 @@ Item {
                         }
                     }
                 } else {
-                    Qt.callLater(keyframes.handleMouseMove, mouseX, mouseY, false, 0);
+                    if (keyframes.item)
+                        Qt.callLater(keyframes.item.handleMouseMove, mouseX, mouseY, false, 0);
                 }
             }
-            onMouseYChanged: if (!pressed) Qt.callLater(keyframes.handleMouseMove, mouseX, mouseY, false, 0);
+            onMouseYChanged: if (!pressed && keyframes.item) Qt.callLater(keyframes.item.handleMouseMove, mouseX, mouseY, false, 0);
             onPressed: (mouse) => {
                 panInit.x = mouse.x;
                 panInit.y = mouse.y;
@@ -393,18 +401,18 @@ Item {
             }
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    timelineContextMenu.pressedX = mouse.x;
-                    timelineContextMenu.popup()
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                 } else {
                     mouse.accepted = false;
                 }
             }
             onClicked: (mouse) => {
-                if (keyframes.handleMouseMove(mouse.x, mouse.y, true, mouse.button))
+                if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, mouse.button))
                     return;
                 if (mouse.button === Qt.RightButton) {
-                    timelineContextMenu.pressedX = mouse.x;
-                    timelineContextMenu.popup();
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                 }
                 root.focus = true;
             }
@@ -437,89 +445,92 @@ Item {
             }
         }
 
-        Menu {
+        Component {
             id: timelineContextMenu;
-            property real pressedX: x;
-
-            font.pixelSize: 11.5 * dpiScale;
-            Action {
-                id: addCalibAction;
-                iconName: "plus";
-                text: qsTr("Add calibration point");
-                onTriggered: {
-                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);
-                }
-            }
-            QQC.MenuSeparator { id: msep; verticalPadding: 5 * dpiScale; }
-            Action {
-                id: syncHereAction;
-                iconName: "spinner";
-                text: qsTr("Auto sync here");
-                onTriggered: root.addAutoSyncPoint(root.position);
-            }
-            Action {
-                id: addSyncAction;
-                iconName: "plus";
-                text: qsTr("Add manual sync point here");
-                onTriggered: root.addManualSyncPoint(root.position);
-            }
-            Action {
-                id: guessOrientationHere;
-                iconName: "axes";
-                text: qsTr("Guess IMU orientation here");
-                onTriggered: {
-                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-                    controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation");
-                }
-            }
-            Action {
-                id: estimateRSAction;
-                iconName: "readout_time";
-                text: qsTr("Estimate rolling shutter here");
-                onTriggered: {
-                    const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
-
-                    const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" +
-                                      "This feature is experimental, the results may not be correct at all.\n" +
-                                      "Are you sure you want to continue?");
-                    messageBox(Modal.Warning, text, [
-                        { text: qsTr("Yes"), clicked: function() {
-                            controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "estimate_rolling_shutter");
-                        }},
-                        { text: qsTr("No"), accent: true },
-                    ]);
-                }
-            }
-            Action {
-                id: debiasAction;
-                iconName: "bias";
-                text: qsTr("Estimate gyro bias here");
-                onTriggered: controller.estimate_bias(root.position);
-            }
-            Action {
-                iconName: "bin;#f67575";
-                text: qsTr("Delete all sync points");
-                onTriggered: {
-                    root.editingSyncPoint = false;
-                    controller.clear_offsets();
-                }
-            }
-            QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
             Menu {
+                id: timelineContextMenuInner;
                 font.pixelSize: 11.5 * dpiScale;
-                title: qsTr("Chart display mode")
-                Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: root.setDisplayMode(0); }
-                Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: root.setDisplayMode(1); }
-                Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: root.setDisplayMode(2); }
-                Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: root.setDisplayMode(3); }
-            }
-            Component.onCompleted: {
-                if (!isCalibrator) {
-                    timelineContextMenu.removeAction(addCalibAction);
-                    timelineContextMenu.removeItem(msep);
+                Action {
+                    id: addCalibAction;
+                    iconName: "plus";
+                    text: qsTr("Add calibration point");
+                    onTriggered: {
+                        const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                        controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);
+                    }
+                }
+                QQC.MenuSeparator { id: msep; verticalPadding: 5 * dpiScale; }
+                Action {
+                    iconName: "spinner";
+                    text: qsTr("Auto sync here");
+                    onTriggered: root.addAutoSyncPoint(root.position);
+                }
+                Action {
+                    iconName: "plus";
+                    text: qsTr("Add manual sync point here");
+                    onTriggered: root.addManualSyncPoint(root.position);
+                }
+                Action {
+                    iconName: "axes";
+                    text: qsTr("Guess IMU orientation here");
+                    onTriggered: {
+                        const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+                        controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "guess_imu_orientation");
+                    }
+                }
+                Action {
+                    iconName: "readout_time";
+                    text: qsTr("Estimate rolling shutter here");
+                    onTriggered: {
+                        const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
+
+                        const text = qsTr("Your video needs to be already synced properly and you should use this function\non a part of your video with significant camera motion (ideally horizontal).\n\n" +
+                                        "This feature is experimental, the results may not be correct at all.\n" +
+                                        "Are you sure you want to continue?");
+                        messageBox(Modal.Warning, text, [
+                            { text: qsTr("Yes"), clicked: function() {
+                                controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "estimate_rolling_shutter");
+                            }},
+                            { text: qsTr("No"), accent: true },
+                        ]);
+                    }
+                }
+                Action {
+                    iconName: "bias";
+                    text: qsTr("Estimate gyro bias here");
+                    onTriggered: controller.estimate_bias(root.position);
+                }
+                Action {
+                    iconName: "bin;#f67575";
+                    text: qsTr("Delete all sync points");
+                    onTriggered: {
+                        root.editingSyncPoint = false;
+                        controller.clear_offsets();
+                    }
+                }
+                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+                Menu {
+                    font.pixelSize: 11.5 * dpiScale;
+                    title: qsTr("Chart display mode")
+                    Action { checkable: true; checked: chart.viewMode === 0; text: qsTr("Gyroscope");     onTriggered: root.setDisplayMode(0); }
+                    Action { checkable: true; checked: chart.viewMode === 1; text: qsTr("Accelerometer"); onTriggered: root.setDisplayMode(1); }
+                    Action { checkable: true; checked: chart.viewMode === 2; text: qsTr("Magnetometer");  onTriggered: root.setDisplayMode(2); }
+                    Action { checkable: true; checked: chart.viewMode === 3; text: qsTr("Quaternions");   onTriggered: root.setDisplayMode(3); }
+                }
+                Component.onCompleted: {
+                    if (!isCalibrator) {
+                        timelineContextMenuInner.removeAction(addCalibAction);
+                        timelineContextMenuInner.removeItem(msep);
+                    }
                 }
             }
+        }
+        Loader {
+            id: menuLoader;
+            active: false;
+            asynchronous: true;
+            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
+            sourceComponent: timelineContextMenu;
         }
 
         Item {

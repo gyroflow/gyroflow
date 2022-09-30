@@ -55,12 +55,14 @@ Rectangle {
                 if (mouse.button === Qt.LeftButton) {
                     root.edit(root.org_timestamp_us, root.value);
                 } else {
-                    menu.popup();
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                 }
             }
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    menu.popup()
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                 } else {
                     mouse.accepted = false;
                 }
@@ -77,31 +79,41 @@ Rectangle {
             font.pixelSize: 11 * dpiScale;
         }
 
-        Menu {
+        Component {
             id: menu;
-            Action {
-                id: editAction;
-                text: qsTr("Edit offset");
-                iconName: "pencil";
-                onTriggered: root.edit(root.org_timestamp_us, root.value);
-            }
-            Action {
-                text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
-                iconName: "bin;#f67575";
-                onTriggered: root.remove(root.org_timestamp_us);
-            }
-            Action {
-                id: zoomAction;
-                text: qsTr("Zoom in");
-                iconName: "search";
-                onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
-            }
-            Component.onCompleted: {
-                if (isCalibPoint) {
-                    menu.removeAction(editAction);
-                    menu.removeAction(zoomAction);
+            Menu {
+                id: menuInner;
+                Action {
+                    id: editAction;
+                    text: qsTr("Edit offset");
+                    iconName: "pencil";
+                    onTriggered: root.edit(root.org_timestamp_us, root.value);
+                }
+                Action {
+                    text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
+                    iconName: "bin;#f67575";
+                    onTriggered: root.remove(root.org_timestamp_us);
+                }
+                Action {
+                    id: zoomAction;
+                    text: qsTr("Zoom in");
+                    iconName: "search";
+                    onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
+                }
+                Component.onCompleted: {
+                    if (isCalibPoint) {
+                        menuInner.removeAction(editAction);
+                        menuInner.removeAction(zoomAction);
+                    }
                 }
             }
+        }
+        Loader {
+            id: menuLoader;
+            active: false;
+            asynchronous: true;
+            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
+            sourceComponent: menu
         }
     }
 }

@@ -11,6 +11,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
     config.include(&qt_include_path);
     config.include(&format!("{}/QtCore", qt_include_path));
+    config.include(&format!("{}/QtQml", qt_include_path));
     if cfg!(target_os = "macos") {
         config.include(format!("{}/QtCore.framework/Headers/", qt_library_path));
     }
@@ -84,6 +85,7 @@ fn main() {
     for f in env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
     }
+    // config.define("QT_QML_DEBUG", None);
 
     if target_os == "ios" {
         println!("cargo:rustc-link-arg={}/objects-Release/Quick_resources_2/.rcc/qrc_scenegraph_shaders.cpp.o", qt_library_path);

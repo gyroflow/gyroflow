@@ -21,7 +21,7 @@ Item {
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
     property alias stabEnabledBtn: stabEnabledBtn;
-    property alias queue: queue;
+    property alias queue: queue.item;
     property alias statistics: statistics;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
@@ -176,6 +176,57 @@ Item {
                 }
             }
         }
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
+            if (is_main_video) {
+                vidInfo.updateEntry("Detected camera", camera || "---");
+                vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
+                // If source was detected, but gyro data is empty
+                if (camera) {
+                    if (!contains_gyro && !contains_quats) {
+                        messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
+                    }
+                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
+                    if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
+                }
+            }
+            if (sample_rate > 0.0 && sample_rate < 50) {
+                messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
+            }
+            if (root.pendingGyroflowData) {
+                Qt.callLater(loadGyroflowData, root.pendingGyroflowData);
+            } else {
+                Qt.callLater(controller.recompute_threaded);
+            }
+        }
+        function onChart_data_changed() {
+            chartUpdateTimer.start();
+        }
+        function onKeyframes_changed() {
+            Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
+            Qt.callLater(controller.update_keyframe_values, vid.timestamp);
+        }
+        function onCompute_progress(id: real, progress: real) {
+            videoLoader.active = progress < 1;
+            videoLoader.cancelable = false;
+        }
+        function onSync_progress(progress: real, ready: int, total: int) {
+            videoLoader.active = progress < 1;
+            videoLoader.currentFrame = ready;
+            videoLoader.totalFrames = total;
+            videoLoader.additional = "";
+            videoLoader.text = videoLoader.active? qsTr("Analyzing %1...") : "";
+            videoLoader.progress = videoLoader.active? progress : -1;
+            videoLoader.cancelable = true;
+        }
+        function onLoading_gyro_progress(progress: real) {
+            videoLoader.active = progress < 1;
+            videoLoader.currentFrame = 0;
+            videoLoader.totalFrames = 0;
+            videoLoader.additional = "";
+            videoLoader.text = videoLoader.active? qsTr("Loading gyro data %1...") : "";
+            videoLoader.progress = videoLoader.active? progress : -1;
+            videoLoader.cancelable = true;
+        }
     }
     property Modal externalSdkModal: null;
 
@@ -283,8 +334,8 @@ Item {
             const paths = urls.map(x => controller.url_to_path(x));
             const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
                 { text: qsTr("Add to render queue"), clicked: function() {
-                    queue.dt.loadFiles(urls);
-                    queue.shown = true;
+                    queue.item.dt.loadFiles(urls);
+                    queue.item.shown = true;
                 } },
                 { text: qsTr("Merge them into one video"), clicked: function() {
                     dlg.btnsRow.children[0].enabled = false;
@@ -368,38 +419,6 @@ Item {
         return false;
     }
 
-    Connections {
-        target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
-            if (is_main_video) {
-                vidInfo.updateEntry("Detected camera", camera || "---");
-                vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
-                // If source was detected, but gyro data is empty
-                if (camera) {
-                    if (!contains_gyro && !contains_quats) {
-                        messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
-                    }
-                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
-                    if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
-                }
-            }
-            if (sample_rate > 0.0 && sample_rate < 50) {
-                messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
-            }
-            if (root.pendingGyroflowData) {
-                Qt.callLater(loadGyroflowData, root.pendingGyroflowData);
-            } else {
-                Qt.callLater(controller.recompute_threaded);
-            }
-        }
-        function onChart_data_changed() {
-            chartUpdateTimer.start();
-        }
-        function onKeyframes_changed() {
-            Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
-            Qt.callLater(controller.update_keyframe_values, vid.timestamp);
-        }
-    }
     Timer {
         id: chartUpdateTimer;
         repeat: false;
@@ -457,7 +476,7 @@ Item {
                     const fov = controller.current_fov;
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
-                    if (window.stab.fovSlider.field.value > 1) {
+                    if (window.stab && window.stab.fovSlider.field.value > 1) {
                         safeAreaRect.width = safeAreaRect.parent.width / window.stab.fovSlider.field.value;
                         safeAreaRect.height = safeAreaRect.parent.height / window.stab.fovSlider.field.value;
                     }
@@ -581,15 +600,18 @@ Item {
                 leftPadding: 0;
                 scale: dropText.contentWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.contentWidth : 1.0;
             }
-            DropTargetRect {
-                visible: !dropText.loadingFile && !vid.loaded;
+            ItemLoader {
                 anchors.fill: dropText;
                 anchors.margins: -30 * dpiScale;
+                visible: !dropText.loadingFile && !vid.loaded;
                 scale: dropText.scale;
+                sourceComponent: Component { DropTargetRect { } }
             }
-            DropTargetRect {
-                visible: !dropText.loadingFile && vid.loaded;
+            ItemLoader {
+                anchors.fill: parent;
                 anchors.margins: 5 * dpiScale;
+                visible: !dropText.loadingFile && vid.loaded;
+                sourceComponent: Component { DropTargetRect { } }
             }
             MouseArea {
                 visible: !vid.loaded;
@@ -601,7 +623,7 @@ Item {
         DropArea {
             id: da;
             anchors.fill: dropRect;
-            enabled: !queue.shown;
+            enabled: queue.item && !queue.item.shown;
 
             onEntered: (drag) => {
                 const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
@@ -632,42 +654,28 @@ Item {
                 videoLoader.active = false;
             }
         }
-        RenderQueue {
+        Loader {
             id: queue;
+            asynchronous: true;
             anchors.fill: vid.loaded? vidParent : dropRect;
             anchors.margins: 10 * dpiScale;
-            onShownChanged: statistics.shown &= !shown;
+            sourceComponent: Component {
+                RenderQueue {
+                    onShownChanged: if (statistics.item) statistics.item.shown &= !shown;
+                }
+            }
         }
-        Statistics {
+        Loader {
             id: statistics;
+            asynchronous: true;
+            active: false;
             anchors.fill: vid.loaded? vidParent : dropRect;
             anchors.margins: 10 * dpiScale;
-            onShownChanged: queue.shown &= !shown;
-        }
-
-        Connections {
-            target: controller;
-            function onCompute_progress(id: real, progress: real) {
-                videoLoader.active = progress < 1;
-                videoLoader.cancelable = false;
-            }
-            function onSync_progress(progress: real, ready: int, total: int) {
-                videoLoader.active = progress < 1;
-                videoLoader.currentFrame = ready;
-                videoLoader.totalFrames = total;
-                videoLoader.additional = "";
-                videoLoader.text = videoLoader.active? qsTr("Analyzing %1...") : "";
-                videoLoader.progress = videoLoader.active? progress : -1;
-                videoLoader.cancelable = true;
-            }
-            function onLoading_gyro_progress(progress: real) {
-                videoLoader.active = progress < 1;
-                videoLoader.currentFrame = 0;
-                videoLoader.totalFrames = 0;
-                videoLoader.additional = "";
-                videoLoader.text = videoLoader.active? qsTr("Loading gyro data %1...") : "";
-                videoLoader.progress = videoLoader.active? progress : -1;
-                videoLoader.cancelable = true;
+            onStatusChanged: if (status == Loader.Ready) statistics.item.shown = true;
+            sourceComponent: Component {
+                Statistics {
+                    onShownChanged: queue.item.shown &= !shown;
+                }
             }
         }
     }

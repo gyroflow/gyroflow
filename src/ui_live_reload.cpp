@@ -31,7 +31,7 @@ void init_live_reload(QQmlApplicationEngine *engine, const QString &path) {
             auto children = wnd->contentItem()->childItems();
             if (!children.isEmpty()) {
                 auto itm = children.first();
-                if (itm->objectName() == "App") {
+                if (itm->objectName() == "App" || itm->objectName() == "AppLoader") {
                     itm->setParentItem(nullptr);
                     if (itm == previousItem) previousItem = nullptr;
                     delete itm;

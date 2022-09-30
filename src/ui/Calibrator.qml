@@ -48,6 +48,19 @@ Window {
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
+        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
+            lensCalib.rms = rms;
+            videoArea.videoLoader.active = progress < 1 || rms == 0;
+            videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
+            videoArea.videoLoader.currentFrame = ready;
+            videoArea.videoLoader.totalFrames = total;
+            videoArea.videoLoader.text = progress < 1? qsTr("Analyzing %1...") : "";
+            videoArea.videoLoader.progress = progress < 1? progress : -1;
+            videoArea.videoLoader.cancelable = true;
+            if (!videoArea.videoLoader.active) {
+                Qt.callLater(controller.recompute_threaded);
+            }
+        }
     }
 
     function batchProcess() {
@@ -214,23 +227,6 @@ Window {
 
     Shortcuts {
         videoArea: videoArea;
-    }
-
-    Connections {
-        target: controller;
-        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
-            lensCalib.rms = rms;
-            videoArea.videoLoader.active = progress < 1 || rms == 0;
-            videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
-            videoArea.videoLoader.currentFrame = ready;
-            videoArea.videoLoader.totalFrames = total;
-            videoArea.videoLoader.text = progress < 1? qsTr("Analyzing %1...") : "";
-            videoArea.videoLoader.progress = progress < 1? progress : -1;
-            videoArea.videoLoader.cancelable = true;
-            if (!videoArea.videoLoader.active) {
-                Qt.callLater(controller.recompute_threaded);
-            }
-        }
     }
 
     property bool anyFileLoaded: false;

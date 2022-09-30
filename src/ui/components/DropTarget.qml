@@ -24,7 +24,11 @@ Rectangle {
         scale: dropText.contentWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.contentWidth : 1.0;
     }
 
-    DropTargetRect { }
+    Loader {
+        anchors.fill: parent;
+        asynchronous: true;
+        sourceComponent: Component { DropTargetRect { } }
+    }
 
     DropArea {
         id: da;

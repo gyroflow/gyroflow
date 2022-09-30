@@ -25,12 +25,9 @@ QQC.Popup {
 
     signal clicked(int index);
 
-    contentItem: ListView {
-        id: lv;
-        clip: true;
-        implicitHeight: contentHeight;
-        QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
-        delegate: QQC.ItemDelegate {
+    Component {
+        id: dlgC;
+        QQC.ItemDelegate {
             id: dlg;
             width: parent? parent.width : 0;
             implicitHeight: popup.itemHeight;
@@ -94,6 +91,14 @@ QQC.Popup {
             }
             highlighted: popup.highlightedIndex === index;
         }
+    }
+
+    contentItem: ListView {
+        id: lv;
+        clip: true;
+        implicitHeight: contentHeight;
+        QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
+        delegate: dlgC;
         highlightFollowsCurrentItem: true;
         focus: true;
         keyNavigationEnabled: true;

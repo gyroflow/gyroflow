@@ -22,7 +22,7 @@ TextField {
     property bool keyframesEnabled: false;
     property real finalValue: value;
 
-    property Menu contextMenu: defaultContextMenu;
+    property alias contextMenu: menuLoader.sourceComponent;
 
     onFinalValueChanged: {
         if (keyframe && keyframesEnabled) {
@@ -93,7 +93,8 @@ TextField {
 
         onPressAndHold: (mouse) => {
             if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                contextMenu.popup();
+                if (menuLoader.item) menuLoader.item.popup();
+                menuLoader.active = true;
                 mouse.accepted = true;
             } else {
                 mouse.accepted = false;
@@ -102,7 +103,8 @@ TextField {
 
         function _onClicked(mouse) {
             if (mouse.button === Qt.RightButton) {
-                contextMenu.popup();
+                if (menuLoader.item) menuLoader.item.popup();
+                menuLoader.active = true;
                 mouse.accepted = true;
             } else {
                 mouse.accepted = false;
@@ -113,28 +115,37 @@ TextField {
         onPressed: (mouse) => _onClicked(mouse);
     }
 
-    Menu {
-        id: defaultContextMenu;
-        font.pixelSize: 11.5 * dpiScale;
-        Action {
-            iconName: "undo";
-            text: qsTr("Reset value");
-            enabled: value != defaultValue;
-            onTriggered: root.reset()
-        }
-        Action {
-            iconName: "keyframe";
-            enabled: root.keyframe.length > 0;
-            text: qsTr("Enable keyframing");
-            checked: root.keyframesEnabled;
-            onTriggered: {
-                checked = !checked;
-                root.keyframesEnabled = checked;
-                if (!checked) {
-                    controller.clear_keyframes_type(root.keyframe);
+    Component {
+        id: defaultMenu;
+        Menu {
+            font.pixelSize: 11.5 * dpiScale;
+            Action {
+                iconName: "undo";
+                text: qsTr("Reset value");
+                enabled: value != defaultValue;
+                onTriggered: root.reset()
+            }
+            Action {
+                iconName: "keyframe";
+                enabled: root.keyframe.length > 0;
+                text: qsTr("Enable keyframing");
+                checked: root.keyframesEnabled;
+                onTriggered: {
+                    checked = !checked;
+                    root.keyframesEnabled = checked;
+                    if (!checked) {
+                        controller.clear_keyframes_type(root.keyframe);
+                    }
                 }
             }
         }
+    }
+    Loader {
+        id: menuLoader;
+        active: false;
+        asynchronous: true;
+        onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
+        sourceComponent: defaultMenu
     }
 
     BasicText {

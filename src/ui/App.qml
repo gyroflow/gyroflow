@@ -45,15 +45,15 @@ Rectangle {
             rightPanel.y = Qt.binding(() => videoAreaCol.height);
         }
     }
-    property alias vidInfo: vidInfo;
+    property alias vidInfo: vidInfo.item;
     property alias videoArea: videoArea;
-    property alias motionData: motionData;
-    property alias lensProfile: lensProfile;
-    property alias exportSettings: exportSettings;
-    property alias advanced: advanced;
+    property alias motionData: motionData.item;
+    property alias lensProfile: lensProfile.item;
     property alias outputFile: outputFile.text;
-    property alias sync: sync;
-    property alias stab: stab;
+    property alias sync: sync.item;
+    property alias stab: stab.item;
+    property alias exportSettings: exportSettings.item;
+    property alias advanced: advanced.item;
     property alias renderBtn: renderBtn;
     property alias settings: settings;
 
@@ -103,18 +103,19 @@ Rectangle {
                 Hr { }
             }
 
-            Menu.VideoInformation {
-                id: vidInfo;
-                onSelectFileRequest: fileDialog.open2();
-            }
+            ItemLoader { id: vidInfo; sourceComponent: Component {
+                Menu.VideoInformation {
+                    onSelectFileRequest: fileDialog.open2();
+                }
+            } }
             Hr { }
-            Menu.LensProfile {
-                id: lensProfile;
-            }
+            ItemLoader { id: lensProfile; sourceComponent: Component {
+                Menu.LensProfile { }
+            } }
             Hr { }
-            Menu.MotionData {
-                id: motionData;
-            }
+            ItemLoader { id: motionData; sourceComponent: Component {
+                Menu.MotionData { }
+            } }
         }
 
         Column {
@@ -126,7 +127,7 @@ Rectangle {
             VideoArea {
                 id: videoArea;
                 height: parent.height - (videoArea.fullScreen? 0 : exportbar.height);
-                vidInfo: vidInfo;
+                vidInfo: vidInfo.item;
             }
 
             // Bottom bar
@@ -174,7 +175,7 @@ Rectangle {
                         type: "output-video";
                         onAccepted: {
                             outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
-                            window.exportSettings.updateCodecParams();
+                            exportSettings.item.updateCodecParams();
                         }
                     }
                 }
@@ -196,7 +197,7 @@ Rectangle {
                     property bool allowSync: false;
                     enabled: false;
 
-                    property bool enabled2: window.videoArea.vid.loaded && exportSettings.canExport && !videoArea.videoLoader.active;
+                    property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
                     Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
 
@@ -210,7 +211,7 @@ Rectangle {
                     ];
 
                     function render() {
-                        const fname = window.vidInfo.filename.toLowerCase();
+                        const fname = vidInfo.item.filename.toLowerCase();
                         if (fname.endsWith('.braw') || fname.endsWith('.dng')) {
                             messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use the [OpenFX plugin].").replace(/\[(.*?)\]/, '<a href="https://github.com/gyroflow/gyroflow-ofx/releases"><font color="' + styleTextColor + '">$1</font></a>'), [
                                 { text: qsTr("Ok"), accent: true }
@@ -225,7 +226,7 @@ Rectangle {
                             ]);
                             return;
                         }
-                        const usesQuats = window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && window.motionData.filename == window.vidInfo.filename;
+                        const usesQuats = motionData.item.hasQuaternions && motionData.item.integrationMethod === 0 && motionData.item.filename == vidInfo.item.filename;
                         if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
                             messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},
@@ -322,21 +323,13 @@ Rectangle {
             maxWidth: parent.width - leftPanel.width - 50 * dpiScale;
             implicitWidth: settings.value("rightPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("rightPanelSize", width);
-            Menu.Synchronization {
-                id: sync;
-            }
+            ItemLoader { id: sync; sourceComponent: Component { Menu.Synchronization { } } }
             Hr { }
-            Menu.Stabilization {
-                id: stab;
-            }
+            ItemLoader { id: stab; sourceComponent: Component { Menu.Stabilization { } } }
             Hr { }
-            Menu.Export {
-                id: exportSettings;
-            }
+            ItemLoader { id: exportSettings; sourceComponent: Component { Menu.Export { } } }
             Hr { }
-            Menu.Advanced {
-                id: advanced;
-            }
+            ItemLoader { id: advanced; sourceComponent: Component { Menu.Advanced { } } }
         }
     }
 
@@ -504,7 +497,7 @@ Rectangle {
     }
 
     function renameOutput(orgOutput: string) {
-        const suffix = window.advanced.defaultSuffix.text;
+        const suffix = advanced.item.defaultSuffix.text;
         let output = orgOutput;
         let i = 1;
         while (controller.file_exists(output) || render_queue.file_exists(output)) {
@@ -525,8 +518,8 @@ Rectangle {
 
     function getAdditionalProjectData(): object {
         return {
-            "output": exportSettings.getExportOptions(),
-            "synchronization": sync.getSettings(),
+            "output": exportSettings.item.getExportOptions(),
+            "synchronization": sync.item.getSettings(),
 
             "muted": window.videoArea.vid.muted,
             "playback_speed": window.videoArea.vid.playbackRate

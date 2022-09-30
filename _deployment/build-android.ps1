@@ -1,6 +1,6 @@
 $PROJECT_DIR="$PSScriptRoot\.."
 
-$BUILD_PROFILE = "deploy"
+$BUILD_PROFILE = "deploy" # change to release for testing, it's much faster
 $QT_LIBS = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\lib"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\mingw_64\bin\"
@@ -100,8 +100,12 @@ $qtlibs = @(
     "..\qml\QtQuick\Window\libqml_QtQuick_Window_quickwindowplugin_arm64-v8a.so"
 );
 foreach ($x in $qtlibs) {
-    Copy-Item -Path "$QT_LIBS\$x" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -ErrorAction SilentlyContinue
+    Copy-Item -Path "$QT_LIBS\$x" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
+    . "$Env:ANDROID_NDK_HOME\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-strip.exe" "$QT_LIBS\$x"
 }
+
+# Strip all libs
+. "$Env:ANDROID_NDK_HOME\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-strip.exe" "$PROJECT_DIR\target\android-build\libs\arm64-v8a\*.so"
 
 $androiddeploy = @"
 {
@@ -127,13 +131,27 @@ $androiddeploy = @"
 "@
 $androiddeploy | Out-File -encoding utf8 -FilePath "$PROJECT_DIR\target\android-build\android-deploy.json"
 
+$job = Start-Job -Name "Cleanup" -ArgumentList "$PROJECT_DIR\target\android-build\libs\arm64-v8a" -ScriptBlock {
+    for ($num = 1; $num -le 100 ; $num++) {
+        Remove-Item "${args}\*Universal*"
+        Remove-Item "${args}\*Imagine*"
+        Remove-Item "${args}\*Fusion*"
+        Remove-Item "${args}\*Particles*"
+        Remove-Item "${args}\*tooling*"
+        Remove-Item "${args}\*qgif*"
+        Remove-Item "${args}\*qico*"
+        Remove-Item "${args}\*qjpeg*"
+        Start-Sleep -Milliseconds 300;
+    }
+}
+Get-job | Receive-Job
 androiddeployqt --input "$PROJECT_DIR\target\android-build\android-deploy.json" `
                 --output "$PROJECT_DIR\target\android-build" `
                 --deployment bundled `
                 --android-platform android-30 `
                 --jdk ${Env:JAVA_HOME} `
                 --gradle
-
+Stop-Job $job
 adb install "$PROJECT_DIR\target\android-build\build\outputs\apk\debug\android-build-debug.apk"
 
 # Alternative

@@ -102,6 +102,9 @@ MenuItem {
         function onOrientation_guessed(value: string) {
              orientation.text = value;
         }
+        function onChart_data_changed() {
+            Qt.callLater(orientationIndicator.requestPaint);
+        }
     }
 
     Button {
@@ -431,12 +434,6 @@ MenuItem {
                 currentTimestamp = timestamp;
                 requestPaint();
             }
-            Connections {
-                target: controller;
-                function onChart_data_changed() {
-                    Qt.callLater(orientationIndicator.requestPaint);
-                }
-            }
         }
     }
 
@@ -444,7 +441,10 @@ MenuItem {
         text: qsTr("Statistics");
         anchors.horizontalCenter: parent.horizontalCenter;
         //anchors.verticalCenter: parent.verticalCenter;
-        onClicked: window.videoArea.statistics.shown = !window.videoArea.statistics.shown;
+        onClicked: {
+            if (window.videoArea.statistics.item) window.videoArea.statistics.item.shown = !window.videoArea.statistics.item.shown;
+            window.videoArea.statistics.active = true;
+        }
     }
 
     DropTarget {

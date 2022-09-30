@@ -6,7 +6,7 @@ import QtQuick.Controls as QQC
 
 QQC.CheckBox {
     id: cb;
-    onCheckedChanged: if (checked) { cm1.width = 0; cm2.width = 0; cbanim.start(); }
+    onCheckedChanged: if (checked) { cb.indicator.reset();  }
     implicitHeight: 30 * dpiScale;
 
     Keys.onPressed: (e) => {
@@ -15,11 +15,11 @@ QQC.CheckBox {
         }
     }
 
-    indicator: Rectangle {
-        implicitWidth: 20 * dpiScale
-        implicitHeight: 20 * dpiScale
-        x: cb.leftPadding
-        y: parent.height / 2 - height / 2
+    component Indicator: Rectangle {
+        implicitWidth: 20 * dpiScale;
+        implicitHeight: 20 * dpiScale;
+        x: cb.leftPadding;
+        y: parent.height / 2 - height / 2;
         radius: 5 * dpiScale;
         color: cb.checked? styleAccentColor : "transparent";
         Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo; } }
@@ -28,8 +28,13 @@ QQC.CheckBox {
         opacity: cb.down || cb.activeFocus? 0.8 : 1.0;
         Ease on opacity { }
 
+        function reset() {
+            cm1.width = 0;
+            cm2.width = 0;
+            cbanim.start();
+        }
+
         Item {
-            id: cm;
             anchors.fill: parent;
             visible: opacity > 0;
             Ease on opacity { }
@@ -67,6 +72,8 @@ QQC.CheckBox {
             }
         }
     }
+
+    indicator: Indicator { }
     topPadding: 0;
     bottomPadding: 0;
     leftPadding: 0;

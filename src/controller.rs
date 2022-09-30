@@ -979,6 +979,7 @@ impl Controller {
     }
 
     fn recompute_threaded(&mut self) {
+        if self.stabilizer.params.read().duration_ms <= 0.0 { return; }
         let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(self, |this, (id, _discarded): (u64, bool)| {
             if !this.ongoing_computations.contains(&id) {
                 ::log::error!("Unknown compute_id: {}", id);

@@ -75,6 +75,10 @@ MenuItem {
             horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
             horizonRollSlider.value = horizonCb.checked? +stab.horizon_lock_roll : 0;
             Qt.callLater(updateHorizonLock);
+
+            if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
+            if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
+            if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
         }
     }
 
@@ -152,6 +156,16 @@ MenuItem {
                 }
             }
         }
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
+            if (Math.abs(+frame_readout_time) > 0) {
+                root.setFrameReadoutTime(frame_readout_time);
+            } else {
+                controller.frame_readout_time = shutter.value;
+            }
+        }
+        function onRolling_shutter_estimated(rolling_shutter: real) {
+            root.setFrameReadoutTime(rolling_shutter);
+        }
     }
 
     Component.onCompleted: {
@@ -174,20 +188,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
-    }
-
-    Connections {
-        target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
-            if (Math.abs(+frame_readout_time) > 0) {
-                root.setFrameReadoutTime(frame_readout_time);
-            } else {
-                controller.frame_readout_time = shutter.value;
-            }
-        }
-        function onRolling_shutter_estimated(rolling_shutter: real) {
-            root.setFrameReadoutTime(rolling_shutter);
-        }
     }
 
     InfoMessageSmall {

@@ -270,6 +270,12 @@ The project also supports UI live reload, it's a super quick way of working with
 3. In Visual Studio, go to `Debug -> Performance Profiler...`
     - Under `Target`, open `Change Target` and select `Running Process...`, select the running `gyroflow.exe` process
 
+### Profiling QML
+1. Uncomment `config.define("QT_QML_DEBUG", None);` in `build.rs`
+2. Comment `cli::run()` in `gyroflow.rs`
+3. Run in debug mode with QML debugger args: `cargo run -- "-qmljsdebugger=port:1234,block,services:CanvasFrameRate,EngineControl,DebugMessages"`
+4. in Qt Creator go to `Analyze` -> `QML Profiler (Attach to Waiting Application` and enter port 1234
+
 ## License
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.

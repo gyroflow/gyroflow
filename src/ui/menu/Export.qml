@@ -144,13 +144,6 @@ MenuItem {
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
         }
-
-        const stab = obj.stabilization || { };
-        if (stab && Object.keys(stab).length > 0) {
-            if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
-            if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
-            if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
-        }
     }
 
     ComboBox {

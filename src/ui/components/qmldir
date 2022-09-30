@@ -15,6 +15,7 @@ FrequencyChart 1.0 FrequencyChart.qml
 Hr 1.0 Hr.qml
 InfoMessage 1.0 InfoMessage.qml
 InfoMessageSmall 1.0 InfoMessageSmall.qml
+ItemLoader 1.0 ItemLoader.qml
 Label 1.0 Label.qml
 LensProfileSearchDelegate 1.0 LensProfileSearchDelegate.qml
 LinkButton 1.0 LinkButton.qml

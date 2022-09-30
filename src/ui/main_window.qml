@@ -3,6 +3,7 @@
 
 import QtQuick
 import QtQuick.Window
+import QtQuick.Controls as QQC
 import QtQuick.Controls.Material
 import Qt.labs.settings
 
@@ -38,7 +39,8 @@ Window {
 
     function getApp(): App {
         for (let i = 0; i < contentItem.children.length; ++i) {
-            const x = contentItem.children[i];
+            let x = contentItem.children[i];
+            if (x instanceof Loader) x = x.item;
             if (x.objectName == "App") return x;
         }
         return null;
@@ -46,12 +48,24 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(main_window);
-             if (sett.visibility == Window.FullScreen) main_window.showFullScreen();
-        else if (sett.visibility == Window.Maximized) main_window.showMaximized();
-        else {
+        if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
+                 if (sett.visibility == Window.FullScreen) main_window.showFullScreen();
+            else if (sett.visibility == Window.Maximized)  main_window.showMaximized();
+            else {
+                Qt.callLater(() => {
+                    width = width + 1;
+                    height = height;
+                });
+            }
+        }
+    }
+    property bool isLandscape: width > height;
+    onIsLandscapeChanged: {
+        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
             Qt.callLater(() => {
-                width = width + 1;
-                height = height;
+                main_window.width = main_window.width + 1;
+                main_window.height = main_window.height + 1;
+                main_window.showFullScreen();
             });
         }
     }
@@ -73,5 +87,20 @@ Window {
         }
     }
 
-    App { objectName: "App"; }
+    Loader {
+        id: appLoader;
+        objectName: "AppLoader";
+        anchors.fill: parent;
+        asynchronous: true;
+        opacity: appLoader.status == Loader.Ready? 1 : 0.5;
+        Ease on opacity { }
+        sourceComponent: Component {
+            App { objectName: "App"; }
+        }
+    }
+    QQC.BusyIndicator {
+        anchors.centerIn: parent;
+        running: appLoader.status != Loader.Ready;
+        onRunningChanged: if (!running) destroy(700);
+    }
 }

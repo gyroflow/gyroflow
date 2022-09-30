@@ -15,7 +15,7 @@ TextField {
 
     Popup {
         id: popup;
-        model: root.model;
+        model: [];
         y: parent.height + 2 * dpiScale;
         font.pixelSize: 12 * dpiScale;
         itemHeight: 25 * dpiScale;
@@ -49,6 +49,7 @@ TextField {
             popup.close();
             return;
         }
+
         if (!popup.opened) popup.open();
 
         let m = [];
@@ -97,11 +98,13 @@ TextField {
     }
     Keys.onDownPressed: {
         if (!popup.opened) {
+            if (!popup.model.length) popup.model = root.model;
             popup.open();
         } else {
             popup.highlightedIndex = Math.min(popup.model.length - 1, popup.highlightedIndex + 1);
         }
     }
+    Keys.onEscapePressed: popup.close();
     Keys.onUpPressed: popup.highlightedIndex = Math.max(0, popup.highlightedIndex - 1);
     onAccepted: {
         if (popup.opened) {

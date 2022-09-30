@@ -18,11 +18,19 @@ QQC.Menu {
 
     property var colors: [];
 
-    delegate: QQC.MenuItem {
+    component MenuItem: QQC.MenuItem {
         id: dlg;
+        property real itemHeight: parentMenu? parentMenu.itemHeight : 0;
 
+        property QQC.Menu parentMenu: null;
         property color textColor: orgIconColor.a > 0.1? orgIconColor : (dlg.checked? styleTextColorOnAccent : styleTextColor);
         QQCM.Material.foreground: textColor;
+
+        onImplicitWidthChanged: Qt.callLater(updateMaxHeight);
+        function updateMaxHeight() {
+            if (parentMenu && implicitContentWidth > parentMenu.maxItemWidth)
+                parentMenu.maxItemWidth = implicitContentWidth;
+        }
 
         property color orgIconColor: "transparent";
 
@@ -31,9 +39,9 @@ QQC.Menu {
         topPadding: 5 * dpiScale;
         bottomPadding: 5 * dpiScale;
         spacing: 8 * dpiScale;
-        icon.width: menu? (menu.itemHeight / 2 + 1 * dpiScale) : 0;
-        icon.height: menu? (menu.itemHeight / 2 + 1 * dpiScale) : 0;
-        font: menu? menu.font : undefined;
+        icon.width: itemHeight / 2 + 1 * dpiScale;
+        icon.height: itemHeight / 2 + 1 * dpiScale;
+        font: parentMenu? parentMenu.font : undefined;
 
         Component.onCompleted: {
             if (icon.name && icon.name.indexOf(";") > 0) {
@@ -44,9 +52,6 @@ QQC.Menu {
             } else if (icon.name)  {
                 icon.source = "qrc:/resources/icons/svg/" + icon.name + ".svg";
             }
-            Qt.callLater(function() {
-                if (menu && dlg && dlg.implicitContentWidth > menu.maxItemWidth) menu.maxItemWidth = dlg.implicitContentWidth;
-            });
         }
 
         indicator: Item {
@@ -70,6 +75,9 @@ QQC.Menu {
             implicitHeight: itemHeight;
             radius: 4 * dpiScale;
         }
+    }
+    delegate: Component {
+        MenuItem { parentMenu: menu; }
     }
 
     background: Rectangle {

@@ -24,7 +24,7 @@ Row {
 
     property real value: defaultValue;
 
-    property Menu contextMenu: defaultContextMenu;
+    property alias contextMenu: menuLoader.sourceComponent;
 
     onValueChanged: {
         if (!root.preventChange) {
@@ -62,7 +62,8 @@ Row {
 
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    contextMenu.popup();
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                     mouse.accepted = true;
                 } else {
                     mouse.accepted = false;
@@ -71,7 +72,8 @@ Row {
 
             function _onClicked(mouse) {
                 if (mouse.button === Qt.RightButton) {
-                    contextMenu.popup();
+                    if (menuLoader.item) menuLoader.item.popup();
+                    menuLoader.active = true;
                     mouse.accepted = true;
                 } else {
                     mouse.accepted = false;
@@ -82,30 +84,39 @@ Row {
             onPressed: (mouse) => _onClicked(mouse);
         }
 
-        Menu {
-            id: defaultContextMenu;
-            font.pixelSize: 11.5 * dpiScale;
-            Action {
-                iconName: "undo";
-                text: qsTr("Reset value");
-                enabled: field.value != defaultValue;
-                onTriggered: {
-                    field.value = defaultValue;
+        Component {
+            id: defaultMenu;
+            Menu {
+                font.pixelSize: 11.5 * dpiScale;
+                Action {
+                    iconName: "undo";
+                    text: qsTr("Reset value");
+                    enabled: field.value != defaultValue;
+                    onTriggered: {
+                        field.value = defaultValue;
+                    }
                 }
-            }
-            Action {
-                iconName: "keyframe";
-                enabled: root.keyframe.length > 0;
-                text: qsTr("Enable keyframing");
-                checked: root.keyframesEnabled;
-                onTriggered: {
-                    checked = !checked;
-                    root.keyframesEnabled = checked;
-                    if (!checked) {
-                        controller.clear_keyframes_type(root.keyframe);
+                Action {
+                    iconName: "keyframe";
+                    enabled: root.keyframe.length > 0;
+                    text: qsTr("Enable keyframing");
+                    checked: root.keyframesEnabled;
+                    onTriggered: {
+                        checked = !checked;
+                        root.keyframesEnabled = checked;
+                        if (!checked) {
+                            controller.clear_keyframes_type(root.keyframe);
+                        }
                     }
                 }
             }
+        }
+        Loader {
+            id: menuLoader;
+            active: false;
+            asynchronous: true;
+            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
+            sourceComponent: defaultMenu
         }
     }
     NumberField {
