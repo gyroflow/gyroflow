@@ -61,7 +61,6 @@ public:
         m_shaderPath = shaderPath;
         m_itemTexturePtr = item->rhiTexture();
 
-        m_initialUpdates = rhi->nextResourceUpdateBatch();
 
         m_texIn.reset(rhi->newTexture(QRhiTexture::RGBA8, textureSize, 1, QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
         if (!m_texIn->create()) { qDebug2("init") << "failed to create m_texIn"; return false; }
@@ -88,16 +87,13 @@ public:
 
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
         if (!m_vertexBuffer->create()) { qDebug2("init") << "failed to create m_vertexBuffer"; return false; }
-        m_initialUpdates->uploadStaticBuffer(m_vertexBuffer.get(), quadVertexData);
 
         m_indexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::IndexBuffer, sizeof(quadIndexData)));
         if (!m_indexBuffer->create()) { qDebug2("init") << "failed to create m_indexBuffer"; return false; }
-        m_initialUpdates->uploadStaticBuffer(m_indexBuffer.get(), quadIndexData);
 
         m_drawingUniform.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, 64 + 4));
         if (!m_drawingUniform->create()) { qDebug2("init") << "failed to create m_drawingUniform"; return false; }
         qint32 flip = rhi->isYUpInFramebuffer();
-        m_initialUpdates->updateDynamicBuffer(m_drawingUniform.get(), 64, 4, &flip);
 
         m_drawingSampler.reset(rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
         if (!m_drawingSampler->create()) { qDebug2("init") << "failed to create m_drawingSampler"; return false; }
@@ -133,6 +129,11 @@ public:
         m_pipeline->setShaderResourceBindings(m_srb.get());
         m_pipeline->setRenderPassDescriptor(m_rtRp.get());
         if (!m_pipeline->create()) { qDebug2("init") << "failed to create m_pipeline"; return false; }
+
+        m_initialUpdates = rhi->nextResourceUpdateBatch();
+        m_initialUpdates->uploadStaticBuffer(m_vertexBuffer.get(), quadVertexData);
+        m_initialUpdates->uploadStaticBuffer(m_indexBuffer.get(), quadIndexData);
+        m_initialUpdates->updateDynamicBuffer(m_drawingUniform.get(), 64, 4, &flip);
 
         return true;
     }
