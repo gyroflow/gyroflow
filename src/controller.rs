@@ -50,7 +50,7 @@ pub struct Controller {
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     video_file_loaded: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
-    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue)),
+    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue)),
     load_lens_profile: qt_method!(fn(&mut self, path: String)),
     load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
@@ -574,7 +574,7 @@ impl Controller {
         }
     }
 
-    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, chart: QJSValue, kfview: QJSValue) {
+    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue) {
         let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
@@ -678,14 +678,6 @@ impl Controller {
                     let sample_rate = gyro.get_sample_rate();
                     drop(gyro);
 
-                    if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
-                        let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
-                        chart.setDurationMs(duration_ms);
-                    }
-                    if let Some(kfview) = kfview.to_qobject::<TimelineKeyframesView>() {
-                        let kfview = unsafe { &mut *kfview.as_ptr() }; // _self.borrow_mut();
-                        kfview.setDurationMs(duration_ms);
-                    }
                     let camera_id = stab.camera_id.read();
 
                     let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
@@ -840,17 +832,19 @@ impl Controller {
 
                 let _time = std::time::Instant::now();
                 let mut backend = String::new();
+                let mut fov = 1.0;
 
                 if preview_pipeline.load(SeqCst) == 0 {
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone()) {
                         update_info2((ret.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
-                        return true;
+                    } else {
+                        update_info2((fov, QString::from("---")));
                     }
+                    return true;
                 }
 
                 if preview_pipeline.load(SeqCst) > 1 { return false; }
 
-                let mut fov = 1.0;
                 let ret = match backend_id {
                     1 => { // OpenGL, ptr1: texture, ptr2: opengl context
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {

@@ -35,7 +35,7 @@ MenuItem {
             messageBox(Modal.Error, qsTr("Video file is not loaded."), [ { text: qsTr("Ok"), accent: true } ]);
             return;
         }
-        controller.load_telemetry(url, false, window.videoArea.vid, window.videoArea.timeline.getChart(), window.videoArea.timeline.getKeyframesView());
+        controller.load_telemetry(url, false, window.videoArea.vid);
     }
 
     function loadGyroflow(obj) {

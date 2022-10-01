@@ -75,7 +75,7 @@ Item {
         if (paths[1] && !isCorrectGyroLoaded && controller.file_exists(paths[1])) {
             root.pendingGyroflowData = obj;
             console.log("Loading gyro file", paths[1]);
-            controller.load_telemetry(controller.path_to_url(paths[1]), paths[0] == paths[1], window.videoArea.vid, window.videoArea.timeline.getChart(), window.videoArea.timeline.getKeyframesView());
+            controller.load_telemetry(controller.path_to_url(paths[1]), paths[0] == paths[1], window.videoArea.vid);
             return;
         }
 
@@ -488,6 +488,9 @@ Item {
                     window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
                 }
                 onMetadataLoaded: (md) => {
+                    Qt.callLater(fileLoaded, md);
+                }
+                function fileLoaded(md: object) {
                     loaded = duration > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
@@ -499,7 +502,7 @@ Item {
                     if (root.pendingGyroflowData) {
                         Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData);
                     } else {
-                        controller.load_telemetry(vid.url, true, vid, timeline.getChart(), timeline.getKeyframesView());
+                        controller.load_telemetry(vid.url, true, vid);
                     }
                     vidInfo.loadFromVideoMetadata(md);
                     window.sync.customSyncTimestamps = [];

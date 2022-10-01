@@ -203,7 +203,7 @@ For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU imple
 3. `src/core` contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*, and *OpenCV* is optional
 4. `src/rendering` contains all FFmpeg related code for rendering final video and processing for synchronization
 5. `src/core/gpu` contains GPU implementations of the undistortion
-6. `src/qt_gpu` contains zero-copy GPU undistortion path, using Qt RHI and GLSL compute shader, but this method is experimental and buggy for now
+6. `src/qt_gpu` contains zero-copy GPU undistortion path, using Qt RHI and GLSL compute shader
 7. `src/gyroflow.rs` is the main entry point
 8. `mod.rs` or `lib.rs` in each directory act as a main entry of the module (directory name is the module name and `mod.rs` is kind of an entry point)
 
@@ -274,7 +274,7 @@ The project also supports UI live reload, it's a super quick way of working with
 1. Uncomment `config.define("QT_QML_DEBUG", None);` in `build.rs`
 2. Comment `cli::run()` in `gyroflow.rs`
 3. Run in debug mode with QML debugger args: `cargo run -- "-qmljsdebugger=port:1234,block,services:CanvasFrameRate,EngineControl,DebugMessages"`
-4. in Qt Creator go to `Analyze` -> `QML Profiler (Attach to Waiting Application` and enter port 1234
+4. In Qt Creator go to `Analyze` -> `QML Profiler (Attach to Waiting Application)` and enter port 1234
 
 ## License
 

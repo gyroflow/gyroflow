@@ -53,17 +53,31 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
         let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
             if (!mdkplayer || !mdkplayer->mdkplayer) return false;
 
-            if (!QFile::exists(shader_path)) { qDebug2("render") << shader_path << "doesn't exist"; return false; }
-
-            if (output_size.width() < 4 || output_size.height() < 4) return false;
-
             auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
 
-            if (!rhiUndistortion || rhiUndistortion->outSize() != output_size || rhiUndistortion->texSize() != QSize(width, height) || rhiUndistortion->shaderPath() != shader_path) {
+            if (!QFile::exists(shader_path)) {
+                qDebug2("render") << shader_path << "doesn't exist";
+                delete rhiUndistortion;
+                mdkplayer->mdkplayer->setUserData(nullptr);
+                return false;
+            }
+            if (output_size.width() < 4 || output_size.height() < 4) {
+                delete rhiUndistortion;
+                mdkplayer->mdkplayer->setUserData(nullptr);
+                return true;
+            }
+
+            if (!rhiUndistortion
+              || rhiUndistortion->outSize() != output_size
+              || rhiUndistortion->texSize() != QSize(width, height)
+              || rhiUndistortion->shaderPath() != shader_path
+              || rhiUndistortion->itemTexturePtr() != mdkplayer->mdkplayer->rhiTexture()) {
                 delete rhiUndistortion;
                 rhiUndistortion = new QtRHIUndistort();
                 if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, canvas_size)) {
                     qDebug2("render") << "Failed to initialize";
+                    delete rhiUndistortion;
+                    mdkplayer->mdkplayer->setUserData(nullptr);
                     return false;
                 }
                 qDebug2("render") << "Initialized" << QSize(width, height) << "->" << output_size << shader_path << rhiUndistortion;
@@ -72,7 +86,6 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
                     delete static_cast<QtRHIUndistort *>(ptr);
                 });
             }
-            if (!rhiUndistortion) return false;
 
             return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len);
         });

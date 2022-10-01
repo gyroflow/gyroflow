@@ -49,6 +49,7 @@ public:
     QSize outSize() { return m_outputSize; }
     QSize texSize() { return m_textureSize; }
     QString shaderPath() { return m_shaderPath; }
+    QRhiTexture *itemTexturePtr() { return m_itemTexturePtr; }
 
     bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, QSize canvasSize) {
         if (!item) return false;
@@ -58,6 +59,7 @@ public:
         m_outputSize = outputSize;
         m_textureSize = textureSize;
         m_shaderPath = shaderPath;
+        m_itemTexturePtr = item->rhiTexture();
 
         m_initialUpdates = rhi->nextResourceUpdateBatch();
 
@@ -191,6 +193,8 @@ public:
             return QShader::fromSerialized(f.readAll());
         return QShader();
     }
+
+    QRhiTexture *m_itemTexturePtr{nullptr};
 
     QScopedPointer<QRhiTexture> m_texIn;
     QScopedPointer<QRhiTexture> m_texMatrices;
