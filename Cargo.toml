@@ -75,8 +75,7 @@ winres = "0.1.12"
 walkdir = "2.3.2"
 cc = "1.0.73"
 
-[lib]
-crate-type = ["cdylib"]
+[[bin]]
 name = "gyroflow"
 path = "src/gyroflow.rs"
 
