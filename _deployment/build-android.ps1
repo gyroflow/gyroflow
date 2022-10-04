@@ -140,7 +140,6 @@ $job = Start-Job -Name "Cleanup" -ArgumentList "$PROJECT_DIR\target\android-buil
         Remove-Item "${args}\*tooling*"
         Remove-Item "${args}\*qgif*"
         Remove-Item "${args}\*qico*"
-        Remove-Item "${args}\*qjpeg*"
         Start-Sleep -Milliseconds 300;
     }
 }

@@ -1018,7 +1018,7 @@ impl RenderQueue {
                                     err(("An error occured: %1".to_string(), e.to_string()));
                                 }
 
-                                Self::do_autosync(&path, info.duration_ms, &video_size, stab.clone(), processing, err.clone(), sync_options);
+                                Self::do_autosync(&path, info.duration_ms, stab.clone(), processing, err.clone(), sync_options);
 
                                 processing_done(());
                             }
@@ -1034,7 +1034,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, video_size: &(usize, usize), stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
         let (has_gyro, has_sync_points) = {
             let gyro = stab.gyro.read();
             (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
@@ -1073,9 +1073,7 @@ impl RenderQueue {
 
                             let every_nth_frame = sync_params.every_nth_frame.max(1);
 
-                            let size = stab.params.read().size;
-                            let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
-                            stab.set_size(sw as usize, sh as usize);
+                            let size = stab.params.read().video_size;
 
                             if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
                                 let processing_cb2 = processing_cb.clone();
@@ -1097,7 +1095,8 @@ impl RenderQueue {
                                     }
                                 });
 
-                                let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)) as u32, 720);
+                                let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)).round() as u32, 720);
+
                                 let gpu_decoding = *rendering::GPU_DECODING.read();
 
                                 let mut frame_no = 0;
@@ -1131,7 +1130,6 @@ impl RenderQueue {
                                         sync.finished_feeding_frames();
                                     }
                                     Err(error) => {
-                                        dbg!(&error.to_string());
                                         err(("An error occured: %1".to_string(), error.to_string()));
                                     }
                                 }
@@ -1139,7 +1137,6 @@ impl RenderQueue {
                                 err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
                             }
 
-                            stab.set_size(video_size.0, video_size.1);
                             stab.recompute_blocking();
                         }
                     }
@@ -1205,11 +1202,11 @@ impl RenderQueue {
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false))) {
                             ::log::error!("Failed to update queue stab data: {:?}", e);
                         }
-                        let (path, duration_ms, video_size, ) = {
+                        let (path, duration_ms, ) = {
                             let params = stab.params.read();
-                            (stab.input_file.read().path.clone(), params.duration_ms, params.video_size)
+                            (stab.input_file.read().path.clone(), params.duration_ms)
                         };
-                        Self::do_autosync(&path, duration_ms, &video_size, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
+                        Self::do_autosync(&path, duration_ms, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
                         processing_done(job_id);
                     });
 

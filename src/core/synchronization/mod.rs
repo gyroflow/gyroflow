@@ -111,14 +111,14 @@ impl PoseEstimator {
         let _ = opencv::init();
     }
 
-    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: usize, img: Arc<image::GrayImage>) {
-        let frame_size = (img.width(), img.height());
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: usize, img: Arc<image::GrayImage>, width: u32, height: u32) {
+        let frame_size = (width, height);
         let item = match method {
-            0 => ItemAkaze::detect_features(timestamp_us, img).into(),
+            0 => ItemAkaze::detect_features(timestamp_us, img, width, height).into(),
             #[cfg(feature = "use-opencv")]
-            1 => ItemOpenCV::detect_features(timestamp_us, img).into(),
+            1 => ItemOpenCV::detect_features(timestamp_us, img, width, height).into(),
             #[cfg(feature = "use-opencv")]
-            2 => ItemOpenCVDis::detect_features(timestamp_us, img).into(),
+            2 => ItemOpenCVDis::detect_features(timestamp_us, img, width, height).into(),
             _ => panic!("Invalid method {}", method) // TODO change to Result<>
         };
         {

@@ -105,10 +105,10 @@ impl ItemAkaze {
         satisfies_lowes_ratio.map(|(ix1, neighbors)| (ix1, neighbors[0].index)).collect()
     }
 
-    pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
+    pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
         let mut akz = Akaze::new(0.0007);
         akz.maximum_features = 200;
-        let img_size = (img.width(), img.height());
+        let img_size = (width, height);
         let (points, descriptors) = akz.extract(&image::DynamicImage::ImageLuma8(Arc::try_unwrap(img).unwrap()));
 
         /*let mut hasher = crc32fast::Hasher::new();

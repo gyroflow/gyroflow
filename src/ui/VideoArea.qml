@@ -199,6 +199,11 @@ Item {
             }
         }
         function onChart_data_changed() {
+            chartUpdateTimer.series = "";
+            chartUpdateTimer.start();
+        }
+        function onZooming_data_changed() {
+            chartUpdateTimer.series = "8";
             chartUpdateTimer.start();
         }
         function onKeyframes_changed() {
@@ -424,7 +429,8 @@ Item {
         repeat: false;
         running: false;
         interval: 100;
-        onTriggered: Qt.callLater(controller.update_chart, timeline.getChart());
+        property string series;
+        onTriggered: Qt.callLater(controller.update_chart, timeline.getChart(), series);
     }
 
     Item {

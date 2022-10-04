@@ -311,6 +311,8 @@ pub fn run(open_file: &mut String) -> bool {
 
                 queue.jobs_added.remove(job_id);
 
+                let mut applying_preset = false;
+
                 if queue.jobs_added.is_empty() {
                     // All jobs added and completed processing
 
@@ -320,8 +322,10 @@ pub fn run(open_file: &mut String) -> bool {
                             log::info!("Applying preset {}", preset);
                             if preset.starts_with('{') {
                                 queue.apply_to_all(preset.clone(), additional_data.to_string());
+                                applying_preset = true;
                             } else if let Ok(data) = std::fs::read_to_string(&preset) {
                                 queue.apply_to_all(data, additional_data.to_string());
+                                applying_preset = true;
                             }
                         }
                     }
@@ -330,9 +334,11 @@ pub fn run(open_file: &mut String) -> bool {
                         presets.clear();
                     }
 
-                    qmetaobject::single_shot(std::time::Duration::from_millis(500), move || {
-                        queue.start(); // Start the rendering queue
-                    });
+                    if !applying_preset {
+                        qmetaobject::single_shot(std::time::Duration::from_millis(500), move || {
+                            queue.start(); // Start the rendering queue
+                        });
+                    }
                 }
             });
         }

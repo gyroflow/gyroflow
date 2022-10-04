@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 
+use gyroflow_core::stabilization_params::StabilizationParams;
 use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
 use crate::util;
@@ -20,6 +21,7 @@ struct Series {
     data: BTreeMap<i64, f64>, // timestamp, value
     lines: Vec<Vec<QLineF>>,
     is_optflow: bool,
+    is_fovs: bool,
     visible: bool,
 }
 
@@ -38,6 +40,7 @@ pub struct TimelineGyroChart {
     visibleAreaLeft: qt_property!(f64; WRITE setVisibleAreaLeft),
     visibleAreaRight: qt_property!(f64; WRITE setVisibleAreaRight),
     vscale: qt_property!(f64; WRITE setVScale),
+    theme: qt_property!(String),
 
     setDurationMs: qt_method!(fn(&mut self, v: f64)),
     setVScaleToVisibleArea: qt_method!(fn(&mut self)),
@@ -48,12 +51,13 @@ pub struct TimelineGyroChart {
 
     viewMode: qt_property!(u32; WRITE setViewMode NOTIFY viewModeChanged),
 
-    series: [Series; 4+4],
+    series: [Series; 4+4+1],
 
     gyro: Vec<ChartData>,
     accl: Vec<ChartData>,
     magn: Vec<ChartData>,
     quats: Vec<ChartData>,
+    fovs: Vec<ChartData>,
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
     org_sync_results: Vec<ChartData>,
@@ -71,7 +75,7 @@ impl TimelineGyroChart {
     fn setAxisVisible     (&mut self, a: usize, v: bool) { self.series[a].visible = v; self.update(); self.axisVisibleChanged(); }
     fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
-    fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(); self.viewModeChanged(); }
+    fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(""); self.viewModeChanged(); }
 
     pub fn setVScaleToVisibleArea(&mut self) {
         let rect = (self as &dyn QQuickItem).bounding_rect();
@@ -127,18 +131,20 @@ impl TimelineGyroChart {
                 let num_samples = range.clone().count();
 
                 serie.lines.clear();
+                let vscale = if serie.is_fovs { 1.0 } else { self.vscale };
+                let add_y =  if serie.is_fovs { half_height } else { 0.0 };
                 if num_samples > 1 {
                     if let Some(first_item) = range.next() {
                         let mut line = Vec::new();
                         let mut prev_point = (*first_item.0, QPointF {
                             x: map_to_visible_area(*first_item.0 as f64 / duration_us) * rect.width,
-                            y: (1.0 - *first_item.1 * self.vscale) * half_height
+                            y: (1.0 - *first_item.1 * vscale) * half_height + add_y
                         });
                         let step = (num_samples / resolution as usize).max(1);
                         for data in range.step_by(step) {
                             let point = QPointF {
                                 x: map_to_visible_area(*data.0 as f64 / duration_us) * rect.width,
-                                y: (1.0 - *data.1 * self.vscale) * half_height
+                                y: (1.0 - *data.1 * vscale) * half_height + add_y
                             };
 
                             let new_line = serie.is_optflow && *data.0 - prev_point.0 > 100_000;
@@ -170,6 +176,30 @@ impl TimelineGyroChart {
             }
         }
     }
+    fn drawOverlay(&mut self, p: &mut QPainter, a: usize, color: &str) {
+        let rect = (self as &dyn QQuickItem).bounding_rect();
+
+        let mut pen = QPen::from_color(QColor::from_name(color));
+        pen.set_width_f(1.5); // TODO * dpiScale
+        p.set_pen(pen);
+
+        let mut brush = QBrush::from_color(QColor::from_name(color));
+        brush.set_style(BrushStyle::SolidPattern);
+        p.set_brush(brush);
+
+        for l in &self.series[a].lines {
+            if !l.is_empty() {
+                let mut points = Vec::with_capacity(l.len() * 2);
+                points.push(QPointF { x: -2.0, y: rect.height });
+                for line in l {
+                    points.push(line.pt1);
+                    points.push(line.pt2);
+                }
+                points.push(QPointF { x: rect.width + 2.0, y: rect.height });
+                p.draw_polygon(&points);
+            }
+        }
+    }
 
     pub fn setSyncResults(&mut self, data: &BTreeMap<i64, TimeIMU>) {
         if self.viewMode == 0 {
@@ -185,8 +215,6 @@ impl TimelineGyroChart {
             }
             self.org_sync_results = self.sync_results.clone();
             Self::normalize_height(&mut self.sync_results, self.gyro_max);
-
-            self.update_data();
         }
     }
 
@@ -203,77 +231,87 @@ impl TimelineGyroChart {
             }
             self.org_sync_quats = self.sync_quats.clone();
             Self::normalize_height(&mut self.sync_quats, None);
-            self.update_data();
         }
     }
 
-    pub fn setFromGyroSource(&mut self, gyro: &GyroSource) {
-        self.gyro = Vec::with_capacity(gyro.raw_imu.len());
-        self.accl = Vec::with_capacity(gyro.raw_imu.len());
-        self.magn = Vec::with_capacity(gyro.raw_imu.len());
-        self.quats = Vec::with_capacity(gyro.quaternions.len());
-        self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
+    pub fn setFromGyroSource(&mut self, gyro: &GyroSource, params: &StabilizationParams, series: &str) {
+        if series.is_empty() {
+            self.gyro = Vec::with_capacity(gyro.raw_imu.len());
+            self.accl = Vec::with_capacity(gyro.raw_imu.len());
+            self.magn = Vec::with_capacity(gyro.raw_imu.len());
+            self.quats = Vec::with_capacity(gyro.quaternions.len());
+            self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
 
-        for x in &gyro.raw_imu {
-            if self.viewMode == 0 {
-                if let Some(g) = x.gyro.as_ref() {
-                    self.gyro.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                        values: [g[0], g[1], g[2], 0.0]
-                    });
+            for x in &gyro.raw_imu {
+                if self.viewMode == 0 {
+                    if let Some(g) = x.gyro.as_ref() {
+                        self.gyro.push(ChartData {
+                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                            values: [g[0], g[1], g[2], 0.0]
+                        });
+                    }
+                }
+                if self.viewMode == 1 {
+                    if let Some(a) = x.accl.as_ref() {
+                        self.accl.push(ChartData {
+                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                            values: [a[0], a[1], a[2], 0.0]
+                        });
+                    }
+                }
+                if self.viewMode == 2 {
+                    if let Some(m) = x.magn.as_ref() {
+                        self.magn.push(ChartData {
+                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                            values: [m[0], m[1], m[2], 0.0]
+                        });
+                    }
                 }
             }
-            if self.viewMode == 1 {
-                if let Some(a) = x.accl.as_ref() {
-                    self.accl.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                        values: [a[0], a[1], a[2], 0.0]
-                    });
-                }
+
+            if self.viewMode == 3 {
+                let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
+                    for x in quats {
+                        let mut ts = *x.0 as f64 / 1000.0;
+                        ts += gyro.offset_at_gyro_timestamp(ts);
+
+                        let q = x.1.quaternion().as_vector();
+
+                        out_quats.push(ChartData {
+                            timestamp_us: (ts * 1000.0) as i64,
+                            values: [q[0], q[1], q[2], q[3]]
+                        });
+                    }
+                };
+                add_quats(&gyro.quaternions, &mut self.quats);
+                add_quats(&gyro.org_smoothed_quaternions, &mut self.smoothed_quats);
             }
-            if self.viewMode == 2 {
-                if let Some(m) = x.magn.as_ref() {
-                    self.magn.push(ChartData {
-                        timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                        values: [m[0], m[1], m[2], 0.0]
-                    });
-                }
+
+            match self.viewMode {
+                0 => { self.gyro_max = Self::normalize_height(&mut self.gyro, None); },
+                1 => { Self::normalize_height(&mut self.accl, None); },
+                2 => { Self::normalize_height(&mut self.magn, None); },
+                3 => {
+                    let qmax = Self::normalize_height(&mut self.quats, None);
+                    Self::normalize_height(&mut self.smoothed_quats, qmax);
+                },
+                _ => { }
             }
+
+            self.sync_results = self.org_sync_results.clone();
+            Self::normalize_height(&mut self.sync_results, self.gyro_max);
+        }
+        if series.is_empty() || series == "8" {
+            let fps = params.get_scaled_fps();
+            let max = *params.fovs.iter().max_by(|a, b| a.total_cmp(b)).unwrap_or(&1.0);
+            self.fovs = params.fovs.iter().enumerate().map(|(i, x)| ChartData {
+                timestamp_us: (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64,
+                values: [max - *x, 0.0, 0.0, 0.0]
+            }).collect();
+            Self::normalize_height(&mut self.fovs, None);
         }
 
-        if self.viewMode == 3 {
-            let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
-                for x in quats {
-                    let mut ts = *x.0 as f64 / 1000.0;
-                    ts += gyro.offset_at_gyro_timestamp(ts);
-
-                    let q = x.1.quaternion().as_vector();
-
-                    out_quats.push(ChartData {
-                        timestamp_us: (ts * 1000.0) as i64,
-                        values: [q[0], q[1], q[2], q[3]]
-                    });
-                }
-            };
-            add_quats(&gyro.quaternions, &mut self.quats);
-            add_quats(&gyro.org_smoothed_quaternions, &mut self.smoothed_quats);
-        }
-
-        match self.viewMode {
-            0 => { self.gyro_max = Self::normalize_height(&mut self.gyro, None); },
-            1 => { Self::normalize_height(&mut self.accl, None); },
-            2 => { Self::normalize_height(&mut self.magn, None); },
-            3 => {
-                let qmax = Self::normalize_height(&mut self.quats, None);
-                Self::normalize_height(&mut self.smoothed_quats, qmax);
-            },
-            _ => { }
-        }
-
-        self.sync_results = self.org_sync_results.clone();
-        Self::normalize_height(&mut self.sync_results, self.gyro_max);
-
-        self.update_data();
+        self.update_data(series);
     }
     fn get_serie_vector(vec: &[ChartData], i: usize) -> BTreeMap<i64, f64> {
         let mut ret = BTreeMap::new();
@@ -282,54 +320,59 @@ impl TimelineGyroChart {
         }
         ret
     }
-    pub fn update_data(&mut self) {
-        for s in &mut self.series {
-            s.data.clear();
+    pub fn update_data(&mut self, series: &str) {
+        if series.is_empty() {
+            for s in &mut self.series {
+                s.data.clear();
+            }
+            match self.viewMode {
+                0 => {  // Gyroscope
+                    self.series[0].data = Self::get_serie_vector(&self.gyro, 0);
+                    self.series[1].data = Self::get_serie_vector(&self.gyro, 1);
+                    self.series[2].data = Self::get_serie_vector(&self.gyro, 2);
+
+                    // + Sync results
+                    self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
+                    self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
+                    self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
+                    self.series[4].is_optflow = true;
+                    self.series[5].is_optflow = true;
+                    self.series[6].is_optflow = true;
+                }
+                1 => { // Accelerometer
+                    self.series[0].data = Self::get_serie_vector(&self.accl, 0);
+                    self.series[1].data = Self::get_serie_vector(&self.accl, 1);
+                    self.series[2].data = Self::get_serie_vector(&self.accl, 2);
+                }
+                2 => { // Magnetometer
+                    self.series[0].data = Self::get_serie_vector(&self.magn, 0);
+                    self.series[1].data = Self::get_serie_vector(&self.magn, 1);
+                    self.series[2].data = Self::get_serie_vector(&self.magn, 2);
+                }
+                3 => { // Quaternions
+                    self.series[0].data = Self::get_serie_vector(&self.quats, 0);
+                    self.series[1].data = Self::get_serie_vector(&self.quats, 1);
+                    self.series[2].data = Self::get_serie_vector(&self.quats, 2);
+                    self.series[3].data = Self::get_serie_vector(&self.quats, 3);
+
+                    // + Sync quaternions
+                    // self.series[4].data = Self::get_serie_vector(&self.sync_quats, 0);
+                    // self.series[5].data = Self::get_serie_vector(&self.sync_quats, 1);
+                    // self.series[6].data = Self::get_serie_vector(&self.sync_quats, 2);
+                    // self.series[7].data = Self::get_serie_vector(&self.sync_quats, 3);
+
+                    // + Smoothed quaternions
+                    self.series[4].data = Self::get_serie_vector(&self.smoothed_quats, 0);
+                    self.series[5].data = Self::get_serie_vector(&self.smoothed_quats, 1);
+                    self.series[6].data = Self::get_serie_vector(&self.smoothed_quats, 2);
+                    self.series[7].data = Self::get_serie_vector(&self.smoothed_quats, 3);
+                }
+                _ => panic!("Invalid view mode")
+            }
         }
-        match self.viewMode {
-            0 => {  // Gyroscope
-                self.series[0].data = Self::get_serie_vector(&self.gyro, 0);
-                self.series[1].data = Self::get_serie_vector(&self.gyro, 1);
-                self.series[2].data = Self::get_serie_vector(&self.gyro, 2);
 
-                // + Sync results
-                self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
-                self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
-                self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
-                self.series[4].is_optflow = true;
-                self.series[5].is_optflow = true;
-                self.series[6].is_optflow = true;
-            }
-            1 => { // Accelerometer
-                self.series[0].data = Self::get_serie_vector(&self.accl, 0);
-                self.series[1].data = Self::get_serie_vector(&self.accl, 1);
-                self.series[2].data = Self::get_serie_vector(&self.accl, 2);
-            }
-            2 => { // Magnetometer
-                self.series[0].data = Self::get_serie_vector(&self.magn, 0);
-                self.series[1].data = Self::get_serie_vector(&self.magn, 1);
-                self.series[2].data = Self::get_serie_vector(&self.magn, 2);
-            }
-            3 => { // Quaternions
-                self.series[0].data = Self::get_serie_vector(&self.quats, 0);
-                self.series[1].data = Self::get_serie_vector(&self.quats, 1);
-                self.series[2].data = Self::get_serie_vector(&self.quats, 2);
-                self.series[3].data = Self::get_serie_vector(&self.quats, 3);
-
-                // + Sync quaternions
-                // self.series[4].data = Self::get_serie_vector(&self.sync_quats, 0);
-                // self.series[5].data = Self::get_serie_vector(&self.sync_quats, 1);
-                // self.series[6].data = Self::get_serie_vector(&self.sync_quats, 2);
-                // self.series[7].data = Self::get_serie_vector(&self.sync_quats, 3);
-
-                // + Smoothed quaternions
-                self.series[4].data = Self::get_serie_vector(&self.smoothed_quats, 0);
-                self.series[5].data = Self::get_serie_vector(&self.smoothed_quats, 1);
-                self.series[6].data = Self::get_serie_vector(&self.smoothed_quats, 2);
-                self.series[7].data = Self::get_serie_vector(&self.smoothed_quats, 3);
-            }
-            _ => panic!("Invalid view mode")
-        }
+        self.series[8].data = Self::get_serie_vector(&self.fovs, 0);
+        self.series[8].is_fovs = true;
 
         self.update();
     }
@@ -368,6 +411,8 @@ impl QQuickItem for TimelineGyroChart {
         self.series[4].visible = true;
         self.series[5].visible = true;
         self.series[6].visible = true;
+
+        self.series[8].visible = true;
     }
 
     fn geometry_changed(&mut self, _new: QRectF, _old: QRectF) {
@@ -379,15 +424,28 @@ impl QQuickPaintedItem for TimelineGyroChart {
     fn paint(&mut self, p: &mut QPainter) {
         p.set_render_hint(QPainterRenderHint::Antialiasing, true);
 
-        if self.series[0].visible { self.drawAxis(p, 0, "#8f4c4c"); } // X
-        if self.series[1].visible { self.drawAxis(p, 1, "#4c8f4d"); } // Y
-        if self.series[2].visible { self.drawAxis(p, 2, "#4c7c8f"); } // Z
-        if self.series[3].visible { self.drawAxis(p, 3, "#8f4c8f"); } // Angle
+        let colors = if self.theme == "light" { // Light theme
+            ["#8f4c4c", "#4c8f4d", "#4c7c8f", "#8f4c8f",
+             "#ff8888", "#88ff88", "#88deff", "#ff88ff",
+             "#10000000"
+            ]
+        } else { // Dark theme
+            ["#8f4c4c", "#4c8f4d", "#4c7c8f", "#8f4c8f",
+             "#ff8888", "#88ff88", "#88deff", "#ff88ff",
+             "#10ffffff"
+            ]
+        };
 
-        if self.series[4].visible { self.drawAxis(p, 4, "#ff8888"); } // Sync X
-        if self.series[5].visible { self.drawAxis(p, 5, "#88ff88"); } // Sync Y
-        if self.series[6].visible { self.drawAxis(p, 6, "#88deff"); } // Sync Z
-        if self.series[7].visible { self.drawAxis(p, 7, "#ff88ff"); } // Sync Angle
+        if self.series[0].visible { self.drawAxis(p, 0, colors[0]); } // X
+        if self.series[1].visible { self.drawAxis(p, 1, colors[1]); } // Y
+        if self.series[2].visible { self.drawAxis(p, 2, colors[2]); } // Z
+        if self.series[3].visible { self.drawAxis(p, 3, colors[3]); } // Angle
 
+        if self.series[4].visible { self.drawAxis(p, 4, colors[4]); } // Sync X
+        if self.series[5].visible { self.drawAxis(p, 5, colors[5]); } // Sync Y
+        if self.series[6].visible { self.drawAxis(p, 6, colors[6]); } // Sync Z
+        if self.series[7].visible { self.drawAxis(p, 7, colors[7]); } // Sync Angle
+
+        if self.series[8].visible { self.drawOverlay(p, 8, colors[8]); } // FOVs - zooming amount
     }
 }

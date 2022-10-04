@@ -58,7 +58,7 @@ pub struct Controller {
 
     set_of_method: qt_method!(fn(&self, v: u32)),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
-    update_chart: qt_method!(fn(&self, chart: QJSValue)),
+    update_chart: qt_method!(fn(&self, chart: QJSValue, series: String)),
     update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
@@ -153,6 +153,7 @@ pub struct Controller {
     set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
 
     chart_data_changed: qt_signal!(),
+    zooming_data_changed: qt_signal!(),
     keyframes_changed: qt_signal!(),
 
     cancel_current_operation: qt_method!(fn(&mut self)),
@@ -404,8 +405,8 @@ impl Controller {
                             if abs_frame_no % every_nth_frame == 0 {
                                 let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
                                 let ratio = input_frame.height() as f64 / h as f64;
-                                let sw = (input_frame.width() as f64 / ratio).floor() as u32;
-                                let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).floor() as u32;
+                                let sw = (input_frame.width() as f64 / ratio).round() as u32;
+                                let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
                                 match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                     Ok(small_frame) => {
                                         let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
@@ -468,14 +469,16 @@ impl Controller {
         }
     }
 
-    fn update_chart(&mut self, chart: QJSValue) {
+    fn update_chart(&mut self, chart: QJSValue, series: String) {
         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
 
-            chart.setSyncResults(&*self.stabilizer.pose_estimator.estimated_gyro.read());
-            chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
+            if series.is_empty() {
+                chart.setSyncResults(&*self.stabilizer.pose_estimator.estimated_gyro.read());
+                chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
+            }
 
-            chart.setFromGyroSource(&self.stabilizer.gyro.read());
+            chart.setFromGyroSource(&self.stabilizer.gyro.read(), &self.stabilizer.params.read(), &series);
         }
     }
 
@@ -1136,7 +1139,7 @@ impl Controller {
     }
 
     wrap_simple_method!(override_video_fps,         v: f64; recompute; update_offset_model);
-    wrap_simple_method!(set_video_rotation,         v: f64; recompute);
+    wrap_simple_method!(set_video_rotation,         v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
@@ -1144,21 +1147,21 @@ impl Controller {
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
-    wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute);
-    wrap_simple_method!(set_zooming_center_x,   v: f64; recompute);
-    wrap_simple_method!(set_zooming_center_y,   v: f64; recompute);
+    wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
-    wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute);
+    wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
     wrap_simple_method!(set_lens_is_asymmetrical,      v: bool; recompute);
     wrap_simple_method!(set_input_vertical_stretch,    v: f64; recompute);
     wrap_simple_method!(set_background_mode,           v: i32; recompute);
     wrap_simple_method!(set_background_margin,         v: f64; recompute);
     wrap_simple_method!(set_background_margin_feather, v: f64; recompute);
-    wrap_simple_method!(set_video_speed,               v: f64, s: bool, z: bool; recompute);
+    wrap_simple_method!(set_video_speed,               v: f64, s: bool, z: bool; recompute; zooming_data_changed);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);

@@ -72,9 +72,9 @@ impl EstimatorItemInterface for ItemOpenCV {
 }
 
 impl ItemOpenCV {
-    pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
-        let (w, h) = (img.width() as i32, img.height() as i32);
-        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, w as usize) };
+    pub fn detect_features(_timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+        let (w, h) = (width as i32, height as i32);
+        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, img.width() as usize) };
 
         // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
 

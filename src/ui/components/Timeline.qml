@@ -82,7 +82,7 @@ Item {
     }
     function setDisplayMode(i) {
         chart.viewMode = i;
-        controller.update_chart(chart);
+        controller.update_chart(chart, "");
     }
 
     function updateDurations() {
@@ -92,7 +92,7 @@ Item {
         root.orgDurationMs = controller.get_org_duration_ms();
         root.scaledFps     = controller.get_scaled_fps();
 
-        Qt.callLater(controller.update_chart, chart);
+        Qt.callLater(controller.update_chart, chart, "");
         Qt.callLater(controller.update_keyframes_view, keyframes);
     }
 
@@ -145,6 +145,7 @@ Item {
         TimelineAxisButton { id: a1; text: "Y"; onCheckedChanged: chart.setAxisVisible(1, checked); checked: chart.getAxisVisible(1); }
         TimelineAxisButton { id: a2; text: "Z"; onCheckedChanged: chart.setAxisVisible(2, checked); checked: chart.getAxisVisible(2); }
         TimelineAxisButton { id: a3; text: "W"; onCheckedChanged: chart.setAxisVisible(3, checked); checked: chart.getAxisVisible(3); }
+        TimelineAxisButton { id: a8; text: "Z"; onCheckedChanged: chart.setAxisVisible(8, checked); checked: chart.getAxisVisible(8); tooltip: qsTr("Zooming"); }
     }
     Column {
         visible: !root.fullScreen;
@@ -182,6 +183,36 @@ Item {
                 anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
                 anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
                 opacity: root.trimActive? 0.9 : 1.0;
+                theme: style;
+                onViewModeChanged: {
+                    switch (viewMode) {
+                        case 0: // Gyroscope
+                        case 1: // Accelerometer
+                        case 2: // Magnetometer
+                            a3.visible = false;
+                            a7.visible = false;
+                            a0.text = "Y"; a0.tooltip = qsTr("Yaw axis");
+                            a1.text = "P"; a1.tooltip = qsTr("Pitch axis");
+                            a2.text = "R"; a2.tooltip = qsTr("Roll axis");
+                            a4.text = "Y"; a4.tooltip = qsTr("Yaw axis");
+                            a5.text = "P"; a5.tooltip = qsTr("Pitch axis");
+                            a6.text = "R"; a6.tooltip = qsTr("Roll axis");
+                        break;
+                        case 3: // Quaternions
+                            a3.visible = true;
+                            a7.visible = true;
+                            a0.text = "X"; a0.tooltip = "X";
+                            a1.text = "Y"; a1.tooltip = "Y";
+                            a2.text = "Z"; a2.tooltip = "Z";
+                            a3.text = "W"; a3.tooltip = qsTr("Angle");
+                            a4.text = "X"; a4.tooltip = "X";
+                            a5.text = "Y"; a5.tooltip = "Y";
+                            a6.text = "Z"; a6.tooltip = "Z";
+                            a7.text = "W"; a7.tooltip = qsTr("Angle");
+                        break;
+                    }
+                }
+                Component.onCompleted: viewModeChanged();
                 onAxisVisibleChanged: {
                     a0.checked = chart.getAxisVisible(0);
                     a1.checked = chart.getAxisVisible(1);
@@ -191,6 +222,7 @@ Item {
                     a5.checked = chart.getAxisVisible(5);
                     a6.checked = chart.getAxisVisible(6);
                     a7.checked = chart.getAxisVisible(7);
+                    a8.checked = chart.getAxisVisible(8);
                 }
             }
 
@@ -519,8 +551,10 @@ Item {
                 }
                 Component.onCompleted: {
                     if (!isCalibrator) {
-                        timelineContextMenuInner.removeAction(addCalibAction);
-                        timelineContextMenuInner.removeItem(msep);
+                        Qt.callLater(function() {
+                            timelineContextMenuInner.removeAction(addCalibAction);
+                            timelineContextMenuInner.removeItem(msep);
+                        })
                     }
                 }
             }

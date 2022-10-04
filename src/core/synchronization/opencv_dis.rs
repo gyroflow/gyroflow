@@ -72,8 +72,8 @@ impl EstimatorItemInterface for ItemOpenCVDis {
 }
 
 impl ItemOpenCVDis {
-    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>) -> Self {
-        let (w, h) = (img.width() as i32, img.height() as i32);
+    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+        let (w, h) = (width as i32, height as i32);
         Self {
             features: Vec::new(),
             timestamp_us,
@@ -93,8 +93,10 @@ impl ItemOpenCVDis {
             }
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
+                let stride1 = self.img.width();
+                let stride2 = next.img.width();
+                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, stride1 as usize) }?;
+                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, stride2 as usize) }?;
 
                 let mut of = Mat::default();
                 let mut optflow = <dyn opencv::video::DISOpticalFlow>::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;

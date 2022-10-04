@@ -157,7 +157,7 @@ MenuItem {
         function updateGpuStatus() {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
-            if ((format.name == "H.264/AVC" && window.vidInfo.pixelFormat.includes("10 bit"))) {
+            if ((format.name == "H.264/AVC" && window.vidInfo && window.vidInfo.pixelFormat.includes("10 bit"))) {
                 gpu.enabled2 = false;
             }
             const gpuChecked = +settings.value("exportGpu-" + currentIndex, -1);

@@ -120,8 +120,11 @@ impl AutosyncProcess {
         self.ranges_us.iter().map(|&v| (v.0 as f64 / 1000.0, v.1 as f64 / 1000.0)).collect()
     }
 
-    pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, width: u32, height: u32, stride: usize, pixels: &[u8]) {
+    pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, mut width: u32, height: u32, stride: usize, pixels: &[u8]) {
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
+        if width > stride as u32 {
+            width = stride as u32;
+        }
 
         let method = self.sync_params.of_method;
         let estimator = self.estimator.clone();
@@ -146,7 +149,7 @@ impl AutosyncProcess {
                     return;
                 }
                 if let Some(img) = img {
-                    estimator.detect_features(frame_no, timestamp_us, method, img);
+                    estimator.detect_features(frame_no, timestamp_us, method, img, width, height);
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame_no % 7 == 0 {
