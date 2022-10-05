@@ -68,7 +68,7 @@ Not: Bu yalnızca görsel bir işarettir, render işlemini etkilemez.</translati
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Preview pipeline</source>
-      <translation type="unfinished">Preview pipeline</translation>
+      <translation>Veri hattını gözden geçir</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="236"/>
@@ -573,7 +573,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
       <source>%1 Hz</source>
-      <translation type="unfinished">%1 Hz</translation>
+      <translation>%1 Hz</translation>
     </message>
   </context>
   <context>
@@ -669,7 +669,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Dijital lens</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="413"/>
@@ -989,7 +989,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="441"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>İstatistikler</translation>
     </message>
   </context>
   <context>
@@ -1753,17 +1753,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="521"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Video hızı</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="557"/>
       <source>Link with smoothing</source>
-      <translation type="unfinished">Link with smoothing</translation>
+      <translation>Yumuşatma ile bağla</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
       <source>Link with zooming speed</source>
-      <translation type="unfinished">Link with zooming speed</translation>
+      <translation>Zoomlama hızıyla bağla</translation>
     </message>
   </context>
   <context>
@@ -1771,47 +1771,47 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="60"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>İstatistikler</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro - X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro - Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro - Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>İvmeölçer - X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>İvmeölçer - Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>İvmeölçer - Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>Logaritmik değer ekseni</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
       <source>Sample rate</source>
-      <translation type="unfinished">Sample rate</translation>
+      <translation>Örnekleme sıklığı</translation>
     </message>
   </context>
   <context>
@@ -1903,7 +1903,7 @@ Bu seçenek hesaplama süresini ikiye katlar. Dolayısıyla, bu seçeneği sadec
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="239"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>İşleme çözünürlüğü</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="261"/>
@@ -2126,31 +2126,31 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="148"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Zoomlama</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="194"/>
       <location filename="../../src/ui/components/Timeline.qml" line="197"/>
       <source>Yaw axis</source>
-      <translation type="unfinished">Yaw axis</translation>
+      <translation>Yaw ekseni</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="195"/>
       <location filename="../../src/ui/components/Timeline.qml" line="198"/>
       <source>Pitch axis</source>
-      <translation type="unfinished">Pitch axis</translation>
+      <translation>Pitch ekseni</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="196"/>
       <location filename="../../src/ui/components/Timeline.qml" line="199"/>
       <source>Roll axis</source>
-      <translation type="unfinished">Roll axis</translation>
+      <translation>Roll ekseni</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="207"/>
       <location filename="../../src/ui/components/Timeline.qml" line="211"/>
       <source>Angle</source>
-      <translation type="unfinished">Angle</translation>
+      <translation>Açı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="281"/>
@@ -2300,17 +2300,17 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="325"/>
       <source>Pitch smoothness</source>
-      <translation type="unfinished">Pitch smoothness</translation>
+      <translation>Pitch yumuşaklığı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="326"/>
       <source>Roll smoothness</source>
-      <translation type="unfinished">Roll smoothness</translation>
+      <translation>Roll yumuşaklığı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="327"/>
       <source>Yaw smoothness</source>
-      <translation type="unfinished">Yaw smoothness</translation>
+      <translation>Yaw yumuşaklığı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="782"/>

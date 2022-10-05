@@ -68,7 +68,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Preview pipeline</source>
-      <translation type="unfinished">Preview pipeline</translation>
+      <translation>Anteprima pipeline</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="236"/>
@@ -573,7 +573,7 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
       <source>%1 Hz</source>
-      <translation type="unfinished">%1 Hz</translation>
+      <translation>%1 Hz</translation>
     </message>
   </context>
   <context>
@@ -669,7 +669,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Obiettivo digitale</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="413"/>
@@ -989,7 +989,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="441"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Statistiche</translation>
     </message>
   </context>
   <context>
@@ -1609,7 +1609,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Max smoothness at high velocity</source>
-      <translation>Massima fluidità ad alta velocità</translation>
+      <translation>Massima fluidità ad alte velocità</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
@@ -1753,17 +1753,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="521"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Velocità del video</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="557"/>
       <source>Link with smoothing</source>
-      <translation type="unfinished">Link with smoothing</translation>
+      <translation>Collega con lo smoothing</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
       <source>Link with zooming speed</source>
-      <translation type="unfinished">Link with zooming speed</translation>
+      <translation>Collega con la velocità di zoom</translation>
     </message>
   </context>
   <context>
@@ -1771,47 +1771,47 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="60"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Statistiche</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>Accl-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>Accl-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>Asse logaritmico</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
       <source>Sample rate</source>
-      <translation type="unfinished">Sample rate</translation>
+      <translation>Frequenza di campionamento</translation>
     </message>
   </context>
   <context>
@@ -1903,7 +1903,7 @@ Raddoppia il tempo di calcolo, quindi abilitalo solo per il punto iniziale e des
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="239"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Risoluzione di elaborazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="261"/>
@@ -2129,31 +2129,31 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="148"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="194"/>
       <location filename="../../src/ui/components/Timeline.qml" line="197"/>
       <source>Yaw axis</source>
-      <translation type="unfinished">Yaw axis</translation>
+      <translation>Asse yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="195"/>
       <location filename="../../src/ui/components/Timeline.qml" line="198"/>
       <source>Pitch axis</source>
-      <translation type="unfinished">Pitch axis</translation>
+      <translation>Asse pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="196"/>
       <location filename="../../src/ui/components/Timeline.qml" line="199"/>
       <source>Roll axis</source>
-      <translation type="unfinished">Roll axis</translation>
+      <translation>Asse roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="207"/>
       <location filename="../../src/ui/components/Timeline.qml" line="211"/>
       <source>Angle</source>
-      <translation type="unfinished">Angle</translation>
+      <translation>Angolo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="281"/>
@@ -2303,17 +2303,17 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="325"/>
       <source>Pitch smoothness</source>
-      <translation type="unfinished">Pitch smoothness</translation>
+      <translation>Fluidità sul pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="326"/>
       <source>Roll smoothness</source>
-      <translation type="unfinished">Roll smoothness</translation>
+      <translation>Fluidità sul roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="327"/>
       <source>Yaw smoothness</source>
-      <translation type="unfinished">Yaw smoothness</translation>
+      <translation>Fluidità sullo yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="782"/>
