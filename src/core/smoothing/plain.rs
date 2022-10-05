@@ -27,7 +27,7 @@ impl SmoothingAlgorithm for Plain {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
-    fn get_parameter(&mut self, name: &str) -> f64 {
+    fn get_parameter(&self, name: &str) -> f64 {
         match name {
             "time_constant" => self.time_constant,
             _ => 0.0

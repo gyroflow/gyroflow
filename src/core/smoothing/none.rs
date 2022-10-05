@@ -13,7 +13,7 @@ impl SmoothingAlgorithm for None {
     fn get_parameters_json(&self) -> serde_json::Value { serde_json::json!([]) }
     fn get_status_json(&self) -> serde_json::Value { serde_json::json!([]) }
     fn set_parameter(&mut self, _name: &str, _val: f64) { }
-    fn get_parameter(&mut self, _name: &str) -> f64 { 0.0 }
+    fn get_parameter(&self, _name: &str) -> f64 { 0.0 }
 
     fn get_checksum(&self) -> u64 { 0 }
     fn smooth(&self, quats: &TimeQuat, _duration: f64, _: &StabilizationParams, _: &KeyframeManager) -> TimeQuat { quats.clone() }

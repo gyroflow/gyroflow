@@ -24,7 +24,7 @@ impl SmoothingAlgorithm for Fixed {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
-    fn get_parameter(&mut self, name: &str) -> f64 {
+    fn get_parameter(&self, name: &str) -> f64 {
         match name {
             "roll"  => self.roll,
             "pitch" => self.pitch,

@@ -61,7 +61,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
-    fn get_parameter(&mut self, name: &str) -> f64 {
+    fn get_parameter(&self, name: &str) -> f64 {
         match name {
             "smoothness"       => self.smoothness,
             "smoothness_pitch" => self.smoothness_pitch,

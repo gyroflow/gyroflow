@@ -23,7 +23,7 @@ pub trait SmoothingAlgorithm: DynClone {
     fn get_parameters_json(&self) -> serde_json::Value;
     fn get_status_json(&self) -> serde_json::Value;
     fn set_parameter(&mut self, name: &str, val: f64);
-    fn get_parameter(&mut self, name: &str) -> f64;
+    fn get_parameter(&self, name: &str) -> f64;
 
     fn get_checksum(&self) -> u64;
 
