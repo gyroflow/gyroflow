@@ -18,10 +18,18 @@ impl SmoothingAlgorithm for Fixed {
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
-            "roll" => self.roll = val,
+            "roll"  => self.roll  = val,
             "pitch" => self.pitch = val,
-            "yaw" => self.yaw = val,
+            "yaw"   => self.yaw   = val,
             _ => log::error!("Invalid parameter name: {}", name)
+        }
+    }
+    fn get_parameter(&mut self, name: &str) -> f64 {
+        match name {
+            "roll"  => self.roll,
+            "pitch" => self.pitch,
+            "yaw"   => self.yaw,
+            _ => 0.0
         }
     }
 

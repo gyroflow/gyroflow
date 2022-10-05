@@ -27,6 +27,12 @@ impl SmoothingAlgorithm for Plain {
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
+    fn get_parameter(&mut self, name: &str) -> f64 {
+        match name {
+            "time_constant" => self.time_constant,
+            _ => 0.0
+        }
+    }
 
     fn get_parameters_json(&self) -> serde_json::Value {
         serde_json::json!([

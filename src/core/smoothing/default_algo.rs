@@ -50,15 +50,28 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
-            "smoothness" => self.smoothness = val,
+            "smoothness"       => self.smoothness = val,
             "smoothness_pitch" => self.smoothness_pitch = val,
-            "smoothness_yaw" => self.smoothness_yaw = val,
-            "smoothness_roll" => self.smoothness_roll = val,
-            "per_axis" => self.per_axis = val > 0.1,
-            "second_pass" => self.second_pass = val > 0.1,
-            "max_smoothness" => self.max_smoothness = val,
-            "alpha_0_1s" => self.alpha_0_1s = val,
+            "smoothness_yaw"   => self.smoothness_yaw = val,
+            "smoothness_roll"  => self.smoothness_roll = val,
+            "per_axis"         => self.per_axis = val > 0.1,
+            "second_pass"      => self.second_pass = val > 0.1,
+            "max_smoothness"   => self.max_smoothness = val,
+            "alpha_0_1s"       => self.alpha_0_1s = val,
             _ => log::error!("Invalid parameter name: {}", name)
+        }
+    }
+    fn get_parameter(&mut self, name: &str) -> f64 {
+        match name {
+            "smoothness"       => self.smoothness,
+            "smoothness_pitch" => self.smoothness_pitch,
+            "smoothness_yaw"   => self.smoothness_yaw,
+            "smoothness_roll"  => self.smoothness_roll,
+            "per_axis"         => if self.per_axis { 1.0 } else { 0.0 },
+            "second_pass"      => if self.second_pass { 1.0 } else { 0.0 },
+            "max_smoothness"   => self.max_smoothness,
+            "alpha_0_1s"       => self.alpha_0_1s,
+            _ => 0.0
         }
     }
 
