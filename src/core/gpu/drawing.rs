@@ -68,7 +68,7 @@ impl DrawCanvas {
 
     pub fn put_pixel(&mut self, x: i32, mut y: i32, color: Color, alpha: Alpha, stage: Stage, y_inverted: bool, size: usize) {
         let (w, h) = self.get_size();
-        if y_inverted { y = h as i32 - y; }
+        if y_inverted { y = match stage { Stage::OnInput => self.height, Stage::OnOutput => self.output_height } as i32 - y; }
         if x < 0 || y < 0 || x > w as i32 * self.scale as i32 || y > h as i32 * self.scale as i32 { return; }
         let adj = if size > 2 { size as f32 / -2.0 } else { 0.0 };
         for xstep in 0..size {

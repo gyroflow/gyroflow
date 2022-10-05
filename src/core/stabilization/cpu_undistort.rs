@@ -97,6 +97,9 @@ impl<T: PixelType> Stabilization<T> {
             px[0] += 16.0;
             px[1] += 16.0;
         }
+        fn map_coord(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
 
         fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit: f32) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
@@ -134,9 +137,10 @@ impl<T: PixelType> Stabilization<T> {
             let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
             let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
 
-            let mut uv = (uv.0 + params.source_pos[0] as f32, uv.1 + params.source_pos[1] as f32);
-            if params.source_stretch[0] > 0.0 { uv.0 *= params.source_stretch[0]; }
-            if params.source_stretch[1] > 0.0 { uv.1 *= params.source_stretch[1]; }
+            let uv = (
+                map_coord(uv.0, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32),
+                map_coord(uv.1, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
+            );
 
             let u = uv.0 - offset;
             let v = uv.1 - offset;
@@ -154,10 +158,10 @@ impl<T: PixelType> Stabilization<T> {
             let mut src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
 
             for yp in 0..I {
-                if sy + yp >= 0 && sy + yp < params.height {
+                if sy + yp >= params.output_rect[1] && sy + yp < params.output_rect[1] + params.output_rect[3] {
                     let mut xsum = Vector4::<f32>::from_element(0.0);
                     for xp in 0..I {
-                        let pixel = if sx + xp >= 0 && sx + xp < params.width {
+                        let pixel = if sx + xp >= params.output_rect[0] && sx + xp < params.output_rect[0] + params.output_rect[2] {
                             let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
                             let mut src_px = PixelType::to_float(*px1);
                             src_px = draw_pixel(src_px, sx + xp, sy + yp, true, params.width, params.canvas_scale, drawing);
@@ -191,9 +195,11 @@ impl<T: PixelType> Stabilization<T> {
 
         out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
-                let mut out_pos = (x as f32 - params.output_pos[0] as f32, y as f32 - params.output_pos[1] as f32);
-                if params.output_stretch[0] > 0.0 { out_pos.0 *= params.output_stretch[0]; }
-                if params.output_stretch[1] > 0.0 { out_pos.1 *= params.output_stretch[1]; }
+
+                let mut out_pos = (
+                    map_coord(x as f32, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width as f32 ),
+                    map_coord(y as f32, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
+                );
 
                 if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());

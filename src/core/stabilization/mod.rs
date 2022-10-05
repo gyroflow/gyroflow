@@ -71,10 +71,8 @@ pub struct KernelParams {
     pub reserved3:                f32, // 8
     pub translation2d:         [f32; 2], // 16
     pub translation3d:         [f32; 4], // 16
-    pub source_pos:            [i32; 2], // 16 - x, y
-    pub output_pos:            [i32; 2], // 16 - x, y
-    pub source_stretch:        [f32; 2], // 8 - stretch_x, stretch_y
-    pub output_stretch:        [f32; 2], // 16 - stretch_x, stretch_y
+    pub source_rect:           [i32; 4], // 16 - x, y, w, h
+    pub output_rect:           [i32; 4], // 16 - x, y, w, h
     pub digital_lens_params:   [f32; 4], // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
@@ -85,8 +83,8 @@ pub struct Stabilization<T: PixelType> {
     pub stab_data: BTreeMap<i64, FrameTransform>,
     last_frame_data: RefCell<FrameTransform>,
 
-    size:        (usize, usize, usize), // width, height, stride
-    output_size: (usize, usize, usize), // width, height, stride
+    size:        (usize, usize), // width, height
+    output_size: (usize, usize), // width, height
     pub background: Vector4<f32>,
 
     pub interpolation: Interpolation,
@@ -110,6 +108,7 @@ pub struct Stabilization<T: PixelType> {
     _d: std::marker::PhantomData<T>
 }
 
+#[derive(Debug)]
 pub struct ProcessedInfo {
     pub fov: f64,
     pub backend: &'static str,
@@ -130,32 +129,40 @@ impl<T: PixelType> Stabilization<T> {
             transform.kernel_params.interpolation = self.interpolation as i32;
             transform.kernel_params.width  = self.size.0 as i32;
             transform.kernel_params.height = self.size.1 as i32;
-            transform.kernel_params.stride = self.size.2 as i32;
             transform.kernel_params.output_width  = self.output_size.0 as i32;
             transform.kernel_params.output_height = self.output_size.1 as i32;
-            transform.kernel_params.output_stride = self.output_size.2 as i32;
             transform.kernel_params.background = [self.background[0], self.background[1], self.background[2], self.background[3]];
             transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
             transform.kernel_params.pix_element_count = T::COUNT as i32;
             transform.kernel_params.canvas_scale = self.drawing.scale as f32;
 
             if let Some(buffers) = buffers {
-                if self.size.0        != buffers.input_size.0  { transform.kernel_params.source_stretch[0] = self.size.0        as f32 / buffers.input_size.0  as f32; }
-                if self.size.1        != buffers.input_size.1  { transform.kernel_params.source_stretch[1] = self.size.1        as f32 / buffers.input_size.1  as f32; }
-                if self.output_size.0 != buffers.output_size.0 { transform.kernel_params.output_stretch[0] = self.output_size.0 as f32 / buffers.output_size.0 as f32; }
-                if self.output_size.1 != buffers.output_size.1 { transform.kernel_params.output_stretch[1] = self.output_size.1 as f32 / buffers.output_size.1 as f32; }
+                transform.kernel_params.stride        = buffers.input_size.2 as i32;
+                transform.kernel_params.output_stride = buffers.output_size.2 as i32;
 
                 if let Some(r) = buffers.input_rect {
-                    transform.kernel_params.source_pos[0] = r.0 as i32;
-                    transform.kernel_params.source_pos[1] = r.1 as i32;
-                    transform.kernel_params.source_stretch[0] = r.2 as f32 / buffers.input_size.0 as f32;
-                    transform.kernel_params.source_stretch[1] = r.3 as f32 / buffers.input_size.1 as f32;
+                    transform.kernel_params.source_rect[0] = r.0 as i32;
+                    transform.kernel_params.source_rect[1] = r.1 as i32;
+                    transform.kernel_params.source_rect[2] = r.2 as i32;
+                    transform.kernel_params.source_rect[3] = r.3 as i32;
+                } else {
+                    // Stretch to the buffer by default
+                    transform.kernel_params.source_rect[0] = 0;
+                    transform.kernel_params.source_rect[1] = 0;
+                    transform.kernel_params.source_rect[2] = buffers.input_size.0  as i32;
+                    transform.kernel_params.source_rect[3] = buffers.input_size.1  as i32;
                 }
                 if let Some(r) = buffers.output_rect {
-                    transform.kernel_params.output_pos[0] = r.0 as i32;
-                    transform.kernel_params.output_pos[1] = r.1 as i32;
-                    transform.kernel_params.output_stretch[0] = r.2 as f32 / buffers.output_size.0 as f32;
-                    transform.kernel_params.output_stretch[1] = r.3 as f32 / buffers.output_size.1 as f32;
+                    transform.kernel_params.output_rect[0] = r.0 as i32;
+                    transform.kernel_params.output_rect[1] = r.1 as i32;
+                    transform.kernel_params.output_rect[2] = r.2 as i32;
+                    transform.kernel_params.output_rect[3] = r.3 as i32;
+                } else {
+                    // Stretch to the buffer by default
+                    transform.kernel_params.output_rect[0] = 0;
+                    transform.kernel_params.output_rect[1] = 0;
+                    transform.kernel_params.output_rect[2] = buffers.output_size.0 as i32;
+                    transform.kernel_params.output_rect[3] = buffers.output_size.1 as i32;
                 }
             }
 
@@ -163,7 +170,7 @@ impl<T: PixelType> Stabilization<T> {
         }
     }
 
-    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize, usize), output_size: (usize, usize, usize)) {
+    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), output_size: (usize, usize)) {
         self.background = bg;
 
         self.backend_initialized = None;
@@ -320,7 +327,7 @@ impl<T: PixelType> Stabilization<T> {
         self.init_backends(timestamp_us, buffers);
     }
     pub fn process_pixels(&self, timestamp_us: i64, buffers: &mut BufferDescription) -> Option<ProcessedInfo> {
-        if self.size != buffers.input_size || buffers.input_size.1 < 4 || buffers.output_size.1 < 4 { return None; }
+        if /*self.size != buffers.input_size || */buffers.input_size.1 < 4 || buffers.output_size.1 < 4 { return None; }
 
         let mut _last_frame_data = None;
 
@@ -339,8 +346,8 @@ impl<T: PixelType> Stabilization<T> {
             let drawing_buffer = self.drawing.get_buffer();
             *self.last_frame_data.borrow_mut() = itm.clone();
 
-            if self.size        != (itm.kernel_params.width as usize,        itm.kernel_params.height as usize,        itm.kernel_params.stride as usize) ||
-               self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize, itm.kernel_params.output_stride as usize) {
+            if self.size        != (itm.kernel_params.width as usize,        itm.kernel_params.height as usize) ||
+               self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) {
                 log::warn!("Size mismatch ({:?} != ({}, {}, {}) || ({:?} != ({}, {}, {})", self.size, itm.kernel_params.width, itm.kernel_params.height, itm.kernel_params.stride, self.output_size, itm.kernel_params.output_width, itm.kernel_params.output_height, itm.kernel_params.output_stride);
                 return None;
             }

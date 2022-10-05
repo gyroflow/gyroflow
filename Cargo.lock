@@ -1373,7 +1373,7 @@ dependencies = [
  "simple-easing",
  "space",
  "telemetry-parser",
- "time 0.3.14",
+ "time 0.3.15",
  "walkdir",
  "wgpu",
 ]
@@ -2168,9 +2168,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.47.0"
+version = "0.47.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66a2ad892d997bdae85d4c3c5ea498cbca1d4722f685845b3ef7d7c7a40c6541"
+checksum = "b1ff8e5f87c638009197e364ced74045f8f19f15bec2ac2e61399c27bc313cf5"
 dependencies = [
  "clang",
  "clang-sys",
@@ -2855,7 +2855,7 @@ checksum = "48dfff04aade74dd495b007c831cd6f4e0cee19c344dd9dc0884c0289b70a786"
 dependencies = [
  "log",
  "termcolor",
- "time 0.3.14",
+ "time 0.3.15",
 ]
 
 [[package]]
@@ -2878,9 +2878,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fd0db749597d91ff862fd1d55ea87f7855a744a8425a64695b6fca237d1dad1"
+checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
 name = "socket2"
@@ -2950,7 +2950,7 @@ dependencies = [
 [[package]]
 name = "system_shutdown"
 version = "4.0.0"
-source = "git+https://github.com/AdrianEddy/system_shutdown.git?rev=f27a4d8#f27a4d83d85369c0775e6650a8aac651f6b875d0"
+source = "git+https://github.com/risoflora/system_shutdown.git?rev=73aa506#73aa506a644ffd921c9a8ae7ba4384ad31aabf3d"
 dependencies = [
  "windows",
  "zbus",
@@ -3066,9 +3066,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c3f9a28b618c3a6b9251b6908e9c99e04b9e5c02e6581ccbb67d59c34ef7f9b"
+checksum = "d634a985c4d4238ec39cacaed2e7ae552fbd3c476b552c1deac3021b7d7eaf0c"
 dependencies = [
  "itoa 1.0.3",
  "libc",

@@ -13,7 +13,7 @@ opencv = ["gyroflow-core/use-opencv"]
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "c321a4d" }
-system_shutdown = { git = "https://github.com/AdrianEddy/system_shutdown.git", rev = "f27a4d8" }
+system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "73aa506" }
 breakpad-sys = "0.1.1"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]

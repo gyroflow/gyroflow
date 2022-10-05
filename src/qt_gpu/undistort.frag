@@ -40,10 +40,8 @@ layout(std140, binding = 2) uniform KernelParams {
     float reserved3;                // 8
     vec2 translation2d;             // 16
     vec4 translation3d;             // 16
-    ivec2 source_pos;               // 8
-    ivec2 output_pos;               // 16
-    vec2 source_stretch;            // 8
-    vec2 output_stretch;            // 16
+    ivec4 source_rect;              // 16 - x, y, w, h - unused in this kernel
+    ivec4 output_rect;              // 16 - x, y, w, h - unused in this kernel
     vec4 digital_lens_params;       // 16
 } params;
 

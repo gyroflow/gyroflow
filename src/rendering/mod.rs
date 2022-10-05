@@ -345,8 +345,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         macro_rules! create_planes_proc {
             ($planes:ident, $(($t:tt, $in_frame:expr, $out_frame:expr, $ind:expr, $yuvi:expr, $max_val:expr), )*) => {
                 $({
-                    let in_size  = ($in_frame .plane_width($ind) as usize, $in_frame .plane_height($ind) as usize, $in_frame .stride($ind) as usize);
-                    let out_size = ($out_frame.plane_width($ind) as usize, $out_frame.plane_height($ind) as usize, $out_frame.stride($ind) as usize);
+                    let in_size  = ($in_frame .plane_width($ind) as usize, $in_frame .plane_height($ind) as usize);
+                    let out_size = ($out_frame.plane_width($ind) as usize, $out_frame.plane_height($ind) as usize);
                     let bg = {
                         let mut params = stab.params.write();
                         params.size        = (in_size.0,  in_size.1);

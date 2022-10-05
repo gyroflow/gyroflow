@@ -231,6 +231,7 @@ pub struct Controller {
     clear_keyframes_type: qt_method!(fn(&self, typ: String)),
     keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
     is_keyframed: qt_method!(fn(&self, typ: String) -> bool),
+    set_prevent_recompute: qt_method!(fn(&self, v: bool)),
 
     keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
     update_keyframe_values: qt_method!(fn(&self, timestamp_ms: f64)),
@@ -581,8 +582,6 @@ impl Controller {
         let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
-        self.loading_gyro_in_progress = true;
-        self.loading_gyro_in_progress_changed();
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -645,6 +644,8 @@ impl Controller {
             });
 
             if duration_ms > 0.0 && fps > 0.0 {
+                self.loading_gyro_in_progress = true;
+                self.loading_gyro_in_progress_changed();
                 core::run_threaded(move || {
                     let mut file_metadata = None;
                     if is_main_video {
@@ -779,6 +780,10 @@ impl Controller {
         self.preview_pipeline.store(index as usize, SeqCst);
     }
 
+    fn set_prevent_recompute(&self, v: bool) {
+        self.stabilizer.prevent_recompute.store(v, SeqCst);
+    }
+
     fn set_gpu_decoding(&self, enabled: bool) {
         *rendering::GPU_DECODING.write() = enabled;
     }
@@ -803,13 +808,15 @@ impl Controller {
 
             let bg_color = vid.getBackgroundColor().get_rgba_f();
             self.stabilizer.params.write().background = Vector4::new(bg_color.0 as f32 * 255.0, bg_color.1 as f32 * 255.0, bg_color.2 as f32 * 255.0, bg_color.3 as f32 * 255.0);
-
+            let request_recompute = util::qt_queued_callback_mut(self, move |this, _: ()| {
+                this.request_recompute();
+            });
             let stab = self.stabilizer.clone();
             vid.onResize(Box::new(move |width, height| {
                 let current_size = stab.params.read().size;
                 if current_size.0 != width as usize || current_size.1 != height as usize {
                     stab.set_size(width as usize, height as usize);
-                    stab.recompute_threaded(|_|());
+                    request_recompute(());
                 }
             }));
 
@@ -851,11 +858,11 @@ impl Controller {
                 let ret = match backend_id {
                     1 => { // OpenGL, ptr1: texture, ptr2: opengl context
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                            input_size: (width as usize, height as usize, width as usize * 4),
+                            input_size:  (width as usize, height as usize, width as usize * 4),
                             output_size: (width as usize, height as usize, width as usize * 4),
                             buffers: BufferSource::OpenGL {
-                                input: ptr1 as u32,
-                                output: ptr1 as u32,
+                                input:   ptr1 as u32,
+                                output:  ptr1 as u32,
                                 context: ptr2 as *mut std::ffi::c_void
                             },
                             input_rect: None,
@@ -871,10 +878,10 @@ impl Controller {
                     },
                     3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                            input_size: (width as usize, height as usize, width as usize * 4),
+                            input_size:  (width as usize, height as usize, width as usize * 4),
                             output_size: (width as usize, height as usize, width as usize * 4),
                             buffers: BufferSource::DirectX {
-                                input: ptr1 as *mut std::ffi::c_void,
+                                input:  ptr1 as *mut std::ffi::c_void,
                                 output: ptr1 as *mut std::ffi::c_void,
                                 device: ptr2 as *mut std::ffi::c_void,
                                 device_context: ptr3 as *mut std::ffi::c_void

@@ -30,10 +30,8 @@ struct KernelParams {
     reserved3:                f32, // 8
     translation2d:      vec2<f32>, // 16
     translation3d:      vec4<f32>, // 16
-    source_pos:         vec2<i32>, // 8
-    output_pos:         vec2<i32>, // 16
-    source_stretch:     vec2<f32>, // 8
-    output_stretch:     vec2<f32>, // 16
+    source_rect:        vec4<i32>, // 16 - x, y, w, h
+    output_rect:        vec4<i32>, // 16 - x, y, w, h
     digital_lens_params:vec4<f32>, // 16
 }
 
@@ -88,6 +86,9 @@ fn remap_colorrange(px: vec4<f32>, isY: bool) -> vec4<f32> {
     if (isY) { return (16.0 / bg_scaler) + (px * 0.85882352); } // (235 - 16) / 255
     else     { return (16.0 / bg_scaler) + (px * 0.87843137); } // (240 - 16) / 255
 }
+fn map_coord(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let fix_range = bool(params.flags & 1);
@@ -101,9 +102,10 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
     let offset = offsets[params.interpolation >> 2u];
 
-    var uv = uv + vec2<f32>(params.source_pos);
-    if (params.source_stretch.x > 0.0) { uv.x = uv.x * params.source_stretch.x; }
-    if (params.source_stretch.y > 0.0) { uv.y = uv.y * params.source_stretch.y; }
+    var uv = vec2<f32>(
+        map_coord(uv.x, 0.0, f32(params.width),  f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+        map_coord(uv.y, 0.0, f32(params.height), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
+    );
 
     uv = uv - offset;
 
@@ -117,11 +119,11 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let coeffs_y = i32(ind + ((sy0 & (INTER_TAB_SIZE - 1)) << shift));
 
     for (var yp: i32 = 0; yp < i32(params.interpolation); yp = yp + 1) {
-        if (sy + yp >= 0 && sy + yp < params.height) {
+        if (sy + yp >= params.source_rect.y && sy + yp < params.source_rect.y + params.source_rect.w) {
             var xsum = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             for (var xp: i32 = 0; xp < i32(params.interpolation); xp = xp + 1) {
                 var pixel: vec4<f32>;
-                if (sx + xp >= 0 && sx + xp < params.width) {
+                if (sx + xp >= params.source_rect.x && sx + xp < params.source_rect.x + params.source_rect.z) {
                     pixel = vec4<f32>(textureLoad(input_tex, vec2<i32>(sx + xp, sy + yp), 0));
                     pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
                     if (fix_range) {
@@ -186,9 +188,10 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
         return bg;
     }
 
-    var out_pos = position.xy - vec2<f32>(params.output_pos);
-    if (params.output_stretch.x > 0.0) { out_pos.x = out_pos.x * params.output_stretch.x; }
-    if (params.output_stretch.y > 0.0) { out_pos.y = out_pos.y * params.output_stretch.y; }
+    var out_pos = vec2<f32>(
+        map_coord(position.x, f32(params.output_rect.x), f32(params.output_rect.x + params.output_rect.z), 0.0, f32(params.output_width) ),
+        map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
+    );
 
     let p = out_pos;
     out_pos = out_pos + params.translation2d;

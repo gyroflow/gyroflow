@@ -183,6 +183,8 @@ public:
         u->copyTexture(item->rhiTexture(), m_texIn.get(), {});
         cb->resourceUpdate(u);
 
+        rhi->finish();
+
         return true;
     }
 

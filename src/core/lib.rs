@@ -69,6 +69,7 @@ pub struct StabilizationManager<T: PixelType> {
     pub current_compute_id: Arc<AtomicU64>,
     pub smoothing_checksum: Arc<AtomicU64>,
     pub zooming_checksum: Arc<AtomicU64>,
+    pub prevent_recompute: Arc<AtomicBool>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
@@ -94,6 +95,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
             current_compute_id: Arc::new(AtomicU64::new(0)),
             smoothing_checksum: Arc::new(AtomicU64::new(0)),
             zooming_checksum: Arc::new(AtomicU64::new(0)),
+            prevent_recompute: Arc::new(AtomicBool::new(false)),
 
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
@@ -204,11 +206,8 @@ impl<T: PixelType> StabilizationManager<T> {
             (params.size.0, params.size.1, params.output_size.0, params.output_size.1, params.background)
         };
 
-        let s = w * T::COUNT * T::SCALAR_BYTES;
-        let os = ow * T::COUNT * T::SCALAR_BYTES;
-
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
-            self.stabilization.write().init_size(bg, (w, h, s), (ow, oh, os));
+            self.stabilization.write().init_size(bg, (w, h), (ow, oh));
             self.lens.write().optimal_fov = None;
 
             self.invalidate_smoothing();
@@ -313,6 +312,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let compute_id = fastrand::u64(..);
         self.current_compute_id.store(compute_id, SeqCst);
 
+        let prevent_recompute = self.prevent_recompute.clone();
         let current_compute_id = self.current_compute_id.clone();
         let smoothing_checksum = self.smoothing_checksum.clone();
         let zooming_checksum = self.zooming_checksum.clone();
@@ -320,6 +320,7 @@ impl<T: PixelType> StabilizationManager<T> {
         let stabilization = self.stabilization.clone();
         THREAD_POOL.spawn(move || {
             // std::thread::sleep(std::time::Duration::from_millis(20));
+            if prevent_recompute.load(SeqCst) { return cb((compute_id, true)); } // we're still loading, don't recompute
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut smoothing_changed = false;

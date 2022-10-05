@@ -5,6 +5,8 @@ use std::collections::BTreeMap;
 
 use nalgebra::Vector4;
 
+use crate::keyframes::*;
+
 #[derive(Default, Clone, Copy, Debug)]
 pub enum BackgroundMode {
     #[default]
@@ -44,6 +46,7 @@ pub struct StabilizationParams {
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
+    pub speed_ramped_timestamps: Option<BTreeMap<i64, i64>>,
     pub frame_count: usize,
     pub duration_ms: f64,
 
@@ -110,6 +113,7 @@ impl Default for StabilizationParams {
             video_speed: 1.0,
             video_speed_affects_smoothing: true,
             video_speed_affects_zooming: true,
+            speed_ramped_timestamps: None,
             frame_count: 0,
             duration_ms: 0.0,
         }
@@ -140,6 +144,52 @@ impl StabilizationParams {
             self.min_fov = 1.0;
         }
         self.fovs = fovs;
+    }
+
+    pub fn calculate_ramped_timestamps(&mut self, keyframes: &KeyframeManager) {
+        if keyframes.is_keyframed(&KeyframeType::VideoSpeed) || self.video_speed != 1.0 {
+            let fps = self.fps; // get_scaled_fps();
+            let mut ramped_ts = 0.0;
+            let mut prev_real_ts = 0.0;
+            let mut map = BTreeMap::new();
+            for i in 0..self.frame_count {
+                let ts = crate::timestamp_at_frame(i as i32, fps);
+                let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(self.video_speed);
+                let current_interval = ((ts - prev_real_ts) as f64) / vid_speed;
+                ramped_ts += current_interval;
+                prev_real_ts = ts;
+                map.insert((ramped_ts * 1000.0).round() as i64, (ts * 1000.0).round() as i64);
+            }
+
+            self.speed_ramped_timestamps = Some(map);
+        }
+    }
+    pub fn get_source_timestamp_at_ramped_timestamp(&self, timestamp_us: i64) -> i64 {
+        if let Some(map) = &self.speed_ramped_timestamps {
+            match map.len() {
+                0 => { return timestamp_us; },
+                1 => { return *map.values().next().unwrap(); },
+                _ => {
+                    if let Some(&first_ts) = map.keys().next() {
+                        if let Some(&last_ts) = map.keys().next_back() {
+                            let lookup_ts = timestamp_us.min(last_ts-1).max(first_ts+1);
+                            if let Some(v1) = map.range(..=lookup_ts).next_back() {
+                                if *v1.0 == lookup_ts {
+                                    return *v1.1;
+                                }
+                                if let Some(v2) = map.range(lookup_ts..).next() {
+                                    let time_delta = (v2.0 - v1.0) as f64;
+                                    let fract = (timestamp_us - v1.0) as f64 / time_delta;
+                                    return (*v1.1 as f64 + (*v2.1 as f64 - *v1.1 as f64) * fract).round() as i64;
+                                }
+                            }
+                        }
+                    }
+                    return timestamp_us;
+                }
+            }
+        }
+        timestamp_us
     }
 
     pub fn clear(&mut self) {

@@ -79,6 +79,7 @@ Item {
             return;
         }
 
+        controller.set_prevent_recompute(true);
         if (obj.toString().startsWith("file")) {
             // obj is url
             controller.import_gyroflow_file(obj);
@@ -135,6 +136,8 @@ Item {
                     videoArea.vid.muted = !!obj.muted;
                 }
             }
+            controller.set_prevent_recompute(false);
+            Qt.callLater(controller.recompute_threaded);
         }
         function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {

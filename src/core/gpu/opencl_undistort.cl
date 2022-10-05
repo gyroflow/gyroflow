@@ -40,10 +40,8 @@ typedef struct {
     float reserved3;                 // 8
     float2 translation2d;            // 16
     float4 translation3d;            // 16
-    int2 source_pos;                 // 8
-    int2 output_pos;                 // 16
-    float2 source_stretch;           // 8
-    float2 output_stretch;           // 16
+    int4 source_rect;                // 16
+    int4 output_rect;                // 16
     float4 digital_lens_params;      // 16
 } KernelParams;
 
@@ -137,16 +135,17 @@ DATA_TYPEF remap_colorrange(DATA_TYPEF px, bool isY) {
     if (isY) { return 16.0f + (px * 0.85882352f); } // (235 - 16) / 255
     else     { return 16.0f + (px * 0.87843137f); } // (240 - 16) / 255
 }
+float map_coord(float x, float in_min, float in_max, float out_min, float out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 LENS_MODEL_FUNCTIONS;
 
 DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = params->flags & 1;
 
-    uv.x += params->source_pos.x;
-    uv.y += params->source_pos.y;
-    if (params->source_stretch.x > 0.0f) uv.x = (int)round((float)uv.x * params->source_stretch.x);
-    if (params->source_stretch.y > 0.0f) uv.y = (int)round((float)uv.y * params->source_stretch.y);
+    uv.x = map_coord(uv.x, 0.0f, (float)params->width,  (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+    uv.y = map_coord(uv.y, 0.0f, (float)params->height, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
 
     uv -= S_OFFSET;
 
@@ -166,11 +165,11 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
 
     #pragma unroll
     for (int yp = 0; yp < INTERPOLATION; ++yp) {
-        if (sy + yp >= 0 && sy + yp < params->height) {
+        if (sy + yp >= params->source_rect.y && sy + yp < params->source_rect.y + params->source_rect.w) {
             DATA_TYPEF xsum = 0.0f;
             #pragma unroll
             for (int xp = 0; xp < INTERPOLATION; ++xp) {
-                if (sx + xp >= 0 && sx + xp < params->width) {
+                if (sx + xp >= params->source_rect.x && sx + xp < params->source_rect.x + params->source_rect.z) {
                     DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp];
                     draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params->canvas_scale, drawing);
                     DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
@@ -220,23 +219,19 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
 __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices, __global const uchar *drawing) {
-    int x = get_global_id(0);
-    int y = get_global_id(1);
-    int buf_x = x;
-    int buf_y = y;
+    int buf_x = get_global_id(0);
+    int buf_y = get_global_id(1);
 
     __global KernelParams *params = (__global KernelParams *)params_buf;
 
-    x -= params->output_pos.x;
-    y -= params->output_pos.y;
-    if (params->output_stretch.x > 0.0f) x = (int)round((float)x * params->output_stretch.x);
-    if (params->output_stretch.y > 0.0f) y = (int)round((float)y * params->output_stretch.y);
+    float x = map_coord((float)buf_x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width );
+    float y = map_coord((float)buf_y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height);
 
     DATA_TYPEF bg = *(__global DATA_TYPEF *)&params->background;
 
     if (matrices == 0 || params->width < 1) return;
 
-    if (x >= 0 && y >= 0 && x < params->output_width && y < params->output_height) {
+    if (x >= 0.0f && y >= 0.0f && x < (float)params->output_width && y < (float)params->output_height) {
         __global DATA_TYPE *out_pix = &dstptr[buf_x * PIXEL_BYTES + buf_y * params->output_stride];
 
         if (params->flags & 4) { // Fill with background
