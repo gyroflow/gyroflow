@@ -21,7 +21,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="78"/>
       <source>Margin</source>
-      <translation type="unfinished">Margin</translation>
+      <translation>Περιθώριο</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="93"/>
@@ -68,12 +68,12 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Preview pipeline</source>
-      <translation type="unfinished">Preview pipeline</translation>
+      <translation>Προεπισκόπηση του αγωγού</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="236"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Συσκευή για επεξεργασία βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="250"/>
@@ -83,42 +83,42 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
       <source>Default file suffix</source>
-      <translation type="unfinished">Default file suffix</translation>
+      <translation>Προεπιλεγμένη κατάληξη αρχείου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="302"/>
       <source>Reset all settings to default</source>
-      <translation type="unfinished">Reset all settings to default</translation>
+      <translation>Επαναφέρετε όλες τις ρυθμίσεις στις προεπιλεγμένες</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="306"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Είστε βέβαιοι ότι θέλετε να επαναφέρετε όλες τις ρυθμίσεις στις προεπιλεγμένες ρυθμίσεις;</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="307"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ναί</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="315"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Οι ρυθμίσεις εκκαθαρίστηκαν, παρακαλώ επανεκκινήστε το Gyroflow για να τεθούν σε ισχύ οι αλλαγές.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="316"/>
       <source>Exit</source>
-      <translation type="unfinished">Exit</translation>
+      <translation>Έξοδος</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="317"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Ακύρωση</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="320"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Όχι</translation>
     </message>
   </context>
   <context>
@@ -221,8 +221,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="216"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use the [OpenFX plugin].</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use the [OpenFX plugin].</translation>
+      <translation>Αυτή η μορφή δεν είναι διαθέσιμη για εξαγωγή.
+Σας προτείνω να εξαγάγετε το πρότζεκτ σας και να χρησιμοποιήσετε το [πρόσθετο OpenFX].</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="381"/>
@@ -242,7 +242,7 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     <message>
       <location filename="../../src/ui/App.qml" line="392"/>
       <source>`.gyroflow` file already exists, what do you want to do?</source>
-      <translation type="unfinished">`.gyroflow` file already exists, what do you want to do?</translation>
+      <translation>`.gyroflow` αρχείο υπάρχει ήδη, τι θέλετε να κάνετε;</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="393"/>
@@ -279,24 +279,24 @@ The recommended workflow is to export project file and use the [OpenFX plugin].<
     <message>
       <location filename="../../src/ui/App.qml" line="441"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Το Gyroflow θα κλείσει τον υπολογιστή σε 60 δευτερόλεπτα, επειδή όλες οι εργασίες έχουν ολοκληρωθεί.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="442"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Το Gyroflow θα επανεκκινήσει τον υπολογιστή σε 60 δευτερόλεπτα επειδή όλες οι εργασίες έχουν ολοκληρωθεί.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="455"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
-      <translation type="unfinished">This encoder requires an external library licensed as GPL.
-Do you agree with the [GPL license] and want to download the additional codec?</translation>
+      <translation>Αυτός ο κωδικοποιητής απαιτεί μια εξωτερική βιβλιοθήκη με άδεια χρήσης ως GPL.
+Συμφωνείτε με την [άδεια GPL] και θέλετε να κατεβάσετε τον πρόσθετο κωδικοποιητή;</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="456"/>
       <source>Yes, I agree</source>
-      <translation type="unfinished">Yes, I agree</translation>
+      <translation>Ναι, συμφωνώ</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="471"/>
@@ -333,12 +333,12 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="490"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</translation>
+      <translation>Η GPU σας δεν υποστηρίζει την κωδικοποίηση H.265/HEVC, προσπαθήστε να χρησιμοποιήσετε H.264/AVC ή να απενεργοποιήσετε την κωδικοποίηση GPU στις ρυθμίσεις εξαγωγής.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="493"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
+      <translation>Βεβαιωθείτε ότι η επέκταση εξόδου σας υποστηρίζει το επιλεγμένο codec. &quot;.mov&quot; θα πρέπει να λειτουργεί στις περισσότερες περιπτώσεις.</translation>
     </message>
   </context>
   <context>
@@ -462,7 +462,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="281"/>
       <source>Original (%1 x %2)</source>
-      <translation type="unfinished">Original (%1 x %2)</translation>
+      <translation>Πρωτότυπο (%1 x %2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="301"/>
@@ -522,7 +522,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="348"/>
       <source>Audio export not available when changing video speed.</source>
-      <translation type="unfinished">Audio export not available when changing video speed.</translation>
+      <translation>Η εξαγωγή ήχου δεν είναι διαθέσιμη κατά την αλλαγή ταχύτητας βίντεο.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
@@ -542,7 +542,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="388"/>
       <source>Keyframe distance</source>
-      <translation type="unfinished">Keyframe distance</translation>
+      <translation>Απόσταση βασικών καρέ</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="397"/>
@@ -552,22 +552,22 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="402"/>
       <source>Preserve other tracks</source>
-      <translation type="unfinished">Preserve other tracks</translation>
+      <translation>Διατήρηση άλλων κομματιών</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="404"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation type="unfinished">This disables trim range and you need to use the .mov output file extension</translation>
+      <translation>Αυτό απενεργοποιεί το εύρος περικοπών και θα πρέπει να χρησιμοποιήσετε την επέκταση αρχείου εξόδου .mov</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="409"/>
       <source>Use black frames outside trim range and keep original file duration</source>
-      <translation type="unfinished">Use black frames outside trim range and keep original file duration</translation>
+      <translation>Χρήση μαύρων πλαισίων εκτός του εύρους περικοπών και διατήρηση της αρχικής διάρκειας του αρχείου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="416"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Συσκευή αποτύπωσης</translation>
     </message>
   </context>
   <context>
@@ -575,7 +575,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
       <source>%1 Hz</source>
-      <translation type="unfinished">%1 Hz</translation>
+      <translation>%1 Hz</translation>
     </message>
   </context>
   <context>
@@ -671,17 +671,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Ψηφιακός φακός</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="413"/>
       <source>Input horizontal stretch</source>
-      <translation type="unfinished">Input horizontal stretch</translation>
+      <translation>Οριζόντιο τέντωμα εισόδου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="428"/>
       <source>Input vertical stretch</source>
-      <translation type="unfinished">Input vertical stretch</translation>
+      <translation>Κατακόρυφο τέντωμα εισόδου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="443"/>
@@ -711,12 +711,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="516"/>
       <source>Lens is asymmetrical</source>
-      <translation type="unfinished">Lens is asymmetrical</translation>
+      <translation>Ο φακός είναι ασύμμετρος</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="523"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
-      <translation type="unfinished">Plain chessboard pattern (previous version without dots in the middle)</translation>
+      <translation>Απλό μοτίβο σκακιέρας (προηγούμενη έκδοση χωρίς τελείες στη μέση)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="251"/>
@@ -779,12 +779,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="202"/>
       <source>Rate this profile: [Good] | [Bad]</source>
-      <translation type="unfinished">Rate this profile: [Good] | [Bad]</translation>
+      <translation>Βαθμολόγησε αυτό το προφίλ: [Good] / [Bad]</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="204"/>
       <source>Thank you for rating this profile.</source>
-      <translation type="unfinished">Thank you for rating this profile.</translation>
+      <translation>Σας ευχαριστούμε για τη βαθμολογία αυτού του προφίλ.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="232"/>
@@ -822,12 +822,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>προκαθορισμένο</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>επίσημο</translation>
     </message>
   </context>
   <context>
@@ -873,12 +873,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="35"/>
       <source>Video file is not loaded.</source>
-      <translation type="unfinished">Video file is not loaded.</translation>
+      <translation>Δεν έχει φορτωθεί το αρχείο βίντεο.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="35"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Εντάξει</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="111"/>
@@ -931,12 +931,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="225"/>
       <source>Separate accelerometer rotation</source>
-      <translation type="unfinished">Separate accelerometer rotation</translation>
+      <translation>Ξεχωριστή περιστροφή επιταχυνσιόμετρου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="233"/>
       <source>Accelerometer rotation</source>
-      <translation type="unfinished">Accelerometer rotation</translation>
+      <translation>Περιστροφή Επιταχυνσιόμετρου</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="271"/>
@@ -986,12 +986,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="346"/>
       <source>Orientation indicator</source>
-      <translation type="unfinished">Orientation indicator</translation>
+      <translation>Ένδειξη προσανατολισμού</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="441"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Στατιστικά</translation>
     </message>
   </context>
   <context>
@@ -1004,7 +1004,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="131"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Ενεργοποίηση πλαισίου-κλειδιού</translation>
     </message>
   </context>
   <context>
@@ -1027,27 +1027,27 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="206"/>
       <source>Create settings preset</source>
-      <translation type="unfinished">Create settings preset</translation>
+      <translation>Δημιουργία προκαθορισμένης ρύθμισης</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="207"/>
       <source>Apply selected settings to all items in the render queue</source>
-      <translation type="unfinished">Apply selected settings to all items in the render queue</translation>
+      <translation>Εφαρμογή επιλεγμένων ρυθμίσεων σε όλα τα αντικείμενα στην ουρά αναπαραγωγής</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="208"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Εξαγωγή αρχείου (συμπεριλαμβανομένων επεξεργασμένων δεδομένων γυροσκοπίου)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="209"/>
       <source>Export project file (including gyro data)</source>
-      <translation type="unfinished">Export project file (including gyro data)</translation>
+      <translation>Εξαγωγή αρχείου .gyroflow (με δεδομένα γυροσκοπίου)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="210"/>
       <source>Export project file</source>
-      <translation type="unfinished">Export project file</translation>
+      <translation>Εξαγωγή αρχείου </translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="44"/>
@@ -1074,7 +1074,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="67"/>
       <source>Margin with feather</source>
-      <translation type="unfinished">Margin with feather</translation>
+      <translation>Περιθώριο με φτερό</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
@@ -1139,42 +1139,42 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="282"/>
       <source>rs-sync</source>
-      <translation type="unfinished">rs-sync</translation>
+      <translation>rs-συγχρονισμός</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="575"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>Καμία ενέργεια</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="576"/>
       <source>Shut down the computer</source>
-      <translation type="unfinished">Shut down the computer</translation>
+      <translation>Τερματισμός λειτουργίας του υπολογιστή</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="577"/>
       <source>Restart the computer</source>
-      <translation type="unfinished">Restart the computer</translation>
+      <translation>Επανεκκινήστε τον υπολογιστή σας</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="578"/>
       <source>Sleep</source>
-      <translation type="unfinished">Sleep</translation>
+      <translation>Αναστολή</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="579"/>
       <source>Hibernate</source>
-      <translation type="unfinished">Hibernate</translation>
+      <translation>Αδρανοποίηση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="580"/>
       <source>Logout</source>
-      <translation type="unfinished">Logout</translation>
+      <translation>Αποσύνδεση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="581"/>
       <source>Close Gyroflow</source>
-      <translation type="unfinished">Close Gyroflow</translation>
+      <translation>Κλείσιμο Gyroflow</translation>
     </message>
   </context>
   <context>
@@ -1182,175 +1182,175 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="190"/>
       <source>Pause</source>
-      <translation type="unfinished">Pause</translation>
+      <translation>Παύση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="41"/>
       <source>Render queue</source>
-      <translation type="unfinished">Render queue</translation>
+      <translation>Ουρά αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="583"/>
       <source>When rendering is finished: %1</source>
-      <translation type="unfinished">When rendering is finished: %1</translation>
+      <translation>Όταν η απόδοση έχει ολοκληρωθεί: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="91"/>
       <location filename="../../src/ui/RenderQueue.qml" line="479"/>
       <source> @ %1fps</source>
-      <translation type="unfinished"> @ %1fps</translation>
+      <translation> @ %1fps</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="94"/>
       <source>Elapsed: %1</source>
-      <translation type="unfinished">Elapsed: %1</translation>
+      <translation>Έχουν παρέλθει: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="105"/>
       <source>Remaining: %1</source>
-      <translation type="unfinished">Remaining: %1</translation>
+      <translation>Απομένει: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="124"/>
       <location filename="../../src/ui/RenderQueue.qml" line="145"/>
       <location filename="../../src/ui/RenderQueue.qml" line="231"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Εντάξει</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Rendering %1...</source>
-      <translation type="unfinished">Rendering %1...</translation>
+      <translation>Αποτύπωση %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="142"/>
       <source>Rendering completed. The file was written to: %1.</source>
-      <translation type="unfinished">Rendering completed. The file was written to: %1.</translation>
+      <translation>Η αποτύπωση ολοκληρώθηκε. Το αρχείο γράφτηκε σε: %1.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
       <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>Open rendered file</source>
-      <translation type="unfinished">Open rendered file</translation>
+      <translation>Άνοιγμα αρχείου αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="144"/>
       <location filename="../../src/ui/RenderQueue.qml" line="523"/>
       <source>Open file location</source>
-      <translation type="unfinished">Open file location</translation>
+      <translation>Άνοιγμα τοποθεσίας αρχείου</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="160"/>
       <location filename="../../src/ui/RenderQueue.qml" line="372"/>
       <source>Render using CPU</source>
-      <translation type="unfinished">Render using CPU</translation>
+      <translation>Αποτύπωση με χρήση του επεξεργαστή</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="167"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Ακύρωση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="169"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation type="unfinished">GPU accelerated encoder doesn&apos;t support this pixel format (%1).
-Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</translation>
+      <translation>Η επιτάχυνση κωδικοποίησης της κάρτας γραφικών σας δεν υποστηρίζει αυτή τη μορφή εικονοστοιχείων (%1).
+Θέλετε να μετατρέψετε σε διαφορετική μορφή εικονοστοιχείων ή να κρατήσετε την αρχική και να αποτυπώσετε με τον επεξεργαστή;</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="188"/>
       <source>Start exporting</source>
-      <translation type="unfinished">Start exporting</translation>
+      <translation>Έναρξη Εξαγωγής</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="189"/>
       <source>Resume</source>
-      <translation type="unfinished">Resume</translation>
+      <translation>Συνέχιση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="227"/>
       <source>You have unfinished tasks in the render queue.</source>
-      <translation type="unfinished">You have unfinished tasks in the render queue.</translation>
+      <translation>Έχετε ημιτελείς εργασίες στην ουρά απόδοσης.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="228"/>
       <source>Open render queue</source>
-      <translation type="unfinished">Open render queue</translation>
+      <translation>Άνοιγμα ουράς αναπαραγωγής</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="293"/>
       <source>Render now</source>
-      <translation type="unfinished">Render now</translation>
+      <translation>Αποτύπωση τώρα</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="299"/>
       <source>Edit</source>
-      <translation type="unfinished">Edit</translation>
+      <translation>Επεξεργασία</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Reset status</source>
-      <translation type="unfinished">Reset status</translation>
+      <translation>Επαναφορά κατάστασης</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="312"/>
       <source>Stop</source>
-      <translation type="unfinished">Stop</translation>
+      <translation>Διακοπή</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="362"/>
       <source>Missing required components.</source>
-      <translation type="unfinished">Missing required components.</translation>
+      <translation>Λείπουν τα απαιτούμενα εξαρτήματα.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="380"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ναί</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="381"/>
       <source>Rename</source>
-      <translation type="unfinished">Rename</translation>
+      <translation>Μετονομασία</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>No</source>
-      <translation type="unfinished">No</translation>
+      <translation>Όχι</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="382"/>
       <source>Output file already exists.</source>
-      <translation type="unfinished">Output file already exists.</translation>
+      <translation>Το αρχείο υπάρχει ήδη.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="483"/>
       <source>Synchronizing...</source>
-      <translation type="unfinished">Synchronizing...</translation>
+      <translation>Συγχρονισμός...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="484"/>
       <source>Elapsed: %1. Remaining: %2</source>
-      <translation type="unfinished">Elapsed: %1. Remaining: %2</translation>
+      <translation>Έχουν παρέλθει: %1. Απομένει: %2</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="527"/>
       <source>Remove</source>
-      <translation type="unfinished">Remove</translation>
+      <translation>Αφαίρεση</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="606"/>
       <source>Number of parallel renders: %1</source>
-      <translation type="unfinished">Number of parallel renders: %1</translation>
+      <translation>Αριθμός παράλληλων αποτυπώσεων: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="452"/>
       <source>Save to: %1</source>
-      <translation type="unfinished">Save to: %1</translation>
+      <translation>Αποθήκευση σε: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="453"/>
       <source>Export settings: %1</source>
-      <translation type="unfinished">Export settings: %1</translation>
+      <translation>Εξαγωγή ρυθμίσεων</translation>
     </message>
   </context>
   <context>
@@ -1358,205 +1358,206 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="71"/>
       <source>Select settings you want to include in the preset</source>
-      <translation type="unfinished">Select settings you want to include in the preset</translation>
+      <translation>Επιλέξτε τις ρυθμίσεις που θέλετε να συμπεριλάβετε στην προκαθορισμένη ρύθμιση</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="72"/>
       <source>Select settings you want to apply to all items in the render queue</source>
-      <translation type="unfinished">Select settings you want to apply to all items in the render queue</translation>
+      <translation>Επιλέξτε τις ρυθμίσεις που θέλετε να εφαρμόσετε σε όλα τα στοιχεία στην ουρά απόδοσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Video</source>
-      <translation type="unfinished">Video</translation>
+      <translation>Βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>Rotation</source>
-      <translation type="unfinished">Rotation</translation>
+      <translation>Περιστροφή</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Frame rate</source>
-      <translation type="unfinished">Frame rate</translation>
+      <translation>Ρυθμός ανανέωσης καρέ</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>Lens profile</source>
-      <translation type="unfinished">Lens profile</translation>
+      <translation>Προφίλ φακού</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Motion data</source>
-      <translation type="unfinished">Motion data</translation>
+      <translation>Δεδομένα κίνησης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Low pass filter</source>
-      <translation type="unfinished">Low pass filter</translation>
+      <translation>Φίλτρο χαμηλής διέλευσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Προκατάληψη γυροσκοπίου</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>IMU orientation</source>
-      <translation type="unfinished">IMU orientation</translation>
+      <translation>Προσανατολισμός IMU</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Μέθοδος ενσωμάτωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Εύρος κοψίματος</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
       <source>Offsets</source>
-      <translation type="unfinished">Offsets</translation>
+      <translation>Αντισταθμίσεις
+</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Keyframes</source>
-      <translation type="unfinished">Keyframes</translation>
+      <translation>Βασικά καρέ</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Γίνεται συγχρονισμός</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Σκληρή μετατόπιση γυροσκοπίου</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <source>Sync search size</source>
-      <translation type="unfinished">Sync search size</translation>
+      <translation>Συγχρονισμός μεγέθους αναζήτησης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Μέγιστα σημεία συγχρονισμού</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>Do autosync</source>
-      <translation type="unfinished">Do autosync</translation>
+      <translation>Αυτόματος συγχρονισμός</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Stabilization</source>
-      <translation type="unfinished">Stabilization</translation>
+      <translation>Σταθεροποίηση</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>Οπτικό Πεδίο (FOV)</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Smoothing params</source>
-      <translation type="unfinished">Smoothing params</translation>
+      <translation>Εξομάλυνση παραμέτρων</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
       <source>Horizon lock</source>
-      <translation type="unfinished">Horizon lock</translation>
+      <translation>Κλείδωμα ορίζοντα</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Rolling shutter correction</source>
-      <translation type="unfinished">Rolling shutter correction</translation>
+      <translation>Διόρθωση κλείστρου κύλισης</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Μεγέθυνση</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Δύναμη διόρθωσης φακού</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Ταχύτητα Βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="117"/>
       <source>Export settings</source>
-      <translation type="unfinished">Export settings</translation>
+      <translation>Εξαγωγή ρυθμίσεων</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="118"/>
       <source>Codec</source>
-      <translation type="unfinished">Codec</translation>
+      <translation>Κωδικοποίηση</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="119"/>
       <source>Audio</source>
-      <translation type="unfinished">Audio</translation>
+      <translation>Ήχος</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="120"/>
       <source>Output path</source>
-      <translation type="unfinished">Output path</translation>
+      <translation>Διαδρομή εξόδου</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Output size</source>
-      <translation type="unfinished">Output size</translation>
+      <translation>Ανάλυση εξόδου</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="123"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Προηγμένες Ρυθμίσεις</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="124"/>
       <source>Background</source>
-      <translation type="unfinished">Background</translation>
+      <translation>Παρασκήνιο</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="125"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>Ταχύτητα αναπαραγωγής</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="126"/>
       <source>Playback mute status</source>
-      <translation type="unfinished">Playback mute status</translation>
+      <translation>Κατάσταση σίγασης αναπαραγωγής</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="204"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+      <translation>Συμβουλή: Μπορείτε να έχετε τις προεπιλογές σας στο πλαίσιο αναζήτησης προφίλ φακού, αν αποθηκεύσετε την προκαθορισμένη τιμή (αρχείο `.gyroflow`) στον κατάλογο `camera_presets`.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="230"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Αποθήκευση</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="230"/>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Εφαρμογή</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="230"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Ακύρωση</translation>
     </message>
   </context>
   <context>
@@ -1569,7 +1570,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="102"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Ενεργοποίηση πλαισίου-κλειδιού</translation>
     </message>
   </context>
   <context>
@@ -1612,12 +1613,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Μέγιστη ομαλότητα σε υψηλή ταχύτητα</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>Δεύτερο πέρασμα εξομάλυνσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
@@ -1686,12 +1687,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="355"/>
       <source>Use gravity vectors</source>
-      <translation type="unfinished">Use gravity vectors</translation>
+      <translation>Χρησιμοποιήστε διανύσματα βαρύτητας</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="365"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation type="unfinished">If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</translation>
+      <translation>Εάν ο ορίζοντας δεν είναι καλά κλειδωμένος, δοκιμάστε μια διαφορετική μέθοδο ενσωμάτωσης στην ενότητα &quot;Δεδομένα Κίνησης&quot;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="386"/>
@@ -1716,17 +1717,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="430"/>
       <source>Zooming center offset</source>
-      <translation type="unfinished">Zooming center offset</translation>
+      <translation>Μεγέθυνση μετατόπισης στο κέντρο X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="452"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="473"/>
@@ -1756,17 +1757,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="521"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Ταχύτητα Βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="557"/>
       <source>Link with smoothing</source>
-      <translation type="unfinished">Link with smoothing</translation>
+      <translation>Σύνδεση με εξομάλυνση</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
       <source>Link with zooming speed</source>
-      <translation type="unfinished">Link with zooming speed</translation>
+      <translation>Σύνδεση με ταχύτητα μεγέθυνσης</translation>
     </message>
   </context>
   <context>
@@ -1774,47 +1775,47 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="60"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Στατιστικά</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>Accl-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>Accl-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>Λογαριθμική τιμή άξονα</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
       <source>Sample rate</source>
-      <translation type="unfinished">Sample rate</translation>
+      <translation>Ρυθμός δειγματοληψίας</translation>
     </message>
   </context>
   <context>
@@ -1852,7 +1853,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="134"/>
       <source>Experimental automatic sync point selection.</source>
-      <translation type="unfinished">Experimental automatic sync point selection.</translation>
+      <translation>Πειραματική επιλογή σημείου αυτόματου συγχρονισμού.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="141"/>
@@ -1875,8 +1876,8 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/menu/Synchronization.qml" line="164"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
-      <translation type="unfinished">Analyze both positive and negative offset.
-This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</translation>
+      <translation>Αναλύστε τόσο θετικά όσο και αρνητικά offset.
+Αυτό διπλασιάζει το χρόνο υπολογισμού, οπότε ελέγξτε αυτό μόνο για το αρχικό σημείο και αποεπιλέξτε μόλις γνωρίζετε τη μετατόπιση.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="170"/>
@@ -1886,7 +1887,7 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="190"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
-      <translation type="unfinished">Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</translation>
+      <translation>Υπολογίστε πρώτα την αρχική μετατόπιση (χρησιμοποιώντας τη μέθοδο matrix) και έπειτα βελτιώστε τη χρήση πιο αργής αλλά πιο ακριβούς μεθόδου rs-συγχρονισμού.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="195"/>
@@ -1906,7 +1907,7 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="239"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Ανάλυση επεξεργασίας</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="261"/>
@@ -1943,8 +1944,8 @@ Resulting offset is the one where lines were the shortest, meaning the video was
       <location filename="../../src/ui/menu/Synchronization.qml" line="289"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
-      <translation type="unfinished">Rolling shutter video to gyro synchronization algorithm.
-Make sure you have proper rolling shutter value set before syncing.</translation>
+      <translation>Βίντεο κυλιόμενου κλείστρου στον αλγόριθμο συγχρονισμού γυροσκοπίου.
+Βεβαιωθείτε ότι έχετε ορίσει την κατάλληλη τιμή κυλιόμενου κλείστρου πριν από τον συγχρονισμό.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="296"/>
@@ -2131,116 +2132,116 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="148"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Μεγέθυνση</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="194"/>
       <location filename="../../src/ui/components/Timeline.qml" line="197"/>
       <source>Yaw axis</source>
-      <translation type="unfinished">Yaw axis</translation>
+      <translation>Άξονας εκτροπής (Yaw)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="195"/>
       <location filename="../../src/ui/components/Timeline.qml" line="198"/>
       <source>Pitch axis</source>
-      <translation type="unfinished">Pitch axis</translation>
+      <translation>Άξονας βήματος (Pitch)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="196"/>
       <location filename="../../src/ui/components/Timeline.qml" line="199"/>
       <source>Roll axis</source>
-      <translation type="unfinished">Roll axis</translation>
+      <translation>Άξονας ρολ (Roll)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="207"/>
       <location filename="../../src/ui/components/Timeline.qml" line="211"/>
       <source>Angle</source>
-      <translation type="unfinished">Angle</translation>
+      <translation>Γωνία</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="281"/>
       <source>Delete</source>
-      <translation type="unfinished">Delete</translation>
+      <translation>Διαγραφή</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="287"/>
       <source>Ease in</source>
-      <translation type="unfinished">Ease in</translation>
+      <translation>Ευκολία μέσα</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Ease out</source>
-      <translation type="unfinished">Ease out</translation>
+      <translation>Ευκολία έξω</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="312"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>Οπτικό Πεδίο (FOV)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="313"/>
       <source>Video rotation</source>
-      <translation type="unfinished">Video rotation</translation>
+      <translation>Περιστροφή βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="314"/>
       <source>Zooming speed</source>
-      <translation type="unfinished">Zooming speed</translation>
+      <translation>Ταχύτητα μεγέθυνσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="315"/>
       <source>Zooming center offset X</source>
-      <translation type="unfinished">Zooming center offset X</translation>
+      <translation>Μεγέθυνση μετατόπισης στο κέντρο X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="316"/>
       <source>Zooming center offset Y</source>
-      <translation type="unfinished">Zooming center offset Y</translation>
+      <translation>Μεγέθυνση μετατόπισης στο κέντρο X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="317"/>
       <source>Background margin</source>
-      <translation type="unfinished">Background margin</translation>
+      <translation>Περιθώριο παρασκηνίου</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="318"/>
       <source>Background feather</source>
-      <translation type="unfinished">Background feather</translation>
+      <translation>Φτερό παρασκηνίου</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="319"/>
       <source>Horizon lock amount</source>
-      <translation type="unfinished">Horizon lock amount</translation>
+      <translation>Ποσό κλειδώματος Ορίζοντα</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="320"/>
       <source>Horizon lock roll correction</source>
-      <translation type="unfinished">Horizon lock roll correction</translation>
+      <translation>Kλείδωμα Ορίζοντα Διόρθωση ρολ άξονα (Roll axis)</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="321"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Δύναμη διόρθωσης φακού</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="322"/>
       <source>Max smoothness</source>
-      <translation type="unfinished">Max smoothness</translation>
+      <translation>Μέγιστη ομαλότητα</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="323"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Μέγιστη ομαλότητα σε υψηλή ταχύτητα</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="324"/>
       <source>Smoothness</source>
-      <translation type="unfinished">Smoothness</translation>
+      <translation>Ομαλότητα</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="507"/>
       <source>Guess IMU orientation here</source>
-      <translation type="unfinished">Guess IMU orientation here</translation>
+      <translation>Μαντέψτε τον προσανατολισμό IMU εδώ</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="532"/>
@@ -2285,7 +2286,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="783"/>
       <source>Control+Shift+Scroll</source>
-      <translation type="unfinished">Control+Shift+Scroll</translation>
+      <translation>Control+Shift+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="784"/>
@@ -2305,17 +2306,17 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="325"/>
       <source>Pitch smoothness</source>
-      <translation type="unfinished">Pitch smoothness</translation>
+      <translation>Ομαλότητα γωνίας</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="326"/>
       <source>Roll smoothness</source>
-      <translation type="unfinished">Roll smoothness</translation>
+      <translation>Ομαλότητα κύλισης</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="327"/>
       <source>Yaw smoothness</source>
-      <translation type="unfinished">Yaw smoothness</translation>
+      <translation>Ομαλότητα εκτροπής</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="782"/>
@@ -2368,27 +2369,27 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/Util.js" line="22"/>
       <source>d</source>
-      <translation type="unfinished">d</translation>
+      <translation>δ - μικρό</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="23"/>
       <source>h</source>
-      <translation type="unfinished">h</translation>
+      <translation>η</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="24"/>
       <source>m</source>
-      <translation type="unfinished">m</translation>
+      <translation>μ</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="25"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>σ</translation>
     </message>
     <message>
       <location filename="../../src/ui/Util.js" line="27"/>
       <source>&amp;lt; 1s</source>
-      <translation type="unfinished">&amp;lt; 1s</translation>
+      <translation>&amp;lt; 1 δευτερόλεπτο</translation>
     </message>
   </context>
   <context>
@@ -2449,65 +2450,65 @@ Please provide frame rate: </source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="144"/>
       <source>Downloading %1 (%2)</source>
-      <translation type="unfinished">Downloading %1 (%2)</translation>
+      <translation>Γίνεται λήψη %1$d/%2$d</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="151"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
-      <translation type="unfinished">Component was installed successfully.
-You need to restart Gyroflow for changes to take effect.
-Your render queue and current file is saved automatically.</translation>
+      <translation>Η εφαρμογή εγκαταστάθηκε επιτυχώς.
+Πρέπει να επανεκκινήσετε το Gyroflow για να εφαρμοστούν οι αλλαγές.
+Η ουρά απόδοσης και το τρέχον αρχείο αποθηκεύονται αυτόματα.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="166"/>
       <source>Merging files to %1 (%2)</source>
-      <translation type="unfinished">Merging files to %1 (%2)</translation>
+      <translation>Συγχώνευση αρχείων σε %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="248"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
-      <translation type="unfinished">This format requires an external SDK. Do you want to download it now?</translation>
+      <translation>Αυτή η μορφή απαιτεί ένα εξωτερικό SDK. Θέλετε να το κατεβάσετε τώρα;</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="283"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
-      <translation type="unfinished">Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</translation>
+      <translation>Έχει εντοπιστεί διαχωρισμός εγγραφής, θέλετε να συνδέσετε αυτόματα τα αρχεία (%1) για να δημιουργήσετε ένα πλήρες κλιπ;</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="340"/>
       <source>You have opened multiple files. What do you want to do?</source>
-      <translation type="unfinished">You have opened multiple files. What do you want to do?</translation>
+      <translation>Έχετε ανοίξει πολλά αρχεία. Τι θέλετε να κάνετε;</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="341"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Προσθήκη στη λίστα αποτύπωσης</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="345"/>
       <source>Merge them into one video</source>
-      <translation type="unfinished">Merge them into one video</translation>
+      <translation>Συγχώνευση σε ένα βίντεο</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="352"/>
       <source>Open the first file</source>
-      <translation type="unfinished">Open the first file</translation>
+      <translation>Άνοιγμα του πρώτου αρχείου</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="186"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
-      <translation type="unfinished">File format was detected, but no motion data was found.
-The camera probably doesn&apos;t record motion data in this particular shooting mode.</translation>
+      <translation>Η μορφή του αρχείου εντοπίστηκε, αλλά δεν βρέθηκαν δεδομένα κίνησης.
+Η κάμερα πιθανώς δεν καταγράφει&apos;t δεδομένα κίνησης σε αυτή τη συγκεκριμένη λειτουργία λήψης.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
-      <translation type="unfinished">Motion data sampling rate is too low (%1 Hz).
-50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
+      <translation>Ο ρυθμός δειγματοληψίας δεδομένων κίνησης είναι πολύ χαμηλός (%1 Hz).
+τα 50 Hz είναι το ελάχιστο και συνιστούμε τουλάχιστον 200 Hz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="580"/>
@@ -2532,7 +2533,7 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="231"/>
       <source>Loading gyro data %1...</source>
-      <translation type="unfinished">Loading gyro data %1...</translation>
+      <translation>Φόρτωση δεδομένων γυροσκοπίου %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="734"/>

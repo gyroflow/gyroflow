@@ -1302,7 +1302,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="380"/>
       <source>Yes</source>
-      <translation>Si</translation>
+      <translation>Sì</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="381"/>
