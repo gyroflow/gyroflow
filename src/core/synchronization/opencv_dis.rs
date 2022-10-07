@@ -93,10 +93,8 @@ impl ItemOpenCVDis {
             }
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let stride1 = self.img.width();
-                let stride2 = next.img.width();
-                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, stride1 as usize) }?;
-                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, stride2 as usize) }?;
+                let a1_img = unsafe { Mat::new_size_with_data(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, 0) }?;
+                let a2_img = unsafe { Mat::new_size_with_data(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, 0) }?;
 
                 let mut of = Mat::default();
                 let mut optflow = <dyn opencv::video::DISOpticalFlow>::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
