@@ -1,6 +1,6 @@
 [package]
 name = "gyroflow"
-version = "1.3.0-beta"
+version = "1.3.0-beta.2"
 authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
 edition = "2021"
 build = "build.rs"
