@@ -5,8 +5,9 @@ use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelPara
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 
-pub const COEFFS: [f32; 64+128+256] = [
+pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
     // Bilinear
+    // offset 0
     1.000000, 0.000000, 0.968750, 0.031250, 0.937500, 0.062500, 0.906250, 0.093750, 0.875000, 0.125000, 0.843750, 0.156250,
     0.812500, 0.187500, 0.781250, 0.218750, 0.750000, 0.250000, 0.718750, 0.281250, 0.687500, 0.312500, 0.656250, 0.343750,
     0.625000, 0.375000, 0.593750, 0.406250, 0.562500, 0.437500, 0.531250, 0.468750, 0.500000, 0.500000, 0.468750, 0.531250,
@@ -15,6 +16,7 @@ pub const COEFFS: [f32; 64+128+256] = [
     0.062500, 0.937500, 0.031250, 0.968750,
 
     // Bicubic
+    // offset 64
      0.000000, 1.000000, 0.000000,  0.000000, -0.021996, 0.997841, 0.024864, -0.000710, -0.041199, 0.991516, 0.052429, -0.002747,
     -0.057747, 0.981255, 0.082466, -0.005974, -0.071777, 0.967285, 0.114746, -0.010254, -0.083427, 0.949837, 0.149040, -0.015450,
     -0.092834, 0.929138, 0.185120, -0.021423, -0.100136, 0.905418, 0.222755, -0.028038, -0.105469, 0.878906, 0.261719, -0.035156,
@@ -28,6 +30,7 @@ pub const COEFFS: [f32; 64+128+256] = [
     -0.002747, 0.052429, 0.991516, -0.041199, -0.000710, 0.024864, 0.997841, -0.021996,
 
     // Lanczos4
+    // offset 192
      0.000000,  0.000000,  0.000000,  1.000000,  0.000000,  0.000000,  0.000000,  0.000000, -0.002981,  0.009625, -0.027053,  0.998265,
      0.029187, -0.010246,  0.003264, -0.000062, -0.005661,  0.018562, -0.051889,  0.993077,  0.060407, -0.021035,  0.006789, -0.000250,
     -0.008027,  0.026758, -0.074449,  0.984478,  0.093543, -0.032281,  0.010545, -0.000567, -0.010071,  0.034167, -0.094690,  0.972534,
@@ -49,7 +52,23 @@ pub const COEFFS: [f32; 64+128+256] = [
     -0.001582,  0.018613, -0.055744,  0.165004,  0.957333, -0.112589,  0.040757, -0.011792, -0.001012,  0.014499, -0.043886,  0.128459,
      0.972534, -0.094690,  0.034167, -0.010071, -0.000567,  0.010545, -0.032281,  0.093543,  0.984478, -0.074449,  0.026758, -0.008027,
     -0.000250,  0.006789, -0.021035,  0.060407,  0.993077, -0.051889,  0.018562, -0.005661, -0.000062,  0.003264, -0.010246,  0.029187,
-     0.998265, -0.027053,  0.009625, -0.002981
+     0.998265, -0.027053,  0.009625, -0.002981,
+
+    // Colors
+    // offset 448
+    0.0,   0.0,   0.0,     0.0, // None
+    255.0, 0.0,   0.0,   255.0, // Red
+    0.0,   255.0, 0.0,   255.0, // Green
+    0.0,   0.0,   255.0, 255.0, // Blue
+    254.0, 251.0, 71.0,  255.0, // Yellow
+    200.0, 200.0, 0.0,   255.0, // Yellow2
+    255.0, 0.0,   255.0, 255.0, // Magenta
+    0.0,   128.0, 255.0, 255.0, // Blue2
+    0.0,   200.0, 200.0, 255.0,  // Blue3
+
+    // Alphas
+    // offset 484
+    1.0, 0.75, 0.50, 0.25,
 ];
 
 const COLORS: [Vector4<f32>; 9] = [
@@ -70,9 +89,9 @@ impl<T: PixelType> Stabilization<T> {
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
     pub fn undistort_image_cpu<const I: i32>(pixels: &[u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) {
-        fn draw_pixel(in_pix: Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, scale: f32, drawing: &[u8]) ->Vector4<f32> {
-            if drawing.is_empty() { return in_pix; }
-            let pos = ((y as f32 / scale).floor() * (width as f32) + (x as f32 / scale).floor()).round() as usize;
+        fn draw_pixel(in_pix: Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) -> Vector4<f32> {
+            if drawing.is_empty() || (params.flags & 8) == 0 { return in_pix; }
+            let pos = ((y as f32 / params.canvas_scale).floor() * (width as f32) + (x as f32 / params.canvas_scale).floor()).round() as usize;
             let mut pix = in_pix;
             if let Some(&data) = drawing.get(pos) {
                 if data > 0 {
@@ -164,7 +183,7 @@ impl<T: PixelType> Stabilization<T> {
                         let pixel = if sx + xp >= params.output_rect[0] && sx + xp < params.output_rect[0] + params.output_rect[2] {
                             let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
                             let mut src_px = PixelType::to_float(*px1);
-                            src_px = draw_pixel(src_px, sx + xp, sy + yp, true, params.width, params.canvas_scale, drawing);
+                            src_px = draw_pixel(src_px, sx + xp, sy + yp, true, params.width, params, drawing);
                             if fix_range {
                                 remap_colorrange(&mut src_px, params.bytes_per_pixel == 1)
                             }
@@ -293,7 +312,7 @@ impl<T: PixelType> Stabilization<T> {
                                 let c1 = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
                                 let c2 = sample_input_at::<I, T>(pt2, pixels, params, &bg, drawing);
                                 pixel = c1 * alpha + c2 * (1.0 - alpha);
-                                pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params.canvas_scale, drawing);
+                                pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
                                 *pix_out = PixelType::from_float(pixel);
                                 return;
                             },
@@ -302,7 +321,7 @@ impl<T: PixelType> Stabilization<T> {
 
                         pixel = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
                     }
-                    pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params.canvas_scale, drawing);
+                    pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
                     *pix_out = PixelType::from_float(pixel);
                 }
             });

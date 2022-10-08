@@ -47,18 +47,9 @@ let INTER_BITS: u32 = 5u;
 let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
 
 fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
-    var colors: array<vec4<f32>, 9> = array<vec4<f32>, 9>(
-        vec4<f32>(0.0,   0.0,   0.0,     0.0), // None
-        vec4<f32>(255.0, 0.0,   0.0,   255.0), // Red
-        vec4<f32>(0.0,   255.0, 0.0,   255.0), // Green
-        vec4<f32>(0.0,   0.0,   255.0, 255.0), // Blue
-        vec4<f32>(254.0, 251.0, 71.0,  255.0), // Yellow
-        vec4<f32>(200.0, 200.0, 0.0,   255.0), // Yellow2
-        vec4<f32>(255.0, 0.0,   255.0, 255.0), // Magenta
-        vec4<f32>(0.0,   128.0, 255.0, 255.0), // Blue2
-        vec4<f32>(0.0,   200.0, 200.0, 255.0)  // Blue3
-    );
-    var alphas: vec4<f32> = vec4<f32>( 1.0, 0.75, 0.50, 0.25 );
+    if (!bool(params.flags & 8)) { // Drawing not enabled
+        return in_pix;
+    }
 
     let width = max(params.width, params.output_width);
 
@@ -72,8 +63,9 @@ fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
         let alpha = (data & 0x06u) >> 1u;
         let stage = data & 1u;
         if (((stage == 0u && isInput) || (stage == 1u && !isInput)) && color < 9u) {
-            let colorf = colors[color] / bg_scaler;
-            let alphaf = alphas[alpha];
+            let color_offs = 448u + (color * 4u);
+            let colorf = vec4<f32>(coeffs[color_offs], coeffs[color_offs + 1u], coeffs[color_offs + 2u], coeffs[color_offs + 3u]) / bg_scaler;
+            let alphaf = coeffs[484u + alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);
             pix.w = 255.0 / bg_scaler;
         }

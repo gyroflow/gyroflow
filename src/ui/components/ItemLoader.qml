@@ -7,6 +7,7 @@ Loader {
     asynchronous: true;
     width: parent.width;
     visible: status == Loader.Ready;
+    onStatusChanged: if (status === Loader.Ready) window.onItemLoaded(item);
     opacity: visible? 1 : 0;
     Ease on opacity { }
 }

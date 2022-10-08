@@ -29,12 +29,17 @@ pub enum Interpolation {
     Lanczos4 = 8
 }
 
+lazy_static::lazy_static! {
+    pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
+}
+
 bitflags::bitflags! {
     #[derive(Default)]
     pub struct KernelParamsFlags: i32 {
         const FIX_COLOR_RANGE      = 1;
         const HAS_DIGITAL_LENS     = 2;
         const FILL_WITH_BACKGROUND = 4;
+        const DRAWING_ENABLED      = 8;
     }
 }
 
@@ -97,8 +102,6 @@ pub struct Stabilization<T: PixelType> {
 
     backend_initialized: Option<(usize, usize, usize,   usize, usize, usize,   u32, u32)>, // (in_w, in_h, in_s,  out_w, out_h, out_s, buffer_checksum, lens models)
 
-    pub gpu_list: Vec<String>,
-
     compute_params: ComputeParams,
 
     pub drawing: DrawCanvas,
@@ -125,6 +128,8 @@ impl<T: PixelType> Stabilization<T> {
             let timestamp_ms = (timestamp_us as f64) / 1000.0;
             let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs
 
+            self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
+
             let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
             transform.kernel_params.interpolation = self.interpolation as i32;
             transform.kernel_params.width  = self.size.0 as i32;
@@ -135,6 +140,7 @@ impl<T: PixelType> Stabilization<T> {
             transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
             transform.kernel_params.pix_element_count = T::COUNT as i32;
             transform.kernel_params.canvas_scale = self.drawing.scale as f32;
+            transform.kernel_params.flags = self.kernel_flags.bits();
 
             if let Some(buffers) = buffers {
                 transform.kernel_params.stride        = buffers.input_size.2 as i32;
@@ -181,7 +187,9 @@ impl<T: PixelType> Stabilization<T> {
         self.size = size;
         self.output_size = output_size;
 
-        self.drawing = DrawCanvas::new(size.0, size.1, output_size.0, output_size.1, (size.1 as f64 / 720.0).max(1.0) as usize);
+        if self.kernel_flags.contains(KernelParamsFlags::DRAWING_ENABLED) {
+            self.drawing = DrawCanvas::new(size.0, size.1, output_size.0, output_size.1, (size.1 as f64 / 720.0).max(1.0) as usize);
+        }
 
         self.stab_data.clear();
     }
@@ -232,7 +240,8 @@ impl<T: PixelType> Stabilization<T> {
             self.backend_initialized = Some(tuple);
             return true;
         }
-        if let Some(name) = self.gpu_list.get(i as usize) {
+        let gpu_list = GPU_LIST.read();
+        if let Some(name) = gpu_list.get(i as usize) {
             if name.starts_with("[OpenCL]") {
                 self.backend_initialized = None;
                 #[cfg(feature = "use-opencl")]
@@ -244,7 +253,7 @@ impl<T: PixelType> Stabilization<T> {
                 }
             } else if name.starts_with("[wgpu]") {
                 self.backend_initialized = None;
-                let first_ind = self.gpu_list.iter().enumerate().find(|(_, m)| m.starts_with("[wgpu]")).map(|(idx, _)| idx).unwrap_or(0);
+                let first_ind = gpu_list.iter().enumerate().find(|(_, m)| m.starts_with("[wgpu]")).map(|(idx, _)| idx).unwrap_or(0);
                 let wgpu_ind = i - first_ind as isize;
                 if wgpu_ind >= 0 {
                     match wgpu::WgpuWrapper::set_device(wgpu_ind as usize, buffers) {
@@ -280,7 +289,7 @@ impl<T: PixelType> Stabilization<T> {
                         opencl::OclWrapper::new(&params, T::ocl_names(), &self.compute_params, buffers, canvas_len)
                     });
                     match cl {
-                        Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; },
+                        Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; log::info!("Initialized OpenCL for {:?} -> {:?}", buffers.input_size, buffers.output_size); },
                         Ok(Err(e)) => { log::error!("OpenCL error init_backends: {:?}", e); },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
@@ -299,7 +308,7 @@ impl<T: PixelType> Stabilization<T> {
                         wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
                     });
                     match wgpu {
-                        Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); },
+                        Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input_size, buffers.output_size); },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize wgpu {}", s);
@@ -381,7 +390,7 @@ impl<T: PixelType> Stabilization<T> {
                 return Some(ret);
             }
         } else {
-            println!("no data");
+            log::warn!("No stab data at {timestamp_us}");
         }
         None
     }

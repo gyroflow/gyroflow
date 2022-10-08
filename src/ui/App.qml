@@ -73,6 +73,14 @@ Rectangle {
         onAccepted: videoArea.loadMultipleFiles(selectedFiles, false);
     }
 
+    property string pendingOpenFile: openFileOnStart;
+    function onItemLoaded() {
+        if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile) {
+            videoArea.loadFile(controller.path_to_url(pendingOpenFile));
+            pendingOpenFile = "";
+        }
+    }
+
     Item {
         id: mainLayout;
         width: parent.width;

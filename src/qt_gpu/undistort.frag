@@ -63,6 +63,9 @@ const vec4 colors[9] = vec4[9](
 );
 const float alphas[4] = float[4](1.0, 0.75, 0.50, 0.25);
 void draw_pixel(inout vec4 out_pix, float x, float y, bool isInput) {
+    if (!bool(params.flags & 8)) { // Drawing not enabled
+        return;
+    }
     int width = max(params.width, params.output_width);
     int height = max(params.height, params.output_height);
 

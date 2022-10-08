@@ -543,11 +543,6 @@ Item {
                 backgroundColor: "#111111";
                 Component.onCompleted: {
                     controller.init_player(this);
-                    Qt.callLater(() => {
-                        if (!isCalibrator && openFileOnStart) {
-                            root.loadFile(controller.path_to_url(openFileOnStart));
-                        }
-                    });
                 }
                 Rectangle {
                     border.color: styleVideoBorderColor;

@@ -110,8 +110,11 @@ __constant float4 colors[9] = {
     (float4)(0.0f,   200.0f, 200.0f, 255.0f)  // Blue3
 };
 __constant float alphas[4] = { 1.0f, 0.75f, 0.50f, 0.25f };
-void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, float scale, __global const uchar *drawing) {
-    int pos = (int)round(floor((float)y / scale) * (width / scale) + floor((float)x / scale));
+void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, __global KernelParams *params, __global const uchar *drawing) {
+    if (!(params->flags & 8)) { // Drawing not enabled
+        return;
+    }
+    int pos = (int)round(floor((float)y / params->canvas_scale) * (width / params->canvas_scale) + floor((float)x / params->canvas_scale));
     uchar data = drawing[pos];
     if (data > 0) {
         uchar color = (data & 0xF8) >> 3;
@@ -171,7 +174,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
             for (int xp = 0; xp < INTERPOLATION; ++xp) {
                 if (sx + xp >= params->source_rect.x && sx + xp < params->source_rect.x + params->source_rect.z) {
                     DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp];
-                    draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params->canvas_scale, drawing);
+                    draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params, drawing);
                     DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
                     if (fix_range) {
                         srcpx = remap_colorrange(srcpx, PIXEL_BYTES == 1);
@@ -309,7 +312,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                     DATA_TYPEF c1 = sample_input_at(uv,  srcptr, params, drawing, bg);
                     DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, drawing, bg);
                     final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
-                    draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params->canvas_scale, drawing);
+                    draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
                     *out_pix = final_pix;
                     return;
                 } break;
@@ -319,7 +322,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         } else {
             final_pix = DATA_CONVERT(bg);
         }
-        draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params->canvas_scale, drawing);
+        draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
         *out_pix = final_pix;
     }
 }

@@ -357,6 +357,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                     };
                     let mut plane = Stabilization::<$t>::default();
                     plane.interpolation = Interpolation::Lanczos4;
+                    plane.set_device(stab.params.read().current_device as isize);
 
                     // Workaround for a bug in prores videotoolbox encoder
                     if $in_frame.format() == ffmpeg_next::format::Pixel::NV12 && is_prores_videotoolbox {

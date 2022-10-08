@@ -68,6 +68,7 @@ pub struct StabilizationParams {
     pub show_optical_flow: bool,
 
     pub of_method: u32,
+    pub current_device: i32,
 
     pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>
 }
@@ -107,6 +108,8 @@ impl Default for StabilizationParams {
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
 
             of_method: 2,
+
+            current_device: 0,
 
             fps: 0.0,
             fps_scale: None,
@@ -208,6 +211,7 @@ impl StabilizationParams {
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,
             of_method:                 self.of_method,
+            current_device:            self.current_device,
             ..Default::default()
         };
     }

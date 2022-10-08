@@ -14,6 +14,8 @@ cpp! {{
 }}
 
 pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager<RGBA8>>) -> Option<ProcessedInfo> {
+    if stab.prevent_recompute.load(std::sync::atomic::Ordering::SeqCst) { return None; }
+
     let p = stab.params.read();
     let output_size = QSize { width: p.output_size.0 as u32, height: p.output_size.1 as u32 };
     let shader_path = {

@@ -191,6 +191,11 @@ impl OclWrapper {
                        .replace("DATA_TYPE", ocl_names.0)
                        .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
                        .replace("INTERPOLATION", &format!("{}", params.interpolation));
+
+        if (params.flags & 8) == 0 { // Drawing not enabled
+            kernel = kernel.replace("params->flags & 8", "false"); // It makes it much faster for some reason
+        }
+
         let mut image_src = None;
         let mut image_dst = None;
 

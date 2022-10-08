@@ -161,8 +161,6 @@ impl FrameTransform {
                 digital_lens_params[i] = *v as f32;
             }
         }
-        let mut flags = super::KernelParamsFlags::default();
-        flags.set(super::KernelParamsFlags::HAS_DIGITAL_LENS, params.digital_lens.is_some());
 
         let kernel_params = KernelParams {
             matrix_count:  matrices.len() as i32,
@@ -180,7 +178,6 @@ impl FrameTransform {
             translation2d: [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32],
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
-            flags: flags.bits(),
             ..Default::default()
         };
 

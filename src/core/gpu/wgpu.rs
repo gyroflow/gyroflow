@@ -89,7 +89,7 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, _buffers: &BufferDescription, drawing_len: usize) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, _buffers: &BufferDescription, mut drawing_len: usize) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
         if params.height < 4 || params.output_height < 4 || params.stride < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
@@ -97,6 +97,8 @@ impl WgpuWrapper {
         let in_size = (params.stride * params.height) as wgpu::BufferAddress;
         let out_size = (params.output_stride * params.output_height) as wgpu::BufferAddress;
         let params_size = (max_matrix_count * std::mem::size_of::<f32>()) as wgpu::BufferAddress;
+
+        let drawing_enabled = (params.flags & 8) == 8;
 
         let adapter_initialized = ADAPTER.read().is_some();
         if !adapter_initialized { Self::initialize_context(); }
@@ -124,6 +126,11 @@ impl WgpuWrapper {
             kernel = kernel.replace("bg_scaler", &format!("{:.6}", wgpu_format.2));
             // Replace it in source to allow for loop unrolling when compiling shader
             kernel = kernel.replace("params.interpolation", &format!("{}u", params.interpolation));
+
+            if !drawing_enabled {
+                drawing_len = 16;
+                kernel = kernel.replace("bool(params.flags & 8)", "false"); // It makes it much faster for some reason
+            }
 
             let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
                 source: wgpu::ShaderSource::Wgsl(Cow::Owned(kernel)),
@@ -205,17 +212,20 @@ impl WgpuWrapper {
 
             let view = in_pixels.create_view(&wgpu::TextureViewDescriptor::default());
 
+            let mut bindings = vec![
+                wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) },
+                wgpu::BindGroupEntry { binding: 3, resource: buf_coeffs.as_entire_binding() },
+            ];
+            //if drawing_enabled {
+                bindings.push(wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() });
+            //}
             let bind_group_layout = render_pipeline.get_bind_group_layout(0);
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: None,
                 layout: &bind_group_layout,
-                entries: &[
-                    wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) },
-                    wgpu::BindGroupEntry { binding: 3, resource: buf_coeffs.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
-                ],
+                entries: &bindings,
             });
 
             Some(Self {

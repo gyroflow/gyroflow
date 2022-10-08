@@ -31,7 +31,7 @@ use stabilization_params::StabilizationParams;
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
 use smoothing::Smoothing;
-use stabilization::Stabilization;
+use stabilization::{ Stabilization, KernelParamsFlags };
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
@@ -664,6 +664,7 @@ impl<T: PixelType> StabilizationManager<T> {
     }
     pub fn set_render_params(&self, size: (usize, usize), output_size: (usize, usize)) {
         self.params.write().framebuffer_inverted = false;
+        self.stabilization.write().kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, false);
         self.set_size(size.0, size.1);
         self.set_output_size(output_size.0, output_size.1);
 
@@ -703,13 +704,10 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn list_gpu_devices<F: Fn(Vec<String>) + Send + Sync + 'static>(&self, cb: F) {
         let stab = self.stabilization.clone();
         run_threaded(move || {
-            let lock = stab.upgradable_read();
-            let list = lock.list_devices();
+            let list = stab.read().list_devices();
 
-            {
-                let mut lock = RwLockUpgradableReadGuard::upgrade(lock);
-                lock.gpu_list = list.clone();
-            }
+            *stabilization::GPU_LIST.write() = list.clone();
+
             cb(list);
         });
     }
