@@ -120,13 +120,11 @@ void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, __glo
         uchar color = (data & 0xF8) >> 3;
         uchar alpha = (data & 0x06) >> 1;
         uchar stage = data & 1;
-        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9) {
+        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9 && alpha < 4) {
             float4 colorf4 = colors[color];
             DATA_TYPEF colorf = *(DATA_TYPEF *)&colorf4;
 
-            float4 alphaf4 = (float4)alphas[alpha];
-            alphaf4.a = 1.0;
-            DATA_TYPEF alphaf = *(DATA_TYPEF *)&alphaf4;
+            float alphaf = alphas[alpha];
 
             *out_pix = DATA_CONVERT(colorf * alphaf + DATA_CONVERTF(*out_pix) * (1.0f - alphaf));
         }
@@ -235,7 +233,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     if (matrices == 0 || params->width < 1) return;
 
     if (x >= 0.0f && y >= 0.0f && x < (float)params->output_width && y < (float)params->output_height) {
-        __global DATA_TYPE *out_pix = &dstptr[buf_x * PIXEL_BYTES + buf_y * params->output_stride];
+        __global DATA_TYPE *out_pix = (__global DATA_TYPE *)&dstptr[buf_x * PIXEL_BYTES + buf_y * params->output_stride];
 
         if (params->flags & 4) { // Fill with background
             *out_pix = DATA_CONVERT(bg);

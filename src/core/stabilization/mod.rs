@@ -329,6 +329,7 @@ impl<T: PixelType> Stabilization<T> {
 
     pub fn ensure_ready_for_processing(&mut self, timestamp_us: i64, buffers: &mut BufferDescription) {
         if let Some(dev) = self.pending_device_change.take() {
+            log::debug!("Setting device {dev}");
             self.update_device(dev, buffers);
         }
 

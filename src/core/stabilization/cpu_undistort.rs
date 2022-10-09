@@ -64,52 +64,52 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
     200.0, 200.0, 0.0,   255.0, // Yellow2
     255.0, 0.0,   255.0, 255.0, // Magenta
     0.0,   128.0, 255.0, 255.0, // Blue2
-    0.0,   200.0, 200.0, 255.0,  // Blue3
+    0.0,   200.0, 200.0, 255.0, // Blue3
 
     // Alphas
     // offset 484
     1.0, 0.75, 0.50, 0.25,
 ];
 
-const COLORS: [Vector4<f32>; 9] = [
-    Vector4::new(0.0,   0.0,   0.0,     0.0), // None
-    Vector4::new(255.0, 0.0,   0.0,   255.0), // Red
-    Vector4::new(0.0,   255.0, 0.0,   255.0), // Green
-    Vector4::new(0.0,   0.0,   255.0, 255.0), // Blue
-    Vector4::new(254.0, 251.0, 71.0,  255.0), // Yellow
-    Vector4::new(200.0, 200.0, 0.0,   255.0), // Yellow2
-    Vector4::new(255.0, 0.0,   255.0, 255.0), // Magenta
-    Vector4::new(0.0,   128.0, 255.0, 255.0), // Blue2
-    Vector4::new(0.0,   200.0, 200.0, 255.0)  // Blue3
-];
-const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
+// const COLORS: [Vector4<f32>; 9] = [
+//     Vector4::new(0.0,   0.0,   0.0,     0.0), // None
+//     Vector4::new(255.0, 0.0,   0.0,   255.0), // Red
+//     Vector4::new(0.0,   255.0, 0.0,   255.0), // Green
+//     Vector4::new(0.0,   0.0,   255.0, 255.0), // Blue
+//     Vector4::new(254.0, 251.0, 71.0,  255.0), // Yellow
+//     Vector4::new(200.0, 200.0, 0.0,   255.0), // Yellow2
+//     Vector4::new(255.0, 0.0,   255.0, 255.0), // Magenta
+//     Vector4::new(0.0,   128.0, 255.0, 255.0), // Blue2
+//     Vector4::new(0.0,   200.0, 200.0, 255.0)  // Blue3
+// ];
+// const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 
 impl<T: PixelType> Stabilization<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
     pub fn undistort_image_cpu<const I: i32>(pixels: &[u8], out_pixels: &mut [u8], params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) {
-        fn draw_pixel(in_pix: Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) -> Vector4<f32> {
-            if drawing.is_empty() || (params.flags & 8) == 0 { return in_pix; }
-            let pos = ((y as f32 / params.canvas_scale).floor() * (width as f32) + (x as f32 / params.canvas_scale).floor()).round() as usize;
-            let mut pix = in_pix;
-            if let Some(&data) = drawing.get(pos) {
-                if data > 0 {
-                    let color = (data & 0xF8) >> 3;
-                    let alpha = (data & 0x06) >> 1;
-                    let stage = data & 1;
-                    if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < 9 {
-                        let colorf = COLORS[color as usize];
-                        let alphaf = ALPHAS[alpha as usize];
-                        pix = colorf * alphaf + pix * (1.0 - alphaf);
-                        pix.w = 255.0;
-                    }
-                }
-            }
-            return pix;
-        }
+        // #[cold]
+        // fn draw_pixel(pix: &mut Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) {
+        //     if drawing.is_empty() || (params.flags & 8) == 0 { return; }
+        //     let pos = ((y as f32 / params.canvas_scale).floor() * (width as f32) + (x as f32 / params.canvas_scale).floor()).round() as usize;
+        //     if let Some(&data) = drawing.get(pos) {
+        //         if data > 0 {
+        //             let color = (data & 0xF8) >> 3;
+        //             let alpha = (data & 0x06) >> 1;
+        //             let stage = data & 1;
+        //             if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < 9 {
+        //                 let colorf = COLORS[color as usize];
+        //                 let alphaf = ALPHAS[alpha as usize];
+        //                 *pix = colorf * alphaf + *pix * (1.0 - alphaf);
+        //                 pix.w = 255.0;
+        //             }
+        //         }
+        //     }
+        // }
 
         // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
+        #[cold]
         fn remap_colorrange(px: &mut Vector4<f32>, is_y: bool) {
             if is_y { *px *= 0.85882352; } // (235 - 16) / 255
             else    { *px *= 0.87843137; } // (240 - 16) / 255
@@ -147,9 +147,7 @@ impl<T: PixelType> Stabilization<T> {
             return None;
         }
 
-        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), pixels: &[u8], params: &KernelParams, bg: &Vector4<f32>, drawing: &[u8]) -> Vector4<f32> {
-            let fix_range = (params.flags & 1) == 1;
-
+        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), pixels: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
             const INTER_BITS: usize = 5;
             const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
             let shift: i32 = (I >> 2) + 1;
@@ -157,8 +155,8 @@ impl<T: PixelType> Stabilization<T> {
             let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
 
             let uv = (
-                map_coord(uv.0, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32),
-                map_coord(uv.1, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
+                map_coord(uv.0, 0.0, params.width  as f32, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                map_coord(uv.1, 0.0, params.height as f32, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
             );
 
             let u = uv.0 - offset;
@@ -177,16 +175,13 @@ impl<T: PixelType> Stabilization<T> {
             let mut src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
 
             for yp in 0..I {
-                if sy + yp >= params.output_rect[1] && sy + yp < params.output_rect[1] + params.output_rect[3] {
+                if sy + yp >= params.source_rect[1] && sy + yp < params.source_rect[1] + params.source_rect[3] {
                     let mut xsum = Vector4::<f32>::from_element(0.0);
                     for xp in 0..I {
-                        let pixel = if sx + xp >= params.output_rect[0] && sx + xp < params.output_rect[0] + params.output_rect[2] {
+                        let pixel = if sx + xp >= params.source_rect[0] && sx + xp < params.source_rect[0] + params.source_rect[2] {
                             let px1: &T = bytemuck::from_bytes(&pixels[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
-                            let mut src_px = PixelType::to_float(*px1);
-                            src_px = draw_pixel(src_px, sx + xp, sy + yp, true, params.width, params, drawing);
-                            if fix_range {
-                                remap_colorrange(&mut src_px, params.bytes_per_pixel == 1)
-                            }
+                            let src_px = PixelType::to_float(*px1);
+                            // draw_pixel(&mut src_px, sx + xp, sy + yp, true, params.width, params, drawing);
                             src_px
                         } else {
                             *bg
@@ -212,6 +207,11 @@ impl<T: PixelType> Stabilization<T> {
         let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
         let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
 
+        // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
+        let fill_bg = (params.flags & 4) == 4;
+        let fix_range = (params.flags & 1) == 1;
+        let is_y = params.bytes_per_pixel == 1;
+
         out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
 
@@ -223,7 +223,7 @@ impl<T: PixelType> Stabilization<T> {
                 if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
                     assert!(pix_chunk.len() == std::mem::size_of::<T>());
 
-                    let p = out_pos;
+                    // let p = out_pos;
                     let mut pixel = bg;
 
                     out_pos.0 += params.translation2d[0];
@@ -231,7 +231,7 @@ impl<T: PixelType> Stabilization<T> {
 
                     let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
-                    if (params.flags & 4) == 4 { // Fill with background
+                    if fill_bg {
                         *pix_out = bg_t;
                         return;
                     }
@@ -312,7 +312,10 @@ impl<T: PixelType> Stabilization<T> {
                                 let c1 = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
                                 let c2 = sample_input_at::<I, T>(pt2, pixels, params, &bg, drawing);
                                 pixel = c1 * alpha + c2 * (1.0 - alpha);
-                                pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                                // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                                if fix_range {
+                                    remap_colorrange(&mut pixel, is_y)
+                                }
                                 *pix_out = PixelType::from_float(pixel);
                                 return;
                             },
@@ -321,7 +324,11 @@ impl<T: PixelType> Stabilization<T> {
 
                         pixel = sample_input_at::<I, T>(uv, pixels, params, &bg, drawing);
                     }
-                    pixel = draw_pixel(pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                    // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+
+                    if fix_range {
+                        remap_colorrange(&mut pixel, is_y)
+                    }
                     *pix_out = PixelType::from_float(pixel);
                 }
             });

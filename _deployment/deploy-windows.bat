@@ -28,6 +28,7 @@ xcopy /Y "%QT_DIR%\bin\Qt6QuickDialogs2QuickImpl.dll"                           
 xcopy /Y "%QT_DIR%\bin\Qt6QuickDialogs2Utils.dll"                                                  "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6QuickTemplates2.dll"                                                     "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6Svg.dll"                                                                 "%TARGET%\"
+xcopy /Y "%QT_DIR%\bin\d3dcompiler_47.dll"                                                         "%TARGET%\"
 :: Copy QtQuick
 xcopy /Y "%QT_DIR%\qml\Qt\labs\settings\qmldir"                                                    "%TARGET%\Qt\labs\settings\"
 xcopy /Y "%QT_DIR%\qml\Qt\labs\settings\qmlsettingsplugin.dll"                                     "%TARGET%\Qt\labs\settings\"

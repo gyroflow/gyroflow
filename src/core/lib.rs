@@ -706,6 +706,8 @@ impl<T: PixelType> StabilizationManager<T> {
         run_threaded(move || {
             let list = stab.read().list_devices();
 
+            log::info!("GPU list: {:?}", &list);
+
             *stabilization::GPU_LIST.write() = list.clone();
 
             cb(list);
