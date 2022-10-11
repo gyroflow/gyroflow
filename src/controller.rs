@@ -59,7 +59,7 @@ pub struct Controller {
 
     set_of_method: qt_method!(fn(&self, v: u32)),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
-    update_chart: qt_method!(fn(&self, chart: QJSValue, series: String)),
+    update_chart: qt_method!(fn(&self, chart: QJSValue, series: String) -> bool),
     update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
@@ -471,17 +471,35 @@ impl Controller {
         }
     }
 
-    fn update_chart(&mut self, chart: QJSValue, series: String) {
+    fn update_chart(&mut self, chart: QJSValue, series: String) -> bool {
         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
 
-            if series.is_empty() {
-                chart.setSyncResults(&*self.stabilizer.pose_estimator.estimated_gyro.read());
-                chart.setSyncResultsQuats(&*self.stabilizer.pose_estimator.estimated_quats.read());
+            if self.stabilizer.pose_estimator.estimated_gyro.is_locked() ||
+               self.stabilizer.pose_estimator.estimated_quats.is_locked() ||
+               self.stabilizer.gyro.is_locked() ||
+               self.stabilizer.params.is_locked() {
+                ::log::debug!("Chart mutex locked, retrying");
+                return false;
             }
 
-            chart.setFromGyroSource(&self.stabilizer.gyro.read(), &self.stabilizer.params.read(), &series);
+            if series.is_empty() {
+                if let Some(est_gyro) = self.stabilizer.pose_estimator.estimated_gyro.try_read() {
+                    chart.setSyncResults(&est_gyro);
+                    if let Some(est_quats) = self.stabilizer.pose_estimator.estimated_quats.try_read() {
+                        chart.setSyncResultsQuats(&est_quats);
+                    }
+                }
+            }
+
+            if let Some(gyro) = self.stabilizer.gyro.try_read() {
+                if let Some(params) = self.stabilizer.params.try_read() {
+                    chart.setFromGyroSource(&gyro, &params, &series);
+                    return true;
+                }
+            }
         }
+        false
     }
 
     fn update_frequency_graph(&mut self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize) {

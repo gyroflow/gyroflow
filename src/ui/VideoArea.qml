@@ -202,12 +202,10 @@ Item {
             }
         }
         function onChart_data_changed() {
-            chartUpdateTimer.series = "";
-            chartUpdateTimer.start();
+            timeline.triggerUpdateChart("");
         }
         function onZooming_data_changed() {
-            chartUpdateTimer.series = "8";
-            chartUpdateTimer.start();
+            timeline.triggerUpdateChart("8");
         }
         function onKeyframes_changed() {
             Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
@@ -425,15 +423,6 @@ Item {
             }
         }
         return false;
-    }
-
-    Timer {
-        id: chartUpdateTimer;
-        repeat: false;
-        running: false;
-        interval: 100;
-        property string series;
-        onTriggered: Qt.callLater(controller.update_chart, timeline.getChart(), series);
     }
 
     Item {

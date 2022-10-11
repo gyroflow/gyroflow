@@ -82,7 +82,23 @@ Item {
     }
     function setDisplayMode(i) {
         chart.viewMode = i;
-        controller.update_chart(chart, "");
+        triggerUpdateChart("");
+    }
+    function triggerUpdateChart(series: string) {
+        chartUpdateTimer.series = series || "";
+        chartUpdateTimer.start();
+    }
+    Timer {
+        id: chartUpdateTimer;
+        repeat: false;
+        running: false;
+        interval: 100;
+        property string series;
+        onTriggered: {
+            if (!controller.update_chart(chart, series)) {
+                chartUpdateTimer.start(); // try again
+            }
+        }
     }
 
     function updateDurations() {
@@ -92,7 +108,7 @@ Item {
         root.orgDurationMs = controller.get_org_duration_ms();
         root.scaledFps     = controller.get_scaled_fps();
 
-        Qt.callLater(controller.update_chart, chart, "");
+        triggerUpdateChart("");
         Qt.callLater(controller.update_keyframes_view, keyframes);
     }
 
