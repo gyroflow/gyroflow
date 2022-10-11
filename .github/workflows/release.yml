@@ -58,14 +58,14 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v1
         with:
-          key: gf8
+          key: gf9
 
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-2
+          key: ${{ runner.os }}-gf-ext-3
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: f688b2e29676bfa3a02ead4b7096c589f8af8180
+          vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
           doNotCache: true
 
       # Download and install OpenCV
