@@ -201,7 +201,8 @@ Modal {
 
     BasicText {
         visible: root.isPreset;
-        text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.");
+        text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.") + "\n\n" +
+              qsTr("You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.");
         color: styleTextColor;
         textFormat: Text.MarkdownText;
     }

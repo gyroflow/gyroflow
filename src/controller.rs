@@ -153,6 +153,8 @@ pub struct Controller {
 
     set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
 
+    load_default_preset: qt_method!(fn(&mut self)),
+
     chart_data_changed: qt_signal!(),
     zooming_data_changed: qt_signal!(),
     keyframes_changed: qt_signal!(),
@@ -738,6 +740,12 @@ impl Controller {
         self.lens_changed();
         self.lens_profile_loaded(QString::from(json), QString::from(filepath));
         self.request_recompute();
+    }
+    fn load_default_preset(&mut self) {
+        let local_path = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
+        if local_path.exists() {
+            self.import_gyroflow_file(util::path_to_url(QString::from(local_path.to_string_lossy().into_owned())));
+        }
     }
 
     fn set_preview_resolution(&mut self, target_height: i32, player: QJSValue) {

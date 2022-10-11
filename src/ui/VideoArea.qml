@@ -199,6 +199,9 @@ Item {
                 Qt.callLater(loadGyroflowData, root.pendingGyroflowData);
             } else {
                 Qt.callLater(controller.recompute_threaded);
+                if (is_main_video) {
+                    controller.load_default_preset();
+                }
             }
         }
         function onChart_data_changed() {
