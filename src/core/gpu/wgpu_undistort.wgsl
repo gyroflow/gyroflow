@@ -174,10 +174,10 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
 @fragment
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
-    let bg = vec4<SCALAR>(params.background.x / bg_scaler, params.background.y / bg_scaler, params.background.z / bg_scaler, params.background.w / bg_scaler);
+    let bg = vec4<f32>(params.background.x / bg_scaler, params.background.y / bg_scaler, params.background.z / bg_scaler, params.background.w / bg_scaler);
 
     if (bool(params.flags & 4)) { // Fill with background
-        return bg;
+        return vec4<SCALAR>(bg);
     }
 
     var out_pos = vec2<f32>(
@@ -188,7 +188,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     let p = out_pos;
     out_pos = out_pos + params.translation2d;
 
-    if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return bg; }
+    if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return vec4<SCALAR>(bg); }
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
@@ -225,7 +225,7 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 9u;
 
-    var pixel: vec4<SCALAR> = bg;
+    var pixel: vec4<f32> = bg;
 
     var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
     if (uv.x > -99998.0) {
@@ -258,13 +258,13 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 
             let c1 = sample_input_at(uv);
             let c2 = sample_input_at(pt2);
-            pixel = vec4<SCALAR>(c1 * alpha + c2 * (1.0 - alpha));
+            pixel = c1 * alpha + c2 * (1.0 - alpha);
             pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
-            return pixel;
+            return vec4<SCALAR>(pixel);
         }
 
-        pixel = vec4<SCALAR>(sample_input_at(uv));
+        pixel = sample_input_at(uv);
     }
     pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
-    return pixel;
+    return vec4<SCALAR>(pixel);
 }

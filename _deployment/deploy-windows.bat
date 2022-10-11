@@ -28,7 +28,6 @@ xcopy /Y "%QT_DIR%\bin\Qt6QuickDialogs2QuickImpl.dll"                           
 xcopy /Y "%QT_DIR%\bin\Qt6QuickDialogs2Utils.dll"                                                  "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6QuickTemplates2.dll"                                                     "%TARGET%\"
 xcopy /Y "%QT_DIR%\bin\Qt6Svg.dll"                                                                 "%TARGET%\"
-xcopy /Y "%QT_DIR%\bin\d3dcompiler_47.dll"                                                         "%TARGET%\"
 :: Copy QtQuick
 xcopy /Y "%QT_DIR%\qml\Qt\labs\settings\qmldir"                                                    "%TARGET%\Qt\labs\settings\"
 xcopy /Y "%QT_DIR%\qml\Qt\labs\settings\qmlsettingsplugin.dll"                                     "%TARGET%\Qt\labs\settings\"
@@ -101,5 +100,6 @@ xcopy /Y "%PROJECT_DIR%\_deployment\windows\Gyroflow_with_console.bat" "%TARGET%
 xcopy /Y /E "%PROJECT_DIR%\resources\camera_presets\*"                 "%TARGET%\camera_presets\"
 
 :: Other
-xcopy /Y "%QT_DIR%\bin\d3dcompiler*.dll"                             "%TARGET%\"
+xcopy /Y "%QT_DIR%\bin\d3dcompiler_47.dll"                             "%TARGET%\"
+xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "%TARGET%\"
 :: vc_redist.x64.exe
