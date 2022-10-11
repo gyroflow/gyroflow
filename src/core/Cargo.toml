@@ -54,9 +54,9 @@ space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.1.1"
 
-opencv = { version = "0.68.0", optional = true }
+opencv = { version = "0.70.0", optional = true }
 
-wgpu = "0.13"
+wgpu = "0.14"
 bytemuck = "1.12.1"
 
 pollster = "0.2.5"

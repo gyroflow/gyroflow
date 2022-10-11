@@ -211,6 +211,10 @@ impl<T: PixelType> Stabilization<T> {
         let fill_bg = (params.flags & 4) == 4;
         let fix_range = (params.flags & 1) == 1;
         let is_y = params.bytes_per_pixel == 1;
+        if params.output_stride <= 0 {
+            log::error!("output_stride: {}", params.output_stride);
+            return;
+        }
 
         out_pixels.par_chunks_mut(params.output_stride as usize).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
             row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
