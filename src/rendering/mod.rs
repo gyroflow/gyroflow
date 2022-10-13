@@ -459,6 +459,17 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                         (Luma16, input_frame, output_frame, 3, [3], max_val),
                     );
                 },
+                Pixel::GBRAPF32LE => { create_planes_proc!(planes,
+                    (R32f,  input_frame, output_frame, 0, [2], 255.0),
+                    (R32f,  input_frame, output_frame, 0, [0], 255.0),
+                    (R32f,  input_frame, output_frame, 0, [1], 255.0),
+                    (R32f,  input_frame, output_frame, 0, [3], 255.0),
+                ); },
+                Pixel::GBRPF32LE => { create_planes_proc!(planes,
+                    (R32f,  input_frame, output_frame, 0, [2], 255.0),
+                    (R32f,  input_frame, output_frame, 0, [0], 255.0),
+                    (R32f,  input_frame, output_frame, 0, [1], 255.0),
+                ); },
                 Pixel::AYUV64LE => { create_planes_proc!(planes, (AYUV16, input_frame, output_frame, 0, [3,0,1,2], 65535.0), ); },
                 Pixel::RGB24    => { create_planes_proc!(planes, (RGB8,   input_frame, output_frame, 0, [], 255.0), ); },
                 Pixel::RGBA     => { create_planes_proc!(planes, (RGBA8,  input_frame, output_frame, 0, [], 255.0), ); },
@@ -495,7 +506,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
             Pixel::YUV422P10LE | Pixel::YUV422P12LE | Pixel::YUV422P14LE | Pixel::YUV422P16LE |
             Pixel::YUV444P10LE | Pixel::YUV444P12LE | Pixel::YUV444P14LE | Pixel::YUV444P16LE |
             Pixel::YUVA444P10LE | Pixel::YUVA444P12LE | Pixel::YUVA444P16LE |
-            Pixel::AYUV64LE |
+            Pixel::AYUV64LE | Pixel::GBRAPF32LE | Pixel::GBRPF32LE |
             Pixel::RGB24 | Pixel::RGBA | Pixel::RGB48BE | Pixel::RGBA64BE => {
                 undistort_frame(input_frame, output_frame)
             },

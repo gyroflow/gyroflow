@@ -216,6 +216,12 @@ impl OclWrapper {
 
             let (source_buffer, dest_buffer) =
                 match &buffers.buffers {
+                    BufferSource::None => {
+                        (
+                            Buffer::builder().queue(ocl_queue.clone()).len(16).flags(MemFlags::new().read_only().host_write_only()).build()?,
+                            Buffer::builder().queue(ocl_queue.clone()).len(16).flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?
+                        )
+                    },
                     BufferSource::Cpu { input, output } => {
                         (
                             Buffer::builder().queue(ocl_queue.clone()).len(input.len()).flags(MemFlags::new().read_only().host_write_only()).build()?,
@@ -326,6 +332,7 @@ impl OclWrapper {
             self.buf_drawing.write(drawing_buffer).enq()?;
         }
         match buffers.buffers {
+            BufferSource::None => { },
             BufferSource::Cpu { ref input, ref output } => {
                 if self.src.len() != input.len()  { log::error!("Buffer size mismatch input! {} vs {}", self.src.len(), input.len());  return Ok(()); }
                 if self.dst.len() != output.len() { log::error!("Buffer size mismatch output! {} vs {}", self.dst.len(), output.len()); return Ok(()); }
@@ -361,6 +368,7 @@ impl OclWrapper {
         unsafe { self.kernel.enq()?; }
 
         match &mut buffers.buffers {
+            BufferSource::None => { },
             BufferSource::Cpu { output, .. } => {
                 self.dst.read(&mut **output).enq()?;
             },
@@ -393,6 +401,7 @@ impl OclWrapper {
 
 pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
     match buffers.buffers {
+        BufferSource::None           => false,
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => true,
         BufferSource::DirectX { .. } => cfg!(target_os = "windows"),

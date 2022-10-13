@@ -89,13 +89,16 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, _buffers: &BufferDescription, mut drawing_len: usize) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &BufferDescription, mut drawing_len: usize) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
         if params.height < 4 || params.output_height < 4 || params.stride < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
 
-        let in_size = (params.stride * params.height) as wgpu::BufferAddress;
-        let out_size = (params.output_stride * params.output_height) as wgpu::BufferAddress;
+        let output_height = buffers.output_size.1 as i32;
+        let output_stride = buffers.output_size.2 as i32;
+
+        let in_size = (buffers.input_size.2 * buffers.input_size.1) as wgpu::BufferAddress;
+        let out_size = (buffers.output_size.2 * buffers.output_size.1) as wgpu::BufferAddress;
         let params_size = (max_matrix_count * std::mem::size_of::<f32>()) as wgpu::BufferAddress;
 
         let drawing_enabled = (params.flags & 8) == 8;
@@ -138,9 +141,9 @@ impl WgpuWrapper {
             });
 
             let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as i32;
-            let padding = (align - params.output_stride % align) % align;
-            let padded_out_stride = params.output_stride + padding;
-            let staging_size = padded_out_stride * params.output_height;
+            let padding = (align - output_stride % align) % align;
+            let padded_out_stride = output_stride + padding;
+            let staging_size = padded_out_stride * output_height;
 
             let staging_buffer = device.create_buffer(&wgpu::BufferDescriptor { size: staging_size as u64, usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_matrices  = device.create_buffer(&wgpu::BufferDescriptor { size: params_size, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
@@ -150,7 +153,7 @@ impl WgpuWrapper {
 
             let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
                 label: None,
-                size: wgpu::Extent3d { width: params.width as u32, height: params.height as u32, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d { width: buffers.input_size.0 as u32, height: buffers.input_size.1 as u32, depth_or_array_layers: 1 },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -159,7 +162,7 @@ impl WgpuWrapper {
             });
             let out_pixels = device.create_texture(&wgpu::TextureDescriptor {
                 label: None,
-                size: wgpu::Extent3d { width: params.output_width as u32, height: params.output_height as u32, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d { width: buffers.output_size.0 as u32, height: buffers.output_size.1 as u32, depth_or_array_layers: 1 },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -256,6 +259,7 @@ impl WgpuWrapper {
         let matrices = bytemuck::cast_slice(&itm.matrices);
 
         match &buffers.buffers {
+            BufferSource::None => { },
             BufferSource::Cpu { input, output } => {
                 if self.in_size  != input.len()  as u64 { log::error!("Buffer size mismatch! {} vs {}", self.in_size,  input.len()); return false; }
                 if self.out_size != output.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.out_size, output.len()); return false; }
@@ -265,12 +269,12 @@ impl WgpuWrapper {
                     bytemuck::cast_slice(input),
                     wgpu::ImageDataLayout {
                         offset: 0,
-                        bytes_per_row: std::num::NonZeroU32::new(itm.kernel_params.stride as u32),
+                        bytes_per_row: std::num::NonZeroU32::new(buffers.input_size.2 as u32),
                         rows_per_image: None,
                     },
                     wgpu::Extent3d {
-                        width: itm.kernel_params.width as u32,
-                        height: itm.kernel_params.height as u32,
+                        width: buffers.input_size.0 as u32,
+                        height: buffers.input_size.1 as u32,
                         depth_or_array_layers: 1,
                     },
                 );
@@ -330,8 +334,8 @@ impl WgpuWrapper {
                     rows_per_image: None,
                 },
             }, wgpu::Extent3d {
-                width: itm.kernel_params.output_width as u32,
-                height: itm.kernel_params.output_height as u32,
+                width: buffers.output_size.0 as u32,
+                height: buffers.output_size.1 as u32,
                 depth_or_array_layers: 1,
             });
         }
@@ -347,23 +351,23 @@ impl WgpuWrapper {
 
             if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
                 let data = buffer_slice.get_mapped_range();
-                if self.padded_out_stride == itm.kernel_params.output_stride as u32 {
+                if self.padded_out_stride == buffers.output_size.2 as u32 {
                     // Fast path
                     output.copy_from_slice(data.as_ref());
                 } else {
                     // data.as_ref()
                     //     .chunks(self.padded_out_stride as usize)
-                    //     .zip(output.chunks_mut(itm.kernel_params.output_stride as usize))
+                    //     .zip(output.chunks_mut(buffers.output_size.2))
                     //     .for_each(|(src, dest)| {
-                    //         dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
+                    //         dest.copy_from_slice(&src[0..buffers.output_size.2]);
                     //     });
                     use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
                     use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
                     data.as_ref()
                         .par_chunks(self.padded_out_stride as usize)
-                        .zip(output.par_chunks_mut(itm.kernel_params.output_stride as usize))
+                        .zip(output.par_chunks_mut(buffers.output_size.2))
                         .for_each(|(src, dest)| {
-                            dest.copy_from_slice(&src[0..itm.kernel_params.output_stride as usize]);
+                            dest.copy_from_slice(&src[0..buffers.output_size.2]);
                         });
                 }
 
@@ -382,6 +386,7 @@ impl WgpuWrapper {
 
 pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
     match buffers.buffers {
+        BufferSource::None           => false,
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => false,
         BufferSource::DirectX { .. } => false,

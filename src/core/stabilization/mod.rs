@@ -123,57 +123,63 @@ impl<T: PixelType> Stabilization<T> {
         self.compute_params = params;
     }
 
-    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64, buffers: Option<&mut BufferDescription>) {
-        if !self.stab_data.contains_key(&timestamp_us) {
-            // We need buffers to set the stab data, otherwise we have invalid sizes and strides
-            if let Some(buffers) = buffers {
-                let timestamp_ms = (timestamp_us as f64) / 1000.0;
-                let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs
-
-                self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
-
-                let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
-                transform.kernel_params.interpolation = self.interpolation as i32;
-                transform.kernel_params.width  = self.size.0 as i32;
-                transform.kernel_params.height = self.size.1 as i32;
-                transform.kernel_params.output_width  = self.output_size.0 as i32;
-                transform.kernel_params.output_height = self.output_size.1 as i32;
-                transform.kernel_params.background = [self.background[0], self.background[1], self.background[2], self.background[3]];
-                transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
-                transform.kernel_params.pix_element_count = T::COUNT as i32;
-                transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-                transform.kernel_params.flags = self.kernel_flags.bits();
-
-                transform.kernel_params.stride        = buffers.input_size.2 as i32;
-                transform.kernel_params.output_stride = buffers.output_size.2 as i32;
-
-                if let Some(r) = buffers.input_rect {
-                    transform.kernel_params.source_rect[0] = r.0 as i32;
-                    transform.kernel_params.source_rect[1] = r.1 as i32;
-                    transform.kernel_params.source_rect[2] = r.2 as i32;
-                    transform.kernel_params.source_rect[3] = r.3 as i32;
-                } else {
-                    // Stretch to the buffer by default
-                    transform.kernel_params.source_rect[0] = 0;
-                    transform.kernel_params.source_rect[1] = 0;
-                    transform.kernel_params.source_rect[2] = buffers.input_size.0  as i32;
-                    transform.kernel_params.source_rect[3] = buffers.input_size.1  as i32;
-                }
-                if let Some(r) = buffers.output_rect {
-                    transform.kernel_params.output_rect[0] = r.0 as i32;
-                    transform.kernel_params.output_rect[1] = r.1 as i32;
-                    transform.kernel_params.output_rect[2] = r.2 as i32;
-                    transform.kernel_params.output_rect[3] = r.3 as i32;
-                } else {
-                    // Stretch to the buffer by default
-                    transform.kernel_params.output_rect[0] = 0;
-                    transform.kernel_params.output_rect[1] = 0;
-                    transform.kernel_params.output_rect[2] = buffers.output_size.0 as i32;
-                    transform.kernel_params.output_rect[3] = buffers.output_size.1 as i32;
-                }
-
-                self.stab_data.insert(timestamp_us, transform);
+    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64, buffers: &mut BufferDescription) {
+        let mut insert = true;
+        if let Some(itm) = self.stab_data.get(&timestamp_us) {
+            insert = false;
+            if itm.kernel_params.stride        != buffers.input_size.2 as i32 ||
+               itm.kernel_params.output_stride != buffers.output_size.2 as i32 {
+                log::warn!("Stride mismatch ({} != {} || {} != {}",itm.kernel_params.stride,buffers.input_size.2, itm.kernel_params.output_stride, buffers.output_size.2);
+                insert = true;
             }
+        }
+        if insert {
+            let timestamp_ms = (timestamp_us as f64) / 1000.0;
+            let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs
+
+            self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
+
+            let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
+            transform.kernel_params.interpolation = self.interpolation as i32;
+            transform.kernel_params.width  = self.size.0 as i32;
+            transform.kernel_params.height = self.size.1 as i32;
+            transform.kernel_params.output_width  = self.output_size.0 as i32;
+            transform.kernel_params.output_height = self.output_size.1 as i32;
+            transform.kernel_params.background = [self.background[0], self.background[1], self.background[2], self.background[3]];
+            transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
+            transform.kernel_params.pix_element_count = T::COUNT as i32;
+            transform.kernel_params.canvas_scale = self.drawing.scale as f32;
+            transform.kernel_params.flags = self.kernel_flags.bits();
+
+            transform.kernel_params.stride        = buffers.input_size.2 as i32;
+            transform.kernel_params.output_stride = buffers.output_size.2 as i32;
+
+            if let Some(r) = buffers.input_rect {
+                transform.kernel_params.source_rect[0] = r.0 as i32;
+                transform.kernel_params.source_rect[1] = r.1 as i32;
+                transform.kernel_params.source_rect[2] = r.2 as i32;
+                transform.kernel_params.source_rect[3] = r.3 as i32;
+            } else {
+                // Stretch to the buffer by default
+                transform.kernel_params.source_rect[0] = 0;
+                transform.kernel_params.source_rect[1] = 0;
+                transform.kernel_params.source_rect[2] = buffers.input_size.0  as i32;
+                transform.kernel_params.source_rect[3] = buffers.input_size.1  as i32;
+            }
+            if let Some(r) = buffers.output_rect {
+                transform.kernel_params.output_rect[0] = r.0 as i32;
+                transform.kernel_params.output_rect[1] = r.1 as i32;
+                transform.kernel_params.output_rect[2] = r.2 as i32;
+                transform.kernel_params.output_rect[3] = r.3 as i32;
+            } else {
+                // Stretch to the buffer by default
+                transform.kernel_params.output_rect[0] = 0;
+                transform.kernel_params.output_rect[1] = 0;
+                transform.kernel_params.output_rect[2] = buffers.output_size.0 as i32;
+                transform.kernel_params.output_rect[3] = buffers.output_size.1 as i32;
+            }
+
+            self.stab_data.insert(timestamp_us, transform);
         }
     }
 
@@ -334,7 +340,7 @@ impl<T: PixelType> Stabilization<T> {
             self.update_device(dev, buffers);
         }
 
-        self.ensure_stab_data_at_timestamp(timestamp_us, Some(buffers));
+        self.ensure_stab_data_at_timestamp(timestamp_us, buffers);
         self.init_backends(timestamp_us, buffers);
     }
     pub fn process_pixels(&self, timestamp_us: i64, buffers: &mut BufferDescription) -> Option<ProcessedInfo> {
@@ -381,13 +387,13 @@ impl<T: PixelType> Stabilization<T> {
                 return Some(ret);
             }
 
-            if let BufferSource::Cpu { input, output } = &mut buffers.buffers {
-                // CPU path
-                match self.interpolation {
-                    Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer); },
-                    Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer); },
-                    Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(input, output, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer); },
-                }
+            // CPU path
+            let ok = match self.interpolation {
+                Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+            };
+            if ok {
                 ret.backend = "CPU";
                 return Some(ret);
             }

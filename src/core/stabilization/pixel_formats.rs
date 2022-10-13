@@ -33,6 +33,7 @@ fn rgb_to_yuv(v: Vector4<f32>) -> Vector4<f32> {
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct AYUV16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBAf(f32, f32, f32, f32);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct R32f(f32);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV8(u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV16(u16, u16);
 
@@ -131,6 +132,18 @@ impl PixelType for RGBAf {
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float4", "convert_float4", "float4", "convert_float4") }
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba32Float, "f32", 255.0)) }
+}
+unsafe impl bytemuck::Zeroable for R32f { }
+unsafe impl bytemuck::Pod for R32f { }
+impl PixelType for R32f {
+    const COUNT: usize = 1;
+    const SCALAR_BYTES: usize = 4;
+    type Scalar = f32;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0, 0.0, 0.0, 0.0) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0]) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], _max_val: f32) -> Vector4<f32> { Vector4::new(v[ind[0]], 0.0, 0.0, 0.0) }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float", "convert_float", "float", "convert_float") }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::R32Float, "f32", 255.0)) }
 }
 unsafe impl bytemuck::Zeroable for UV8 { }
 unsafe impl bytemuck::Pod for UV8 { }

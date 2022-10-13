@@ -873,7 +873,14 @@ impl Controller {
                 let mut fov = 1.0;
 
                 if preview_pipeline.load(SeqCst) == 0 {
-                    if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone()) {
+                    let mut buffers = BufferDescription {
+                        input_size:  (width as usize, height as usize, width as usize * 4),
+                        output_size: (width as usize, height as usize, width as usize * 4),
+                        buffers: BufferSource::None,
+                        input_rect: None,
+                        output_rect: None,
+                    };
+                    if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
                         update_info2((ret.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
                         update_info2((fov, QString::from("---")));

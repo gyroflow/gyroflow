@@ -17,6 +17,7 @@ pub struct BufferDescription<'a> {
     pub buffers: BufferSource<'a>
 }
 pub enum BufferSource<'a> {
+    None,
     Cpu {
         input: &'a mut [u8],
         output: &'a mut [u8]
@@ -56,7 +57,8 @@ impl<'a> BufferSource<'a> {
         use std::hash::Hasher;
         let mut hasher = crc32fast::Hasher::new();
         match &self {
-            BufferSource::Cpu { .. } => { }
+            BufferSource::None => { }
+            BufferSource::Cpu { .. } => { hasher.write_u64(1); }
             #[cfg(feature = "use-opencl")]
             BufferSource::OpenCL { queue, .. } => { hasher.write_u64(*queue as u64); }
             BufferSource::OpenGL { context, .. } => { hasher.write_u64(*context as u64); }
