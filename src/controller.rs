@@ -819,7 +819,7 @@ impl Controller {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             vid.onResize(Box::new(|_, _| { }));
-            vid.onProcessTexture(Box::new(|_, _, _, _, _, _, _, _, _| -> bool {
+            vid.onProcessTexture(Box::new(|_, _, _, _, _, _, _, _, _, _| -> bool {
                 false
             }));
             vid.onProcessPixels(Box::new(|_, _, _, _, _, _| -> (u32, u32, u32, *mut u8) {
@@ -863,7 +863,7 @@ impl Controller {
                 this.processing_info_changed();
             });
             let update_info2 = update_info.clone();
-            vid.onProcessTexture(Box::new(move |_frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, _ptr4| -> bool {
+            vid.onProcessTexture(Box::new(move |_frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, ptr4, ptr5| -> bool {
                 if width < 4 || height < 4 || backend_id == 0 { return false; }
 
                 if !stab.params.read().stab_enabled { return false; }
@@ -929,8 +929,24 @@ impl Controller {
                             None => false
                         }
                     },
-                    4 => { // Vulkan, ptr1: texture, ptr2: device, ptr3: command list, ptr4: physical device
-                        false
+                    4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
+                            input_size:  (width as usize, height as usize, width as usize * 4),
+                            output_size: (width as usize, height as usize, width as usize * 4),
+                            buffers: BufferSource::Vulkan {
+                                input:  ptr1,
+                                output: ptr1,
+                                device: ptr2,
+                                physical_device: ptr4,
+                                instance: ptr5
+                            },
+                            input_rect: None,
+                            output_rect: None,
+                        });
+                        match ret {
+                            Some(bk) => { fov = bk.fov; backend = format!("Vulkan->{}", bk.backend); true },
+                            None => false
+                        }
                     }
                     _ => false
                 };

@@ -30,6 +30,7 @@ pub struct WgpuWrapper  {
 }
 
 lazy_static::lazy_static! {
+    static ref INSTANCE: RwLock<Option<wgpu::Instance>> = RwLock::new(None);
     static ref ADAPTER: RwLock<Option<Adapter>> = RwLock::new(None);
 }
 
@@ -38,11 +39,16 @@ impl WgpuWrapper {
         let instance = wgpu::Instance::new(wgpu::Backends::all());
 
         let adapters = instance.enumerate_adapters(wgpu::Backends::all());
-        adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
+        let ret = adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect();
+
+        *INSTANCE.write() = Some(instance);
+
+        ret
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
+        let lock = INSTANCE.read();
+        let instance = lock.as_ref().unwrap();
 
         let mut i = 0;
         for a in instance.enumerate_adapters(wgpu::Backends::all()) {
@@ -68,7 +74,8 @@ impl WgpuWrapper {
     }
 
     pub fn initialize_context() -> Option<(String, String)> {
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
+        let lock = INSTANCE.read();
+        let instance = lock.as_ref().unwrap();
 
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
@@ -288,7 +295,8 @@ impl WgpuWrapper {
             },
             BufferSource::OpenGL { .. } => {
                 return false;
-            }
+            },
+            BufferSource::Vulkan { .. } => { }
         }
 
         if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return false; }
@@ -392,5 +400,6 @@ pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
         BufferSource::DirectX { .. } => false,
         #[cfg(feature = "use-opencl")]
         BufferSource::OpenCL  { .. } => false,
+        BufferSource::Vulkan  { .. } => false,
     }
 }

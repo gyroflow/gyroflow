@@ -216,12 +216,6 @@ impl OclWrapper {
 
             let (source_buffer, dest_buffer) =
                 match &buffers.buffers {
-                    BufferSource::None => {
-                        (
-                            Buffer::builder().queue(ocl_queue.clone()).len(16).flags(MemFlags::new().read_only().host_write_only()).build()?,
-                            Buffer::builder().queue(ocl_queue.clone()).len(16).flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?
-                        )
-                    },
                     BufferSource::Cpu { input, output } => {
                         (
                             Buffer::builder().queue(ocl_queue.clone()).len(input.len()).flags(MemFlags::new().read_only().host_write_only()).build()?,
@@ -268,7 +262,8 @@ impl OclWrapper {
                             Buffer::builder().queue(ocl_queue.clone()).len(image_src.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?,
                             Buffer::builder().queue(ocl_queue.clone()).len(image_dst.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?
                         )
-                    }
+                    },
+                    _ => panic!("Unsupported buffer")
                 };
 
             let program = Program::builder()
@@ -359,7 +354,8 @@ impl OclWrapper {
                     let _ = tex.cmd().copy_to_buffer(&self.src, 0).enq();
                     tex.cmd().d3d11_release().enq()?;
                 }
-            }
+            },
+            _ => panic!("Unsupported buffer")
         }
 
         self.buf_params.write(bytemuck::bytes_of(&itm.kernel_params)).enq()?;
@@ -406,5 +402,6 @@ pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
         BufferSource::OpenGL  { .. } => true,
         BufferSource::DirectX { .. } => cfg!(target_os = "windows"),
         BufferSource::OpenCL  { .. } => true,
+        BufferSource::Vulkan  { .. } => false,
     }
 }

@@ -39,15 +39,18 @@ pub enum BufferSource<'a> {
         output: u32, // GLuint
         context: *mut std::ffi::c_void, // OpenGL context pointer
     },
+    Vulkan {
+        input: u64,
+        output: u64,
+        device: u64,
+        physical_device: u64,
+        instance: u64,
+    }
     /*Cuda {
         input: u32,
         output: u32,
     },
     Metal {
-        input: u32,
-        output: u32,
-    },
-    Vulkan {
         input: u32,
         output: u32,
     }*/
@@ -65,7 +68,12 @@ impl<'a> BufferSource<'a> {
             BufferSource::DirectX { device, device_context, .. } => {
                 hasher.write_u64(*device as u64);
                 hasher.write_u64(*device_context as u64);
-            }
+            },
+            BufferSource::Vulkan { instance, device, physical_device, .. } => {
+                hasher.write_u64(*instance);
+                hasher.write_u64(*device);
+                hasher.write_u64(*physical_device);
+            },
         }
         hasher.finalize()
     }

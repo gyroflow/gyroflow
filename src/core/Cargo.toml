@@ -57,7 +57,9 @@ enterpolation = "0.1.1"
 opencv = { version = "0.70.0", optional = true }
 
 wgpu = "0.14"
+wgpu-hal = "0.14"
 bytemuck = "1.12.1"
+ash = "0.37"
 
 pollster = "0.2.5"
 futures-intrusive = "0.4.0"

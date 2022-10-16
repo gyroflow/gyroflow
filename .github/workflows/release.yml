@@ -48,7 +48,7 @@ jobs:
       ]
     runs-on: ${{ matrix.targets.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -56,7 +56,7 @@ jobs:
           profile: minimal
           override: true
           target: ${{ matrix.targets.target }}
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
         with:
           key: gf9
 
@@ -187,7 +187,7 @@ jobs:
           7z a ../Gyroflow-${{ matrix.targets.name }}.zip *
 
       - name: Save Binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gyroflow
           path: _deployment/_binaries/*.*
@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: gyroflow
 
