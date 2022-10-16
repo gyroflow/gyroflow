@@ -368,8 +368,8 @@ Item {
             controller.image_sequence_start = 0;
             controller.image_sequence_fps = 0;
         }
-        if (/\d+\.(png|exr|dng)$/i.test(urlStr)) {
-            let firstNum = urlStr.match(/(\d+)\.(png|exr|dng)$/i);
+        if (/\d+\.(png|jpg|exr|dng)$/i.test(urlStr)) {
+            let firstNum = urlStr.match(/(\d+)\.(png|jpg|exr|dng)$/i);
             if (firstNum[1]) {
                 const ext = firstNum[2];
                 firstNum = firstNum[1];
