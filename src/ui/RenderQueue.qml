@@ -126,7 +126,7 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool) {
+            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool, start_time: real) {
                 if (job_id == render_queue.main_job_id) {
                     window.videoArea.videoLoader.active = !finished;
                     window.videoArea.videoLoader.currentFrame = frame;
@@ -135,6 +135,7 @@ Item {
                     window.videoArea.videoLoader.text = window.videoArea.videoLoader.active? qsTr("Rendering %1...") : "";
                     window.videoArea.videoLoader.progress = window.videoArea.videoLoader.active? progress : -1;
                     window.videoArea.videoLoader.cancelable = true;
+                    window.videoArea.videoLoader.startTime = start_time;
 
                     if (total_frames > 0 && finished) {
                         render_queue.main_job_id = 0;

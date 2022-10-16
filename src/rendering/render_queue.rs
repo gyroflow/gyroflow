@@ -167,7 +167,7 @@ pub struct RenderQueue {
     pub queue_changed: qt_signal!(),
     pub status_changed: qt_signal!(),
 
-    pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool),
+    pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool, start_time: f64),
     pub encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
     pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
@@ -617,12 +617,15 @@ impl RenderQueue {
             let progress = util::qt_queued_callback_mut(self, move |this, (progress, current_frame, total_frames, finished): (f64, usize, usize, bool)| {
                 rendered_frames2.store(current_frame, SeqCst);
 
+                let mut start_time = 0;
+
                 update_model!(this, job_id, itm {
                     itm.current_frame = current_frame as u64;
                     itm.total_frames = total_frames as u64;
                     if itm.start_timestamp == 0 {
                         itm.start_timestamp = Self::current_timestamp();
                     }
+                    start_time = itm.start_timestamp;
                     itm.end_timestamp = Self::current_timestamp();
                     if finished {
                         itm.status = JobStatus::Finished;
@@ -630,7 +633,7 @@ impl RenderQueue {
                 });
 
                 this.end_timestamp = Self::current_timestamp();
-                this.render_progress(job_id, progress, current_frame, total_frames, finished);
+                this.render_progress(job_id, progress, current_frame, total_frames, finished, start_time as f64);
                 this.progress_changed();
 
                 if finished {
@@ -664,7 +667,7 @@ impl RenderQueue {
                 });
 
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
-                this.render_progress(job_id, 1.0, 0, 0, true);
+                this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
 
                 if !single {
                     // Start the next one
@@ -686,7 +689,7 @@ impl RenderQueue {
                 });
 
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
-                this.render_progress(job_id, 1.0, 0, 0, true);
+                this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
 
                 if !single {
                     // Start the next one
