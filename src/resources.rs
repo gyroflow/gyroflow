@@ -72,6 +72,7 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/undistort_ptlens_digital_stretch.frag.qsb",
         "src/qt_gpu/compiled/undistort_ptlens.frag.qsb",
 
+        "resources/translations/cs.qm",
         "resources/translations/da.qm",
         "resources/translations/de.qm",
         "resources/translations/el.qm",

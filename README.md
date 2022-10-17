@@ -160,6 +160,7 @@ Currently *Gyroflow* is available in:
 * **English** (base language)
 * **Chinese Simplified** (by [DusKing1](https://github.com/DusKing1))
 * **Chinese Traditional** (by [DusKing1](https://github.com/DusKing1))
+* **Czech** (by Jakub Ešpandr, VitroidFPV, davidazarian, Michael Kmoch)
 * **Danish** (by [ElvinC](https://github.com/ElvinC))
 * **Finnish** (by Jesse Julkunen)
 * **French** (by KennyDorion)

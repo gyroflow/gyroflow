@@ -754,7 +754,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="31"/>
       <source>Lens profiles</source>
-      <translation>Προφίλ φακού</translation>
+      <translation>Προφίλ φακών</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="149"/>

@@ -68,7 +68,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="213"/>
       <source>Preview pipeline</source>
-      <translation type="unfinished">Preview pipeline</translation>
+      <translation>预览队列</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="236"/>
@@ -1761,12 +1761,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="557"/>
       <source>Link with smoothing</source>
-      <translation type="unfinished">Link with smoothing</translation>
+      <translation>链接平滑</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
       <source>Link with zooming speed</source>
-      <translation type="unfinished">Link with zooming speed</translation>
+      <translation>链接缩放速度</translation>
     </message>
   </context>
   <context>
@@ -1779,37 +1779,37 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation>陀螺仪-X</translation>
+      <translation>陀螺仪 - X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation>陀螺仪-Y</translation>
+      <translation>陀螺仪 - Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation>陀螺仪-Z</translation>
+      <translation>陀螺仪 - Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation>加速度计-X</translation>
+      <translation>加速度计 - X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation>加速度计-Y</translation>
+      <translation>加速度计 - Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation>加速度计-Z</translation>
+      <translation>加速度计 - Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>对数化坐标轴</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
@@ -1906,7 +1906,7 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="239"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>处理分辨率</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="261"/>
@@ -2132,7 +2132,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="148"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>缩放</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="194"/>

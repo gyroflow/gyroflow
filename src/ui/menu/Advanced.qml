@@ -157,6 +157,7 @@ MenuItem {
                 ["English",                      "en"],
                 ["Chinese - Simplified (简体中文)",  "zh_CN"],
                 ["Chinese - Traditional (繁體中文)", "zh_TW"],
+                ["Czech (Čeština)",              "cs"],
                 ["Danish (dansk)",               "da"],
                 ["Finnish (suomi)",              "fi"],
                 ["French (français)",            "fr"],

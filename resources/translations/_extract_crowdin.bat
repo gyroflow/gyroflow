@@ -1,6 +1,7 @@
 @echo off
 7z x -o"translations/" "gyroflow (translations).zip"
 
+echo F | xcopy /y translations\cs\gyroflow.ts cs.ts
 echo F | xcopy /y translations\da\gyroflow.ts da.ts
 echo F | xcopy /y translations\de\gyroflow.ts de.ts
 echo F | xcopy /y translations\el\gyroflow.ts el.ts
