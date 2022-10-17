@@ -1758,6 +1758,7 @@ impl Controller {
                 let mut last_timestamp = 0.0;
                 let mut add_timestamp = 0.0;
                 let mut output_gcsv = None;
+                let mut first_file = true;
                 for x in &file_list {
                     let path = Path::new(x).with_extension("gcsv");
                     if path.exists() {
@@ -1775,6 +1776,7 @@ impl Controller {
                                 if !is_data {
                                     if line.starts_with("t,") || line.starts_with("time,") {
                                         is_data = true;
+                                        if !first_file { continue; }
                                     }
                                 } else if line.contains(',') {
                                     if let Ok(timestamp)= line.split(',').next().unwrap().parse::<f64>() {
@@ -1783,11 +1785,14 @@ impl Controller {
                                         line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).into_iter().map(str::to_string)).join(",");
                                     }
                                 }
-                                writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
+                                if first_file || is_data {
+                                    writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
+                                }
                             }
                         }
                         add_timestamp += last_timestamp;
                     }
+                    first_file = false;
                 }
                 Ok(())
             })();
