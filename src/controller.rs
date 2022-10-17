@@ -1751,9 +1751,9 @@ impl Controller {
         });
         core::run_threaded(move || {
             ///////////////// Merge .gcsv /////////////////
-            let _ = (|| -> std::io::Result<()> {
+            if let Err(e) = (|| -> std::io::Result<()> {
                 use std::fs::File;
-                use std::io::{self, BufRead, Write};
+                use std::io::{ BufRead, Write };
                 use std::path::Path;
                 let mut last_diff = 0.0;
                 let mut last_timestamp = 0.0;
@@ -1763,7 +1763,6 @@ impl Controller {
                 for x in &file_list {
                     let path = Path::new(x).with_extension("gcsv");
                     if path.exists() {
-                        last_timestamp = 0.0;
                         let mut is_data = false;
                         if let Ok(file) = File::open(path) {
                             if output_gcsv.is_none() {
@@ -1793,11 +1792,14 @@ impl Controller {
                             }
                         }
                         add_timestamp += last_timestamp + last_diff;
+                        last_timestamp = 0.0;
                     }
                     first_file = false;
                 }
                 Ok(())
-            })();
+            })() {
+                ::log::error!("Failed to merge .gcsv files: {:?}", e);
+            }
             ///////////////// Merge .gcsv /////////////////
 
             let res = mp4_merge::join_files(&file_list, output_file, |p| progress((p.min(0.9999), String::default())));

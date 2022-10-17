@@ -23,7 +23,7 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 cstr = "0.2.11"
 cpp = "0.5.7"
 serde = "1.0.145"
-serde_json = "1.0.85"
+serde_json = "1.0.86"
 bytemuck = "1.12.1"
 nalgebra = "0.30"
 semver = "1.0.14"
@@ -43,7 +43,7 @@ rustfft = "6.0.1"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "a185b16" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7b83f74" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
