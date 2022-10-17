@@ -183,7 +183,7 @@ tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64
 
 # ---- Build AppImage ----
 export APP_DIR=$TARGET/../AppDir
-export APP_VERSION=1.3.0-rc
+export APP_VERSION=1.3.0
 
 rm -rf $APP_DIR
 mkdir -p $APP_DIR/usr/share/icons
