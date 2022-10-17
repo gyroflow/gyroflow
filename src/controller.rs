@@ -1755,6 +1755,7 @@ impl Controller {
                 use std::fs::File;
                 use std::io::{self, BufRead, Write};
                 use std::path::Path;
+                let mut last_diff = 0.0;
                 let mut last_timestamp = 0.0;
                 let mut add_timestamp = 0.0;
                 let mut output_gcsv = None;
@@ -1780,6 +1781,7 @@ impl Controller {
                                     }
                                 } else if line.contains(',') {
                                     if let Ok(timestamp)= line.split(',').next().unwrap().parse::<f64>() {
+                                        last_diff = timestamp - last_timestamp;
                                         last_timestamp = timestamp;
                                         let new_timestamp = timestamp + add_timestamp;
                                         line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).into_iter().map(str::to_string)).join(",");
@@ -1790,7 +1792,7 @@ impl Controller {
                                 }
                             }
                         }
-                        add_timestamp += last_timestamp;
+                        add_timestamp += last_timestamp + last_diff;
                     }
                     first_file = false;
                 }
