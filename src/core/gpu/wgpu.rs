@@ -47,6 +47,9 @@ impl WgpuWrapper {
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
+        if INSTANCE.read().is_none() {
+            *INSTANCE.write() = Some(wgpu::Instance::new(wgpu::Backends::all()));
+        }
         let lock = INSTANCE.read();
         let instance = lock.as_ref().unwrap();
 
@@ -74,6 +77,9 @@ impl WgpuWrapper {
     }
 
     pub fn initialize_context() -> Option<(String, String)> {
+        if INSTANCE.read().is_none() {
+            *INSTANCE.write() = Some(wgpu::Instance::new(wgpu::Backends::all()));
+        }
         let lock = INSTANCE.read();
         let instance = lock.as_ref().unwrap();
 
