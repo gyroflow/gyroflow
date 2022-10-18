@@ -16,6 +16,8 @@ pub struct BufferDescription<'a> {
 
     pub buffers: BufferSource<'a>
 }
+
+#[derive(Debug)]
 pub enum BufferSource<'a> {
     None,
     Cpu {

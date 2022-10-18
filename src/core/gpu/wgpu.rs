@@ -36,10 +36,23 @@ lazy_static::lazy_static! {
 
 impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
+        let devices = std::panic::catch_unwind(|| -> Vec<String> {
         let adapters = INSTANCE.lock().enumerate_adapters(wgpu::Backends::all());
-        let ret = adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect();
-
-        ret
+            adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
+        });
+        match devices {
+            Ok(devices) => { return devices; },
+            Err(e) => {
+                if let Some(s) = e.downcast_ref::<&str>() {
+                    log::error!("Failed to initialize wgpu {}", s);
+                } else if let Some(s) = e.downcast_ref::<String>() {
+                    log::error!("Failed to initialize wgpu {}", s);
+                } else {
+                    log::error!("Failed to initialize wgpu {:?}", e);
+                }
+            }
+        }
+        Vec::new()
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {

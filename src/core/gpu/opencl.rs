@@ -263,7 +263,7 @@ impl OclWrapper {
                             Buffer::builder().queue(ocl_queue.clone()).len(image_dst.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?
                         )
                     },
-                    _ => panic!("Unsupported buffer")
+                    _ => panic!("Unsupported buffer {:?}", buffers.buffers)
                 };
 
             let program = Program::builder()
@@ -355,7 +355,7 @@ impl OclWrapper {
                     tex.cmd().d3d11_release().enq()?;
                 }
             },
-            _ => panic!("Unsupported buffer")
+            _ => panic!("Unsupported buffer {:?}", buffers.buffers)
         }
 
         self.buf_params.write(bytemuck::bytes_of(&itm.kernel_params)).enq()?;
