@@ -1750,61 +1750,63 @@ impl Controller {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
         });
         core::run_threaded(move || {
-            ///////////////// Merge .gcsv /////////////////
-            if let Err(e) = (|| -> std::io::Result<()> {
-                use std::fs::File;
-                use std::io::{ BufRead, Write };
-                use std::path::Path;
-                let mut last_diff = 0.0;
-                let mut last_timestamp = 0.0;
-                let mut add_timestamp = 0.0;
-                let mut output_gcsv = None;
-                let mut first_file = true;
-                for x in &file_list {
-                    let path = Path::new(x).with_extension("gcsv");
-                    if path.exists() {
-                        let mut is_data = false;
-                        if let Ok(file) = File::open(path) {
-                            if output_gcsv.is_none() {
-                                output_gcsv = Some(File::create(Path::new(&output_file).with_extension("gcsv"))?);
-                            }
-                            for (i, line) in std::io::BufReader::new(file).lines().enumerate() {
-                                let mut line = line?;
-                                if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
-                                    return Ok(()); // not a .gcsv file
-                                }
-                                if !is_data {
-                                    if line.starts_with("t,") || line.starts_with("time,") {
-                                        is_data = true;
-                                        if !first_file { continue; }
-                                    }
-                                } else if line.contains(',') {
-                                    if let Ok(timestamp)= line.split(',').next().unwrap().parse::<f64>() {
-                                        last_diff = timestamp - last_timestamp;
-                                        last_timestamp = timestamp;
-                                        let new_timestamp = timestamp + add_timestamp;
-                                        line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).into_iter().map(str::to_string)).join(",");
-                                    }
-                                }
-                                if first_file || is_data {
-                                    writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
-                                }
-                            }
-                        }
-                        add_timestamp += last_timestamp + last_diff;
-                        last_timestamp = 0.0;
-                    }
-                    first_file = false;
-                }
-                Ok(())
-            })() {
-                ::log::error!("Failed to merge .gcsv files: {:?}", e);
-            }
-            ///////////////// Merge .gcsv /////////////////
-
-            let res = mp4_merge::join_files(&file_list, output_file, |p| progress((p.min(0.9999), String::default())));
+            let res = mp4_merge::join_files(&file_list, output_file.clone(), |p| progress((p.min(0.9999), String::default())));
             match res {
-                Ok(_) => progress((1.0, String::default())),
+                Ok(_) => {
+
+                ///////////////// Merge .gcsv /////////////////
+                if let Err(e) = (|| -> std::io::Result<()> {
+                    use std::fs::File;
+                    use std::io::{ BufRead, Write };
+                    use std::path::Path;
+                    let mut last_diff = 0.0;
+                    let mut last_timestamp = 0.0;
+                    let mut add_timestamp = 0.0;
+                    let mut output_gcsv = None;
+                    let mut first_file = true;
+                    for x in &file_list {
+                        let path = Path::new(x).with_extension("gcsv");
+                        if path.exists() {
+                            let mut is_data = false;
+                            if let Ok(file) = File::open(path) {
+                                if output_gcsv.is_none() {
+                                    output_gcsv = Some(File::create(Path::new(&output_file).with_extension("gcsv"))?);
+                                }
+                                for (i, line) in std::io::BufReader::new(file).lines().enumerate() {
+                                    let mut line = line?;
+                                    if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
+                                        return Ok(()); // not a .gcsv file
+                                    }
+                                    if !is_data {
+                                        if line.starts_with("t,") || line.starts_with("time,") {
+                                            is_data = true;
+                                            if !first_file { continue; }
+                                        }
+                                    } else if line.contains(',') {
+                                        if let Ok(timestamp)= line.split(',').next().unwrap().parse::<f64>() {
+                                            last_diff = timestamp - last_timestamp;
+                                            last_timestamp = timestamp;
+                                            let new_timestamp = timestamp + add_timestamp;
+                                            line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).into_iter().map(str::to_string)).join(",");
+                                        }
+                                    }
+                                    if first_file || is_data {
+                                        writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
+                                    }
+                                }
+                            }
+                            add_timestamp += last_timestamp + last_diff;
+                            last_timestamp = 0.0;
+                        }
+                        first_file = false;
+                    }
+                    Ok(())
+                })() {
+                    ::log::error!("Failed to merge .gcsv files: {:?}", e);
+                }
+                ///////////////// Merge .gcsv /////////////////
+                    progress((1.0, String::default()))
+                },
                 Err(e) => progress((1.0, e.to_string()))
             }
         });

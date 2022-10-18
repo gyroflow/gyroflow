@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use walkdir::WalkDir;
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
@@ -99,7 +98,7 @@ impl LensProfileDatabase {
         }
 
         #[cfg(not(target_os = "android"))]
-        WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
+        walkdir::WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
                 if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
