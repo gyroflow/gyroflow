@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use wgpu::Adapter;
 use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
-use parking_lot::RwLock;
+use parking_lot::{ RwLock, Mutex };
 use crate::gpu:: { BufferDescription, BufferSource };
 use crate::stabilization::ComputeParams;
 use crate::stabilization::KernelParams;
@@ -30,28 +30,20 @@ pub struct WgpuWrapper  {
 }
 
 lazy_static::lazy_static! {
-    static ref INSTANCE: RwLock<Option<wgpu::Instance>> = RwLock::new(None);
+    static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(wgpu::Instance::new(wgpu::Backends::all()));
     static ref ADAPTER: RwLock<Option<Adapter>> = RwLock::new(None);
 }
 
 impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
-
-        let adapters = instance.enumerate_adapters(wgpu::Backends::all());
+        let adapters = INSTANCE.lock().enumerate_adapters(wgpu::Backends::all());
         let ret = adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect();
-
-        *INSTANCE.write() = Some(instance);
 
         ret
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
-        if INSTANCE.read().is_none() {
-            *INSTANCE.write() = Some(wgpu::Instance::new(wgpu::Backends::all()));
-        }
-        let lock = INSTANCE.read();
-        let instance = lock.as_ref().unwrap();
+        let instance = INSTANCE.lock();
 
         let mut i = 0;
         for a in instance.enumerate_adapters(wgpu::Backends::all()) {
@@ -77,11 +69,7 @@ impl WgpuWrapper {
     }
 
     pub fn initialize_context() -> Option<(String, String)> {
-        if INSTANCE.read().is_none() {
-            *INSTANCE.write() = Some(wgpu::Instance::new(wgpu::Backends::all()));
-        }
-        let lock = INSTANCE.read();
-        let instance = lock.as_ref().unwrap();
+        let instance = INSTANCE.lock();
 
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
