@@ -4,6 +4,11 @@
 use std::fs::File;
 use std::io::Result;
 
+#[no_mangle]
+pub static NvOptimusEnablement: i32 = 1;
+#[no_mangle]
+pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
+
 pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64, f64)> { // -> (width, height, fps, duration_s)
     let mut stream = File::open(&filepath)?;
     let filesize = stream.metadata().unwrap().len() as usize;
