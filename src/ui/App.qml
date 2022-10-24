@@ -500,6 +500,9 @@ Rectangle {
         if (text.includes("codec not currently supported in container")) {
             return qsTr("Make sure your output extension supports the selected codec. \".mov\" should work in most cases.") + "\n\n" + text;
         }
+        if (text.includes("[aac]") && text.includes("Invalid data found when processing input")) {
+            return qsTr("Audio encoder couldn't process the input data. Try unchecking \"Export audio\" in Export settings.") + "\n\n" + text;
+        }
 
         return text.trim();
     }
