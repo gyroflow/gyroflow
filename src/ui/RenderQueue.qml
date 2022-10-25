@@ -154,7 +154,7 @@ Item {
                         text: f,
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, f);
-                            render_queue.render_job(job_id, false);
+                            render_queue.render_job(job_id);
                         }
                     }));
                     buttons.push({
@@ -162,7 +162,7 @@ Item {
                         accent: true,
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, "cpu");
-                            render_queue.render_job(job_id, false);
+                            render_queue.render_job(job_id);
                         }
                     });
                     buttons.push({ text: qsTr("Cancel") });
@@ -293,7 +293,7 @@ Item {
                     iconName: "play";
                     text: qsTr("Render now");
                     enabled: !isFinished && !isInProgress;
-                    onTriggered: render_queue.render_job(job_id, true);
+                    onTriggered: render_queue.render_job(job_id);
                 }
                 Action {
                     iconName: "pencil";

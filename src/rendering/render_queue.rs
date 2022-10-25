@@ -136,7 +136,7 @@ pub struct RenderQueue {
     pause: qt_method!(fn(&mut self)),
     stop: qt_method!(fn(&mut self)),
 
-    render_job: qt_method!(fn(&mut self, job_id: u32, single: bool)),
+    render_job: qt_method!(fn(&mut self, job_id: u32)),
     cancel_job: qt_method!(fn(&self, job_id: u32)),
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
@@ -430,7 +430,7 @@ impl RenderQueue {
                     }
                 }
                 if let Some(job_id) = job_id {
-                    self.render_job(job_id, false);
+                    self.render_job(job_id);
                 } else {
                     if self.get_active_render_count() == 0 {
                         self.post_render_action();
@@ -465,7 +465,7 @@ impl RenderQueue {
 
     fn post_render_action(&self) {
         // If it was running for at least 1 minute
-        if Self::current_timestamp() - self.start_timestamp > 60000 && self.when_done > 0 {
+        if Self::current_timestamp() - self.start_timestamp > 6000 && self.when_done > 0 {
             self.request_close();
 
             #[cfg(not(any(target_os = "ios", target_os = "android")))]
@@ -584,7 +584,7 @@ impl RenderQueue {
         QString::default()
     }
 
-    pub fn render_job(&mut self, job_id: u32, single: bool) {
+    pub fn render_job(&mut self, job_id: u32) {
         if let Some(job) = self.jobs.get(&job_id) {
             {
                 let mut q = self.queue.borrow_mut();
@@ -637,7 +637,7 @@ impl RenderQueue {
                 this.progress_changed();
 
                 if finished {
-                    if !single {
+                    if this.get_pending_count() > 0 {
                         // Start the next one
                         this.start();
                     } else {
@@ -669,7 +669,7 @@ impl RenderQueue {
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
 
-                if !single {
+                if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
                 }
@@ -691,7 +691,7 @@ impl RenderQueue {
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
 
-                if !single {
+                if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
                 }

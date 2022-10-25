@@ -707,10 +707,12 @@ impl Controller {
 
                     let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
                     if is_main_video && !id_str.is_empty() {
-                        let db = stab.lens_profile_db.read();
-                        if db.contains_id(&id_str) {
-                            load_lens(id_str);
-                        }
+                        let mut db = stab.lens_profile_db.write();
+                        db.on_loaded(move |db| {
+                            if db.contains_id(&id_str) {
+                                load_lens(id_str);
+                            }
+                        });
                     }
                     reload_lens(());
                     if let Some(md) = file_metadata {
@@ -1546,7 +1548,7 @@ impl Controller {
                 // new_db.list_all_metadata();
                 // new_db.process_adjusted_metadata();
 
-                *db.write() = new_db;
+                db.write().set_from_db(new_db);
             }
 
             let all_names = db.read().get_all_info().into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {

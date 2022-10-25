@@ -259,7 +259,7 @@ Rectangle {
                             } else {
                                 // Export now
                                 render_queue.main_job_id = job_id;
-                                render_queue.render_job(job_id, true);
+                                render_queue.render_job(job_id);
                             }
                         }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
                     }

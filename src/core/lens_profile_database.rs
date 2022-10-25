@@ -8,10 +8,16 @@ use std::path::PathBuf;
 #[cfg(target_os = "android")]
 static LENS_PROFILES_STATIC: include_dir::Dir = include_dir::include_dir!("$CARGO_MANIFEST_DIR/../../resources/camera_presets/");
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
+    loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     loaded: bool
+}
+impl Clone for LensProfileDatabase {
+    fn clone(&self) -> Self {
+        Self { map: self.map.clone(), loaded: self.loaded, ..Default::default() }
+    }
 }
 
 impl LensProfileDatabase {
@@ -53,6 +59,8 @@ impl LensProfileDatabase {
 
     pub fn load_all(&mut self) {
         log::info!("Lens profiles directory: {:?}", Self::get_path());
+
+        std::thread::sleep(std::time::Duration::from_secs(5));
 
         let _time = std::time::Instant::now();
 
@@ -118,6 +126,17 @@ impl LensProfileDatabase {
         self.loaded = true;
     }
 
+    pub fn set_from_db(&mut self, b: Self) {
+        self.map = b.map;
+        self.loaded = b.loaded;
+        if self.loaded {
+            let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
+            for cb in cbs {
+                cb(&self);
+            }
+        }
+    }
+
     pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
         // (name, filename, crc32, official, rating, aspect_ratio*1000)
         let mut set = HashSet::with_capacity(self.map.len());
@@ -181,6 +200,13 @@ impl LensProfileDatabase {
         }
     }
 
+    pub fn on_loaded<F: FnOnce(&Self) + Send + Sync + 'static>(&mut self, cb: F) {
+        if self.loaded {
+            cb(self);
+        } else {
+            self.loaded_callbacks.push(Box::new(cb));
+        }
+    }
     pub fn contains_id(&self, id: &str) -> bool {
         self.map.contains_key(id)
     }
