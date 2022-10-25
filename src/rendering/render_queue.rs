@@ -465,7 +465,7 @@ impl RenderQueue {
 
     fn post_render_action(&self) {
         // If it was running for at least 1 minute
-        if Self::current_timestamp() - self.start_timestamp > 6000 && self.when_done > 0 {
+        if Self::current_timestamp() - self.start_timestamp > 60000 && self.when_done > 0 {
             self.request_close();
 
             #[cfg(not(any(target_os = "ios", target_os = "android")))]
