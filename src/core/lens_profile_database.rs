@@ -60,8 +60,6 @@ impl LensProfileDatabase {
     pub fn load_all(&mut self) {
         log::info!("Lens profiles directory: {:?}", Self::get_path());
 
-        std::thread::sleep(std::time::Duration::from_secs(5));
-
         let _time = std::time::Instant::now();
 
         let mut load = |data: &str, f_name: &str| {
