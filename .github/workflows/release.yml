@@ -58,7 +58,7 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf12
+          key: gf13
 
       - name: Dependencies cache
         id: extcache
