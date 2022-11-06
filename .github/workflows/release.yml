@@ -83,6 +83,8 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
           doNotCache: true
+        env:
+          VCPKG_ROOT:
 
       # Download and install OpenCV
       - name: Install OpenCV and curl
