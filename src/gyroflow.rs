@@ -139,10 +139,11 @@ fn entry() {
         use std::path::PathBuf;
         // Try to load from disk first
         let path = (|| -> Option<String> {
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            let path = PathBuf::from("../Resources/ui/main_window.qml");
-            #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-            let path = PathBuf::from("./ui/main_window.qml");
+            let path = if cfg!(any(target_os = "macos", target_os = "ios")) {
+                PathBuf::from("../Resources/ui/main_window.qml")
+            } else {
+                PathBuf::from("./ui/main_window.qml")
+            };
             let final_path = std::env::current_exe().ok()?.parent()?.join(&path);
             if final_path.exists() {
                 Some(String::from(final_path.to_str()?))
