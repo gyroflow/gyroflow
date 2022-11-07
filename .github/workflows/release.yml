@@ -83,17 +83,15 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
           doNotCache: true
-        env:
-          VCPKG_ROOT:
 
       # Download and install OpenCV
       - name: Install OpenCV and curl
         if: ${{ matrix.targets.os != 'ubuntu-latest' && steps.extcache.outputs.cache-hit != 'true' }}
         run: |
-          vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg }}"
-          vcpkg install "opencv4[core]:${{ matrix.targets.vcpkg2 }}"
-          vcpkg install "curl[core]:${{ matrix.targets.vcpkg }}"
-          vcpkg install "opencl:${{ matrix.targets.vcpkg }}"
+          vcpkg --vcpkg-root "${{ github.workspace }}/ext/vcpkg" install "opencv4[core]:${{ matrix.targets.vcpkg }}"
+          vcpkg --vcpkg-root "${{ github.workspace }}/ext/vcpkg" install "opencv4[core]:${{ matrix.targets.vcpkg2 }}"
+          vcpkg --vcpkg-root "${{ github.workspace }}/ext/vcpkg" install "curl[core]:${{ matrix.targets.vcpkg }}"
+          vcpkg --vcpkg-root "${{ github.workspace }}/ext/vcpkg" install "opencl:${{ matrix.targets.vcpkg }}"
 
       # Download and install Qt
       - name: Install Qt
