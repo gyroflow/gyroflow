@@ -19,7 +19,10 @@ pub struct MDKProcessor {
 impl MDKProcessor {
     pub fn from_file(path: &str) -> Self {
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
-        let custom_decoder = String::new(); // eg. BRAW:format=rgba64le
+        let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
+        if !*super::GPU_DECODING.read() && path.to_ascii_lowercase().ends_with("braw") {
+            custom_decoder = "BRAW:scale=1920x1080".to_owned(); // Disable GPU decoding for BRAW
+        }
         mdk.setUrl(crate::util::path_to_url(QString::from(path)), QString::from(custom_decoder));
         Self {
             mdk,

@@ -278,8 +278,9 @@ impl Controller {
         self.chart_data_changed();
         self.keyframes_changed();
         self.update_offset_model();
+        let file_path = util::url_to_path(url.clone());
         *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
-            path: util::url_to_path(url.clone()),
+            path: file_path.clone(),
             image_sequence_start: self.image_sequence_start,
             image_sequence_fps: self.image_sequence_fps
         };
@@ -287,6 +288,9 @@ impl Controller {
         let mut custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
         if self.image_sequence_start > 0 {
             custom_decoder = QString::from(format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start));
+        }
+        if !*rendering::GPU_DECODING.read() && file_path.to_ascii_lowercase().ends_with("braw") {
+            custom_decoder = QString::from("BRAW:gpu=no:scale=1920x1080"); // Disable GPU decoding for BRAW
         }
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
