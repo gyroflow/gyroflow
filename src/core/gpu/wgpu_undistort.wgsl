@@ -186,9 +186,10 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     );
 
     let p = out_pos;
-    out_pos = out_pos + params.translation2d;
 
     if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return vec4<SCALAR>(bg); }
+
+    out_pos = out_pos + params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
