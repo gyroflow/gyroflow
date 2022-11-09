@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: e79c0d2b5d72eb3063cf32a1f7de1a9cf19930f3
+          vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
           doNotCache: true
 
       # Download and install OpenCV
