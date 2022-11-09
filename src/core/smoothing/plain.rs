@@ -10,11 +10,13 @@ use std::collections::BTreeMap;
 #[derive(Clone)]
 pub struct Plain {
     pub time_constant: f64,
+    pub trim_range_only: bool,
 }
 
 impl Default for Plain {
     fn default() -> Self { Self {
         time_constant: 0.25,
+        trim_range_only: false,
     } }
 }
 
@@ -24,12 +26,14 @@ impl SmoothingAlgorithm for Plain {
     fn set_parameter(&mut self, name: &str, val: f64) {
         match name {
             "time_constant" => self.time_constant = val,
+            "trim_range_only" => self.trim_range_only = val > 0.1,
             _ => log::error!("Invalid parameter name: {}", name)
         }
     }
     fn get_parameter(&self, name: &str) -> f64 {
         match name {
             "time_constant" => self.time_constant,
+            "trim_range_only" => if self.trim_range_only { 1.0 } else { 0.0 },
             _ => 0.0
         }
     }
@@ -46,7 +50,15 @@ impl SmoothingAlgorithm for Plain {
                 "default": 0.25,
                 "unit": "s",
                 "keyframe": "SmoothingParamTimeConstant"
-            }
+            },
+            {
+                "name": "trim_range_only",
+                "description": "Only within trim range",
+                "advanced": true,
+                "type": "CheckBox",
+                "default": self.trim_range_only,
+                "value": if self.trim_range_only { 1.0 } else { 0.0 },
+            },
         ])
     }
     fn get_status_json(&self) -> serde_json::Value {
@@ -71,6 +83,29 @@ impl SmoothingAlgorithm for Plain {
         if self.time_constant > 0.0 {
             alpha = get_alpha(self.time_constant);
         }
+
+        let mut quats_copy = None;
+        let quats = if self.trim_range_only && (stabilization_params.trim_start != 0.0 || stabilization_params.trim_end != 1.0) {
+            let ts_start = ((duration * stabilization_params.trim_start) * 1000.0).round() as i64;
+            let ts_end   = ((duration * stabilization_params.trim_end) * 1000.0).round() as i64;
+            if quats.range(ts_start..ts_end).next().is_none() {
+                &quats
+            } else {
+                let mut first_q = quats.range(ts_start..ts_end).next().unwrap().1.clone();
+                let mut last_q = quats.range(ts_start..ts_end).next_back().unwrap().1.clone();
+                quats_copy = Some(quats.clone());
+                for (ts, q) in quats_copy.as_mut().unwrap().iter_mut() {
+                    if *ts < ts_start {
+                        *q = first_q.clone();
+                    } else if *ts > ts_end {
+                        *q = last_q.clone();
+                    }
+                }
+                quats_copy.as_ref().unwrap()
+            }
+        } else {
+            &quats
+        };
 
         let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
         if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant) || (stabilization_params.video_speed_affects_smoothing && (stabilization_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {

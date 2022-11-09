@@ -28,6 +28,7 @@ pub struct DefaultAlgo {
     pub smoothness_roll: f64,
     pub per_axis: bool,
     pub second_pass: bool,
+    pub trim_range_only: bool,
     pub max_smoothness: f64,
     pub alpha_0_1s: f64,
 }
@@ -40,6 +41,7 @@ impl Default for DefaultAlgo {
         smoothness_roll: 0.5,
         per_axis: false,
         second_pass: true,
+        trim_range_only: false,
         max_smoothness: 1.0,
         alpha_0_1s: 0.1
     } }
@@ -56,6 +58,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "smoothness_roll"  => self.smoothness_roll = val,
             "per_axis"         => self.per_axis = val > 0.1,
             "second_pass"      => self.second_pass = val > 0.1,
+            "trim_range_only"  => self.trim_range_only = val > 0.1,
             "max_smoothness"   => self.max_smoothness = val,
             "alpha_0_1s"       => self.alpha_0_1s = val,
             _ => log::error!("Invalid parameter name: {}", name)
@@ -69,6 +72,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "smoothness_roll"  => self.smoothness_roll,
             "per_axis"         => if self.per_axis { 1.0 } else { 0.0 },
             "second_pass"      => if self.second_pass { 1.0 } else { 0.0 },
+            "trim_range_only"  => if self.trim_range_only { 1.0 } else { 0.0 },
             "max_smoothness"   => self.max_smoothness,
             "alpha_0_1s"       => self.alpha_0_1s,
             _ => 0.0
@@ -149,6 +153,14 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "value": if self.second_pass { 1.0 } else { 0.0 },
             },
             {
+                "name": "trim_range_only",
+                "description": "Only within trim range",
+                "advanced": true,
+                "type": "CheckBox",
+                "default": self.trim_range_only,
+                "value": if self.trim_range_only { 1.0 } else { 0.0 },
+            },
+            {
                 "name": "max_smoothness",
                 "description": "Max smoothness",
                 "advanced": true,
@@ -204,6 +216,29 @@ impl SmoothingAlgorithm for DefaultAlgo {
             1.0 - (-(1.0 / sample_rate) / time_constant).exp()
         };
         let noop = |v| v;
+
+        let mut quats_copy = None;
+        let quats = if self.trim_range_only && (stabilization_params.trim_start != 0.0 || stabilization_params.trim_end != 1.0) {
+            let ts_start = ((duration * stabilization_params.trim_start) * 1000.0).round() as i64;
+            let ts_end   = ((duration * stabilization_params.trim_end) * 1000.0).round() as i64;
+            if quats.range(ts_start..ts_end).next().is_none() {
+                &quats
+            } else {
+                let mut first_q = quats.range(ts_start..ts_end).next().unwrap().1.clone();
+                let mut last_q = quats.range(ts_start..ts_end).next_back().unwrap().1.clone();
+                quats_copy = Some(quats.clone());
+                for (ts, q) in quats_copy.as_mut().unwrap().iter_mut() {
+                    if *ts < ts_start {
+                        *q = first_q.clone();
+                    } else if *ts > ts_end {
+                        *q = last_q.clone();
+                    }
+                }
+                quats_copy.as_ref().unwrap()
+            }
+        } else {
+            &quats
+        };
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();
