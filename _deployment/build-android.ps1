@@ -4,13 +4,13 @@ $BUILD_PROFILE = "deploy" # change to release for testing, it's much faster
 $QT_LIBS = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\lib"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin"
 $Env:Path += ";$PROJECT_DIR\ext\6.3.1\mingw_64\bin\"
-$Env:Path += ";$PROJECT_DIR\ext\llvm-13-win64\bin"
+$Env:Path += ";$PROJECT_DIR\ext\llvm-15-win64\bin"
 $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk\android-ndk-r23c"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
 $Env:QMAKE = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin\qmake.bat"
 $Env:FFMPEG_DIR = "$PROJECT_DIR\ext\ffmpeg-5.1-android-gpl-lite"
-$Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-13-win64\bin"
+$Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-15-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"
 $Env:OPENCV_LINK_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
 $Env:OPENCV_INCLUDE_PATHS = "$PROJECT_DIR\ext\OpenCV-android-sdk\sdk\native\jni\include"
@@ -20,7 +20,7 @@ $CLANG_LIB = $Env:LIBCLANG_PATH.replace('\', '/').replace('/bin', '/lib');
 $NDK_REPLACED = $Env:ANDROID_NDK_HOME.replace('\', '/');
 $SDK_REPLACED = $Env:ANDROID_SDK_ROOT.replace('\', '/');
 $PROJECT_DIR_UNIX = $PROJECT_DIR.replace('\', '/');
-$Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/13.0.0/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+$Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/15.0.4/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
 
 Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"           -Destination "$QT_LIBS\libQt6Core.so"           -ErrorAction SilentlyContinue
 Copy-Item -Path "$QT_LIBS\libQt6Gui_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Gui.so"            -ErrorAction SilentlyContinue

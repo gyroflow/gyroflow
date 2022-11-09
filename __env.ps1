@@ -13,8 +13,8 @@ $Env:OPENCV_INCLUDE_PATHS = "$PSScriptRoot\ext\vcpkg\installed\x64-windows-relea
 $Env:Path = ";$PSScriptRoot\ext\vcpkg\installed\x64-windows-release\bin;$Env:Path"
 
 # Clang
-$Env:LIBCLANG_PATH = "$PSScriptRoot\ext\llvm-13-win64\bin"
-$Env:Path = "$PSScriptRoot\ext\llvm-13-win64\bin;$Env:Path"
+$Env:LIBCLANG_PATH = "$PSScriptRoot\ext\llvm-15-win64\bin"
+$Env:Path = "$PSScriptRoot\ext\llvm-15-win64\bin;$Env:Path"
 # $Env:LIBCLANG_PATH = "D:\Program Files\LLVM\bin"
 # $Env:Path = "D:\Program Files\LLVM\bin;$Env:Path" # or other path if you have LLVM installed in other place
 

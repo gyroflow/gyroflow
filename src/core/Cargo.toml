@@ -54,7 +54,7 @@ space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.1.1"
 
-opencv = { version = "0.72.1", optional = true }
+opencv = { version = "0.73.0", optional = true }
 
 wgpu = "0.14"
 wgpu-hal = "0.14"
@@ -72,7 +72,7 @@ log = "0.4.17"
 ocl = { version = "0.19.4", optional = true, git = "https://github.com/AdrianEddy/ocl" }
 ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/AdrianEddy/ocl" }
 
-rustfft = "6.0.1"
+rustfft = "6.1.0"
 
 [features]
 default = []

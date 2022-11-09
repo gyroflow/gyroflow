@@ -65,7 +65,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-4
+          key: ${{ runner.os }}-gf-ext-5
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
+          vcpkgGitCommitId: e79c0d2b5d72eb3063cf32a1f7de1a9cf19930f3
           doNotCache: true
 
       # Download and install OpenCV
@@ -106,7 +106,7 @@ jobs:
         if: ${{ matrix.targets.os == 'windows-2022' }}
         uses: KyleMayes/install-llvm-action@v1.5.0
         with:
-          version: "13.0"
+          version: "15.0"
           directory: ${{ github.workspace }}/ext/llvm
           cached: ${{ steps.extcache.outputs.cache-hit }}
       - name: Set LIBCLANG_PATH
