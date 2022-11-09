@@ -3083,7 +3083,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.6"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=d0ad93e#d0ad93efa81c7d0aef9354c72a43c00e4b0d36ab"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=9224652#922465222b8e2d9359fb7b8cb0130eae1dcb658f"
 dependencies = [
  "argh",
  "byteorder",
