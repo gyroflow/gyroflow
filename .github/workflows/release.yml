@@ -65,7 +65,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-5
+          key: ${{ runner.os }}-gf-ext-1
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
