@@ -39,7 +39,7 @@ impl EstimatorItemInterface for ItemAkaze {
 
     fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>> {
         if let EstimatorItem::ItemAkaze(next) = next {
-            use nalgebra::{ UnitVector3, Point2 };
+            use cv_core::nalgebra::{ UnitVector3, Point2 };
 
             let pts1 = &self.features;
             let pts2 = &next.features;
@@ -67,7 +67,8 @@ impl EstimatorItemInterface for ItemAkaze {
 
                 let eight_point = eight_point::EightPoint::new();
                 if let Some(out) = arrsac.model(&eight_point, matches.iter().copied()) {
-                    return Some(out.isometry().rotation);
+                    let rot = out.isometry().rotation;
+                    return Some(nalgebra::Rotation3::from_matrix_unchecked(nalgebra::Matrix3::from_column_slice(rot.matrix().as_slice())));
                     /*let rotations = cv_pinhole::EssentialMatrix::from(out).possible_rotations(1e-12, 1000).unwrap();
                     if rotations[0].angle() < rotations[1].angle() {
                         Some(rotations[0])

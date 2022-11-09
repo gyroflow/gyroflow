@@ -37,10 +37,9 @@ dependencies = [
 [[package]]
 name = "ahrs"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dce5b6279fad0a36b3ef4fd938fb6b2751a8899ff8275fb9aba9a25345ca9992"
+source = "git+https://github.com/AdrianEddy/ahrs-rs.git?rev=5bdd344#5bdd3444954186d23c76c45a0beae52198e89d20"
 dependencies = [
- "nalgebra",
+ "nalgebra 0.31.3",
  "num-traits 0.2.15",
  "simba",
 ]
@@ -139,7 +138,7 @@ checksum = "75f2b0dada81340718682df780c9a696b090b6ef7e83c3dcc770af6de9302995"
 dependencies = [
  "anyhow",
  "cfg-if",
- "nalgebra",
+ "nalgebra 0.31.3",
  "num-complex",
  "num-integer",
  "num-traits 0.2.15",
@@ -553,7 +552,7 @@ version = "0.15.0"
 source = "git+https://github.com/rust-cv/cv.git?rev=511024f#511024feaa077a9af377cca7b654ad3d57d3bd6a"
 dependencies = [
  "derive_more",
- "nalgebra",
+ "nalgebra 0.30.1",
  "num-traits 0.2.15",
  "sample-consensus",
 ]
@@ -566,7 +565,7 @@ dependencies = [
  "cv-core",
  "derive_more",
  "float-ord",
- "nalgebra",
+ "nalgebra 0.30.1",
  "num-traits 0.2.15",
 ]
 
@@ -954,7 +953,7 @@ dependencies = [
  "line_drawing",
  "log",
  "mimalloc",
- "nalgebra",
+ "nalgebra 0.31.3",
  "num",
  "ocl",
  "ocl-interop",
@@ -1403,6 +1402,21 @@ name = "nalgebra"
 version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fb2d0de08694bed883320212c18ee3008576bfe8c306f4c3c4a58b4876998be"
+dependencies = [
+ "approx",
+ "matrixmultiply",
+ "num-complex",
+ "num-rational 0.4.1",
+ "num-traits 0.2.15",
+ "simba",
+ "typenum",
+]
+
+[[package]]
+name = "nalgebra"
+version = "0.31.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eef2ccf9aefdae3334ad5911b5414724b9047bfe145b3353d5878732cc7b86b"
 dependencies = [
  "approx",
  "matrixmultiply",
@@ -1994,13 +2008,13 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=cf5ee33#cf5ee3390533c21996d87017b99c18269cf980aa"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=76dfd15#76dfd15a130bd3a1950766b4dd9264fbc4f365a6"
 dependencies = [
  "argmin",
  "argmin-math",
  "libm 0.2.6",
  "log",
- "nalgebra",
+ "nalgebra 0.31.3",
  "rand",
  "rayon",
  "superslice",
