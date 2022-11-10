@@ -138,6 +138,11 @@ jobs:
           chmod +x ${{ github.workspace }}/_deployment/deploy-linux.sh
           ${{ github.workspace }}/_deployment/deploy-linux.sh build-docker
 
+      - name: Force qml-video-rs rebuild
+        run: |
+          rm -rf ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy/build/qml-video-rs*
+          rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
+
       - name: Build Gyroflow
         if: ${{ matrix.targets.os == 'windows-2022' }}
         env:
