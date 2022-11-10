@@ -94,6 +94,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] Runcam CSV (Runcam 5 Orange, iFlight GOCam GR, Runcam Thumb, Mobius Maxi 4K)
 - [x] Hawkeye Firefly X Lite CSV
 - [x] WitMotion (WT901SDCL binary and *.txt)
+- [x] Vuze (VuzeXR)
 
 ### Info for cameras not on the list
 
