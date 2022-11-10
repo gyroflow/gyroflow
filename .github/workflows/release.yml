@@ -141,6 +141,7 @@ jobs:
       - name: Force qml-video-rs rebuild
         run: |
           rm -rf ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy/build/qml-video-rs*
+          rm -rf ${{ github.workspace }}/target/${{ matrix.targets.target2 }}/deploy/build/qml-video-rs*
           rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
 
       - name: Build Gyroflow
