@@ -144,7 +144,7 @@ pub struct RenderQueue {
     add_file: qt_method!(fn(&mut self, path: String, gyro_path: String, additional_data: String) -> u32),
 
     get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
-    set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String)),
+    set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String, start: bool)),
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
     set_error_string: qt_method!(fn(&mut self, job_id: u32, err: QString)),
@@ -186,12 +186,14 @@ pub struct RenderQueue {
     pub default_suffix: qt_property!(QString),
 
     when_done: qt_property!(i32; WRITE set_when_done),
+
     parallel_renders: qt_property!(i32; WRITE set_parallel_renders),
+    pub export_project: qt_property!(u32),
+    pub overwrite_mode: qt_property!(u32),
+
     pub request_close: qt_signal!(),
 
     pub queue_finished: qt_signal!(),
-
-    pub export_project: u32,
 
     pub jobs_added: HashSet<u32>,
 
@@ -255,7 +257,7 @@ impl RenderQueue {
         }
     }
 
-    pub fn set_job_output_path(&mut self, job_id: u32, new_path: String) {
+    pub fn set_job_output_path(&mut self, job_id: u32, new_path: String, start: bool) {
         if let Some(job) = self.jobs.get_mut(&job_id) {
             job.render_options.output_path = new_path.clone();
         }
@@ -264,7 +266,7 @@ impl RenderQueue {
             itm.error_string = QString::default();
             itm.status = JobStatus::Queued;
         });
-        if self.status.to_string() != "active" {
+        if start && self.status.to_string() != "active" {
             self.start();
         }
     }

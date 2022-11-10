@@ -217,24 +217,24 @@ impl SmoothingAlgorithm for DefaultAlgo {
         };
         let noop = |v| v;
 
-        let mut quats_copy = None;
+        let mut _quats_copy = None;
         let quats = if self.trim_range_only && (stabilization_params.trim_start != 0.0 || stabilization_params.trim_end != 1.0) {
             let ts_start = ((duration * stabilization_params.trim_start) * 1000.0).round() as i64;
             let ts_end   = ((duration * stabilization_params.trim_end) * 1000.0).round() as i64;
             if quats.range(ts_start..ts_end).next().is_none() {
                 &quats
             } else {
-                let mut first_q = quats.range(ts_start..ts_end).next().unwrap().1.clone();
-                let mut last_q = quats.range(ts_start..ts_end).next_back().unwrap().1.clone();
-                quats_copy = Some(quats.clone());
-                for (ts, q) in quats_copy.as_mut().unwrap().iter_mut() {
+                let first_q = quats.range(ts_start..ts_end).next().unwrap().1.clone();
+                let last_q = quats.range(ts_start..ts_end).next_back().unwrap().1.clone();
+                _quats_copy = Some(quats.clone());
+                for (ts, q) in _quats_copy.as_mut().unwrap().iter_mut() {
                     if *ts < ts_start {
                         *q = first_q.clone();
                     } else if *ts > ts_end {
                         *q = last_q.clone();
                     }
                 }
-                quats_copy.as_ref().unwrap()
+                _quats_copy.as_ref().unwrap()
             }
         } else {
             &quats
