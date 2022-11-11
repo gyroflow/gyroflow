@@ -52,6 +52,8 @@ Item {
 
         if (obj.toString().startsWith("file")) { // obj is url
             paths = controller.get_paths_from_gyroflow_file(obj);
+        } else if (obj.project_file) {
+            paths = controller.get_paths_from_gyroflow_file(controller.path_to_url(obj.project_file));
         } else {
             paths = [
                 obj.videofile,
@@ -83,6 +85,8 @@ Item {
         if (obj.toString().startsWith("file")) {
             // obj is url
             controller.import_gyroflow_file(obj);
+        } else if (obj.project_file) {
+            controller.import_gyroflow_file(controller.path_to_url(obj.project_file));
         } else {
             controller.import_gyroflow_data(JSON.stringify(obj));
         }
@@ -464,8 +468,8 @@ Item {
                 transform: [
                     Scale {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
-                        xScale: vid.stabEnabled? 1 : vid.videoWidth  / Math.max(1, root.outWidth);
-                        yScale: vid.stabEnabled? 1 : vid.videoHeight / Math.max(1, root.outHeight);
+                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / (vid.videoHeight / Math.max(1, vid.videoWidth)));
+                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / (vid.videoWidth / Math.max(1, vid.videoHeight)));
                     },
                     Rotation {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;

@@ -292,6 +292,12 @@ impl RenderQueue {
         if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             if let Some(out) = obj.get("output") {
                 if let Ok(render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                    if let Some(project_path) = self.stabilizer.input_file.read().project_file_path.as_ref() {
+                        // Save project file on disk
+                        if let Err(e) = self.stabilizer.export_gyroflow_file(project_path, false, false, &additional_data) {
+                            ::log::warn!("Failed to save project file: {}: {:?}", project_path, e);
+                        }
+                    }
                     let stab = self.stabilizer.get_cloned();
                     self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
                 }
@@ -563,7 +569,9 @@ impl RenderQueue {
     pub fn restore_render_queue(&mut self, json: String, additional_data: String) {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
-                if let Ok(data) = serde_json::to_string(&x) {
+                if let Some(project) = x.get("project_file").and_then(|x| x.as_str()) {
+                    self.add_file(project.to_string(), String::new(), additional_data.clone());
+                } else if let Ok(data) = serde_json::to_string(&x) {
                     self.add_file(data, String::new(), additional_data.clone());
                 }
             }
@@ -572,6 +580,11 @@ impl RenderQueue {
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
+            if let Some(path) = job.stab.input_file.read().project_file_path.as_ref() {
+                if std::path::Path::new(&path).exists() {
+                    return QString::from(serde_json::json!({ "project_file": path }).to_string());
+                }
+            }
             let mut additional_data = job.additional_data.clone();
             if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
                 if let Ok(output) = serde_json::to_value(&job.render_options) {
@@ -579,7 +592,7 @@ impl RenderQueue {
                 }
                 additional_data = serde_json::to_string(&obj).unwrap_or_default();
             }
-            if let Ok(data) = job.stab.export_gyroflow_data(true, false, additional_data) {
+            if let Ok(data) = job.stab.export_gyroflow_data(true, false, &additional_data) {
                 return QString::from(data);
             }
         }
@@ -722,9 +735,9 @@ impl RenderQueue {
                 }
                 let path = std::path::Path::new(&render_options.output_path.replace(&self.default_suffix.to_string(), "")).with_extension("gyroflow");
                 let result = match self.export_project {
-                    1 => job.stab.export_gyroflow_file(&path, true, false, additional_data),
-                    2 => job.stab.export_gyroflow_file(&path, false, false, additional_data),
-                    3 => job.stab.export_gyroflow_file(&path, false, true, additional_data),
+                    1 => job.stab.export_gyroflow_file(&path, true, false, &additional_data),
+                    2 => job.stab.export_gyroflow_file(&path, false, false, &additional_data),
+                    3 => job.stab.export_gyroflow_file(&path, false, true, &additional_data),
                     _ => { Err(std::io::Error::new(std::io::ErrorKind::Other, "Unknown option")) }
                 };
                 if let Err(e) = result {
@@ -850,7 +863,7 @@ impl RenderQueue {
                             background_margin_feather: params.background_margin_feather,
                             ..Default::default()
                         })),
-                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), image_sequence_start: 0, image_sequence_fps: 0.0 })),
+                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), project_file_path: None, image_sequence_start: 0, image_sequence_fps: 0.0 })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
                         ..Default::default()
                     };

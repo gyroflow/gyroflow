@@ -191,6 +191,9 @@ pub struct Controller {
     export_gyroflow_file: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool)),
     export_gyroflow_data: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString),
 
+    project_file_path: qt_property!(QString; READ get_project_file_path NOTIFY project_file_path_changed),
+    project_file_path_changed: qt_signal!(),
+
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
     rate_profile: qt_method!(fn(&self, name: QString, json: QString, is_good: bool)),
@@ -281,9 +284,11 @@ impl Controller {
         let file_path = util::url_to_path(url.clone());
         *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
             path: file_path.clone(),
+            project_file_path: None,
             image_sequence_start: self.image_sequence_start,
             image_sequence_fps: self.image_sequence_fps
         };
+        self.project_file_path_changed();
 
         let mut custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
         if self.image_sequence_start > 0 {
@@ -297,6 +302,10 @@ impl Controller {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             vid.setUrl(url, custom_decoder);
         }
+    }
+
+    fn get_project_file_path(&self) -> QString {
+        QString::from(self.stabilizer.input_file.read().project_file_path.as_ref().cloned().unwrap_or_default())
     }
 
     fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String) {
@@ -1059,9 +1068,13 @@ impl Controller {
 
     fn export_gyroflow_file(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool) {
         let gf_path = if override_location.is_empty() {
-            let video_path = self.stabilizer.input_file.read().path.clone();
-            let video_path = std::path::Path::new(&video_path);
-            video_path.with_extension("gyroflow").to_string_lossy().into()
+            let input_file = self.stabilizer.input_file.read();
+            if let Some(project_path) = input_file.project_file_path.as_ref() {
+                project_path.clone()
+            } else {
+                let video_path = std::path::Path::new(&input_file.path);
+                video_path.with_extension("gyroflow").to_string_lossy().into()
+            }
         } else {
             override_location.to_string()
         };
@@ -1069,7 +1082,7 @@ impl Controller {
         if !overwrite && std::path::Path::new(&gf_path).exists() {
             self.gyroflow_exists(QString::from(gf_path), thin, extended);
         } else {
-            match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, additional_data.to_json().to_string()) {
+            match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
                 Ok(_) => {
                     self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
                 },
@@ -1084,7 +1097,7 @@ impl Controller {
     }
 
     fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString {
-        QString::from(self.stabilizer.export_gyroflow_data(thin, extended, additional_data.to_json().to_string()).unwrap_or_default())
+        QString::from(self.stabilizer.export_gyroflow_data(thin, extended, &additional_data.to_json().to_string()).unwrap_or_default())
     }
 
     fn get_paths_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
@@ -1133,6 +1146,7 @@ impl Controller {
 
             let obj = this.import_gyroflow_internal(obj);
             this.gyroflow_file_loaded(obj);
+            this.project_file_path_changed();
         });
 
         let stab = self.stabilizer.clone();

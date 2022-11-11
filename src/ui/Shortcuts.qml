@@ -188,4 +188,10 @@ Item {
         sequence: "q";
         onActivated: videoArea.queue.shown = !videoArea.queue.shown;
     }
+
+    // Save project file
+    Shortcut {
+        sequence: "Ctrl+s";
+        onActivated: window.saveProject();
+    }
 }

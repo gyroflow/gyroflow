@@ -203,20 +203,37 @@ Rectangle {
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
+                    onIsAddToQueueChanged: updateModel();
                     enabled: false;
 
                     property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
                     Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
 
-                    model: [
-                        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue")),
-                        QT_TRANSLATE_NOOP("Popup", "Create settings preset"),
-                        QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue"),
-                        QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)"),
-                        QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)"),
-                        QT_TRANSLATE_NOOP("Popup", "Export project file")
-                    ];
+                    function updateModel() {
+                        let m = [
+                            isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue")),
+                            QT_TRANSLATE_NOOP("Popup", "Create settings preset"),
+                            QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue"),
+                            QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)"),
+                            QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)"),
+                            QT_TRANSLATE_NOOP("Popup", "Export project file")
+                        ];
+                        if (controller.project_file_path) m.push(QT_TRANSLATE_NOOP("Popup", "Save project file"));
+                        model = m;
+                    }
+
+                    model: [];
+
+                    Connections {
+                        target: controller;
+                        function onProject_file_path_changed() { renderBtn.updateModel(); }
+                    }
+                    Connections {
+                        target: render_queue;
+                        function onQueue_changed() { renderBtn.updateModel(); }
+                    }
+                    Component.onCompleted: updateModel();
 
                     function render() {
                         const fname = vidInfo.item.filename.toLowerCase();
@@ -305,6 +322,7 @@ Rectangle {
                             case 5: // Export project file
                                 controller.export_gyroflow_file(/*thin*/index == 5, /*ext*/index == 3, window.getAdditionalProjectData(), "", false);
                             break;
+                            case 6: window.saveProject(); break;
                         }
                     }
                 }
@@ -538,6 +556,10 @@ Rectangle {
         };
     }
     function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
+
+    function saveProject() {
+        controller.export_gyroflow_file(false, false, window.getAdditionalProjectData(), controller.project_file_path, !!controller.project_file_path);
+    }
 
     /*Row {
         id: fps;

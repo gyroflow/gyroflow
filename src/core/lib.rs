@@ -51,6 +51,7 @@ lazy_static::lazy_static! {
 #[derive(Default, Clone, Debug)]
 pub struct InputFile {
     pub path: String,
+    pub project_file_path: Option<String>,
     pub image_sequence_fps: f64,
     pub image_sequence_start: i32
 }
@@ -714,13 +715,16 @@ impl<T: PixelType> StabilizationManager<T> {
         });
     }
 
-    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, additional_data: String) -> std::io::Result<()> {
+    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, additional_data: &str) -> std::io::Result<()> {
         let data = self.export_gyroflow_data(thin, extended, additional_data)?;
+        let path_str = filepath.as_ref().to_string_lossy().to_string();
         std::fs::write(filepath, data)?;
+
+        self.input_file.write().project_file_path = Some(path_str);
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: String) -> std::io::Result<String> {
+    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: &str) -> std::io::Result<String> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -816,7 +820,7 @@ impl<T: PixelType> StabilizationManager<T> {
             // "stab_transform":    {} // timestamp, final quaternion
         });
 
-        util::merge_json(&mut obj, &serde_json::from_str(&additional_data).unwrap_or_default());
+        util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
         if extended {
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
@@ -847,7 +851,12 @@ impl<T: PixelType> StabilizationManager<T> {
 
     pub fn import_gyroflow_file<F: Fn(f64)>(&self, path: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
         let data = std::fs::read(path)?;
-        self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag)
+
+        let result = self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag);
+        if result.is_ok() {
+            self.input_file.write().project_file_path = Some(path.to_string());
+        }
+        result
     }
     pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
