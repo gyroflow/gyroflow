@@ -292,9 +292,10 @@ impl RenderQueue {
         if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             if let Some(out) = obj.get("output") {
                 if let Ok(render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
-                    if let Some(project_path) = self.stabilizer.input_file.read().project_file_path.as_ref() {
+                    let project_path = self.stabilizer.input_file.read().project_file_path.clone();
+                    if let Some(project_path) = project_path {
                         // Save project file on disk
-                        if let Err(e) = self.stabilizer.export_gyroflow_file(project_path, false, false, &additional_data) {
+                        if let Err(e) = self.stabilizer.export_gyroflow_file(&project_path, false, false, &additional_data) {
                             ::log::warn!("Failed to save project file: {}: {:?}", project_path, e);
                         }
                     }
