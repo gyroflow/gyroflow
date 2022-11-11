@@ -255,7 +255,8 @@ Rectangle {
                             const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
-                                videoArea.queue.shown = true;
+                                if (+settings.value("showQueueWhenAdding", "1"))
+                                    videoArea.queue.shown = true;
                             } else {
                                 // Export now
                                 render_queue.main_job_id = job_id;

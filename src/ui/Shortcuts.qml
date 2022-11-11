@@ -182,4 +182,10 @@ Item {
         sequence: "Esc";
         onActivated: videoArea.fullScreen = false;
     }
+
+    // Toggle render queue
+    Shortcut {
+        sequence: "q";
+        onActivated: videoArea.queue.shown = !videoArea.queue.shown;
+    }
 }

@@ -677,6 +677,8 @@ Item {
                     Action { text: qsTr("Project file (including processed gyro data)");   onTriggered: queueSettings.setExportMode(3, exportModeMenu); }
                     Component.onCompleted: queueSettings.setExportMode(+window.settings.value("exportMode", "0"), exportModeMenu);
                 }
+                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+                Action { checkable: true; checked: +settings.value("showQueueWhenAdding", "1") > 0; text: qsTr("Show queue when adding an item"); onTriggered: window.settings.setValue("showQueueWhenAdding", checked? 1 : 0); }
             }
         }
         Loader {
