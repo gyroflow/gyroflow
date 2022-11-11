@@ -60,7 +60,7 @@ impl Default for ComplementaryFilterV2 {
         Self {
             gain_acc: 0.0004,
             prev_gain_acc: 0.0,
-            gain_mag: 0.01,
+            gain_mag: 0.0004,
             bias_alpha: 0.001,
             do_bias_estimation: true,
             do_adaptive_gain: true,
