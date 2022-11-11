@@ -343,7 +343,7 @@ Ak máš novší počítač, aktuálne ovládače na GPU a myslíš si, že by s
     <message>
       <location filename="../../src/ui/App.qml" line="504"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Kodek zvuku neumožnuje spracovať vstupné data. Skús deaktivovať "Export zvuku" v nastaveniach exportu.</translation>
     </message>
   </context>
   <context>
@@ -1325,62 +1325,62 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="612"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Nastavenia fronty</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="652"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Počet paralelných renderov</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Predvolená akcia pre zhodu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="664"/>
       <source>Ask</source>
-      <translation type="unfinished">Ask</translation>
+      <translation>Opýtať sa</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="666"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Prepísať súbor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="667"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Premenovať súbor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="668"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Preskočiť</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="673"/>
       <source>Export mode</source>
-      <translation type="unfinished">Export mode</translation>
+      <translation>Mód exportu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Stabilizovať video</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="675"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>Projekt</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="676"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>Projekt (vrátane gyro dát)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="677"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Projekt (vrátane spracovaných gyro dát)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="383"/>
@@ -1607,7 +1607,7 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Môžeš taktiež uložiť tvoje nastavenia ako `default.gyroflow` v adresári `camera_presets` ktorý bude stále aplikovaný po načítaní video súboru.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
@@ -1688,7 +1688,7 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Only within trim range</source>
-      <translation type="unfinished">Only within trim range</translation>
+      <translation>Iba v označenom rozsahu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>

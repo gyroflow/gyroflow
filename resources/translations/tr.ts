@@ -341,7 +341,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="504"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Ses enkoderi veriyi işleyemedi. Dışarı aktarma ayarlarından &quot;Sesi dışarı aktar&quot; seçeneğini kaldırmayı deneyin.</translation>
     </message>
   </context>
   <context>
@@ -1322,62 +1322,62 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="612"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Sıra ayarları</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="652"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Paralel render sayısı</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Varsayılan üzerine-yazma aksiyonu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="664"/>
       <source>Ask</source>
-      <translation type="unfinished">Ask</translation>
+      <translation>Sor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="666"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Dosyanın üzerine yaz</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="667"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Dosyayı yeniden adlandır</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="668"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Dosyayı pas geç</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="673"/>
       <source>Export mode</source>
-      <translation type="unfinished">Export mode</translation>
+      <translation>Dışa aktarma modu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Stabilize edilmiş video</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="675"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>Proje dosyası</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="676"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>Proje dosyası (gyro verisi dahil)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="677"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Proje dosyası (işlenmiş gyro dosyası dahil)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="383"/>
@@ -1604,7 +1604,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Önayarlarınızı `camera_presets` klasörü içinde `default.gyroflow` olarak kaydedebilir ve gelecekteki tüm işleriniz için kullanabilirsiniz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
@@ -1685,7 +1685,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Only within trim range</source>
-      <translation type="unfinished">Only within trim range</translation>
+      <translation>Yalnızca kırpma aralığı içinde</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
