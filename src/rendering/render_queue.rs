@@ -131,6 +131,7 @@ pub struct RenderQueue {
 
     add: qt_method!(fn(&mut self, additional_data: String, thumbnail_url: QString) -> u32),
     remove: qt_method!(fn(&mut self, job_id: u32)),
+    clear: qt_method!(fn(&mut self)),
 
     start: qt_method!(fn(&mut self)),
     pause: qt_method!(fn(&mut self)),
@@ -380,6 +381,17 @@ impl RenderQueue {
         }
         self.jobs.remove(&job_id);
         self.update_queue_indices();
+    }
+    pub fn clear(&mut self) {
+        let mut to_delete = Vec::new();
+        for v in self.queue.borrow().iter() {
+            if v.status != JobStatus::Rendering {
+                to_delete.push(v.job_id);
+            }
+        }
+        for job_id in to_delete {
+            self.remove(job_id);
+        }
     }
     fn update_queue_indices(&mut self) {
         for (i, v) in self.queue.borrow().iter().enumerate() {

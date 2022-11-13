@@ -681,7 +681,13 @@ Item {
                 Component.onCompleted: queueSettings.setExportMode(+window.settings.value("exportMode", "0"), exportModeMenu);
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
-            Action { checkable: true; checked: +settings.value("showQueueWhenAdding", "1") > 0; text: qsTr("Show queue when adding an item"); onTriggered: window.settings.setValue("showQueueWhenAdding", checked? 1 : 0); }
+            Action { checked: +settings.value("showQueueWhenAdding", "1") > 0; text: qsTr("Show queue when adding an item"); onTriggered: { checked = !checked; window.settings.setValue("showQueueWhenAdding", checked? 1 : 0); } }
+            Action { text: qsTr("Clear render queue"); onTriggered: {
+                messageBox(Modal.Warning, qsTr("Are you sure you want to remove all items from the render queue?"), [
+                    { text: qsTr("Yes"), clicked: render_queue.clear },
+                    { text: qsTr("No"), accent: true },
+                ]);
+            } }
         }
     }
 
