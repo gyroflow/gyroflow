@@ -54,7 +54,7 @@ Item {
         sequence: "Home";
         onActivated: {
             videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimStart);
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimStart) + 1;
         }
     }
     // Go to trim end
@@ -62,7 +62,7 @@ Item {
         sequence: "End";
         onActivated: {
             videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimEnd);
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimEnd) - 1;
         }
     }
     // Set trim start here
