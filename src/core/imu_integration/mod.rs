@@ -10,6 +10,8 @@ use nalgebra::*;
 use super::gyro_source::{TimeIMU, Quat64, TimeQuat};
 use ahrs::{Ahrs, Madgwick, Mahony};
 
+// TODO: Magnetometer calculations are disabled in Complementary and VQF. Figure out what's wrong and enable them
+
 pub trait GyroIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat;
 }
@@ -67,14 +69,14 @@ impl GyroIntegrator for ComplementaryIntegrator {
                 let acc = Vector3::new(-a[1], a[0], a[2]);
                 // log::info!("acc norm: {}", acc.norm());
 
-                if let Some(m) = v.magn.as_ref() {
+                /*if let Some(m) = v.magn.as_ref() {
                     if let Some(magn) = Vector3::new(-m[1], m[0], m[2]).try_normalize(0.0) {
                         f.update_mag(acc[0], acc[1], acc[2],
                             -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD,
                             magn[0], magn[1], magn[2],
                             (v.timestamp_ms - prev_time) / 1000.0);
                     }
-                } else {
+                } else */{
                     counter += 1;
                     if counter % 20 == 0 {
                         //println!("{:?}, {:?}, {:?}, {:?}, {:?}, {:?}, {:?}", v.timestamp_ms, acc[0], acc[1], acc[2], -g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD);
@@ -127,7 +129,7 @@ impl GyroIntegrator for VQFIntegrator {
             tau_mag: 40.0,
             ..Default::default()
         };
-        vqf::offline_vqf(gyr, acc, Some(mag), num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
+        vqf::offline_vqf(gyr, acc, None/*Some(mag)*/, num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
         for (i, v) in imu_data.iter().enumerate() {
             out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
         }
