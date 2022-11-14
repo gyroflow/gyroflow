@@ -48,7 +48,7 @@ name = "ahrs"
 version = "0.5.0"
 source = "git+https://github.com/AdrianEddy/ahrs-rs.git?rev=5bdd344#5bdd3444954186d23c76c45a0beae52198e89d20"
 dependencies = [
- "nalgebra 0.31.3",
+ "nalgebra 0.31.4",
  "num-traits 0.2.15",
  "simba",
 ]
@@ -147,7 +147,7 @@ checksum = "75f2b0dada81340718682df780c9a696b090b6ef7e83c3dcc770af6de9302995"
 dependencies = [
  "anyhow",
  "cfg-if",
- "nalgebra 0.31.3",
+ "nalgebra 0.31.4",
  "num-complex",
  "num-integer",
  "num-traits 0.2.15",
@@ -508,9 +508,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.22"
+version = "0.4.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfd4d1b31faaa3a89d7934dbded3111da0d2ef28e3ebccdb4f0179f5929d1ef1"
+checksum = "16b0a3d9ed01224b22057780a37bb8c5dbfe1be8ba48678e7bf57ec4b385411f"
 dependencies = [
  "iana-time-zone",
  "js-sys",
@@ -1395,7 +1395,7 @@ dependencies = [
  "log",
  "log-panics",
  "mp4-merge",
- "nalgebra 0.31.3",
+ "nalgebra 0.31.4",
  "ndk-sys",
  "parking_lot",
  "pollster",
@@ -1451,7 +1451,7 @@ dependencies = [
  "line_drawing",
  "log",
  "mimalloc",
- "nalgebra 0.31.3",
+ "nalgebra 0.31.4",
  "num",
  "ocl",
  "ocl-interop",
@@ -1986,9 +1986,9 @@ dependencies = [
 
 [[package]]
 name = "nalgebra"
-version = "0.31.3"
+version = "0.31.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0eef2ccf9aefdae3334ad5911b5414724b9047bfe145b3353d5878732cc7b86b"
+checksum = "20bd243ab3dbb395b39ee730402d2e5405e448c75133ec49cc977762c4cba3d1"
 dependencies = [
  "approx",
  "matrixmultiply",
@@ -2762,7 +2762,7 @@ dependencies = [
  "argmin-math",
  "libm 0.2.6",
  "log",
- "nalgebra 0.31.3",
+ "nalgebra 0.31.4",
  "rand",
  "rayon",
  "superslice",
@@ -3095,8 +3095,8 @@ dependencies = [
 
 [[package]]
 name = "telemetry-parser"
-version = "0.2.6"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=adb6c12#adb6c123981cf3ce6461c81b512a50f624759b3b"
+version = "0.2.7"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=5baa869#5baa869bc25934fee98972112057b2f6ac96448e"
 dependencies = [
  "argh",
  "byteorder",
