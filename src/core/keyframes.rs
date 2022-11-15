@@ -72,7 +72,7 @@ impl KeyframeManager {
     pub fn set(&mut self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
         let kf = Keyframe {
             value,
-            ..Default::default()
+            easing: Easing::EaseInOut
         };
         if let Some(x) = self.keyframes.get_mut(typ) {
             match x.entry(timestamp_us) {
