@@ -129,7 +129,7 @@ jobs:
           rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
       - name: Force qml-video-rs rebuild (Win)
         if: ${{ matrix.targets.os == 'windows-2022' }}
-        run: rm -r -force ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy/build/qml-video-rs*
+        run: rm -r -force ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install dependencies Mac
         if: ${{ matrix.targets.os == 'macos-latest' }}
