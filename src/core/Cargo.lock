@@ -731,9 +731,9 @@ dependencies = [
 
 [[package]]
 name = "fallible_collections"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c195cf4b2285d3c993eb887b4dc56b0d5728bbe1d0f9a99c0ac6bec2da3e4d85"
+checksum = "3f57ccc32870366ae684be48b32a1a2e196f98a42a9b4361fe77e13fd4a34755"
 dependencies = [
  "hashbrown",
 ]
@@ -1228,11 +1228,12 @@ checksum = "348108ab3fba42ec82ff6e9564fc4ca0247bdccdc68dd8af9764bbc79c3c8ffb"
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c37567b180c1af25924b303ddf1ee4467653783440c62360beb2b322a4d93361"
+checksum = "04d1c67deb83e6b75fa4fe3309e09cfeade12e7721d95322af500d3814ea60c9"
 dependencies = [
  "cc",
+ "libc",
 ]
 
 [[package]]
@@ -1327,9 +1328,9 @@ dependencies = [
 
 [[package]]
 name = "mimalloc"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b32d6a9ac92d0239d7bfa31137fb47634ac7272a3c11bcee91379ac100781670"
+checksum = "9b2374e2999959a7b583e1811a1ddbf1d3a4b9496eceb9746f1192a59d871eca"
 dependencies = [
  "libmimalloc-sys",
 ]
@@ -1670,9 +1671,9 @@ checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
 
 [[package]]
 name = "opencv"
-version = "0.73.0"
+version = "0.74.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc68bca875a535ddede590be6f183385c4df051564bc261b4d595784cf77f0b7"
+checksum = "fe3d63c999b67192138a770107d1ebb7e554a4a889cf2542c19e36b97938b2ee"
 dependencies = [
  "cc",
  "clang",
@@ -1690,9 +1691,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.51.0"
+version = "0.52.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f3d515801a6bdfdba28978e506c54a1a1466d358c8fe44918d25ef6b6d847c1"
+checksum = "082d8259f4a7ea455e3553f9a1bc817520eb465a153bbf5ec0cb0b73590ee28d"
 dependencies = [
  "clang",
  "clang-sys",
@@ -2248,7 +2249,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=80cffb7#80cffb7ebcaf998964a7484451b6b5331da89d00"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=382810f#382810f3e306c597df2d9b708a9f9790f24140b9"
 dependencies = [
  "argh",
  "byteorder",
