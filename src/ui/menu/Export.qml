@@ -281,7 +281,9 @@ MenuItem {
                 Action { text: qsTr("Original (%1 x %2)").arg(root.originalWidth).arg(root.originalHeight); onTriggered: sizeMenu.setSize(root.originalWidth, root.originalHeight) }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
+                Action { text: "7k (6720 x 3780)";     onTriggered: sizeMenu.setSize(6720, 3780) }
                 Action { text: "6k (6016 x 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
+                Action { text: "5k (4800 x 2700)";     onTriggered: sizeMenu.setSize(4800, 2700) }
                 Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize(3840, 2160) }
                 Action { text: "2k (2048 x 1080)";     onTriggered: sizeMenu.setSize(2048, 1080) }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }

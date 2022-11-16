@@ -1,14 +1,14 @@
 $PROJECT_DIR="$PSScriptRoot\.."
 
 $BUILD_PROFILE = "deploy" # change to release for testing, it's much faster
-$QT_LIBS = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\lib"
-$Env:Path += ";$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin"
-$Env:Path += ";$PROJECT_DIR\ext\6.3.1\mingw_64\bin\"
+$QT_LIBS = "$PROJECT_DIR\ext\6.4.1\android_arm64_v8a\lib"
+$Env:Path += ";$PROJECT_DIR\ext\6.4.1\android_arm64_v8a\bin"
+$Env:Path += ";$PROJECT_DIR\ext\6.4.1\mingw_64\bin\"
 $Env:Path += ";$PROJECT_DIR\ext\llvm-15-win64\bin"
 $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk\android-ndk-r23c"
 $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
 $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
-$Env:QMAKE = "$PROJECT_DIR\ext\6.3.1\android_arm64_v8a\bin\qmake.bat"
+$Env:QMAKE = "$PROJECT_DIR\ext\6.4.1\android_arm64_v8a\bin\qmake.bat"
 $Env:FFMPEG_DIR = "$PROJECT_DIR\ext\ffmpeg-5.1-android-gpl-lite"
 $Env:LIBCLANG_PATH = "$PROJECT_DIR\ext\llvm-15-win64\bin"
 $Env:OPENCV_LINK_LIBS = "opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z"
@@ -110,7 +110,7 @@ foreach ($x in $qtlibs) {
 $androiddeploy = @"
 {
    "description": "",
-   "qt": "$PROJECT_DIR_UNIX/ext/6.3.1/android_arm64_v8a",
+   "qt": "$PROJECT_DIR_UNIX/ext/6.4.1/android_arm64_v8a",
    "sdk": "$SDK_REPLACED",
    "sdkBuildToolsRevision": "30.0.3",
    "ndk": "$NDK_REPLACED",
@@ -121,8 +121,8 @@ $androiddeploy = @"
    "android-min-sdk-version": "23",
    "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
    "android-target-sdk-version": "29",
-   "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/6.3.1/mingw_64/bin/qmlimportscanner",
-   "rcc-binary": "$PROJECT_DIR_UNIX/ext/6.3.1/mingw_64/bin/rcc",
+   "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/6.4.1/mingw_64/bin/qmlimportscanner",
+   "rcc-binary": "$PROJECT_DIR_UNIX/ext/6.4.1/mingw_64/bin/rcc",
    "qml-root-path": "$PROJECT_DIR_UNIX/src",
    "stdcpp-path": "$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib",
    "qrcFiles": "",
