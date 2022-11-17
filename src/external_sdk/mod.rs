@@ -41,6 +41,9 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                 if cfg!(target_os = "macos") {
                     out_dir.push("../Frameworks/");
                 }
+                if cfg!(target_os = "linux") {
+                    out_dir.push("lib/");
+                }
                 let size = buf.len().max(1) as f64;
                 let br = ProgressReader::new(Cursor::new(buf), |read| {
                     cb((0.5 + (read as f64 / size) * 0.5, sdk_name, "".into()));

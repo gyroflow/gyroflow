@@ -20,12 +20,16 @@ impl BrawSdk {
                     return parent.exists();
                 }
             } else if cfg!(target_os = "linux") {
-                return
-                    exe_path.with_file_name("libBlackmagicRawAPI.so").exists() &&
-                    exe_path.with_file_name("libDecoderCUDA.so").exists() &&
-                    exe_path.with_file_name("libDecoderOpenCL.so").exists() &&
-                    exe_path.with_file_name("libInstructionSetServicesAVX.so").exists() &&
-                    exe_path.with_file_name("libInstructionSetServicesAVX2.so").exists();
+                if let Some(parent) = exe_path.parent() {
+                    let mut lib = parent.to_path_buf();
+                    lib.push("lib/_");
+                    return
+                        lib.with_file_name("libBlackmagicRawAPI.so").exists() &&
+                        lib.with_file_name("libDecoderCUDA.so").exists() &&
+                        lib.with_file_name("libDecoderOpenCL.so").exists() &&
+                        lib.with_file_name("libInstructionSetServicesAVX.so").exists() &&
+                        lib.with_file_name("libInstructionSetServicesAVX2.so").exists();
+                }
             }
         }
 
