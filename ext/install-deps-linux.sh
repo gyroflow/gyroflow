@@ -19,7 +19,7 @@ fi
 
 if [ "$1" != "CI" ] || [ "$1" == "docker" ]; then
     # OpenCV dependencies
-    sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev
+    sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev
 
     # Install OpenCV
     $VCPKG_ROOT/vcpkg install "opencv[core]:x64-linux-release"

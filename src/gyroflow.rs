@@ -103,6 +103,11 @@ fn entry() {
         MDKVideoItem::setGlobalOption("plugins", "mdk-braw");
     }
 
+    if cfg!(target_os = "linux") {
+        // Init wgpu before Qt because of a bug in `khronos-egl`
+        gyroflow_core::gpu::wgpu::WgpuWrapper::list_devices();
+    }
+
     let _ = external_sdk::cleanup();
 
     let ctl = RefCell::new(controller::Controller::new());

@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::borrow::Cow;
+use std::sync::atomic::{ AtomicUsize, Ordering::SeqCst };
 use wgpu::Adapter;
 use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
@@ -31,40 +32,43 @@ pub struct WgpuWrapper  {
 
 lazy_static::lazy_static! {
     static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(wgpu::Instance::new(wgpu::Backends::all()));
-    static ref ADAPTER: RwLock<Option<Adapter>> = RwLock::new(None);
+    static ref ADAPTERS: RwLock<Vec<Adapter>> = RwLock::new(Vec::new());
+    static ref ADAPTER: AtomicUsize = AtomicUsize::new(0);
 }
 
 impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
-        let devices = std::panic::catch_unwind(|| -> Vec<String> {
-        let adapters = INSTANCE.lock().enumerate_adapters(wgpu::Backends::all());
-            adapters.map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
-        });
-        match devices {
-            Ok(devices) => { return devices; },
-            Err(e) => {
-                if let Some(s) = e.downcast_ref::<&str>() {
-                    log::error!("Failed to initialize wgpu {}", s);
-                } else if let Some(s) = e.downcast_ref::<String>() {
-                    log::error!("Failed to initialize wgpu {}", s);
-                } else {
-                    log::error!("Failed to initialize wgpu {:?}", e);
+        if ADAPTERS.read().is_empty() {
+            let devices = std::panic::catch_unwind(|| -> Vec<Adapter> {
+                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).collect()
+            });
+            match devices {
+                Ok(devices) => { *ADAPTERS.write() = devices; },
+                Err(e) => {
+                    if let Some(s) = e.downcast_ref::<&str>() {
+                        log::error!("Failed to initialize wgpu {}", s);
+                    } else if let Some(s) = e.downcast_ref::<String>() {
+                        log::error!("Failed to initialize wgpu {}", s);
+                    } else {
+                        log::error!("Failed to initialize wgpu {:?}", e);
+                    }
                 }
             }
         }
-        Vec::new()
+
+        ADAPTERS.read().iter().map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
         let instance = INSTANCE.lock();
 
         let mut i = 0;
-        for a in instance.enumerate_adapters(wgpu::Backends::all()) {
+        for a in ADAPTERS.read().iter() {
             if i == index {
                 let info = a.get_info();
                 log::debug!("WGPU adapter: {:?}", &info);
 
-                *ADAPTER.write() = Some(a);
+                ADAPTER.store(i, SeqCst);
                 return Some(());
             }
             i += 1;
@@ -72,8 +76,8 @@ impl WgpuWrapper {
         None
     }
     pub fn get_info() -> Option<String> {
-        let lock = ADAPTER.read();
-        if let Some(ref adapter) = *lock {
+        let lock = ADAPTERS.read();
+        if let Some(ref adapter) = lock.get(ADAPTER.load(SeqCst)) {
             let info = adapter.get_info();
             Some(format!("{} ({:?})", info.name, info.backend))
         } else {
@@ -98,7 +102,8 @@ impl WgpuWrapper {
         let name = info.name.clone();
         let list_name = format!("[wgpu] {} ({:?})", info.name, info.backend);
 
-        *ADAPTER.write() = Some(adapter);
+        ADAPTERS.write().push(adapter);
+        ADAPTER.store(ADAPTERS.read().len() - 1, SeqCst);
 
         Some((name, list_name))
     }
@@ -106,7 +111,7 @@ impl WgpuWrapper {
     pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &BufferDescription, mut drawing_len: usize) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
-        if params.height < 4 || params.output_height < 4 || params.stride < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
+        if params.height < 4 || params.output_height < 4 || buffers.input_size.2 < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
 
         let output_height = buffers.output_size.1 as i32;
         let output_stride = buffers.output_size.2 as i32;
@@ -117,10 +122,10 @@ impl WgpuWrapper {
 
         let drawing_enabled = (params.flags & 8) == 8;
 
-        let adapter_initialized = ADAPTER.read().is_some();
+        let adapter_initialized = ADAPTERS.read().get(ADAPTER.load(SeqCst)).is_some();
         if !adapter_initialized { Self::initialize_context(); }
-        let lock = ADAPTER.read();
-        if let Some(ref adapter) = *lock {
+        let lock = ADAPTERS.read();
+        if let Some(adapter) = lock.get(ADAPTER.load(SeqCst)) {
             let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                 label: None,
                 features: wgpu::Features::empty(),
