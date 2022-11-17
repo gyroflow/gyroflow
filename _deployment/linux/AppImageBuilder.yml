@@ -40,8 +40,6 @@ AppDir:
     - libpulse-dev:amd64
     - libasound2:amd64
     - libasound-dev:amd64
-    - libxkbcommon0:amd64
-    - libxkbcommon-dev:amd64
     - libc++-dev:amd64
     - libcanberra-gtk0:amd64
     - libcanberra-gtk3-module:amd64
@@ -132,7 +130,6 @@ AppDir:
     - /lib/x86_64-linux-gnu/libxcb-dri3.so.0
     - /lib/x86_64-linux-gnu/libxcb-present.so.0
     - /lib/x86_64-linux-gnu/libxcb-sync.so.1
-    - /lib/x86_64-linux-gnu/libxkbcommon.so.0
     - /lib/x86_64-linux-gnu/libxshmfence.so.1
     - /usr/lib/locale/locale-archive
     - /usr/share/icons/default/index.theme
