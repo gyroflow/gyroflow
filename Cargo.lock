@@ -935,9 +935,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.10.5"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adfbc57365a37acbd2ebf2b64d7e69bb766e2fea813521ed536f5d0520dcf86c"
+checksum = "8168378f4e5023e7218c89c891c0fd8ecdb5e5e4f18cb78f38cf245dd021e76f"
 dependencies = [
  "block-buffer",
  "crypto-common",
@@ -3097,7 +3097,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=382810f#382810f3e306c597df2d9b708a9f9790f24140b9"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=13cf7f1#13cf7f181d9d340cc0503d274ff30b8b868afa4c"
 dependencies = [
  "argh",
  "byteorder",
