@@ -40,6 +40,8 @@ AppDir:
     - libpulse-dev:amd64
     - libasound2:amd64
     - libasound-dev:amd64
+    - libxkbcommon0:amd64
+    - libxkbcommon-dev:amd64
     - libc++-dev:amd64
     - libcanberra-gtk0:amd64
     - libcanberra-gtk3-module:amd64
