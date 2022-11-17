@@ -211,7 +211,21 @@ pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<forma
     }
 }
 
-pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, _pixel_format: ffi::AVPixelFormat, _size: (u32, u32)) -> Result<(), ()> {
+pub fn is_hardware_format(format: ffi::AVPixelFormat) -> bool {
+    format == ffi::AVPixelFormat::AV_PIX_FMT_CUDA ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_DXVA2_VLD ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_VDPAU ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_D3D11 ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_D3D11VA_VLD ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_VIDEOTOOLBOX ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_MEDIACODEC ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_OPENCL ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_QSV ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_MMAL ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_VAAPI
+}
+
+pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32), init_hwframes: bool) -> Result<(), ()> {
     let mut devices = DEVICES.lock();
     if let Some(dev) = devices.get_mut(&type_) {
         unsafe {
@@ -219,76 +233,76 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                 (*encoder_ctx).hw_device_ctx = dev.add_ref();
                 log::debug!("Setting hw_device_ctx {:?}", (*encoder_ctx).hw_device_ctx);
             }
-            return Ok(());
-            /*if dev.sw_formats.is_empty() && !(*encoder_ctx).codec.is_null() {
-                dev.sw_formats = pix_formats_to_vec((*(*encoder_ctx).codec).pix_fmts);
-                log::debug!("Setting codec formats: {:?}", dev.sw_formats);
-            }
 
-            dbg!(&dev.sw_formats);
-            dbg!(&dev.hw_formats);
-            if !dev.hw_formats.is_empty() {
-                let target_format = {
-                    if !dev.sw_formats.contains(&pixel_format) {
-                        log::warn!("Encoder doesn't support the desired pixel format ({:?})\n", pixel_format);
-                        log::debug!("dev.sw_formats: {:?}", &dev.sw_formats);
-                        let formats = get_transfer_formats_to_gpu(_frame_ctx);
-                        if formats.is_empty() {
-                            super::append_log(&format!("No frame transfer formats. Desired format: {:?}\n", pixel_format));
-                            ffi::AVPixelFormat::AV_PIX_FMT_NONE
-                        } else if formats.contains(&pixel_format) {
-                            pixel_format
-                        } else {
-                            // Just pick the first format.
-                            // TODO: this should maybe take into consideration if the frame is 8 bit or more
-                            *formats.first().unwrap()
-                        }
-                    } else {
-                        pixel_format
-                    }
-                };
-                log::debug!("target_format: {:?}", &target_format);
-
-                if target_format != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
-                    let hw_format = *dev.hw_formats.first().unwrap(); // Safe because we check !is_empty() above
-
-                    if (*encoder_ctx).hw_frames_ctx.is_null() {
-                        let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
-                        if hw_frames_ref.is_null() {
-                            super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
-                            return Err(());
-                        }
-                        (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
-                        ffi::av_buffer_unref(&mut hw_frames_ref);
-                    } else {
-                        log::debug!("hwframes already exists");
-                    }
-                    let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
-
-                    let mut frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
-                    dbg!(&(*frames_ctx).format);
-                    dbg!(&(*frames_ctx).sw_format);
-                    if (*frames_ctx).format    == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).format    = hw_format; }
-                    if (*frames_ctx).sw_format == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).sw_format = target_format; }
-                    (*frames_ctx).width     = size.0 as i32;
-                    (*frames_ctx).height    = size.1 as i32;
-                    if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_QSV || type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VAAPI {
-                        (*frames_ctx).initial_pool_size = 20;
-                    }
-
-                    let err = ffi::av_hwframe_ctx_init(frames_ctx_ref);
-                    if err < 0 {
-                        super::append_log(&format!("Failed to initialize frame context. Error code: {}\n", err));
-                        ffi::av_buffer_unref(&mut frames_ctx_ref);
-                        return Err(());
-                    } else {
-                        log::debug!("inited hwframe ctx");
-                    }
-                    dbg!(&(*frames_ctx).format);
-                    dbg!(&(*frames_ctx).sw_format);
-                    (*encoder_ctx).pix_fmt = (*frames_ctx).format;
+            if init_hwframes {
+                if dev.sw_formats.is_empty() && !(*encoder_ctx).codec.is_null() {
+                    dev.sw_formats = pix_formats_to_vec((*(*encoder_ctx).codec).pix_fmts);
+                    log::debug!("Setting codec formats: {:?}", dev.sw_formats);
                 }
-            }*/
+
+                if !dev.hw_formats.is_empty() {
+                    let target_format: ffi::AVPixelFormat = {
+                        if !dev.sw_formats.contains(&pixel_format.into()) {
+                            log::warn!("Encoder doesn't support the desired pixel format ({:?})\n", pixel_format);
+                            log::debug!("dev.sw_formats: {:?}", &dev.sw_formats);
+                            let formats = get_transfer_formats_to_gpu(_frame_ctx);
+                            if formats.is_empty() {
+                                super::append_log(&format!("No frame transfer formats. Desired format: {:?}\n", pixel_format));
+                                ffi::AVPixelFormat::AV_PIX_FMT_NONE
+                            } else if formats.contains(&pixel_format.into()) {
+                                pixel_format
+                            } else {
+                                // Just pick the first format.
+                                // TODO: this should maybe take into consideration if the frame is 8 bit or more
+                                format::Pixel::into(*formats.first().unwrap())
+                            }
+                        } else {
+                            pixel_format.into()
+                        }
+                    };
+                    log::debug!("target_format: {:?}", &target_format);
+
+                    if target_format != ffi::AVPixelFormat::AV_PIX_FMT_NONE {
+                        let hw_format = *dev.hw_formats.first().unwrap(); // Safe because we check !is_empty() above
+
+                        if (*encoder_ctx).hw_frames_ctx.is_null() {
+                            let mut hw_frames_ref = ffi::av_hwframe_ctx_alloc(dev.as_mut_ptr());
+                            if hw_frames_ref.is_null() {
+                                super::append_log(&format!("Failed to create GPU frame context {:?}.\n", type_));
+                                return Err(());
+                            }
+                            (*encoder_ctx).hw_frames_ctx = ffi::av_buffer_ref(hw_frames_ref);
+                            ffi::av_buffer_unref(&mut hw_frames_ref);
+                        } else {
+                            log::debug!("hwframes already exists");
+                        }
+                        let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
+
+                        let mut frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
+                        if (*frames_ctx).format    == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).format    = hw_format.into(); }
+                        if (*frames_ctx).sw_format == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).sw_format = target_format; }
+                        (*frames_ctx).width     = size.0 as i32;
+                        (*frames_ctx).height    = size.1 as i32;
+                        if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_QSV || type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VAAPI {
+                            (*frames_ctx).initial_pool_size = 20;
+                        }
+
+                        let err = ffi::av_hwframe_ctx_init(frames_ctx_ref);
+                        if err < 0 {
+                            super::append_log(&format!("Failed to initialize frame context. Error code: {}\n", err));
+                            ffi::av_buffer_unref(&mut frames_ctx_ref);
+                            return Err(());
+                        } else {
+                            log::debug!("inited hwframe ctx");
+                        }
+                        log::debug!("frames_ctx.format: {:?}", &(*frames_ctx).format);
+                        log::debug!("frames_ctx.sw_format: {:?}", &(*frames_ctx).sw_format);
+                        (*encoder_ctx).pix_fmt = (*frames_ctx).format;
+                    }
+                }
+
+            }
+            return Ok(());
         }
     } else {
         log::warn!("DEVICES didn't have {:?}", type_);

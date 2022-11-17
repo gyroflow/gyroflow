@@ -13,6 +13,7 @@ pub struct FrameBuffers {
 
     pub output_frame_pre: Option<frame::Video>,
     pub output_frame_post: Option<frame::Video>,
+    pub output_frame_hw: Option<frame::Video>,
 }
 impl Default for FrameBuffers {
     fn default() -> Self { Self {
@@ -20,6 +21,7 @@ impl Default for FrameBuffers {
         converted_frame: frame::Video::empty(),
         output_frame_pre: None,
         output_frame_post: None,
+        output_frame_hw: None,
     } }
 }
 
@@ -86,7 +88,7 @@ macro_rules! ffmpeg {
 }
 
 impl<'a> VideoTranscoder<'a> {
-    fn init_encoder(frame: &mut frame::Video, params: &EncoderParams, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, output_index: usize) -> Result<encoder::video::Video, FFmpegError> {
+    fn init_encoder(frame: &mut frame::Video, params: &EncoderParams, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, output_index: usize, hw_upload_format: &Option<format::Pixel>) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(output_index).unwrap();
         let encoder_codec = params.codec.unwrap();
@@ -136,7 +138,7 @@ impl<'a> VideoTranscoder<'a> {
         log::debug!("hw_device_type {:?}", params.hw_device_type);
         if let Some(hw_type) = params.hw_device_type {
             unsafe {
-                if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size).is_err() {
+                if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size, hw_upload_format.is_some()).is_err() {
                     super::append_log("Failed to create encoder HW context.\n");
                 }
             }
@@ -227,6 +229,8 @@ impl<'a> VideoTranscoder<'a> {
                         }
                     }
 
+                    let mut hw_upload_format = None;
+
                     // Encode output frame
                     if !self.decode_only {
                         let in_format = input_frame.format();
@@ -242,15 +246,25 @@ impl<'a> VideoTranscoder<'a> {
                                 if !hw_formats.is_empty() {
                                     let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                                     let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
-                                    if picked != format::Pixel::None {
+                                    if super::ffmpeg_hw::is_hardware_format(picked.into()) {
+                                        hw_upload_format = Some(picked);
+                                    } else if picked != format::Pixel::None {
                                         self.encoder_params.pixel_format = Some(picked);
                                     }
                                 }
                             }
                         }
+                        if self.codec_supported_formats.len() == 1 {
+                            if let Some(first_format) = self.codec_supported_formats.first() {
+                                if super::ffmpeg_hw::is_hardware_format(first_format.clone().into()) {
+                                    hw_upload_format = Some(*first_format);
+                                }
+                            }
+                        }
 
                         let target_format = self.encoder_params.pixel_format.unwrap_or(in_format);
-                        if in_format != target_format {
+
+                        if hw_upload_format.is_none() && in_format != target_format {
                             if self.encoder_converter.is_none() {
                                 log::debug!("Converting from {:?} to {:?}", final_frame.format(), target_format);
                                 self.buffers.converted_frame = frame::Video::new(target_format, final_frame.width(), final_frame.height());
@@ -318,7 +332,7 @@ impl<'a> VideoTranscoder<'a> {
 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
 
-                            let result = Self::init_encoder(final_frame, &self.encoder_params, decoder, size, bitrate, octx, self.output_index.unwrap_or_default());
+                            let result = Self::init_encoder(final_frame, &self.encoder_params, decoder, size, bitrate, octx, self.output_index.unwrap_or_default(), &hw_upload_format);
 
                             // let mut output = String::new();
                             // std::io::Read::read_to_string(stderr_buf, &mut output).unwrap();
@@ -344,6 +358,33 @@ impl<'a> VideoTranscoder<'a> {
                         encoder.set_color_range(final_frame.color_range());
 
                         ts = rate_control.out_timestamp_us;
+
+                        if let Some(hw_upload_format) = hw_upload_format {
+                            log::debug!("Uploading frame to the device, hw_upload_format {:?}, final_frame.format: {:?}", hw_upload_format, final_frame.format());
+
+                            if self.buffers.output_frame_hw.is_none()  {
+                                self.buffers.output_frame_hw = Some(frame::Video::empty());
+                            }
+
+                            let output_hw_frame = self.buffers.output_frame_hw.as_mut().ok_or(FFmpegError::FrameEmpty)?;
+
+                            // Upload back to GPU
+                            unsafe {
+                                let err = ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, output_hw_frame.as_mut_ptr(), 0);
+                                if err < 0 {
+                                    return Err(FFmpegError::ToHWBufferError(err));
+                                }
+                                if (*output_hw_frame.as_mut_ptr()).hw_frames_ctx.is_null() {
+                                    return Err(FFmpegError::NoFramesContext);
+                                }
+                                let err = ffi::av_hwframe_transfer_data(output_hw_frame.as_mut_ptr(), final_frame.as_mut_ptr(), 0);
+                                if err < 0 {
+                                    return Err(FFmpegError::ToHWTransferError(err));
+                                }
+                            }
+                            unsafe { Self::copy_frame_props(output_hw_frame.as_mut_ptr(), final_frame.as_ptr()) }
+                            final_frame = output_hw_frame;
+                        }
 
                         for _ in 0..rate_control.repeat_times {
                             let timestamp = Some(ts.rescale((1, 1000000), time_base));
