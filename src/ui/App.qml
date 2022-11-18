@@ -382,7 +382,7 @@ Rectangle {
             return;
         }
 
-        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type });
+        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type, modalIdentifier: identifier || "" });
         el.text = text;
         el.onClicked.connect((index, dontShowAgain) => {
             if (identifier && dontShowAgain) {

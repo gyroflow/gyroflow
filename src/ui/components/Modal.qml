@@ -18,6 +18,7 @@ Rectangle {
     property bool isWide: root.text.length > 200;
     property real widthRatio: 0.8;
     property int accentButton: -1;
+    property string modalIdentifier: "";
     default property alias data: mainColumn.data;
     onTextChanged: {
         if (text.indexOf("<") > -1 && textFormat != Text.MarkdownText) {
@@ -136,7 +137,7 @@ Rectangle {
             CheckBox {
                 x: 20 * dpiScale;
                 id: dontShowAgain;
-                visible: btns.model?.length == 1 || false;
+                visible: root.modalIdentifier && (btns.model?.length == 1);
                 text: qsTr("Don't show again");
                 checked: false;
             }
