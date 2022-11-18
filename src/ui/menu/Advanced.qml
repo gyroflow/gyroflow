@@ -315,7 +315,7 @@ MenuItem {
 
                     messageBox(Modal.Info, qsTr("Settings cleared, please restart Gyroflow for the changes to take effect."), [
                         { text: qsTr("Exit"), accent: true, clicked: Qt.quit},
-                        { text: qsTr("Cancel") },
+                        { text: qsTr("Ok") },
                     ]);
                 }},
                 { text: qsTr("No"), accent: true },

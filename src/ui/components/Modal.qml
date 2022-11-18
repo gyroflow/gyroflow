@@ -30,7 +30,7 @@ Rectangle {
 
     property int iconType: Modal.Warning;
 
-    signal clicked(int index);
+    signal clicked(int index, bool dontShowAgain);
 
     function close() {
         opened = false;
@@ -133,6 +133,13 @@ Rectangle {
                 }
             }
             Item { height: 25 * dpiScale; width: 1; }
+            CheckBox {
+                x: 20 * dpiScale;
+                id: dontShowAgain;
+                visible: btns.model?.length == 1 || false;
+                text: qsTr("Don't show again");
+                checked: false;
+            }
             Flow {
                 id: btnsRow;
                 anchors.horizontalCenter: parent.horizontalCenter;
@@ -148,7 +155,7 @@ Rectangle {
                     id: btns;
                     Button {
                         text: modelData;
-                        onClicked: root.clicked(index);
+                        onClicked: root.clicked(index, dontShowAgain.checked);
                         leftPadding: 20 * dpiScale;
                         rightPadding: 20 * dpiScale;
                         accent: root.accentButton === index;
@@ -156,5 +163,10 @@ Rectangle {
                 }
             }
         }
+    }
+    Shortcut {
+        sequence: "Return";
+        enabled: root.opened && (root.accentButton > -1 || btns.model?.length == 1);
+        onActivated: if (root.opened) root.clicked(btns.model.length > 1? root.accentButton : 0, dontShowAgain.checked);
     }
 }

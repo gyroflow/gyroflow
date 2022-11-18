@@ -31,6 +31,8 @@ Rectangle {
     }
     property real parentWidth: parent.width;
     onParentWidthChanged: Qt.callLater(updateSize);
+    Ease on opacity { }
+    Ease on height { }
 
     Text {
         id: t;

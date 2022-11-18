@@ -23,6 +23,7 @@ Item {
     property alias stabEnabledBtn: stabEnabledBtn;
     property alias queue: queue.item;
     property alias statistics: statistics;
+    property alias infoMessages: infoMessages;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -404,13 +405,6 @@ Item {
             [/(DJI_\d+_(\d+)\.MP4)$/i, function(match, i) {
                 return match.substring(0, 9) + i.toString().padStart(3, '0') + match.substring(12);
             }],
-            // DJI, by duration
-            [/(DJI_(\d+)\.MP4)$/i, function(match, i) {
-                return match.substring(0, 4) + i.toString().padStart(4, '0') + ".MP4";
-            }, function(newPath, list) {
-                // DJI splits the files after 6 minutes
-                return !list.length || (controller.video_duration(list[list.length - 1]) > 358 && controller.video_duration(newPath) < 358)
-            }],
         ];
         for (const x of patterns) {
             let match = urlStr.match(x[0]);
@@ -573,6 +567,12 @@ Item {
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
                 text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
+            }
+            Column {
+                id: infoMessages;
+                width: vid.width;
+                spacing: 5 * dpiScale;
+                visible: children.length > 0;
             }
             MouseArea {
                 anchors.fill: parent;

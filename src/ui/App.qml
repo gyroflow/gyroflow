@@ -364,11 +364,31 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int): Modal {
+    function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+
+        if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
+            const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+                text: text,
+                type: type - 1,
+                opacity: 0
+            });
+            im.opacity = 1;
+            Qt.createQmlObject("import QtQuick; Timer { interval: 2000; running: true; }", im, "t1").onTriggered.connect(() => {
+                im.opacity = 0;
+                im.height = -5 * dpiScale;
+                im.destroy(700);
+            });
+            return;
+        }
+
         const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type });
         el.text = text;
-        el.onClicked.connect((index) => {
+        el.onClicked.connect((index, dontShowAgain) => {
+            if (identifier && dontShowAgain) {
+                window.settings.setValue("dontShowAgain-" + identifier, 1);
+            }
+
             let returnVal = undefined;
             if (buttons[index].clicked)
                 returnVal = buttons[index].clicked();
@@ -398,8 +418,8 @@ Rectangle {
             if (text)
                 messageBox(Modal.Error, text, [ { text: qsTr("Ok"), clicked: window[callback] } ]);
         }
-        function onMessage(text: string, arg: string, callback: string) {
-            messageBox(Modal.Info, qsTr(text).arg(arg), [ { text: qsTr("Ok"), clicked: window[callback] } ]);
+        function onMessage(text: string, arg: string, callback: string, id: string) {
+            messageBox(Modal.Info, qsTr(text).arg(arg), [ { text: qsTr("Ok"), clicked: window[callback] } ], null, undefined, id);
         }
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
