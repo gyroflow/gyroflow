@@ -447,6 +447,12 @@ Rectangle {
                         output = path.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
                         if (i > 1000) break;
                     }
+
+                    const suffix = advanced.item.defaultSuffix.text;
+                    const newVideoPath = outputFile.text.replace(new RegExp(suffix + "(_\\d+)?\\.([a-z0-9]+)$", "i"), suffix + "_" + (i - 1) + ".$2");
+                    if (!controller.file_exists(newVideoPath)) {
+                        outputFile.text = newVideoPath;
+                    }
                     controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), output, true);
                 } },
                 { text: qsTr("Choose a different location"), clicked: () => {
