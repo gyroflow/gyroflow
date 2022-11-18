@@ -19,11 +19,15 @@ pub struct RenderQueueItem {
     pub export_settings: QString,
     pub thumbnail_url: QString,
     pub current_frame: u64,
+    pub start_timestamp_frame: u64,
     pub total_frames: u64,
     pub start_timestamp: u64,
+    pub start_timestamp2: u64,
     pub end_timestamp: u64,
     pub error_string: QString,
     pub processing_progress: f64,
+
+    frame_times: std::collections::VecDeque<(u64, u64)>,
 
     status: JobStatus
 }
@@ -326,9 +330,12 @@ impl RenderQueue {
                 itm.current_frame = 0;
                 itm.total_frames = (params.frame_count as f64 * trim_ratio).ceil() as u64;
                 itm.start_timestamp = 0;
+                itm.start_timestamp2 = 0;
+                itm.start_timestamp_frame = 0;
                 itm.end_timestamp = 0;
                 itm.error_string = QString::default();
                 itm.status = JobStatus::Queued;
+                itm.frame_times.clear();
             });
         } else {
             let mut q = self.queue.borrow_mut();
@@ -341,9 +348,12 @@ impl RenderQueue {
                 current_frame: 0,
                 total_frames: (params.frame_count as f64 * trim_ratio).ceil() as u64,
                 start_timestamp: 0,
+                start_timestamp2: 0,
+                start_timestamp_frame: 0,
                 end_timestamp: 0,
                 processing_progress: 0.0,
                 error_string: QString::default(),
+                frame_times: Default::default(),
                 status: JobStatus::Queued,
             });
         }
@@ -655,6 +665,13 @@ impl RenderQueue {
                     }
                     start_time = itm.start_timestamp;
                     itm.end_timestamp = Self::current_timestamp();
+                    itm.frame_times.push_back((itm.current_frame, itm.end_timestamp));
+                    if itm.end_timestamp - itm.start_timestamp > 10000 { // 10s average
+                        if let Some(el) = itm.frame_times.pop_front() {
+                            itm.start_timestamp_frame = el.0;
+                            itm.start_timestamp2 = el.1;
+                        }
+                    }
                     if finished {
                         itm.status = JobStatus::Finished;
                     }

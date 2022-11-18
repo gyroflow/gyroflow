@@ -268,6 +268,14 @@ Item {
                     time.elapsed = times[0];
                     time.remaining = times[1];
                     if (times.length > 2) time.fps = times[2];
+                    if (start_timestamp_frame > 0 && start_timestamp2 > 0) {
+                        const progress2 = (current_frame - start_timestamp_frame) / (total_frames - start_timestamp_frame);
+                        const avgTimes = Util.calculateTimesAndFps(progress2, current_frame - start_timestamp_frame, start_timestamp2);
+                        if (avgTimes !== false) {
+                            time.remaining = avgTimes[1];
+                            if (avgTimes.length > 2) time.fps = avgTimes[2];
+                        }
+                    }
                 } else {
                     time.elapsed = "";
                 }
