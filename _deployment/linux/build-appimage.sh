@@ -8,7 +8,7 @@ rm -rf $APP_DIR
 mkdir -p $APP_DIR/usr/share/icons
 cp -f gyroflow.png $APP_DIR/usr/share/icons/
 cp -f gyroflow.svg $APP_DIR/usr/share/icons/
-cp -f gschemas.compiled $APP_DIR/usr/share/glib-2.0/schemas/
+#cp -f gschemas.compiled $APP_DIR/usr/share/glib-2.0/schemas/
 
 cp -rf $APP_PKG/* $APP_DIR/
 appimage-builder --recipe $PWD/AppImageBuilder.yml
