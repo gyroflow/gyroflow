@@ -500,6 +500,7 @@ Item {
                     videoLoader.active = false;
                     vidInfo.loader = false;
                     timeline.resetTrim();
+                    timeline.resetZoom();
 
                     controller.video_file_loaded(vid.url, vid);
                     window.motionData.filename = "";

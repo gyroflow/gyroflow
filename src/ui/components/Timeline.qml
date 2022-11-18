@@ -67,6 +67,11 @@ Item {
         root.trimStart = 0;
         root.trimEnd = 1.0;
     }
+    function resetZoom() {
+        root.visibleAreaLeft  = 0.0;
+        root.visibleAreaRight = 1.0;
+        chart.vscale = 1.0;
+    }
 
     function toggleAxis(axis: int, solo: bool) {
         let v = (chart.getAxisVisible(axis) ? 1 : 0) + (chart.getAxisVisible(axis + 4) ? 2 : 0);
