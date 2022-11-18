@@ -242,12 +242,13 @@ impl<'a> VideoTranscoder<'a> {
 
                         if self.gpu_decoding && self.encoder_params.pixel_format.is_none() {
                             log::debug!("Hardware transfer formats from GPU: {:?}", hw_formats);
-                            if let Some(hw_formats) = hw_formats {
+                            if let Some(hw_formats) = &hw_formats {
                                 if !hw_formats.is_empty() {
                                     let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
                                     let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
                                     if super::ffmpeg_hw::is_hardware_format(picked.into()) {
                                         hw_upload_format = Some(picked);
+                                        self.encoder_params.pixel_format = Some(dl_format);
                                     } else if picked != format::Pixel::None {
                                         self.encoder_params.pixel_format = Some(picked);
                                     }
@@ -262,7 +263,21 @@ impl<'a> VideoTranscoder<'a> {
                             }
                         }
 
-                        let target_format = self.encoder_params.pixel_format.unwrap_or(in_format);
+                        let mut target_format = self.encoder_params.pixel_format.unwrap_or(in_format);
+                        if super::ffmpeg_hw::is_hardware_format(target_format.into()) {
+                            let sw_format = if self.gpu_decoding {
+                                if let Some(hw_formats) = &hw_formats {
+                                    *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?
+                                } else {
+                                    in_format
+                                }
+                            } else {
+                                in_format
+                            };
+                            hw_upload_format = Some(target_format);
+                            target_format = sw_format;
+                            self.encoder_params.pixel_format = Some(target_format);
+                        }
 
                         if hw_upload_format.is_none() && in_format != target_format {
                             if self.encoder_converter.is_none() {
