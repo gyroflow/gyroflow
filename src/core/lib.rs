@@ -852,13 +852,14 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn import_gyroflow_file<F: Fn(f64)>(&self, path: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
         let data = std::fs::read(path)?;
 
-        let result = self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag);
-        if result.is_ok() {
+        let mut is_preset = false;
+        let result = self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag, &mut is_preset);
+        if !is_preset && result.is_ok() {
             self.input_file.write().project_file_path = Some(path.to_string());
         }
         result
     }
-    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
+    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool) -> std::io::Result<serde_json::Value> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
@@ -868,6 +869,7 @@ impl<T: PixelType> StabilizationManager<T> {
             if let Some(videofile) = obj.get_mut("videofile") {
                 *videofile = serde_json::Value::String(util::path_to_str(&video_path));
             }
+            *is_preset = org_video_path.is_empty();
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
