@@ -224,7 +224,7 @@ pub struct Controller {
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
     export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
 
-    message: qt_signal!(text: QString, arg: QString, callback: QString),
+    message: qt_signal!(text: QString, arg: QString, callback: QString, id: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
     gyroflow_exists: qt_signal!(path: QString, thin: bool, extended: bool),
@@ -278,9 +278,18 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
+
+        // Load current (clean) state to the UI
+        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(true, false, "{}") {
+            if let Ok(current_state) = serde_json::from_str(current_state.as_str()) as serde_json::Result<serde_json::Value> {
+                self.gyroflow_file_loaded(util::serde_json_to_qt_object(&current_state));
+            }
+        }
+
         self.chart_data_changed();
         self.keyframes_changed();
         self.update_offset_model();
+
         let file_path = util::url_to_path(url.clone());
         *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
             path: file_path.clone(),
@@ -1084,7 +1093,7 @@ impl Controller {
         } else {
             match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
                 Ok(_) => {
-                    self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default());
+                    self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default(), QString::from("gyroflow-exported"));
                 },
                 Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
                     self.request_location(QString::from(gf_path), thin, extended);
