@@ -279,7 +279,7 @@ impl<'a> VideoTranscoder<'a> {
                             self.encoder_params.pixel_format = Some(target_format);
                         }
 
-                        if hw_upload_format.is_none() && in_format != target_format {
+                        if in_format != target_format {
                             if self.encoder_converter.is_none() {
                                 log::debug!("Converting from {:?} to {:?}", final_frame.format(), target_format);
                                 self.buffers.converted_frame = frame::Video::new(target_format, final_frame.width(), final_frame.height());
@@ -341,7 +341,7 @@ impl<'a> VideoTranscoder<'a> {
 
                             log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.encoder_params.hw_device_type, self.encoder_params.pixel_format);
                             let pixel_format = self.encoder_params.pixel_format.unwrap_or_else(|| final_frame.format());
-                            if !self.codec_supported_formats.contains(&pixel_format) {
+                            if !self.codec_supported_formats.contains(&pixel_format) && hw_upload_format.is_none() {
                                 return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
                             }
 

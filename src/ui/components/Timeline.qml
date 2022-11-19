@@ -658,8 +658,16 @@ Item {
             }
         }
 
+        Connections {
+            target: controller;
+            function onOffsets_updated() {
+                offsetsRepeater.model = [];
+                offsetsRepeater.model = controller.offsets_model;
+            }
+        }
         Repeater {
-            model: controller? controller.offsets_model : [];
+            id: offsetsRepeater;
+            model: [];
 
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;
