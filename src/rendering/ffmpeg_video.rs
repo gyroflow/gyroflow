@@ -429,6 +429,7 @@ impl<'a> VideoTranscoder<'a> {
                                 }
                             }
                         }
+                        self.buffers.output_frame_hw = None;
                     }
                     if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
                         status = Status::Finish;
