@@ -380,11 +380,10 @@ impl<'a> VideoTranscoder<'a> {
                             log::debug!("Uploading frame to the device, hw_upload_format {:?}, final_frame.format: {:?}", hw_upload_format, final_frame.format());
 
                             output_hw_frame = Some(frame::Video::empty());
-                            final_frame = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
 
                             // Upload back to GPU
                             unsafe {
-                                let frame_ptr = final_frame.as_mut_ptr();
+                                let frame_ptr = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?.as_mut_ptr();
                                 let err = ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, frame_ptr, 0);
                                 if err < 0 {
                                     return Err(FFmpegError::ToHWBufferError(err));
@@ -398,6 +397,7 @@ impl<'a> VideoTranscoder<'a> {
                                 }
                                 Self::copy_frame_props(frame_ptr, final_frame.as_ptr());
                             }
+                            final_frame = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
                         }
 
                         for _ in 0..rate_control.repeat_times {
