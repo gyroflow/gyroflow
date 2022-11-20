@@ -184,7 +184,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     let mut proc = FfmpegProcessor::from_file(&input_file.path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 
     let render_options_dict = render_options.get_encoder_options_dict();
-    let mut hwaccel_device = render_options_dict.get("hwaccel_device");
+    let hwaccel_device = render_options_dict.get("hwaccel_device");
 
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu), hwaccel_device);

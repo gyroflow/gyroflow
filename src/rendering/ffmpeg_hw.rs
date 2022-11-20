@@ -29,7 +29,7 @@ impl HWDevice {
             let dev = device_name.and_then(|x| if x.is_empty() { None } else { CString::new(x).ok() });
 
             let mut device_ref = ptr::null_mut();
-            let err = ffi::av_hwdevice_ctx_create(&mut device_ref, type_, dev.map_or(ptr::null(), |x| x.as_ptr()), ptr::null_mut(), 0);
+            let err = ffi::av_hwdevice_ctx_create(&mut device_ref, type_, dev.as_ref().map_or(ptr::null(), |x| x.as_ptr()), ptr::null_mut(), 0);
             if err >= 0 && !device_ref.is_null() {
                 Ok(Self {
                     type_,

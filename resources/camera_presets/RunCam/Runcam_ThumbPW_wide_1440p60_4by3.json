@@ -58,7 +58,7 @@
   "calibrator_version": "1.3.0",
   "date": "2022-11-14",
   "compatible_settings": [
-    { "width": 1920, "height": 1440, "identifier": "runcam-thumbpw-wide-1920x1440@60000", "fps": 50.00}
+    { "width": 1920, "height": 1440, "identifier": "runcam-thumbpw-wide-1920x1440@50000", "fps": 50.00}
   ],
   "sync_settings": {
     "initial_offset": 0,
