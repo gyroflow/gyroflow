@@ -15,6 +15,7 @@ type DeviceType = ffi::AVHWDeviceType;
 pub struct HWDevice {
     type_: DeviceType,
     device_ref: *mut ffi::AVBufferRef,
+    device_name: Option<String>,
 
     pub hw_formats: Vec<format::Pixel>,
     pub sw_formats: Vec<format::Pixel>,
@@ -32,6 +33,7 @@ impl HWDevice {
             if err >= 0 && !device_ref.is_null() {
                 Ok(Self {
                     type_,
+                    device_name: device_name.map(|x| x.to_string()),
                     device_ref,
                     hw_formats: Vec::new(),
                     sw_formats: Vec::new(),
@@ -50,6 +52,7 @@ impl HWDevice {
     }
     pub fn as_mut_ptr(&self) -> *mut ffi::AVBufferRef { self.device_ref }
     pub fn device_type(&self) -> DeviceType { self.type_ }
+    pub fn device_name(&self) -> Option<&str> { self.device_name.as_deref() }
     pub fn name(&self) -> String {
         unsafe {
             let name_ptr = ffi::av_hwdevice_get_type_name(self.type_);
@@ -123,6 +126,12 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
+            if let Entry::Occupied(e) = devices.entry(type_) {
+                if e.get().device_name() != device {
+                    ::log::debug!("Device name mismatch, removing {type_:?} {device:?}");
+                    e.remove_entry();
+                }
+            }
             if let Entry::Vacant(e) = devices.entry(type_) {
                 if let Ok(dev) = HWDevice::from_type(type_, device) {
                     e.insert(dev);
@@ -155,6 +164,12 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
                         let type_ = (*config).device_type;
                         ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
                         let mut devices = DEVICES.lock();
+                        if let Entry::Occupied(e) = devices.entry(type_) {
+                            if e.get().device_name() != device {
+                                ::log::debug!("Device name mismatch, removing {type_:?} {device:?}");
+                                e.remove_entry();
+                            }
+                        }
                         if let Entry::Vacant(e) = devices.entry(type_) {
                             ::log::debug!("create {:?}", type_);
                             if let Ok(dev) = HWDevice::from_type(type_, device) {
