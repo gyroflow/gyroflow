@@ -374,31 +374,30 @@ impl<'a> VideoTranscoder<'a> {
 
                         ts = rate_control.out_timestamp_us;
 
+                        let mut output_hw_frame = None;
+
                         if let Some(hw_upload_format) = hw_upload_format {
                             log::debug!("Uploading frame to the device, hw_upload_format {:?}, final_frame.format: {:?}", hw_upload_format, final_frame.format());
 
-                            if self.buffers.output_frame_hw.is_none()  {
-                                self.buffers.output_frame_hw = Some(frame::Video::empty());
-                            }
-
-                            let output_hw_frame = self.buffers.output_frame_hw.as_mut().ok_or(FFmpegError::FrameEmpty)?;
+                            output_hw_frame = Some(frame::Video::empty());
+                            final_frame = output_hw_frame.as_mut().ok_or(FFmpegError::FrameEmpty)?;
 
                             // Upload back to GPU
                             unsafe {
-                                let err = ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, output_hw_frame.as_mut_ptr(), 0);
+                                let frame_ptr = final_frame.as_mut_ptr();
+                                let err = ffi::av_hwframe_get_buffer((*encoder.as_mut_ptr()).hw_frames_ctx, frame_ptr, 0);
                                 if err < 0 {
                                     return Err(FFmpegError::ToHWBufferError(err));
                                 }
-                                if (*output_hw_frame.as_mut_ptr()).hw_frames_ctx.is_null() {
+                                if (*frame_ptr).hw_frames_ctx.is_null() {
                                     return Err(FFmpegError::NoFramesContext);
                                 }
-                                let err = ffi::av_hwframe_transfer_data(output_hw_frame.as_mut_ptr(), final_frame.as_mut_ptr(), 0);
+                                let err = ffi::av_hwframe_transfer_data(frame_ptr, final_frame.as_mut_ptr(), 0);
                                 if err < 0 {
                                     return Err(FFmpegError::ToHWTransferError(err));
                                 }
+                                Self::copy_frame_props(frame_ptr, final_frame.as_ptr());
                             }
-                            unsafe { Self::copy_frame_props(output_hw_frame.as_mut_ptr(), final_frame.as_ptr()) }
-                            final_frame = output_hw_frame;
                         }
 
                         for _ in 0..rate_control.repeat_times {
@@ -429,7 +428,6 @@ impl<'a> VideoTranscoder<'a> {
                                 }
                             }
                         }
-                        self.buffers.output_frame_hw = None;
                     }
                     if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
                         status = Status::Finish;

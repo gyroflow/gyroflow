@@ -5,7 +5,8 @@ use ffmpeg_next::{ ffi, format, codec, encoder };
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::ffi::CStr;
+use std::ffi::{ CStr, CString };
+use std::ptr;
 use parking_lot::Mutex;
 
 type DeviceType = ffi::AVHWDeviceType;
@@ -21,10 +22,13 @@ pub struct HWDevice {
     pub max_size: (i32, i32)
 }
 impl HWDevice {
-    pub fn from_type(type_: DeviceType) -> Result<Self, super::FFmpegError> {
+    pub fn from_type(type_: DeviceType, device_name: Option<&str>) -> Result<Self, super::FFmpegError> {
+        log::debug!("HWDevice::from_type {type_:?}, device: {device_name:?}");
         unsafe {
-            let mut device_ref = std::ptr::null_mut();
-            let err = ffi::av_hwdevice_ctx_create(&mut device_ref, type_, std::ptr::null(), std::ptr::null_mut(), 0);
+            let dev = device_name.and_then(|x| if x.is_empty() { None } else { CString::new(x).ok() });
+
+            let mut device_ref = ptr::null_mut();
+            let err = ffi::av_hwdevice_ctx_create(&mut device_ref, type_, dev.map_or(ptr::null(), |x| x.as_ptr()), ptr::null_mut(), 0);
             if err >= 0 && !device_ref.is_null() {
                 Ok(Self {
                     type_,
@@ -69,7 +73,7 @@ pub fn initialize_ctx(type_: ffi::AVHWDeviceType) {
     let mut devices = DEVICES.lock();
     if let Entry::Vacant(e) = devices.entry(type_) {
         ::log::debug!("create {:?}", type_);
-        if let Ok(dev) = HWDevice::from_type(type_) {
+        if let Ok(dev) = HWDevice::from_type(type_, None) {
             ::log::debug!("created ok {:?}", type_);
             e.insert(dev);
         }
@@ -105,7 +109,7 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<form
     ret
 }
 
-pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decoder_ctx: &mut codec::context::Context) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
+pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decoder_ctx: &mut codec::context::Context, device: Option<&str>) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
     for i in index..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i as i32);
@@ -114,13 +118,17 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
                 continue;
             }
             let type_ = (*config).device_type;
+            if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2 {
+                continue;
+            }
             if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
+                continue;
                 return Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None));
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
             if let Entry::Vacant(e) = devices.entry(type_) {
-                if let Ok(dev) = HWDevice::from_type(type_) {
+                if let Ok(dev) = HWDevice::from_type(type_, device) {
                     e.insert(dev);
                 }
             }
@@ -133,7 +141,7 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
     Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None))
 }
 
-pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str, bool, Option<DeviceType>) {
+pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&str>) -> (&'static str, bool, Option<DeviceType>) {
     if encoders.is_empty() { return ("", false, None); } // TODO: should be Result<>
 
     for x in encoders {
@@ -153,7 +161,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                         let mut devices = DEVICES.lock();
                         if let Entry::Vacant(e) = devices.entry(type_) {
                             ::log::debug!("create {:?}", type_);
-                            if let Ok(dev) = HWDevice::from_type(type_) {
+                            if let Ok(dev) = HWDevice::from_type(type_, device) {
                                 ::log::debug!("created ok {:?}", type_);
                                 e.insert(dev);
                             }
@@ -164,7 +172,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
                     };
                     let mut devices = DEVICES.lock();
                     if let Some(dev) = devices.get_mut(&type_) {
-                        let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), std::ptr::null());
+                        let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), ptr::null());
                         if !constraints.is_null() {
                             dev.hw_formats = pix_formats_to_vec((*constraints).valid_hw_formats);
                             dev.sw_formats = pix_formats_to_vec((*constraints).valid_sw_formats);
@@ -189,7 +197,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)]) -> (&'static str,
 }
 
 pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
-    let mut formats = std::ptr::null_mut();
+    let mut formats = ptr::null_mut();
     if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
         ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_FROM, &mut formats, 0);
     }
@@ -200,7 +208,7 @@ pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<for
     }
 }
 pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
-    let mut formats = std::ptr::null_mut();
+    let mut formats = ptr::null_mut();
     if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
         ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_TO, &mut formats, 0);
     }

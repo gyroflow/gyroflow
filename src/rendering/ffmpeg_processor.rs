@@ -112,6 +112,8 @@ impl<'a> FfmpegProcessor<'a> {
         ffmpeg_next::init()?;
         let _ = crate::rendering::init();
 
+        let hwaccel_device = decoder_options.as_ref().and_then(|x| x.get("hwaccel_device").map(|x| x.to_string()));
+
         let mut input_context = decoder_options.map_or_else(|| format::input(&path), |dict| format::input_with_dictionary(&path, dict))?;
 
         // format::context::input::dump(&input_context, 0, Some(path));
@@ -137,7 +139,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut hw_backend = String::new();
         if gpu_decoding {
-            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut decoder_ctx)?;
+            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut decoder_ctx, hwaccel_device.as_deref())?;
             log::debug!("Selected HW backend {:?} ({}) with format {:?}", hw.1, hw.2, hw.3);
             hw_backend = hw.2;
         }
