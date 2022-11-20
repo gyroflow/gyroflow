@@ -118,11 +118,7 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
                 continue;
             }
             let type_ = (*config).device_type;
-            if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2 {
-                continue;
-            }
             if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
-                continue;
                 return Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None));
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
