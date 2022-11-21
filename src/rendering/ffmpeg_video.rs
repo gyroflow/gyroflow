@@ -138,7 +138,7 @@ impl<'a> VideoTranscoder<'a> {
         log::debug!("hw_device_type {:?}", params.hw_device_type);
         if let Some(hw_type) = params.hw_device_type {
             unsafe {
-                if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size, hw_upload_format.is_some()).is_err() {
+                if super::ffmpeg_hw::initialize_hwframes_context(encoder.as_mut_ptr(), frame.as_mut_ptr(), hw_type, pixel_format.into(), size, hw_upload_format.is_some(), params.options.get("hwaccel_device")).is_err() {
                     super::append_log("Failed to create encoder HW context.\n");
                 }
             }

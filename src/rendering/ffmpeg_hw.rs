@@ -69,12 +69,12 @@ unsafe impl Sync for HWDevice { }
 unsafe impl Send for HWDevice { }
 
 lazy_static::lazy_static! {
-    static ref DEVICES: Mutex<HashMap<DeviceType, HWDevice>> = Mutex::new(HashMap::new());
+    static ref DEVICES: Mutex<HashMap<u64, HWDevice>> = Mutex::new(HashMap::new());
 }
 
 pub fn initialize_ctx(type_: ffi::AVHWDeviceType) {
     let mut devices = DEVICES.lock();
-    if let Entry::Vacant(e) = devices.entry(type_) {
+    if let Entry::Vacant(e) = devices.entry(type_ as u64) {
         ::log::debug!("create {:?}", type_);
         if let Ok(dev) = HWDevice::from_type(type_, None) {
             ::log::debug!("created ok {:?}", type_);
@@ -126,18 +126,18 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();
-            if let Entry::Occupied(e) = devices.entry(type_) {
-                if e.get().device_name() != device {
-                    ::log::debug!("Device name mismatch, removing {type_:?} {device:?}");
-                    e.remove_entry();
-                }
+            let mut device_hash = 0;
+            if let Some(dev_name) = device {
+                let mut hasher = crc32fast::Hasher::new();
+                hasher.update(dev_name.as_bytes());
+                device_hash = hasher.finalize() as u64;
             }
-            if let Entry::Vacant(e) = devices.entry(type_) {
+            if let Entry::Vacant(e) = devices.entry(type_ as u64 + device_hash) {
                 if let Ok(dev) = HWDevice::from_type(type_, device) {
                     e.insert(dev);
                 }
             }
-            if let Some(dev) = devices.get(&type_) {
+            if let Some(dev) = devices.get(&(type_ as u64 + device_hash)) {
                 (*decoder_ctx.as_mut_ptr()).hw_device_ctx = dev.add_ref();
                 return Ok((i, type_, dev.name(), Some((*config).pix_fmt)));
             }
@@ -148,6 +148,13 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
 
 pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&str>) -> (&'static str, bool, Option<DeviceType>) {
     if encoders.is_empty() { return ("", false, None); } // TODO: should be Result<>
+
+    let mut device_hash = 0;
+    if let Some(dev_name) = device {
+        let mut hasher = crc32fast::Hasher::new();
+        hasher.update(dev_name.as_bytes());
+        device_hash = hasher.finalize() as u64;
+    }
 
     for x in encoders {
         if let Some(mut enc) = encoder::find_by_name(x.0) {
@@ -164,13 +171,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
                         let type_ = (*config).device_type;
                         ::log::debug!("[enc] codec type {:?} {}, for: {}", type_, i, x.0);
                         let mut devices = DEVICES.lock();
-                        if let Entry::Occupied(e) = devices.entry(type_) {
-                            if e.get().device_name() != device {
-                                ::log::debug!("Device name mismatch, removing {type_:?} {device:?}");
-                                e.remove_entry();
-                            }
-                        }
-                        if let Entry::Vacant(e) = devices.entry(type_) {
+                        if let Entry::Vacant(e) = devices.entry(type_ as u64 + device_hash) {
                             ::log::debug!("create {:?}", type_);
                             if let Ok(dev) = HWDevice::from_type(type_, device) {
                                 ::log::debug!("created ok {:?}", type_);
@@ -182,7 +183,7 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
                         ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX
                     };
                     let mut devices = DEVICES.lock();
-                    if let Some(dev) = devices.get_mut(&type_) {
+                    if let Some(dev) = devices.get_mut(&(type_ as u64 + device_hash)) {
                         let mut constraints = ffi::av_hwdevice_get_hwframe_constraints(dev.as_mut_ptr(), ptr::null());
                         if !constraints.is_null() {
                             dev.hw_formats = pix_formats_to_vec((*constraints).valid_hw_formats);
@@ -244,9 +245,15 @@ pub fn is_hardware_format(format: ffi::AVPixelFormat) -> bool {
     format == ffi::AVPixelFormat::AV_PIX_FMT_VAAPI
 }
 
-pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32), init_hwframes: bool) -> Result<(), ()> {
+pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame_ctx: *mut ffi::AVFrame, type_: DeviceType, pixel_format: ffi::AVPixelFormat, size: (u32, u32), init_hwframes: bool, device_name: Option<&str>) -> Result<(), ()> {
     let mut devices = DEVICES.lock();
-    if let Some(dev) = devices.get_mut(&type_) {
+    let mut device_hash = 0;
+    if let Some(dev_name) = device_name {
+        let mut hasher = crc32fast::Hasher::new();
+        hasher.update(dev_name.as_bytes());
+        device_hash = hasher.finalize() as u64;
+    }
+    if let Some(dev) = devices.get_mut(&(type_ as u64 + device_hash)) {
         unsafe {
             if (*encoder_ctx).hw_device_ctx.is_null() {
                 (*encoder_ctx).hw_device_ctx = dev.add_ref();
