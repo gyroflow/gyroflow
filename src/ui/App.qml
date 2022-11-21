@@ -268,6 +268,16 @@ Rectangle {
                             return;
                         }
 
+                        const encoder = render_queue.get_default_encoder(window.exportSettings.outCodec, window.exportSettings.outGpu);
+                        if (encoder.ends_with("_amf") && window.exportSettings.outBitrate > 100) {
+                            messageBox(Modal.Info, qsTr("Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.\n\n" +
+                                                        "Please check the file bitrate after rendering and if you're affected by this bug, you can either:\n" +
+                                                        "- Set output bitrate to less than 100 Mbps\n" +
+                                                        "- Use \"Custom encoder options\": `-rc cqp -qp_i 28 -qp_p 28`"), [
+                                { text: qsTr("Ok") },
+                            ], undefined, Text.MarkdownText, "amd-bitrate-warning");
+                        }
+
                         videoArea.vid.grabToImage(function(result) {
                             const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
