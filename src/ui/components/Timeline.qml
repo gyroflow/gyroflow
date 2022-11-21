@@ -15,6 +15,8 @@ Item {
     property real trimStart: 0.0;
     property real trimEnd: 1.0;
     property bool trimActive: trimStart > 0.01 || trimEnd < 0.99;
+    property real prevTrimStart: 0.0;
+    property real prevTrimEnd: 1.0;
 
     property real durationMs: 0;
     property real orgDurationMs: 0;
@@ -64,13 +66,18 @@ Item {
     }
 
     function resetTrim() {
-        root.trimStart = 0;
-        root.trimEnd = 1.0;
+        root.trimStart = prevTrimStart;
+        root.trimEnd = prevTrimEnd;
+        root.prevTrimStart = 0;
+        root.prevTrimEnd = 1;
     }
     function resetZoom() {
         root.visibleAreaLeft  = 0.0;
         root.visibleAreaRight = 1.0;
         chart.vscale = 1.0;
+        if ((root.trimStart != 0 || root.trimEnd != 1) && (root.prevTrimStart != 0 || root.prevTrimEnd != 1)) {
+            resetTrim();
+        }
     }
 
     function toggleAxis(axis: int, solo: bool) {
@@ -469,11 +476,7 @@ Item {
                 }
                 root.focus = true;
             }
-            onDoubleClicked: (mouse) => {
-                root.visibleAreaLeft  = 0.0;
-                root.visibleAreaRight = 1.0;
-                chart.vscale = 1.0;
-            }
+            onDoubleClicked: (mouse) => root.resetZoom();
             onWheel: (wheel) => {
                 if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
                     const factor = (wheel.angleDelta.x / 120) / 10;
@@ -693,6 +696,17 @@ Item {
                     const end_ts   = ts_us + (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
                     root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
                     root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
+                    chart.setVScaleToVisibleArea();
+                }
+                onZoomInLoop: (ts_us) => {
+                    root.prevTrimStart = root.trimStart;
+                    root.prevTrimEnd   = root.trimEnd;
+                    const start_ts = ts_us - (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
+                    const end_ts   = ts_us + (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
+                    root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
+                    root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
+                    root.trimStart = root.visibleAreaLeft;
+                    root.trimEnd = root.visibleAreaRight;
                     chart.setVScaleToVisibleArea();
                 }
             }

@@ -24,6 +24,7 @@ Rectangle {
     signal edit(real timestamp_us, real val);
     signal remove(real timestamp_us);
     signal zoomIn(real timestamp_us);
+    signal zoomInLoop(real timestamp_us);
 
     Rectangle {
         height: 12 * dpiScale;
@@ -100,10 +101,17 @@ Rectangle {
                     iconName: "search";
                     onTriggered: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
                 }
+                Action {
+                    id: zoomAction2;
+                    text: qsTr("Zoom in and loop");
+                    iconName: "loop";
+                    onTriggered: root.zoomInLoop(root.org_timestamp_us + root.value * 1000.0);
+                }
                 Component.onCompleted: {
                     if (isCalibPoint) {
                         menuInner.removeAction(editAction);
                         menuInner.removeAction(zoomAction);
+                        menuInner.removeAction(zoomAction2);
                     }
                 }
             }

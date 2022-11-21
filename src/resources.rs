@@ -57,6 +57,7 @@ qrc!(pub rsrc,
         "resources/icons/svg/star_empty.svg",
         "resources/icons/svg/stars5.svg",
         "resources/icons/svg/stars5_empty.svg",
+        "resources/icons/svg/loop.svg",
 
         "src/qt_gpu/compiled/texture.vert.qsb",
         "src/qt_gpu/compiled/undistort_opencv_fisheye.frag.qsb",
