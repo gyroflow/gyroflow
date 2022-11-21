@@ -16,6 +16,8 @@ MenuItem {
     property alias fovSlider: fov;
     property alias maxValues: maxValues;
     property alias videoSpeed: videoSpeed;
+    property alias zoomingCenterX: zoomingCenterX;
+    property alias zoomingCenterY: zoomingCenterY;
 
     Settings {
         id: settings;

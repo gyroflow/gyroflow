@@ -30,8 +30,8 @@ impl FrameTransform {
         let mut new_k = *camera_matrix;
         new_k[(0, 0)] = new_k[(0, 0)] * img_dim_ratio / fov;
         new_k[(1, 1)] = new_k[(1, 1)] * img_dim_ratio / fov;
-        new_k[(0, 2)] = /*(params.video_width  as f64 / 2.0 - focal_center.0) * img_dim_ratio / fov + */out_dim.0 / 2.0;
-        new_k[(1, 2)] = /*(params.video_height as f64 / 2.0 - focal_center.1) * img_dim_ratio / fov + */out_dim.1 / 2.0;
+        new_k[(0, 2)] = /*(params.video_width  as f64 / 2.0 - new_k[(0, 2)]) * img_dim_ratio / fov + */out_dim.0 / 2.0;
+        new_k[(1, 2)] = /*(params.video_height as f64 / 2.0 - new_k[(1, 2)]) * img_dim_ratio / fov + */out_dim.1 / 2.0;
         new_k
     }
     pub fn get_ratio(params: &ComputeParams) -> f64 {

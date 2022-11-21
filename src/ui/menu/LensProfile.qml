@@ -122,6 +122,12 @@ MenuItem {
                     fy.setInitialValue(mtrx[1][1]);
                     cx.setInitialValue(mtrx[0][2]);
                     cy.setInitialValue(mtrx[1][2]);
+
+                    // Set asymmetrical lens center bias
+                    if (obj.asymmetrical) {
+                        window.stab.zoomingCenterX.value = -((mtrx[0][2] / (root.calibWidth / 2.0)) - 1.0);
+                        window.stab.zoomingCenterY.value = -((mtrx[1][2] / (root.calibHeight / 2.0)) - 1.0);
+                    }
                 }
                 Qt.callLater(controller.recompute_threaded);
             }

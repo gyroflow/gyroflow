@@ -409,7 +409,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
             if params.lens_correction_amount < 1.0 {
-                let mut out_c = c; // (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+                let mut out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
                 if params.lens.input_horizontal_stretch > 0.001 { out_c.0 /= params.lens.input_horizontal_stretch as f32; }
                 if params.lens.input_vertical_stretch   > 0.001 { out_c.1 /= params.lens.input_vertical_stretch as f32; }
 
