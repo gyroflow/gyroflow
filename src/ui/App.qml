@@ -269,7 +269,7 @@ Rectangle {
                         }
 
                         const encoder = render_queue.get_default_encoder(window.exportSettings.outCodec, window.exportSettings.outGpu);
-                        if (encoder.ends_with("_amf") && window.exportSettings.outBitrate > 100) {
+                        if ((encoder + "").endsWith("_amf") && window.exportSettings.outBitrate > 100) {
                             messageBox(Modal.Info, qsTr("Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.\n\n" +
                                                         "Please check the file bitrate after rendering and if you're affected by this bug, you can either:\n" +
                                                         "- Set output bitrate to less than 100 Mbps\n" +
