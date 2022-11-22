@@ -78,7 +78,9 @@ Item {
         if (paths[1] && !isCorrectGyroLoaded && controller.file_exists(paths[1])) {
             root.pendingGyroflowData = obj;
             console.log("Loading gyro file", paths[1]);
-            controller.load_telemetry(controller.path_to_url(paths[1]), paths[0] == paths[1], window.videoArea.vid);
+            const url = controller.path_to_url(paths[1])
+            window.motionData.lastSelectedFile = url;
+            controller.load_telemetry(url, paths[0] == paths[1], window.videoArea.vid, -1);
             return;
         }
 
@@ -184,7 +186,7 @@ Item {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
@@ -513,7 +515,7 @@ Item {
                     if (root.pendingGyroflowData) {
                         Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData);
                     } else {
-                        controller.load_telemetry(vid.url, true, vid);
+                        controller.load_telemetry(vid.url, true, vid, -1);
                     }
                     vidInfo.loadFromVideoMetadata(md);
                     window.sync.customSyncTimestamps = [];

@@ -17,6 +17,7 @@ MenuItem {
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
     property string filename: "";
+    property url lastSelectedFile: null;
 
     FileDialog {
         id: fileDialog;
@@ -35,7 +36,8 @@ MenuItem {
             messageBox(Modal.Error, qsTr("Video file is not loaded."), [ { text: qsTr("Ok"), accent: true } ]);
             return;
         }
-        controller.load_telemetry(url, false, window.videoArea.vid);
+        lastSelectedFile = url;
+        controller.load_telemetry(url, false, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1);
     }
 
     function loadGyroflow(obj) {
@@ -63,6 +65,9 @@ MenuItem {
                 lpf.value = +gyro.lpf;
                 lpfcb.checked = lpf.value > 0;
             }
+            if (typeof gyro.sample_index === "number") {
+                currentLog.currentIndex = gyro.sample_index + 1;
+            }
         }
     }
     function setGyroLpf(v: real) {
@@ -70,9 +75,16 @@ MenuItem {
         lpfcb.checked = +v > 0;
     }
 
+    function msToTime(ms: real): string {
+        if (ms >= 60*60*1000) {
+            return new Date(ms).toISOString().substring(11, 11+8);
+        } else {
+            return new Date(ms).toISOString().substring(11+3, 11+8);
+        }
+    }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
             root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
@@ -92,6 +104,20 @@ MenuItem {
             Qt.callLater(controller.recompute_gyro);
 
             window.videoArea.timeline.updateDurations();
+
+            currentLog.preventChange = true;
+            if (usable_logs && usable_logs.includes("|")) {
+                let model = ["All logs combined"];
+                for (const log of usable_logs.split("|")) {
+                    const [logIndex, startTimestamp, duration] = log.split(";");
+                    model.push("#" + (+logIndex + 1) + " | " + msToTime(+startTimestamp) + " - " + msToTime(+startTimestamp + (+duration)) + " (" + msToTime(+duration) + ")");
+                }
+                if (currentLog.model != model)
+                    currentLog.model = model;
+            } else {
+                currentLog.model = [];
+            }
+            currentLog.preventChange = false;
         }
         function onBias_estimated(biasX: real, biasY: real, biasZ: real) {
             gyrobias.checked = true;
@@ -125,6 +151,24 @@ MenuItem {
             "File name": "---",
             "Detected format": "---"
         })
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Select log");
+        visible: currentLog.count > 1;
+
+        ComboBox {
+            id: currentLog;
+            property bool preventChange: false;
+            model: [QT_TRANSLATE_NOOP("Popup", "All logs combined")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            onCurrentIndexChanged: {
+                if (!preventChange && count > 1) {
+                    root.loadFile(root.lastSelectedFile);
+                }
+            }
+        }
     }
     CheckBoxWithContent {
         id: lpfcb;

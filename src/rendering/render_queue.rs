@@ -1028,7 +1028,7 @@ impl RenderQueue {
                                     return;
                                 }
                                 let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                let _ = stab.load_gyro_data(&gyro_path, |_|(), Arc::new(AtomicBool::new(false)));
+                                let _ = stab.load_gyro_data(&gyro_path, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
                                 let camera_id = stab.camera_id.read();
 

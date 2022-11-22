@@ -130,7 +130,7 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(())
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -156,13 +156,15 @@ impl<T: PixelType> StabilizationManager<T> {
         };
 
         let cancel_flag2 = cancel_flag.clone();
-        let mut md = GyroSource::parse_telemetry_file(path, size, fps, progress_cb, cancel_flag2)?;
+        let mut md = GyroSource::parse_telemetry_file(path, options, size, fps, progress_cb, cancel_flag2)?;
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
         }
         if !cancel_flag.load(SeqCst) {
-            self.gyro.write().load_from_telemetry(&md);
+            let mut gyro = self.gyro.write();
+            gyro.load_from_telemetry(&md);
+            gyro.file_load_options = options.clone();
         }
         self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
         let quats = self.gyro.read().quaternions.clone();
@@ -803,6 +805,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "imu_orientation":    gyro.imu_orientation,
                 "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
+                "sample_index":       gyro.file_load_options.sample_index,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
                 "quaternions":        if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.org_quaternions) } else { None },
                 "image_orientations": if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.image_orientations) } else { None },
@@ -970,17 +973,18 @@ impl<T: PixelType> StabilizationManager<T> {
                             frame_rate: None,
                             camera_identifier: None,
                             lens_positions: None,
+                            usable_logs: Vec::new()
                         };
 
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() && blocking {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() && blocking {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }

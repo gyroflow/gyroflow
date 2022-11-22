@@ -36,12 +36,20 @@ pub struct FileMetadata {
     pub frame_rate: Option<f64>,
     pub camera_identifier: Option<CameraIdentifier>,
     pub lens_profile: Option<serde_json::Value>,
-    pub lens_positions: Option<TimeFloat>
+    pub lens_positions: Option<TimeFloat>,
+    pub usable_logs: Vec<String>
+}
+
+#[derive(Default, Clone)]
+pub struct FileLoadOptions {
+    pub sample_index: Option<usize>
 }
 
 #[derive(Default, Clone)]
 pub struct GyroSource {
     pub detected_source: Option<String>,
+
+    pub file_load_options: FileLoadOptions,
 
     pub duration_ms: f64,
     pub fps: f64,
@@ -103,11 +111,11 @@ impl GyroSource {
         self.fps = stabilization_params.get_scaled_fps();
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
     }
-    pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
+    pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
         let mut stream = File::open(path)?;
         let filesize = stream.metadata()?.len() as usize;
 
-        let input = Input::from_stream(&mut stream, filesize, &path, progress_cb, cancel_flag)?;
+        let mut input = Input::from_stream(&mut stream, filesize, &path, progress_cb, cancel_flag)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
 
@@ -121,6 +129,28 @@ impl GyroSource {
         let mut lens_profile = None;
         let mut frame_rate = None;
         let mut lens_positions = None;
+        let mut usable_logs = Vec::new();
+
+        if input.camera_type() == "BlackBox" {
+            if let Some(ref samples) = input.samples {
+                for info in samples.iter() {
+                    log::info!("Blackbox log #{}: Timestamp {:.3} | Duration {:.3} | Data: {}", info.sample_index + 1, info.timestamp_ms / 1000.0, info.duration_ms / 1000.0, info.tag_map.is_some());
+                    if info.tag_map.is_some() && info.duration_ms > 0.0 {
+                        usable_logs.push(format!("{};{};{}", info.sample_index, info.timestamp_ms, info.duration_ms));
+                    }
+                }
+            }
+            if let Some(requested_index) = options.sample_index {
+                let mut new_samples = Vec::new();
+                if let Some(ref mut samples) = input.samples {
+                    for info in samples.drain(..) {
+                        if info.sample_index != requested_index as u64 { continue; }
+                        new_samples.push(info);
+                    }
+                }
+                input.samples = Some(new_samples);
+            }
+        }
 
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
@@ -245,7 +275,8 @@ impl GyroSource {
             frame_readout_time: input.frame_readout_time(),
             frame_rate,
             lens_profile,
-            camera_identifier
+            camera_identifier,
+            usable_logs
         })
     }
 

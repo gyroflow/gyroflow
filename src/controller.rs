@@ -51,7 +51,7 @@ pub struct Controller {
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     video_file_loaded: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
-    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue)),
+    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32)),
     load_lens_profile: qt_method!(fn(&mut self, path: String)),
     load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
@@ -70,7 +70,7 @@ pub struct Controller {
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString, sample_rate: f64),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString, sample_rate: f64, usable_logs: QString),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
     realtime_fps_loaded: qt_signal!(fps: f64),
 
@@ -622,7 +622,7 @@ impl Controller {
         }
     }
 
-    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue) {
+    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, sample_index: i32) {
         let s = util::url_to_path(url);
         let stab = self.stabilizer.clone();
         let filename = QString::from(s.split('/').last().unwrap_or_default());
@@ -650,7 +650,7 @@ impl Controller {
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString, f64)| {
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString, f64, QString)| {
                 this.gyro_loaded = params.4; // Contains gyro
                 this.gyro_changed();
 
@@ -660,7 +660,7 @@ impl Controller {
 
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8, params.9);
+                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8, params.9, params.10);
 
                 stab2.invalidate_ongoing_computations();
                 stab2.invalidate_smoothing();
@@ -697,7 +697,7 @@ impl Controller {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
                             // Ignore the error here, video file may not contain the telemetry and it's ok
-                            if let Ok(md) = stab.load_gyro_data(&s, progress, cancel_flag) {
+                            if let Ok(md) = stab.load_gyro_data(&s, &Default::default(), progress, cancel_flag) {
                                 file_metadata = Some(md);
                             }
 
@@ -706,7 +706,12 @@ impl Controller {
                             }
                         }
                     } else {
-                        match stab.load_gyro_data(&s, progress, cancel_flag) {
+                        let mut options = gyroflow_core::gyro_source::FileLoadOptions::default();
+                        if sample_index > -1 {
+                            options.sample_index = Some(sample_index as usize);
+                        }
+
+                        match stab.load_gyro_data(&s, &options, progress, cancel_flag) {
                             Ok(md) => {
                                 file_metadata = Some(md);
                             },
@@ -738,14 +743,17 @@ impl Controller {
                         });
                     }
                     reload_lens(());
+                    let mut usable_logs = String::new();
                     if let Some(md) = file_metadata {
+                        usable_logs = md.usable_logs.join("|");
                         on_metadata(md);
                     }
 
                     let frame_readout_time = stab.params.read().frame_readout_time;
                     let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
 
-                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id), sample_rate));
+
+                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id), sample_rate, QString::from(usable_logs)));
                 });
             }
         }
