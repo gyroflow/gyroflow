@@ -67,6 +67,11 @@ pub struct LensProfile {
 
     pub interpolations: Option<serde_json::Value>,
 
+    pub focal_length: Option<f64>,
+    pub crop_factor: Option<f64>,
+
+    // Note, when adding visible fields here, checksum will change, so need to decide how to handle it in lens_profile_database.rs:load_all -> profile.checksum = ...
+
     #[serde(skip)]
     pub filename: String,
 
@@ -303,6 +308,8 @@ impl LensProfile {
                 if x.contains_key("crop") { cpy.crop = x["crop"].as_f64(); }
                 if x.contains_key("interpolations") { cpy.interpolations = x.get("interpolations").cloned(); }
                 if x.contains_key("digital_lens")   { cpy.digital_lens   = x.get("digital_lens").and_then(|x| x.as_str().map(|x| x.to_owned())); }
+                if x.contains_key("focal_length")   { cpy.focal_length   = x.get("focal_length").and_then(|x| x.as_f64()); }
+                if x.contains_key("crop_factor")    { cpy.crop_factor    = x.get("crop_factor").and_then(|x| x.as_f64()); }
 
                 if x.contains_key("sync_settings") {
                     if let Some(obj) = x.get("sync_settings") {
@@ -435,6 +442,11 @@ impl LensProfile {
                             }
                             cpy.crop = Some(l1.crop.unwrap_or(1.0) * (1.0 - fract) + (l2.crop.unwrap_or(1.0) * fract));
 
+                            match (l1.focal_length, l2.focal_length) {
+                                (Some(fl1), Some(fl2)) => { cpy.focal_length = Some(fl1 * (1.0 - fract) + (fl2 * fract))},
+                                _ => { }
+                            }
+
                             cpy.calib_dimension.w = (l1.calib_dimension.w as f64 * (1.0 - fract) + (l2.calib_dimension.w as f64 * fract)).round() as usize;
                             cpy.calib_dimension.h = (l1.calib_dimension.h as f64 * (1.0 - fract) + (l2.calib_dimension.h as f64 * fract)).round() as usize;
 
@@ -489,6 +501,9 @@ impl LensProfile {
                                     new_profile.fisheye_params.distortion_coeffs[i] = v;
                                 }
                             }
+                        }
+                        if let Some(fl) = v.get("focal_length").and_then(|x| x.as_f64()) {
+                            new_profile.focal_length = Some(fl);
                         }
                         interpolations.insert(key, new_profile);
                     }

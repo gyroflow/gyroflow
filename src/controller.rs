@@ -256,6 +256,7 @@ pub struct Controller {
     processing_resolution: i32,
 
     current_fov: qt_property!(f64; NOTIFY processing_info_changed),
+    current_focal_length: qt_property!(f64; NOTIFY processing_info_changed),
     processing_info: qt_property!(QString; NOTIFY processing_info_changed),
     processing_info_changed: qt_signal!(),
 
@@ -881,8 +882,9 @@ impl Controller {
             let stab = self.stabilizer.clone();
             let preview_pipeline = self.preview_pipeline.clone();
             let out_pixels = RefCell::new(Vec::new());
-            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, info): (f64, QString)| {
+            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, focal_length, info): (f64, Option<f64>, QString)| {
                 this.current_fov = fov;
+                this.current_focal_length = focal_length.unwrap_or_default();
                 this.processing_info = info;
                 this.processing_info_changed();
             });
@@ -895,6 +897,7 @@ impl Controller {
                 let _time = std::time::Instant::now();
                 let mut backend = String::new();
                 let mut fov = 1.0;
+                let mut focal_length = None;
 
                 if preview_pipeline.load(SeqCst) == 0 {
                     let mut buffers = BufferDescription {
@@ -905,9 +908,9 @@ impl Controller {
                         output_rect: None,
                     };
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
-                        update_info2((ret.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((ret.fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
-                        update_info2((fov, QString::from("---")));
+                        update_info2((fov, focal_length, QString::from("---")));
                     }
                     return true;
                 }
@@ -928,7 +931,7 @@ impl Controller {
                             output_rect: None,
                         });
                         match ret {
-                            Some(bk) => { fov = bk.fov; backend = format!("OpenGL->{}", bk.backend); true },
+                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("OpenGL->{}", bk.backend); true },
                             None => false
                         }
                     },
@@ -949,7 +952,7 @@ impl Controller {
                             output_rect: None,
                         });
                         match ret {
-                            Some(bk) => { fov = bk.fov; backend = format!("DirectX->{}", bk.backend); true },
+                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX->{}", bk.backend); true },
                             None => false
                         }
                     },
@@ -968,16 +971,16 @@ impl Controller {
                             output_rect: None,
                         });
                         match ret {
-                            Some(bk) => { fov = bk.fov; backend = format!("Vulkan->{}", bk.backend); true },
+                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Vulkan->{}", bk.backend); true },
                             None => false
                         }
                     }
                     _ => false
                 };
                 if ret {
-                    update_info2((fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                    update_info2((fov, focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                 } else {
-                    update_info2((fov, QString::from("---")));
+                    update_info2((fov, focal_length, QString::from("---")));
                 }
                 ret
             }));
@@ -1008,11 +1011,11 @@ impl Controller {
                 });
                 match ret {
                     Some(bk) => {
-                        update_info2((bk.fov, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((bk.fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                         (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                     },
                     None => {
-                        update_info2((1.0, QString::from("---")));
+                        update_info2((1.0, None, QString::from("---")));
                         (0, 0, 0, std::ptr::null_mut())
                     }
                 }

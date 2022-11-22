@@ -114,6 +114,7 @@ pub struct Stabilization<T: PixelType> {
 #[derive(Debug)]
 pub struct ProcessedInfo {
     pub fov: f64,
+    pub focal_length: Option<f64>,
     pub backend: &'static str,
 }
 
@@ -358,6 +359,7 @@ impl<T: PixelType> Stabilization<T> {
         if let Some(itm) = itm {
             let mut ret = ProcessedInfo {
                 fov: itm.fov,
+                focal_length: itm.focal_length,
                 backend: ""
             };
             let drawing_buffer = self.drawing.get_buffer();

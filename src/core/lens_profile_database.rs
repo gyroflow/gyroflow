@@ -85,7 +85,14 @@ impl LensProfileDatabase {
                                 log::warn!("Lens profile already present: {}, filename: {} from {}", key, f_name, self.map.get(&key).unwrap().filename);
                             }
                         } else {
-                            profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.get_json().unwrap_or_default().as_bytes())));
+                            (|| -> Option<()> {
+                                let mut to_checksum = profile.get_json_value().ok()?;
+                                let mut obj = to_checksum.as_object_mut()?;
+                                obj.remove_entry("focal_length");
+                                obj.remove_entry("crop_factor");
+                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(serde_json::to_string_pretty(&to_checksum).ok()?.as_bytes())));
+                                Some(())
+                            })();
                             self.map.insert(key, profile);
                         }
                     }

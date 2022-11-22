@@ -11,6 +11,7 @@ pub struct FrameTransform {
     pub matrices: Vec<[f32; 9]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
+    pub focal_length: Option<f64>,
 }
 
 impl FrameTransform {
@@ -45,7 +46,7 @@ impl FrameTransform {
         fov
     }
 
-    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64) {
+    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
         let mut interpolated_lens = None;
         if let Some(lens_positions) = params.gyro.lens_positions.as_ref() {
             use crate::util::MapClosest;
@@ -75,7 +76,7 @@ impl FrameTransform {
         camera_matrix[(1, 1)] *= lens_ratioy;
         camera_matrix[(0, 2)] *= lens_ratiox;
         camera_matrix[(1, 2)] *= lens_ratioy;
-        (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch)
+        (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, lens.focal_length)
     }
 
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
@@ -93,7 +94,8 @@ impl FrameTransform {
             distortion_coeffs,
             radial_distortion_limit,
             input_horizontal_stretch,
-            input_vertical_stretch) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+            input_vertical_stretch,
+            focal_length) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
         // ----------- Lens -----------
 
         let img_dim_ratio = Self::get_ratio(params);
@@ -184,7 +186,8 @@ impl FrameTransform {
         Self {
             matrices,
             kernel_params,
-            fov: ui_fov
+            fov: ui_fov,
+            focal_length
         }
     }
 
@@ -193,7 +196,7 @@ impl FrameTransform {
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
-        let (camera_matrix, distortion_coeffs, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
 
         let img_dim_ratio = Self::get_ratio(params);
         let fov = Self::get_fov(params, 0, false, timestamp_ms);

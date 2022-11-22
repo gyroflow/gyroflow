@@ -474,6 +474,37 @@ MenuItem {
                 }
             }
         }
+        CheckBoxWithContent {
+            id: flcb;
+            text: qsTr("Focal length");
+            Label {
+                text: qsTr("Lens native focal length");
+                position: Label.LeftPosition;
+                NumberField {
+                    id: fl;
+                    unit: qsTr("mm");
+                    precision: 2;
+                    value: 0;
+                    from: 0;
+                    width: parent.width;
+                    onValueChanged: calib.calibrationInfo.focal_length = flcb.checked? value : null;
+                }
+            }
+            Label {
+                text: qsTr("Crop factor");
+                position: Label.LeftPosition;
+                NumberField {
+                    id: crop;
+                    unit: qsTr("x");
+                    precision: 2;
+                    value: 1;
+                    from: 0;
+                    to: 10;
+                    width: parent.width;
+                    onValueChanged: calib.calibrationInfo.crop_factor = flcb.checked? value : null;
+                }
+            }
+        }
         Label {
             position: Label.LeftPosition;
             text: qsTr("Preview resolution");

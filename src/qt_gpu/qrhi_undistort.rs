@@ -96,6 +96,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
             if ok {
                 return Some(ProcessedInfo {
                     fov: itm.fov,
+                    focal_length: itm.focal_length,
                     backend: "Qt RHI"
                 });
             }

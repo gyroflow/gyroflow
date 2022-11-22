@@ -356,7 +356,7 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.video_width.max(1) as f64;//FrameTransform::get_ratio(params);
 
-    let (camera_matrix, distortion_coeffs, _, _, _) = FrameTransform::get_lens_data_at_timestamp(params, timestamp_us as f64 / 1000.0);
+    let (camera_matrix, distortion_coeffs, _, _, _, _) = FrameTransform::get_lens_data_at_timestamp(params, timestamp_us as f64 / 1000.0);
 
     let scaled_k = camera_matrix * img_dim_ratio;
 

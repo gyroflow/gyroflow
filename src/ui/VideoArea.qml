@@ -473,8 +473,19 @@ Item {
 
                 function fovChanged() {
                     const fov = controller.current_fov;
+                    const focal_length = controller.current_focal_length;
+                    const crop_factor = window.lensProfile.cropFactor || 1.0;
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
+
+                    if (+focal_length > 0) {
+                        const fl = +focal_length / fov;
+                        currentFovText.text += "\n" + qsTr("Focal length: %1 mm").arg(fl.toFixed(2));
+                        if (crop_factor && crop_factor != 1.0) {
+                            currentFovText.text += " (" + qsTr("full frame equiv.: %1 mm").arg((fl * crop_factor).toFixed(2)) + ")";
+                        }
+                    }
+
                     if (window.stab && window.stab.fovSlider.field.value > 1) {
                         safeAreaRect.width = safeAreaRect.parent.width / window.stab.fovSlider.field.value;
                         safeAreaRect.height = safeAreaRect.parent.height / window.stab.fovSlider.field.value;
