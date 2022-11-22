@@ -132,23 +132,16 @@ impl GyroSource {
         let mut usable_logs = Vec::new();
 
         if input.camera_type() == "BlackBox" {
-            if let Some(ref samples) = input.samples {
+            if let Some(ref mut samples) = input.samples {
                 for info in samples.iter() {
                     log::info!("Blackbox log #{}: Timestamp {:.3} | Duration {:.3} | Data: {}", info.sample_index + 1, info.timestamp_ms / 1000.0, info.duration_ms / 1000.0, info.tag_map.is_some());
                     if info.tag_map.is_some() && info.duration_ms > 0.0 {
                         usable_logs.push(format!("{};{};{}", info.sample_index, info.timestamp_ms, info.duration_ms));
                     }
                 }
-            }
-            if let Some(requested_index) = options.sample_index {
-                let mut new_samples = Vec::new();
-                if let Some(ref mut samples) = input.samples {
-                    for info in samples.drain(..) {
-                        if info.sample_index != requested_index as u64 { continue; }
-                        new_samples.push(info);
-                    }
+                if let Some(requested_index) = options.sample_index {
+                    samples.retain(|x| x.sample_index as usize == requested_index);
                 }
-                input.samples = Some(new_samples);
             }
         }
 
