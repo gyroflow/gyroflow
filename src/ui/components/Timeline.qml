@@ -668,6 +668,12 @@ Item {
                 offsetsRepeater.model = [];
                 offsetsRepeater.model = controller.offsets_model;
             }
+            function onCalib_model_updated() {
+                calibRepeater.model = [];
+                if (isCalibrator) {
+                    calibRepeater.model = controller.calib_model;
+                }
+            }
         }
         Repeater {
             id: offsetsRepeater;
@@ -715,8 +721,9 @@ Item {
             }
         }
         Repeater {
+            id: calibRepeater;
             visible: isCalibrator;
-            model: isCalibrator && controller? controller.calib_model : [];
+            model: [];
 
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;

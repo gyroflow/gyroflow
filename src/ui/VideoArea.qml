@@ -247,6 +247,7 @@ Item {
     property Modal externalSdkModal: null;
 
     function loadFile(url: url, skip_detection: bool) {
+        stabEnabledBtn.checked = false;
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -460,7 +461,7 @@ Item {
                 anchors.fill: parent;
                 property bool loaded: false;
 
-                property bool stabEnabled: true;
+                property bool stabEnabled: stabEnabledBtn.checked;
                 transform: [
                     Scale {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
@@ -476,7 +477,7 @@ Item {
                 function fovChanged() {
                     const fov = controller.current_fov;
                     const focal_length = controller.current_focal_length;
-                    const crop_factor = window.lensProfile.cropFactor || 1.0;
+                    const crop_factor = window.lensProfile?.cropFactor || 1.0;
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
                     currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
 
@@ -540,7 +541,8 @@ Item {
                         Qt.callLater(() => {
                             vid.currentFrame++;
                             Qt.callLater(() => vid.currentFrame--);
-                        })
+                            stabEnabledBtn.checked = true;
+                        });
                     }
                 }
 
@@ -773,7 +775,7 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     iconName: "gyroflow";
-                    onCheckedChanged: { vid.stabEnabled = checked; controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
+                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 

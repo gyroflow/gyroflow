@@ -44,7 +44,7 @@ MenuItem {
             model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
-            currentIndex: 3;
+            currentIndex: 0;
             onCurrentIndexChanged: {
                 let target_height = -1; // Full
                 switch (currentIndex) {

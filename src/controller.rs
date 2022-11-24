@@ -272,7 +272,7 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {
         Self {
-            preview_resolution: 720,
+            preview_resolution: -1,
             processing_resolution: 720,
             ..Default::default()
         }

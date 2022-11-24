@@ -130,7 +130,7 @@ impl<T: PixelType> Stabilization<T> {
             insert = false;
             if itm.kernel_params.stride        != buffers.input_size.2 as i32 ||
                itm.kernel_params.output_stride != buffers.output_size.2 as i32 {
-                log::warn!("Stride mismatch ({} != {} || {} != {}",itm.kernel_params.stride,buffers.input_size.2, itm.kernel_params.output_stride, buffers.output_size.2);
+                log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input_size.2, itm.kernel_params.output_stride, buffers.output_size.2);
                 insert = true;
             }
         }
