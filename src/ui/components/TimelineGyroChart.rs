@@ -213,12 +213,9 @@ impl TimelineGyroChart {
 
         let duration_us = self.duration_ms * 1000.0;
 
-        let from_timestamp = ((self.visibleAreaLeft - 0.01) * duration_us).floor() as i64;
-        let mut to_timestamp = ((self.visibleAreaRight + 0.01) * duration_us).ceil() as i64;
-
         let mut min =  999999999.0f64;
         let mut max = -999999999.0f64;
-        for (ts, &(offset, linear_offset)) in &self.sync_points {
+        for (_, &(offset, _linear_offset)) in &self.sync_points {
             min = min.min(offset);
             max = max.max(offset);
         }
@@ -246,11 +243,13 @@ impl TimelineGyroChart {
             p.draw_ellipse_with_center(pt, 3.0, 3.0);
         }
 
-        let mut pen = QPen::from_color(QColor::from_name("#25e8d2"));
-        pen.set_width_f(2.0); // TODO * dpiScale
-        p.set_pen(pen);
-        p.set_brush(QBrush::default());
-        p.draw_polyline(points.as_slice());
+        if !points.is_empty() {
+            let mut pen = QPen::from_color(QColor::from_name("#25e8d2"));
+            pen.set_width_f(2.0); // TODO * dpiScale
+            p.set_pen(pen);
+            p.set_brush(QBrush::default());
+            p.draw_polyline(points.as_slice());
+        }
     }
 
     pub fn setSyncResults(&mut self, data: &BTreeMap<i64, TimeIMU>) {

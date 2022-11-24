@@ -36,11 +36,13 @@ lazy_static::lazy_static! {
     static ref ADAPTER: AtomicUsize = AtomicUsize::new(0);
 }
 
+const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
+
 impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
         if ADAPTERS.read().is_empty() {
             let devices = std::panic::catch_unwind(|| -> Vec<Adapter> {
-                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).collect()
+                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
             });
             match devices {
                 Ok(devices) => { *ADAPTERS.write() = devices; },
@@ -60,8 +62,6 @@ impl WgpuWrapper {
     }
 
     pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
-        let instance = INSTANCE.lock();
-
         let mut i = 0;
         for a in ADAPTERS.read().iter() {
             if i == index {
