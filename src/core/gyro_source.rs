@@ -86,7 +86,10 @@ pub struct GyroSource {
 
     pub smoothing_status: serde_json::Value,
 
+    pub prevent_recompute: bool,
+
     offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
+    offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
     pub file_path: String
@@ -377,6 +380,9 @@ impl GyroSource {
     pub fn get_offsets(&self) -> &BTreeMap<i64, f64> {
         &self.offsets
     }
+    pub fn get_offsets_plus_linear(&self) -> BTreeMap<i64, (f64, f64)> {
+        self.offsets.iter().map(|(k, v)| (*k, (*v, self.offsets_linear.get(k).copied().unwrap_or(*v)))).collect()
+    }
     pub fn set_offsets(&mut self, offsets: BTreeMap<i64, f64>) {
         self.offsets = offsets;
         self.adjust_offsets();
@@ -386,7 +392,99 @@ impl GyroSource {
         self.offsets.retain(|k, _| !(ts-range_us..ts+range_us).contains(k));
         self.adjust_offsets();
     }
-    fn adjust_offsets(&mut self) {
+
+    fn line_fit(offsets: &BTreeMap<i64, f64>) -> Option<[f64; 3]> {
+        let a = OMatrix::<f64, nalgebra::Dynamic, U2>::from_row_iterator(offsets.len(), offsets.iter().flat_map(|(k, _)| [*k as f64, 1.0]));
+        let b = OVector::<f64, nalgebra::Dynamic>::from_iterator(offsets.len(), offsets.iter().map(|(_, v)| *v));
+
+        let svd = nalgebra::linalg::SVD::new(a.clone(), true, true);
+        let solution = svd.solve(&b, 1e-14).ok()?;
+        if solution.len() >= 2 {
+            let model: OVector<f64, nalgebra::Dynamic> = a * &solution;
+            let l1: OVector<f64, nalgebra::Dynamic> = model - b;
+            let residuals: f64 = l1.dot(&l1);
+
+            Some([solution[0], solution[1], residuals])
+        } else {
+            None
+        }
+    }
+
+    pub fn adjust_offsets(&mut self) {
+        if self.prevent_recompute { return; }
+        // Calculate line fit
+        if self.offsets.len() > 1 {
+            let len = self.offsets.len();
+            let keys: Vec<i64> = self.offsets.keys().copied().collect();
+
+            #[derive(Default)]
+            struct Params {
+                offsets: BTreeMap<i64, f64>,
+                rsquared: f64,
+                coeffs: [f64; 3]
+            }
+            let mut best = Params { rsquared: 1000.0, ..Default::default() };
+
+            let max_fitting_error = 5.0; // max 5 ms
+
+            for i in 0..len {
+                for j in 0..len {
+                    if i != j {
+                        let i_offset = self.offsets.get(&keys[i]).unwrap();
+                        let j_offset = self.offsets.get(&keys[j]).unwrap();
+                        let slope = (j_offset - i_offset) / (keys[j] - keys[i]) as f64;
+                        let intersect = i_offset - keys[i] as f64 * slope;
+
+                        let within_error: BTreeMap<i64, f64> = self.offsets.iter().filter_map(|(k, v)| {
+                            if ((*k as f64 * slope + intersect) - *v).abs() < max_fitting_error {
+                                Some((*k, *v))
+                            } else {
+                                None
+                            }
+                        }).collect();
+
+                        if within_error.len() >= best.offsets.len() && within_error != best.offsets {
+                            if let Some(solution) = Self::line_fit(&within_error) {
+                                let close_constant = solution[0].abs() < 0.1;
+                                if within_error.len() > 2 && close_constant {
+                                    if solution[2] < best.rsquared {
+                                        best = Params {
+                                            rsquared: solution[2],
+                                            offsets: within_error.clone(),
+                                            coeffs: solution.clone()
+                                        };
+                                    }
+                                } else if close_constant {
+                                    best = Params {
+                                        rsquared: best.rsquared,
+                                        offsets: within_error.clone(),
+                                        coeffs: solution.clone()
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            self.offsets_linear.clear();
+            if !best.offsets.is_empty() {
+                for (k, _) in &self.offsets {
+                    let fitted = *k as f64 * best.coeffs[0] + best.coeffs[1];
+                    self.offsets_linear.insert(*k, fitted);
+                }
+            } else {
+                if let Some(solution) = Self::line_fit(&self.offsets) {
+                    for (k, _) in &self.offsets {
+                        let fitted = *k as f64 * solution[0] + solution[1];
+                        self.offsets_linear.insert(*k, fitted);
+                    }
+                }
+            }
+        } else {
+            self.offsets_linear = self.offsets.clone();
+        }
+
         self.offsets_adjusted = self.offsets.iter().map(|(k, v)| (*k + (*v * 1000.0).round() as i64, *v)).collect::<BTreeMap<i64, f64>>();
     }
 

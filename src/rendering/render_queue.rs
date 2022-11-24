@@ -1133,6 +1133,7 @@ impl RenderQueue {
                                 sync.on_finished(move |arg| {
                                     if let Either::Left(offsets) = arg {
                                         let mut gyro = stab2.gyro.write();
+                                        gyro.prevent_recompute = true;
                                         for x in offsets {
                                             ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                                             let new_ts = ((x.0 - x.1) * 1000.0) as i64;
@@ -1140,6 +1141,8 @@ impl RenderQueue {
                                             gyro.remove_offsets_near(new_ts, 100.0);
                                             gyro.set_offset(new_ts, x.1);
                                         }
+                                        gyro.prevent_recompute = false;
+                                        gyro.adjust_offsets();
                                         stab2.keyframes.write().update_gyro(&gyro);
                                     }
                                 });

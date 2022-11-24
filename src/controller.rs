@@ -34,6 +34,7 @@ use crate::qt_gpu::qrhi_undistort;
 struct OffsetItem {
     pub timestamp_us: i64,
     pub offset_ms: f64,
+    pub linear_offset_ms: f64,
 }
 
 #[derive(Default, SimpleListItem)]
@@ -356,6 +357,7 @@ impl Controller {
                 }
             } else {
                 let mut gyro = this.stabilizer.gyro.write();
+                gyro.prevent_recompute = true;
                 for x in offsets {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                     let new_ts = ((x.0 - x.1) * 1000.0) as i64;
@@ -363,6 +365,8 @@ impl Controller {
                     gyro.remove_offsets_near(new_ts, 100.0);
                     gyro.set_offset(new_ts, x.1);
                 }
+                gyro.prevent_recompute = false;
+                gyro.adjust_offsets();
                 this.stabilizer.keyframes.write().update_gyro(&gyro);
                 this.stabilizer.invalidate_zooming();
             }
@@ -590,9 +594,10 @@ impl Controller {
     }
 
     fn update_offset_model(&mut self) {
-        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().get_offsets().iter().map(|(k, v)| OffsetItem {
+        self.offsets_model = RefCell::new(self.stabilizer.gyro.read().get_offsets_plus_linear().iter().map(|(k, v)| OffsetItem {
             timestamp_us: *k,
-            offset_ms: *v
+            offset_ms: v.0,
+            linear_offset_ms: v.1
         }).collect());
 
         util::qt_queued_callback(self, |this, _| {

@@ -51,7 +51,9 @@ pub struct TimelineGyroChart {
 
     viewMode: qt_property!(u32; WRITE setViewMode NOTIFY viewModeChanged),
 
-    series: [Series; 4+4+1],
+    series: [Series; 4+4+1+1],
+
+    sync_points: BTreeMap<i64, (f64, f64)>, // timestamp, (offset, fitted offset)
 
     gyro: Vec<ChartData>,
     accl: Vec<ChartData>,
@@ -169,6 +171,7 @@ impl TimelineGyroChart {
         let mut pen = QPen::from_color(QColor::from_name(color));
         pen.set_width_f(1.5); // TODO * dpiScale
         p.set_pen(pen);
+        p.set_brush(QBrush::default());
 
         for l in &self.series[a].lines {
             if !l.is_empty() {
@@ -199,6 +202,55 @@ impl TimelineGyroChart {
                 p.draw_polygon(&points);
             }
         }
+    }
+    fn drawSyncPoints(&mut self, p: &mut QPainter) {
+        p.set_pen(QPen::default());
+
+        let rect = (self as &dyn QQuickItem).bounding_rect();
+        if rect.width <= 0.0 || rect.height <= 0.0 || self.sync_points.is_empty() { return; }
+
+        let map_to_visible_area = |v: f64| -> f64 { (v - self.visibleAreaLeft) / (self.visibleAreaRight - self.visibleAreaLeft) };
+
+        let duration_us = self.duration_ms * 1000.0;
+
+        let from_timestamp = ((self.visibleAreaLeft - 0.01) * duration_us).floor() as i64;
+        let mut to_timestamp = ((self.visibleAreaRight + 0.01) * duration_us).ceil() as i64;
+
+        let mut min =  999999999.0f64;
+        let mut max = -999999999.0f64;
+        for (ts, &(offset, linear_offset)) in &self.sync_points {
+            min = min.min(offset);
+            max = max.max(offset);
+        }
+        const MIN_RANGE: f64 = 30.0; // ms
+        let range = max - min;
+        let margin = (MIN_RANGE - range).max(0.0) / 2.0;
+
+        let mut points = Vec::with_capacity(self.sync_points.len());
+        for (ts, (offset, linear_offset)) in &self.sync_points {
+            let y = 1.0 - ((linear_offset - min + margin) / range.max(MIN_RANGE));
+            let x = map_to_visible_area((*ts as f64 + offset * 1000.0) / duration_us) * rect.width;
+            points.push(QPointF {
+                x,
+                y: (8.0 + y * (rect.height - 16.0)),
+            });
+
+            let y = 1.0 - ((offset - min + margin) / range.max(MIN_RANGE));
+            let pt = QPointF {
+                x,
+                y: (8.0 + y * (rect.height - 16.0)),
+            };
+
+            let validness = ((*offset - *linear_offset).abs()).min(30.0) / 30.0; // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
+            p.set_brush(QBrush::from_color(QColor::from_hsv_f((112.0 * (1.0 - validness)) / 360.0, 0.84, 0.86)));
+            p.draw_ellipse_with_center(pt, 3.0, 3.0);
+        }
+
+        let mut pen = QPen::from_color(QColor::from_name("#25e8d2"));
+        pen.set_width_f(2.0); // TODO * dpiScale
+        p.set_pen(pen);
+        p.set_brush(QBrush::default());
+        p.draw_polyline(points.as_slice());
     }
 
     pub fn setSyncResults(&mut self, data: &BTreeMap<i64, TimeIMU>) {
@@ -241,6 +293,7 @@ impl TimelineGyroChart {
             self.magn = Vec::with_capacity(gyro.raw_imu.len());
             self.quats = Vec::with_capacity(gyro.quaternions.len());
             self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
+            self.sync_points = gyro.get_offsets_plus_linear();
 
             for x in &gyro.raw_imu {
                 if self.viewMode == 0 {
@@ -447,5 +500,7 @@ impl QQuickPaintedItem for TimelineGyroChart {
         if self.series[7].visible { self.drawAxis(p, 7, colors[7]); } // Sync Angle
 
         if self.series[8].visible { self.drawOverlay(p, 8, colors[8]); } // FOVs - zooming amount
+
+        if self.series[9].visible { self.drawSyncPoints(p); } // Sync points and line fit
     }
 }

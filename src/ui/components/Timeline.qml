@@ -185,6 +185,7 @@ Item {
         TimelineAxisButton { id: a5; text: "Y"; onCheckedChanged: chart.setAxisVisible(5, checked); checked: chart.getAxisVisible(5); }
         TimelineAxisButton { id: a6; text: "Z"; onCheckedChanged: chart.setAxisVisible(6, checked); checked: chart.getAxisVisible(6); }
         TimelineAxisButton { id: a7; text: "W"; onCheckedChanged: chart.setAxisVisible(7, checked); checked: chart.getAxisVisible(7); }
+        TimelineAxisButton { id: a9; text: "S"; onCheckedChanged: chart.setAxisVisible(9, checked); checked: chart.getAxisVisible(9); tooltip: qsTr("Sync points debug");  }
     }
 
     Item {
@@ -680,6 +681,8 @@ Item {
                 value: offset_ms;
                 unit: qsTr("ms");
                 isCalibPoint: false;
+                property real validness: (Math.min(30.0, Math.abs(offset_ms - linear_offset_ms)) / 30.0); // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
+                color: Qt.hsva((112 * (1.0 - validness)) / 360, 0.84, 0.86, 1.0);
                 onEdit: (ts_us, val) => {
                     root.editingSyncPoint = true;
                     syncPointSlider.timestamp_us = ts_us;
@@ -718,7 +721,7 @@ Item {
             TimelineSyncPoint {
                 y: (root.fullScreen? 0 : 35) * dpiScale;
                 timeline: root;
-                color: is_forced? "#11d144" : "#17b3f0";
+                color: is_forced? "#53ddff" : "#15a3d6";
                 org_timestamp_us: timestamp_us;
                 position: timestamp_us / (root.durationMs * 1000.0); // TODO: Math.round?
                 value: sharpness;

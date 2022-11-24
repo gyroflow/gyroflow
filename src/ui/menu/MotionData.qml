@@ -17,7 +17,7 @@ MenuItem {
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
     property string filename: "";
-    property url lastSelectedFile: null;
+    property url lastSelectedFile: "";
 
     FileDialog {
         id: fileDialog;
