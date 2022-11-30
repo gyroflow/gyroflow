@@ -6,11 +6,13 @@ use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use std::collections::BTreeMap;
 use crate::filtering::Lowpass;
 use crate::stabilization::ComputeParams;
-use super::SyncParams;
+use super::super::{ PoseEstimator, SyncParams };
 
 use crate::gyro_source::TimeIMU;
 
-pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimated_gyro: &BTreeMap<i64, TimeIMU>, sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    let estimated_gyro = estimator.estimated_gyro.read().clone();
+
     let mut offsets = Vec::new();
     let gyro = &params.gyro;
     let ranges_len = ranges.len() as f64;

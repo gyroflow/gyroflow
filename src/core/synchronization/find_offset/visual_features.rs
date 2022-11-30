@@ -4,10 +4,9 @@
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ stabilization, stabilization::ComputeParams };
 use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
-use super::PoseEstimator;
-use super::SyncParams;
+use super::super::{ PoseEstimator, SyncParams };
 
-pub fn find_offsets<F: Fn(f64) + Sync>(ranges: &[(i64, i64)], estimator: &PoseEstimator, sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();

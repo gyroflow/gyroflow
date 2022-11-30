@@ -3,10 +3,10 @@
 
 use nalgebra::Rotation3;
 use std::ops::Range;
-use std::sync::atomic::{ AtomicBool, Ordering::SeqCst };
+use std::sync::Arc;
+use std::sync::atomic::{ AtomicBool, AtomicU32, Ordering::SeqCst };
 use std::vec::Vec;
 use parking_lot::RwLock;
-use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
@@ -14,29 +14,18 @@ use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 use crate::gyro_source::{ Quat64, TimeQuat };
 use crate::stabilization::ComputeParams;
 
-use self::find_offset_rssync::FindOffsetsRssync;
-#[cfg(feature = "use-opencv")]
-use self::opencv::ItemOpenCV;
-#[cfg(feature = "use-opencv")]
-use self::opencv_dis::ItemOpenCVDis;
-use self::akaze::ItemAkaze;
+mod optical_flow; pub use optical_flow::*;
+mod estimate_pose; pub use estimate_pose::*;
+mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_features; }
 
 use super::gyro_source::TimeIMU;
 
-#[cfg(feature = "use-opencv")]
-mod opencv;
-#[cfg(feature = "use-opencv")]
-mod opencv_dis;
-mod akaze;
-mod find_offset;
-mod find_offset_rssync;
+
+
 pub mod optimsync;
-// mod cpp_wrapper;
-mod find_offset_visually;
 mod autosync;
 pub use autosync::AutosyncProcess;
 use crate::util::MapClosest;
-use enum_dispatch::enum_dispatch;
 
 pub type GrayImage = image::GrayImage;
 pub type OpticalFlowPoints = Vec<(f32, f32)>; // timestamp_us, points
@@ -54,32 +43,13 @@ pub struct SyncParams {
     pub every_nth_frame: usize,
     pub time_per_syncpoint: f64,
     pub of_method: usize,
-    pub offset_method: usize
-}
-
-#[enum_dispatch]
-#[derive(Clone)]
-pub enum EstimatorItem {
-    ItemAkaze,
-    #[cfg(feature = "use-opencv")]
-    ItemOpenCV,
-    #[cfg(feature = "use-opencv")]
-    ItemOpenCVDis,
-}
-
-#[enum_dispatch(EstimatorItem)]
-pub trait EstimatorItemInterface {
-    fn estimate_pose(&self, next: &EstimatorItem, params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>>;
-    fn get_features(&self) -> &Vec<(f32, f32)>;
-
-    fn optical_flow_to(&self, to: &EstimatorItem) -> OpticalFlowPair;
-
-    fn cleanup(&mut self);
+    pub offset_method: usize,
+    pub pose_method: usize
 }
 
 #[derive(Clone)]
 pub struct FrameResult {
-    pub item: EstimatorItem,
+    pub of_method: OpticalFlowMethod,
     pub frame_no: usize,
     pub timestamp_us: i64,
     pub gyro_timestamp_us: i64,
@@ -98,8 +68,10 @@ pub struct PoseEstimator {
     pub sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>,
     pub estimated_gyro: Arc<RwLock<BTreeMap<i64, TimeIMU>>>,
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
-    pub lpf: std::sync::atomic::AtomicU32,
-    pub every_nth_frame: std::sync::atomic::AtomicUsize
+    pub lpf: AtomicU32,
+    pub every_nth_frame: AtomicU32,
+    pub pose_method: AtomicU32,
+    pub offset_method: AtomicU32,
 }
 
 impl PoseEstimator {
@@ -107,24 +79,14 @@ impl PoseEstimator {
         self.sync_results.write().clear();
         self.estimated_gyro.write().clear();
         self.estimated_quats.write().clear();
-        #[cfg(feature = "use-opencv")]
-        let _ = opencv::init();
     }
 
-    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, method: usize, img: Arc<image::GrayImage>, width: u32, height: u32) {
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
         let frame_size = (width, height);
-        let item = match method {
-            0 => ItemAkaze::detect_features(timestamp_us, img, width, height).into(),
-            #[cfg(feature = "use-opencv")]
-            1 => ItemOpenCV::detect_features(timestamp_us, img, width, height).into(),
-            #[cfg(feature = "use-opencv")]
-            2 => ItemOpenCVDis::detect_features(timestamp_us, img, width, height).into(),
-            _ => panic!("Invalid method {}", method) // TODO change to Result<>
-        };
         {
             let mut l = self.sync_results.write();
             l.entry(timestamp_us).or_insert(FrameResult {
-                item,
+                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height),
                 frame_no,
                 frame_size,
                 timestamp_us,
@@ -159,18 +121,22 @@ impl PoseEstimator {
         }
 
         let results = self.sync_results.clone();
+        let mut pose = EstimatePoseMethod::from(self.pose_method.load(SeqCst));
+        pose.init(params);
         frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
             let l = results.read();
             if let Some(curr) = l.get(ts) {
                 if curr.rotation.is_none() {
-                    let curr = curr.item.clone();
+                    //let curr = curr.item.clone();
                     if let Some(next) = l.get(next_ts) {
-                        let next = next.item.clone();
+                        // TODO estimate pose should be quick so test if instead of cloning it is faster just to keep the lock for longer
+                        let curr_of = curr.of_method.clone();
+                        let next_of = next.of_method.clone();
 
                         // Unlock the mutex for estimate_pose
                         drop(l);
 
-                        if let Some(rot) = curr.estimate_pose(&next, params, *ts, *next_ts) {
+                        if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
                             let mut l = results.write();
                             if let Some(x) = l.get_mut(ts) {
                                 x.rotation = Some(rot);
@@ -227,7 +193,7 @@ impl PoseEstimator {
                     if let Some(to_key) = keys.get(i + d) {
                         if let Some(to_item) = l.get(to_key) {
                             if from_fr.frame_no + d == to_item.frame_no {
-                                let of = from_fr.item.optical_flow_to(&to_item.item);
+                                let of = from_fr.of_method.optical_flow_to(&to_item.of_method);
                                 if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
                                     from_of.insert(d,
                                         of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
@@ -243,7 +209,7 @@ impl PoseEstimator {
     pub fn cleanup(&self) {
         let mut l = self.sync_results.write();
         for (_, i) in l.iter_mut(){
-            i.item.cleanup();
+            i.of_method.cleanup();
         }
     }
 
@@ -402,42 +368,11 @@ impl PoseEstimator {
     }
 
     pub fn find_offsets<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        let gyro = self.estimated_gyro.read().clone();
-        find_offset::find_offsets(ranges, &gyro, sync_params, params, progress_cb, cancel_flag)
-    }
-    pub fn find_offsets_visually<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        find_offset_visually::find_offsets(ranges, self, sync_params, params, for_rs, progress_cb, cancel_flag)
-    }
-    pub fn find_offsets_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
-        // Try essential matrix first, because it's much faster
-        let mut sync_params = sync_params.clone();
-        if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
-            fn median(mut v: Vec<f64>) -> f64 {
-                v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-                let len = v.len();
-                if (len % 2) == 0 {
-                    (v[len / 2 - 1] + v[len / 2]) / 2.0
-                } else {
-                    v[len / 2]
-                }
-            }
-
-            let gyro = self.estimated_gyro.read().clone();
-            let offsets = find_offset::find_offsets(&ranges, &gyro, &sync_params, params, &progress_cb, cancel_flag.clone());
-            if !offsets.is_empty() {
-                let median_offset = median(offsets.iter().map(|x| x.1).collect());
-                sync_params.initial_offset = median_offset;
-                sync_params.initial_offset_inv = false;
-                sync_params.search_size = 3000.0;
-                log::debug!("Initial offset: {}", median_offset);
-            }
+        match self.offset_method.load(SeqCst) {
+            0 => find_offset::essential_matrix::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
+            1 => find_offset::visual_features::find_offsets(&self, ranges,  sync_params, params, false, progress_cb, cancel_flag),
+            2 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
+            v => { log::error!("Unknown offset method: {v}"); Vec::new() }
         }
-
-        let offsets = FindOffsetsRssync::new(ranges, self.sync_results.clone(), &sync_params, params, progress_cb, cancel_flag).full_sync();
-        offsets
-    }
-
-    pub fn guess_orientation_rssync<F: Fn(f64) + Sync>(&self, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Option<(String, f64)> {
-        FindOffsetsRssync::new(ranges, self.sync_results.clone(), sync_params, params, progress_cb, cancel_flag).guess_orient()
     }
 }

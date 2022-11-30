@@ -25,6 +25,7 @@ MenuItem {
         property alias experimentalAutoSyncPoints: experimentalAutoSyncPoints.checked;
         // property alias syncMethod: syncMethod.currentIndex;
         // property alias offsetMethod: offsetMethod.currentIndex;
+        // property alias poseMethod: poseMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
         property alias showOF: showOF.checked;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
@@ -33,6 +34,7 @@ MenuItem {
 
     property alias timePerSyncpoint: timePerSyncpoint;
     property alias everyNthFrame: everyNthFrame;
+    property alias poseMethod: poseMethod;
     property var customSyncTimestamps: [];
 
     function loadGyroflow(obj) {
@@ -47,6 +49,7 @@ MenuItem {
             if (o.hasOwnProperty("time_per_syncpoint")) timePerSyncpoint.value              = +o.time_per_syncpoint;
             if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
+            if (o.hasOwnProperty("pose_method"))        poseMethod.currentIndex             = +o.pose_method;
             if (o.hasOwnProperty("custom_sync_timestamps")) sync.customSyncTimestamps       = o.custom_sync_timestamps;
             if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.experimental_auto_sync_points;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
@@ -74,6 +77,7 @@ MenuItem {
             "time_per_syncpoint": timePerSyncpoint.value,
             "of_method":          syncMethod.currentIndex,
             "offset_method":      offsetMethod.currentIndex,
+            "pose_method":        poseMethod.currentIndex,
             "auto_sync_points":   experimentalAutoSyncPoints.checked,
         };
     }
@@ -275,11 +279,25 @@ MenuItem {
             }
         }
         Label {
-            text: qsTr("Offset calculation method");
+            text: qsTr("Pose method");
+            position: Label.LeftPosition;
+
+            ComboBox {
+                id: poseMethod;
+                model: ["findEssentialMat", "Almeida", "EightPoint", "findHomography"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 0;
+                onCurrentIndexChanged: controller.set_of_method(syncMethod.currentIndex);
+            }
+        }
+        Label {
+            text: qsTr("Offset method");
+            position: Label.LeftPosition;
 
             ComboBox {
                 id: offsetMethod;
-                model: [QT_TRANSLATE_NOOP("Popup", "Using essential matrix"), QT_TRANSLATE_NOOP("Popup", "Using visual features"), QT_TRANSLATE_NOOP("Popup", "rs-sync")];
+                model: [QT_TRANSLATE_NOOP("Popup", "Essential matrix"), QT_TRANSLATE_NOOP("Popup", "Visual features"), QT_TRANSLATE_NOOP("Popup", "rs-sync")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;

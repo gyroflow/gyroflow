@@ -146,6 +146,10 @@ MenuItem {
                         window.stab.zoomingCenterX.value = -((mtrx[0][2] / (root.calibWidth / 2.0)) - 1.0);
                         window.stab.zoomingCenterY.value = -((mtrx[1][2] / (root.calibHeight / 2.0)) - 1.0);
                     }
+                    // If focal length in pixels is large, it's more likely that Almeida pose estimator will yield better results
+                    if (mtrx[0][0] > 10000) {
+                        window.sync.poseMethod.currentIndex = 1; // Almeida
+                    }
                 }
                 Qt.callLater(controller.recompute_threaded);
             }

@@ -87,7 +87,7 @@ impl LensProfileDatabase {
                         } else {
                             (|| -> Option<()> {
                                 let mut to_checksum = profile.get_json_value().ok()?;
-                                let mut obj = to_checksum.as_object_mut()?;
+                                let obj = to_checksum.as_object_mut()?;
                                 obj.remove_entry("focal_length");
                                 obj.remove_entry("crop_factor");
                                 profile.checksum = Some(format!("{:08x}", crc32fast::hash(serde_json::to_string_pretty(&to_checksum).ok()?.as_bytes())));

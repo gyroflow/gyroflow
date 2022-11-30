@@ -372,12 +372,12 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn get_features_pixels(&self, timestamp_us: i64, size: (usize, usize)) -> Option<Vec<(i32, i32)>> { // (x, y, alpha)
         let mut ret = None;
         use crate::util::MapClosest;
-        use synchronization::EstimatorItemInterface;
+        use synchronization::OpticalFlowTrait;
 
         if let Some(l) = self.pose_estimator.sync_results.try_read() {
             if let Some(entry) = l.get_closest(&timestamp_us, 2000) { // closest within 2ms
                 let ratio = size.1 as f32 / entry.frame_size.1.max(1) as f32;
-                for pt in entry.item.get_features() {
+                for pt in entry.of_method.features() {
                     if ret.is_none() {
                         // Only allocate if we actually have any points
                         ret = Some(Vec::with_capacity(2048));

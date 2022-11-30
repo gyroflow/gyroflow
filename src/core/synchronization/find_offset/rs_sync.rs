@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-use super::OpticalFlowPoints;
-use super::FrameResult;
-use super::SyncParams;
+use super::super::{ PoseEstimator, OpticalFlowPoints, FrameResult, SyncParams };
 use crate::gyro_source::{ Quat64, TimeQuat, GyroSource };
 use crate::stabilization::{ undistort_points_for_optical_flow, ComputeParams };
 use nalgebra::Vector3;
@@ -15,6 +13,34 @@ use std::sync::{
     atomic::{ AtomicBool, AtomicUsize, Ordering::Relaxed, Ordering::SeqCst },
     Arc,
 };
+
+pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    // Try essential matrix first, because it's much faster
+    let mut sync_params = sync_params.clone();
+    if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
+        fn median(mut v: Vec<f64>) -> f64 {
+            v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            let len = v.len();
+            if (len % 2) == 0 {
+                (v[len / 2 - 1] + v[len / 2]) / 2.0
+            } else {
+                v[len / 2]
+            }
+        }
+
+        let offsets = super::essential_matrix::find_offsets(estimator, &ranges, &sync_params, params, &progress_cb, cancel_flag.clone());
+        if !offsets.is_empty() {
+            let median_offset = median(offsets.iter().map(|x| x.1).collect());
+            sync_params.initial_offset = median_offset;
+            sync_params.initial_offset_inv = false;
+            sync_params.search_size = 3000.0;
+            log::debug!("Initial offset: {}", median_offset);
+        }
+    }
+
+    let offsets = FindOffsetsRssync::new(ranges, estimator.sync_results.clone(), &sync_params, params, progress_cb, cancel_flag).full_sync();
+    offsets
+}
 
 pub struct FindOffsetsRssync<'a> {
     sync: SyncProblem<'a>,
