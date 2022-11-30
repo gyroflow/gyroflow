@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+#![allow(unused_variables, dead_code, unused_mut)]
 use super::super::{ OpticalFlowPair, OpticalFlowPoints };
 use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use parking_lot::RwLock;
-use std::ffi::c_void;
-use opencv::core::{ Mat, Size, Point2f, CV_8UC1 };
-use opencv::prelude::MatTraitConst;
-use opencv::core::TermCriteria;
+#[cfg(feature = "use-opencv")]
+use opencv::{ core::{ Mat, Size, Point2f, CV_8UC1, TermCriteria }, prelude::MatTraitConst };
 
 #[derive(Clone)]
 pub struct OFOpenCVPyrLK {
@@ -23,24 +22,27 @@ pub struct OFOpenCVPyrLK {
 impl OFOpenCVPyrLK {
     pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
         let (w, h) = (width as i32, height as i32);
-        let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut c_void, img.width() as usize) };
 
-        // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
+        let mut features = Vec::new();
 
-        let mut pts = Mat::default();
+        #[cfg(feature = "use-opencv")]
+        {
+            let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut std::ffi::c_void, img.width() as usize) };
 
-        //let inp = inp.get_umat(ACCESS_READ, UMatUsageFlags::USAGE_DEFAULT).unwrap();
-        //let mut pts = UMat::new(UMatUsageFlags::USAGE_DEFAULT);
+            // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
 
-        if let Err(e) = inp.and_then(|inp| {
-            opencv::imgproc::good_features_to_track(&inp, &mut pts, 200, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
-        }) {
-            log::error!("OpenCV error {:?}", e);
+            let mut pts = Mat::default();
+
+            if let Err(e) = inp.and_then(|inp| {
+                opencv::imgproc::good_features_to_track(&inp, &mut pts, 200, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
+            }) {
+                log::error!("OpenCV error {:?}", e);
+            }
+            features = (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x, x.y))}).collect();
         }
 
-        //let pts = pts.get_mat(ACCESS_READ).unwrap().clone();
         Self {
-            features: (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x, x.y))}).collect(),
+            features,
             size: (w, h),
             img,
             timestamp_us,
@@ -55,8 +57,9 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
     }
     fn features(&self) -> &Vec<(f32, f32)> { &self.features }
 
-    fn optical_flow_to(&self, to: &OpticalFlowMethod) -> OpticalFlowPair {
-        if let OpticalFlowMethod::OFOpenCVPyrLK(next) = to {
+    fn optical_flow_to(&self, _to: &OpticalFlowMethod) -> OpticalFlowPair {
+        #[cfg(feature = "use-opencv")]
+        if let OpticalFlowMethod::OFOpenCVPyrLK(next) = _to {
             let (w, h) = self.size;
             if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
 
@@ -65,8 +68,8 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
             }
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
-                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, w as usize) }?;
+                let a1_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, w as usize) }?;
+                let a2_img = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, w as usize) }?;
 
                 let pts1: Vec<Point2f> = self.features.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32)).collect();
 
@@ -98,16 +101,14 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
             match result {
                 Ok(res) => {
                     self.matched_points.write().insert(next.timestamp_us, res.clone());
-                    Some(res)
+                    return Some(res);
                 },
                 Err(e) => {
                     log::error!("OpenCV error: {:?}", e);
-                    None
                 }
             }
-        } else {
-            None
         }
+        None
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());

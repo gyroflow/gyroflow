@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+#![allow(unused_variables, dead_code)]
 use super::super::OpticalFlowPair;
 use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
 use std::collections::BTreeMap;
-use std::ffi::c_void;
 use std::sync::Arc;
 use parking_lot::RwLock;
-use opencv::core::{ Mat, Size, CV_8UC1, Vec2f };
-use opencv::prelude::MatTraitConst;
-use opencv::prelude::DenseOpticalFlow;
+#[cfg(feature = "use-opencv")]
+use opencv::{ core::{ Mat, Size, CV_8UC1, Vec2f }, prelude::{ MatTraitConst, DenseOpticalFlow } };
 
 #[derive(Clone)]
 pub struct OFOpenCVDis {
@@ -39,8 +38,9 @@ impl OpticalFlowTrait for OFOpenCVDis {
     }
     fn features(&self) -> &Vec<(f32, f32)> { &self.features }
 
-    fn optical_flow_to(&self, to: &OpticalFlowMethod) -> OpticalFlowPair {
-        if let OpticalFlowMethod::OFOpenCVDis(next) = to {
+    fn optical_flow_to(&self, _to: &OpticalFlowMethod) -> OpticalFlowPair {
+        #[cfg(feature = "use-opencv")]
+        if let OpticalFlowMethod::OFOpenCVDis(next) = _to {
             let (w, h) = self.size;
             if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
 
@@ -49,8 +49,8 @@ impl OpticalFlowTrait for OFOpenCVDis {
             }
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let a1_img = unsafe { Mat::new_size_with_data(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut c_void, 0) }?;
-                let a2_img = unsafe { Mat::new_size_with_data(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut c_void, 0) }?;
+                let a1_img = unsafe { Mat::new_size_with_data(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
+                let a2_img = unsafe { Mat::new_size_with_data(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
 
                 let mut of = Mat::default();
                 let mut optflow = <dyn opencv::video::DISOpticalFlow>::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
@@ -72,16 +72,14 @@ impl OpticalFlowTrait for OFOpenCVDis {
             match result {
                 Ok(res) => {
                     self.matched_points.write().insert(next.timestamp_us, res.clone());
-                    Some(res)
+                    return Some(res);
                 },
                 Err(e) => {
                     log::error!("OpenCV error: {:?}", e);
-                    None
                 }
             }
-        } else {
-            None
         }
+        None
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());

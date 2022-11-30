@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+#![allow(unused_variables, dead_code)]
 use super::super::OpticalFlowPair;
 use super::EstimatePoseTrait;
 
 use nalgebra::Rotation3;
-use opencv::core::{ Mat, Point2f, Vector };
-use opencv::prelude::MatTraitConst;
+#[cfg(feature = "use-opencv")]
+use opencv::{ core::{ Mat, Point2f, Vector }, prelude::MatTraitConst };
 
 use crate::stabilization::*;
 
@@ -19,6 +20,7 @@ impl EstimatePoseTrait for PoseFindHomography {
     fn estimate_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<Rotation3<f64>> {
         let (pts1, pts2) = pairs.as_ref()?;
 
+        #[cfg(feature = "use-opencv")]
         let result = || -> Result<Rotation3<f64>, opencv::Error> {
             let pts11 = undistort_points_for_optical_flow(&pts1, timestamp_us, params, size);
             let pts22 = undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, size);
@@ -53,6 +55,8 @@ impl EstimatePoseTrait for PoseFindHomography {
                 Err(opencv::Error::new(0, "Model not found".to_string()))
             }
         }();
+        #[cfg(not(feature = "use-opencv"))]
+        let result = Err(());
 
         match result {
             Ok(res) => Some(res),
@@ -64,6 +68,7 @@ impl EstimatePoseTrait for PoseFindHomography {
     }
 }
 
+#[cfg(feature = "use-opencv")]
 fn cv_to_na(r1: Mat) -> Result<Rotation3<f64>, opencv::Error> {
     if r1.typ() != opencv::core::CV_64FC1 {
         return Err(opencv::Error::new(0, "Invalid matrix type".to_string()));

@@ -20,8 +20,6 @@ mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_feat
 
 use super::gyro_source::TimeIMU;
 
-
-
 pub mod optimsync;
 mod autosync;
 pub use autosync::AutosyncProcess;
