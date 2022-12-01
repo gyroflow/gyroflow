@@ -81,6 +81,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("h264_v4l2m2m",      true),
+                #[cfg(target_os = "android")]
+                ("h264_mediacodec",    true),
                 ("libx264",           false),
             ],
             "H.265/HEVC" => vec![
@@ -98,6 +100,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_mf",           true),
                 #[cfg(target_os = "linux")]
                 ("hevc_v4l2m2m",      true),
+                #[cfg(target_os = "android")]
+                ("hevc_mediacodec",   true),
                 ("libx265",           false),
             ],
             "ProRes" => vec![
@@ -260,8 +264,11 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         _ => { }
     }
 
-    proc.video.encoder_params.options.set("allow_sw", "1");
-    proc.video.encoder_params.options.set("realtime", "0");
+    if cfg!(any(target_os = "macos", target_os = "ios")) {
+        proc.video.encoder_params.options.set("allow_sw", "1");
+        proc.video.encoder_params.options.set("realtime", "0");
+        proc.video.encoder_params.options.set("constant_bit_rate", "1");
+    }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
 
@@ -634,7 +641,7 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
         ret.push_str("```\n");
         FFMPEG_LOG.write().push_str(&ret);
         show_help_children((*c).priv_class, ffi::AV_OPT_FLAG_ENCODING_PARAM | ffi::AV_OPT_FLAG_DECODING_PARAM);
-        FFMPEG_LOG.write().push_str("\n```");
+        FFMPEG_LOG.write().push_str("\n```\nAdditional supported flags:\n\n```\n-hwaccel_device\n-qscale\n```");
     }
 }
 

@@ -58,6 +58,8 @@ MenuItem {
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
     function getExportOptions() {
+        let encoderOpts = encoderOptions.text.replace("-qscale:v", "-qscale")
+                                             .replace("-q:v", "-qscale");
         return {
             codec:          root.outCodec,
             codec_options:  root.outCodecOptions,
@@ -70,7 +72,7 @@ MenuItem {
             pixel_format:   "",
 
             // Advanced
-            encoder_options:       encoderOptions.text,
+            encoder_options:       encoderOpts,
             keyframe_distance:     keyframeDistance.value,
             preserve_other_tracks: preserveOtherTracks.checked,
             pad_with_black:        padWithBlack.checked,

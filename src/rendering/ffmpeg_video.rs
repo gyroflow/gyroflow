@@ -134,6 +134,14 @@ impl<'a> VideoTranscoder<'a> {
         if global_header {
             encoder.set_flags(codec::Flags::GLOBAL_HEADER);
         }
+        if let Some(qscale) = params.options.get("qscale").and_then(|x| x.parse::<i32>().ok()) {
+            if qscale >= 0 {
+                unsafe {
+                    (*encoder.as_mut_ptr()).flags |= ffi::AV_CODEC_FLAG_QSCALE as i32;
+                    (*encoder.as_mut_ptr()).global_quality = ffi::FF_QP2LAMBDA * qscale;
+                }
+            }
+        }
 
         log::debug!("hw_device_type {:?}", params.hw_device_type);
         if let Some(hw_type) = params.hw_device_type {
