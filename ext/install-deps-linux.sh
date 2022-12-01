@@ -41,9 +41,9 @@ if [ "$1" == "docker" ]; then
 fi
 
 
-if [ ! -d "ffmpeg-5.1-linux-clang-gpl-lite" ]; then
+if [ ! -d "ffmpeg-master-linux-clang-gpl-lite" ]; then
     # Download and extract ffmpeg
-    curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-5.1-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+    curl -L https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-master-linux-clang-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
     7z x -aoa ffmpeg.tar.xz
     tar -xf ffmpeg.tar.xz
 fi

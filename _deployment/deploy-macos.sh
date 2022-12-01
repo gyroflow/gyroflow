@@ -4,7 +4,7 @@
 : "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
 : "${QT_DIR:=$PROJECT_DIR/ext/6.4.1/macos}"
 : "${OPENCV_DIR:=$PROJECT_DIR/ext/vcpkg/installed}"
-: "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-5.1-macOS-gpl-lite}"
+: "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-master-macOS-gpl-lite}"
 
 rm -rf "$PROJECT_DIR/_deployment/_binaries/mac"
 

@@ -19,12 +19,12 @@ fi
 
 if [ ! -d "ffmpeg-x86_64" ]; then
     # Download and extract ffmpeg
-    curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-5.1-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+    curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-master-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
     7z x ffmpeg.tar.xz
     tar -xf ffmpeg.tar
     mkdir -p ffmpeg-x86_64/lib
     mkdir -p ffmpeg-arm64/lib
-    cd ffmpeg-5.1-macOS-gpl-lite
+    cd ffmpeg-master-macOS-gpl-lite
     lipo lib/libavcodec.a    -thin x86_64 -output ../ffmpeg-x86_64/lib/libavcodec.a
     lipo lib/libavformat.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavformat.a
     lipo lib/libavdevice.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavdevice.a

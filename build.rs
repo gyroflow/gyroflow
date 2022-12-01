@@ -278,8 +278,8 @@ fn main() {
         "windows" => {
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
-            println!("cargo:rustc-link-search={}/lib/x64", std::env::var("FFMPEG_DIR").unwrap());
-            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}\\lib\\x64", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}\\lib", std::env::var("FFMPEG_DIR").unwrap());
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
             res.set("FileVersion", env!("CARGO_PKG_VERSION"));
