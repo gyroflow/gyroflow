@@ -50,7 +50,7 @@ MenuItem {
             if (o.hasOwnProperty("of_method"))          syncMethod.currentIndex             = +o.of_method;
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
             if (o.hasOwnProperty("pose_method"))        poseMethod.currentIndex             = +o.pose_method;
-            if (o.hasOwnProperty("custom_sync_timestamps")) sync.customSyncTimestamps       = o.custom_sync_timestamps;
+            if (o.hasOwnProperty("custom_sync_pattern")) sync.customSyncTimestamps          = resolveSyncpointPattern(o.custom_sync_pattern);
             if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.experimental_auto_sync_points;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
@@ -83,6 +83,50 @@ MenuItem {
     }
     function getSettingsJson() { return JSON.stringify(getSettings()); }
 
+    // Pattern example, all values can be either frames, s or ms
+    // {
+    //     "start": "1001"    // frames
+    //     "interval": "5s"   // s
+    //     "gap": "100ms"     // ms
+    // }
+    // Keep in sync with render_queue.rs
+    function resolveSyncpointPattern(o) {
+        const duration = window.videoArea.vid.duration;
+        const fps      = window.videoArea.vid.frameRate;
+
+        function resolveDurationToMs(d) {
+            if (!d) return 0;
+                 if (d.toString().endsWith("ms")) return +(d.replace("ms", ""));
+            else if (d.toString().endsWith("s"))  return +(d.replace("s", "")) * 1000.0;
+            else                                  return (+d / fps) * 1000.0;
+        }
+        function resolveItem(x) {
+            const start = x.hasOwnProperty("start")? resolveDurationToMs(x.start) : 0;
+            const interval = x.hasOwnProperty("interval")? resolveDurationToMs(x.interval) : duration;
+            const gap = resolveDurationToMs(x.gap);
+            let out = [];
+            for (let i = start; i < duration; i += interval) {
+                out.push(i - gap / 2.0);
+                if (gap > 0) {
+                    out.push(i + gap / 2.0);
+                }
+            }
+            return out;
+        }
+
+        let timestamps = [];
+        if (Array.isArray(o)) {
+            for (const x of o) {
+                timestamps.push(...resolveItem(x));
+            }
+        } else if (Object.isObject(o)) {
+            timestamps.push(...resolveItem(o));
+        }
+        timestamps.sort((a, b) => a - b);
+
+        return timestamps;
+    }
+
     Button {
         id: autosync;
         text: qsTr("Auto sync");
@@ -108,8 +152,8 @@ MenuItem {
                     ranges.push(pos);
                 }
                 if (sync.customSyncTimestamps.length > 0) {
-                    const duration = window.videoArea.timeline.durationMs;
-                    ranges = sync.customSyncTimestamps.filter(v => v <= duration).map(v => v / duration);
+                    const duration = window.videoArea.vid.duration;
+                    ranges = sync.customSyncTimestamps.filter(v => (v >= videoArea.trimStart * duration) && (v <= videoArea.trimEnd * duration)).map(v => v / duration);
                 }
                 sync_points = ranges.join(";");
             }

@@ -314,6 +314,9 @@ impl LensProfile {
                 if x.contains_key("sync_settings") {
                     if let Some(obj) = x.get("sync_settings") {
                         if let Some(ref mut ss) = cpy.sync_settings {
+                            if obj.get("custom_sync_pattern").is_some() && ss.get("custom_sync_pattern").is_some() {
+                                ss.as_object_mut().unwrap().remove("custom_sync_pattern");
+                            }
                             crate::util::merge_json(ss, obj);
                         } else {
                             cpy.sync_settings = Some(obj.clone());

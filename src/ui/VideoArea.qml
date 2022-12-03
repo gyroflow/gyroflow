@@ -826,6 +826,7 @@ Item {
             Timeline {
                 id: timeline;
                 durationMs: vid.duration;
+                scaledFps: vid.frameRate;
                 anchors.fill: parent;
                 fullScreen: root.fullScreen;
 

@@ -1088,6 +1088,7 @@ impl RenderQueue {
             let gyro = stab.gyro.read();
             (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
         };
+        let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone();
         if let Some(sync_settings) = sync_settings {
@@ -1109,8 +1110,10 @@ impl RenderQueue {
                         let chunks = 1.0 / points as f64;
                         let start = chunks / 2.0;
                         let mut timestamps_fract: Vec<f64> = (0..points).map(|i| start + (i as f64 * chunks)).collect();
-                        if let Some(v) = sync_options.get("custom_sync_timestamps").and_then(|v| v.as_array()) {
-                            timestamps_fract = v.iter().filter_map(|v| v.as_f64()).filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
+
+                        if let Some(v) = sync_options.get("custom_sync_pattern") {
+                            let v = Self::resolve_syncpoint_pattern(v, duration_ms, fps);
+                            timestamps_fract = v.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
                         }
 
                         if let Ok(mut sync_params) = serde_json::from_value(serde_json::Value::Object(sync_options)) as serde_json::Result<synchronization::SyncParams> {
@@ -1285,5 +1288,46 @@ impl RenderQueue {
     }
     fn get_encoder_options(&self, encoder: String) -> String {
         rendering::get_encoder_options(&encoder)
+    }
+
+    // Keep in sync with Synchronization.qml
+    fn resolve_syncpoint_pattern(o: &serde_json::Value, duration: f64, fps: f64) -> Vec<f64> {
+        fn resolve_duration_to_ms(d: &serde_json::Value, fps: f64) -> Option<f64> {
+            if !d.is_number() && !d.is_string() { return None; }
+                 if d.is_string() && d.as_str()?.ends_with("ms") { d.as_str()?.strip_suffix("ms")?.parse::<f64>().ok() }
+            else if d.is_string() && d.as_str()?.ends_with("s")  { d.as_str()?.strip_suffix("s")?.parse::<f64>().ok().map(|x| x * 1000.0) }
+            else if d.is_string() { d.as_str()?.parse::<f64>().ok().map(|x| (x / fps) * 1000.0) }
+            else { d.as_f64().map(|x| (x / fps) * 1000.0) }
+        }
+        fn resolve_item(x: &serde_json::Value, duration: f64, fps: f64) -> Vec<f64> {
+            let Some(x) = x.as_object() else {
+                return Vec::new();
+            };
+            let start = x.get("start").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
+            let interval = x.get("interval").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or(duration);
+            let gap = x.get("gap").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
+            let mut out = Vec::new();
+            let mut i = start;
+            while i < duration {
+                out.push(i - gap / 2.0);
+                if gap > 0.0 {
+                    out.push(i + gap / 2.0);
+                }
+                i += interval;
+            }
+            out
+        }
+
+        let mut timestamps = Vec::new();
+        if let Some(array) = o.as_array() {
+            for x in array {
+                timestamps.append(&mut resolve_item(x, duration, fps));
+            }
+        } else if o.is_object() {
+            timestamps.append(&mut resolve_item(o, duration, fps));
+        }
+        timestamps.sort_by(|a, b| a.total_cmp(&b));
+
+        timestamps
     }
 }
