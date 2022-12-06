@@ -185,7 +185,7 @@ Item {
         TimelineAxisButton { id: a5; text: "Y"; onCheckedChanged: chart.setAxisVisible(5, checked); checked: chart.getAxisVisible(5); }
         TimelineAxisButton { id: a6; text: "Z"; onCheckedChanged: chart.setAxisVisible(6, checked); checked: chart.getAxisVisible(6); }
         TimelineAxisButton { id: a7; text: "W"; onCheckedChanged: chart.setAxisVisible(7, checked); checked: chart.getAxisVisible(7); }
-        TimelineAxisButton { id: a9; text: "S"; onCheckedChanged: chart.setAxisVisible(9, checked); checked: chart.getAxisVisible(9); tooltip: qsTr("Sync points debug");  }
+        TimelineAxisButton { id: a9; text: "S"; onCheckedChanged: chart.setAxisVisible(9, checked); checked: chart.getAxisVisible(9); tooltip: qsTr("Sync points debug layer"); }
     }
 
     Item {
