@@ -84,16 +84,16 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
             root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
-            orientation.text = imu_orientation;
+            orientation.text = additional_data.imu_orientation;
 
             // Twice to trigger change signal
-            integrator.hasQuaternions = !contains_quats;
-            integrator.hasQuaternions = contains_quats;
-            if (contains_quats && !is_main_video) {
+            integrator.hasQuaternions = !additional_data.contains_quats;
+            integrator.hasQuaternions = additional_data.contains_quats;
+            if (additional_data.contains_quats && !is_main_video) {
                 integrator.currentIndex = 1;
                 integrateTimer.start();
             }
@@ -106,9 +106,9 @@ MenuItem {
             window.videoArea.timeline.updateDurations();
 
             currentLog.preventChange = true;
-            if (usable_logs && usable_logs.includes("|")) {
+            if (additional_data.usable_logs && additional_data.usable_logs.length > 0) {
                 let model = ["All logs combined"];
-                for (const log of usable_logs.split("|")) {
+                for (const log of additional_data.usable_logs) {
                     const [logIndex, startTimestamp, duration] = log.split(";");
                     model.push("#" + (+logIndex + 1) + " | " + msToTime(+startTimestamp) + " - " + msToTime(+startTimestamp + (+duration)) + " (" + msToTime(+duration) + ")");
                 }

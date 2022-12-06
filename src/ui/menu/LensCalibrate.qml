@@ -81,14 +81,14 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
-            shutter.value = Math.abs(frame_readout_time);
-            shutterCb.checked = Math.abs(frame_readout_time) > 0;
-            bottomToTop.checked = frame_readout_time < 0;
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+            shutter.value = Math.abs(additional_data.frame_readout_time);
+            shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
+            bottomToTop.checked = additional_data.frame_readout_time < 0;
 
             calib.resetMetadata();
-            if (camera_id_json) {
-                const camera_id = JSON.parse(camera_id_json);
+            if (additional_data.camera_id) {
+                const camera_id = additional_data.camera_id;
                 if (camera_id) {
                     if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
                     if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }

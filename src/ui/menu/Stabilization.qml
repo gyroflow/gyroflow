@@ -158,9 +158,9 @@ MenuItem {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
-            if (Math.abs(+frame_readout_time) > 0) {
-                root.setFrameReadoutTime(frame_readout_time);
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+            if (Math.abs(+additional_data.frame_readout_time) > 0) {
+                root.setFrameReadoutTime(additional_data.frame_readout_time);
             } else {
                 controller.frame_readout_time = shutter.value;
             }

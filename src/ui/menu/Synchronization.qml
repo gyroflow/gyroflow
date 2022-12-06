@@ -36,6 +36,7 @@ MenuItem {
     property alias everyNthFrame: everyNthFrame;
     property alias poseMethod: poseMethod;
     property var customSyncTimestamps: [];
+    property var additionalSyncTimestamps: [];
 
     function loadGyroflow(obj) {
         const o = obj.synchronization || { };
@@ -126,6 +127,17 @@ MenuItem {
 
         return timestamps;
     }
+    Connections {
+        target: controller;
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+            sync.additionalSyncTimestamps = [];
+            if (additional_data.additional_sync_points) {
+                for (const x of additional_data.additional_sync_points.split(";")) {
+                    sync.additionalSyncTimestamps.push(+x);
+                }
+            }
+        }
+    }
 
     Button {
         id: autosync;
@@ -151,10 +163,16 @@ MenuItem {
                     const pos = start + (i*chunks);
                     ranges.push(pos);
                 }
+                const duration = window.videoArea.vid.duration;
                 if (sync.customSyncTimestamps.length > 0) {
-                    const duration = window.videoArea.vid.duration;
                     ranges = sync.customSyncTimestamps.filter(v => (v >= videoArea.trimStart * duration) && (v <= videoArea.trimEnd * duration)).map(v => v / duration);
                 }
+                if (sync.additionalSyncTimestamps.length > 0) {
+                    for (const x of sync.additionalSyncTimestamps.filter(v => (v >= videoArea.trimStart * duration) && (v <= videoArea.trimEnd * duration))) {
+                        ranges.push(x / duration);
+                    }
+                }
+                ranges.sort((a, b) => a - b);
                 sync_points = ranges.join(";");
             }
             controller.start_autosync(sync_points, sync.getSettingsJson(), "synchronize");

@@ -973,7 +973,7 @@ impl<T: PixelType> StabilizationManager<T> {
                             frame_rate: None,
                             camera_identifier: None,
                             lens_positions: None,
-                            usable_logs: Vec::new()
+                            additional_data: Default::default()
                         };
 
                         let mut gyro = self.gyro.write();

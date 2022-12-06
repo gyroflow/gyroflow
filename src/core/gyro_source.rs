@@ -26,18 +26,18 @@ pub type TimeFloat = BTreeMap<i64, f64>; // key is timestamp_us
 
 #[derive(Default)]
 pub struct FileMetadata {
-    pub imu_orientation: Option<String>,
-    pub raw_imu:  Option<Vec<TimeIMU>>,
-    pub quaternions:  Option<TimeQuat>,
-    pub gravity_vectors:  Option<TimeVec>,
+    pub imu_orientation:     Option<String>,
+    pub raw_imu:             Option<Vec<TimeIMU>>,
+    pub quaternions:         Option<TimeQuat>,
+    pub gravity_vectors:     Option<TimeVec>,
     pub image_orientations:  Option<TimeQuat>,
-    pub detected_source: Option<String>,
-    pub frame_readout_time: Option<f64>,
-    pub frame_rate: Option<f64>,
-    pub camera_identifier: Option<CameraIdentifier>,
-    pub lens_profile: Option<serde_json::Value>,
-    pub lens_positions: Option<TimeFloat>,
-    pub usable_logs: Vec<String>
+    pub detected_source:     Option<String>,
+    pub frame_readout_time:  Option<f64>,
+    pub frame_rate:          Option<f64>,
+    pub camera_identifier:   Option<CameraIdentifier>,
+    pub lens_profile:        Option<serde_json::Value>,
+    pub lens_positions:      Option<TimeFloat>,
+    pub additional_data:     serde_json::Value
 }
 
 #[derive(Default, Clone)]
@@ -132,19 +132,21 @@ impl GyroSource {
         let mut lens_profile = None;
         let mut frame_rate = None;
         let mut lens_positions = None;
-        let mut usable_logs = Vec::new();
+        let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
 
         if input.camera_type() == "BlackBox" {
             if let Some(ref mut samples) = input.samples {
+                let mut usable_logs = Vec::new();
                 for info in samples.iter() {
                     log::info!("Blackbox log #{}: Timestamp {:.3} | Duration {:.3} | Data: {}", info.sample_index + 1, info.timestamp_ms / 1000.0, info.duration_ms / 1000.0, info.tag_map.is_some());
                     if info.tag_map.is_some() && info.duration_ms > 0.0 {
-                        usable_logs.push(format!("{};{};{}", info.sample_index, info.timestamp_ms, info.duration_ms));
+                        usable_logs.push(serde_json::Value::String(format!("{};{};{}", info.sample_index, info.timestamp_ms, info.duration_ms)));
                     }
                 }
                 if let Some(requested_index) = options.sample_index {
                     samples.retain(|x| x.sample_index as usize == requested_index);
                 }
+                additional_data.as_object_mut().unwrap().insert("usable_logs".to_owned(), serde_json::Value::Array(usable_logs));
             }
         }
 
@@ -183,6 +185,9 @@ impl GyroSource {
                     if let Some(map) = tag_map.get(&GroupId::Default) {
                         if let Some(v) = map.get_t(TagId::FrameRate) as Option<&f64> {
                             frame_rate = Some(*v);
+                        }
+                        if let Some(v) = map.get_t(TagId::Metadata) as Option<&serde_json::Value> {
+                            crate::util::merge_json(&mut additional_data, v);
                         }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Custom("FovAdaptationScore".into())) {
@@ -272,7 +277,7 @@ impl GyroSource {
             frame_rate,
             lens_profile,
             camera_identifier,
-            usable_logs
+            additional_data
         })
     }
 

@@ -7,7 +7,7 @@ use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
-use std::collections::BTreeSet;
+use std::collections::{ BTreeSet, BTreeMap };
 use std::str::FromStr;
 
 use qml_video_rs::video_item::MDKVideoItem;
@@ -71,7 +71,7 @@ pub struct Controller {
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
-    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, imu_orientation: QString, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: f64, camera_id_json: QString, sample_rate: f64, usable_logs: QString),
+    telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, additional_data: QJsonObject),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
     realtime_fps_loaded: qt_signal!(fps: f64),
 
@@ -655,8 +655,8 @@ impl Controller {
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, QString, bool, bool, bool, f64, QString, f64, QString)| {
-                this.gyro_loaded = params.4; // Contains gyro
+            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, bool, serde_json::Value)| {
+                this.gyro_loaded = params.3; // Contains motion
                 this.gyro_changed();
 
                 this.loading_gyro_in_progress = false;
@@ -665,7 +665,8 @@ impl Controller {
 
                 this.update_offset_model();
                 this.chart_data_changed();
-                this.telemetry_loaded(params.0, params.1, params.2, params.3, params.4, params.5, params.6, params.7, params.8, params.9, params.10);
+
+                this.telemetry_loaded(params.0, params.1, params.2, util::serde_json_to_qt_object(&params.4));
 
                 stab2.invalidate_ongoing_computations();
                 stab2.invalidate_smoothing();
@@ -697,6 +698,8 @@ impl Controller {
                 self.loading_gyro_in_progress_changed();
                 core::run_threaded(move || {
                     let mut file_metadata = None;
+                    let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
+                    let additional_obj = additional_data.as_object_mut().unwrap();
                     if is_main_video {
                         if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
                             err(("An error occured: %1".to_string(), e.to_string()));
@@ -729,11 +732,14 @@ impl Controller {
 
                     let gyro = stab.gyro.read();
                     let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                    let orientation = gyro.imu_orientation.as_ref().map(String::clone).unwrap_or_else(|| "XYZ".into());
                     let has_raw_gyro = !gyro.org_raw_imu.is_empty();
                     let has_quats = !gyro.org_quaternions.is_empty();
-                    let has_gyro = has_raw_gyro || has_quats;
-                    let sample_rate = gyro.get_sample_rate();
+                    let has_motion = has_raw_gyro || has_quats;
+                    additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
+                    additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
+                    additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
+                    additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
+                    additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyro.get_sample_rate()).unwrap());
                     drop(gyro);
 
                     let camera_id = stab.camera_id.read();
@@ -748,17 +754,18 @@ impl Controller {
                         });
                     }
                     reload_lens(());
-                    let mut usable_logs = String::new();
+
+                    additional_obj.insert("frame_readout_time".to_owned(), serde_json::to_value(stab.params.read().frame_readout_time).unwrap());
+                    if let Some(cam_id) = camera_id.as_ref() {
+                        additional_obj.insert("camera_id".to_owned(), serde_json::to_value(cam_id).unwrap());
+                    }
+
                     if let Some(md) = file_metadata {
-                        usable_logs = md.usable_logs.join("|");
+                        gyroflow_core::util::merge_json(&mut additional_data, &md.additional_data);
                         on_metadata(md);
                     }
 
-                    let frame_readout_time = stab.params.read().frame_readout_time;
-                    let camera_id = camera_id.as_ref().map(|v| v.to_json()).unwrap_or_default();
-
-
-                    finished((is_main_video, filename, QString::from(detected.trim()), QString::from(orientation), has_gyro, has_raw_gyro, has_quats, frame_readout_time, QString::from(camera_id), sample_rate, QString::from(usable_logs)));
+                    finished((is_main_video, filename, QString::from(detected.trim()), has_motion, additional_data));
                 });
             }
         }
@@ -1803,13 +1810,16 @@ impl Controller {
                 ///////////////// Merge .gcsv /////////////////
                 if let Err(e) = (|| -> std::io::Result<()> {
                     use std::fs::File;
-                    use std::io::{ BufRead, Write };
+                    use std::io::{ BufRead, Write, Seek, SeekFrom };
                     use std::path::Path;
                     let mut last_diff = 0.0;
                     let mut last_timestamp = 0.0;
                     let mut add_timestamp = 0.0;
                     let mut output_gcsv = None;
                     let mut first_file = true;
+                    let mut sync_points = Vec::new();
+                    let mut time_scale = 0.001; // default to millisecond
+                    let mut headers_end_position = None;
                     for x in &file_list {
                         let path = Path::new(x).with_extension("gcsv");
                         if path.exists() {
@@ -1824,12 +1834,24 @@ impl Controller {
                                         return Ok(()); // not a .gcsv file
                                     }
                                     if !is_data {
+                                        if line.starts_with("tscale,") {
+                                            if let Ok(ts) = line.strip_prefix("tscale,").unwrap().parse::<f64>() {
+                                                time_scale = ts;
+                                            }
+                                        }
                                         if line.starts_with("t,") || line.starts_with("time,") {
                                             is_data = true;
-                                            if !first_file { continue; }
+                                            if !first_file {
+                                                sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
+                                                sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
+                                                continue;
+                                            } else {
+                                                headers_end_position = Some(output_gcsv.as_ref().unwrap().stream_position()?);
+                                                writeln!(output_gcsv.as_mut().unwrap(), "additional_sync_points,{}", " ".repeat(1024))?; // 1kb of placeholder spaces
+                                            }
                                         }
                                     } else if line.contains(',') {
-                                        if let Ok(timestamp)= line.split(',').next().unwrap().parse::<f64>() {
+                                        if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
                                             last_diff = timestamp - last_timestamp;
                                             last_timestamp = timestamp;
                                             let new_timestamp = timestamp + add_timestamp;
@@ -1845,6 +1867,11 @@ impl Controller {
                             last_timestamp = 0.0;
                         }
                         first_file = false;
+                    }
+                    if !sync_points.is_empty() && output_gcsv.is_some() && headers_end_position.is_some() {
+                        let output_gcsv = output_gcsv.as_mut().unwrap();
+                        output_gcsv.seek(SeekFrom::Start(headers_end_position.unwrap()))?;
+                        write!(output_gcsv, "additional_sync_points,{}", sync_points.into_iter().map(|x| format!("{:.3}", x)).join(";"))?;
                     }
                     Ok(())
                 })() {

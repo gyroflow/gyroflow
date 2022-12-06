@@ -186,20 +186,21 @@ Item {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+            console.log("Telemetry additional data:", JSON.stringify(additional_data));
             if (is_main_video) {
                 vidInfo.updateEntry("Detected camera", camera || "---");
-                vidInfo.updateEntry("Contains gyro", contains_gyro? "Yes" : "No");
+                vidInfo.updateEntry("Contains gyro", additional_data.contains_motion? "Yes" : "No");
                 // If source was detected, but gyro data is empty
                 if (camera) {
-                    if (!contains_gyro && !contains_quats) {
+                    if (!additional_data.contains_motion && !additional_data.contains_quats) {
                         messageBox(Modal.Warning, qsTr("File format was detected, but no motion data was found.\nThe camera probably doesn't record motion data in this particular shooting mode."), [ { "text": qsTr("Ok") } ]);
                     }
-                    if (contains_raw_gyro && !contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
-                    if (!contains_raw_gyro && contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
+                    if (additional_data.contains_raw_gyro && !additional_data.contains_quats) timeline.setDisplayMode(0); // Switch to gyro view
+                    if (!additional_data.contains_raw_gyro && additional_data.contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
                 }
             }
-            if (sample_rate > 0.0 && sample_rate < 50) {
+            if (+additional_data.sample_rate > 0.0 && +additional_data.sample_rate < 50) {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
             }
             if (root.pendingGyroflowData) {
@@ -247,7 +248,6 @@ Item {
     property Modal externalSdkModal: null;
 
     function loadFile(url: url, skip_detection: bool) {
-        stabEnabledBtn.checked = false;
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
         }
@@ -255,6 +255,7 @@ Item {
         if (url.toString().endsWith(".gyroflow")) {
             return loadGyroflowData(url);
         }
+        stabEnabledBtn.checked = false;
 
         if (controller.check_external_sdk(url.toString())) {
             const dlg = messageBox(Modal.Info, qsTr("This format requires an external SDK. Do you want to download it now?"), [

@@ -124,7 +124,7 @@ Window {
         }
         Connections {
             target: controller;
-            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, imu_orientation: string, contains_gyro: bool, contains_raw_gyro: bool, contains_quats: bool, frame_readout_time: real, camera_id_json: string, sample_rate: real, usable_logs: string) {
+            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
                 calibrator_window.anyFileLoaded = true;
                 videoArea.timeline.updateDurations();
 
