@@ -288,7 +288,7 @@ impl<T: PixelType> Stabilization<T> {
             if let Some(itm) = self.stab_data.get(&timestamp_us) {
                 let params = itm.kernel_params;
                 let canvas_len = self.drawing.get_buffer_len();
-                let next_backend = self.next_backend.take().unwrap_or_default();
+                let mut next_backend = self.next_backend.take().unwrap_or_default();
 
                 #[cfg(feature = "use-opencl")]
                 if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
@@ -298,8 +298,9 @@ impl<T: PixelType> Stabilization<T> {
                     });
                     match cl {
                         Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; log::info!("Initialized OpenCL for {:?} -> {:?}", buffers.input_size, buffers.output_size); },
-                        Ok(Err(e)) => { log::error!("OpenCL error init_backends: {:?}", e); },
+                        Ok(Err(e)) => { next_backend = ""; log::error!("OpenCL error init_backends: {:?}", e); },
                         Err(e) => {
+                            next_backend = "";
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize OpenCL {}", s);
                             } else if let Some(s) = e.downcast_ref::<String>() {
