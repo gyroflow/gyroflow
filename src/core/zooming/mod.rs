@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Maik <myco at gmx>
 
-//pub mod fov_default;
-//pub mod fov_direct;
+// pub mod fov_default;
+// pub mod fov_direct;
 pub mod fov_iterative;
 
 pub mod zoom_disabled;
@@ -14,7 +14,7 @@ use std::hash::Hasher;
 use enterpolation::Merge;
 use std::collections::BTreeMap;
 
-use crate::stabilization::{ ComputeParams };
+use crate::stabilization::ComputeParams;
 use crate::keyframes::*;
 
 #[derive(PartialEq, Clone)]
@@ -68,7 +68,7 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
 
     let fov_estimator = Box::new(fov_iterative::FovIterative::new(compute_params.clone()));
     // let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
-    //let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
+    // let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
     match mode {
         Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
         Mode::Static              => Box::new(zoom_static::ZoomStatic::new(fov_estimator, compute_params)),

@@ -891,6 +891,11 @@ impl RenderQueue {
                             background_mode:           params.background_mode,
                             background_margin:         params.background_margin,
                             background_margin_feather: params.background_margin_feather,
+                            current_device:            params.current_device,
+                            video_speed:               params.video_speed,
+                            video_speed_affects_smoothing: params.video_speed_affects_smoothing,
+                            video_speed_affects_zooming:   params.video_speed_affects_zooming,
+                            of_method:                 params.of_method,
                             ..Default::default()
                         })),
                         input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), project_file_path: None, image_sequence_start: 0, image_sequence_fps: 0.0 })),

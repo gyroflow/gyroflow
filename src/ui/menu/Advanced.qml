@@ -30,10 +30,10 @@ MenuItem {
     property alias defaultSuffix: defaultSuffix;
 
     function loadGyroflow(obj) {
-        if (obj.background_mode) backgroundMode.currentIndex = obj.background_mode;
-        if (obj.background_margin) marginPixels.value = obj.background_margin;
-        if (obj.background_margin_feather) featherPixels.value = obj.background_margin_feather;
-        if (obj.background_color) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
+        if (obj.hasOwnProperty("background_mode")) backgroundMode.currentIndex = +obj.background_mode;
+        if (obj,hasOwnProperty("background_margin")) marginPixels.value =+ obj.background_margin;
+        if (obj,hasOwnProperty("background_margin_feather")) featherPixels.value = +obj.background_margin_feather;
+        if (obj,hasOwnProperty("background_color")) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
     }
     Label {
         position: Label.LeftPosition;
@@ -78,7 +78,7 @@ MenuItem {
             text: qsTr("Margin");
             SliderWithField {
                 id: marginPixels;
-                value: 20;
+                value: 0.20;
                 defaultValue: 20;
                 from: 0;
                 to: 50;
@@ -86,14 +86,15 @@ MenuItem {
                 precision: 0;
                 width: parent.width;
                 keyframe: "BackgroundMargin";
-                onValueChanged: controller.background_margin = value / 100;
+                scaler: 100.0;
+                onValueChanged: controller.background_margin = value;
             }
         }
         Label {
             text: qsTr("Feather");
             SliderWithField {
                 id: featherPixels;
-                value: 5;
+                value: 0.05;
                 defaultValue: 5;
                 from: 0;
                 to: 50;
@@ -101,7 +102,8 @@ MenuItem {
                 precision: 0;
                 width: parent.width;
                 keyframe: "BackgroundFeather";
-                onValueChanged: controller.background_margin_feather = value / 100;
+                scaler: 100.0;
+                onValueChanged: controller.background_margin_feather = value;
             }
         }
     }
@@ -277,6 +279,7 @@ MenuItem {
                 }
                 const text = currentIndex == model.length - 1? "cpu" : currentText;
                 settings.setValue("processingDevice", text);
+                settings.setValue("processingDeviceIndex", processingDevice.currentIndex);
             }
         }
     }

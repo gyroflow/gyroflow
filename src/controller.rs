@@ -1285,6 +1285,7 @@ impl Controller {
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
     wrap_simple_method!(recompute_gyro,; recompute; chart_data_changed);
+    wrap_simple_method!(set_device, v: i32);
 
     fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }
@@ -1692,11 +1693,6 @@ impl Controller {
             this.gpu_list_loaded(util::serde_json_to_qt_array(&serde_json::json!(list)))
         });
         self.stabilizer.list_gpu_devices(finished);
-    }
-    fn set_device(&self, i: i32) {
-        self.stabilizer.params.write().current_device = i;
-        let mut l = self.stabilizer.stabilization.write();
-        l.set_device(i as isize);
     }
     fn set_rendering_gpu_type_from_name(&self, name: String) {
         rendering::set_gpu_type_from_name(&name);

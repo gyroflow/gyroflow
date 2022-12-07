@@ -1129,6 +1129,12 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(obj)
     }
 
+    pub fn set_device(&self, i: i32) {
+        self.params.write().current_device = i;
+        let mut l = self.stabilization.write();
+        l.set_device(i as isize);
+    }
+
     pub fn set_keyframe(&self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
         self.keyframes.write().set(typ, timestamp_us, value);
         self.keyframes_updated(typ);

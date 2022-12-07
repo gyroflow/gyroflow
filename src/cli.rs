@@ -451,6 +451,10 @@ fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>, queue: 
     let codec = settings.get("defaultCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap().min(codecs.len() - 1);
     let codec_name = codecs[codec];
 
+    if let Some(processing_device) = settings.get("processingDeviceIndex").and_then(|x| x.parse::<i32>().ok()) {
+        stab.set_device(processing_device);
+    }
+
     // Sync and export settings
     serde_json::json!({
         "output": {
