@@ -1844,6 +1844,8 @@ impl Controller {
                                             if !first_file {
                                                 sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
                                                 sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
+                                                sync_points.push((add_timestamp * time_scale + 1.0) * 1000.0);
+                                                sync_points.push((add_timestamp * time_scale + 1.5) * 1000.0);
                                                 continue;
                                             } else {
                                                 headers_end_position = Some(output_gcsv.as_ref().unwrap().stream_position()?);
