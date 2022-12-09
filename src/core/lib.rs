@@ -250,9 +250,9 @@ impl<T: PixelType> StabilizationManager<T> {
     }
 
     pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> Vec<f64> {
-        let (window, frames, fps) = {
+        let (window, frames, fps, method) = {
             let params = params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps())
+            (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
         if window > 0.0 || window < -0.9 {
             let mut timestamps = Vec::with_capacity(frames);
@@ -260,7 +260,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 timestamps.push(i as f64 * 1000.0 / fps);
             }
 
-            let fovs = zoom.compute(&timestamps, &keyframes);
+            let fovs = zoom.compute(&timestamps, &keyframes, method.into());
             fovs.iter().map(|v| v.0).collect()
         } else {
             Vec::new()
@@ -496,6 +496,7 @@ impl<T: PixelType> StabilizationManager<T> {
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_x      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.0 = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_y      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.1 = v; self.invalidate_zooming(); }
+    pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;        self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
@@ -788,6 +789,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 "frame_readout_time":     params.frame_readout_time,
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
                 "adaptive_zoom_center_offset": params.adaptive_zoom_center_offset,
+                "adaptive_zoom_method": params.adaptive_zoom_method,
                 // "adaptive_zoom_fovs":     if !thin { util::compress_to_base91(&params.fovs) } else { None },
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
@@ -1023,6 +1025,9 @@ impl<T: PixelType> StabilizationManager<T> {
                         center_offs.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
                         center_offs.get(1).and_then(|x| x.as_f64()).unwrap_or_default()
                     );
+                }
+                if let Some(zooming_method) = obj.get("adaptive_zoom_method").and_then(|x| x.as_i64()) {
+                    params.adaptive_zoom_method = zooming_method as i32;
                 }
 
                 if let Some(method) = obj.get("method").and_then(|x| x.as_str()) {

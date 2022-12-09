@@ -9,7 +9,7 @@ pub struct ZoomDisabled {
 }
 
 impl ZoomingAlgorithm for ZoomDisabled {
-    fn compute(&self, _timestamps: &[f64], _keyframes: &KeyframeManager) -> Vec<(f64, Point2D)> {
+    fn compute(&self, _timestamps: &[f64], _keyframes: &KeyframeManager, _method: ZoomMethod) -> Vec<(f64, Point2D)> {
         Vec::new()
     }
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { Default::default() }

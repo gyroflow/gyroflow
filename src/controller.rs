@@ -123,6 +123,7 @@ pub struct Controller {
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
+    zooming_method: qt_property!(i32; WRITE set_zooming_method),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool)),
@@ -1261,6 +1262,7 @@ impl Controller {
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zooming_method,     v: i32; recompute; zooming_data_changed);
     wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);

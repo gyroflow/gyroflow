@@ -12,6 +12,8 @@ pub struct ZoomDynamic {
 }
 
 struct DataPerTimestamp {
+    fps: f64,
+    window: f64,
     frames: usize,
     half_frames: isize,
     gaussian_window: Vec<f64>
@@ -20,7 +22,7 @@ struct DataPerTimestamp {
 impl ZoomingAlgorithm for ZoomDynamic {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
 
-    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager) -> Vec<(f64, Point2D)> {
+    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<(f64, Point2D)> {
         if timestamps.is_empty() {
             return Vec::new();
         }
@@ -39,29 +41,49 @@ impl ZoomingAlgorithm for ZoomDynamic {
                 let frames = self.get_frames_per_window(window);
                 if frames > max_window { max_window = frames; }
                 DataPerTimestamp {
+                    window,
+                    fps: self.compute_params.scaled_fps,
                     frames,
                     half_frames: (frames / 2) as isize,
                     gaussian_window: gaussian_window_normalized(frames, frames as f64 / 6.0)
                 }
             }).collect::<Vec<_>>();
 
-            let max_window_half = max_window / 2;
-
-            let fov_values_pad = pad_edge(&fov_values, (max_window_half, max_window_half));
-            let fov_min = min_rolling_dynamic(&fov_values_pad, max_window_half as isize, &data_per_timestamp);
-            let fov_min_pad = pad_edge(&fov_min, (max_window_half, max_window_half));
-
-            fov_values = convolve_dynamic(&fov_min_pad, max_window_half as isize, &data_per_timestamp);
+            match method {
+                ZoomMethod::GaussianFilter => {
+                    let max_window_half = max_window / 2;
+                    let fov_values_pad = pad_edge(&fov_values, (max_window_half, max_window_half));
+                    let fov_min = min_rolling_dynamic(&fov_values_pad, max_window_half as isize, &data_per_timestamp);
+                    let fov_min_pad = pad_edge(&fov_min, (max_window_half, max_window_half));
+                    fov_values = convolve_dynamic(&fov_min_pad, max_window_half as isize, &data_per_timestamp);
+                },
+                ZoomMethod::EnvelopeFollower => {
+                    let second_pass_alpha = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / 0.2).exp();
+                    fov_values = envelope_follower(&fov_values, &data_per_timestamp, None);
+                    fov_values = envelope_follower(&fov_values, &data_per_timestamp, Some(second_pass_alpha));
+                }
+            }
         } else {
-            // Static window
-            let frames = self.get_frames_per_window(self.window);
+            match method {
+                ZoomMethod::GaussianFilter => {
+                    // Static window
+                    let frames = self.get_frames_per_window(self.window);
 
-            let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
-            let fov_min = min_rolling(&fov_values_pad, frames);
-            let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
+                    let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
+                    let fov_min = min_rolling(&fov_values_pad, frames);
+                    let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
 
-            let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
-            fov_values = convolve(&fov_min_pad, &gaussian);
+                    let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
+                    fov_values = convolve(&fov_min_pad, &gaussian);
+                },
+                ZoomMethod::EnvelopeFollower => {
+                    let first_pass_alpha  = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / self.window).exp();
+                    let second_pass_alpha = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / 0.2).exp();
+
+                    fov_values = envelope_follower(&fov_values, &[], Some(first_pass_alpha));
+                    fov_values = envelope_follower(&fov_values, &[], Some(second_pass_alpha));
+                }
+            }
         }
 
         fov_values.iter().copied().zip(center_position.iter().copied()).collect()
@@ -106,14 +128,13 @@ fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
     }).collect()
 }
 
-fn gaussian_window(m: usize, std: f64) -> Vec<f64> {
-    let step = 1.0 / m as f64;
-    let n: Vec<f64> = (0..m).map(|i| (i as f64 * step) - (m as f64 - 1.0) / 2.0).collect();
-    let sig2 = 2.0 * std * std;
-    n.iter().map(|&v| (-v).powi(2) / sig2).collect()
+fn gaussian_window(width: isize, std: f64) -> Vec<f64> {
+    let sig2 = 2.0 * std.powi(2);
+    (-width / 2..=width / 2).map(|x| (-(x.pow(2) as f64) / sig2).exp()).collect()
 }
+
 fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
-    let mut w = gaussian_window(m, std);
+    let mut w = gaussian_window(m as isize, std);
     let sum: f64 = w.iter().sum();
     w.iter_mut().for_each(|v| *v /= sum);
     w
@@ -168,4 +189,30 @@ fn convolve_dynamic(a: &[f64], max_window_half: isize, data_per_timestamp: &[Dat
         }
     }
     ret
+}
+
+fn envelope_follower(a: &[f64], data_per_timestamp: &[DataPerTimestamp], alpha: Option<f64>) -> Vec<f64> {
+    if a.is_empty() { return Vec::new(); }
+
+    let alphas = if let Some(alpha) = alpha {
+        vec![alpha; a.len()]
+    } else {
+        data_per_timestamp.iter().map(|dpt| {
+            1.0 - (-(1.0 / dpt.fps) / dpt.window).exp()
+        }).collect::<Vec<_>>()
+    };
+
+    let mut q = *a.iter().next_back().unwrap();
+    let smoothed_rev = a.iter().zip(&alphas).rev().map(|(&x, coeff)| {
+        q = x.min(x * coeff + q * (1.0-coeff));
+        q
+    }).collect::<Vec<_>>();
+
+    let mut q = *smoothed_rev.iter().next_back().unwrap();
+    let smoothed2 = smoothed_rev.iter().rev().zip(&alphas).map(|(&x, coeff)| {
+        q = x.min(x * coeff + q * (1.0-coeff));
+        q
+    }).collect::<Vec<_>>();
+
+    smoothed2
 }

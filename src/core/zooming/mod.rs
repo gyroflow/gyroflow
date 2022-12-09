@@ -35,8 +35,22 @@ impl Merge<f32> for Point2D {
     }
 }
 
+pub enum ZoomMethod {
+    GaussianFilter,
+    EnvelopeFollower,
+}
+impl From<i32> for ZoomMethod {
+    fn from(v: i32) -> Self {
+        match v {
+            0 => Self::GaussianFilter,
+            1 => Self::EnvelopeFollower,
+            _ => { log::error!("Invalid zooming method: {v}"); Self::GaussianFilter }
+        }
+    }
+}
+
 pub trait ZoomingAlgorithm {
-    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager) -> Vec<(f64, Point2D)>;
+    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<(f64, Point2D)>;
     fn compute_params(&self) -> &ComputeParams;
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
     fn hash(&self, hasher: &mut dyn Hasher);

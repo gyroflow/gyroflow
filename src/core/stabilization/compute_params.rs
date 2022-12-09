@@ -39,6 +39,7 @@ pub struct ComputeParams {
     pub scaled_fps: f64,
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
+    pub adaptive_zoom_method: i32,
     pub framebuffer_inverted: bool,
 
     pub zooming_debug_points: bool,
@@ -83,6 +84,7 @@ impl ComputeParams {
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
+            adaptive_zoom_method: params.adaptive_zoom_method,
             video_speed: params.video_speed,
             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
             video_speed_affects_zooming: params.video_speed_affects_zooming,
@@ -133,6 +135,7 @@ impl std::fmt::Debug for ComputeParams {
          .field("scaled_fps",                &self.scaled_fps)
          .field("adaptive_zoom_window",      &self.adaptive_zoom_window)
          .field("adaptive_zoom_center_offset", &self.adaptive_zoom_center_offset)
+         .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
          .field("framebuffer_inverted",      &self.framebuffer_inverted)
          .field("zooming_debug_points",      &self.zooming_debug_points)
          .field("distortion_model",          &self.distortion_model.id())

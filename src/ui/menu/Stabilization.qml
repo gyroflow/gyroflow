@@ -28,6 +28,7 @@ MenuItem {
         property alias useGravityVectors: useGravityVectors.checked;
         property alias videoSpeedAffectsSmoothing: videoSpeedAffectsSmoothing.checked;
         property alias videoSpeedAffectsZooming: videoSpeedAffectsZooming.checked;
+        property alias zoomingMethod: zoomingMethod.currentIndex;
     }
 
     function loadGyroflow(obj) {
@@ -69,6 +70,7 @@ MenuItem {
                 zoomingCenterX.value = stab.adaptive_zoom_center_offset[0];
                 zoomingCenterY.value = stab.adaptive_zoom_center_offset[1];
             }
+            if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;
             }
@@ -81,6 +83,7 @@ MenuItem {
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
             if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
             if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
+
         }
     }
 
@@ -426,46 +429,75 @@ MenuItem {
             width: parent.width;
             keyframe: "ZoomingSpeed";
             onValueChanged: controller.adaptive_zoom = value;
+            onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
         }
     }
 
-    Label {
-        text: qsTr("Zooming center offset");
-        visible: croppingMode.currentIndex > 0;
-        Column {
-            width: parent.width;
-            Label {
-                text: qsTr("X");
-                position: Label.LeftPosition;
-                SliderWithField {
-                    id: zoomingCenterX;
-                    precision: 0;
-                    value: 0;
-                    defaultValue: 0;
-                    from: -100;
-                    to: 100;
-                    unit: qsTr("%");
-                    width: parent.width;
-                    keyframe: "ZoomingCenterX";
-                    scaler: 100.0;
-                    onValueChanged: controller.zooming_center_x = value;
+    AdvancedSection {
+        InfoMessageSmall {
+            show: croppingMode.currentIndex == 1 && zoomingMethod.currentIndex == 0 && zoomingMethod.zoomingSpeedKeyframed;
+            text: qsTr("When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.");
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Zooming method");
+            visible: croppingMode.currentIndex == 1;
+            ComboBox {
+                id: zoomingMethod;
+                model: ["Gaussian filter", "Envelope follower"];
+                // font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 0;
+                onCurrentIndexChanged: controller.zooming_method = currentIndex;
+                property bool zoomingSpeedKeyframed: adaptiveZoom.keyframesEnabled || (videoSpeed.keyframesEnabled && videoSpeedAffectsSmoothing.checked);
+                function adjustMethod() {
+                    // If keyframes are enabled, change to Envelope follower by default
+                    if (zoomingSpeedKeyframed && zoomingMethod.currentIndex == 0) {
+                        currentIndex = 1;
+                    }
                 }
             }
-            Label {
-                text: qsTr("Y");
-                position: Label.LeftPosition;
-                SliderWithField {
-                    id: zoomingCenterY;
-                    precision: 0;
-                    value: 0;
-                    defaultValue: 0;
-                    from: -100;
-                    to: 100;
-                    unit: qsTr("%");
-                    width: parent.width;
-                    keyframe: "ZoomingCenterY";
-                    scaler: 100.0;
-                    onValueChanged: controller.zooming_center_y = value;
+        }
+
+        Label {
+            text: qsTr("Zooming center offset");
+            visible: croppingMode.currentIndex > 0;
+            Column {
+                width: parent.width;
+                Label {
+                    text: qsTr("X");
+                    position: Label.LeftPosition;
+                    SliderWithField {
+                        id: zoomingCenterX;
+                        precision: 0;
+                        value: 0;
+                        defaultValue: 0;
+                        from: -100;
+                        to: 100;
+                        unit: qsTr("%");
+                        width: parent.width;
+                        keyframe: "ZoomingCenterX";
+                        scaler: 100.0;
+                        onValueChanged: controller.zooming_center_x = value;
+                    }
+                }
+                Label {
+                    text: qsTr("Y");
+                    position: Label.LeftPosition;
+                    SliderWithField {
+                        id: zoomingCenterY;
+                        precision: 0;
+                        value: 0;
+                        defaultValue: 0;
+                        from: -100;
+                        to: 100;
+                        unit: qsTr("%");
+                        width: parent.width;
+                        keyframe: "ZoomingCenterY";
+                        scaler: 100.0;
+                        onValueChanged: controller.zooming_center_y = value;
+                    }
                 }
             }
         }
@@ -540,6 +572,7 @@ MenuItem {
                 isKeyframed = controller.is_keyframed("VideoSpeed");
             }
             onValueChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
             Connections {
                 target: controller;
                 function onKeyframe_value_updated(keyframe: string, value: real) {
