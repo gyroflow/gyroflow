@@ -20,7 +20,7 @@ impl FrameTransform {
         if can_invert && params.framebuffer_inverted {
             frame_readout_time *= -1.0;
         }
-        frame_readout_time / 2.0
+        frame_readout_time
     }
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
         let img_dim_ratio = Self::get_ratio(params);
@@ -122,6 +122,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+        let smoothed_quat1 = params.gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
@@ -132,7 +133,7 @@ impl FrameTransform {
             } else {
                 timestamp_ms
             };
-            let quat = params.gyro.smoothed_quat_at_timestamp(quat_time)
+            let quat = smoothed_quat1
                      * quat1
                      * params.gyro.org_quat_at_timestamp(quat_time);
 
@@ -214,6 +215,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+        let smoothed_quat1 = params.gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
@@ -224,7 +226,7 @@ impl FrameTransform {
             } else {
                 timestamp_ms
             };
-            let quat = params.gyro.smoothed_quat_at_timestamp(quat_time)
+            let quat = smoothed_quat1
                      * quat1
                      * params.gyro.org_quat_at_timestamp(quat_time);
 
