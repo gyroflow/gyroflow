@@ -24,98 +24,98 @@
       <translation>주변부</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="93"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="94"/>
       <source>Feather</source>
       <translation>페더링</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="111"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="113"/>
       <source>Render background</source>
       <translation>배경색</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="122"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="124"/>
       <source>Theme</source>
       <translation>테마</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="138"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="140"/>
       <source>UI scaling</source>
       <translation>UI 배율</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="152"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="154"/>
       <source>Language</source>
       <translation>언어</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="201"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="203"/>
       <source>Safe area guide</source>
       <translation>안전 영역 가이드</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="202"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="204"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>FOV &gt; 1인 경우, FOV = 1인 직사각형을 미리 보기 영상 위에 표시합니다. 시각적인 표시이며, 렌더링 출력에 영향을 미치지 않습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="208"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="210"/>
       <source>Use GPU decoding</source>
       <translation>GPU 디코딩 사용</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="214"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="216"/>
       <source>Preview pipeline</source>
       <translation type="unfinished">Preview pipeline</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="237"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="239"/>
       <source>Device for video processing</source>
       <translation>영상 처리에 사용할 장치</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="251"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
       <source>CPU only</source>
       <translation>CPU 단독</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="292"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="295"/>
       <source>Default file suffix</source>
       <translation>기본 파일 접미사</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="303"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="306"/>
       <source>Reset all settings to default</source>
       <translation>모든 설정을 기본값으로 초기화</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="307"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="310"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
       <translation>모든 설정을 기본값으로 초기화할까요?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="308"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="311"/>
       <source>Yes</source>
       <translation>예</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="316"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="319"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
       <translation>설정을 초기화했습니다. 변경 사항을 적용하려면 Gyroflow를 다시 시작하세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="317"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="320"/>
       <source>Exit</source>
       <translation>종료</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="318"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="321"/>
       <source>Ok</source>
       <translation type="unfinished">Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="321"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="324"/>
       <source>No</source>
       <translation>아니요</translation>
     </message>
@@ -1143,12 +1143,12 @@ Do you want to submit your profile?</source>
       <translation>페더링된 주변부</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Light</source>
       <translation>밝음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="126"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
       <source>Dark</source>
       <translation>어두움</translation>
     </message>
@@ -1163,37 +1163,37 @@ Do you want to submit your profile?</source>
       <translation>없음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="174"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="177"/>
       <source>No smoothing</source>
       <translation>스무딩 없음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="175"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="178"/>
       <source>Default</source>
       <translation>기본</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="176"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="179"/>
       <source>Plain 3D</source>
       <translation>일반 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="177"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
       <source>Fixed camera</source>
       <translation>고정된 카메라</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="402"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="405"/>
       <source>No zooming</source>
       <translation>확대 없음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="402"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="405"/>
       <source>Dynamic zooming</source>
       <translation>동적 확대</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="402"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="405"/>
       <source>Static zoom</source>
       <translation>확대 값 고정</translation>
     </message>
@@ -1729,196 +1729,206 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>안정화</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="179"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
       <source>Pitch smoothness</source>
       <translation>피치 평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Yaw smoothness</source>
       <translation>요 평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
       <source>Roll smoothness</source>
       <translation>롤 평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Smoothness</source>
       <translation>평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
       <source>Per axis</source>
       <translation>축별 설정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
       <source>Max smoothness</source>
       <translation>최대 평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
       <source>Max smoothness at high velocity</source>
       <translation>고속에서의 최대 평활도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
       <source>Second smoothing pass</source>
       <translation>2차 스무딩 처리</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
       <source>Only within trim range</source>
       <translation type="unfinished">Only within trim range</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
       <source>Yaw angle correction</source>
       <translation>요 각도 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
       <source>Pitch angle correction</source>
       <translation>피치 각도 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="342"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="345"/>
       <source>Roll angle correction</source>
       <translation>롤 각도 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
       <source>Yaw angle</source>
       <translation>요 각도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
       <source>Pitch angle</source>
       <translation>피치 각도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
       <source>Roll angle</source>
       <translation>롤 각도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="202"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>FOV가 1.0보다 큼, 검은 경계가 보일 수 있음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="204"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="207"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="318"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="321"/>
       <source>Lock horizon</source>
       <translation>수평 잠금</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="323"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="326"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>잠금 수준</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="331"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="334"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="495"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="350"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="353"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="358"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="361"/>
       <source>Use gravity vectors</source>
       <translation>중력 벡터 사용</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="368"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="371"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>수평 잠금이 제대로 이루어지지 않으면, &quot;흔들림 데이터&quot; 영역에서 다른 보정 방식을 시도해 보세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="389"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>최대 회전: 피치: %1, 요: %2, 롤: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="394"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
       <source>Max zoom: %1</source>
       <translation>최대 확대: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="417"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="420"/>
       <source>Zooming speed</source>
       <translation>확대 속도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="425"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
+      <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
+      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
+      <source>Zooming method</source>
+      <translation type="unfinished">Zooming method</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
       <source>Zooming center offset</source>
       <translation>확대 중심 오프셋</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="438"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="469"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="455"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="476"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="508"/>
       <source>Rolling shutter correction</source>
       <translation>롤링 셔터 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="482"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
       <source>Frame readout time</source>
       <translation>프레임 리드아웃 시간</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="488"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="500"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="532"/>
       <source>Bottom to top</source>
       <translation>하단에서 상단까지</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="507"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="539"/>
       <source>Lens correction strength</source>
       <translation>렌즈 보정 강도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="524"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
       <source>Video speed</source>
       <translation type="unfinished">Video speed</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="560"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="593"/>
       <source>Link with smoothing</source>
       <translation type="unfinished">Link with smoothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="573"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="606"/>
       <source>Link with zooming speed</source>
       <translation type="unfinished">Link with zooming speed</translation>
     </message>
