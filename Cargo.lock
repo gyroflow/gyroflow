@@ -1133,9 +1133,9 @@ dependencies = [
 
 [[package]]
 name = "filetime"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b9663d381d07ae25dc88dbdf27df458faa83a9b25336bcac83d5e452b5fc9d3"
+checksum = "4e884668cd0c7480504233e951174ddc3b382f7c2666e3b7310b5c4e7b0c37f9"
 dependencies = [
  "cfg-if",
  "libc",
@@ -3091,7 +3091,8 @@ dependencies = [
 [[package]]
 name = "system_shutdown"
 version = "4.0.0"
-source = "git+https://github.com/risoflora/system_shutdown.git?rev=077da92#077da92fba302a26e551ff2ae5e34d308f3cfc3b"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7bf59aec03436e30e37e56f226363623d7a9114a1358aae6835c3a6575d2fe7"
 dependencies = [
  "windows",
  "zbus",
@@ -3111,7 +3112,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=0e25dae#0e25dae864e0acf4c7c5fb647282f17f0c8e5a78"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=76a8d58#76a8d5841a2d670c0e3de3288fae2210f2cd3aa9"
 dependencies = [
  "argh",
  "byteorder",

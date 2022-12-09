@@ -13,7 +13,7 @@ opencv = ["gyroflow-core/use-opencv"]
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "eb66d52" }
-system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "077da92" }
+system_shutdown = "4.0.0"
 breakpad-sys = "0.1.1"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
@@ -22,8 +22,8 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 [dependencies]
 cstr = "0.2.11"
 cpp = "0.5.7"
-serde = "1.0.147"
-serde_json = "1.0.87"
+serde = "1.0.149"
+serde_json = "1.0.89"
 bytemuck = "1.12.3"
 nalgebra = "0.31"
 semver = "1.0.14"
@@ -33,7 +33,7 @@ regex = "1.7.0"
 
 pollster = "0.2.5"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.24"
+flate2 = "1.0.25"
 walkdir = "2.3.2"
 mp4-merge = "0.1.3"
 human-sort = "0.2.2"
@@ -65,7 +65,7 @@ log-panics = { version = "2.1", features = ["with-backtrace"] }
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
-ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = "792db4c"  }
+ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = "792db4c" }
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
 version = "0.43.0"
