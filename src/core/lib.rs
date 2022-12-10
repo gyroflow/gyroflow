@@ -1168,6 +1168,7 @@ impl<T: PixelType> StabilizationManager<T> {
     fn keyframes_updated(&self, typ: &KeyframeType) {
         match typ {
             KeyframeType::VideoRotation |
+            KeyframeType::ZoomingSpeed |
             KeyframeType::ZoomingCenterX |
             KeyframeType::ZoomingCenterY => self.invalidate_zooming(),
 

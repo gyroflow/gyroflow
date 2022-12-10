@@ -1712,6 +1712,7 @@ impl Controller {
             self.stabilizer.set_keyframe(&kf, timestamp_us, value);
             self.keyframes_changed();
             self.request_recompute();
+            self.chart_data_changed();
         }
     }
     fn set_keyframe_easing(&self, typ: String, timestamp_us: i64, easing: String) {
@@ -1720,6 +1721,7 @@ impl Controller {
                 self.stabilizer.set_keyframe_easing(&kf, timestamp_us, e);
                 self.keyframes_changed();
                 self.request_recompute();
+                self.chart_data_changed();
             }
         }
     }
@@ -1736,6 +1738,7 @@ impl Controller {
             self.stabilizer.remove_keyframe(&kf, timestamp_us);
             self.keyframes_changed();
             self.request_recompute();
+            self.chart_data_changed();
         }
     }
     fn clear_keyframes_type(&self, typ: String) {
@@ -1743,6 +1746,7 @@ impl Controller {
             self.stabilizer.clear_keyframes_type(&kf);
             self.keyframes_changed();
             self.request_recompute();
+            self.chart_data_changed();
         }
     }
     fn keyframe_value_at_video_timestamp(&self, typ: String, timestamp_ms: f64) -> QJSValue {

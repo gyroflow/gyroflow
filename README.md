@@ -77,13 +77,13 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Fully zero-copy GPU preview rendering (working but experimental)
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be used to create OpenFX and Adobe plugins (on the TODO list)
 - Automatic updates of lens profile database
-- Built-in official lens profiles for GoPro: HERO 6, 7, 8, 9, 10; RunCam: Thumb, ThumbPro, 5 Orange; Insta360: GO 2 in all shooting modes
+- Built-in official lens profiles for GoPro: HERO 6, 7, 8, 9, 10, 11; RunCam: Thumb, ThumbPro, 5 Orange; Insta360: GO 2 in all shooting modes
 
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
 - [x] Sony (a1, a7c, a7r IV, a7 IV, a7s III, a9 II, FX3, FX6, FX9, RX0 II, RX100 VII, ZV1, ZV-E10)
 - [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2, Caddx Peanut)
-- [x] DJI Avata
+- [x] DJI (Avata, O3 Air Unit)
 - [x] Blackmagic RAW (*.braw)
 - [x] RED RAW (*.r3d)
 - [x] Betaflight blackbox (*.bfl, *.bbl, *.csv)

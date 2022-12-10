@@ -214,6 +214,7 @@ impl StabilizationParams {
             background_margin_feather: self.background_margin_feather,
             of_method:                 self.of_method,
             current_device:            self.current_device,
+            adaptive_zoom_method:      self.adaptive_zoom_method,
             ..Default::default()
         };
     }
