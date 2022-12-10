@@ -59,6 +59,8 @@ fn entry() {
         qApp->setOrganizationName("Gyroflow");
         qApp->setOrganizationDomain("gyroflow.xyz");
         qApp->setApplicationName("Gyroflow");
+
+        QMessageLogger("", 0, "main").debug(QLoggingCategory("gyroflow")) << "Qt version:" << qVersion();
     });
 
     let mut open_file = String::new();
