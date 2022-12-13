@@ -33,6 +33,7 @@ fn rgb_to_yuv(v: Vector4<f32>) -> Vector4<f32> {
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBA16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct AYUV16(u16, u16, u16, u16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBAf(f32, f32, f32, f32);
+#[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct RGBAf16(Ff16, Ff16, Ff16, Ff16);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct R32f(f32);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV8(u8, u8);
 #[derive(Default, Clone, Copy, PartialEq, PartialOrd)] pub struct UV16(u16, u16);
@@ -132,6 +133,23 @@ impl PixelType for RGBAf {
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float4", "convert_float4", "float4", "convert_float4") }
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba32Float, "f32", 255.0)) }
+}
+#[derive(Default, Copy, Clone, PartialEq, PartialOrd)]
+pub struct Ff16(half::f16);
+unsafe impl bytemuck::Zeroable for Ff16 { }
+unsafe impl bytemuck::Pod for Ff16 { }
+
+unsafe impl bytemuck::Zeroable for RGBAf16 { }
+unsafe impl bytemuck::Pod for RGBAf16 { }
+impl PixelType for RGBAf16 {
+    const COUNT: usize = 4;
+    const SCALAR_BYTES: usize = 2;
+    type Scalar = Ff16;
+    #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0.0.to_f32(), v.1.0.to_f32(), v.2.0.to_f32(), v.3.0.to_f32()) }
+    #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(Ff16(half::f16::from_f32(v[0])), Ff16(half::f16::from_f32(v[1])), Ff16(half::f16::from_f32(v[2])), Ff16(half::f16::from_f32(v[3]))) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _max_val: f32) -> Vector4<f32> { v }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("half4", "convert_half4", "half4", "convert_half4") }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Float, "f16", 255.0)) }
 }
 unsafe impl bytemuck::Zeroable for R32f { }
 unsafe impl bytemuck::Pod for R32f { }
