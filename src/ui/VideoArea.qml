@@ -537,12 +537,14 @@ Item {
                 }
                 Timer {
                     id: bufferTrigger;
-                    interval: 500;
+                    interval: 150;
                     onTriggered: {
+                        if (!vid.loaded) bufferTrigger.start();
                         Qt.callLater(() => {
                             vid.currentFrame++;
-                            Qt.callLater(() => vid.currentFrame--);
-                            stabEnabledBtn.checked = true;
+                            Qt.callLater(() => vid.currentFrame = 0);
+                            if (vid.loaded)
+                                stabEnabledBtn.checked = true;
                         });
                     }
                 }
