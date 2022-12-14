@@ -22,7 +22,7 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 [dependencies]
 cstr = "0.2.11"
 cpp = "0.5.7"
-serde = "1.0.149"
+serde = "1.0.150"
 serde_json = "1.0.89"
 bytemuck = "1.12.3"
 nalgebra = "0.31"
@@ -65,7 +65,7 @@ log-panics = { version = "2.1", features = ["with-backtrace"] }
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
-ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = "792db4c" }
+ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = "baf16ed" }
 
 [target."cfg(target_os = \"windows\")".dependencies.windows]
 version = "0.43.0"
@@ -75,7 +75,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 cpp_build = "0.5.7"
 winres = "0.1.12"
 walkdir = "2.3.2"
-cc = "1.0.76"
+cc = "1.0.77"
 
 [[bin]]
 name = "gyroflow"
@@ -110,4 +110,4 @@ name = "android.permission.WRITE_EXTERNAL_STORAGE"
 [target.'cfg(target_os = "android")'.dependencies]
 # ndk = { version = "*", features = ["trace"] }
 # ndk-glue = { version = "*", features = ["logger"] }
-ndk-sys = { version = "0.4.0" }
+ndk-sys = { version = "0.4.1" }
