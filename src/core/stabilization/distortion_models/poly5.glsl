@@ -30,7 +30,8 @@ vec2 undistort_point(vec2 pos) {
     return pos * ru;
 }
 
-vec2 distort_point(vec2 pos) {
+vec2 distort_point(float x, float y, float z) {
+    vec2 pos = vec2(x, y) / z;
     float ru2 = (pos.x * pos.x + pos.y * pos.y);
     float poly4 = 1.0 + params.k1.x * ru2 + params.k1.y * ru2 * ru2;
     return pos * poly4;

@@ -51,12 +51,14 @@ impl Poly3 {
         ))
     }
 
-    pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
-        let poly2 = params.k[0] * (point.0 * point.0 + point.1 * point.1) + 1.0;
+    pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
+        let x = x / z;
+        let y = y / z;
+        let poly2 = params.k[0] * (x.powi(2) + y.powi(2)) + 1.0;
 
         (
-            point.0 * poly2,
-            point.1 * poly2
+            x * poly2,
+            y * poly2
         )
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }

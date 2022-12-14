@@ -43,7 +43,8 @@ fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
     return vec2<f32>(0.0, 0.0);
 }
 
-fn distort_point(pos: vec2<f32>) -> vec2<f32> {
+fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
+    let pos = vec2<f32>(x, y) / z;
     let r = length(pos);
 
     let theta = atan(r);

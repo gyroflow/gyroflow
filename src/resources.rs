@@ -72,6 +72,8 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/undistort_poly5.frag.qsb",
         "src/qt_gpu/compiled/undistort_ptlens_digital_stretch.frag.qsb",
         "src/qt_gpu/compiled/undistort_ptlens.frag.qsb",
+        "src/qt_gpu/compiled/undistort_insta360_digital_stretch.frag.qsb",
+        "src/qt_gpu/compiled/undistort_insta360.frag.qsb",
 
         "resources/translations/cs.qm",
         "resources/translations/da.qm",

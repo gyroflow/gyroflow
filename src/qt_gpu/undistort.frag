@@ -93,12 +93,10 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
     float _w = (float(pos.x) * get_param(idx, 6)) + (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + params.translation3d.z;
 
     if (_w > 0) {
-        vec2 pos = vec2(_x, _y) / _w;
-        float r = length(pos);
-        if (params.r_limit > 0.0 && r > params.r_limit) {
+        if (params.r_limit > 0.0 && length(vec2(_x, _y) / _w) > params.r_limit) {
             return vec2(-99999.0, -99999.0);
         }
-        vec2 uv = params.f * distort_point(pos) + params.c;
+        vec2 uv = params.f * distort_point(_x, _y, _w) + params.c;
 
         if (bool(params.flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);

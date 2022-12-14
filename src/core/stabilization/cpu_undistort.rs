@@ -128,16 +128,15 @@ impl<T: PixelType> Stabilization<T> {
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
             let _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
             if _w > 0.0 {
-                let pos = (_x / _w, _y / _w);
-                if params.r_limit > 0.0 && (pos.0 * pos.0 + pos.1 * pos.1) > r_limit {
+                if params.r_limit > 0.0 && ((_x / _w).powi(2) + (_y / _w).powi(2)).sqrt() > r_limit {
                     return None;
                 }
-                let mut uv = distortion_model.distort_point(pos, &params);
+                let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
                 uv = ((uv.0 * params.f[0]) + params.c[0], (uv.1 * params.f[1]) + params.c[1]);
 
                 if (params.flags & 2) == 2 { // Has digital lens
                     if let Some(digital) = digital_lens {
-                        uv = digital.distort_point(uv, params);
+                        uv = digital.distort_point(uv.0, uv.1, 1.0, params);
                     }
                 }
 
@@ -415,12 +414,12 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
 
                 let mut new_pt = pt;
                 new_pt = ((new_pt.0 - out_c.0) / f.0, (new_pt.1 - out_c.1) / f.1);
-                new_pt = params.distortion_model.distort_point(new_pt, &kernel_params);
+                new_pt = params.distortion_model.distort_point(new_pt.0, new_pt.1, 1.0, &kernel_params); // TODO: z?
                 new_pt = ((new_pt.0 * f.0) + out_c.0, (new_pt.1 * f.1) + out_c.1);
 
                 if let Some(digital) = &params.digital_lens {
-                    new_pt = digital.distort_point(new_pt, &kernel_params);
-                    if digital.id() == "gopro_superview" || digital.id() == "gopro_hyperview"{
+                    new_pt = digital.distort_point(new_pt.0, new_pt.1, 1.0, &kernel_params);
+                    if digital.id() == "gopro_superview" || digital.id() == "gopro_hyperview" {
                         // TODO: This calculation is wrong but it somewhat works
                         let size = (params.width as f32, params.height as f32);
                         new_pt = (new_pt.0 / size.0 - 0.5, new_pt.1 / size.1 - 0.5);

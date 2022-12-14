@@ -40,7 +40,8 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     return pos * ru;
 }
 
-float2 distort_point(float2 pos, __global KernelParams *params) {
+float2 distort_point(float x, float y, float z, __global KernelParams *params) {
+    float2 pos = (float2)(x, y) / z;
     float poly2 = params->k[0] * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }

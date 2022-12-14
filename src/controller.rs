@@ -745,8 +745,10 @@ impl Controller {
 
                     let camera_id = stab.camera_id.read();
 
+                    let has_builtin_profile = file_metadata.as_ref().and_then(|x| x.lens_profile.as_ref().and_then(|y| Some(y.is_object()))).unwrap_or_default();
+
                     let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
-                    if is_main_video && !id_str.is_empty() {
+                    if is_main_video && !id_str.is_empty() && !has_builtin_profile {
                         let mut db = stab.lens_profile_db.write();
                         db.on_loaded(move |db| {
                             if db.contains_id(&id_str) {

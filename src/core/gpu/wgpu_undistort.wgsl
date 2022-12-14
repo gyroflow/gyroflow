@@ -141,12 +141,10 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
     let _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
 
     if (_w > 0.0) {
-        let pos = vec2<f32>(_x, _y) / _w;
-        let r = length(pos);
-        if (params.r_limit > 0.0 && r > params.r_limit) {
+        if (params.r_limit > 0.0 && length(vec2<f32>(_x, _y) / _w) > params.r_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
-        var uv = f * distort_point(pos) + c;
+        var uv = f * distort_point(_x, _y, _w) + c;
 
         if (bool(params.flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);

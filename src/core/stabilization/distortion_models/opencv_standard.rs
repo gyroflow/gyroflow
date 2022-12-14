@@ -30,8 +30,9 @@ impl OpenCVStandard {
         Some((x, y))
     }
 
-    pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
-        let (x, y) = point;
+    pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
+        let x = x / z;
+        let y = y / z;
         let r2 = x * x + y * y;
         let r4 = r2 * r2;
         let r6 = r4 * r2;

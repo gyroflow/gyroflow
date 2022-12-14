@@ -16,9 +16,9 @@ impl DigitalStretch {
 
     /// `uv` range: (0,0)..(width, height)
     /// From real to processed
-    pub fn distort_point(&self, uv: (f32, f32), params: &KernelParams) -> (f32, f32) {
-        (uv.0 * params.digital_lens_params[0],
-         uv.1 * params.digital_lens_params[1])
+    pub fn distort_point(&self, x: f32, y: f32, _z: f32, params: &KernelParams) -> (f32, f32) {
+        (x * params.digital_lens_params[0],
+         y * params.digital_lens_params[1])
     }
     pub fn adjust_lens_profile(&self, _profile: &mut LensProfile) {
         // TODO

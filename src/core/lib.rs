@@ -177,7 +177,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 if let Some(found) = db.find(lens_str) {
                     *l = found.clone();
                 }
-            } else {
+            } else if lens.is_object() {
                 l.load_from_json_value(lens);
                 l.filename = path.to_string();
                 let db = self.lens_profile_db.read();

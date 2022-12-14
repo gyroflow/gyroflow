@@ -43,7 +43,8 @@ vec2 undistort_point(vec2 pos) {
     return vec2(0.0, 0.0);
 }
 
-vec2 distort_point(vec2 pos) {
+vec2 distort_point(float x, float y, float z) {
+    vec2 pos = vec2(x, y) / z;
     float r = length(pos);
 
     float theta = atan(r);

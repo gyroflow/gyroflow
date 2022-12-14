@@ -26,20 +26,20 @@ impl GoProSuperview {
 
     /// `uv` range: (0,0)...(width, height)
     /// From wide to superview
-    pub fn distort_point(&self, mut uv: (f32, f32), params: &KernelParams) -> (f32, f32) {
+    pub fn distort_point(&self, mut x: f32, mut y: f32, _z: f32, params: &KernelParams) -> (f32, f32) {
         let size = (params.width as f32, params.height as f32);
-        uv = ((uv.0 / size.0) - 0.5,
-              (uv.1 / size.1) - 0.5);
+        x = (x / size.0) - 0.5;
+        y = (y / size.1) - 0.5;
 
-        let xs = if uv.0 < 0.0 { -1.0 } else { 1.0 };
-        let ys = if uv.1 < 0.0 { -1.0 } else { 1.0 };
+        let xs = if x < 0.0 { -1.0 } else { 1.0 };
+        let ys = if y < 0.0 { -1.0 } else { 1.0 };
 
-        uv.1 = ys * (3.57143 * ((0.5992 * uv.1.abs() + 1.0).sqrt() - 1.0));
-        uv.0 = xs * (3.57143 * (0.880341 * (0.5992 * uv.0.abs() + 0.775).sqrt() - 0.775));
-        uv.0 = xs * (-1.11111 * ((1.0 - 1.8 * uv.0.abs()).sqrt() - 1.0));
+        y = ys * (3.57143 * ((0.5992 * y.abs() + 1.0).sqrt() - 1.0));
+        x = xs * (3.57143 * (0.880341 * (0.5992 * x.abs() + 0.775).sqrt() - 0.775));
+        x = xs * (-1.11111 * ((1.0 - 1.8 * x.abs()).sqrt() - 1.0));
 
-        ((uv.0 + 0.5) * size.0,
-         (uv.1 + 0.5) * size.1)
+        ((x + 0.5) * size.0,
+         (y + 0.5) * size.1)
     }
     pub fn adjust_lens_profile(&self, profile: &mut LensProfile) {
         let aspect = (profile.calib_dimension.w as f64 / profile.calib_dimension.h as f64 * 100.0) as usize;

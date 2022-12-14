@@ -32,7 +32,8 @@ fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
     return pos * ru;
 }
 
-fn distort_point(pos: vec2<f32>) -> vec2<f32> {
+fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
+    let pos = vec2<f32>(x, y) / z;
     let ru2 = (pos.x * pos.x + pos.y * pos.y);
     let r = sqrt(ru2);
     let poly3 = params.k1.x * ru2 * r + params.k1.y * ru2 + params.k1.z * r + 1.0;

@@ -197,12 +197,10 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     float _y = (pos.x * matrix[3]) + (pos.y * matrix[4]) + matrix[5] + params->translation3d.y;
     float _w = (pos.x * matrix[6]) + (pos.y * matrix[7]) + matrix[8] + params->translation3d.z;
     if (_w > 0) {
-        float2 pos = (float2)(_x, _y) / _w;
-        float r = length(pos);
-        if (params->r_limit > 0.0f && r > params->r_limit) {
+        if (params->r_limit > 0.0f && length((float2)(_x, _y) / _w) > params->r_limit) {
             return (float2)(-99999.0f, -99999.0f);
         }
-        float2 uv = params->f * distort_point(pos, params) + params->c;
+        float2 uv = params->f * distort_point(_x, _y, _w, params) + params->c;
 
         if (params->flags & 2) { // Has digital lens
             uv = digital_distort_point(uv, params);

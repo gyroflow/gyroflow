@@ -6,6 +6,7 @@ mod opencv_standard;
 mod poly3;
 mod poly5;
 mod ptlens;
+mod insta360;
 
 mod gopro_superview;
 mod gopro_hyperview;
@@ -29,17 +30,17 @@ macro_rules! impl_models {
         impl DistortionModel {
             pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
                 match &self.inner {
-                    $(DistortionModels::$name(x) => x.undistort_point(point, params),)*
+                    $(DistortionModels::$name(m) => m.undistort_point(point, params),)*
                 }
             }
-            pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
+            pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
                 match &self.inner {
-                    $(DistortionModels::$name(x) => x.distort_point(point, params),)*
+                    $(DistortionModels::$name(m) => m.distort_point(x, y, z, params),)*
                 }
             }
             pub fn adjust_lens_profile(&self, profile: &mut crate::LensProfile) {
                 match &self.inner {
-                    $(DistortionModels::$name(x) => x.adjust_lens_profile(profile),)*
+                    $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
 
@@ -65,6 +66,7 @@ impl_models! {
     Poly3          => poly3::Poly3,
     Poly5          => poly5::Poly5,
     PtLens         => ptlens::PtLens,
+    Insta360       => insta360::Insta360,
 
     // Digital lenses (ie. post-processing)
     GoProSuperview => gopro_superview::GoProSuperview,

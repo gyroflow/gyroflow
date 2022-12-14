@@ -67,8 +67,10 @@ impl OpenCVFisheye {
         None
     }
 
-    pub fn distort_point(&self, point: (f32, f32), params: &KernelParams) -> (f32, f32) {
-        let r = (point.0 * point.0 + point.1 * point.1).sqrt();
+    pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
+        let x = x / z;
+        let y = y / z;
+        let r = (x.powi(2) + y.powi(2)).sqrt();
 
         let theta = r.atan();
         let theta2 = theta*theta;
@@ -81,8 +83,8 @@ impl OpenCVFisheye {
         let scale = if r == 0.0 { 1.0 } else { theta_d / r };
 
         (
-            point.0 * scale,
-            point.1 * scale
+            x * scale,
+            y * scale
         )
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
