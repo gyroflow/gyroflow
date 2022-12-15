@@ -841,13 +841,31 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(serde_json::to_string_pretty(&obj)?)
     }
 
-    pub fn get_new_videofile_path(file_path: &str, path: Option<std::path::PathBuf>) -> PathBuf {
-        let mut file_path = std::path::Path::new(file_path).to_path_buf();
+    pub fn get_new_videofile_path(file_path_str: &str, path: Option<std::path::PathBuf>, sequence_start: u32) -> PathBuf {
+        let mut file_path = std::path::Path::new(file_path_str).to_path_buf();
+        let mut replaced = None;
         if path.is_some() && !file_path.exists() {
+            if let Some(num_pos) = file_path_str.find('%') {
+                if let Some(d_pos) = file_path_str[num_pos+1..].find('d') {
+                    if d_pos <= 5 {
+                        let num_str = &file_path_str[num_pos+1..num_pos+1+d_pos];
+                        if let Ok(num) = num_str.parse::<u32>() {
+                            let new_num = format!("{:01$}", sequence_start, num as usize);
+                            let from = format!("%{}d", num_str);
+                            file_path = std::path::Path::new(&file_path_str.replace(&from, &new_num)).to_path_buf();
+                            replaced = Some((from, new_num));
+                        }
+                    }
+                }
+            }
             if let Some(filename) = file_path.file_name() {
                 let new_path = path.as_ref().unwrap().with_file_name(filename);
                 if new_path.exists() {
-                    file_path = new_path;
+                    if let Some((from, to)) = replaced {
+                        file_path = new_path.with_file_name(&filename.to_string_lossy().replace(&to, &from));
+                    } else {
+                        file_path = new_path;
+                    }
                 }
             }
         }
@@ -869,8 +887,9 @@ impl<T: PixelType> StabilizationManager<T> {
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
             let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+            let sequence_start = obj.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as u32;
 
-            let video_path = Self::get_new_videofile_path(&org_video_path, path.clone());
+            let video_path = Self::get_new_videofile_path(&org_video_path, path.clone(), sequence_start);
             if let Some(videofile) = obj.get_mut("videofile") {
                 *videofile = serde_json::Value::String(util::path_to_str(&video_path));
             }
@@ -902,7 +921,7 @@ impl<T: PixelType> StabilizationManager<T> {
             obj.remove("stab_transform");
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
                 let org_gyro_path = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
-                let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone());
+                let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone(), sequence_start);
                 if let Some(fp) = obj.get_mut("filepath") {
                     *fp = serde_json::Value::String(util::path_to_str(&gyro_path));
                 }

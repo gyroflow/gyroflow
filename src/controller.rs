@@ -1151,7 +1151,7 @@ impl Controller {
                     self.image_sequence_fps = seq_fps;
                 }
                 if !org_video_path.is_empty() {
-                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path.clone()));
+                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path.clone()), self.image_sequence_start as u32);
                     ret[0] = QString::from(core::util::path_to_str(&video_path));
                 }
 
@@ -1159,7 +1159,7 @@ impl Controller {
                     let gyro_path = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
 
                     if !gyro_path.is_empty() {
-                        let gyro_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&gyro_path, Some(path));
+                        let gyro_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&gyro_path, Some(path), self.image_sequence_start as u32);
                         ret[1] = QString::from(core::util::path_to_str(&gyro_path));
                     }
                 }
@@ -1380,7 +1380,7 @@ impl Controller {
             if max_points > 0 {
                 let mut lock = cal.write();
                 let cal = lock.as_mut().unwrap();
-                let saved: std::collections::BTreeMap<i32, core::calibration::Detected> = {
+                let saved: BTreeMap<i32, core::calibration::Detected> = {
                     let lock = cal.image_points.read();
                     cal.forced_frames.iter().filter_map(|f| Some((*f, lock.get(f)?.clone()))).collect()
                 };
