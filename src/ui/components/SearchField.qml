@@ -42,7 +42,26 @@ TextField {
     }
 
     onTextChanged: {
-        const searchTerm = text.toLowerCase();
+        const searchTerm = text.toLowerCase()
+            .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
+            .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
+            .replace("bmpcc",    "blackmagic pocket cinema camera")
+            .replace("gopro5",   "hero5 black")  .replace("gopro 5",   "hero5 black")
+            .replace("gopro6",   "hero6 black")  .replace("gopro 6",   "hero6 black")
+            .replace("gopro7",   "hero7 black")  .replace("gopro 7",   "hero7 black")
+            .replace("gopro8",   "hero8 black")  .replace("gopro 8",   "hero8 black")
+            .replace("gopro9",   "hero9 black")  .replace("gopro 9",   "hero9 black")
+            .replace("gopro10",  "hero10 black") .replace("gopro 10",  "hero10 black")
+            .replace("gopro11",  "hero11 black") .replace("gopro 11",  "hero11 black")
+            .replace("gopro12",  "hero12 black") .replace("gopro 12",  "hero12 black")
+            .replace("session5", "hero5 session").replace("session 5", "hero5 session")
+            .replace("a73",      "a7iii")
+            .replace("a74",      "a7iv")
+            .replace("a7r3",     "a7riii")
+            .replace("a7r4",     "a7riv")
+            .replace("a7s2",     "a7sii")
+            .replace("a7s3",     "a7siii");
+
         const words = searchTerm.split(/[\s,;]+/).filter(s => s);
 
         if (!words.length) {
