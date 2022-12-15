@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi 11_29__720p_16by9_1280x720-29.57fps",
+  "note": "",
+  "calibrated_by": "fsb fsb",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi 11",
+  "lens_model": "29",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.573633,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2921047585825286,
+    "camera_matrix": [
+      [
+        740.1074032710554,
+        0.0,
+        639.7943976708254
+      ],
+      [
+        0.0,
+        738.0934361711336,
+        369.1086284643162
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3106391717481538,
+      -0.21176597614018183,
+      1.1102803626615654,
+      -0.8177025729083525
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

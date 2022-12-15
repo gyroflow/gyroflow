@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_Laowa 10 mm f4__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "user",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Laowa 10 mm f4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7295209066707543,
+    "camera_matrix": [
+      [
+        1574.9992869164855,
+        0.0,
+        1920.551997505182
+      ],
+      [
+        0.0,
+        1581.4602571710968,
+        1035.9629825154684
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32781801558653223,
+      0.041145651588349035,
+      0.13394882650932136,
+      0.036274079975399304
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

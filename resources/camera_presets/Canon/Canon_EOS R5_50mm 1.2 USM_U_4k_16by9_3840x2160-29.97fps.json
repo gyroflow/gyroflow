@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS R5_50mm 1.2 USM_U_4k_16by9_3840x2160-29.97fps",
+  "note": "50mm",
+  "calibrated_by": "Ryan Osmond",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "50mm 1.2 USM",
+  "camera_setting": "U",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.386086653308914,
+    "camera_matrix": [
+      [
+        9356.821881379614,
+        0.0,
+        1462.200662097794
+      ],
+      [
+        0.0,
+        9352.76196184934,
+        1096.5375479973025
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.06006947566590972,
+      -5.754967184830709,
+      154.4425668562681,
+      -1112.898818314093
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

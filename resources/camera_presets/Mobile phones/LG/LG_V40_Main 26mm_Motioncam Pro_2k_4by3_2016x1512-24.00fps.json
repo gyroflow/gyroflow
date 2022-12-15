@@ -1,0 +1,63 @@
+{
+  "name": "LG_V40_Main 26mm_Motioncam Pro_2k_4by3_2016x1512-24.00fps",
+  "note": "",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "V40",
+  "lens_model": "Main 26mm",
+  "camera_setting": "Motioncam Pro",
+  "calib_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 3024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4579211991878389,
+    "camera_matrix": [
+      [
+        1628.2093227605767,
+        0.0,
+        1012.4725208514848
+      ],
+      [
+        0.0,
+        1626.430533326523,
+        772.5058183768795
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8648854401146003,
+      -4.503438506759055,
+      15.243705937314722,
+      -17.11005882625185
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

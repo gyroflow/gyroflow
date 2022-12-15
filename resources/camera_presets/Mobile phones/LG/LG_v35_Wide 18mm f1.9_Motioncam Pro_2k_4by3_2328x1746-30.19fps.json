@@ -1,0 +1,63 @@
+{
+  "name": "LG_v35_Wide 18mm f1.9_Motioncam Pro_2k_4by3_2328x1746-30.19fps",
+  "note": "",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "v35",
+  "lens_model": "Wide 18mm f1.9",
+  "camera_setting": "Motioncam Pro",
+  "calib_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "orig_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "output_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.193213,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.1484576041674623,
+    "camera_matrix": [
+      [
+        1232.5214860546173,
+        0.0,
+        1188.5030030307612
+      ],
+      [
+        0.0,
+        1232.568970703646,
+        852.7864787034706
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34180266892803396,
+      -0.14278460808042276,
+      0.893304972607867,
+      -0.8567502092474008
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

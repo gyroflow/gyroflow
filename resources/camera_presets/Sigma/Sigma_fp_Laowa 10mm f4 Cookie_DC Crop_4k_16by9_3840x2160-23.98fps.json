@@ -1,0 +1,63 @@
+{
+  "name": "Sigma_fp_Laowa 10mm f/4 Cookie_DC Crop_4k_16by9_3840x2160-23.98fps",
+  "note": "DC Crop",
+  "calibrated_by": "Edward Robison",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Laowa 10mm f/4 Cookie",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6813202227724166,
+    "camera_matrix": [
+      [
+        1745.3882154177984,
+        0.0,
+        1945.5015916128852
+      ],
+      [
+        0.0,
+        1744.738510301435,
+        1069.339754553528
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32399760544910833,
+      0.049108490937483894,
+      0.1756583865845842,
+      -0.05759936304024267
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

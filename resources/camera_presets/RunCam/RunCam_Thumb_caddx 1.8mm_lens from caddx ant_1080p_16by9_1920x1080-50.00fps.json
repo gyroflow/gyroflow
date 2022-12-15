@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_Thumb_caddx 1.8mm_lens from caddx ant_1080p_16by9_1920x1080-50.00fps",
+  "note": "lens from caddx ant",
+  "calibrated_by": "MATT",
+  "camera_brand": "RunCam",
+  "camera_model": "Thumb",
+  "lens_model": "caddx 1.8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.587435809093442,
+    "camera_matrix": [
+      [
+        824.5021126386018,
+        0.0,
+        995.864787965784
+      ],
+      [
+        0.0,
+        822.1986102565107,
+        586.3798012478494
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.023601011871714227,
+      -0.093525220210951,
+      0.07635383588118254,
+      -0.026243090539812643
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

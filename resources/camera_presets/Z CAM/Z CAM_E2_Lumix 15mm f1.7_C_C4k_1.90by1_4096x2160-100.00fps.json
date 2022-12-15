@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2_Lumix 15mm f1.7_C_C4k_1.90by1_4096x2160-100.00fps",
+  "note": "",
+  "calibrated_by": "Jarek",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Lumix 15mm f1.7",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 100.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3468486000294569,
+    "camera_matrix": [
+      [
+        3125.4837284726423,
+        0.0,
+        2020.4190286784508
+      ],
+      [
+        0.0,
+        3127.021741300463,
+        1029.3079710923755
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08783640349041107,
+      0.28161614856896033,
+      -0.8259699842155327,
+      1.3710169851764589
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

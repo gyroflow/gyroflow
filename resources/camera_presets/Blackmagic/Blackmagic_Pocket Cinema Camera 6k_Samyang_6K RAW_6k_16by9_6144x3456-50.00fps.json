@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Samyang_6K RAW_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "shawn",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Samyang",
+  "camera_setting": "6K RAW",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7862029933855714,
+    "camera_matrix": [
+      [
+        4226.005799036929,
+        0.0,
+        3112.9453802028575
+      ],
+      [
+        0.0,
+        4230.915317871525,
+        1697.0495522278247
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25085868148562956,
+      0.052062083434347525,
+      0.2896985794408805,
+      -0.16097600637203086
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

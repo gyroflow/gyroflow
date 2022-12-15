@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 27mm Nanomorph__5k_2by1_5544x2772-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 27mm Nanomorph",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5544,
+    "h": 2772
+  },
+  "orig_dimension": {
+    "w": 5544,
+    "h": 2772
+  },
+  "output_dimension": {
+    "w": 3696,
+    "h": 2078
+  },
+  "frame_readout_time": 14.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.5,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.239894637050804,
+    "camera_matrix": [
+      [
+        6356.896421626279,
+        0.0,
+        2768.770564449187
+      ],
+      [
+        0.0,
+        6293.603581861064,
+        1304.4301219291492
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3440994606276545,
+      -0.07528493181667556,
+      -8.440518622907414,
+      48.23125343262994
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

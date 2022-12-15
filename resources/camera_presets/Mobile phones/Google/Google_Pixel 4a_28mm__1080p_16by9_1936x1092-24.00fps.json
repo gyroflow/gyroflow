@@ -1,0 +1,63 @@
+{
+  "name": "Google_Pixel 4a_28mm__1080p_16by9_1936x1092-24.00fps",
+  "note": "",
+  "calibrated_by": "Windows",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 4a",
+  "lens_model": "28mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "orig_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "output_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4547442888391061,
+    "camera_matrix": [
+      [
+        -570.3759844390553,
+        -0.0,
+        968.9734082851533
+      ],
+      [
+        0.0,
+        -566.2795828928461,
+        537.6040443990664
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3371886710109903,
+      0.28246012989571156,
+      -0.2376845472178241,
+      0.1979995177496773
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

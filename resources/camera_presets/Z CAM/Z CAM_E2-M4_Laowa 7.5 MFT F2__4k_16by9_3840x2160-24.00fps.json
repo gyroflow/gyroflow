@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5 MFT F2__4k_16by9_3840x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Jon Riley",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5 MFT F2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.22067933510939683,
+    "camera_matrix": [
+      [
+        1652.1145201273032,
+        0.0,
+        1894.619248172731
+      ],
+      [
+        0.0,
+        1652.4047547338748,
+        1039.346215106109
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32888643961920005,
+      0.09280471696927496,
+      0.02877674669024456,
+      0.04672574275577082
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

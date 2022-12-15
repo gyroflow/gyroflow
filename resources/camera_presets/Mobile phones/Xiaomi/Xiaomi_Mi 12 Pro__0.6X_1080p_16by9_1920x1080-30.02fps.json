@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Mi 12 Pro__0.6X_1080p_16by9_1920x1080-30.02fps",
+  "note": "",
+  "calibrated_by": "Jeff Zhou",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 12 Pro",
+  "lens_model": "",
+  "camera_setting": "0.6X",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.022303,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2660497651172906,
+    "camera_matrix": [
+      [
+        1013.2283071358568,
+        0.0,
+        948.9457684352265
+      ],
+      [
+        0.0,
+        1014.8336219207924,
+        534.3748973094088
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33969525574739085,
+      -0.2020775450583591,
+      1.196066239337778,
+      -1.125130034434776
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-12",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

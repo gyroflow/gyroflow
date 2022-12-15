@@ -1,0 +1,63 @@
+{
+  "name": "DJI_FPV_14.66__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Christopher Rivera",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "14.66",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.635282990409904,
+    "camera_matrix": [
+      [
+        7669.05585894775,
+        0.0,
+        1863.2043948114865
+      ],
+      [
+        0.0,
+        7444.999652127956,
+        -748.1777228042002
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28769745030550053,
+      -1.1435974756881109,
+      19.351654031628563,
+      -72.28206719987772
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

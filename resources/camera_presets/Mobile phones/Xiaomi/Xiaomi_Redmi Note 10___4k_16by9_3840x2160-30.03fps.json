@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Redmi Note 10___4k_16by9_3840x2160-30.03fps",
+  "note": "",
+  "calibrated_by": "kaem1",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 10",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.029455,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4751509876384417,
+    "camera_matrix": [
+      [
+        2988.945243320285,
+        0.0,
+        1915.400358519794
+      ],
+      [
+        0.0,
+        2987.796335175702,
+        1072.2794271524156
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35233801565692324,
+      0.16332947622269897,
+      2.230953289786898,
+      -6.6617003129837205
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

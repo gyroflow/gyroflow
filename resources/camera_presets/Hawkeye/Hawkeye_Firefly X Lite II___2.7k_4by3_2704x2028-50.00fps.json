@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly X Lite II___2.7k_4by3_2704x2028-50.00fps",
+  "note": "",
+  "calibrated_by": "Pavel FPV",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite II",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4988696687219754,
+    "camera_matrix": [
+      [
+        1352.2372499265864,
+        0.0,
+        1367.550100635212
+      ],
+      [
+        0.0,
+        1351.6793394136214,
+        1051.5625844693614
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.024883892675106236,
+      -0.027201437001098967,
+      0.02079192808087574,
+      -0.00601283547515279
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

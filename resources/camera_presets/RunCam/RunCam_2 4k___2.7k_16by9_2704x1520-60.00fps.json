@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_2 4k___2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "PC",
+  "camera_brand": "RunCam",
+  "camera_model": "2 4k",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2732159018722044,
+    "camera_matrix": [
+      [
+        1187.6693429812597,
+        0.0,
+        1339.111602739801
+      ],
+      [
+        0.0,
+        1186.26562809316,
+        820.6901078730548
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06535411781414154,
+      -0.01296044576898064,
+      0.016386036284694875,
+      -0.006694241166327705
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-beta",
+  "date": "2022-10-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Sony_Xperia Pro-i_Main 25mm_Motion Cam Pro CinemaDNG_C4k_2.38by1_4032x1692-29.97fps",
+  "note": "Motion Cam Pro CinemaDNG",
+  "calibrated_by": "Janne Linna",
+  "camera_brand": "Sony",
+  "camera_model": "Xperia Pro-i",
+  "lens_model": "Main 25mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 1692
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 1692
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 1692
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8039646769597403,
+    "camera_matrix": [
+      [
+        2611.2792672395267,
+        0.0,
+        1994.4752874432056
+      ],
+      [
+        0.0,
+        2613.002609503475,
+        844.2902052596856
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6947901139767592,
+      0.30209086067552293,
+      -1.3574667352603795,
+      0.4044982352408418
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Samsung_Note 8_Wide_FHD_1080p_16by9_1920x1080-29.98fps",
+  "note": "",
+  "calibrated_by": "levar",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 8",
+  "lens_model": "Wide",
+  "camera_setting": "FHD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 28,
+  "fps": 29.981506,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32103490160725456,
+    "camera_matrix": [
+      [
+        1801.0068028443895,
+        0.0,
+        958.4419825845032
+      ],
+      [
+        0.0,
+        1800.9832086483432,
+        537.0975580354692
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5330251556401968,
+      -0.4866612989316083,
+      -0.3727882758136585,
+      3.4381680448730645
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

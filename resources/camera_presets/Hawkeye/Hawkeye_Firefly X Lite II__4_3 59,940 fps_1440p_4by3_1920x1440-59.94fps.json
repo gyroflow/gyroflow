@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_Firefly X Lite II__4:3 59,940 fps_1440p_4by3_1920x1440-59.94fps",
+  "note": "4:3 59,940 fps",
+  "calibrated_by": "edinho polastre",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly X Lite II",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.708098075015461,
+    "camera_matrix": [
+      [
+        956.9088907897496,
+        0.0,
+        925.7501719824955
+      ],
+      [
+        0.0,
+        956.211423708252,
+        699.202285956305
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.024414341819517155,
+      -0.041992226478641904,
+      0.055321526996057066,
+      -0.020288594375942895
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

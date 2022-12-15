@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_Sigma 30mm 1.4 DC DN__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Al Minz",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Sigma 30mm 1.4 DC DN",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.5360334779198854,
+    "camera_matrix": [
+      [
+        6612.201828290315,
+        0.0,
+        1927.682446453702
+      ],
+      [
+        0.0,
+        6615.713495321685,
+        1171.0251127149056
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3213667422589862,
+      0.25646111090994095,
+      -4.195462309596875,
+      41.588622395191656
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-a4cfcbad-3840x2160@29970",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

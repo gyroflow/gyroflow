@@ -1,0 +1,63 @@
+{
+  "name": "Google_Pixel 4a 5g__.6 zoom_1080p_16by9_1920x1080-60.05fps",
+  "note": "",
+  "calibrated_by": "Christopher Durant",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 4a 5g",
+  "lens_model": "",
+  "camera_setting": ".6 zoom",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.054867,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5528231043027204,
+    "camera_matrix": [
+      [
+        1137.1924143910962,
+        0.0,
+        955.7075363629868
+      ],
+      [
+        0.0,
+        1129.149672794361,
+        567.4776171216579
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34830614442459734,
+      -0.2517765639879579,
+      1.0621705180566443,
+      -0.5920115467015888
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

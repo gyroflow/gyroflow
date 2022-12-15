@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7C_Sigma 24-70mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Joey Wong",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Sigma 24-70mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.44436048207431345,
+    "camera_matrix": [
+      [
+        2617.6034988282595,
+        0.0,
+        1904.4725164665424
+      ],
+      [
+        0.0,
+        2616.0325138703297,
+        1086.484226808158
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1482047821415337,
+      0.1858089958557636,
+      -0.19754544946819985,
+      0.5802928177224832
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-25cf8183-3840x2160@23976",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

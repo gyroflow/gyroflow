@@ -1,0 +1,63 @@
+{
+  "name": "Apple_iPhone XS Max___1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Developer",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone XS Max",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.972553,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4186354880289822,
+    "camera_matrix": [
+      [
+        1692.8721914772352,
+        0.0,
+        953.3896738626124
+      ],
+      [
+        0.0,
+        1693.8746661992875,
+        536.0451150886032
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5389651542522345,
+      0.11352473067758669,
+      -8.897588483531575,
+      28.30657549268822
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "polaroid_cube___1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "pedro maroso",
+  "camera_brand": "polaroid",
+  "camera_model": "cube",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.969999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.605391728483026,
+    "camera_matrix": [
+      [
+        1151.0652657344915,
+        0.0,
+        995.5782486023128
+      ],
+      [
+        0.0,
+        1149.236585043133,
+        545.2201315798346
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.017556836365505174,
+      -0.2186332554643629,
+      0.411992224472264,
+      -0.07963817360233921
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

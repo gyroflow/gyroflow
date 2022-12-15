@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Mi 10T_26mm__4k_16by9_3840x2160-30.04fps",
+  "note": "",
+  "calibrated_by": "TECNO",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10T",
+  "lens_model": "26mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 3.2164091416523313,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.039209,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4942438023159184,
+    "camera_matrix": [
+      [
+        2937.602225035963,
+        0.0,
+        1924.671125312384
+      ],
+      [
+        0.0,
+        2938.564918382869,
+        1087.415833822589
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4534158652755471,
+      0.11662096525046364,
+      -0.5977398150664266,
+      1.1162964310610195
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

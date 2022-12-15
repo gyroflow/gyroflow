@@ -1,0 +1,63 @@
+{
+  "name": "LG_V35_16mm_Q 0.717_C4k_4by3_4656x3492-24.00fps",
+  "note": "Q 0.717",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "V35",
+  "lens_model": "16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "orig_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "output_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7174757016626698,
+    "camera_matrix": [
+      [
+        2338.9716908410983,
+        0.0,
+        2336.577487988975
+      ],
+      [
+        0.0,
+        2340.2204452861474,
+        1721.7263057805153
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2895435595307347,
+      0.13027187464936352,
+      0.2741381535463736,
+      -0.3208914408752404
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

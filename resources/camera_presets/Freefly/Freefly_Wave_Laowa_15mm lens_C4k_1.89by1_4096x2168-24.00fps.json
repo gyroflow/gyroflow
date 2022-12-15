@@ -1,0 +1,69 @@
+{
+  "name": "Freefly_Wave_Laowa_15mm lens_C4k_1.89by1_4096x2168-24.00fps",
+  "note": "15mm lens",
+  "calibrated_by": "Andrew Orton",
+  "camera_brand": "Freefly",
+  "camera_model": "Wave",
+  "lens_model": "Laowa",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2168
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2168
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2168
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4697949373467955,
+    "camera_matrix": [
+      [
+        2874.4006026863203,
+        0.0,
+        2116.9262931451112
+      ],
+      [
+        0.0,
+        2861.3017187469086,
+        1048.580313171212
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3102374174487439,
+      0.18137561974414337,
+      -0.10805584571913664,
+      0.12728020981903604
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.1",
+  "date": "2022-09-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

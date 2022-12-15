@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7IV_16.00mm_No stabilization_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Mohsen Malallah",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "16.00mm",
+  "camera_setting": "No stabilization",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.100149429046518,
+    "camera_matrix": [
+      [
+        3177.8815247759667,
+        0.0,
+        1944.8141953538368
+      ],
+      [
+        0.0,
+        3185.5197608692883,
+        1063.202912417329
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3338317768733964,
+      1.0118626763290195,
+      -1.0130891701357354,
+      2.032398866338222
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-16.00mm-3840x2160@59940",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

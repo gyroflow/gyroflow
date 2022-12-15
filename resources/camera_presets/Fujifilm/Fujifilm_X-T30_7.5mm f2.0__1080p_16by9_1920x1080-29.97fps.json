@@ -1,0 +1,63 @@
+{
+  "name": "Fujifilm_X-T30_7.5mm f2.0__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Admin",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T30",
+  "lens_model": "7.5mm f2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3872232635328894,
+    "camera_matrix": [
+      [
+        807.5086311513777,
+        0.0,
+        947.0836112880912
+      ],
+      [
+        0.0,
+        806.5912648880488,
+        537.2403231507315
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.002254835713591579,
+      -0.017503454342191253,
+      0.010515136683711514,
+      -0.004196424536187514
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

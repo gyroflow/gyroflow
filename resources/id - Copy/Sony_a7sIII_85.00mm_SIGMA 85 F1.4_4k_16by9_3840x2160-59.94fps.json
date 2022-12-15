@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7sIII_85.00mm_SIGMA 85 F1.4_4k_16by9_3840x2160-59.94fps",
+  "note": "SIGMA 85 F1.4",
+  "calibrated_by": "GOLEM_M1MAX",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "85.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 3,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5619484668528151,
+    "camera_matrix": [
+      [
+        -10964.898222335372,
+        -0.0,
+        1901.7183807041883
+      ],
+      [
+        0.0,
+        -10904.299438657095,
+        945.5438007153998
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3409896669805115,
+      14.077693858704247,
+      -214.9191212546419,
+      -2397.7975531716493
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-85.00mm-3840x2160@59940",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

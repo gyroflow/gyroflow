@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_OneRS_Ultrawide 104_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Patrick Luzadas",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Ultrawide 104",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5730453973720219,
+    "camera_matrix": [
+      [
+        1865.6947673130849,
+        0.0,
+        1991.3923346103372
+      ],
+      [
+        0.0,
+        1865.9317341101569,
+        1490.1965350022306
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08897428125573453,
+      -0.11033333979898297,
+      0.12807052849010583,
+      -0.0666649638891093
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-ultrawide104-4000x3000@29970-no-eis",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-23",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

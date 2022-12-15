@@ -1,0 +1,63 @@
+{
+  "name": "DJI_Mavic Air 2__2.7k_2.5k_16by9_2688x1512-25.00fps",
+  "note": "",
+  "calibrated_by": "Czmielik",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic Air 2",
+  "lens_model": "",
+  "camera_setting": "2.7k",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34576495055086326,
+    "camera_matrix": [
+      [
+        1273.9471994895544,
+        0.0,
+        1295.5390362045302
+      ],
+      [
+        0.0,
+        1277.8250241731123,
+        697.0286436917831
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3478290157497584,
+      0.009975642770350988,
+      0.3926990605198323,
+      -0.21616878515385937
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

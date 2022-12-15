@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneRS_5K25 10mm MFT Laowa_NO-EIS_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "5K25 10mm MFT Laowa",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.876431899098324,
+    "camera_matrix": [
+      [
+        4151.383257298583,
+        0.0,
+        2664.2431872453512
+      ],
+      [
+        0.0,
+        4147.875062367893,
+        1521.7377231675182
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35948331387856514,
+      0.031027487541157223,
+      0.6524226586783008,
+      -1.5198948768404652
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

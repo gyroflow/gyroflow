@@ -1,0 +1,66 @@
+{
+  "name": "Canon_Vixia HF200___1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Daniel Park",
+  "camera_brand": "Canon",
+  "camera_model": "Vixia HF200",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3690228188035465,
+    "camera_matrix": [
+      [
+        6963.023398080173,
+        0.0,
+        972.6826699412496
+      ],
+      [
+        0.0,
+        6940.022425528939,
+        533.5241711357825
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.9342318792474394,
+      263.20250829676837,
+      -17092.290850519497,
+      375156.3536553885
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

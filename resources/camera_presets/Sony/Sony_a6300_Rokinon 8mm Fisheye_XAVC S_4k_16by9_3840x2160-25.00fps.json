@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_Rokinon 8mm Fisheye_XAVC S_4k_16by9_3840x2160-25.00fps",
+  "note": "V2",
+  "calibrated_by": "Jonathan",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "Rokinon 8mm Fisheye",
+  "camera_setting": "XAVC S",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8031651918015441,
+    "camera_matrix": [
+      [
+        1385.8923345717646,
+        0.0,
+        1907.8128521042256
+      ],
+      [
+        0.0,
+        1385.2243058674117,
+        1086.9280455526716
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03908841712077701,
+      -0.003535308781639787,
+      0.005423196884583754,
+      -0.0003803724622163674
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

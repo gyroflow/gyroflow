@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Redmi 8__Auto_1080p_16by9_1920x1080-29.95fps",
+  "note": "",
+  "calibrated_by": "Nikos Maretas",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi 8",
+  "lens_model": "",
+  "camera_setting": "Auto",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.945908,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.41835608189279233,
+    "camera_matrix": [
+      [
+        1654.4328856418688,
+        0.0,
+        964.4680116451646
+      ],
+      [
+        0.0,
+        1652.3407960330555,
+        513.9452633231028
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5328423989058664,
+      -0.910159163300466,
+      4.881846848679265,
+      -10.062538832647798
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

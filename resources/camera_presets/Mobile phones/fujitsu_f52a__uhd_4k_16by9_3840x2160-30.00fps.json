@@ -1,0 +1,66 @@
+{
+  "name": "fujitsu_f52a_広角_uhd_4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "koji nakano",
+  "camera_brand": "fujitsu",
+  "camera_model": "f52a",
+  "lens_model": "広角",
+  "camera_setting": "uhd",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.998333,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.531003756547048,
+    "camera_matrix": [
+      [
+        3094.1061957667575,
+        0.0,
+        1925.2469036388673
+      ],
+      [
+        0.0,
+        3095.3955734879128,
+        1072.036936416817
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4094951832557911,
+      0.23710479983971888,
+      -0.3097962495254287,
+      -1.143664690809001
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

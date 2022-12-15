@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS 6 Mark 2_Canon 24-70mm Ultrasonix_29:59_1080p_16by9_1920x1080-25.00fps",
+  "note": "29:59",
+  "calibrated_by": "Florian Link",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6 Mark 2",
+  "lens_model": "Canon 24-70mm Ultrasonix",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.27324580419336764,
+    "camera_matrix": [
+      [
+        1263.718796492615,
+        0.0,
+        974.4887228292102
+      ],
+      [
+        0.0,
+        1264.0586802895302,
+        551.3772962604002
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17000413583966625,
+      0.26428344198661163,
+      -0.22728053408225887,
+      0.3458299097191577
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

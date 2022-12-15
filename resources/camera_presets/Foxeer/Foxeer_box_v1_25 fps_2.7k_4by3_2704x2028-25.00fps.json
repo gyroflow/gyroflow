@@ -1,0 +1,66 @@
+{
+  "name": "Foxeer_box_v1_25 fps_2.7k_4by3_2704x2028-25.00fps",
+  "note": "25 fps",
+  "calibrated_by": "Martin K",
+  "camera_brand": "Foxeer",
+  "camera_model": "box",
+  "lens_model": "v1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 17,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.49934953528819426,
+    "camera_matrix": [
+      [
+        1188.3747957926105,
+        0.0,
+        1321.0760184838518
+      ],
+      [
+        0.0,
+        1189.6796569702065,
+        975.7515826851886
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06705036754444338,
+      -0.000574575517970206,
+      0.004599054792859402,
+      -0.0017684061330700796
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneR_6mm Laowa MFT Cine 5k_NO-EIS_5k_16by9_5312x2988-25.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "6mm Laowa MFT Cine 5k",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7984252287165706,
+    "camera_matrix": [
+      [
+        2578.0777319955832,
+        0.0,
+        2687.367505311011
+      ],
+      [
+        0.0,
+        2579.9659644453077,
+        1536.234246384773
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34341586871898616,
+      0.0126671568991439,
+      0.47336084460419087,
+      -0.45906618291347306
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

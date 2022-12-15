@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_fa1c2fc6__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Tom Jablonski",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "fa1c2fc6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2651686792623134,
+    "camera_matrix": [
+      [
+        3129.2397392108414,
+        0.0,
+        1954.6027062990065
+      ],
+      [
+        0.0,
+        3102.697965031494,
+        1089.4596137922451
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29780076997772087,
+      0.6547709081104917,
+      -1.6758948066417203,
+      1.4211712718103855
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

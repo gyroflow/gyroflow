@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7C_SEL24105G@24mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "yoyo Mo",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "SEL24105G@24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8261716183337567,
+    "camera_matrix": [
+      [
+        2686.6070858577887,
+        0.0,
+        1908.2822010972288
+      ],
+      [
+        0.0,
+        2688.2382442958456,
+        1021.8824275097512
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.314044038457873,
+      -0.007243974596946597,
+      0.274517885152387,
+      0.23298039537741788
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-3eb3b43e-3840x2160@25000",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Fujifilm_X-T3_Carl Zeiss Jena 20mm f4__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Florent CURK",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Carl Zeiss Jena 20mm f4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": -14.09,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6391959035330967,
+    "camera_matrix": [
+      [
+        3057.380027331984,
+        0.0,
+        1887.0790793731264
+      ],
+      [
+        0.0,
+        3067.568584898466,
+        1043.8072174844694
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.199508554151439,
+      0.14209974826401378,
+      -0.14968551657784962,
+      0.4340969211971915
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

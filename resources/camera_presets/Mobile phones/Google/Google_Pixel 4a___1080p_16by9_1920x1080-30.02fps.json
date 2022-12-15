@@ -1,0 +1,66 @@
+{
+  "name": "Google_Pixel 4a___1080p_16by9_1920x1080-30.02fps",
+  "note": "",
+  "calibrated_by": "Sam Metcalfe",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 4a",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.020452,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3736939892797832,
+    "camera_matrix": [
+      [
+        1818.0217102123008,
+        0.0,
+        967.8871753063804
+      ],
+      [
+        0.0,
+        1816.16535068784,
+        529.4035440919259
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.471724281396855,
+      0.1660319187157357,
+      -4.313095319734071,
+      12.769777842895476
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-S6_Sigma 18-35_C_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "EF Mount 18mm",
+  "calibrated_by": "SIRIUS",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Sigma 18-35",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.19796893934049223,
+    "camera_matrix": [
+      [
+        3275.661983843568,
+        0.0,
+        2037.7097437485463
+      ],
+      [
+        0.0,
+        3275.683787107718,
+        1075.9853381742244
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22013774281697776,
+      0.22520594166505944,
+      -0.1420669830651262,
+      0.4202842383775545
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

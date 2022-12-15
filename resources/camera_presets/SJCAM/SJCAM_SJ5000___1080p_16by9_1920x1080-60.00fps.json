@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_SJ5000___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "kkozu",
+  "camera_brand": "SJCAM",
+  "camera_model": "SJ5000",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6372826071968962,
+    "camera_matrix": [
+      [
+        1398.0277484714093,
+        0.0,
+        906.491271441063
+      ],
+      [
+        0.0,
+        1406.2706754897297,
+        475.65712771801816
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04931511561185871,
+      0.006803255018110789,
+      0.01809007753350494,
+      -0.04010685718825769
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

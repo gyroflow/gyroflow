@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Laowa 7.5mm_BRAW 8.1_C4k_2.38by1_4096x1720-24.00fps",
+  "note": "",
+  "calibrated_by": "Braulio Lorenzo",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "BRAW 8.1",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1720
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1720
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4297570051994116,
+    "camera_matrix": [
+      [
+        1716.4274227092292,
+        0.0,
+        2065.751890276925
+      ],
+      [
+        0.0,
+        1715.5972387757954,
+        875.8940699466555
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3470365588945242,
+      0.060364317152705,
+      0.07987162424751489,
+      0.03296195573155392
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

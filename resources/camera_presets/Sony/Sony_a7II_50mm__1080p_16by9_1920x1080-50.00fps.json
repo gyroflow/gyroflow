@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7II_50mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "fa",
+  "camera_brand": "Sony",
+  "camera_model": "a7II",
+  "lens_model": "50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5075460376954191,
+    "camera_matrix": [
+      [
+        11939.91108688499,
+        0.0,
+        -550.8386633076519
+      ],
+      [
+        0.0,
+        11868.905828344452,
+        193.31747082033505
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.9038233535447344,
+      -27.563062361343743,
+      549.4427868552436,
+      -1016.1100145977052
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

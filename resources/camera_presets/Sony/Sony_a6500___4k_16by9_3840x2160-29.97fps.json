@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a6500___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Ricardo Oliveira",
+  "camera_brand": "Sony",
+  "camera_model": "a6500",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.188085880739204,
+    "camera_matrix": [
+      [
+        4956.26164993492,
+        0.0,
+        1819.8073524485796
+      ],
+      [
+        0.0,
+        4882.197547425714,
+        1501.9122488283926
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2835083301398944,
+      -0.8633816471240483,
+      8.333229575157702,
+      -13.970472061067785
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

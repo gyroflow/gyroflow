@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 10MM COOKIE_120 VFR_4k_16by9_3840x2160-119.88fps",
+  "note": "120 VFR",
+  "calibrated_by": "Sam Cook",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 10MM COOKIE",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.15500786175217382,
+    "camera_matrix": [
+      [
+        2257.1828700247447,
+        0.0,
+        1957.1918780699043
+      ],
+      [
+        0.0,
+        2251.909058853192,
+        1065.9636086498872
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3238686103215236,
+      0.0945423180613782,
+      0.06849920058532073,
+      0.06048939920078075
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

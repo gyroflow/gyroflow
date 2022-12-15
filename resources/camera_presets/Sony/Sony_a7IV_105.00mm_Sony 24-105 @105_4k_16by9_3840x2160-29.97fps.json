@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7IV_105.00mm_Sony 24-105 @105_4k_16by9_3840x2160-29.97fps",
+  "note": "Sony 24-105 @105",
+  "calibrated_by": "Thodoris Tsakalos",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "105.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8234634615644937,
+    "camera_matrix": [
+      [
+        16186.493761531903,
+        0.0,
+        1938.7312094853355
+      ],
+      [
+        0.0,
+        16177.561661884383,
+        1463.609235839293
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32253492222834035,
+      -22.68640958507232,
+      3516.1965068585027,
+      -120873.3989865324
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-105.00mm-3840x2160@29970",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

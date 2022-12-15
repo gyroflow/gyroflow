@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_OneR_Ultrawide 88_NO-EIS_480p_16by9_640x360-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Raul Gomez Fernandez",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 88",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 640,
+    "h": 360
+  },
+  "orig_dimension": {
+    "w": 640,
+    "h": 360
+  },
+  "output_dimension": {
+    "w": 640,
+    "h": 360
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3199027021208998,
+    "camera_matrix": [
+      [
+        325.45256648003385,
+        0.0,
+        318.1576404508805
+      ],
+      [
+        0.0,
+        325.49872007646303,
+        177.60145109090138
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0034971308343558064,
+      0.006472438145078671,
+      -0.03315368917211661,
+      0.02251302289779266
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oner-ultrawide88-640x360@29970-no-eis",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "GoPro_HERO4 Silver_WIDE_AUTO_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Awal Ramadan",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Silver",
+  "lens_model": "WIDE",
+  "camera_setting": "AUTO",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9359589383280614,
+    "camera_matrix": [
+      [
+        746.5755863037589,
+        0.0,
+        943.9682570062176
+      ],
+      [
+        0.0,
+        750.0029716094996,
+        519.0518812710993
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12503394514076366,
+      0.02178564037685769,
+      0.014326390915132605,
+      -0.03609716706144253
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "OnePlus_Nord N10___480p_16by9_854x480-28.98fps",
+  "note": "",
+  "calibrated_by": "Minhaz Mahmood",
+  "camera_brand": "OnePlus",
+  "camera_model": "Nord N10",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 854,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 854,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 854,
+    "h": 480
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 28.977671,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.343399936432514,
+    "camera_matrix": [
+      [
+        776.0930969268388,
+        0.0,
+        434.3814334694076
+      ],
+      [
+        0.0,
+        777.5972801832254,
+        235.94055832521528
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3446562418403968,
+      1.4222165762186458,
+      -9.768107670104868,
+      23.284414416931867
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_IMX686___1080p_16by9_1942x1096-28.96fps",
+  "note": "",
+  "calibrated_by": "Harmony",
+  "camera_brand": "Sony",
+  "camera_model": "IMX686",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1942,
+    "h": 1096
+  },
+  "orig_dimension": {
+    "w": 1942,
+    "h": 1096
+  },
+  "output_dimension": {
+    "w": 1942,
+    "h": 1096
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 28.960154,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4619669869167245,
+    "camera_matrix": [
+      [
+        2120.67684031728,
+        0.0,
+        1047.9328146076318
+      ],
+      [
+        0.0,
+        2134.6875834675784,
+        534.6969162330258
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5665808479951631,
+      -1.432520875157909,
+      9.207771811890824,
+      -15.146846865455844
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

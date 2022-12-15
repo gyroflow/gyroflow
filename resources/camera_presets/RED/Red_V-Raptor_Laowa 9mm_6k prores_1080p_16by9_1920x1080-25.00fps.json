@@ -1,0 +1,66 @@
+{
+  "name": "Red_V-Raptor_Laowa 9mm_6k prores_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Radar Kane",
+  "camera_brand": "Red",
+  "camera_model": "V-Raptor",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "6k prores",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.658310873570693,
+    "camera_matrix": [
+      [
+        620.9744591719972,
+        0.0,
+        961.3781365728316
+      ],
+      [
+        0.0,
+        620.1251685773591,
+        535.4235060870242
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3177693737387263,
+      0.05022920280435747,
+      0.1332469463878007,
+      -0.01998453399523712
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_46062e2_11mm_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Ka kei Leung",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "46062e2",
+  "camera_setting": "11mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5251244316445125,
+    "camera_matrix": [
+      [
+        1783.4896858731256,
+        0.0,
+        1933.4912961291157
+      ],
+      [
+        0.0,
+        1784.213744134904,
+        1074.5640496720198
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3278217121028068,
+      0.023021085255145828,
+      0.27878245970043214,
+      -0.10358244441718914
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-46062e2-3840x2160@25000",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

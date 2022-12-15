@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_Micro V2 HDZero_Ratel 1 1.66mm__480p_4by3_960x720-59.94fps",
+  "note": "",
+  "calibrated_by": "Ondrej Slachta",
+  "camera_brand": "RunCam",
+  "camera_model": "Micro V2 HDZero",
+  "lens_model": "Ratel 1 1.66mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 0.75,
+  "input_vertical_stretch": 1.0,
+  "num_images": 38,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.44527419565541526,
+    "camera_matrix": [
+      [
+        378.8147975793054,
+        0.0,
+        505.6679409727535
+      ],
+      [
+        0.0,
+        378.537717241425,
+        361.1576744772437
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0060283886133321585,
+      -0.0003436478968737243,
+      -0.006577126105332019,
+      0.0035937289729559784
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

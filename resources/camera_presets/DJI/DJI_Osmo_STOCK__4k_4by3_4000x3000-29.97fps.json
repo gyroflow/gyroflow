@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Osmo_STOCK__4k_4by3_4000x3000-29.97fps",
+  "note": "",
+  "calibrated_by": "StaticMotion",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo",
+  "lens_model": "STOCK",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 20.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.809789001992859,
+    "camera_matrix": [
+      [
+        1751.2358035114223,
+        0.0,
+        1997.3296355156208
+      ],
+      [
+        0.0,
+        1749.6098941251105,
+        1471.2437179692618
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20494008504777247,
+      0.06279127367874826,
+      -0.1602469339408273,
+      0.05082327855767761
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

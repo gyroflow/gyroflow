@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_OneRS_1inch 5.7k_NO-EIS_5k_16by9_5312x2988-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "gzzh",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "1inch 5.7k",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5983085477791786,
+    "camera_matrix": [
+      [
+        2237.6181144406446,
+        0.0,
+        2704.9857148539127
+      ],
+      [
+        0.0,
+        2234.4531905656163,
+        1552.853581248845
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.043597355327471346,
+      0.00508816670895629,
+      -0.004125747570969164,
+      0.0015994998980171375
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-10",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

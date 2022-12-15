@@ -1,0 +1,66 @@
+{
+  "name": "Fimi_Fimi x8 2022 v2_soni f1/6 48mp__4k_16by9_3840x2160-29.13fps",
+  "note": "",
+  "calibrated_by": "Nathan khouri",
+  "camera_brand": "Fimi",
+  "camera_model": "Fimi x8 2022 v2",
+  "lens_model": "soni f1/6 48mp",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.133286,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9816636285317732,
+    "camera_matrix": [
+      [
+        3413.3623454860053,
+        0.0,
+        1940.759527149631
+      ],
+      [
+        0.0,
+        3415.657505680782,
+        1043.497175968334
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6079566497655317,
+      -0.7733768484842618,
+      0.3247534096116224,
+      2.7486882501008845
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-beta.2",
+  "date": "2022-10-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

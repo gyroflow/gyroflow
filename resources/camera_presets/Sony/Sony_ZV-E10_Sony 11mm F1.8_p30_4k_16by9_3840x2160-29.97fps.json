@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_Sony 11mm F1.8_p30_4k_16by9_3840x2160-29.97fps",
+  "note": "Program Auto",
+  "calibrated_by": "Julius Lee",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Sony 11mm F1.8",
+  "camera_setting": "p30",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 32.16,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 2.083129935249626,
+    "camera_matrix": [
+      [
+        2224.666288009329,
+        0.0,
+        1911.2293514135995
+      ],
+      [
+        0.0,
+        2239.110470147977,
+        1043.1862246109763
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3550763450954494,
+      -0.17219644487830563,
+      0.8416371013366186,
+      -0.6363967655170676
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-ea4cb87f-3840x2160@29970",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

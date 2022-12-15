@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX100III___1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Vincent Lublink",
+  "camera_brand": "Sony",
+  "camera_model": "RX100III",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6930327622277257,
+    "camera_matrix": [
+      [
+        1370.389606893487,
+        0.0,
+        947.8218297735528
+      ],
+      [
+        0.0,
+        1365.6409543867694,
+        539.6208076878693
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3508601572229663,
+      -0.07044967178278999,
+      1.161501121120864,
+      -1.8438827656699703
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

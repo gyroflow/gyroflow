@@ -1,0 +1,63 @@
+{
+  "name": "LG_V40_Tele 53mm f2.4__2k_4by3_2016x1512-30.10fps",
+  "note": "",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "V40",
+  "lens_model": "Tele 53mm f2.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2016,
+    "h": 1134
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.102743,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7018273436176657,
+    "camera_matrix": [
+      [
+        3143.5451990075712,
+        0.0,
+        1031.8291210562372
+      ],
+      [
+        0.0,
+        3139.7100591226313,
+        784.7831398291036
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29148860075286565,
+      21.31889583586216,
+      -292.20787526234636,
+      1138.7771207750034
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

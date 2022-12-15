@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_45mm f2.8 dg dn c_uhd_4k_16by9_3856x2170-24.00fps",
+  "note": "",
+  "calibrated_by": "koji nakano",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "45mm f2.8 dg dn c",
+  "camera_setting": "uhd",
+  "calib_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "orig_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "output_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "frame_readout_time": 20.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.42620810993562447,
+    "camera_matrix": [
+      [
+        4414.831925931028,
+        0.0,
+        1911.6933731331344
+      ],
+      [
+        0.0,
+        4449.0538430296265,
+        1273.3642100963923
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4177004811640558,
+      -1.193071506095133,
+      14.816434379564951,
+      -42.95638123627923
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

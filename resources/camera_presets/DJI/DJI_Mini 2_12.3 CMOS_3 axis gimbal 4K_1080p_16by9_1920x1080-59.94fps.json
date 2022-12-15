@@ -1,0 +1,66 @@
+{
+  "name": "DJI_Mini 2_1/2.3\" CMOS_3 axis gimbal 4K_1080p_16by9_1920x1080-59.94fps",
+  "note": "3 axis gimbal 4K",
+  "calibrated_by": "chris jones",
+  "camera_brand": "DJI",
+  "camera_model": "Mini 2",
+  "lens_model": "1/2.3\" CMOS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.25865240217517693,
+    "camera_matrix": [
+      [
+        1684.4147911741163,
+        0.0,
+        938.8047876876072
+      ],
+      [
+        0.0,
+        1675.6975997108375,
+        450.2864654252563
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4053507518700045,
+      -0.35539598733434735,
+      1.6860280800095635,
+      -2.1272295592718806
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Fujifilm_X-T1_Sugma 8-16__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Tankizt",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T1",
+  "lens_model": "Sugma 8-16",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 44,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3141743385701373,
+    "camera_matrix": [
+      [
+        913.2641403277526,
+        0.0,
+        974.2202917044478
+      ],
+      [
+        0.0,
+        913.0181133090224,
+        543.3228296547348
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35351838617363845,
+      0.28737368652583856,
+      -0.35209249251631974,
+      0.21796839768385368
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

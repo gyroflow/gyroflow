@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 5D Mark II_Canon EF USM 16-35mm_Manual_1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Carla Veronica Moscoso Yepez # 755",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 5D Mark II",
+  "lens_model": "Canon EF USM 16-35mm",
+  "camera_setting": "Manual",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32820260223129427,
+    "camera_matrix": [
+      [
+        903.3609499283004,
+        0.0,
+        973.5088994101789
+      ],
+      [
+        0.0,
+        902.7962617657356,
+        548.3220413791076
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3008880659464968,
+      0.056873705541426595,
+      0.0029554076071668205,
+      0.1399637441307005
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

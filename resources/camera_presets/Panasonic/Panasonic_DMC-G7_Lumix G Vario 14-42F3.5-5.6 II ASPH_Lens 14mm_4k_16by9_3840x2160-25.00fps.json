@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_DMC-G7_Lumix G Vario 14-42/F3.5-5.6 II ASPH_Lens 14mm_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Abdul",
+  "camera_brand": "Panasonic",
+  "camera_model": "DMC-G7",
+  "lens_model": "Lumix G Vario 14-42/F3.5-5.6 II ASPH",
+  "camera_setting": "Lens 14mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.49200549326949095,
+    "camera_matrix": [
+      [
+        3817.3936908070255,
+        0.0,
+        1921.512550683417
+      ],
+      [
+        0.0,
+        3805.670474568182,
+        1160.989322039672
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32232833652004295,
+      -0.37435524772047274,
+      3.7834020843474327,
+      -8.515366165399335
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

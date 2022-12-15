@@ -1,0 +1,63 @@
+{
+  "name": "Caddx_Vista_nebula pro nano__480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "madalin Alexandru",
+  "camera_brand": "Caddx",
+  "camera_model": "Vista",
+  "lens_model": "nebula pro nano",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.19397159956803348,
+    "camera_matrix": [
+      [
+        495.76847558885135,
+        0.0,
+        476.632259418847
+      ],
+      [
+        0.0,
+        495.788293431958,
+        347.0581005210595
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.007886282967156703,
+      -0.08268709866540289,
+      0.0678043290285636,
+      -0.024466752244534023
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-07",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

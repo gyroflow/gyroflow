@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2_ZHONGYI 25mm f0.95_C_C4k_2.37by1_4096x1728-150.00fps",
+  "note": "",
+  "calibrated_by": "Jarek",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "ZHONGYI 25mm f0.95",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1728
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 150.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6200536634659639,
+    "camera_matrix": [
+      [
+        5320.333632711096,
+        0.0,
+        1998.161594908349
+      ],
+      [
+        0.0,
+        5323.15733368865,
+        884.538866655972
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.005979157010231264,
+      1.2341725983844989,
+      -4.660331412279818,
+      7.293637762733083
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

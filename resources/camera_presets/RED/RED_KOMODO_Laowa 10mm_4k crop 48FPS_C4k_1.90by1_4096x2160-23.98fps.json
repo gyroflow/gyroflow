@@ -1,0 +1,63 @@
+{
+  "name": "RED_KOMODO_Laowa 10mm_4k crop 48FPS_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "neo.exe",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 10mm",
+  "camera_setting": "4k crop 48FPS",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.25066727732961236,
+    "camera_matrix": [
+      [
+        2359.99741272825,
+        0.0,
+        2057.012567278473
+      ],
+      [
+        0.0,
+        2359.779291212467,
+        1089.1226216423386
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3190013625633828,
+      0.06775515540950779,
+      0.11845968770779776,
+      0.009202565406878471
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

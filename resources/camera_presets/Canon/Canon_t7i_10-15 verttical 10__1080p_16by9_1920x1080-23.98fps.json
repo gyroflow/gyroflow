@@ -1,0 +1,66 @@
+{
+  "name": "Canon_t7i_10-15 verttical 10__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Nathan khouri",
+  "camera_brand": "Canon",
+  "camera_model": "t7i",
+  "lens_model": "10-15 verttical 10",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3308454581699367,
+    "camera_matrix": [
+      [
+        901.4857381953244,
+        0.0,
+        961.1937115554964
+      ],
+      [
+        0.0,
+        900.7405634913172,
+        530.5496894803343
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.358457463655539,
+      0.0141005428526006,
+      0.27665148672669426,
+      -0.20842725671703505
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-beta.2",
+  "date": "2022-10-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-1_4535a9af_With Ulanzi 18mm_4k_16by9_3840x2160-29.97fps",
+  "note": "With Ulanzi 18mm",
+  "calibrated_by": "Johannes Waschke",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-1",
+  "lens_model": "4535a9af",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 17.355525627840223,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6821696154021626,
+    "camera_matrix": [
+      [
+        2417.6450944051385,
+        0.0,
+        1929.2430137726212
+      ],
+      [
+        0.0,
+        2420.177909955222,
+        1090.0907312358947
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23789631502941236,
+      -0.069140843717345,
+      0.3582130248106503,
+      -0.2980208438999107
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-1-4535a9af-3840x2160@29970",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

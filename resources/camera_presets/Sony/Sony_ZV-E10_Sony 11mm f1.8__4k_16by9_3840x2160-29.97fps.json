@@ -1,0 +1,63 @@
+{
+  "name": "Sony_ZV-E10_Sony 11mm f1.8__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "沈育",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Sony 11mm f1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0967114798819408,
+    "camera_matrix": [
+      [
+        2460.384286367243,
+        0.0,
+        1939.704928815288
+      ],
+      [
+        0.0,
+        2449.7444386809366,
+        1090.3298517810551
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4871927131649167,
+      -0.7761551855608633,
+      3.2711628914985535,
+      -3.272261597174449
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-80e09a5b-3840x2160@29970",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

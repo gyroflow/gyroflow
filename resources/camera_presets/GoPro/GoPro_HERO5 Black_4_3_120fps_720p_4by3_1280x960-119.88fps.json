@@ -1,0 +1,63 @@
+{
+  "name": "GoPro_HERO5 Black_4:3_120fps_720p_4by3_1280x960-119.88fps",
+  "note": "120fps",
+  "calibrated_by": "Brendo Neves",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Black",
+  "lens_model": "4:3",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 960
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 960
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 119.880119,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3213519347555068,
+    "camera_matrix": [
+      [
+        561.6155305855822,
+        0.0,
+        642.098768727619
+      ],
+      [
+        0.0,
+        560.748480735972,
+        470.8031457927
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04343271215377734,
+      0.06996308860778805,
+      -0.08712859032605055,
+      0.032053377616182405
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-13",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_7Artisans25mm_ML 2k 1:1_1080p_3by2_1920x1280-24.64fps",
+  "note": "",
+  "calibrated_by": "Simone Rampichini",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "7Artisans25mm",
+  "camera_setting": "ML 2k 1:1",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1280
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1280
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1280
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.636999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7116032211941804,
+    "camera_matrix": [
+      [
+        6237.267162915431,
+        0.0,
+        747.414797878514
+      ],
+      [
+        0.0,
+        6250.157316303872,
+        611.8567031065296
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15013772147379925,
+      -5.345462296725162,
+      386.9805170918944,
+      -8774.572292415909
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Mi 11 Ultra 24mm_24mm__4k_4by3_4000x3000-24.00fps",
+  "note": "",
+  "calibrated_by": "高嶋恒希",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 11 Ultra 24mm",
+  "lens_model": "24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.637566415811194,
+    "camera_matrix": [
+      [
+        2806.1973356921044,
+        0.0,
+        2029.3466250618892
+      ],
+      [
+        0.0,
+        2805.1786148749516,
+        1475.7622717646327
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30806379706668857,
+      0.69897406299156,
+      -2.066156077322498,
+      2.4035851356670364
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

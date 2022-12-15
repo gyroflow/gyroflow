@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-E4_Rokinon 12mm f/2.0__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Skrat",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-E4",
+  "lens_model": "Rokinon 12mm f/2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2720106445156786,
+    "camera_matrix": [
+      [
+        1057.831715243542,
+        0.0,
+        950.268350104567
+      ],
+      [
+        0.0,
+        1057.9392980028,
+        546.9262754518659
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3081270679945932,
+      0.10670443742693028,
+      -0.0046009351056637456,
+      0.10050525323476656
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

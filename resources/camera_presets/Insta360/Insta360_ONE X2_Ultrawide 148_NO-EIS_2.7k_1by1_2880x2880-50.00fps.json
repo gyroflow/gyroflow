@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_ONE X2_Ultrawide 148_NO-EIS_2.7k_1by1_2880x2880-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "felix barjou",
+  "camera_brand": "Insta360",
+  "camera_model": "ONE X2",
+  "lens_model": "Ultrawide 148",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2880,
+    "h": 2880
+  },
+  "orig_dimension": {
+    "w": 2880,
+    "h": 2880
+  },
+  "output_dimension": {
+    "w": 2880,
+    "h": 2880
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3846352626575951,
+    "camera_matrix": [
+      [
+        540.2795386575723,
+        0.0,
+        1444.3003736812125
+      ],
+      [
+        0.0,
+        540.5326551000614,
+        1443.7974976965074
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2206843377577173,
+      0.0590585156653012,
+      -0.029721897988288205,
+      0.012502406067622467
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-onex2-ultrawide148-2880x2880@50000-no-eis",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

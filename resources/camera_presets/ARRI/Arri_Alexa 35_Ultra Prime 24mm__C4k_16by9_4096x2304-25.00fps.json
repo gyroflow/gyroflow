@@ -1,0 +1,66 @@
+{
+  "name": "Arri_Alexa 35_Ultra Prime 24mm__C4k_16by9_4096x2304-25.00fps",
+  "note": "",
+  "calibrated_by": "Bernhard Russow",
+  "camera_brand": "Arri",
+  "camera_model": "Alexa 35",
+  "lens_model": "Ultra Prime 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.22617908072817208,
+    "camera_matrix": [
+      [
+        3898.384011769415,
+        0.0,
+        2060.6726644524756
+      ],
+      [
+        0.0,
+        3897.856194607633,
+        1153.9022269055367
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18638553065409355,
+      0.23435912043092252,
+      -0.011406749729043904,
+      0.5554573154291361
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

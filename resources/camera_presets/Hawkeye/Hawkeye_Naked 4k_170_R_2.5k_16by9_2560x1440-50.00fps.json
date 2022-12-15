@@ -1,0 +1,63 @@
+{
+  "name": "Hawkeye_Naked 4k_170_R_2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "Grau",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Naked 4k",
+  "lens_model": "170",
+  "camera_setting": "R",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5178148809417773,
+    "camera_matrix": [
+      [
+        1104.5246640201738,
+        0.0,
+        1337.2465564683496
+      ],
+      [
+        0.0,
+        1086.829070349007,
+        677.3582978724507
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.11778259497946764,
+      0.0984618651251043,
+      -0.16438134041496322,
+      0.06586597925712638
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

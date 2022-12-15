@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_split 3 lite caddx turtle 2_caddx_hd_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "JUSTZ_GARAGE",
+  "camera_brand": "RunCam",
+  "camera_model": "split 3 lite caddx turtle 2",
+  "lens_model": "caddx",
+  "camera_setting": "hd",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2981433523626399,
+    "camera_matrix": [
+      [
+        801.4919805656863,
+        0.0,
+        942.4289934718146
+      ],
+      [
+        0.0,
+        801.2036740802912,
+        508.4029550327356
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03680663696919033,
+      0.05934085337876092,
+      -0.0363208578462666,
+      0.009459439902950869
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

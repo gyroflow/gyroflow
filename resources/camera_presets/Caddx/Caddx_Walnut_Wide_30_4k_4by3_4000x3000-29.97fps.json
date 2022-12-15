@@ -1,0 +1,63 @@
+{
+  "name": "Caddx_Walnut_Wide_30_4k_4by3_4000x3000-29.97fps",
+  "note": "",
+  "calibrated_by": "@maximilian_pircher",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "Wide",
+  "camera_setting": "30",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9624824331424716,
+    "camera_matrix": [
+      [
+        1758.6692848233852,
+        0.0,
+        2035.0123991453845
+      ],
+      [
+        0.0,
+        1758.9513053339406,
+        1488.041223569661
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05855521755251174,
+      0.014366497564508165,
+      -0.013266516778893789,
+      0.006838690743922456
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

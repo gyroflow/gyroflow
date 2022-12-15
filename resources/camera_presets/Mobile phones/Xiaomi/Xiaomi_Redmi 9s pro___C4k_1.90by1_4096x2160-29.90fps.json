@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Redmi 9s pro___C4k_1.90by1_4096x2160-29.90fps",
+  "note": "",
+  "calibrated_by": "Dantistnfs",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi 9s pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.899767,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4711223424561259,
+    "camera_matrix": [
+      [
+        3063.8506397695273,
+        0.0,
+        2060.496967148573
+      ],
+      [
+        0.0,
+        3069.6972591187323,
+        1064.7998736257798
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3618329951750971,
+      1.7195352220327291,
+      -28.763148895451813,
+      145.79760968508268
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Fujifilm_X-T3_fujinon 14mm f2.8_x1.28 crop sensor_4k_16by9_3840x2160-50.00fps",
+  "note": "x1.28 crop sensor",
+  "calibrated_by": "Florent CURK",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "fujinon 14mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5611966115557043,
+    "camera_matrix": [
+      [
+        2876.7697931180005,
+        0.0,
+        1898.7684148999383
+      ],
+      [
+        0.0,
+        2876.0034419447625,
+        1063.1997318163942
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30616518856765673,
+      0.2845557313932949,
+      -0.5651842917119471,
+      0.8345150727593791
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

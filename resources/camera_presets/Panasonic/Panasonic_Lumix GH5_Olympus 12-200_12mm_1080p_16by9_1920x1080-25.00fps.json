@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_Lumix GH5_Olympus 12-200_12mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Пользователь",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH5",
+  "lens_model": "Olympus 12-200",
+  "camera_setting": "12mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4360851857775209,
+    "camera_matrix": [
+      [
+        1479.0042290493132,
+        0.0,
+        948.411140675786
+      ],
+      [
+        0.0,
+        1477.4336953085365,
+        552.1679541997154
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3299568760131572,
+      0.005989597309727633,
+      0.41956692738569634,
+      -0.2868503944917523
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

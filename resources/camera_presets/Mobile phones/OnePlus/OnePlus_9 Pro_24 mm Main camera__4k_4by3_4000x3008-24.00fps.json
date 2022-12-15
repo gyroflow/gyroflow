@@ -1,0 +1,63 @@
+{
+  "name": "OnePlus_9 Pro_24 mm Main camera__4k_4by3_4000x3008-24.00fps",
+  "note": "",
+  "calibrated_by": "Luca C.",
+  "camera_brand": "OnePlus",
+  "camera_model": "9 Pro",
+  "lens_model": "24 mm Main camera",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3008
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3008
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3008
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.001171,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9032398413950028,
+    "camera_matrix": [
+      [
+        2663.0287692054794,
+        0.0,
+        1966.2365664025965
+      ],
+      [
+        0.0,
+        2665.586313311958,
+        1487.567687460764
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2738834713022983,
+      0.5995297560989573,
+      -0.7082810414106417,
+      0.11481567372199313
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

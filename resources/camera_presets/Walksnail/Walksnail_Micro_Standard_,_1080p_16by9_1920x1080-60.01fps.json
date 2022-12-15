@@ -1,0 +1,63 @@
+{
+  "name": "Walksnail_Micro_Standard_,_1080p_16by9_1920x1080-60.01fps",
+  "note": "Onboard VTX recording",
+  "calibrated_by": "Jan Daliba",
+  "camera_brand": "Walksnail",
+  "camera_model": "Micro",
+  "lens_model": "Standard",
+  "camera_setting": ",",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.013706,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2790258638628039,
+    "camera_matrix": [
+      [
+        725.5272581225993,
+        0.0,
+        953.5216522249514
+      ],
+      [
+        0.0,
+        724.8159623912578,
+        541.1126309853443
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.023440436908032138,
+      0.01196626742246009,
+      -0.0065087179787122595,
+      0.0007402571669719968
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

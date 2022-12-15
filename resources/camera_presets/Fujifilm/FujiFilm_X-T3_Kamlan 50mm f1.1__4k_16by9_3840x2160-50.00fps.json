@@ -1,0 +1,63 @@
+{
+  "name": "FujiFilm_X-T3_Kamlan 50mm f1.1__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Dmitry Kalinin",
+  "camera_brand": "FujiFilm",
+  "camera_model": "X-T3",
+  "lens_model": "Kamlan 50mm f1.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5841284079484559,
+    "camera_matrix": [
+      [
+        14237.195507660908,
+        0.0,
+        1486.6009322342643
+      ],
+      [
+        0.0,
+        14386.10879667894,
+        1248.3036297252163
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5753499803332446,
+      3.136527926181139,
+      -12404.78768376589,
+      1053978.828460022
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

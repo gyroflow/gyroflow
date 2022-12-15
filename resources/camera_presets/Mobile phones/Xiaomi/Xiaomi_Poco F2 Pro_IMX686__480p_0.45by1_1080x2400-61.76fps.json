@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Poco F2 Pro_IMX686__480p_0.45by1_1080x2400-61.76fps",
+  "note": "",
+  "calibrated_by": "Martín Nóvoa",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Poco F2 Pro",
+  "lens_model": "IMX686",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1080,
+    "h": 2400
+  },
+  "orig_dimension": {
+    "w": 1080,
+    "h": 2400
+  },
+  "output_dimension": {
+    "w": 1080,
+    "h": 2400
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 61.758488,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.8969099081964604,
+    "camera_matrix": [
+      [
+        1387.310136035315,
+        0.0,
+        717.3564487901481
+      ],
+      [
+        0.0,
+        1359.162855565167,
+        1202.8289514082107
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4439937495039084,
+      0.2638994037023831,
+      0.1887824627464135,
+      -0.01152007619999313
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

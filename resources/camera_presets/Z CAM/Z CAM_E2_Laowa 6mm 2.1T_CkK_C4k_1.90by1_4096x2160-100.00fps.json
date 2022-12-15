@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2_Laowa 6mm 2.1T_CkK_C4k_1.90by1_4096x2160-100.00fps",
+  "note": "",
+  "calibrated_by": "Jarek",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 6mm 2.1T",
+  "camera_setting": "CkK",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 100.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2600954824368458,
+    "camera_matrix": [
+      [
+        1225.2396942836851,
+        0.0,
+        1985.492467027825
+      ],
+      [
+        0.0,
+        1224.4085874215375,
+        1091.4469224749228
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33799522685696937,
+      0.13733394847951272,
+      0.017391557207625648,
+      0.05415476624517019
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Walksnail_Avatar___1080p_16by9_1920x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "Vitaliy Pesternikov",
+  "camera_brand": "Walksnail",
+  "camera_model": "Avatar",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.021614,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2541884308001096,
+    "camera_matrix": [
+      [
+        735.302697553067,
+        0.0,
+        908.6012232323998
+      ],
+      [
+        0.0,
+        735.8932023908302,
+        551.8836401594327
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.014484340586488086,
+      0.01683605981196259,
+      -0.01427505291297878,
+      0.004896382192062487
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_Lumix S5_50 mm_50 fps_1080p_16by9_1920x1080-50.00fps",
+  "note": "50 fps",
+  "calibrated_by": "AkiM",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix S5",
+  "lens_model": "50 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3826260865553474,
+    "camera_matrix": [
+      [
+        2939.012672545217,
+        0.0,
+        884.1527152784814
+      ],
+      [
+        0.0,
+        2955.019047314661,
+        581.692122442644
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2849583245860538,
+      0.44185704173193807,
+      7.016564148417608,
+      -45.39339150555994
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

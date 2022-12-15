@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7C_Sigma 28-70mm__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Roy",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Sigma 28-70mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4320376533990948,
+    "camera_matrix": [
+      [
+        2581.7326225304096,
+        0.0,
+        966.1028370548996
+      ],
+      [
+        0.0,
+        2578.7868140392825,
+        591.613701431701
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2596661583238255,
+      -0.19029568197233104,
+      39.994969515273226,
+      -317.43437885097035
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-c74266b2-1920x1080@50000",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

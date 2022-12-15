@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_SJ10 Pro_standart_stab off_4k_16by9_3840x2160-29.97fps",
+  "note": "fw:R1.2.2NMP(08.09.2021)cfn",
+  "calibrated_by": "Сергей",
+  "camera_brand": "SJCAM",
+  "camera_model": "SJ10 Pro",
+  "lens_model": "standart",
+  "camera_setting": "stab off",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.38482456841668383,
+    "camera_matrix": [
+      [
+        2092.256416502933,
+        0.0,
+        1927.8968173446813
+      ],
+      [
+        0.0,
+        2093.7465838793537,
+        1114.6003975531742
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.030793725863024465,
+      -0.06908778070359078,
+      0.08955026553239029,
+      -0.040827556618177906
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

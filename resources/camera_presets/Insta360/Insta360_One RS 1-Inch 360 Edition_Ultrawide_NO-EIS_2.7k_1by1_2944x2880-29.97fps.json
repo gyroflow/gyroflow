@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_One RS 1-Inch 360 Edition_Ultrawide_NO-EIS_2.7k_1by1_2944x2880-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "AJP",
+  "camera_brand": "Insta360",
+  "camera_model": "One RS 1-Inch 360 Edition",
+  "lens_model": "Ultrawide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2944,
+    "h": 2880
+  },
+  "orig_dimension": {
+    "w": 2944,
+    "h": 2880
+  },
+  "output_dimension": {
+    "w": 2944,
+    "h": 2880
+  },
+  "frame_readout_time": 31.110015006955432,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3950541440397387,
+    "camera_matrix": [
+      [
+        920.2522596566354,
+        0.0,
+        1471.5029406453382
+      ],
+      [
+        0.0,
+        919.8942993496306,
+        1434.037612299142
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.035185292665574436,
+      -0.013697557105294288,
+      -0.0021108354712896537,
+      0.0003947365356652496
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-ultrawide-2944x2880@29970-no-eis",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

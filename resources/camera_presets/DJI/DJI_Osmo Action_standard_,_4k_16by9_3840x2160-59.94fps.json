@@ -1,0 +1,63 @@
+{
+  "name": "DJI_Osmo Action_standard_,_4k_16by9_3840x2160-59.94fps",
+  "note": "lens f2,8, angle 145",
+  "calibrated_by": "Silver",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action",
+  "lens_model": "standard",
+  "camera_setting": ",",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7511767606971496,
+    "camera_matrix": [
+      [
+        1720.047448790203,
+        0.0,
+        1961.057107190364
+      ],
+      [
+        0.0,
+        1719.727634498801,
+        1115.9720333759024
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23235420275722848,
+      0.3992699013183501,
+      -0.3304148549504581,
+      0.279016521846284
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_Lumix GH3_Lumix 12-60_Full_1080p_16by9_1920x1080-29.97fps",
+  "note": "12mm",
+  "calibrated_by": "Daniel Doren H",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH3",
+  "lens_model": "Lumix 12-60",
+  "camera_setting": "Full",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2756227694191405,
+    "camera_matrix": [
+      [
+        1393.6879861509392,
+        0.0,
+        953.1878131420232
+      ],
+      [
+        0.0,
+        1403.6916396614106,
+        530.2675221027483
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2860974578188558,
+      0.08602652833537441,
+      0.0913280688130073,
+      0.0627048710775911
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

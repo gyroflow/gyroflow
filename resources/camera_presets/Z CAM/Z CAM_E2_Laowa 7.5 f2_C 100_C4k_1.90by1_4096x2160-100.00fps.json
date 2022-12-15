@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2_Laowa 7.5 f2_C 100_C4k_1.90by1_4096x2160-100.00fps",
+  "note": "",
+  "calibrated_by": "Jarek",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 7.5 f2",
+  "camera_setting": "C 100",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 100.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32841866780664714,
+    "camera_matrix": [
+      [
+        1609.18256395239,
+        0.0,
+        2014.7266788297657
+      ],
+      [
+        0.0,
+        1605.8649382317797,
+        1076.945891537177
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3309848297705203,
+      0.1132809986655806,
+      -0.008998642112483314,
+      0.06951746369723563
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

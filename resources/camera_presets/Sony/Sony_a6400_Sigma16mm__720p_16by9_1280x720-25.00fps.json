@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a6400_Sigma16mm__720p_16by9_1280x720-25.00fps",
+  "note": "",
+  "calibrated_by": "mac",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Sigma16mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29964486104588395,
+    "camera_matrix": [
+      [
+        893.8575712688233,
+        0.0,
+        632.1377156623771
+      ],
+      [
+        0.0,
+        894.2887258378314,
+        383.6885412573308
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3401440810932172,
+      0.437972988092392,
+      -2.724104642870509,
+      7.115238918531922
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

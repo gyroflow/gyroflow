@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7IV_Sigma 16-28mm f2.8_28mm_4k_16by9_3840x2160-25.00fps",
+  "note": "28mm",
+  "calibrated_by": "gadas",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Sigma 16-28mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7556088788172713,
+    "camera_matrix": [
+      [
+        2802.799806969884,
+        0.0,
+        1970.2519395943405
+      ],
+      [
+        0.0,
+        2809.9083554008416,
+        1080.6593690285758
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3100673986934499,
+      0.2375881848008196,
+      -0.3140849001814085,
+      0.7562800327318634
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

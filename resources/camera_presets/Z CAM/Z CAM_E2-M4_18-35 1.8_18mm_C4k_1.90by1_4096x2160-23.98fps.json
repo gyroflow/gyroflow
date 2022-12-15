@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_18-35 1.8_18mm_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "4k",
+  "calibrated_by": "Sandro A. Mrowinski",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "18-35 1.8",
+  "camera_setting": "18mm",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 42,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6534610153316657,
+    "camera_matrix": [
+      [
+        3945.8576430326625,
+        0.0,
+        2110.7526576474925
+      ],
+      [
+        0.0,
+        3946.4345528384206,
+        1072.6682685264636
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22051597476367432,
+      0.136735702314253,
+      0.31346620741134357,
+      -0.6090598163621018
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-17",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

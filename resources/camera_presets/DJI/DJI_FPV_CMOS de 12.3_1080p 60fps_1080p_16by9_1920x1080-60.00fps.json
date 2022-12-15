@@ -1,0 +1,63 @@
+{
+  "name": "DJI_FPV_CMOS de 1/2.3\"_1080p 60fps_1080p_16by9_1920x1080-60.00fps",
+  "note": "1080p 60fps",
+  "calibrated_by": "Luis Angel Santamarta",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "CMOS de 1/2.3\"",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3292200652829875,
+    "camera_matrix": [
+      [
+        971.5683184335924,
+        0.0,
+        957.9523817788836
+      ],
+      [
+        0.0,
+        971.1593178812394,
+        530.537759214147
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34337901644681906,
+      0.0881901851689406,
+      0.3564415485942048,
+      -0.4586097734758327
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_7artisans 7.5mm f2.8__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Alexprofpv",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "7artisans 7.5mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.687222877473695,
+    "camera_matrix": [
+      [
+        1415.612868002053,
+        0.0,
+        1904.96247023709
+      ],
+      [
+        0.0,
+        1409.1055595411076,
+        1095.3325632379483
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05007218662089719,
+      0.005411543488564924,
+      -0.021903117267055836,
+      0.01699279554294344
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

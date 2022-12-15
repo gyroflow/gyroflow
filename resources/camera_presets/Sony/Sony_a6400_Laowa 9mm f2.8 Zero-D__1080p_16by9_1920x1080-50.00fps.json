@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a6400_Laowa 9mm f/2.8 Zero-D__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "pixxelpusher",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Laowa 9mm f/2.8 Zero-D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2560184601215746,
+    "camera_matrix": [
+      [
+        761.0956869954521,
+        0.0,
+        952.8106026450456
+      ],
+      [
+        0.0,
+        760.6962818544182,
+        547.9288597975004
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35287890330486216,
+      0.0470752848164983,
+      0.1609536364159275,
+      -0.0452583908273528
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

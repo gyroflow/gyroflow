@@ -1,0 +1,63 @@
+{
+  "name": "RED_Gemini_Sigma_HD_C4k_16by9_4800x2700-23.98fps",
+  "note": "18mm",
+  "calibrated_by": "Ryan Holdridge",
+  "camera_brand": "RED",
+  "camera_model": "Gemini",
+  "lens_model": "Sigma",
+  "camera_setting": "HD",
+  "calib_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 4800,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6322869629077348,
+    "camera_matrix": [
+      [
+        3040.4424560055786,
+        0.0,
+        2423.1967308360618
+      ],
+      [
+        0.0,
+        3036.7702915319337,
+        1328.806405254043
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21385333640948717,
+      0.24418242336959312,
+      -0.32265767813642426,
+      0.5520854222682051
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

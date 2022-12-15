@@ -1,0 +1,63 @@
+{
+  "name": "Samsung_S20 fe_Main rear lens__4k_16by9_3840x2160-29.98fps",
+  "note": "",
+  "calibrated_by": "john preston",
+  "camera_brand": "Samsung",
+  "camera_model": "S20 fe",
+  "lens_model": "Main rear lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.983614,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.985783480501218,
+    "camera_matrix": [
+      [
+        3015.244427133974,
+        0.0,
+        1975.873513084255
+      ],
+      [
+        0.0,
+        3011.800244745774,
+        1235.1902245338258
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.36357832272963125,
+      0.1378820792512825,
+      0.05813355912512822,
+      -0.26428964650761294
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

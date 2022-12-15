@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_Sigma 18-35 1.8_no sb_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "calibratoin 2",
+  "calibrated_by": "RogStrix",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Sigma 18-35 1.8",
+  "camera_setting": "no sb",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 26,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0625349812082934,
+    "camera_matrix": [
+      [
+        4086.077934571073,
+        0.0,
+        2159.3367186535124
+      ],
+      [
+        0.0,
+        4084.737643649895,
+        1039.5269800886413
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19582783965098705,
+      0.47481465778504295,
+      -1.6627330802318774,
+      3.0624276802762056
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

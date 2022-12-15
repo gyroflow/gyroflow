@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R6_Samyang 14mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Tommaso Zanini",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R6",
+  "lens_model": "Samyang 14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.38472119269020894,
+    "camera_matrix": [
+      [
+        821.4389113326497,
+        0.0,
+        969.2054017528528
+      ],
+      [
+        0.0,
+        822.2972618511243,
+        530.1133194449269
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16959773944774698,
+      0.1462377460073124,
+      -0.08047251230758103,
+      0.13216119690229475
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

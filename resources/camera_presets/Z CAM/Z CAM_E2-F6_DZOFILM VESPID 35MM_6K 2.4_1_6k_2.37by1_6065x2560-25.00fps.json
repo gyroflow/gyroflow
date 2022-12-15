@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2-F6_DZOFILM VESPID 35MM_6K 2.4:1_6k_2.37by1_6065x2560-25.00fps",
+  "note": "",
+  "calibrated_by": "wt04_reddragon",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "DZOFILM VESPID 35MM",
+  "camera_setting": "6K 2.4:1",
+  "calib_dimension": {
+    "w": 6065,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 6065,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 6064,
+    "h": 2560
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3042138025006679,
+    "camera_matrix": [
+      [
+        5964.965633549946,
+        0.0,
+        3080.1414708254483
+      ],
+      [
+        0.0,
+        5961.828021494984,
+        1293.7707947505585
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18067649870185432,
+      0.15839275086787552,
+      0.21420345578096783,
+      1.522952906112116
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

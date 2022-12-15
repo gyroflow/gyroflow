@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a1_50.00mm__6k_16by9_7680x4320-29.97fps",
+  "note": "",
+  "calibrated_by": "GOLEM_M1MAX",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "50.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7395727160614083,
+    "camera_matrix": [
+      [
+        10012.924125009287,
+        0.0,
+        3810.540948408598
+      ],
+      [
+        0.0,
+        10010.652450817974,
+        2168.0597677751384
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.39097199857032977,
+      -1.6612743063580082,
+      20.156989901969848,
+      -73.77061252404798
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

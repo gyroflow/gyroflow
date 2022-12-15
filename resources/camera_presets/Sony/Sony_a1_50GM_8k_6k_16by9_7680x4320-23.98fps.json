@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a1_50GM_8k_6k_16by9_7680x4320-23.98fps",
+  "note": "",
+  "calibrated_by": "Matt MacKenzie",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "50GM",
+  "camera_setting": "8k",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": 16.6,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9623710637693492,
+    "camera_matrix": [
+      [
+        10810.844529312531,
+        0.0,
+        3826.6818898300144
+      ],
+      [
+        0.0,
+        10813.437535918596,
+        2141.7614611644035
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.237179007707874,
+      0.3220371771372349,
+      7.780597164085222,
+      -10.865298055234696
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-1-50.00mm-7680x4320@23976",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

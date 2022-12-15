@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Wallimex 10mm EF_6K BRAW_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "Marius Ramminger",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Wallimex 10mm EF",
+  "camera_setting": "6K BRAW",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8067403711392117,
+    "camera_matrix": [
+      [
+        2769.9382161166504,
+        0.0,
+        3127.7118173568656
+      ],
+      [
+        0.0,
+        2769.9996327353897,
+        1740.205454737217
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2701117802651731,
+      0.22180655859035417,
+      -0.2674252459914104,
+      0.25285790145304055
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

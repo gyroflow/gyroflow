@@ -1,0 +1,63 @@
+{
+  "name": "Sony_Xperia 5II_26mm_MotionCam_C4k_16by9_4032x2272-23.98fps",
+  "note": "",
+  "calibrated_by": "Eilie Hallak",
+  "camera_brand": "Sony",
+  "camera_model": "Xperia 5II",
+  "lens_model": "26mm",
+  "camera_setting": "MotionCam",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 2272
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 2272
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 2272
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.981968,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4430960492673172,
+    "camera_matrix": [
+      [
+        4748.5178993574455,
+        0.0,
+        2089.125672825534
+      ],
+      [
+        0.0,
+        4589.819564869871,
+        1248.2643946884707
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31472511232102707,
+      2.197708237078251,
+      -11.411717051714191,
+      10.873373588655726
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

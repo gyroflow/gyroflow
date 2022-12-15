@@ -1,0 +1,66 @@
+{
+  "name": "Sony_Xperia PRO-I_50mm Telephoto (Exmos RS IMX663)_f/2.4 (Cinema Pro)_4k_2.34by1_3840x1644-23.96fps",
+  "note": "4K with 21:9",
+  "calibrated_by": "RaguSaucy",
+  "camera_brand": "Sony",
+  "camera_model": "Xperia PRO-I",
+  "lens_model": "50mm Telephoto (Exmos RS IMX663)",
+  "camera_setting": "f/2.4 (Cinema Pro)",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 1644
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 1644
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 1644
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.963268,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8917476505186963,
+    "camera_matrix": [
+      [
+        5743.1507771825345,
+        0.0,
+        1990.918219900484
+      ],
+      [
+        0.0,
+        5776.194179195809,
+        800.8836922682136
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.39208307510912704,
+      0.7747254882589503,
+      -6.771803292699667,
+      15.067528065729336
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

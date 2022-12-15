@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Mi 10T Pro_108MP 1080p Main__1080p_16by9_1926x1084-24.02fps",
+  "note": "",
+  "calibrated_by": "Muhamad Ardiyansah",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10T Pro",
+  "lens_model": "108MP 1080p Main",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1926,
+    "h": 1084
+  },
+  "orig_dimension": {
+    "w": 1926,
+    "h": 1084
+  },
+  "output_dimension": {
+    "w": 1926,
+    "h": 1084
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.018888,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2809936462282559,
+    "camera_matrix": [
+      [
+        2046.6616383927696,
+        0.0,
+        979.7334638706808
+      ],
+      [
+        0.0,
+        2045.8482695634368,
+        550.1248598128349
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5566905878474121,
+      -1.1630513946944008,
+      3.4689284216561593,
+      -4.844626773961243
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

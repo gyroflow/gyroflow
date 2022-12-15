@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_16mm Meike MFT_DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "16mm Meike MFT",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3813298893173044,
+    "camera_matrix": [
+      [
+        3477.0197876710727,
+        0.0,
+        2053.7737459288483
+      ],
+      [
+        0.0,
+        3479.093132129172,
+        1100.5079602136022
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2182182070574507,
+      0.1847611703949993,
+      0.015430323652946186,
+      0.021742375991366625
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

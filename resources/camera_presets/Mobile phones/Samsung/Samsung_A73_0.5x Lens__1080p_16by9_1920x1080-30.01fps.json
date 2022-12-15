@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_A73_0.5x Lens__1080p_16by9_1920x1080-30.01fps",
+  "note": "",
+  "calibrated_by": "Leo Barua",
+  "camera_brand": "Samsung",
+  "camera_model": "A73",
+  "lens_model": "0.5x Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.007822,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8993834680832503,
+    "camera_matrix": [
+      [
+        3216.691765098877,
+        0.0,
+        942.2777476450102
+      ],
+      [
+        0.0,
+        3207.795249313405,
+        552.0458566902893
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6738828278667485,
+      -4.331816301854545,
+      60.006107124471,
+      -328.17580688493
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_RX0II_BEASTGRIP 0.6X_SLOG2_4k_16by9_3840x2160-23.98fps",
+  "note": "SLOG2",
+  "calibrated_by": "FLYBY",
+  "camera_brand": "Sony",
+  "camera_model": "RX0II",
+  "lens_model": "BEASTGRIP 0.6X",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9479341676806587,
+    "camera_matrix": [
+      [
+        1912.330588431311,
+        0.0,
+        2008.5699830710544
+      ],
+      [
+        0.0,
+        1896.5602059070077,
+        1097.5876815214033
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1359399501434886,
+      0.69250257174915,
+      -2.6578607258006497,
+      4.284263821268721
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

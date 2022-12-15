@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_10mm Meike Mini Prime_DCI_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "10mm Meike Mini Prime",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3948054298280956,
+    "camera_matrix": [
+      [
+        2333.70109249131,
+        0.0,
+        2058.8169387820867
+      ],
+      [
+        0.0,
+        2333.788897653915,
+        1101.5497968721918
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3803555450713583,
+      0.1472329099983012,
+      -0.03150124516435613,
+      0.00002078345049847659
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

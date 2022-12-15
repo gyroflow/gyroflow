@@ -1,0 +1,66 @@
+{
+  "name": "RED_8k vv_leica 35 mm_8k_2k_1.90by1_2048x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Martin Venier",
+  "camera_brand": "RED",
+  "camera_model": "8k vv",
+  "lens_model": "leica 35 mm",
+  "camera_setting": "8k",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.25276886463081716,
+    "camera_matrix": [
+      [
+        1740.969663398633,
+        0.0,
+        1028.874647615309
+      ],
+      [
+        0.0,
+        1741.2252845867986,
+        551.2388958420112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23588507085679555,
+      0.06277265579126097,
+      0.7081217701749271,
+      -0.6734740134477447
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

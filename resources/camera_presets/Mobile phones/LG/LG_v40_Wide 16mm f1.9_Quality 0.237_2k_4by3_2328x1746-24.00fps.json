@@ -1,0 +1,63 @@
+{
+  "name": "LG_v40_Wide 16mm f1.9_Quality 0.237_2k_4by3_2328x1746-24.00fps",
+  "note": "Quality 0.237",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "v40",
+  "lens_model": "Wide 16mm f1.9",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "orig_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "output_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.23691795339315755,
+    "camera_matrix": [
+      [
+        1113.607730712897,
+        0.0,
+        1187.145420576181
+      ],
+      [
+        0.0,
+        1112.0189952227097,
+        886.218479350249
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28108447787845614,
+      0.26406291552541017,
+      -0.16469930164770255,
+      0.08650091338068035
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

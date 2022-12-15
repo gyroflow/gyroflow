@@ -1,0 +1,66 @@
+{
+  "name": "Huawei_MateX2_Rear_P_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Benny Feng",
+  "camera_brand": "Huawei",
+  "camera_model": "MateX2",
+  "lens_model": "Rear",
+  "camera_setting": "P",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.004772,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4215702731597751,
+    "camera_matrix": [
+      [
+        1346.421993204084,
+        0.0,
+        965.2372812739012
+      ],
+      [
+        0.0,
+        1346.5858174712776,
+        519.9186244002424
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20703934385892905,
+      0.8123243305637659,
+      -0.13624507612511563,
+      -1.859963168588871
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

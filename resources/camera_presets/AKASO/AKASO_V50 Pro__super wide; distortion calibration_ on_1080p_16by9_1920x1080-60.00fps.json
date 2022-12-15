@@ -1,0 +1,63 @@
+{
+  "name": "AKASO_V50 Pro__super wide; distortion calibration: on_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Vasil Kalchev",
+  "camera_brand": "AKASO",
+  "camera_model": "V50 Pro",
+  "lens_model": "",
+  "camera_setting": "super wide; distortion calibration: on",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.628413730394464,
+    "camera_matrix": [
+      [
+        852.4247639593326,
+        0.0,
+        965.9490565778124
+      ],
+      [
+        0.0,
+        852.3814718232163,
+        542.7602795632697
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26263713893801427,
+      0.09809180653545237,
+      -0.013602477607457811,
+      0.043573199212911425
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

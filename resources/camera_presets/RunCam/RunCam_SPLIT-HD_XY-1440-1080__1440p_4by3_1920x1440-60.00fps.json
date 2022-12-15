@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_SPLIT-HD_XY-1440-1080__1440p_4by3_1920x1440-60.00fps",
+  "note": "",
+  "calibrated_by": "Administrator",
+  "camera_brand": "RunCam",
+  "camera_model": "SPLIT-HD",
+  "lens_model": "XY-1440-1080",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3191420183617893,
+    "camera_matrix": [
+      [
+        991.6969524142494,
+        0.0,
+        963.88658310426
+      ],
+      [
+        0.0,
+        991.7803880948064,
+        719.4896382588126
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10833893707606448,
+      -0.02280913705540274,
+      0.11642454736447314,
+      -0.16735928797566826
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-split-hd-wide-1920x1440@60000",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

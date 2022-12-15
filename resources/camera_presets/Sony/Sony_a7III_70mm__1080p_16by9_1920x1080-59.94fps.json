@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7III_70mm__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "ASUS",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "70mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.36730917450563255,
+    "camera_matrix": [
+      [
+        1853.802853720446,
+        0.0,
+        973.3079443565804
+      ],
+      [
+        0.0,
+        1848.9791101192077,
+        402.6641643593643
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35675724454916447,
+      -0.7528396143480107,
+      4.60461670692467,
+      -1.630415292789209
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_ThumbPro_Foxeer 1.7mm__4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Daft",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPro",
+  "lens_model": "Foxeer 1.7mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.920612661747384,
+    "camera_matrix": [
+      [
+        1294.5331956925777,
+        0.0,
+        1915.2941432691205
+      ],
+      [
+        0.0,
+        1294.510108509184,
+        985.6447514848188
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0055884605438261325,
+      -0.0029021400860768567,
+      -0.004715371849241376,
+      0.002963142594155156
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

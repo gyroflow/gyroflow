@@ -1,0 +1,63 @@
+{
+  "name": "RED_KOMODO_LAOWA 10 mm f/4 Cookie_17:9 6K_6k_1.90by1_6144x3240-25.00fps",
+  "note": "R3D RAW",
+  "calibrated_by": "Daniel Wagner - thedrone.studio GmbH",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "LAOWA 10 mm f/4 Cookie",
+  "camera_setting": "17:9 6K",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6626728617960965,
+    "camera_matrix": [
+      [
+        2357.152543027387,
+        0.0,
+        3066.14351239553
+      ],
+      [
+        0.0,
+        2356.4139833027884,
+        1618.12838558015
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31084565068745845,
+      0.06908830816890629,
+      0.10298044368050333,
+      0.018249908167183224
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

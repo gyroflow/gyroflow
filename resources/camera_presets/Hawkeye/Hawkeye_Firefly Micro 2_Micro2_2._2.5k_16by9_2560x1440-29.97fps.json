@@ -1,0 +1,63 @@
+{
+  "name": "Hawkeye_Firefly Micro 2_Micro2_2._2.5k_16by9_2560x1440-29.97fps",
+  "note": "",
+  "calibrated_by": "MiyaTron",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Micro 2",
+  "lens_model": "Micro2",
+  "camera_setting": "2.",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6275625660723174,
+    "camera_matrix": [
+      [
+        1736.0701561890053,
+        0.0,
+        1263.286313427972
+      ],
+      [
+        0.0,
+        1733.3854145981998,
+        688.1581529547757
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.09865567748900284,
+      -0.022969299794558917,
+      0.024271451792714022,
+      -0.0161227773454394
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

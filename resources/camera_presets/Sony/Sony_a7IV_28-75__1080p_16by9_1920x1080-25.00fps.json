@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_28-75__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Montaggio",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "28-75",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3813566679583077,
+    "camera_matrix": [
+      [
+        2969.2290518661207,
+        0.0,
+        969.3276546134754
+      ],
+      [
+        0.0,
+        2939.795352351264,
+        534.4973090915273
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.49091231544415,
+      -0.4408372502423174,
+      18.11144611492766,
+      -94.85048073896638
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

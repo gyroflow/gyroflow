@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_SMO 4K_Standard_60_4k_16by9_3840x2160-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Hoffmann, Marc",
+  "camera_brand": "Insta360",
+  "camera_model": "SMO 4K",
+  "lens_model": "Standard",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8815573217798448,
+    "camera_matrix": [
+      [
+        1934.8698213990149,
+        0.0,
+        1893.238367090929
+      ],
+      [
+        0.0,
+        1933.189778278168,
+        1060.2472740122762
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.007206596197199447,
+      -0.010663941786052253,
+      0.005397436576712498,
+      -0.003291459996626855
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

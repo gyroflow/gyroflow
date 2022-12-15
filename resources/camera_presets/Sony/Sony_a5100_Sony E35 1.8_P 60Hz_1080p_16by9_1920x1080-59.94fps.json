@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a5100_Sony E35 1.8_P 60Hz_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "TweeaakC",
+  "camera_brand": "Sony",
+  "camera_model": "a5100",
+  "lens_model": "Sony E35 1.8",
+  "camera_setting": "P 60Hz",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3271582267478752,
+    "camera_matrix": [
+      [
+        3025.231563874741,
+        0.0,
+        959.1443399111588
+      ],
+      [
+        0.0,
+        3018.0346669894993,
+        526.2274549594508
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12433163441098076,
+      7.860266514377517,
+      -107.97877059895087,
+      542.3894666419592
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

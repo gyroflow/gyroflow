@@ -1,0 +1,63 @@
+{
+  "name": "Wolfang_GA320___4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "BURBAN G",
+  "camera_brand": "Wolfang",
+  "camera_model": "GA320",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7199058227712365,
+    "camera_matrix": [
+      [
+        1979.5468983303945,
+        0.0,
+        1965.9734110851884
+      ],
+      [
+        0.0,
+        1978.8441529349896,
+        1001.139899402678
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.11367893152879782,
+      0.015611749980986932,
+      -0.04010026090085022,
+      0.03147298511783524
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-03",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

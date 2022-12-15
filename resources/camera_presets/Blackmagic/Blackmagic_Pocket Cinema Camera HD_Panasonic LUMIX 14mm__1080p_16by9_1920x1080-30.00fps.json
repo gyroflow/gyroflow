@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera HD_Panasonic LUMIX 14mm__1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "cinematix.flights",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera HD",
+  "lens_model": "Panasonic LUMIX 14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5119910179080687,
+    "camera_matrix": [
+      [
+        5480.9062221498,
+        0.0,
+        1626.9071002931755
+      ],
+      [
+        0.0,
+        5612.039546083871,
+        910.2663702316904
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6400417292616597,
+      -13.314862026545397,
+      202.127617272689,
+      -1032.810544232798
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

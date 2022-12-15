@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7IV_Sony FE 35 mm F1.4 GM_Super35 Mode_4k_16by9_3840x2160-59.94fps",
+  "note": "Super35 Mode",
+  "calibrated_by": "Carsten Senkfeil",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Sony FE 35 mm F1.4 GM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3911289349104125,
+    "camera_matrix": [
+      [
+        6384.795723747689,
+        0.0,
+        1816.5264046708949
+      ],
+      [
+        0.0,
+        6238.939282887302,
+        1026.308629261942
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3031503848734372,
+      -0.3871691339672309,
+      29.0695386682667,
+      -249.6119509130347
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

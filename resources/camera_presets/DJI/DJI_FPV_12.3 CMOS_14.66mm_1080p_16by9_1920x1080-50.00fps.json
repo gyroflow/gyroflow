@@ -1,0 +1,66 @@
+{
+  "name": "DJI_FPV_1/2.3” CMOS_14.66mm_1080p_16by9_1920x1080-50.00fps",
+  "note": "150deg FOV",
+  "calibrated_by": "Mike Smith",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "1/2.3” CMOS",
+  "camera_setting": "14.66mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.22286417730366184,
+    "camera_matrix": [
+      [
+        819.9272116080144,
+        0.0,
+        955.896494440484
+      ],
+      [
+        0.0,
+        819.9776021196934,
+        544.1498010857608
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09618410707767552,
+      -0.002832157854262582,
+      -0.01533548563842575,
+      0.005617140977754785
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

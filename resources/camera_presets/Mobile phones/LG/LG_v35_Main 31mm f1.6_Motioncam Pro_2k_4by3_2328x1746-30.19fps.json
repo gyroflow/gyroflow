@@ -1,0 +1,63 @@
+{
+  "name": "LG_v35_Main 31mm f1.6_Motioncam Pro_2k_4by3_2328x1746-30.19fps",
+  "note": "Motioncam Pro",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "v35",
+  "lens_model": "Main 31mm f1.6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "orig_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "output_dimension": {
+    "w": 2328,
+    "h": 1310
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.186058,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5300482479012342,
+    "camera_matrix": [
+      [
+        2069.459049805172,
+        0.0,
+        1161.8647473745723
+      ],
+      [
+        0.0,
+        2068.8782365582365,
+        864.9091476025499
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8915963753583247,
+      -4.962142729348296,
+      18.935176685836577,
+      -24.974546133227328
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

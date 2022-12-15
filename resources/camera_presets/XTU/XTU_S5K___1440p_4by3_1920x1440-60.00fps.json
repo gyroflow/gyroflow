@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S5K___1440p_4by3_1920x1440-60.00fps",
+  "note": "",
+  "calibrated_by": "Yihao",
+  "camera_brand": "XTU",
+  "camera_model": "S5K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.00809489139694,
+    "camera_matrix": [
+      [
+        375.44978313729854,
+        0.0,
+        960.0008039415552
+      ],
+      [
+        0.0,
+        377.71085121299063,
+        601.3947213124012
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2895851014685313,
+      0.22011612371914,
+      -0.09832851468982284,
+      0.09435227914055472
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-10-14",
+  "compatible_settings": []
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_Canon 15-45mm_p_720p_3by2_1736x1158-24.00fps",
+  "note": "15mm",
+  "calibrated_by": "Dan Pingstone",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Canon 15-45mm",
+  "camera_setting": "p",
+  "calib_dimension": {
+    "w": 1736,
+    "h": 1158
+  },
+  "orig_dimension": {
+    "w": 1736,
+    "h": 1158
+  },
+  "output_dimension": {
+    "w": 1736,
+    "h": 1158
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32943250391821455,
+    "camera_matrix": [
+      [
+        1201.8604459994126,
+        0.0,
+        865.3675496055841
+      ],
+      [
+        0.0,
+        1201.8887103016327,
+        576.3353259078625
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17185666643098968,
+      0.2737676410739445,
+      -0.4221832520220836,
+      0.573248416535245
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_Tamron 70-300 4.5-6.3 Di III RXD_Intelligent Auto_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Jonathan",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Tamron 70-300 4.5-6.3 Di III RXD",
+  "camera_setting": "Intelligent Auto",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1363505656756792,
+    "camera_matrix": [
+      [
+        16340.93243698566,
+        0.0,
+        2310.130061512792
+      ],
+      [
+        0.0,
+        16193.565391728802,
+        2015.525944481491
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2259212503445292,
+      16.88189563832918,
+      -1426.2595621352912,
+      32208.882351525317
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-ab7b24b0-3840x2160@29970",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

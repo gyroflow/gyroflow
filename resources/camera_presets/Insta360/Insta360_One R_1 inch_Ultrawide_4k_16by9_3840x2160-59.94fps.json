@@ -1,0 +1,63 @@
+{
+  "name": "Insta360_One R_1 inch_Ultrawide_4k_16by9_3840x2160-59.94fps",
+  "note": "V1",
+  "calibrated_by": "alexjania",
+  "camera_brand": "Insta360",
+  "camera_model": "One R",
+  "lens_model": "1 inch",
+  "camera_setting": "Ultrawide",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 0.20841507276036084,
+    "camera_matrix": [
+      [
+        2235.348130079217,
+        0.0,
+        1983.3214030536255
+      ],
+      [
+        0.0,
+        2243.919509652018,
+        1120.476962067205
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03169468306516604,
+      0.06801863635863228,
+      -0.18220714384637135,
+      0.22164628899206176
+    ],
+    "radial_distortion_limit": 10.0
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

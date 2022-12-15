@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_12T Pro_1/1.22\" 200mp 23mm f/1.69_mcpro24 5.7K 60fps_5k_4by3_5760x4320-57.91fps",
+  "note": "Auto calibrated",
+  "calibrated_by": "Draco",
+  "camera_brand": "Xiaomi",
+  "camera_model": "12T Pro",
+  "lens_model": "1/1.22\" 200mp 23mm f/1.69",
+  "camera_setting": "mcpro24 5.7K 60fps",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 57.911716,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.042199826745158,
+    "camera_matrix": [
+      [
+        5225.637820111226,
+        0.0,
+        2890.50639082049
+      ],
+      [
+        0.0,
+        5222.441162930591,
+        2171.207478068397
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5300399139726709,
+      -0.7321288014052817,
+      0.4057113912848025,
+      3.2524466905160136
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

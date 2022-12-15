@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k G2_Samyang 12mm__6k_16by9_6144x3456-24.00fps",
+  "note": "",
+  "calibrated_by": "Daniel Schreiber",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k G2",
+  "lens_model": "Samyang 12mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.31677487150619704,
+    "camera_matrix": [
+      [
+        3309.6173413189013,
+        0.0,
+        3077.6298218523484
+      ],
+      [
+        0.0,
+        3310.9976133618047,
+        1732.730916145585
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03994477879197108,
+      0.013066847329451774,
+      -0.02022691075694739,
+      0.015860430353558296
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

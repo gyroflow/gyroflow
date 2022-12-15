@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7rIII_FE 3.5 28-70__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Robert Lozoya",
+  "camera_brand": "Sony",
+  "camera_model": "a7rIII",
+  "lens_model": "FE 3.5 28-70",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5159512148583038,
+    "camera_matrix": [
+      [
+        4676.701397550907,
+        0.0,
+        1915.4838259986727
+      ],
+      [
+        0.0,
+        4670.070641074016,
+        1080.8068254967404
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3254066439199206,
+      0.19656131831270104,
+      0.7405594513118966,
+      -3.1534319571868648
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

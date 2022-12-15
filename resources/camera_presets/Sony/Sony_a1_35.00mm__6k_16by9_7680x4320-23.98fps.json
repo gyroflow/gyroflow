@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a1_35.00mm__6k_16by9_7680x4320-23.98fps",
+  "note": "",
+  "calibrated_by": "Steve",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "35.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": 16.6,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 1.0512518315075177,
+    "camera_matrix": [
+      [
+        7922.717943535799,
+        0.0,
+        3832.0904989585583
+      ],
+      [
+        0.0,
+        7743.351718549288,
+        2176.3447029145127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4401685945137435,
+      -0.03762247793149327,
+      -0.0035640217364584226,
+      0.023102163728903904
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-06-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "DDPAI_Mini5___4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "张强锋",
+  "camera_brand": "DDPAI",
+  "camera_model": "Mini5",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7240476677115998,
+    "camera_matrix": [
+      [
+        1808.6722801370852,
+        0.0,
+        1994.2380505397896
+      ],
+      [
+        0.0,
+        1798.8037334812766,
+        1188.6403045388429
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10391677189265836,
+      -0.30397700833881813,
+      0.3064528648852428,
+      -0.11508886721819904
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

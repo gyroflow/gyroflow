@@ -1,0 +1,63 @@
+{
+  "name": "Garmin_Virb XE_Standard_Stabilizer On_1440p_4by3_1920x1440-25.00fps",
+  "note": "Stabilizer On",
+  "calibrated_by": "Michael N",
+  "camera_brand": "Garmin",
+  "camera_model": "Virb XE",
+  "lens_model": "Standard",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6341149351937654,
+    "camera_matrix": [
+      [
+        847.927770118926,
+        0.0,
+        943.979724259382
+      ],
+      [
+        0.0,
+        848.9459612162427,
+        726.396923409739
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09430287148066473,
+      0.055883072998204816,
+      -0.03973588007810967,
+      0.018416632852185037
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-22",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

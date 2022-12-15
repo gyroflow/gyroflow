@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_Lumix GH6_Panasonic Leica DG Summilux 9mm 1.7__5k_1.89by1_5727x3024-23.98fps",
+  "note": "",
+  "calibrated_by": "V V",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH6",
+  "lens_model": "Panasonic Leica DG Summilux 9mm 1.7",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5727,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5727,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5728,
+    "h": 3024
+  },
+  "frame_readout_time": 12.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.777357891699889,
+    "camera_matrix": [
+      [
+        3132.458700336821,
+        0.0,
+        2890.4260758093997
+      ],
+      [
+        0.0,
+        3129.82006914045,
+        1486.7895626284103
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31101444629907754,
+      0.2318952900966757,
+      -0.445737062285519,
+      0.7046814576161066
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

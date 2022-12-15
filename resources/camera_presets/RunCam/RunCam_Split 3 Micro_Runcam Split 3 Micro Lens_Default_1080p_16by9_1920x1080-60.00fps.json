@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_Split 3 Micro_Runcam Split 3 Micro Lens_Default_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "SaltyEddy",
+  "camera_brand": "RunCam",
+  "camera_model": "Split 3 Micro",
+  "lens_model": "Runcam Split 3 Micro Lens",
+  "camera_setting": "Default",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.199750348858898,
+    "camera_matrix": [
+      [
+        826.5948021156313,
+        0.0,
+        978.9223459561103
+      ],
+      [
+        0.0,
+        825.1911848951532,
+        555.1124326644613
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.01854974497690983,
+      -0.009178322082854594,
+      0.010636229135038408,
+      -0.007727619198584931
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-01",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

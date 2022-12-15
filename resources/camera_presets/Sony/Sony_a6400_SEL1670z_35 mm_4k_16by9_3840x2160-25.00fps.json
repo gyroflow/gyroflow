@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a6400_SEL1670z_35 mm_4k_16by9_3840x2160-25.00fps",
+  "note": "35 mm",
+  "calibrated_by": "pigonthewind",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "SEL1670z",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 40.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6686956659016812,
+    "camera_matrix": [
+      [
+        7067.2255256390235,
+        0.0,
+        1955.6320678683664
+      ],
+      [
+        0.0,
+        7040.7363122210545,
+        1221.657580899127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1937913842880292,
+      9.391338364038084,
+      -194.6051522491262,
+      1224.680881698074
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

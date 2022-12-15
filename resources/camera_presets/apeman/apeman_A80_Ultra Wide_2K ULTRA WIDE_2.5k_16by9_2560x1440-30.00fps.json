@@ -1,0 +1,66 @@
+{
+  "name": "apeman_A80_Ultra Wide_2K ULTRA WIDE_2.5k_16by9_2560x1440-30.00fps",
+  "note": "",
+  "calibrated_by": "QUESUS",
+  "camera_brand": "apeman",
+  "camera_model": "A80",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "2K ULTRA WIDE",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3821289271780204,
+    "camera_matrix": [
+      [
+        1281.9428239577956,
+        0.0,
+        1265.6456995234014
+      ],
+      [
+        0.0,
+        1295.6694784956967,
+        731.626249612727
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.009838752439408231,
+      0.024634705123255104,
+      -0.06233348704602792,
+      0.06440978079791798
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Google_Pixel 5__RAW_C4k_4by3_4032x3024-29.98fps",
+  "note": "",
+  "calibrated_by": "admin",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 5",
+  "lens_model": "",
+  "camera_setting": "RAW",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.984062,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0028436710198922,
+    "camera_matrix": [
+      [
+        3167.971098519288,
+        0.0,
+        2031.7493087424896
+      ],
+      [
+        0.0,
+        3158.0300640330015,
+        1525.2545532121237
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5785780363185903,
+      -1.1754620861370408,
+      3.228807395292083,
+      -2.4412951500277447
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

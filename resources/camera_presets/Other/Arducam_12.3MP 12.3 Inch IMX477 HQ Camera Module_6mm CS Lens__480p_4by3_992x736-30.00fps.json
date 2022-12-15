@@ -1,0 +1,63 @@
+{
+  "name": "Arducam_12.3MP 1/2.3 Inch IMX477 HQ Camera Module_6mm CS Lens__480p_4by3_992x736-30.00fps",
+  "note": "",
+  "calibrated_by": "Max Maton",
+  "camera_brand": "Arducam",
+  "camera_model": "12.3MP 1/2.3 Inch IMX477 HQ Camera Module",
+  "lens_model": "6mm CS Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 992,
+    "h": 736
+  },
+  "orig_dimension": {
+    "w": 992,
+    "h": 736
+  },
+  "output_dimension": {
+    "w": 992,
+    "h": 736
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3055900979408921,
+    "camera_matrix": [
+      [
+        1006.5936026103196,
+        0.0,
+        485.7886719441899
+      ],
+      [
+        0.0,
+        1010.1040605609726,
+        368.6834303855491
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1683269125039552,
+      -0.12370041304371047,
+      0.6442789118706433,
+      -0.938418068331789
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

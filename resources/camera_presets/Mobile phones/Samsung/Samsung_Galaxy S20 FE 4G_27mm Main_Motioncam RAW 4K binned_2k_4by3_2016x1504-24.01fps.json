@@ -1,0 +1,63 @@
+{
+  "name": "Samsung_Galaxy S20 FE 4G_27mm Main_Motioncam RAW 4K binned_2k_4by3_2016x1504-24.01fps",
+  "note": "Motioncam RAW 4K binned",
+  "calibrated_by": "MotionCam Pro User",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S20 FE 4G",
+  "lens_model": "27mm Main",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "orig_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "output_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.007318,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4648265292252885,
+    "camera_matrix": [
+      [
+        1400.779320830162,
+        0.0,
+        1014.0855663534926
+      ],
+      [
+        0.0,
+        1402.2764635875733,
+        736.8535753786275
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3734550858736734,
+      -0.01203406007153734,
+      0.933249807546424,
+      -1.4694552413193231
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

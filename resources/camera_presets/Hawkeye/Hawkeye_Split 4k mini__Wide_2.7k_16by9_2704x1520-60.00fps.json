@@ -1,0 +1,63 @@
+{
+  "name": "Hawkeye_Split 4k mini__Wide_2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Kostya",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Split 4k mini",
+  "lens_model": "",
+  "camera_setting": "Wide",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8433462345356046,
+    "camera_matrix": [
+      [
+        1306.8887654843584,
+        0.0,
+        1322.3920514294318
+      ],
+      [
+        0.0,
+        1304.953551154112,
+        823.6873278474461
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.040785318785509,
+      0.01948018287286759,
+      -0.02243672641293951,
+      0.007848023945861302
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-19",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

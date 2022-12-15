@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7III_kit 3.5-5.6 28-70 28mm_28mm_1080p_16by9_1920x1080-50.00fps",
+  "note": "50fps",
+  "calibrated_by": "Panos Taxiarchis Magnisalis",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "kit 3.5-5.6 28-70 28mm",
+  "camera_setting": "28mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4508910793309815,
+    "camera_matrix": [
+      [
+        1154.0663850471033,
+        0.0,
+        938.8302367071584
+      ],
+      [
+        0.0,
+        1161.4562446426555,
+        384.1492706562786
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4486081336665479,
+      -0.07791548449699053,
+      1.4125735720755312,
+      -1.9464425874092848
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

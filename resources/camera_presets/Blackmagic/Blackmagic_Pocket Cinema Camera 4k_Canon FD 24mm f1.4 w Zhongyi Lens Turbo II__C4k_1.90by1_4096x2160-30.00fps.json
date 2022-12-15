@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Canon FD 24mm f1.4 w/ Zhongyi Lens Turbo II__C4k_1.90by1_4096x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Justin Kramer",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Canon FD 24mm f1.4 w/ Zhongyi Lens Turbo II",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6383877630845128,
+    "camera_matrix": [
+      [
+        8937.99562411149,
+        0.0,
+        1989.762844307852
+      ],
+      [
+        0.0,
+        8941.262648534948,
+        995.6324143787168
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08022027686942887,
+      4.27373029868851,
+      -149.28938523060285,
+      1934.810392098927
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

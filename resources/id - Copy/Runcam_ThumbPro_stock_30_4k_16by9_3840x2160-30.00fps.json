@@ -1,0 +1,66 @@
+{
+  "name": "Runcam_ThumbPro_stock_30_4k_16by9_3840x2160-30.00fps",
+  "note": "auto all",
+  "calibrated_by": "Timberton402",
+  "camera_brand": "Runcam",
+  "camera_model": "ThumbPro",
+  "lens_model": "stock",
+  "camera_setting": "30",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": -17.98,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8454484707123785,
+    "camera_matrix": [
+      [
+        2111.278744005344,
+        0.0,
+        1923.7863908385352
+      ],
+      [
+        0.0,
+        2109.5001018802805,
+        1085.6826956711675
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.009055068252595578,
+      -0.012956794102941729,
+      -0.02110879605004852,
+      0.011100042032703802
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-thumbpro-wide-3840x2160@30000",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

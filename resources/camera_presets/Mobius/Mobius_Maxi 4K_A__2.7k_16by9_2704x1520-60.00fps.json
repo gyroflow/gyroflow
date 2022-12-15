@@ -1,0 +1,66 @@
+{
+  "name": "Mobius_Maxi 4K_A__2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "JD",
+  "camera_brand": "Mobius",
+  "camera_model": "Maxi 4K",
+  "lens_model": "A",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4384907230937863,
+    "camera_matrix": [
+      [
+        1198.460159915261,
+        0.0,
+        1345.2847943738363
+      ],
+      [
+        0.0,
+        1206.1736414433474,
+        771.9453739901256
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04067765888203786,
+      0.03511502402841218,
+      -0.050277048161039645,
+      0.02568563261941448
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

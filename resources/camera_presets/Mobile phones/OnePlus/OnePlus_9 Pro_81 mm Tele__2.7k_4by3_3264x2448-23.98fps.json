@@ -1,0 +1,63 @@
+{
+  "name": "OnePlus_9 Pro_81 mm Tele__2.7k_4by3_3264x2448-23.98fps",
+  "note": "",
+  "calibrated_by": "Luca",
+  "camera_brand": "OnePlus",
+  "camera_model": "9 Pro",
+  "lens_model": "81 mm Tele",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3264,
+    "h": 2448
+  },
+  "orig_dimension": {
+    "w": 3264,
+    "h": 2448
+  },
+  "output_dimension": {
+    "w": 3264,
+    "h": 2448
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6292453971258045,
+    "camera_matrix": [
+      [
+        9088.616256717203,
+        0.0,
+        1601.9761220166924
+      ],
+      [
+        0.0,
+        9072.132086780555,
+        1285.6882449920506
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.4112224007262058,
+      73.86394056475629,
+      -1965.5583573054064,
+      16750.88698957649
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

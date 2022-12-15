@@ -1,0 +1,66 @@
+{
+  "name": "MEIZU_Note9___4k_16by9_4000x2250-24.78fps",
+  "note": "",
+  "calibrated_by": "marfix",
+  "camera_brand": "MEIZU",
+  "camera_model": "Note9",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.779728,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1104814322376757,
+    "camera_matrix": [
+      [
+        3137.990000760219,
+        0.0,
+        1970.7052924001305
+      ],
+      [
+        0.0,
+        3131.229511101926,
+        1138.0883643876614
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6152502216019505,
+      -2.086387088267919,
+      11.0437752190778,
+      -19.90956920717142
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

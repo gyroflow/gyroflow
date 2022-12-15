@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS M_Tokina 12-24 F4_2. 1:1 centred hdmi_2k_2.15by1_2320x1080-24.03fps",
+  "note": "Viltrox SpeedBooster EF-EOS M2  0.71x",
+  "calibrated_by": "syntyp",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Tokina 12-24 F4",
+  "camera_setting": "2. 1:1 centred hdmi",
+  "calib_dimension": {
+    "w": 2320,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2320,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2320,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 24.027699,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4882883400363189,
+    "camera_matrix": [
+      [
+        2422.034604422012,
+        0.0,
+        1224.9468493835996
+      ],
+      [
+        0.0,
+        2418.9575034306317,
+        699.2609366046215
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2819987866708486,
+      0.3518910303981611,
+      -1.539870056886901,
+      3.80394164061957
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Laowa 9mm_BRAW 5.7K_5k_1.90by1_5744x3024-25.00fps",
+  "note": "",
+  "calibrated_by": "Giovanni Strondl",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "BRAW 5.7K",
+  "calib_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6313262590383862,
+    "camera_matrix": [
+      [
+        2478.6196666244064,
+        0.0,
+        2946.450514255823
+      ],
+      [
+        0.0,
+        2475.964275681803,
+        1515.585100508454
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3495160215645516,
+      0.12246898743430566,
+      -0.02840934015616705,
+      0.12729074655988565
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

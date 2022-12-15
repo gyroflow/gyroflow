@@ -1,0 +1,63 @@
+{
+  "name": "RED_KOMODO_Xeen 35mm T1.5__6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "Timothy",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Xeen 35mm T1.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5224913889179964,
+    "camera_matrix": [
+      [
+        5921.678244331483,
+        0.0,
+        3065.5425596773457
+      ],
+      [
+        0.0,
+        5919.849015022931,
+        1592.7904391569075
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2141153592377693,
+      0.10826019852154732,
+      0.3928075822866367,
+      0.5789175719884057
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

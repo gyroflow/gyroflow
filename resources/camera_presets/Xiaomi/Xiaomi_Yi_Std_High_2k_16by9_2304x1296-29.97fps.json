@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Yi_Std_High_2k_16by9_2304x1296-29.97fps",
+  "note": "",
+  "calibrated_by": "QwerTY",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi",
+  "lens_model": "Std",
+  "camera_setting": "High",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 17,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6775367737761603,
+    "camera_matrix": [
+      [
+        1019.1924416514972,
+        0.0,
+        1166.6873838181336
+      ],
+      [
+        0.0,
+        1086.650204966262,
+        622.5752478479709
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10362035632628264,
+      0.0234500147796084,
+      -0.10530453197620852,
+      0.05840234663733887
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

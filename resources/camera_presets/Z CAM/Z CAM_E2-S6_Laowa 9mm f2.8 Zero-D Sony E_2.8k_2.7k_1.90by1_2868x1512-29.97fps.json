@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-S6_Laowa 9mm f/2.8 Zero-D Sony E_2.8k_2.7k_1.90by1_2868x1512-29.97fps",
+  "note": "Used viltrox sony e mount adapter",
+  "calibrated_by": "YOHALMO",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Laowa 9mm f/2.8 Zero-D Sony E",
+  "camera_setting": "2.8k",
+  "calib_dimension": {
+    "w": 2868,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2868,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2868,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2960752797044058,
+    "camera_matrix": [
+      [
+        962.4212151177744,
+        0.0,
+        1431.3189344163784
+      ],
+      [
+        0.0,
+        961.4414237887524,
+        743.4937932002898
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33638368222395704,
+      0.12151722500093412,
+      -0.025239278541101137,
+      0.0924807426228388
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-25",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

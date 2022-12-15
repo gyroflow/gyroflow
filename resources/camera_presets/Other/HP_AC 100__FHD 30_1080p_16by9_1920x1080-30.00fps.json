@@ -1,0 +1,63 @@
+{
+  "name": "HP_AC 100__FHD 30_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Clément Magenties",
+  "camera_brand": "HP",
+  "camera_model": "AC 100",
+  "lens_model": "",
+  "camera_setting": "FHD 30",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7560220291256985,
+    "camera_matrix": [
+      [
+        938.1868446985524,
+        0.0,
+        923.5467610706056
+      ],
+      [
+        0.0,
+        936.9257202298804,
+        505.4820726381884
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.048357809692756555,
+      0.03152800489024699,
+      -0.06959272086268065,
+      0.0960094047917277
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

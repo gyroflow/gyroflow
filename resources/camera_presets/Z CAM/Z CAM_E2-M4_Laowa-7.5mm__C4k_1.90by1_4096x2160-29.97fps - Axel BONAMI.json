@@ -1,0 +1,63 @@
+{
+  "name": "Z CAM_E2-M4_Laowa-7.5mm__C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Axel BONAMI",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa-7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4994072389421163,
+    "camera_matrix": [
+      [
+        1644.3600516475233,
+        0.0,
+        2051.6631707601373
+      ],
+      [
+        0.0,
+        1644.582399020296,
+        1039.070035544284
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3315326791480989,
+      0.1033888914801322,
+      -0.018686124089221615,
+      0.08133923394407139
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

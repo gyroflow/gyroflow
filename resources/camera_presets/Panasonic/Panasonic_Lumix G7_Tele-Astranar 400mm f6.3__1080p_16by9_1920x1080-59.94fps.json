@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix G7_Tele-Astranar 400mm f6.3__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "eaaasun",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix G7",
+  "lens_model": "Tele-Astranar 400mm f6.3",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 12.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.17989419667307915,
+    "camera_matrix": [
+      [
+        -125973.73002428784,
+        -0.0,
+        107.10782801148332
+      ],
+      [
+        0.0,
+        -126850.35562832076,
+        -226.47434156605263
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      10.364915419633824,
+      -22130.81246293235,
+      154173354.58313483,
+      -227177450665.24203
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-09-05",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

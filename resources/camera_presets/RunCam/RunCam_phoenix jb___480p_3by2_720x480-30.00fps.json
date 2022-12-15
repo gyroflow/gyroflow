@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_phoenix jb___480p_3by2_720x480-30.00fps",
+  "note": "",
+  "calibrated_by": "Rory Mace",
+  "camera_brand": "RunCam",
+  "camera_model": "phoenix jb",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3074701148575943,
+    "camera_matrix": [
+      [
+        377.34870119033224,
+        0.0,
+        370.2703389076513
+      ],
+      [
+        0.0,
+        336.0860094277152,
+        242.0107336132703
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07668995345387371,
+      0.010028351808494582,
+      -0.03924907829156591,
+      0.03850032183562006
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

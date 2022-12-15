@@ -1,0 +1,63 @@
+{
+  "name": "XDV_Action Sport Camera___1080p_16by9_1920x1080-59.97fps",
+  "note": "",
+  "calibrated_by": "linus kranz",
+  "camera_brand": "XDV",
+  "camera_model": "Action Sport Camera",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.968544,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.31136907079664833,
+    "camera_matrix": [
+      [
+        1084.4881870151623,
+        0.0,
+        986.849003464922
+      ],
+      [
+        0.0,
+        1084.248422997407,
+        551.0197383242646
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.01854985694562583,
+      -0.012852864331236467,
+      0.017624951764312256,
+      -0.006417694241815422
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

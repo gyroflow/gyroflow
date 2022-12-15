@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_split2___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Vitaliy",
+  "camera_brand": "RunCam",
+  "camera_model": "split2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6521304654508123,
+    "camera_matrix": [
+      [
+        936.733731019506,
+        0.0,
+        944.3891447625
+      ],
+      [
+        0.0,
+        934.1252012875186,
+        547.7841667367921
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.08909940598342724,
+      0.0365183688931512,
+      -0.027577721765790823,
+      0.010830160511837356
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-10-16",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

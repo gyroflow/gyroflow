@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Mi 11 Lite 5G NE_26mm f/1.8_Samsung GW3 64MP sensor (SGW3)_C4k_4by3_4641x3472-24.03fps",
+  "note": "",
+  "calibrated_by": "AfoHT",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 11 Lite 5G NE",
+  "lens_model": "26mm f/1.8",
+  "camera_setting": "Samsung GW3 64MP sensor (SGW3)",
+  "calib_dimension": {
+    "w": 4641,
+    "h": 3472
+  },
+  "orig_dimension": {
+    "w": 4641,
+    "h": 3472
+  },
+  "output_dimension": {
+    "w": 4640,
+    "h": 3472
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.027357,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5528335544714608,
+    "camera_matrix": [
+      [
+        3422.8130443831074,
+        0.0,
+        2315.0602252741905
+      ],
+      [
+        0.0,
+        3420.6100198058753,
+        1726.338442723942
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4793785353736525,
+      -0.8568906563426028,
+      3.9837471797228714,
+      -5.259250563743961
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

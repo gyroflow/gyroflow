@@ -1,0 +1,66 @@
+{
+  "name": "Olympus_OM-D 10 MARK III_M.ZUIKO 14-42_Full HD_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Bruno CICCHELERO",
+  "camera_brand": "Olympus",
+  "camera_model": "OM-D 10 MARK III",
+  "lens_model": "M.ZUIKO 14-42",
+  "camera_setting": "Full HD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6246255471837394,
+    "camera_matrix": [
+      [
+        1181.129784130546,
+        0.0,
+        967.9792183526308
+      ],
+      [
+        0.0,
+        1181.738927140255,
+        627.0463446136918
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3144941545681953,
+      0.25282666828042555,
+      -0.30768799559608306,
+      0.40724325685290086
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

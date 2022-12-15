@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7C_5757fa2d__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "林士閔",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "5757fa2d",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.30719963572873926,
+    "camera_matrix": [
+      [
+        1359.9822896910862,
+        0.0,
+        958.1170956301488
+      ],
+      [
+        0.0,
+        1358.218713328961,
+        536.3346515888443
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32017587918652535,
+      0.1637751256807536,
+      0.09166705765434914,
+      0.5693551298566643
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-5757fa2d-1920x1080@59940",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

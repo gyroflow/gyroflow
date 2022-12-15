@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R5c_rf24 105F4L_uhd_4k_16by9_3840x2160-59.94fps",
+  "note": "distorted",
+  "calibrated_by": "guns120",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "rf24 105F4L",
+  "camera_setting": "uhd",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6868851796187455,
+    "camera_matrix": [
+      [
+        2744.359244925081,
+        0.0,
+        1970.329500598528
+      ],
+      [
+        0.0,
+        2745.767273697686,
+        1145.8760197492911
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23771273510966304,
+      0.041858288798458855,
+      0.3015045779657301,
+      -0.07611899942899404
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Fujifilm_X-H1_XF 16-55 F/2.8__2k_1.90by1_2048x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Mike",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-H1",
+  "lens_model": "XF 16-55 F/2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3444394105205189,
+    "camera_matrix": [
+      [
+        1424.842085196734,
+        0.0,
+        1027.9506772262375
+      ],
+      [
+        0.0,
+        1421.910554415516,
+        577.67755875235
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32249203394065024,
+      0.09325155843230924,
+      0.07852956741251249,
+      0.21188671388684735
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

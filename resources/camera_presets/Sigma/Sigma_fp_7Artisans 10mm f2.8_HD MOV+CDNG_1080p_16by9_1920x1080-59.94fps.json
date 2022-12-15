@@ -1,0 +1,66 @@
+{
+  "name": "Sigma_fp_7Artisans 10mm f2.8_HD MOV+CDNG_1080p_16by9_1920x1080-59.94fps",
+  "note": "Fisheye",
+  "calibrated_by": "NiceCrash_22",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "7Artisans 10mm f2.8",
+  "camera_setting": "HD MOV+CDNG",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3557198698420399,
+    "camera_matrix": [
+      [
+        1186.5836759183228,
+        0.0,
+        962.702688500092
+      ],
+      [
+        0.0,
+        1182.3697838145845,
+        559.0581174463815
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24318362305872823,
+      0.017904229205212497,
+      0.7798032362151108,
+      -1.2738423363726503
+    ],
+    "radial_distortion_limit": 1.1272141706924312
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "LG_V40_Wide 16mm f1.9_Motioncam Pro_2k_4by3_2328x1746-30.20fps",
+  "note": "",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "V40",
+  "lens_model": "Wide 16mm f1.9",
+  "camera_setting": "Motioncam Pro",
+  "calib_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "orig_dimension": {
+    "w": 2328,
+    "h": 1746
+  },
+  "output_dimension": {
+    "w": 2328,
+    "h": 1310
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.19602,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.561403182064647,
+    "camera_matrix": [
+      [
+        1150.99329298744,
+        0.0,
+        1203.468335250555
+      ],
+      [
+        0.0,
+        1146.3909151376283,
+        890.8828480961353
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28745133621838104,
+      0.26029237529235894,
+      -0.16980292818040693,
+      0.07992876043493442
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

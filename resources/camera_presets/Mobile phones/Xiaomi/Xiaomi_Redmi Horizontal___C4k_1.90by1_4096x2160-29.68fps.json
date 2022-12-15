@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Redmi Horizontal___C4k_1.90by1_4096x2160-29.68fps",
+  "note": "",
+  "calibrated_by": "Dantistnfs",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Horizontal",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 27,
+  "fps": 29.675634,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0295013633918566,
+    "camera_matrix": [
+      [
+        3019.081329288307,
+        0.0,
+        2042.7346799127797
+      ],
+      [
+        0.0,
+        3012.4394118089567,
+        1035.1875294252814
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4051108521184619,
+      -0.3117540874256231,
+      1.3035436093148534,
+      -1.6884510190996949
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

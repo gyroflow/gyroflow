@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Poco X3 pro_padrão__1080p_16by9_1920x1080-30.03fps",
+  "note": "",
+  "calibrated_by": "Lucas",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Poco X3 pro",
+  "lens_model": "padrão",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.028934,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.43322693713688465,
+    "camera_matrix": [
+      [
+        1456.232586011238,
+        0.0,
+        961.286289723148
+      ],
+      [
+        0.0,
+        1453.8339416196127,
+        543.7897809792469
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5376552452965463,
+      -0.8367775551124584,
+      3.113934403821542,
+      -4.8012232358144225
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

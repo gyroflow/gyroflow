@@ -1,0 +1,63 @@
+{
+  "name": "Motorola_Edge 20 pro_lente principal_motioncam_4k_16by9_4000x2256-24.00fps",
+  "note": "",
+  "calibrated_by": "Luis Fernandes",
+  "camera_brand": "Motorola",
+  "camera_model": "Edge 20 pro",
+  "lens_model": "lente principal",
+  "camera_setting": "motioncam",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.228385948734003,
+    "camera_matrix": [
+      [
+        8091.023034216515,
+        0.0,
+        2062.3451916851564
+      ],
+      [
+        0.0,
+        8097.104561175322,
+        1163.048736352182
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.888926458641304,
+      -93.85341738050028,
+      2397.8428980718663,
+      -22421.02286590191
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-02",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

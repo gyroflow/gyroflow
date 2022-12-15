@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi Note 9S_1080p 60fps__1080p_16by9_1920x1080-60.31fps",
+  "note": "",
+  "calibrated_by": "PC",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 9S",
+  "lens_model": "1080p 60fps",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 18,
+  "fps": 60.308414,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6567386422762664,
+    "camera_matrix": [
+      [
+        1518.3384664169887,
+        0.0,
+        965.0625586420005
+      ],
+      [
+        0.0,
+        1517.0516020828584,
+        536.6896034652993
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4052052380999894,
+      0.24362653532309456,
+      -0.7421868130955768,
+      -0.031711776169340795
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

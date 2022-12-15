@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7s_28-70__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Stathis",
+  "camera_brand": "Sony",
+  "camera_model": "a7s",
+  "lens_model": "28-70",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34762424726914043,
+    "camera_matrix": [
+      [
+        1488.4650483088317,
+        0.0,
+        966.1833949163828
+      ],
+      [
+        0.0,
+        1488.152793126999,
+        523.9461754767985
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35805752516559114,
+      -0.23295375046423175,
+      1.320812130004908,
+      -1.403989117732196
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

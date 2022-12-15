@@ -1,0 +1,66 @@
+{
+  "name": "Insta360_OneRS_Linear 88_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Sotos Ch",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Linear 88",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7745800710573334,
+    "camera_matrix": [
+      [
+        1879.1668326919091,
+        0.0,
+        2002.9767463100673
+      ],
+      [
+        0.0,
+        1879.576290229316,
+        1480.8141771529772
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0866838191362345,
+      -0.12238324536049744,
+      0.14541131833627616,
+      -0.07100420678834127
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-oners-linear88-4000x3000@29970-no-eis",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

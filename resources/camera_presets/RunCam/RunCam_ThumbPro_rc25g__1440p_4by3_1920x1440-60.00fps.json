@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_ThumbPro_rc25g__1440p_4by3_1920x1440-60.00fps",
+  "note": "",
+  "calibrated_by": "Tolan Blundell",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPro",
+  "lens_model": "rc25g",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2954886491172578,
+    "camera_matrix": [
+      [
+        791.5790312517537,
+        0.0,
+        936.3074820007512
+      ],
+      [
+        0.0,
+        791.0135975673991,
+        714.7763368990197
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.021486021928745096,
+      0.008301163373441587,
+      -0.01037600708487697,
+      0.003510413685723429
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-21",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

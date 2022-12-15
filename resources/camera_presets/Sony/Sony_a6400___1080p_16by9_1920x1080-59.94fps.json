@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "JEYS",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4020486756085269,
+    "camera_matrix": [
+      [
+        2813.6571237116036,
+        0.0,
+        970.7772031113726
+      ],
+      [
+        0.0,
+        2809.968132699309,
+        569.4638212325723
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.303436136391767,
+      -4.6168988215699995,
+      70.17519075669959,
+      -358.6418170677843
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-beta.2",
+  "date": "2022-10-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "RED_KOMODO_Laowa 15mm_23.976_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "neo.exe",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 15mm",
+  "camera_setting": "23.976",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.12859109788503992,
+    "camera_matrix": [
+      [
+        2348.1906793643216,
+        0.0,
+        2067.180654475186
+      ],
+      [
+        0.0,
+        2348.4798587785463,
+        1071.6354727299008
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.319495204221594,
+      0.12247061072334102,
+      0.011645457867854548,
+      0.062038626604678515
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

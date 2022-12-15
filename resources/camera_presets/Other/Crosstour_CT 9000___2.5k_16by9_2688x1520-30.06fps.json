@@ -1,0 +1,69 @@
+{
+  "name": "Crosstour_CT 9000___2.5k_16by9_2688x1520-30.06fps",
+  "note": "",
+  "calibrated_by": "Arthur Hussey",
+  "camera_brand": "Crosstour",
+  "camera_model": "CT 9000",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.056105,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.9642623248081242,
+    "camera_matrix": [
+      [
+        1458.4763399544202,
+        0.0,
+        1292.5259839144278
+      ],
+      [
+        0.0,
+        1459.227678056896,
+        699.7135509965594
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06574732082526982,
+      -0.02675114265305129,
+      0.18351380796584235,
+      -0.2652592923059083
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

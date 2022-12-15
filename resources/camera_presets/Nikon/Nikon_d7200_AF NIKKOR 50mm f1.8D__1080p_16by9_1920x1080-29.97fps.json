@@ -1,0 +1,66 @@
+{
+  "name": "Nikon_d7200_AF NIKKOR 50mm f/1.8D__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "amirreza rahimi",
+  "camera_brand": "Nikon",
+  "camera_model": "d7200",
+  "lens_model": "AF NIKKOR 50mm f/1.8D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.30743770077268917,
+    "camera_matrix": [
+      [
+        4277.8783487778455,
+        0.0,
+        1061.6807516661663
+      ],
+      [
+        0.0,
+        4251.151471807413,
+        604.8800935510213
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.010135868871334691,
+      17.57756334755152,
+      -488.73745782345895,
+      4830.897193353331
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

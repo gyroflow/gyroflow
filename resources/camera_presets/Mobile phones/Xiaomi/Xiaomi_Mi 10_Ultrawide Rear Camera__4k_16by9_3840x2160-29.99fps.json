@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Mi 10_Ultrawide Rear Camera__4k_16by9_3840x2160-29.99fps",
+  "note": "",
+  "calibrated_by": "ZZW",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10",
+  "lens_model": "Ultrawide Rear Camera",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.987902,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.24355929946180987,
+    "camera_matrix": [
+      [
+        2168.8202481917574,
+        0.0,
+        1943.4935397609263
+      ],
+      [
+        0.0,
+        2167.6537054516984,
+        1098.8349769893578
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2852950361942927,
+      0.3906139494848107,
+      -0.4024421541369543,
+      0.28191398562851294
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

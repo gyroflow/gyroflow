@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS M_ZEISS 28MM__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Alexander Jeremy",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "ZEISS 28MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2943541304901309,
+    "camera_matrix": [
+      [
+        1798.5779969245743,
+        0.0,
+        951.4466659784318
+      ],
+      [
+        0.0,
+        1796.8462785057698,
+        572.7347709690902
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17483864406160388,
+      0.234966089094866,
+      -0.403930091340351,
+      1.5332593153698342
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

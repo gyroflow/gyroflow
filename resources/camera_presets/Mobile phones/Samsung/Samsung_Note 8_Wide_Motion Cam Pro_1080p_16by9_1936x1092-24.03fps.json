@@ -1,0 +1,63 @@
+{
+  "name": "Samsung_Note 8_Wide_Motion Cam Pro_1080p_16by9_1936x1092-24.03fps",
+  "note": "Shot with Motion Cam Pro App",
+  "calibrated_by": "levar",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 8",
+  "lens_model": "Wide",
+  "camera_setting": "Motion Cam Pro",
+  "calib_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "orig_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "output_dimension": {
+    "w": 1936,
+    "h": 1092
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 26,
+  "fps": 24.02985,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5615580830021595,
+    "camera_matrix": [
+      [
+        1543.643869096012,
+        0.0,
+        939.8176666168978
+      ],
+      [
+        0.0,
+        1541.667200537308,
+        526.1731372885755
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5345367300231433,
+      -0.8323104972262866,
+      2.113043593642325,
+      -1.679448544678745
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-08",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

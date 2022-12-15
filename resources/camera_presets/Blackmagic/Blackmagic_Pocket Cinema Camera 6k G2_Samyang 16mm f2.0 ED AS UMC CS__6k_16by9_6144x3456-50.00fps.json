@@ -1,0 +1,66 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k G2_Samyang 16mm f/2.0 ED AS UMC CS__6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "HiDrone",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k G2",
+  "lens_model": "Samyang 16mm f/2.0 ED AS UMC CS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": 19.73,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5222615155317517,
+    "camera_matrix": [
+      [
+        4152.420815970039,
+        0.0,
+        3101.9060277830786
+      ],
+      [
+        0.0,
+        4153.8904080949105,
+        1828.3504497706888
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1850257589668865,
+      1.065470547562557,
+      -5.098359602278065,
+      9.305351942154996
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-beta.2",
+  "date": "2022-10-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

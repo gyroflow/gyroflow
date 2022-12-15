@@ -1,0 +1,63 @@
+{
+  "name": "Walksnail_Micro_Standard_720, high framerate_720p_16by9_1280x720-60.01fps",
+  "note": "Goggles DVR",
+  "calibrated_by": "Jan Daliba",
+  "camera_brand": "Walksnail",
+  "camera_model": "Micro",
+  "lens_model": "Standard",
+  "camera_setting": "720, high framerate",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.012867,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2298763040993518,
+    "camera_matrix": [
+      [
+        485.1284473477315,
+        0.0,
+        635.8674556241423
+      ],
+      [
+        0.0,
+        484.9619488892304,
+        360.8926363247076
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.024518171621526624,
+      -0.00352362759962567,
+      0.022576369190993928,
+      -0.016084279785389274
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

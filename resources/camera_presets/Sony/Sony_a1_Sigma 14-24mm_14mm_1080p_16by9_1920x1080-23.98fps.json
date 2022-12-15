@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a1_Sigma 14-24mm_14mm_1080p_16by9_1920x1080-23.98fps",
+  "note": "14mm",
+  "calibrated_by": "Adam Larsen",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "Sigma 14-24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.2686887032801666,
+    "camera_matrix": [
+      [
+        747.6743777849356,
+        0.0,
+        956.4081847316994
+      ],
+      [
+        0.0,
+        747.5534842434134,
+        541.2770625251003
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2944594768763311,
+      0.0809000523925997,
+      0.003864924156512285,
+      0.05479373243172131
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-08-09",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

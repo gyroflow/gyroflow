@@ -1,0 +1,63 @@
+{
+  "name": "RunCam_ThumbPro_2.1mm_2.7k Vertical_720p_9by16_1520x2704-50.00fps",
+  "note": "",
+  "calibrated_by": "nvidia",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPro",
+  "lens_model": "2.1mm",
+  "camera_setting": "2.7k Vertical",
+  "calib_dimension": {
+    "w": 1520,
+    "h": 2704
+  },
+  "orig_dimension": {
+    "w": 1520,
+    "h": 2704
+  },
+  "output_dimension": {
+    "w": 1520,
+    "h": 2704
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.37904324240144693,
+    "camera_matrix": [
+      [
+        988.407363563849,
+        0.0,
+        754.2249954237303
+      ],
+      [
+        0.0,
+        983.7603382745162,
+        1331.5463394181002
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.013149031531485396,
+      -0.01798797933251662,
+      0.013197783814281114,
+      -0.003946602608133528
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-thumbpro-wide-1520x2704@50000",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

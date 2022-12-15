@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Phoenix 2_Analog_Analog_480p_1.19by1_688x576-25.00fps",
+  "note": "Analog",
+  "calibrated_by": "Дмитрий",
+  "camera_brand": "RunCam",
+  "camera_model": "Phoenix 2",
+  "lens_model": "Analog",
+  "camera_setting": "Analog",
+  "calib_dimension": {
+    "w": 688,
+    "h": 576
+  },
+  "orig_dimension": {
+    "w": 688,
+    "h": 576
+  },
+  "output_dimension": {
+    "w": 688,
+    "h": 576
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.4131225705653061,
+    "camera_matrix": [
+      [
+        395.81764046079473,
+        0.0,
+        363.36161718857784
+      ],
+      [
+        0.0,
+        421.13451964426434,
+        312.3317085701004
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.11783462099267708,
+      0.017960774658822523,
+      0.009359889535732423,
+      -0.011912357288163831
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

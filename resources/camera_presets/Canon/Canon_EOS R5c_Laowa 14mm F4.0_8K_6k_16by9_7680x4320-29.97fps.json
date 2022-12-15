@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5c_Laowa 14mm F4.0_8K_6k_16by9_7680x4320-29.97fps",
+  "note": "30P",
+  "calibrated_by": "His_FPV",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "Laowa 14mm F4.0",
+  "camera_setting": "8K",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.8472199699330658,
+    "camera_matrix": [
+      [
+        3229.160254377748,
+        0.0,
+        3818.2332932880568
+      ],
+      [
+        0.0,
+        3225.6620348296983,
+        2172.0139159479268
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3428720181941813,
+      0.09045517262502932,
+      0.049367580186534435,
+      0.059879441452929824
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.1.0",
+  "date": "2022-09-03",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
+}

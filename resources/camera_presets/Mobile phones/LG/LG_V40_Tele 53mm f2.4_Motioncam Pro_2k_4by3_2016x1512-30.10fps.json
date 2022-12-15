@@ -1,0 +1,63 @@
+{
+  "name": "LG_V40_Tele 53mm f2.4_Motioncam Pro_2k_4by3_2016x1512-30.10fps",
+  "note": "",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "V40",
+  "lens_model": "Tele 53mm f2.4",
+  "camera_setting": "Motioncam Pro",
+  "calib_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2016,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2016,
+    "h": 1134
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.102743,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7412600204086477,
+    "camera_matrix": [
+      [
+        2987.5255277257634,
+        0.0,
+        1017.8615320070134
+      ],
+      [
+        0.0,
+        2985.071594184348,
+        785.0934675781266
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25011381185952525,
+      19.094819118899512,
+      -240.29844961224785,
+      876.4639601085368
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_Lumix GH5_Leica 8-18_10 bit 23,97 fps_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Daniel Doren H",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH5",
+  "lens_model": "Leica 8-18",
+  "camera_setting": "10 bit 23,97 fps",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.498011744031688,
+    "camera_matrix": [
+      [
+        2034.358076148054,
+        0.0,
+        2032.5410695803243
+      ],
+      [
+        0.0,
+        2031.1592112087724,
+        1059.5437377439112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3332843388862205,
+      0.17693999954267414,
+      -0.19554751545673343,
+      0.2565235749466564
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Laowa 14mm RF_BRAW 6K_6k_12by5_6144x2560-50.00fps",
+  "note": "",
+  "calibrated_by": "Laurin Göller",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Laowa 14mm RF",
+  "camera_setting": "BRAW 6K",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7041524523268663,
+    "camera_matrix": [
+      [
+        3891.0759569269167,
+        0.0,
+        3116.9164192055396
+      ],
+      [
+        0.0,
+        3885.605597252435,
+        1357.1154847553555
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31727586706852884,
+      0.12424311660137256,
+      0.017256357513205516,
+      0.001605080942820848
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

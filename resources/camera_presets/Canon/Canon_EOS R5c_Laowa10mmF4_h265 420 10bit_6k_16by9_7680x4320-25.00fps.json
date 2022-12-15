@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS R5c_Laowa10mmF4_h265 420 10bit_6k_16by9_7680x4320-25.00fps",
+  "note": "709",
+  "calibrated_by": "His_FPV",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "Laowa10mmF4",
+  "camera_setting": "h265 420 10bit",
+  "calib_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 7680,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2438186847305632,
+    "camera_matrix": [
+      [
+        2388.5214568929155,
+        0.0,
+        3815.9558144298994
+      ],
+      [
+        0.0,
+        2386.2675003560416,
+        2136.376032221733
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3386342606111999,
+      0.017524088811404364,
+      0.14834213877270166,
+      0.03751503937884668
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

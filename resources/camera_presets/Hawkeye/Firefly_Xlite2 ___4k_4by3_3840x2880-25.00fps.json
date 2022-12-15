@@ -1,0 +1,66 @@
+{
+  "name": "Firefly_Xlite2 ___4k_4by3_3840x2880-25.00fps",
+  "note": "",
+  "calibrated_by": "Pavel FPV",
+  "camera_brand": "Firefly",
+  "camera_model": "Xlite2 ",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2880
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2880
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2880
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5366243570649849,
+    "camera_matrix": [
+      [
+        1939.1835422627696,
+        0.0,
+        1951.0448115732968
+      ],
+      [
+        0.0,
+        1935.9568558864664,
+        1496.5453303961667
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05819210314513568,
+      0.09472511864593824,
+      -0.20986193060300712,
+      0.17315339979668143
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

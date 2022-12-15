@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Mix 2s_Wide/Main_GCam_4k_16by9_3840x2160-60.03fps",
+  "note": "GCam",
+  "calibrated_by": "Fox",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mix 2s",
+  "lens_model": "Wide/Main",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.028641,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0279655925478,
+    "camera_matrix": [
+      [
+        2931.650714393414,
+        0.0,
+        1948.4197870062133
+      ],
+      [
+        0.0,
+        2931.651801155002,
+        1077.2645342209032
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8024935465832305,
+      -2.611231098390738,
+      6.617484075852589,
+      -6.014729259742121
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "RED_Helium 8k_Sigma Art 24mm_prores_2k_1.90by1_2048x1080-25.00fps",
+  "note": "25fps",
+  "calibrated_by": "Hurcan Emre Yilm",
+  "camera_brand": "RED",
+  "camera_model": "Helium 8k",
+  "lens_model": "Sigma Art 24mm",
+  "camera_setting": "prores",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 19,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.44179548584905465,
+    "camera_matrix": [
+      [
+        1727.498213202549,
+        0.0,
+        1024.0335966336588
+      ],
+      [
+        0.0,
+        1685.272905742458,
+        558.569622604978
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23795414439697504,
+      0.495766333756236,
+      -1.336591023973949,
+      2.1478616184089567
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-30",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

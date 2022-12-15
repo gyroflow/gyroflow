@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_Lumix GH5_Lumix 15mm_Flat Color_4k_16by9_3840x2160-50.00fps",
+  "note": "Flat Color",
+  "calibrated_by": "Jonas Klein",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH5",
+  "lens_model": "Lumix 15mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.267762191508452,
+    "camera_matrix": [
+      [
+        3210.8804504512213,
+        0.0,
+        1934.414742017408
+      ],
+      [
+        0.0,
+        3211.8609105085693,
+        1041.2367873909243
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26982747615995395,
+      0.5126167338015859,
+      -1.8296652772250968,
+      3.3931094905268235
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

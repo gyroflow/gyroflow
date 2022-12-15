@@ -1,0 +1,63 @@
+{
+  "name": "Sony_Xperia Pro-I XQ-BE62_Sony Exmor RS IMX478_HDR_1080p_16by9_1920x1080-29.97fps",
+  "note": "12MP, f2 wide",
+  "calibrated_by": "J Murphy",
+  "camera_brand": "Sony",
+  "camera_model": "Xperia Pro-I XQ-BE62",
+  "lens_model": "Sony Exmor RS IMX478",
+  "camera_setting": "HDR",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.970377,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3907217018840302,
+    "camera_matrix": [
+      [
+        1309.8303109670442,
+        0.0,
+        956.7499079855712
+      ],
+      [
+        0.0,
+        1309.444045165449,
+        535.6067846255512
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.347792451662727,
+      -0.013098320302841828,
+      0.642281529756073,
+      -0.5742602389500847
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-11",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

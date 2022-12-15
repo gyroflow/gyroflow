@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-E10_TTartisan 7.5mm f2_-_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "jung sungho",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "TTartisan 7.5mm f2",
+  "camera_setting": "-",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.5397431708909564,
+    "camera_matrix": [
+      [
+        1573.4940474322416,
+        0.0,
+        1905.5998779440713
+      ],
+      [
+        0.0,
+        1575.548561126483,
+        1077.727764350756
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.004909213317233873,
+      -0.013236678334552204,
+      0.0064312978422140085,
+      -0.002695812188289581
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2022-10-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

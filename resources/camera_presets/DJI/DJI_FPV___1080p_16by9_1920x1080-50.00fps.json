@@ -1,0 +1,63 @@
+{
+  "name": "DJI_FPV___1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Yngwie",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.1433953388477844,
+    "camera_matrix": [
+      [
+        918.5376562924066,
+        0.0,
+        959.1160816117308
+      ],
+      [
+        0.0,
+        918.7090866445856,
+        516.0340944977246
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08711192004798791,
+      0.032764617803675906,
+      -0.10487718467601556,
+      0.07578517742387728
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

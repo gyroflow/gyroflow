@@ -1,0 +1,63 @@
+{
+  "name": "DJI_4D_DL 35__6k_1.90by1_6007x3168-24.00fps",
+  "note": "",
+  "calibrated_by": "Daniel ilabaca",
+  "camera_brand": "DJI",
+  "camera_model": "4D",
+  "lens_model": "DL 35",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6007,
+    "h": 3168
+  },
+  "orig_dimension": {
+    "w": 6007,
+    "h": 3168
+  },
+  "output_dimension": {
+    "w": 6008,
+    "h": 3168
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5794312114938708,
+    "camera_matrix": [
+      [
+        6136.962107074917,
+        0.0,
+        3067.881517967134
+      ],
+      [
+        0.0,
+        6147.120385803201,
+        1526.8537794540891
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3129894929494978,
+      0.3771966196004791,
+      -1.085933077734177,
+      2.0712896186475853
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

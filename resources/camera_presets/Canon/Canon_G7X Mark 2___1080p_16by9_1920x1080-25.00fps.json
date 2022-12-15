@@ -1,0 +1,66 @@
+{
+  "name": "Canon_G7X Mark 2___1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Zay Payson",
+  "camera_brand": "Canon",
+  "camera_model": "G7X Mark 2",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4562559483603859,
+    "camera_matrix": [
+      [
+        1405.319923654534,
+        0.0,
+        968.9587705205128
+      ],
+      [
+        0.0,
+        1403.2889624382467,
+        520.3439268082358
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3614869900690674,
+      -0.059459746145949774,
+      0.9618861188350096,
+      -1.2903266163592462
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

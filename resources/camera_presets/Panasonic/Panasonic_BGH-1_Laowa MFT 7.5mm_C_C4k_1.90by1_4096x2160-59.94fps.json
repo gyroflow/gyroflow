@@ -1,0 +1,66 @@
+{
+  "name": "Panasonic_BGH-1_Laowa MFT 7.5mm_C_C4k_1.90by1_4096x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Logan Copenhaver",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH-1",
+  "lens_model": "Laowa MFT 7.5mm",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7195379102213949,
+    "camera_matrix": [
+      [
+        1827.2915551327071,
+        0.0,
+        2060.78368752385
+      ],
+      [
+        0.0,
+        1825.5303147863133,
+        1041.188374194281
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5555020264655642,
+      -0.5734450048573358,
+      1.1291086424406818,
+      -0.47510843026952143
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

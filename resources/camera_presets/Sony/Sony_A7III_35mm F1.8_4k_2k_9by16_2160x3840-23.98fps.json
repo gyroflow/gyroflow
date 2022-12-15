@@ -1,0 +1,66 @@
+{
+  "name": "Sony_A7III_35mm F1.8_4k_2k_9by16_2160x3840-23.98fps",
+  "note": "",
+  "calibrated_by": "Lori",
+  "camera_brand": "Sony",
+  "camera_model": "A7III",
+  "lens_model": "35mm F1.8",
+  "camera_setting": "4k",
+  "calib_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "orig_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8305194082205734,
+    "camera_matrix": [
+      [
+        5634.9062409073995,
+        0.0,
+        1485.9652606879563
+      ],
+      [
+        0.0,
+        5642.46177460859,
+        1725.3343239483863
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26536906965818463,
+      1.449406520193675,
+      -17.888646503275716,
+      77.6811588361729
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

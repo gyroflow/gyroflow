@@ -1,0 +1,63 @@
+{
+  "name": "LG_v35_Wide 16mm_Motioncam Pro_C4k_4by3_4656x3492-24.00fps",
+  "note": "Q 0.472",
+  "calibrated_by": "David Barlow",
+  "camera_brand": "LG",
+  "camera_model": "v35",
+  "lens_model": "Wide 16mm",
+  "camera_setting": "Motioncam Pro",
+  "calib_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "orig_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "output_dimension": {
+    "w": 4656,
+    "h": 3492
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4724386783322982,
+    "camera_matrix": [
+      [
+        2473.535900786318,
+        0.0,
+        2343.9339126434975
+      ],
+      [
+        0.0,
+        2469.707066938889,
+        1730.8644063074555
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.284451097779543,
+      0.20069049874643569,
+      0.11176727077836468,
+      -0.23920706698826752
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

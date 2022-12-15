@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7C_Sigma2470_2022.09.27_4k_16by9_3840x2160-29.97fps",
+  "note": "2022.09.27",
+  "calibrated_by": "Leo TX",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Sigma2470",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1040028771279184,
+    "camera_matrix": [
+      [
+        3200.5848321501853,
+        0.0,
+        1914.3454070032903
+      ],
+      [
+        0.0,
+        3189.757750398341,
+        1114.7476757296238
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17232324893463083,
+      0.05905528109328347,
+      0.3319434102917001,
+      -0.5374441480499083
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-daae6efe-3840x2160@29970",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-27",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

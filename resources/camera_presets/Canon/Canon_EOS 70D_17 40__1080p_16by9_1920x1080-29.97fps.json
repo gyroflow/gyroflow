@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 70D_17 40__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "LEGION",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 70D",
+  "lens_model": "17 40",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.39150646203214623,
+    "camera_matrix": [
+      [
+        1478.819767448643,
+        0.0,
+        982.426601958608
+      ],
+      [
+        0.0,
+        1480.476757849961,
+        546.4327589368665
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23392223513007113,
+      0.15298483433489807,
+      -0.10149780211432605,
+      0.21712081885395107
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

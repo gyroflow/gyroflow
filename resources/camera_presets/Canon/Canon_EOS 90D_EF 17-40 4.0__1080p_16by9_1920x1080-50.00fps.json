@@ -1,0 +1,63 @@
+{
+  "name": "Canon_EOS 90D_EF 17-40 4.0__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Dima Apeks",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 90D",
+  "lens_model": "EF 17-40 4.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.382715279760712,
+    "camera_matrix": [
+      [
+        1435.4067189780994,
+        0.0,
+        958.4868110147792
+      ],
+      [
+        0.0,
+        1439.5994176865534,
+        532.6777338523018
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24505807352420403,
+      0.15272789765274747,
+      0.34847198187530765,
+      -0.9172381848999916
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-08-26",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

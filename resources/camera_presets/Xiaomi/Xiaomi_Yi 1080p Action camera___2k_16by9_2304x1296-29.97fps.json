@@ -1,0 +1,63 @@
+{
+  "name": "Xiaomi_Yi 1080p Action camera___2k_16by9_2304x1296-29.97fps",
+  "note": "",
+  "calibrated_by": "Brian Rimer",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Yi 1080p Action camera",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "orig_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "output_dimension": {
+    "w": 2304,
+    "h": 1296
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7097788049265331,
+    "camera_matrix": [
+      [
+        1104.5047173078094,
+        0.0,
+        1132.0534391800716
+      ],
+      [
+        0.0,
+        1102.5161833635625,
+        676.0275949152557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09257258243086491,
+      -0.06184283749332706,
+      0.20042197869977857,
+      -0.16576047165392033
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

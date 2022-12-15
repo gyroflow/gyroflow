@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_4000air___2.5k_16by9_2688x1520-30.04fps",
+  "note": "",
+  "calibrated_by": "JayDeePee",
+  "camera_brand": "SJCAM",
+  "camera_model": "4000air",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.044607,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5149914846476452,
+    "camera_matrix": [
+      [
+        1370.0327396681582,
+        0.0,
+        1518.0796022188813
+      ],
+      [
+        0.0,
+        1374.0090370846883,
+        858.5416487566526
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.01262522798717782,
+      0.03985217874799226,
+      -0.09423816124328492,
+      0.12999637066765887
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

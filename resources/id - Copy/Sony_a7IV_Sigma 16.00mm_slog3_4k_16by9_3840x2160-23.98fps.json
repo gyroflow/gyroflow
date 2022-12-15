@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7IV_Sigma 16.00mm_slog3_4k_16by9_3840x2160-23.98fps",
+  "note": "1.5 crop 24mm",
+  "calibrated_by": "The Kreator",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Sigma 16.00mm",
+  "camera_setting": "slog3",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4358049596789897,
+    "camera_matrix": [
+      [
+        2626.5534840090017,
+        0.0,
+        1920.3121187507024
+      ],
+      [
+        0.0,
+        2626.745253518445,
+        1074.9973504078798
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2805541154480018,
+      0.5971447350895016,
+      -1.6037264429855032,
+      1.9871192964981348
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-16.00mm-3840x2160@23976",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

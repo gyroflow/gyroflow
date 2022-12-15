@@ -1,0 +1,66 @@
+{
+  "name": "Sony_ZV-1_67462ed2_Intelligent Auto_4k_16by9_3840x2160-29.97fps",
+  "note": "Intelligent Auto",
+  "calibrated_by": "Brian",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-1",
+  "lens_model": "67462ed2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6621269534443576,
+    "camera_matrix": [
+      [
+        3276.535792129507,
+        0.0,
+        1975.379879087737
+      ],
+      [
+        0.0,
+        3275.5191350940413,
+        1041.5719668320392
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35302881800403013,
+      -0.2148250136590913,
+      2.1407878026353324,
+      -3.9189998204417886
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-1-67462ed2-3840x2160@29970",
+  "calibrator_version": "1.3.0",
+  "date": "2022-10-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

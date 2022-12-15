@@ -1,0 +1,63 @@
+{
+  "name": "Sony_a7IV_FE PZ 16-35mm F4 G_full-frame_4k_16by9_3840x2160-23.98fps",
+  "note": "16mm",
+  "calibrated_by": "cyf",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "FE PZ 16-35mm F4 G",
+  "camera_setting": "full-frame",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 26.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.469579100575824,
+    "camera_matrix": [
+      [
+        1713.7402938877383,
+        0.0,
+        1914.0860810487884
+      ],
+      [
+        0.0,
+        1711.8828231140574,
+        1074.6264835291092
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3168088447155415,
+      0.13211112950269296,
+      0.050770214948670706,
+      0.07498260055574284
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-16.50mm-3840x2160@23976",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-24",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

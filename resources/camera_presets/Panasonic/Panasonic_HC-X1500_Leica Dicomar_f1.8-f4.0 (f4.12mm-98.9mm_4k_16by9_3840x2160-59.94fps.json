@@ -1,0 +1,63 @@
+{
+  "name": "Panasonic_HC-X1500_Leica Dicomar_f1.8-f4.0 (f4.12mm-98.9mm_4k_16by9_3840x2160-59.94fps",
+  "note": "59.94 fps",
+  "calibrated_by": "Stephen Connolly",
+  "camera_brand": "Panasonic",
+  "camera_model": "HC-X1500",
+  "lens_model": "Leica Dicomar",
+  "camera_setting": "f1.8-f4.0 (f4.12mm-98.9mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4951862600670673,
+    "camera_matrix": [
+      [
+        2611.33336619658,
+        0.0,
+        1924.9164866505575
+      ],
+      [
+        0.0,
+        2612.6433360413557,
+        1077.5832278436962
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3286218078385537,
+      0.118139021369184,
+      0.07044185199275933,
+      0.03910872281280968
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2022-09-29",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

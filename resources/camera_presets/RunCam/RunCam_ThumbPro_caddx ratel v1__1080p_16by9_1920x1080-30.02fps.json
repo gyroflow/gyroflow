@@ -1,0 +1,66 @@
+{
+  "name": "RunCam_ThumbPro_caddx ratel v1__1080p_16by9_1920x1080-30.02fps",
+  "note": "",
+  "calibrated_by": "Gerald Ong",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPro",
+  "lens_model": "caddx ratel v1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.018007,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3537844528097077,
+    "camera_matrix": [
+      [
+        872.6349858729316,
+        0.0,
+        956.0505050038724
+      ],
+      [
+        0.0,
+        871.7742547988593,
+        591.8361519820041
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.07853407782434088,
+      -0.025930736309001785,
+      0.026844641996625916,
+      -0.0034527778359199524
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}
