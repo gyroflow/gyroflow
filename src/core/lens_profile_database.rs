@@ -86,11 +86,24 @@ impl LensProfileDatabase {
                             }
                         } else {
                             (|| -> Option<()> {
-                                let mut to_checksum = profile.get_json_value().ok()?;
-                                let obj = to_checksum.as_object_mut()?;
-                                obj.remove_entry("focal_length");
-                                obj.remove_entry("crop_factor");
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(serde_json::to_string_pretty(&to_checksum).ok()?.as_bytes())));
+                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+                                    profile.identifier,
+
+                                    profile.calib_dimension.w,
+                                    profile.calib_dimension.h,
+
+                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+                                );
+
+                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
                                 Some(())
                             })();
                             self.map.insert(key, profile);
@@ -145,6 +158,7 @@ impl LensProfileDatabase {
     pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
         // (name, filename, crc32, official, rating, aspect_ratio*1000)
         let mut set = HashSet::with_capacity(self.map.len());
+        let mut checksum_map = HashMap::with_capacity(self.map.len());
         let mut ret = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
             if v.filename.ends_with(".gyroflow") {
@@ -177,6 +191,11 @@ impl LensProfileDatabase {
                 }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
+            }
+            if let Some(dup) = checksum_map.get(&v.checksum) {
+                log::error!("Duplicated lens profile! {} vs {}", dup, v.filename);
+            } else {
+                checksum_map.insert(v.checksum.clone(), v.filename.clone());
             }
         }
         ret.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
@@ -269,6 +288,7 @@ impl LensProfileDatabase {
             let (brand, model, lens_model, camera_setting, fname) = (&x[0], &x[1], &x[2], &x[3], &x[4]);
 
             let mut old_path = Self::get_path();
+            if fname.is_empty() { continue; }
             old_path.push(&fname[1..]);
 
             let mut cam_setting = LensProfile::cleanup_name(camera_setting.clone()).trim().to_string();
