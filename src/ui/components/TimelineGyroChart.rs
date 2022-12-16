@@ -238,7 +238,8 @@ impl TimelineGyroChart {
                 y: (8.0 + y * (rect.height - 16.0)),
             };
 
-            let validness = ((*offset - *linear_offset).abs()).min(30.0) / 30.0; // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
+            let bad_syncpoint_distance = 30.0;
+            let validness = ((*offset - *linear_offset).abs()).min(bad_syncpoint_distance) / bad_syncpoint_distance; // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
             p.set_brush(QBrush::from_color(QColor::from_hsv_f((112.0 * (1.0 - validness)) / 360.0, 0.84, 0.86)));
             p.draw_ellipse_with_center(pt, 3.0, 3.0);
         }

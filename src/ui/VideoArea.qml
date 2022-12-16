@@ -36,6 +36,7 @@ Item {
     property url loadedFileUrl;
 
     property bool fullScreen: false;
+    property string detectedCamera: "";
 
     property Menu.VideoInformation vidInfo: null;
 
@@ -189,6 +190,7 @@ Item {
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
             console.log("Telemetry additional data:", JSON.stringify(additional_data));
             if (is_main_video) {
+                root.detectedCamera = camera;
                 vidInfo.updateEntry("Detected camera", camera || "---");
                 vidInfo.updateEntry("Contains gyro", additional_data.contains_motion? "Yes" : "No");
                 // If source was detected, but gyro data is empty

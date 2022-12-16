@@ -687,7 +687,8 @@ Item {
                 value: offset_ms;
                 unit: qsTr("ms");
                 isCalibPoint: false;
-                property real validness: (Math.min(30.0, Math.abs(offset_ms - linear_offset_ms)) / 30.0); // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
+                property real badSyncpointDistance: window.videoArea.detectedCamera.toLowerCase().includes("runcam")? 300.0 : 30.0;
+                property real validness: (Math.min(badSyncpointDistance, Math.abs(offset_ms - linear_offset_ms)) / badSyncpointDistance); // 0 - valid (point near the line), 1 - invalid (30ms or more deviation from the line)
                 color: Qt.hsva((112 * (1.0 - validness)) / 360, 0.84, 0.86, 1.0);
                 onEdit: (ts_us, val) => {
                     root.editingSyncPoint = true;
