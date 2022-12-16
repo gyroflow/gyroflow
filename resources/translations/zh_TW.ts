@@ -945,7 +945,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="157"/>
       <source>Select log</source>
-      <translation type="unfinished">Select log</translation>
+      <translation>選擇日誌</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
@@ -1156,7 +1156,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="163"/>
       <source>All logs combined</source>
-      <translation type="unfinished">All logs combined</translation>
+      <translation>所有組合日誌完畢</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="371"/>
@@ -1206,12 +1206,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Essential matrix</source>
-      <translation type="unfinished">Essential matrix</translation>
+      <translation>本質矩陣</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Visual features</source>
-      <translation type="unfinished">Visual features</translation>
+      <translation>視覺功能</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="595"/>
@@ -1871,12 +1871,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>當使用關鍵幀來控制縮放速度時，建議使用包絡追踪方式。高斯濾波器可能會導致視頻中出現黑色邊界。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>縮放方式</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
@@ -2086,12 +2086,12 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="344"/>
       <source>Pose method</source>
-      <translation type="unfinished">Pose method</translation>
+      <translation>姿態方式</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="357"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>偏移方式</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="367"/>
@@ -2501,7 +2501,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="188"/>
       <source>Sync points debug layer</source>
-      <translation type="unfinished">Sync points debug layer</translation>
+      <translation>同步點調試圖層</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="354"/>

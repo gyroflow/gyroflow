@@ -113,7 +113,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="321"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ок</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="324"/>
@@ -720,7 +720,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="479"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Фокусное расстояние</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="481"/>
@@ -730,7 +730,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="485"/>
       <source>mm</source>
-      <translation type="unfinished">mm</translation>
+      <translation>мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="494"/>
@@ -803,7 +803,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="98"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Да</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="177"/>
@@ -1394,12 +1394,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="624"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Параметры очереди</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Количество параллельных рендеров</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
@@ -1414,17 +1414,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="677"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Перезаписать файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="678"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Переименовать файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="679"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Пропустить файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="684"/>
@@ -1434,37 +1434,37 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="685"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Стабилизированное видео</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="686"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>Файл проекта</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="687"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>Файл проекта (с данными гироскопа)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Файл проекта (с преобразованными данными гироскопа)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Show queue when adding an item</source>
-      <translation type="unfinished">Show queue when adding an item</translation>
+      <translation>Показать очередь при добавлении элемента</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="693"/>
       <source>Clear render queue</source>
-      <translation type="unfinished">Clear render queue</translation>
+      <translation>Очистить очередь рендера</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="694"/>
       <source>Are you sure you want to remove all items from the render queue?</source>
-      <translation type="unfinished">Are you sure you want to remove all items from the render queue?</translation>
+      <translation>Вы уверены, что хотите удалить все элементы из очереди рендера?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="395"/>
@@ -2178,7 +2178,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Фокусное расстояние</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
@@ -2741,7 +2741,7 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="487"/>
       <source>Focal length: %1 mm</source>
-      <translation type="unfinished">Focal length: %1 mm</translation>
+      <translation>Фокусное расстояние: %1 мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="489"/>

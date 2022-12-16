@@ -945,7 +945,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="157"/>
       <source>Select log</source>
-      <translation type="unfinished">Select log</translation>
+      <translation>Vybrať log</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
@@ -1156,7 +1156,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="163"/>
       <source>All logs combined</source>
-      <translation type="unfinished">All logs combined</translation>
+      <translation>Všetky logy naraz</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="371"/>
@@ -1206,12 +1206,12 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Essential matrix</source>
-      <translation type="unfinished">Essential matrix</translation>
+      <translation>Essential matrix</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Visual features</source>
-      <translation type="unfinished">Visual features</translation>
+      <translation>Vizuálne detaily</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="595"/>
@@ -1871,12 +1871,12 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>Ak sa kľúčuje rýchlosť priblíženia odporúča sa použiť metóda "Envelope follower". Gaussov filter môže viesť k čiernym okrajom v zobrazení.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>Metóda priblíženia</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
@@ -2086,12 +2086,12 @@ To ale dvojnásobne predĺži čas na výpočet, takže zaškrtni to len pri prv
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="344"/>
       <source>Pose method</source>
-      <translation type="unfinished">Pose method</translation>
+      <translation>Metóda pozície kamery</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="357"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>Metóda odchýlky</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="367"/>
@@ -2500,7 +2500,7 @@ Chceš pokračovať?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="188"/>
       <source>Sync points debug layer</source>
-      <translation type="unfinished">Sync points debug layer</translation>
+      <translation>Vrstva ladenia synchr. bodov</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="354"/>

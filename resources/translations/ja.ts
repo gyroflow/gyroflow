@@ -1872,12 +1872,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>キーフレームのズーム速度の場合は、Envelope follower方式を使用することをお勧めします。ガウスフィルタは表示中に黒い境界線につながる可能性があります。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>ズーム方法</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
