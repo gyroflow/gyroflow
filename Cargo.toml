@@ -22,11 +22,11 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 [dependencies]
 cstr = "0.2.11"
 cpp = "0.5.7"
-serde = "1.0.150"
-serde_json = "1.0.89"
+serde = "1.0.151"
+serde_json = "1.0.90"
 bytemuck = "1.12.3"
 nalgebra = "0.31"
-semver = "1.0.14"
+semver = "1.0.15"
 fastrand = "1.8.0"
 itertools = "0.10.5"
 regex = "1.7.0"
@@ -75,7 +75,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 cpp_build = "0.5.7"
 winres = "0.1.12"
 walkdir = "2.3.2"
-cc = "1.0.77"
+cc = "1.0.78"
 
 [[bin]]
 name = "gyroflow"
