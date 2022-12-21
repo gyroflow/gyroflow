@@ -267,7 +267,29 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     if cfg!(any(target_os = "macos", target_os = "ios")) {
         proc.video.encoder_params.options.set("allow_sw", "1");
         proc.video.encoder_params.options.set("realtime", "0");
-        proc.video.encoder_params.options.set("constant_bit_rate", "1");
+
+        // Test if `constant_bit_rate` is supported
+        {
+            let log = FFMPEG_LOG.read().clone();
+            if let Some(mut enc) = ffmpeg_next::encoder::find_by_name("h264_videotoolbox") {
+                use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, software, util, Dictionary, Packet, Rational, Error, rescale::Rescale };
+
+                let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(enc.as_ptr()) };
+                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
+                let mut encoder = context.encoder().video()?;
+                encoder.set_width(1920);
+                encoder.set_height(1080);
+                encoder.set_format(format::Pixel::NV12);
+                encoder.set_time_base(ffmpeg_next::Rational::new(30, 1));
+                let mut options = ffmpeg_next::Dictionary::new();
+                options.set("allow_sw", "1");
+                options.set("constant_bit_rate", "1");
+                if let Ok(_) = encoder.open_with(options) {
+                    proc.video.encoder_params.options.set("constant_bit_rate", "1");
+                }
+            }
+            *FFMPEG_LOG.write() = log;
+        }
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
