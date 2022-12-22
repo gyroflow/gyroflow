@@ -22,7 +22,7 @@ jobs:
             ffmpeg_name: "ffmpeg-master-linux-clang-gpl-lite"
           },
           {
-            os: macos-11,
+            os: macos-latest,
             target: x86_64-apple-darwin,
             target2: aarch64-apple-darwin,
             cross: false,
@@ -58,14 +58,14 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf3
+          key: gf4
 
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-1
+          key: ${{ runner.os }}-gf-ext-2
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -83,6 +83,12 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
           vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
           doNotCache: true
+
+      - name: Setup MacOS deployment target
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        run: |
+          echo "SDKROOT=$(xcrun -sdk macosx11.1 --show-sdk-path)" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx11.1 --show-sdk-platform-version)" >> $GITHUB_ENV
 
       # Download and install OpenCV
       - name: Install OpenCV and curl
@@ -132,7 +138,7 @@ jobs:
         run: rm -r -force ${{ github.workspace }}/target/${{ matrix.targets.target }}/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install dependencies Mac
-        if: ${{ matrix.targets.os == 'macos-11' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         run: |
           cd ${{ github.workspace }}/ext
           chmod +x install-deps-mac.sh
@@ -163,14 +169,14 @@ jobs:
           args: --target ${{ matrix.targets.target }} --profile deploy
 
       - name: Install Mac certificate
-        if: ${{ matrix.targets.os == 'macos-11' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v1
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
       - name: Build and deploy Mac
-        if: ${{ matrix.targets.os == 'macos-11' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         env:
           PROJECT_DIR: ${{ github.workspace }}
           QT_DIR: ${{ env.Qt6_DIR }}
@@ -182,7 +188,7 @@ jobs:
           ${{ github.workspace }}/_deployment/deploy-macos.sh deploy-universal
 
       - name: Notarize and staple release build
-        if: ${{ matrix.targets.os == 'macos-11' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         run: |
           npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
