@@ -162,7 +162,7 @@ fn entry() {
             engine.load_file(path.into());
         } else {
             // Load from resources
-            engine.load_file("qrc:/src/ui/main_window.qml".into());
+            engine.load_url(QString::from("qrc:/src/ui/main_window.qml").into());
         }
     } else {
         engine.load_file(format!("{}/src/ui/main_window.qml", env!("CARGO_MANIFEST_DIR")).into());
