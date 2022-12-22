@@ -3,7 +3,7 @@
 export PROJECT_DIR=$(cd "$(dirname "$0")"; pwd -P)
 export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
 
-ARCH=x64_64
+ARCH=x86_64
 ARCH_VCPKG=x64-osx-release
 if [ $(uname -m) = "arm64" ]; then
     ARCH=arm64
