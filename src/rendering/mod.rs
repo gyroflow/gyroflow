@@ -289,6 +289,9 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
             *FFMPEG_LOG.write() = log;
         }
     }
+    if encoder.0.contains("nvenc") {
+        proc.video.encoder_params.options.set("b_ref_mode", "disabled");
+    }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
 
