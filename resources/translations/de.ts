@@ -560,7 +560,7 @@ Wenn dies ein modernes System mit aktuellen Treibern ist, das GPU-encoding unter
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="392"/>
       <source>Keyframe distance</source>
-      <translation>Schlüsselbild-Abstand</translation>
+      <translation>Keyframe-Abstand</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="401"/>
@@ -944,7 +944,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="157"/>
       <source>Select log</source>
-      <translation>Protokoll auswählen</translation>
+      <translation>Log wählen</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="175"/>
@@ -1205,12 +1205,12 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Essential matrix</source>
-      <translation>Wesentliche Matrix</translation>
+      <translation>"essential matrix" Methode</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Visual features</source>
-      <translation>Visuelle Funktionen</translation>
+      <translation>Visuelle-Merkmale</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="595"/>
@@ -1870,12 +1870,13 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="439"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation>Beim Keyframing der Zoomgeschwindigkeit wird empfohlen, die Hüllkurvenfolgemethode zu verwenden. Der Gauß-Filter kann zu schwarzen Rändern in der Ansicht führen.</translation>
+      <translation>Bei der Verwendung von Keyframes für die Steuerung der Zoom-Geschwindigkeit sollte die "Envelope Follower" Methode genutzt werden -
+"Gaussian filter" kann schwarze Ränder im Bild erzeugen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="444"/>
       <source>Zooming method</source>
-      <translation>Zoomverfahren</translation>
+      <translation>Zoom-Verfahren</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="464"/>
@@ -2090,7 +2091,7 @@ Da sich die Berechnungszeit verdoppelt, sollte diese Option nur anfangs für ein
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="357"/>
       <source>Offset method</source>
-      <translation>Offset-Methode</translation>
+      <translation>Versatz-Ermitlung</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="367"/>
@@ -2500,7 +2501,7 @@ Soll trotzdem mit der Analyse fortgefahren werden?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="188"/>
       <source>Sync points debug layer</source>
-      <translation>Synchronisationspunkte der Debug-Ebene</translation>
+      <translation>Debug-Ebene für Sync-Punkte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="354"/>
