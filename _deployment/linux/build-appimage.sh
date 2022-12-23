@@ -2,7 +2,7 @@
 
 APP_PKG=$PWD/Gyroflow
 export APP_DIR=$PWD/AppDir
-export APP_VERSION=1.4.1
+export APP_VERSION=1.4.2
 
 rm -rf $APP_DIR
 mkdir -p $APP_DIR/usr/share/icons
