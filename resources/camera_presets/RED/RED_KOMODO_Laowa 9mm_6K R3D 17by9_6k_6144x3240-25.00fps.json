@@ -1,10 +1,10 @@
 {
-  "name": "RED_Komodo_Laowa 9MM_6K R3D 17:9_6k_1.90by1_6144x3240-25.00fps",
+  "name": "RED_KOMODO_Laowa 9mm_6K R3D 17:9_6k_1.90by1_6144x3240-25.00fps",
   "note": "",
   "calibrated_by": "DrewDrones",
   "camera_brand": "RED",
-  "camera_model": "Komodo",
-  "lens_model": "Laowa 9MM",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 9mm",
   "camera_setting": "6K R3D 17:9",
   "calib_dimension": {
     "w": 6144,
