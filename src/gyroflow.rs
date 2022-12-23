@@ -90,6 +90,9 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
+    if cfg!(compiled_qml) {
+        cpp!(unsafe [] { QLoggingCategory::setFilterRules("qt.qml.diskcache.debug=true"); });
+    }
     // if cfg!(target_os = "android") {
     //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
     // }
