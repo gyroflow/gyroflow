@@ -87,19 +87,17 @@ fn entry() {
         QIcon::setThemeName(QStringLiteral("Gyroflow"));
         QIcon::setThemeSearchPaths(QStringList() << icons_path);
 
+        #ifdef Q_OS_ANDROID
+            // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+            int av_jni_set_java_vm(void *vm, void *log_ctx);
+            av_jni_set_java_vm(QJniEnvironment::javaVM(), nullptr);
+        #endif
+
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
     if cfg!(compiled_qml) {
         cpp!(unsafe [] { QLoggingCategory::setFilterRules("qt.qml.diskcache.debug=true"); });
-    }
-    #[cfg(target_os = "android")]
-    {
-        cpp!(unsafe [] {
-            // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
-            int av_jni_set_java_vm(void *vm, void *log_ctx);
-            av_jni_set_java_vm(QJniEnvironment::javaVM(), nullptr);
-        });
     }
 
     //crate::core::util::rename_calib_videos();
