@@ -82,7 +82,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 #[cfg(target_os = "linux")]
                 ("h264_v4l2m2m",      true),
                 #[cfg(target_os = "android")]
-                ("h264_mediacodec",    true),
+                ("h264_mediacodec",   true),
                 ("libx264",           false),
             ],
             "H.265/HEVC" => vec![
@@ -183,7 +183,9 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     if input_file.image_sequence_start > 0 {
         decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
     }
-
+    if cfg!(target_os = "android") {
+        decoder_options.set("ndk_codec", "1");
+    }
     let gpu_decoding = *GPU_DECODING.read();
     let mut proc = FfmpegProcessor::from_file(&input_file.path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 
@@ -261,6 +263,9 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                     smpte428_1      17           .D.V....... SMPTE ST 428-1
             */
         }
+        Some("h264_mediacodec") | Some("hevc_mediacodec") => {
+            // proc.video.encoder_params.pixel_format = Some(Pixel::NV12);
+        }
         _ => { }
     }
 
@@ -291,6 +296,10 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
     }
     if encoder.0.contains("nvenc") {
         proc.video.encoder_params.options.set("b_ref_mode", "disabled");
+    }
+
+    if cfg!(target_os = "android") {
+        proc.video.encoder_params.options.set("ndk_codec", "1");
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
@@ -622,12 +631,14 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
             }
             match level {
                 ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
+                    ::log::error!("{}", line.trim());
                     line = format!("<font color=\"#d82626\">{}</font>", line);
                 },
                 ffi::AV_LOG_WARNING => {
+                    ::log::warn!("{}", line.trim());
                     line = format!("<font color=\"#f6a10c\">{}</font>", line);
                 },
-                _ => { }
+                _ => { ::log::debug!("{}", line.trim()); }
             }
             FFMPEG_LOG.write().push_str(&line);
         }

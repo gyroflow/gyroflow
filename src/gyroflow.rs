@@ -93,9 +93,14 @@ fn entry() {
     if cfg!(compiled_qml) {
         cpp!(unsafe [] { QLoggingCategory::setFilterRules("qt.qml.diskcache.debug=true"); });
     }
-    // if cfg!(target_os = "android") {
-    //     cpp!(unsafe [] { QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan); });
-    // }
+    #[cfg(target_os = "android")]
+    {
+        cpp!(unsafe [] {
+            // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+            int av_jni_set_java_vm(void *vm, void *log_ctx);
+            av_jni_set_java_vm(QJniEnvironment::javaVM(), nullptr);
+        });
+    }
 
     //crate::core::util::rename_calib_videos();
 
