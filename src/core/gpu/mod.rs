@@ -79,7 +79,7 @@ impl<'a> BufferDescription<'a> {
         }
         match &self.data {
             BufferSource::None => { }
-            BufferSource::Cpu { buffer } => { }
+            BufferSource::Cpu { .. } => { }
             #[cfg(feature = "use-opencl")]
             BufferSource::OpenCL { texture, queue } => {
                 if !self.texture_copy {
