@@ -3,7 +3,6 @@
 
 use ocl::*;
 use ocl::core::{ ImageDescriptor, MemObjectType, GlTextureTarget };
-use ocl::enums::ContextPropertyValue;
 use parking_lot::RwLock;
 use std::ops::DerefMut;
 use super::*;
@@ -48,7 +47,7 @@ impl OclWrapper {
                 }
                 #[cfg(target_os = "windows")]
                 BufferSource::DirectX { device, .. } => {
-                    props.set_property_value(ContextPropertyValue::D3d11DeviceKhr(*device));
+                    props.set_property_value(ocl::enums::ContextPropertyValue::D3d11DeviceKhr(*device));
                 },
                 _ => { }
             }

@@ -147,12 +147,16 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/.empty
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns/.empty
     rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/.empty
+    rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib
+    rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework/Versions/A/libass.9.dylib
+
     if [ "$SIGNING_FINGERPRINT" != "" ]; then
 
         # Certificate needs to be "Developer ID Application"
 
         OBJECTS=(
-            "Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
+            #"Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
+            #"Frameworks/mdk.framework/Versions/A/libass.9.dylib"
             "Frameworks/mdk.framework/Versions/A/libmdk-braw.dylib"
             "Frameworks/mdk.framework/Versions/A/mdk"
             "Frameworks/QtCore.framework/Versions/A/QtCore"
