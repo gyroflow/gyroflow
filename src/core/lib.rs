@@ -35,7 +35,8 @@ use stabilization::{ Stabilization, KernelParamsFlags };
 use zooming::ZoomingAlgorithm;
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
-use gpu::BufferDescription;
+pub use wgpu::TextureFormat as WgpuTextureFormat;
+use gpu::Buffers;
 use gpu::drawing::*;
 
 #[cfg(feature = "opencv")]
@@ -464,10 +465,9 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
 
-    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut BufferDescription) -> Option<stabilization::ProcessedInfo> {
-        if let gpu::BufferSource::Cpu { input, output } = &buffers.buffers {
-            if input.is_empty() || output.is_empty() { return None; }
-        }
+    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Option<stabilization::ProcessedInfo> {
+        if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return None; } }
+        if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return None; } }
 
         if let Some(scale) = self.params.read().fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;

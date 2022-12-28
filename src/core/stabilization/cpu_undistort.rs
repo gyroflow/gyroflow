@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use crate::gpu::{ BufferDescription, BufferSource };
+use crate::gpu::{ Buffers, BufferSource };
 
 use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
@@ -90,7 +90,7 @@ impl<T: PixelType> Stabilization<T> {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-    pub fn undistort_image_cpu<const I: i32>(buffers: &mut BufferDescription, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) -> bool {
+    pub fn undistort_image_cpu<const I: i32>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) -> bool {
         // #[cold]
         // fn draw_pixel(pix: &mut Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) {
         //     if drawing.is_empty() || (params.flags & 8) == 0 { return; }
@@ -199,147 +199,151 @@ impl<T: PixelType> Stabilization<T> {
             sum
         }
 
-        if let BufferSource::Cpu { input, output } = &mut buffers.buffers {
-            let r_limit = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
+        if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
+            if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
+                let r_limit = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
 
-            let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]);
-            let bg_t: T = PixelType::from_float(bg);
+                let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]);
+                let bg_t: T = PixelType::from_float(bg);
 
-            let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
-            let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-            let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
+                let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
+                let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+                let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
 
-            // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
-            let fill_bg = (params.flags & 4) == 4;
-            let fix_range = (params.flags & 1) == 1;
-            let is_y = params.bytes_per_pixel == 1;
-            if buffers.output_size.2 <= 0 {
-                log::error!("buffers.output_size: {:?}", buffers.output_size);
-                return false;
-            }
+                // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
+                let fill_bg = (params.flags & 4) == 4;
+                let fix_range = (params.flags & 1) == 1;
+                let is_y = params.bytes_per_pixel == 1;
+                if buffers.output.size.2 <= 0 {
+                    log::error!("buffers.output_size: {:?}", buffers.output.size);
+                    return false;
+                }
 
-            output.par_chunks_mut(buffers.output_size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
-                row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
+                output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
+                    row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
 
-                    let mut out_pos = (
-                        map_coord(x as f32, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width as f32 ),
-                        map_coord(y as f32, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
-                    );
+                        let mut out_pos = (
+                            map_coord(x as f32, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width as f32 ),
+                            map_coord(y as f32, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
+                        );
 
-                    if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
-                        assert!(pix_chunk.len() == std::mem::size_of::<T>());
+                        if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
+                            assert!(pix_chunk.len() == std::mem::size_of::<T>());
 
-                        // let p = out_pos;
-                        let mut pixel = bg;
+                            // let p = out_pos;
+                            let mut pixel = bg;
 
-                        out_pos.0 += params.translation2d[0];
-                        out_pos.1 += params.translation2d[1];
+                            out_pos.0 += params.translation2d[0];
+                            out_pos.1 += params.translation2d[1];
 
-                        let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
+                            let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
-                        if fill_bg {
-                            *pix_out = bg_t;
-                            return;
-                        }
-
-                        ///////////////////////////////////////////////////////////////////
-                        // Calculate source `y` for rolling shutter
-                        let mut sy = y;
-                        if params.matrix_count > 1 {
-                            let idx = params.matrix_count as usize / 2;
-                            if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
-                                sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                            if fill_bg {
+                                *pix_out = bg_t;
+                                return;
                             }
-                        }
-                        ///////////////////////////////////////////////////////////////////
 
-                        ///////////////////////////////////////////////////////////////////
-                        // Add lens distortion back
-                        if params.lens_correction_amount < 1.0 {
-                            let mut new_out_pos = out_pos;
-
-                            if (params.flags & 2) == 2 { // Has digial lens
-                                if let Some(digital) = digital_lens {
-                                    if let Some(pt) = digital.undistort_point(new_out_pos, params) {
-                                        new_out_pos = pt;
-                                    }
+                            ///////////////////////////////////////////////////////////////////
+                            // Calculate source `y` for rolling shutter
+                            let mut sy = y;
+                            if params.matrix_count > 1 {
+                                let idx = params.matrix_count as usize / 2;
+                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
+                                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
                                 }
                             }
+                            ///////////////////////////////////////////////////////////////////
 
-                            new_out_pos = ((new_out_pos.0 - out_c.0) / out_f.0, (new_out_pos.1 - out_c.1) / out_f.1);
-                            new_out_pos = distortion_model.undistort_point(new_out_pos, &params).unwrap_or_default();
-                            new_out_pos = ((new_out_pos.0 * out_f.0) + out_c.0, (new_out_pos.1 * out_f.1) + out_c.1);
+                            ///////////////////////////////////////////////////////////////////
+                            // Add lens distortion back
+                            if params.lens_correction_amount < 1.0 {
+                                let mut new_out_pos = out_pos;
 
-                            out_pos = (
-                                new_out_pos.0 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
-                                new_out_pos.1 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount),
-                            );
-                        }
-                        ///////////////////////////////////////////////////////////////////
-
-                        let idx = sy.min(params.matrix_count as usize - 1);
-                        if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
-                            let width_f = params.width as f32;
-                            let height_f = params.height as f32;
-                            match params.background_mode {
-                                1 => { // Edge repeat
-                                    uv = (
-                                        uv.0.max(0.0).min(width_f  - 1.0),
-                                        uv.1.max(0.0).min(height_f - 1.0),
-                                    );
-                                },
-                                2 => { // Edge mirror
-                                    let rx = uv.0.round();
-                                    let ry = uv.1.round();
-                                    let width3 = width_f - 3.0;
-                                    let height3 = height_f - 3.0;
-                                    if rx > width3  { uv.0 = width3  - (rx - width3); }
-                                    if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
-                                    if ry > height3 { uv.1 = height3 - (ry - height3); }
-                                    if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
-                                },
-                                3 => { // Margin with feather
-                                    let widthf  = width_f - 1.0;
-                                    let heightf = height_f - 1.0;
-
-                                    let feather = (params.background_margin_feather * heightf).max(0.0001);
-                                    let mut pt2 = uv;
-                                    let mut alpha = 1.0;
-                                    if (uv.0 > widthf - feather) || (uv.0 < feather) || (uv.1 > heightf - feather) || (uv.1 < feather) {
-                                        alpha = ((widthf - uv.0).min(heightf - uv.1).min(uv.0).min(uv.1) / feather).min(1.0).max(0.0);
-                                        pt2 = (pt2.0 / width_f, pt2.1 / height_f);
-                                        pt2 = (
-                                            ((pt2.0 - 0.5) * (1.0 - params.background_margin)) + 0.5,
-                                            ((pt2.1 - 0.5) * (1.0 - params.background_margin)) + 0.5
-                                        );
-                                        pt2 = (pt2.0 * width_f, pt2.1 * height_f);
+                                if (params.flags & 2) == 2 { // Has digial lens
+                                    if let Some(digital) = digital_lens {
+                                        if let Some(pt) = digital.undistort_point(new_out_pos, params) {
+                                            new_out_pos = pt;
+                                        }
                                     }
+                                }
 
-                                    let c1 = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
-                                    let c2 = sample_input_at::<I, T>(pt2, input, params, &bg, drawing);
-                                    pixel = c1 * alpha + c2 * (1.0 - alpha);
-                                    // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
-                                    if fix_range {
-                                        remap_colorrange(&mut pixel, is_y)
-                                    }
-                                    *pix_out = PixelType::from_float(pixel);
-                                    return;
-                                },
-                                _ => { }
+                                new_out_pos = ((new_out_pos.0 - out_c.0) / out_f.0, (new_out_pos.1 - out_c.1) / out_f.1);
+                                new_out_pos = distortion_model.undistort_point(new_out_pos, &params).unwrap_or_default();
+                                new_out_pos = ((new_out_pos.0 * out_f.0) + out_c.0, (new_out_pos.1 * out_f.1) + out_c.1);
+
+                                out_pos = (
+                                    new_out_pos.0 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
+                                    new_out_pos.1 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount),
+                                );
                             }
+                            ///////////////////////////////////////////////////////////////////
 
-                            pixel = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
-                        }
-                        // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                            let idx = sy.min(params.matrix_count as usize - 1);
+                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
+                                let width_f = params.width as f32;
+                                let height_f = params.height as f32;
+                                match params.background_mode {
+                                    1 => { // Edge repeat
+                                        uv = (
+                                            uv.0.max(0.0).min(width_f  - 1.0),
+                                            uv.1.max(0.0).min(height_f - 1.0),
+                                        );
+                                    },
+                                    2 => { // Edge mirror
+                                        let rx = uv.0.round();
+                                        let ry = uv.1.round();
+                                        let width3 = width_f - 3.0;
+                                        let height3 = height_f - 3.0;
+                                        if rx > width3  { uv.0 = width3  - (rx - width3); }
+                                        if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
+                                        if ry > height3 { uv.1 = height3 - (ry - height3); }
+                                        if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+                                    },
+                                    3 => { // Margin with feather
+                                        let widthf  = width_f - 1.0;
+                                        let heightf = height_f - 1.0;
 
-                        if fix_range {
-                            remap_colorrange(&mut pixel, is_y)
+                                        let feather = (params.background_margin_feather * heightf).max(0.0001);
+                                        let mut pt2 = uv;
+                                        let mut alpha = 1.0;
+                                        if (uv.0 > widthf - feather) || (uv.0 < feather) || (uv.1 > heightf - feather) || (uv.1 < feather) {
+                                            alpha = ((widthf - uv.0).min(heightf - uv.1).min(uv.0).min(uv.1) / feather).min(1.0).max(0.0);
+                                            pt2 = (pt2.0 / width_f, pt2.1 / height_f);
+                                            pt2 = (
+                                                ((pt2.0 - 0.5) * (1.0 - params.background_margin)) + 0.5,
+                                                ((pt2.1 - 0.5) * (1.0 - params.background_margin)) + 0.5
+                                            );
+                                            pt2 = (pt2.0 * width_f, pt2.1 * height_f);
+                                        }
+
+                                        let c1 = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
+                                        let c2 = sample_input_at::<I, T>(pt2, input, params, &bg, drawing);
+                                        pixel = c1 * alpha + c2 * (1.0 - alpha);
+                                        // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                                        if fix_range {
+                                            remap_colorrange(&mut pixel, is_y)
+                                        }
+                                        *pix_out = PixelType::from_float(pixel);
+                                        return;
+                                    },
+                                    _ => { }
+                                }
+
+                                pixel = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
+                            }
+                            // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+
+                            if fix_range {
+                                remap_colorrange(&mut pixel, is_y)
+                            }
+                            *pix_out = PixelType::from_float(pixel);
                         }
-                        *pix_out = PixelType::from_float(pixel);
-                    }
+                    });
                 });
-            });
-            true
+                true
+            } else {
+                false
+            }
         } else {
             false
         }

@@ -5,78 +5,133 @@
 pub mod opencl;
 pub mod wgpu;
 
+pub mod wgpu_interop;
+#[cfg(not(any(target_os = "macos", target_os = "ios")))] pub mod wgpu_interop_vulkan;
+#[cfg(any(target_os = "macos", target_os = "ios"))]      pub mod wgpu_interop_metal;
+#[cfg(target_os = "windows")]                            pub mod wgpu_interop_directx;
+
 pub mod drawing;
+use std::hash::Hasher;
 
+#[derive(Default)]
 pub struct BufferDescription<'a> {
-    pub input_size:  (usize, usize, usize), // width, height, stride
-    pub output_size: (usize, usize, usize), // width, height, stride
-
-    pub input_rect:  Option<(usize, usize, usize, usize)>, // x, y, width, height
-    pub output_rect: Option<(usize, usize, usize, usize)>, // x, y, width, height
-
-    pub buffers: BufferSource<'a>
+    pub size: (usize, usize, usize), // width, height, stride
+    pub rect: Option<(usize, usize, usize, usize)>, // x, y, width, height
+    pub data: BufferSource<'a>,
+    pub texture_copy: bool
+}
+pub struct Buffers<'a> {
+    pub input: BufferDescription<'a>,
+    pub output: BufferDescription<'a>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum BufferSource<'a> {
+    #[default]
     None,
-    Cpu {
-        input: &'a mut [u8],
-        output: &'a mut [u8]
-    },
+    Cpu { buffer: &'a mut [u8] },
     #[cfg(feature = "use-opencl")]
     OpenCL {
-        input: ocl::ffi::cl_mem,
-        output: ocl::ffi::cl_mem,
+        texture: ocl::ffi::cl_mem,
         queue: ocl::ffi::cl_command_queue
     },
+    #[cfg(target_os = "windows")]
     DirectX {
-        input: *mut std::ffi::c_void, // ID3D11Texture2D*
-        output: *mut std::ffi::c_void, // ID3D11Texture2D*
+        texture: *mut std::ffi::c_void, // ID3D11Texture2D*
         device: *mut std::ffi::c_void, // ID3D11Device*
         device_context: *mut std::ffi::c_void, // ID3D11DeviceContext*
     },
     OpenGL {
-        input: u32, // GLuint
-        output: u32, // GLuint
+        texture: u32, // GLuint
         context: *mut std::ffi::c_void, // OpenGL context pointer
     },
     Vulkan {
-        input: u64,
-        output: u64,
+        texture: u64,
         device: u64,
         physical_device: u64,
         instance: u64,
-    }
-    /*Cuda {
-        input: u32,
-        output: u32,
     },
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
     Metal {
-        input: u32,
-        output: u32,
-    }*/
+        texture: *mut metal::MTLTexture,
+        command_queue: *mut metal::MTLCommandQueue,
+    },
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    MetalBuffer {
+        buffer: *mut metal::MTLBuffer,
+        command_queue: *mut metal::MTLCommandQueue,
+    },
+    /*Cuda {
+        input: u32
+    },*/
 }
-impl<'a> BufferSource<'a> {
+impl<'a> BufferDescription<'a> {
     pub fn get_checksum(&self) -> u32 {
-        use std::hash::Hasher;
         let mut hasher = crc32fast::Hasher::new();
-        match &self {
+        hasher.write_usize(self.size.0);
+        hasher.write_usize(self.size.1);
+        hasher.write_usize(self.size.2);
+        if let Some(r) = self.rect {
+            hasher.write_usize(r.0);
+            hasher.write_usize(r.1);
+            hasher.write_usize(r.2);
+            hasher.write_usize(r.3);
+        }
+        match &self.data {
             BufferSource::None => { }
-            BufferSource::Cpu { .. } => { hasher.write_u64(1); }
+            BufferSource::Cpu { buffer } => { }
             #[cfg(feature = "use-opencl")]
-            BufferSource::OpenCL { queue, .. } => { hasher.write_u64(*queue as u64); }
-            BufferSource::OpenGL { context, .. } => { hasher.write_u64(*context as u64); }
-            BufferSource::DirectX { device, device_context, .. } => {
+            BufferSource::OpenCL { texture, queue } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*texture as u64);
+                }
+                hasher.write_u64(*queue as u64);
+            }
+            BufferSource::OpenGL { texture, context } => {
+                if !self.texture_copy {
+                    hasher.write_u32(*texture);
+                }
+                hasher.write_u64(*context as u64);
+            }
+            #[cfg(target_os = "windows")]
+            BufferSource::DirectX { texture, device, device_context } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*texture as u64);
+                }
                 hasher.write_u64(*device as u64);
                 hasher.write_u64(*device_context as u64);
             },
-            BufferSource::Vulkan { instance, device, physical_device, .. } => {
+            BufferSource::Vulkan { texture, instance, device, physical_device } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*texture);
+                }
                 hasher.write_u64(*instance);
                 hasher.write_u64(*device);
                 hasher.write_u64(*physical_device);
             },
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            BufferSource::Metal { texture, command_queue } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*texture as u64);
+                }
+                hasher.write_u64(*command_queue as u64);
+            },
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            BufferSource::MetalBuffer { buffer, command_queue } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*buffer as u64);
+                }
+                hasher.write_u64(*command_queue as u64);
+            },
         }
+        hasher.finalize()
+    }
+}
+impl<'a> Buffers<'a> {
+    pub fn get_checksum(&self) -> u32 {
+        let mut hasher = crc32fast::Hasher::new();
+        hasher.write_u32(self.input.get_checksum());
+        hasher.write_u32(self.output.get_checksum());
         hasher.finalize()
     }
 }

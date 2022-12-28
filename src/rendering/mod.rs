@@ -10,17 +10,22 @@ pub mod ffmpeg_hw;
 pub mod render_queue;
 pub mod mdk_processor;
 pub mod video_processor;
+pub mod zero_copy;
+use zero_copy::*;
 
 pub use self::video_processor::VideoProcessor;
 pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
 use render_queue::RenderOptions;
 use crate::core::{ StabilizationManager, stabilization::* };
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
+use std::cell::RefCell;
 use std::ffi::c_void;
 use std::os::raw::c_char;
 use std::os::raw::c_int;
+use std::rc::Rc;
 use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
+use gyroflow_core::gpu::Buffers;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
@@ -278,7 +283,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
             let log = FFMPEG_LOG.read().clone();
             if let Some(enc) = ffmpeg_next::encoder::find_by_name("h264_videotoolbox") {
                 let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(enc.as_ptr()) };
-                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
+                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(Rc::new(0))) };
                 let mut encoder = context.encoder().video()?;
                 encoder.set_width(1920);
                 encoder.set_height(1080);
@@ -352,6 +357,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         proc.audio_codec = codec::Id::None; // Audio not supported when changing speed
     }
 
+    let render_globals = Rc::new(RefCell::new(zero_copy::RenderGlobals::default()));
+
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter, rate_control| {
         let fill_with_background = render_options.pad_with_black &&
             (timestamp_us < (trim_start * duration_ms * 1000.0).round() as i64 ||
@@ -387,8 +394,8 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         macro_rules! create_planes_proc {
             ($planes:ident, $(($t:tt, $in_frame:expr, $out_frame:expr, $ind:expr, $yuvi:expr, $max_val:expr), )*) => {
                 $({
-                    let in_size  = ($in_frame .plane_width($ind) as usize, $in_frame .plane_height($ind) as usize);
-                    let out_size = ($out_frame.plane_width($ind) as usize, $out_frame.plane_height($ind) as usize);
+                    let in_size = zero_copy::get_plane_size($in_frame, $ind);
+                    let out_size = zero_copy::get_plane_size($out_frame, $ind);
                     let bg = {
                         let mut params = stab.params.write();
                         params.size        = (in_size.0,  in_size.1);
@@ -408,21 +415,14 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
 
                     plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
                     plane.set_compute_params(ComputeParams::from_manager(&stab, false));
+                    let render_globals = render_globals.clone();
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
-                        let input_size  = ( in_frame_data.plane_width(plane_index) as usize,  in_frame_data.plane_height(plane_index) as usize,  in_frame_data.stride(plane_index) as usize);
-                        let output_size = (out_frame_data.plane_width(plane_index) as usize, out_frame_data.plane_height(plane_index) as usize, out_frame_data.stride(plane_index) as usize);
+                        let mut g = render_globals.borrow_mut();
+                        let wgpu_format = $t::wgpu_format().map(|x| x.0);
 
-                        let (buffer, out_buffer) = (in_frame_data.data_mut(plane_index), out_frame_data.data_mut(plane_index));
-
-                        use gyroflow_core::gpu::{ BufferDescription, BufferSource };
-                        let mut buffers = BufferDescription {
-                            input_size,
-                            output_size,
-                            buffers: BufferSource::Cpu {
-                                input: buffer,
-                                output: out_buffer
-                            },
-                            input_rect: None, output_rect: None
+                        let mut buffers = Buffers {
+                            input:  get_plane_buffer(in_frame_data, in_size, plane_index, &mut g, wgpu_format),
+                            output: get_plane_buffer(out_frame_data, out_size, plane_index, &mut g, wgpu_format)
                         };
 
                         plane.ensure_ready_for_processing(timestamp_us, &mut buffers);
@@ -440,7 +440,13 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         if planes.is_empty() {
             // Good reference about video formats: https://source.chromium.org/chromium/chromium/src/+/master:media/base/video_frame.cc
             // https://gist.github.com/Jim-Bar/3cbba684a71d1a9d468a6711a6eddbeb
-            match input_frame.format() {
+
+            let mut format = input_frame.format();
+            if let Some(underlying_format) = zero_copy::map_hardware_format(format, input_frame) {
+                log::debug!("HW frame ({:?}) underlying format: {:?}", format, underlying_format);
+                format = underlying_format;
+            }
+            match format {
                 Pixel::NV12 => {
                     create_planes_proc!(planes,
                         (Luma8, input_frame, output_frame, 0, [0], 255.0),
@@ -542,6 +548,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
         };
 
         match input_frame.format() {
+            Pixel::VIDEOTOOLBOX | // Pixel::D3D11 |
             Pixel::NV12 | Pixel::NV21 | Pixel::YUV420P | Pixel::YUVJ420P |
             Pixel::P010LE | Pixel::P016LE | Pixel::P210LE | Pixel::P216LE | Pixel::P410LE | Pixel::P416LE |
             Pixel::YUV420P10LE | Pixel::YUV420P12LE | Pixel::YUV420P14LE | Pixel::YUV420P16LE |

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use gyroflow_core::{ stabilization::ProcessedInfo, gpu::BufferDescription };
+use gyroflow_core::{ stabilization::ProcessedInfo, gpu::Buffers };
 use qml_video_rs::video_player::MDKPlayerWrapper;
 use std::sync::Arc;
 use crate::core::StabilizationManager;
@@ -13,7 +13,7 @@ cpp! {{
     #include "src/qt_gpu/qrhi_undistort.cpp"
 }}
 
-pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager<RGBA8>>, buffers: &mut BufferDescription) -> Option<ProcessedInfo> {
+pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager<RGBA8>>, buffers: &mut Buffers) -> Option<ProcessedInfo> {
     if stab.prevent_recompute.load(std::sync::atomic::Ordering::SeqCst) { return None; }
 
     let mut timestamp_us = (timestamp * 1000.0).round() as i64;

@@ -896,7 +896,7 @@ impl Controller {
                 }
             }));
 
-            use gyroflow_core::gpu::{ BufferDescription, BufferSource };
+            use gyroflow_core::gpu::{ BufferDescription, Buffers, BufferSource };
 
             let stab = self.stabilizer.clone();
             vid.readyForProcessing(Box::new(move || -> bool {
@@ -923,12 +923,9 @@ impl Controller {
                 let mut focal_length = None;
 
                 if preview_pipeline.load(SeqCst) == 0 {
-                    let mut buffers = BufferDescription {
-                        input_size:  (width as usize, height as usize, width as usize * 4),
-                        output_size: (width as usize, height as usize, width as usize * 4),
-                        buffers: BufferSource::None,
-                        input_rect: None,
-                        output_rect: None,
+                    let mut buffers = Buffers{
+                        input:  BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
+                        output: BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                     };
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
                         update_info2((ret.fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
@@ -940,39 +937,68 @@ impl Controller {
 
                 if preview_pipeline.load(SeqCst) > 1 { return false; }
 
+                let size = (width as usize, height as usize, width as usize * 4);
+
                 let ret = match backend_id {
                     1 => { // OpenGL, ptr1: texture, ptr2: opengl context
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                            input_size:  (width as usize, height as usize, width as usize * 4),
-                            output_size: (width as usize, height as usize, width as usize * 4),
-                            buffers: BufferSource::OpenGL {
-                                input:   ptr1 as u32,
-                                output:  ptr1 as u32,
-                                context: ptr2 as *mut std::ffi::c_void
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                            input: BufferDescription {
+                                size,
+                                data: BufferSource::OpenGL {
+                                    texture: ptr1 as u32,
+                                    context: ptr2 as *mut std::ffi::c_void
+                                }, ..Default::default()
                             },
-                            input_rect: None,
-                            output_rect: None,
+                            output: BufferDescription {
+                                size,
+                                data: BufferSource::OpenGL {
+                                    texture: ptr1 as u32,
+                                    context: ptr2 as *mut std::ffi::c_void
+                                }, ..Default::default()
+                            },
                         });
                         match ret {
                             Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("OpenGL->{}", bk.backend); true },
                             None => false
                         }
                     },
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
                     2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
-                        false
-                    },
-                    3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                            input_size:  (width as usize, height as usize, width as usize * 4),
-                            output_size: (width as usize, height as usize, width as usize * 4),
-                            buffers: BufferSource::DirectX {
-                                input:  ptr1 as *mut std::ffi::c_void,
-                                output: ptr1 as *mut std::ffi::c_void,
-                                device: ptr2 as *mut std::ffi::c_void,
-                                device_context: ptr3 as *mut std::ffi::c_void
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                            input: BufferDescription {
+                                size,
+                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
                             },
-                            input_rect: None,
-                            output_rect: None,
+                            output: BufferDescription {
+                                size,
+                                texture_copy: true,
+                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                            },
+                        });
+                        match ret {
+                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Metal->{}", bk.backend); true },
+                            None => false
+                        }
+                    },
+                    #[cfg(target_os = "windows")]
+                    3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                            input: BufferDescription {
+                                size,
+                                data: BufferSource::DirectX {
+                                    texture: ptr1 as *mut std::ffi::c_void,
+                                    device:  ptr2 as *mut std::ffi::c_void,
+                                    device_context: ptr3 as *mut std::ffi::c_void
+                                }, ..Default::default()
+                            },
+                            output: BufferDescription {
+                                size,
+                                data: BufferSource::DirectX {
+                                    texture: ptr1 as *mut std::ffi::c_void,
+                                    device:  ptr2 as *mut std::ffi::c_void,
+                                    device_context: ptr3 as *mut std::ffi::c_void
+                                }, ..Default::default()
+                            },
                         });
                         match ret {
                             Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX->{}", bk.backend); true },
@@ -980,18 +1006,25 @@ impl Controller {
                         }
                     },
                     4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                            input_size:  (width as usize, height as usize, width as usize * 4),
-                            output_size: (width as usize, height as usize, width as usize * 4),
-                            buffers: BufferSource::Vulkan {
-                                input:  ptr1,
-                                output: ptr1,
-                                device: ptr2,
-                                physical_device: ptr4,
-                                instance: ptr5
+                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                            input: BufferDescription {
+                                size,
+                                data: BufferSource::Vulkan {
+                                    texture: ptr1,
+                                    device: ptr2,
+                                    physical_device: ptr4,
+                                    instance: ptr5
+                                }, ..Default::default()
                             },
-                            input_rect: None,
-                            output_rect: None,
+                            output: BufferDescription {
+                                size,
+                                data: BufferSource::Vulkan {
+                                    texture: ptr1,
+                                    device: ptr2,
+                                    physical_device: ptr4,
+                                    instance: ptr5
+                                }, ..Default::default()
+                            },
                         });
                         match ret {
                             Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Vulkan->{}", bk.backend); true },
@@ -1023,14 +1056,17 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut BufferDescription {
-                    input_size: (width as usize, height as usize, stride as usize),
-                    output_size: (ow, oh, os),
-                    buffers: BufferSource::Cpu {
-                        input: pixels,
-                        output: &mut out_pixels
+                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                    input: BufferDescription {
+                        size: (width as usize, height as usize, stride as usize),
+                        data: BufferSource::Cpu { buffer: pixels },
+                        ..Default::default()
                     },
-                    input_rect: None, output_rect: None
+                    output: BufferDescription {
+                        size: (ow, oh, os),
+                        data: BufferSource::Cpu { buffer: &mut out_pixels },
+                        ..Default::default()
+                    },
                 });
                 match ret {
                     Some(bk) => {

@@ -100,7 +100,7 @@ pub struct Stabilization<T: PixelType> {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
-    backend_initialized: Option<(usize, usize, usize,   usize, usize, usize,   u32, u32)>, // (in_w, in_h, in_s,  out_w, out_h, out_s, buffer_checksum, lens models)
+    backend_initialized: Option<(u32, u32)>, // (buffer_checksum, lens models)
 
     compute_params: ComputeParams,
 
@@ -124,13 +124,13 @@ impl<T: PixelType> Stabilization<T> {
         self.compute_params = params;
     }
 
-    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64, buffers: &mut BufferDescription) {
+    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
-            if itm.kernel_params.stride        != buffers.input_size.2 as i32 ||
-               itm.kernel_params.output_stride != buffers.output_size.2 as i32 {
-                log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input_size.2, itm.kernel_params.output_stride, buffers.output_size.2);
+            if itm.kernel_params.stride        != buffers.input.size.2 as i32 ||
+               itm.kernel_params.output_stride != buffers.output.size.2 as i32 {
+                log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input.size.2, itm.kernel_params.output_stride, buffers.output.size.2);
                 insert = true;
             }
         }
@@ -152,10 +152,10 @@ impl<T: PixelType> Stabilization<T> {
             transform.kernel_params.canvas_scale = self.drawing.scale as f32;
             transform.kernel_params.flags = self.kernel_flags.bits();
 
-            transform.kernel_params.stride        = buffers.input_size.2 as i32;
-            transform.kernel_params.output_stride = buffers.output_size.2 as i32;
+            transform.kernel_params.stride        = buffers.input.size.2 as i32;
+            transform.kernel_params.output_stride = buffers.output.size.2 as i32;
 
-            if let Some(r) = buffers.input_rect {
+            if let Some(r) = buffers.input.rect {
                 transform.kernel_params.source_rect[0] = r.0 as i32;
                 transform.kernel_params.source_rect[1] = r.1 as i32;
                 transform.kernel_params.source_rect[2] = r.2 as i32;
@@ -164,10 +164,10 @@ impl<T: PixelType> Stabilization<T> {
                 // Stretch to the buffer by default
                 transform.kernel_params.source_rect[0] = 0;
                 transform.kernel_params.source_rect[1] = 0;
-                transform.kernel_params.source_rect[2] = buffers.input_size.0  as i32;
-                transform.kernel_params.source_rect[3] = buffers.input_size.1  as i32;
+                transform.kernel_params.source_rect[2] = buffers.input.size.0  as i32;
+                transform.kernel_params.source_rect[3] = buffers.input.size.1  as i32;
             }
-            if let Some(r) = buffers.output_rect {
+            if let Some(r) = buffers.output.rect {
                 transform.kernel_params.output_rect[0] = r.0 as i32;
                 transform.kernel_params.output_rect[1] = r.1 as i32;
                 transform.kernel_params.output_rect[2] = r.2 as i32;
@@ -176,8 +176,8 @@ impl<T: PixelType> Stabilization<T> {
                 // Stretch to the buffer by default
                 transform.kernel_params.output_rect[0] = 0;
                 transform.kernel_params.output_rect[1] = 0;
-                transform.kernel_params.output_rect[2] = buffers.output_size.0 as i32;
-                transform.kernel_params.output_rect[3] = buffers.output_size.1 as i32;
+                transform.kernel_params.output_rect[2] = buffers.output.size.0 as i32;
+                transform.kernel_params.output_rect[3] = buffers.output.size.1 as i32;
             }
 
             self.stab_data.insert(timestamp_us, transform);
@@ -228,7 +228,7 @@ impl<T: PixelType> Stabilization<T> {
         self.pending_device_change = Some(i);
     }
 
-    pub fn update_device(&mut self, i: isize, buffers: &BufferDescription) -> bool {
+    pub fn update_device(&mut self, i: isize, buffers: &Buffers) -> bool {
         self.next_backend = None;
         self.backend_initialized = None;
         #[cfg(feature = "use-opencl")]
@@ -236,9 +236,7 @@ impl<T: PixelType> Stabilization<T> {
         self.wgpu = None;
 
         let tuple = (
-            buffers.input_size.0, buffers.input_size.1, buffers.input_size.2,
-            buffers.output_size.0, buffers.output_size.1, buffers.output_size.2,
-            buffers.buffers.get_checksum(),
+            buffers.get_checksum(),
             crc32fast::hash(format!("{}{}", self.compute_params.distortion_model.id(), self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default()).as_bytes())
         );
         if i < 0 { // CPU
@@ -276,11 +274,9 @@ impl<T: PixelType> Stabilization<T> {
         false
     }
 
-    pub fn init_backends(&mut self, timestamp_us: i64, buffers: &BufferDescription) {
+    pub fn init_backends(&mut self, timestamp_us: i64, buffers: &Buffers) {
         let tuple = (
-            buffers.input_size.0, buffers.input_size.1, buffers.input_size.2,
-            buffers.output_size.0, buffers.output_size.1, buffers.output_size.2,
-            buffers.buffers.get_checksum(),
+            buffers.get_checksum(),
             crc32fast::hash(format!("{}{}", self.compute_params.distortion_model.id(), self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default()).as_bytes())
         );
         if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != tuple {
@@ -297,7 +293,7 @@ impl<T: PixelType> Stabilization<T> {
                         opencl::OclWrapper::new(&params, T::ocl_names(), &self.compute_params, buffers, canvas_len)
                     });
                     match cl {
-                        Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; log::info!("Initialized OpenCL for {:?} -> {:?}", buffers.input_size, buffers.output_size); },
+                        Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; log::info!("Initialized OpenCL for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
                         Ok(Err(e)) => { next_backend = ""; log::error!("OpenCL error init_backends: {:?}", e); },
                         Err(e) => {
                             next_backend = "";
@@ -317,7 +313,7 @@ impl<T: PixelType> Stabilization<T> {
                         wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
                     });
                     match wgpu {
-                        Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input_size, buffers.output_size); },
+                        Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize wgpu {}", s);
@@ -336,7 +332,7 @@ impl<T: PixelType> Stabilization<T> {
         }
     }
 
-    pub fn ensure_ready_for_processing(&mut self, timestamp_us: i64, buffers: &mut BufferDescription) {
+    pub fn ensure_ready_for_processing(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         if let Some(dev) = self.pending_device_change.take() {
             log::debug!("Setting device {dev}");
             self.update_device(dev, buffers);
@@ -345,8 +341,8 @@ impl<T: PixelType> Stabilization<T> {
         self.ensure_stab_data_at_timestamp(timestamp_us, buffers);
         self.init_backends(timestamp_us, buffers);
     }
-    pub fn process_pixels(&self, timestamp_us: i64, buffers: &mut BufferDescription) -> Option<ProcessedInfo> {
-        if /*self.size != buffers.input_size || */buffers.input_size.1 < 4 || buffers.output_size.1 < 4 { return None; }
+    pub fn process_pixels(&self, timestamp_us: i64, buffers: &mut Buffers) -> Option<ProcessedInfo> {
+        if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return None; }
 
         let mut _last_frame_data = None;
 
@@ -375,19 +371,23 @@ impl<T: PixelType> Stabilization<T> {
             // OpenCL path
             #[cfg(feature = "use-opencl")]
             if let Some(ref cl) = self.cl {
-                if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
-                    log::error!("OpenCL error undistort: {:?}", err);
-                } else {
-                    ret.backend = "OpenCL";
-                    return Some(ret);
+                if opencl::is_buffer_supported(buffers) {
+                    if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
+                        log::error!("OpenCL error undistort: {:?}", err);
+                    } else {
+                        ret.backend = "OpenCL";
+                        return Some(ret);
+                    }
                 }
             }
 
             // wgpu path
             if let Some(ref wgpu) = self.wgpu {
-                wgpu.undistort_image(buffers, &itm, drawing_buffer);
-                ret.backend = "wgpu";
-                return Some(ret);
+                if wgpu::is_buffer_supported(buffers) {
+                    wgpu.undistort_image(buffers, &itm, drawing_buffer);
+                    ret.backend = "wgpu";
+                    return Some(ret);
+                }
             }
 
             // CPU path

@@ -7,21 +7,24 @@ use wgpu::Adapter;
 use wgpu::BufferUsages;
 use wgpu::util::DeviceExt;
 use parking_lot::{ RwLock, Mutex };
-use crate::gpu:: { BufferDescription, BufferSource };
+use crate::gpu:: { Buffers, BufferSource };
 use crate::stabilization::ComputeParams;
 use crate::stabilization::KernelParams;
+use super::wgpu_interop::*;
 
 pub struct WgpuWrapper  {
     pub device: wgpu::Device,
     queue: wgpu::Queue,
     staging_buffer: wgpu::Buffer,
-    out_pixels: wgpu::Texture,
-    in_pixels: wgpu::Texture,
     buf_matrices: wgpu::Buffer,
     buf_params: wgpu::Buffer,
     buf_drawing: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     render_pipeline: wgpu::RenderPipeline,
+    pixel_format: wgpu::TextureFormat,
+
+    in_texture: TextureHolder,
+    out_texture: TextureHolder,
 
     padded_out_stride: u32,
     in_size: u64,
@@ -61,7 +64,7 @@ impl WgpuWrapper {
         ADAPTERS.read().iter().map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
     }
 
-    pub fn set_device(index: usize, _buffers: &BufferDescription) -> Option<()> {
+    pub fn set_device(index: usize, _buffers: &Buffers) -> Option<()> {
         let mut i = 0;
         for a in ADAPTERS.read().iter() {
             if i == index {
@@ -108,16 +111,16 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &BufferDescription, mut drawing_len: usize) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &Buffers, mut drawing_len: usize) -> Option<Self> {
         let max_matrix_count = 9 * params.height as usize;
 
-        if params.height < 4 || params.output_height < 4 || buffers.input_size.2 < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
+        if params.height < 4 || params.output_height < 4 || buffers.input.size.2 < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
 
-        let output_height = buffers.output_size.1 as i32;
-        let output_stride = buffers.output_size.2 as i32;
+        let output_height = buffers.output.size.1 as i32;
+        let output_stride = buffers.output.size.2 as i32;
 
-        let in_size = (buffers.input_size.2 * buffers.input_size.1) as wgpu::BufferAddress;
-        let out_size = (buffers.output_size.2 * buffers.output_size.1) as wgpu::BufferAddress;
+        let in_size = (buffers.input.size.2 * buffers.input.size.1) as wgpu::BufferAddress;
+        let out_size = (buffers.output.size.2 * buffers.output.size.1) as wgpu::BufferAddress;
         let params_size = (max_matrix_count * std::mem::size_of::<f32>()) as wgpu::BufferAddress;
 
         let drawing_enabled = (params.flags & 8) == 8;
@@ -126,15 +129,43 @@ impl WgpuWrapper {
         if !adapter_initialized { Self::initialize_context(); }
         let lock = ADAPTERS.read();
         if let Some(adapter) = lock.get(ADAPTER.load(SeqCst)) {
-            let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-                label: None,
-                features: wgpu::Features::empty(),
-                limits: wgpu::Limits {
-                    max_storage_buffers_per_shader_stage: 4,
-                    max_storage_textures_per_shader_stage: 4,
-                    ..wgpu::Limits::default()
+            let (device, queue) = match &buffers.input.data {
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                BufferSource::Metal { command_queue, .. } |
+                BufferSource::MetalBuffer { command_queue, .. } if !(*command_queue).is_null() => {
+                    unsafe {
+                        use foreign_types::ForeignType;
+                        use wgpu_hal::api::Metal;
+
+                        let mtl_cq = metal::CommandQueue::from_ptr(*command_queue);
+                        let mtl_dev = mtl_cq.device();
+
+                        adapter.create_device_from_hal(wgpu_hal::OpenDevice::<Metal> {
+                            device: <Metal as wgpu_hal::Api>::Device::device_from_raw(mtl_dev.to_owned(), wgpu::Features::empty()),
+                            queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_cq)
+                        }, &wgpu::DeviceDescriptor {
+                            label: None,
+                            features: wgpu::Features::empty(),
+                            limits: wgpu::Limits {
+                                max_storage_buffers_per_shader_stage: 4,
+                                max_storage_textures_per_shader_stage: 4,
+                                ..wgpu::Limits::default()
+                            },
+                        }, None).unwrap()
+                    }
                 },
-            }, None)).ok()?;
+                _ => {
+                    pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+                        label: None,
+                        features: wgpu::Features::empty(),
+                        limits: wgpu::Limits {
+                            max_storage_buffers_per_shader_stage: 4,
+                            max_storage_textures_per_shader_stage: 4,
+                            ..wgpu::Limits::default()
+                        },
+                    }, None)).ok()?
+                }
+            };
 
             let mut kernel = include_str!("wgpu_undistort.wgsl").to_string();
             //let mut kernel = std::fs::read_to_string("D:/programowanie/projekty/Rust/gyroflow/src/core/gpu/wgpu_undistort.wgsl").unwrap();
@@ -170,24 +201,9 @@ impl WgpuWrapper {
             let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
 
-            let in_pixels = device.create_texture(&wgpu::TextureDescriptor {
-                label: None,
-                size: wgpu::Extent3d { width: buffers.input_size.0 as u32, height: buffers.input_size.1 as u32, depth_or_array_layers: 1 },
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: wgpu::TextureDimension::D2,
-                format: wgpu_format.0,
-                usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING,
-            });
-            let out_pixels = device.create_texture(&wgpu::TextureDescriptor {
-                label: None,
-                size: wgpu::Extent3d { width: buffers.output_size.0 as u32, height: buffers.output_size.1 as u32, depth_or_array_layers: 1 },
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: wgpu::TextureDimension::D2,
-                format: wgpu_format.0,
-                usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
-            });
+            let backend = adapter.get_info().backend;
+            let in_texture = init_texture(&device, backend, &buffers.input, wgpu_format.0, true);
+            let out_texture = init_texture(&device, backend, &buffers.output, wgpu_format.0, false);
 
             let sample_type = match wgpu_format.1 {
                 "f32" => wgpu::TextureSampleType::Float { filterable: false },
@@ -237,7 +253,7 @@ impl WgpuWrapper {
                 multisample: wgpu::MultisampleState::default(),
             });
 
-            let view = in_pixels.create_view(&wgpu::TextureViewDescriptor::default());
+            let view = in_texture.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
             let bind_group_layout = render_pipeline.get_bind_group_layout(0);
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -256,8 +272,8 @@ impl WgpuWrapper {
                 device,
                 queue,
                 staging_buffer,
-                out_pixels,
-                in_pixels,
+                out_texture,
+                in_texture,
                 buf_matrices,
                 buf_params,
                 buf_drawing,
@@ -267,6 +283,7 @@ impl WgpuWrapper {
                 out_size,
                 params_size,
                 drawing_size: drawing_len as u64,
+                pixel_format: wgpu_format.0,
                 padded_out_stride: padded_out_stride as u32
             })
         } else {
@@ -274,42 +291,17 @@ impl WgpuWrapper {
         }
     }
 
-    pub fn undistort_image(&self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> bool {
+    pub fn undistort_image(&self, buffers: &mut Buffers, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> bool {
         let matrices = bytemuck::cast_slice(&itm.matrices);
 
-        match &buffers.buffers {
-            BufferSource::None => { },
-            BufferSource::Cpu { input, output } => {
-                if self.in_size  != input.len()  as u64 { log::error!("Buffer size mismatch! {} vs {}", self.in_size,  input.len()); return false; }
-                if self.out_size != output.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.out_size, output.len()); return false; }
+        let in_size = (buffers.input.size.2 * buffers.input.size.1) as u64;
+        let out_size = (buffers.output.size.2 * buffers.output.size.1) as u64;
+        if self.in_size  != in_size  { log::error!("Buffer size mismatch! {} vs {}", self.in_size,  in_size);  return false; }
+        if self.out_size != out_size { log::error!("Buffer size mismatch! {} vs {}", self.out_size, out_size); return false; }
 
-                self.queue.write_texture(
-                    self.in_pixels.as_image_copy(),
-                    bytemuck::cast_slice(input),
-                    wgpu::ImageDataLayout {
-                        offset: 0,
-                        bytes_per_row: std::num::NonZeroU32::new(buffers.input_size.2 as u32),
-                        rows_per_image: None,
-                    },
-                    wgpu::Extent3d {
-                        width: buffers.input_size.0 as u32,
-                        height: buffers.input_size.1 as u32,
-                        depth_or_array_layers: 1,
-                    },
-                );
-            },
-            #[cfg(feature = "use-opencl")]
-            BufferSource::OpenCL { .. } => {
-                return false;
-            },
-            BufferSource::DirectX { .. } => {
-                return false;
-            },
-            BufferSource::OpenGL { .. } => {
-                return false;
-            },
-            BufferSource::Vulkan { .. } => { }
-        }
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+        let _temp_texture = handle_input_texture(&self.device, &buffers.input, &self.queue, &mut encoder, &self.in_texture, self.pixel_format);
 
         if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return false; }
 
@@ -320,8 +312,7 @@ impl WgpuWrapper {
             self.queue.write_buffer(&self.buf_drawing, 0, drawing_buffer);
         }
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        let view = self.out_pixels.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = self.out_texture.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
         {
             let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: None,
@@ -340,78 +331,83 @@ impl WgpuWrapper {
             rpass.draw(0..6, 0..1);
         }
 
-        if let BufferSource::Cpu { .. } = buffers.buffers {
-            encoder.copy_texture_to_buffer(wgpu::ImageCopyTexture {
-                texture: &self.out_pixels,
-                mip_level: 0,
-                origin: wgpu::Origin3d::ZERO,
-                aspect: wgpu::TextureAspect::All,
-            }, wgpu::ImageCopyBuffer {
-                buffer: &self.staging_buffer,
-                layout: wgpu::ImageDataLayout {
-                    offset: 0,
-                    bytes_per_row: std::num::NonZeroU32::new(self.padded_out_stride),
-                    rows_per_image: None,
-                },
-            }, wgpu::Extent3d {
-                width: buffers.output_size.0 as u32,
-                height: buffers.output_size.1 as u32,
-                depth_or_array_layers: 1,
-            });
-        }
+        let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, &self.staging_buffer, self.padded_out_stride);
 
         self.queue.submit(Some(encoder.finish()));
 
-        if let BufferSource::Cpu { output, .. } = &mut buffers.buffers {
-            let buffer_slice = self.staging_buffer.slice(..);
-            let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
-            buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
+        match &mut buffers.output.data {
+            BufferSource::Cpu { buffer, .. } => {
+                let buffer_slice = self.staging_buffer.slice(..);
+                let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
+                buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
-            self.device.poll(wgpu::Maintain::Wait);
+                self.device.poll(wgpu::Maintain::Wait);
 
-            if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
-                let data = buffer_slice.get_mapped_range();
-                if self.padded_out_stride == buffers.output_size.2 as u32 {
-                    // Fast path
-                    output.copy_from_slice(data.as_ref());
+                if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
+                    let data = buffer_slice.get_mapped_range();
+                    if self.padded_out_stride == buffers.output.size.2 as u32 {
+                        // Fast path
+                        buffer.copy_from_slice(data.as_ref());
+                    } else {
+                        // data.as_ref()
+                        //     .chunks(self.padded_out_stride as usize)
+                        //     .zip(output.chunks_mut(buffers.output_size.2))
+                        //     .for_each(|(src, dest)| {
+                        //         dest.copy_from_slice(&src[0..buffers.output_size.2]);
+                        //     });
+                        use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
+                        use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
+                        data.as_ref()
+                            .par_chunks(self.padded_out_stride as usize)
+                            .zip(buffer.par_chunks_mut(buffers.output.size.2))
+                            .for_each(|(src, dest)| {
+                                dest.copy_from_slice(&src[0..buffers.output.size.2]);
+                            });
+                    }
+
+                    // We have to make sure all mapped views are dropped before we unmap the buffer.
+                    drop(data);
+                    self.staging_buffer.unmap();
                 } else {
-                    // data.as_ref()
-                    //     .chunks(self.padded_out_stride as usize)
-                    //     .zip(output.chunks_mut(buffers.output_size.2))
-                    //     .for_each(|(src, dest)| {
-                    //         dest.copy_from_slice(&src[0..buffers.output_size.2]);
-                    //     });
-                    use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
-                    use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
-                    data.as_ref()
-                        .par_chunks(self.padded_out_stride as usize)
-                        .zip(output.par_chunks_mut(buffers.output_size.2))
-                        .for_each(|(src, dest)| {
-                            dest.copy_from_slice(&src[0..buffers.output_size.2]);
-                        });
+                    // TODO change to Result
+                    log::error!("failed to run compute on wgpu!");
+                    return false;
                 }
-
-                // We have to make sure all mapped views are dropped before we unmap the buffer.
-                drop(data);
-                self.staging_buffer.unmap();
-            } else {
-                // TODO change to Result
-                log::error!("failed to run compute on wgpu!");
-                return false;
             }
+            #[cfg(target_os = "windows")]
+            BufferSource::DirectX { texture, device_context, .. } => {
+                self.device.poll(wgpu::Maintain::Wait); // TODO: is this needed?
+
+                use windows::{ Win32::Graphics::Direct3D11::*, core::Vtable };
+                unsafe {
+                    let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
+                    let out_texture_d3d = ID3D11Texture2D::from_raw_borrowed(texture);
+                    if let Some(o) = &self.out_texture.d3d11_texture {
+                        device_context.CopyResource(out_texture_d3d, o);
+                    }
+                }
+            },
+            BufferSource::Vulkan { .. } => {
+                self.device.poll(wgpu::Maintain::Wait);
+            },
+            _ => { }
         }
+
         true
     }
 }
 
-pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
-    match buffers.buffers {
+pub fn is_buffer_supported(buffers: &Buffers) -> bool {
+    match buffers.input.data {
         BufferSource::None           => false,
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => false,
+        #[cfg(target_os = "windows")]
         BufferSource::DirectX { .. } => false,
         #[cfg(feature = "use-opencl")]
         BufferSource::OpenCL  { .. } => false,
         BufferSource::Vulkan  { .. } => false,
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => true,
     }
 }

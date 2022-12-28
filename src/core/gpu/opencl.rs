@@ -39,13 +39,14 @@ lazy_static::lazy_static! {
 const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
 
 impl OclWrapper {
-    fn get_properties(buffers: Option<&BufferDescription>) -> ocl::builders::ContextProperties {
+    fn get_properties(buffers: Option<&Buffers>) -> ocl::builders::ContextProperties {
         let mut props = ocl::builders::ContextProperties::new();
         if let Some(buffers) = buffers {
-            match &buffers.buffers {
+            match &buffers.input.data {
                 BufferSource::OpenGL { context: _context, .. } => {
                     props = ocl_interop::get_properties_list();
                 }
+                #[cfg(target_os = "windows")]
                 BufferSource::DirectX { device, .. } => {
                     props.set_property_value(ContextPropertyValue::D3d11DeviceKhr(*device));
                 },
@@ -88,7 +89,7 @@ impl OclWrapper {
         }
     }
 
-    pub fn set_device(index: usize, buffers: &BufferDescription) -> ocl::Result<()> {
+    pub fn set_device(index: usize, buffers: &Buffers) -> ocl::Result<()> {
         let mut i = 0;
         for p in Platform::list() {
             if let Ok(devs) = Device::list(p, Some(ocl::flags::DeviceType::new().gpu().accelerator())) {
@@ -103,7 +104,7 @@ impl OclWrapper {
                             .devices(d)
                             .build()?;
 
-                        *CONTEXT.write() = Some(CtxWrapper { device: d, context, platform: p, surface_checksum: buffers.buffers.get_checksum() });
+                        *CONTEXT.write() = Some(CtxWrapper { device: d, context, platform: p, surface_checksum: buffers.get_checksum() });
                         return Ok(());
                     }
                     i += 1;
@@ -113,7 +114,7 @@ impl OclWrapper {
         Err(ocl::BufferCmdError::MapUnavailable.into())
     }
 
-    pub fn initialize_context(buffers: Option<&BufferDescription>) -> ocl::Result<(String, String)> {
+    pub fn initialize_context(buffers: Option<&Buffers>) -> ocl::Result<(String, String)> {
         // List all devices
         Platform::list().iter().for_each(|p| {
             if let Ok(devs) = Device::list(p, Some(ocl::flags::DeviceType::new().gpu().accelerator())) {
@@ -168,12 +169,12 @@ impl OclWrapper {
         let name = format!("{} {}", device.vendor()?, device.name()?);
         let list_name = format!("[OpenCL] {} {}", platform.name()?, device.name()?);
 
-        *CONTEXT.write() = Some(CtxWrapper { device, context, platform, surface_checksum: buffers.map(|x| x.buffers.get_checksum()).unwrap_or_default() });
+        *CONTEXT.write() = Some(CtxWrapper { device, context, platform, surface_checksum: buffers.map(|x| x.get_checksum()).unwrap_or_default() });
 
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), compute_params: &ComputeParams, buffers: &BufferDescription, drawing_len: usize) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), compute_params: &ComputeParams, buffers: &Buffers, drawing_len: usize) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
 
         let mut kernel = include_str!("opencl_undistort.cl").to_string();
@@ -196,13 +197,10 @@ impl OclWrapper {
             kernel = kernel.replace("params->flags & 8", "false"); // It makes it much faster for some reason
         }
 
-        let mut image_src = None;
-        let mut image_dst = None;
-
         {
             let ctx = CONTEXT.read();
             let context_initialized = ctx.is_some();
-            if !context_initialized || ctx.as_ref().unwrap().surface_checksum != buffers.buffers.get_checksum() {
+            if !context_initialized || ctx.as_ref().unwrap().surface_checksum != buffers.get_checksum() {
                 drop(ctx);
                 Self::initialize_context(Some(buffers))?;
             }
@@ -211,16 +209,15 @@ impl OclWrapper {
         if let Some(ref mut ctx) = *lock {
             let mut ocl_queue = Queue::new(&ctx.context, ctx.device, None)?;
 
-            let in_desc  = ImageDescriptor::new(MemObjectType::Image2d, buffers.input_size.0,  buffers.input_size.1,  1, 1, buffers.input_size.2,  0, None);
-            let out_desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.output_size.0, buffers.output_size.1, 1, 1, buffers.output_size.2, 0, None);
+            let in_desc  = ImageDescriptor::new(MemObjectType::Image2d, buffers.input.size.0,  buffers.input.size.1,  1, 1, buffers.input.size.2,  0, None);
+            let out_desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.output.size.0, buffers.output.size.1, 1, 1, buffers.output.size.2, 0, None);
 
-            let (source_buffer, dest_buffer) =
-                match &buffers.buffers {
-                    BufferSource::Cpu { input, output } => {
-                        (
-                            Buffer::builder().queue(ocl_queue.clone()).len(input.len()).flags(MemFlags::new().read_only().host_write_only()).build()?,
-                            Buffer::builder().queue(ocl_queue.clone()).len(output.len()).flags(MemFlags::new().write_only().host_read_only().alloc_host_ptr()).build()?
-                        )
+            let mut resolve_texture = |buf: &BufferDescription, is_in: bool, ocl_queue: &mut Queue, desc: ImageDescriptor, other_img: Option<&ocl::Image<u8>>| -> ocl::Result<(Buffer<u8>, Option<ocl::Image<u8>>)> {
+                match &buf.data {
+                    BufferSource::Cpu { buffer } => {
+                        let flags = if is_in { MemFlags::new().read_only().host_write_only() }
+                                           else     { MemFlags::new().write_only().host_read_only().alloc_host_ptr() };
+                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buffer.len()).flags(flags).build()?, None))
                     },
                     BufferSource::OpenCL { queue, .. } => {
                         if !queue.is_null() {
@@ -230,41 +227,44 @@ impl OclWrapper {
                             *ctx.device.deref_mut() = device_core;
                             *ctx.context.deref_mut() = context_core;
 
-                            ocl_queue = Queue::new(&ctx.context, ctx.device, None)?;
+                            *ocl_queue = Queue::new(&ctx.context, ctx.device, None)?;
                             *ocl_queue.deref_mut() = queue_core;
                         }
-
-                        (
-                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.input_size.1 * buffers.input_size.2).flags(MemFlags::new().read_only().host_no_access()).build()?,
-                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.output_size.1 * buffers.output_size.2).flags(MemFlags::new().read_write().host_no_access()).build()?
-                        )
+                        let flags = if is_in { MemFlags::new().read_only().host_no_access() }
+                                           else     { MemFlags::new().read_write().host_no_access() };
+                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, None))
                     },
-                    BufferSource::OpenGL { input, output, .. } => {
-                        image_src = Some(Image::from_gl_texture(ocl_queue.clone(), MemFlags::new().read_only(), in_desc, GlTextureTarget::GlTexture2d, 0, *input)?);
-                        image_dst = Some(Image::from_gl_texture(ocl_queue.clone(), MemFlags::new().write_only(), out_desc, GlTextureTarget::GlTexture2d, 0, *output)?);
+                    BufferSource::OpenGL { texture, .. } => {
+                        let flags = if is_in { MemFlags::new().read_only() }
+                                           else     { MemFlags::new().write_only() };
 
-                        (
-                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.input_size.1 * buffers.input_size.2).flags(MemFlags::new().read_only().host_no_access()).build()?,
-                            Buffer::builder().queue(ocl_queue.clone()).len(buffers.output_size.1 * buffers.output_size.2).flags(MemFlags::new().read_write().host_no_access()).build()?
-                        )
+                        let img = Image::from_gl_texture(ocl_queue.clone(), flags, desc, GlTextureTarget::GlTexture2d, 0, *texture)?;
+
+                        let flags = if is_in { MemFlags::new().read_only().host_no_access() }
+                                           else     { MemFlags::new().read_write().host_no_access() };
+
+                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, Some(img)))
                     },
-                    BufferSource::DirectX { input, output, .. } => {
-                        if input == output {
-                            let img = Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().read_write(), in_desc, *input, 0)?;
-                            image_src = Some(img.clone());
-                            image_dst = Some(img.clone());
+                    #[cfg(target_os = "windows")]
+                    BufferSource::DirectX { texture, .. } => {
+                        if is_in {
+                            let img = Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().read_only(), desc, *texture, 0)?;
+                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?, Some(img)))
                         } else {
-                            image_src = Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().read_only(), in_desc, *input, 0)?);
-                            image_dst = Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), out_desc, *output, 0)?);
+                            let img = match &buffers.input.data {
+                                BufferSource::DirectX { texture: in_texture, .. } if *texture == *in_texture => {
+                                    Some(other_img.unwrap().clone())
+                                },
+                                _ => Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), desc, *texture, 0)?)
+                            };
+                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?, img))
                         }
-
-                        (
-                            Buffer::builder().queue(ocl_queue.clone()).len(image_src.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?,
-                            Buffer::builder().queue(ocl_queue.clone()).len(image_dst.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?
-                        )
                     },
-                    _ => panic!("Unsupported buffer {:?}", buffers.buffers)
-                };
+                    _ => panic!("Unsupported buffer {:?}", buf.data)
+                }
+            };
+            let (source_buffer, image_src) = resolve_texture(&buffers.input, true, &mut ocl_queue, in_desc, None)?;
+            let (dest_buffer, image_dst) = resolve_texture(&buffers.output, false, &mut ocl_queue, out_desc, image_src.as_ref())?;
 
             let program = Program::builder()
                 .src(&kernel)
@@ -281,7 +281,7 @@ impl OclWrapper {
             let mut builder = Kernel::builder();
             unsafe {
                 builder.program(&program).name("undistort_image").queue(ocl_queue.clone())
-                    .global_work_size((buffers.output_size.0, buffers.output_size.1))
+                    .global_work_size((buffers.output.size.0, buffers.output.size.1))
                     .disable_arg_type_check()
                     .arg(&source_buffer)
                     .arg(&dest_buffer)
@@ -308,7 +308,7 @@ impl OclWrapper {
         }
     }
 
-    pub fn undistort_image(&self, buffers: &mut BufferDescription, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> ocl::Result<()> {
+    pub fn undistort_image(&self, buffers: &mut Buffers, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
 
         if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch matrices! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
@@ -326,19 +326,16 @@ impl OclWrapper {
             if self.buf_drawing.len() != drawing_buffer.len() { log::error!("Buffer size mismatch drawing_buffer! {} vs {}", self.buf_drawing.len(), drawing_buffer.len()); return Ok(()); }
             self.buf_drawing.write(drawing_buffer).enq()?;
         }
-        match buffers.buffers {
+        match buffers.input.data {
             BufferSource::None => { },
-            BufferSource::Cpu { ref input, ref output } => {
-                if self.src.len() != input.len()  { log::error!("Buffer size mismatch input! {} vs {}", self.src.len(), input.len());  return Ok(()); }
-                if self.dst.len() != output.len() { log::error!("Buffer size mismatch output! {} vs {}", self.dst.len(), output.len()); return Ok(()); }
-
-                self.src.write(input as &[u8]).enq()?;
+            BufferSource::Cpu { ref buffer } => {
+                if self.src.len() != buffer.len() { log::error!("Buffer size mismatch input! {} vs {}", self.src.len(), buffer.len());  return Ok(()); }
+                self.src.write(buffer as &[u8]).enq()?;
             },
-            BufferSource::OpenCL { input, output, .. } => {
+            BufferSource::OpenCL { texture, .. } => {
                 unsafe {
                     let siz = std::mem::size_of::<ocl::ffi::cl_mem>() as usize;
-                    self.kernel.set_arg_unchecked(0, core::ArgVal::from_raw(siz, &input as *const _ as *const std::ffi::c_void, true))?;
-                    self.kernel.set_arg_unchecked(1, core::ArgVal::from_raw(siz, &output as *const _ as *const std::ffi::c_void, true))?;
+                    self.kernel.set_arg_unchecked(0, core::ArgVal::from_raw(siz, &texture as *const _ as *const std::ffi::c_void, true))?;
                 }
             },
             BufferSource::OpenGL { .. } => {
@@ -348,6 +345,7 @@ impl OclWrapper {
                     tex.cmd().gl_release().enq()?;
                 }
             },
+            #[cfg(target_os = "windows")]
             BufferSource::DirectX { .. } => {
                 if let Some(ref tex) = self.image_src {
                     tex.cmd().d3d11_acquire().enq()?;
@@ -355,7 +353,16 @@ impl OclWrapper {
                     tex.cmd().d3d11_release().enq()?;
                 }
             },
-            _ => panic!("Unsupported buffer {:?}", buffers.buffers)
+            _ => panic!("Unsupported input buffer {:?}", buffers.input.data)
+        }
+        match buffers.output.data {
+            BufferSource::OpenCL { texture, .. } => {
+                unsafe {
+                    let siz = std::mem::size_of::<ocl::ffi::cl_mem>() as usize;
+                    self.kernel.set_arg_unchecked(1, core::ArgVal::from_raw(siz, &texture as *const _ as *const std::ffi::c_void, true))?;
+                }
+            },
+            _ => { }
         }
 
         self.buf_params.write(bytemuck::bytes_of(&itm.kernel_params)).enq()?;
@@ -363,10 +370,10 @@ impl OclWrapper {
 
         unsafe { self.kernel.enq()?; }
 
-        match &mut buffers.buffers {
+        match &mut buffers.output.data {
             BufferSource::None => { },
-            BufferSource::Cpu { output, .. } => {
-                self.dst.read(&mut **output).enq()?;
+            BufferSource::Cpu { buffer, .. } => {
+                self.dst.read(&mut **buffer).enq()?;
             },
             BufferSource::OpenGL { .. } => {
                 if let Some(ref tex) = self.image_dst {
@@ -377,6 +384,7 @@ impl OclWrapper {
                     tex.cmd().gl_release().enq()?;
                 }
             },
+            #[cfg(target_os = "windows")]
             BufferSource::DirectX { .. } => {
                 if let Some(ref tex) = self.image_dst {
                     tex.cmd().d3d11_acquire().enq()?;
@@ -395,13 +403,18 @@ impl OclWrapper {
     }
 }
 
-pub fn is_buffer_supported(buffers: &BufferDescription) -> bool {
-    match buffers.buffers {
+pub fn is_buffer_supported(buffers: &Buffers) -> bool {
+    match buffers.input.data {
         BufferSource::None           => false,
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => true,
-        BufferSource::DirectX { .. } => cfg!(target_os = "windows"),
+        #[cfg(target_os = "windows")]
+        BufferSource::DirectX { .. } => true,
         BufferSource::OpenCL  { .. } => true,
         BufferSource::Vulkan  { .. } => false,
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        BufferSource::Metal   { .. } => false,
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        BufferSource::MetalBuffer { .. } => false,
     }
 }
