@@ -57,11 +57,14 @@ enterpolation = "0.2.0"
 
 opencv = { version = "0.74.2", optional = true }
 
-wgpu = "0.14"
-wgpu-hal = "0.14"
-wgpu-types = "0.14"
+#wgpu = "0.14"
+#wgpu-hal = "0.14"
+#wgpu-types = "0.14"
+wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
+wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
+wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
 bytemuck = "1.12.3"
-ash = "0.37"
+ash = "0.37.1"
 
 pollster = "0.2.5"
 futures-intrusive = "0.5.0"

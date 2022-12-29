@@ -130,7 +130,7 @@ impl WgpuWrapper {
         let lock = ADAPTERS.read();
         if let Some(adapter) = lock.get(ADAPTER.load(SeqCst)) {
             let (device, queue) = match &buffers.input.data {
-                /*#[cfg(any(target_os = "macos", target_os = "ios"))]
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
                 BufferSource::Metal { command_queue, .. } |
                 BufferSource::MetalBuffer { command_queue, .. } if !(*command_queue).is_null() => {
                     unsafe {
@@ -153,7 +153,7 @@ impl WgpuWrapper {
                             },
                         }, None).unwrap()
                     }
-                },*/
+                },
                 _ => {
                     pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                         label: None,

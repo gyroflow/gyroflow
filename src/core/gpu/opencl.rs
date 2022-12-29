@@ -211,7 +211,7 @@ impl OclWrapper {
             let in_desc  = ImageDescriptor::new(MemObjectType::Image2d, buffers.input.size.0,  buffers.input.size.1,  1, 1, buffers.input.size.2,  0, None);
             let out_desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.output.size.0, buffers.output.size.1, 1, 1, buffers.output.size.2, 0, None);
 
-            let mut resolve_texture = |buf: &BufferDescription, is_in: bool, ocl_queue: &mut Queue, desc: ImageDescriptor, other_img: Option<&ocl::Image<u8>>| -> ocl::Result<(Buffer<u8>, Option<ocl::Image<u8>>)> {
+            let mut resolve_texture = |buf: &BufferDescription, is_in: bool, ocl_queue: &mut Queue, desc: ImageDescriptor, _other_img: Option<&ocl::Image<u8>>| -> ocl::Result<(Buffer<u8>, Option<ocl::Image<u8>>)> {
                 match &buf.data {
                     BufferSource::Cpu { buffer } => {
                         let flags = if is_in { MemFlags::new().read_only().host_write_only() }
@@ -252,7 +252,7 @@ impl OclWrapper {
                         } else {
                             let img = match &buffers.input.data {
                                 BufferSource::DirectX { texture: in_texture, .. } if *texture == *in_texture => {
-                                    Some(other_img.unwrap().clone())
+                                    Some(_other_img.unwrap().clone())
                                 },
                                 _ => Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), desc, *texture, 0)?)
                             };
