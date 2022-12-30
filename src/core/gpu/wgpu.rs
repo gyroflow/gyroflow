@@ -390,6 +390,10 @@ impl WgpuWrapper {
             BufferSource::Vulkan { .. } => {
                 self.device.poll(wgpu::Maintain::Wait);
             },
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => {
+                self.device.poll(wgpu::Maintain::Wait);
+            },
             _ => { }
         }
 
