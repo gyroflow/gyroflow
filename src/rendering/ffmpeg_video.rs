@@ -93,6 +93,8 @@ impl<'a> VideoTranscoder<'a> {
         let mut ost = octx.stream_mut(output_index).unwrap();
         let encoder_codec = params.codec.unwrap();
 
+        let mut options = params.options.to_owned();
+
         let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(encoder_codec.as_ptr()) };
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };
         let mut encoder = context.encoder().video()?;
@@ -103,6 +105,11 @@ impl<'a> VideoTranscoder<'a> {
         // Workaround for a bug in prores videotoolbox encoder
         if cfg!(any(target_os = "macos", target_os = "ios")) && pixel_format == format::Pixel::NV12 && (codec_name == "prores_videotoolbox" || codec_name == "dnxhd") {
             color_range = util::color::Range::MPEG;
+        }
+        if cfg!(any(target_os = "macos", target_os = "ios")) && codec_name == "hevc_videotoolbox" && pixel_format == format::Pixel::P010LE {
+            if options.get("profile").is_none() {
+                options.set("profile", "main10");
+            }
         }
 
         log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
@@ -134,7 +141,7 @@ impl<'a> VideoTranscoder<'a> {
         if global_header {
             encoder.set_flags(codec::Flags::GLOBAL_HEADER);
         }
-        if let Some(qscale) = params.options.get("qscale").and_then(|x| x.parse::<i32>().ok()) {
+        if let Some(qscale) = options.get("qscale").and_then(|x| x.parse::<i32>().ok()) {
             if qscale >= 0 {
                 unsafe {
                     (*encoder.as_mut_ptr()).flags |= ffi::AV_CODEC_FLAG_QSCALE as i32;
@@ -152,7 +159,7 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
 
-        let encoder = encoder.open_with(params.options.to_owned())?;
+        let encoder = encoder.open_with(options)?;
         ost.set_parameters(&encoder);
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
 
