@@ -493,9 +493,9 @@ Item {
                         }
                     }
 
-                    if (window.stab && window.stab.fovSlider.field.value > 1) {
-                        safeAreaRect.width = safeAreaRect.parent.width / window.stab.fovSlider.field.value;
-                        safeAreaRect.height = safeAreaRect.parent.height / window.stab.fovSlider.field.value;
+                    if (window.stab && safeAreaRect.fov > 1) {
+                        safeAreaRect.width = safeAreaRect.parent.width / safeAreaRect.fov;
+                        safeAreaRect.height = safeAreaRect.parent.height / safeAreaRect.fov;
                     }
                 }
 
@@ -567,11 +567,12 @@ Item {
                 Item {
                     anchors.fill: parent;
                     layer.enabled: true;
-                    opacity: root.safeArea && window.stab.fovSlider.field.value > 1 && stabEnabledBtn.checked? 1 : 0;
+                    opacity: root.safeArea && safeAreaRect.fov > 1 && stabEnabledBtn.checked? 1 : 0;
                     Ease on opacity { }
                     visible: opacity > 0;
                     Item {
                         id: safeAreaRect;
+                        property real fov: window.stab.fovSlider.field.value + (fovOverviewBtn.checked? 1 : 0)
                         width: parent.width;
                         height: parent.height;
                         anchors.centerIn: parent;

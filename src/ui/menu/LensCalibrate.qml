@@ -40,12 +40,9 @@ MenuItem {
                 if ((h % 2) != 0) h--;
             }
 
-            calib.calibrationInfo.output_dimension = { "w": w, "h": h };
             calib.calibrationInfo.fps = fps;
-            list.updateEntry("Default output size", w + "x" + h);
-            calibrator_window.videoArea.outWidth = w;
-            calibrator_window.videoArea.outHeight = h;
-            controller.set_output_size(w, h);
+            list.updateEntryWithTrigger("Default output size", w + "x" + h);
+            fovSlider.value = 2;
         }
     }
     function resetMetadata() {
@@ -311,6 +308,7 @@ MenuItem {
             position: Label.LeftPosition;
             text: qsTr("FOV");
             SliderWithField {
+                id: fovSlider;
                 from: 0.1;
                 to: 3;
                 value: 1.0;
@@ -421,6 +419,7 @@ MenuItem {
                 onValueChanged: {
                     controller.input_horizontal_stretch = value;
                     calib.calibrationInfo.input_horizontal_stretch = value;
+                    updateResolutionTimer.start();
                 }
             }
         }
@@ -436,6 +435,23 @@ MenuItem {
                 onValueChanged: {
                     controller.input_vertical_stretch = value;
                     calib.calibrationInfo.input_vertical_stretch = value;
+                    updateResolutionTimer.start();
+                }
+            }
+        }
+        Timer {
+            id: updateResolutionTimer;
+            interval: 2000;
+            onTriggered: {
+                let w = Math.round(calib.videoWidth * (calib.calibrationInfo.input_horizontal_stretch || 1));
+                let h = Math.round(calib.videoHeight * (calib.calibrationInfo.input_vertical_stretch || 1));
+                if (calib.calibrationInfo.output_dimension.w != w || calib.calibrationInfo.output_dimension.h != h) {
+                    messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "x" + h + "</b>"), [
+                        { text: qsTr("Yes"), accent: true, clicked: () => {
+                            list.updateEntryWithTrigger("Default output size", w + "x" + h);
+                        } },
+                        { text: qsTr("No"), }
+                    ]);
                 }
             }
         }
