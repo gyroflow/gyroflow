@@ -1008,6 +1008,21 @@ impl RenderQueue {
                                             err(("An error occured: %1".to_string(), e.to_string()));
                                         }
                                     }
+                                    if sync_options.get("do_autosync").and_then(|x| x.as_bool()).unwrap_or_default() ||
+                                       obj.get("synchronization").and_then(|x| x.as_object()).and_then(|x| x.get("do_autosync")).and_then(|x| x.as_bool()).unwrap_or_default() {
+                                        let vid_path = stab.input_file.read().path.clone();
+                                        let duration_ms = stab.params.read().duration_ms;
+                                        {
+                                            let mut l = stab.lens.write();
+                                            if let Some(ref mut lss) = l.sync_settings {
+                                                lss.as_object_mut().unwrap().insert("do_autosync".into(), serde_json::Value::Bool(true));
+                                            } else {
+                                                l.sync_settings = obj.get("synchronization").cloned();
+                                            }
+                                        }
+                                        Self::do_autosync(&vid_path, duration_ms, stab.clone(), processing, err.clone(), sync_options);
+                                    }
+
                                     processing_done(());
                                 },
                                 Err(e) => {
