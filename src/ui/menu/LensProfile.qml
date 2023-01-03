@@ -114,7 +114,7 @@ MenuItem {
                     root.profileOriginalJson = json_str;
                     root.profileChecksum = checksum;
 
-                    if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
+                    if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
                     }
                     if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
