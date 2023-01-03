@@ -72,7 +72,7 @@ pub struct Controller {
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, additional_data: QJsonObject),
-    lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString),
+    lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString, checksum: QString),
     realtime_fps_loaded: qt_signal!(fps: f64),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
@@ -199,7 +199,7 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
-    rate_profile: qt_method!(fn(&self, name: QString, json: QString, is_good: bool)),
+    rate_profile: qt_method!(fn(&self, name: QString, json: QString, checksum: QString, is_good: bool)),
     request_profile_ratings: qt_method!(fn(&self)),
 
     set_preview_pipeline: qt_method!(fn(&self, index: i32)),
@@ -683,7 +683,7 @@ impl Controller {
                     this.lens_loaded = true;
                     this.lens_changed();
                     let json = lens.get_json().unwrap_or_default();
-                    this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()));
+                    this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()), QString::from(lens.checksum.clone().unwrap_or_default()));
                 }
             });
             let on_metadata = util::qt_queued_callback_mut(self, move |this, md: core::gyro_source::FileMetadata| {
@@ -778,16 +778,16 @@ impl Controller {
         self.load_lens_profile(util::url_to_path(url))
     }
     fn load_lens_profile(&mut self, path: String) {
-        let (json, filepath) = {
+        let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&path) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
             let lens = self.stabilizer.lens.read();
-            (lens.get_json().unwrap_or_default(), lens.filename.clone())
+            (lens.get_json().unwrap_or_default(), lens.filename.clone(), lens.checksum.clone().unwrap_or_default())
         };
         self.lens_loaded = true;
         self.lens_changed();
-        self.lens_profile_loaded(QString::from(json), QString::from(filepath));
+        self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1268,7 +1268,7 @@ impl Controller {
                     self.lens_loaded = true;
                     self.lens_changed();
                     let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
-                    self.lens_profile_loaded(QString::from(lens_json), QString::default());
+                    self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
                 self.request_recompute();
                 self.chart_data_changed();
@@ -1707,9 +1707,9 @@ impl Controller {
         });
     }
 
-    fn rate_profile(&self, name: QString, json: QString, is_good: bool) {
+    fn rate_profile(&self, name: QString, json: QString, checksum: QString, is_good: bool) {
         core::run_threaded(move || {
-            let mut url = url::Url::parse(&format!("https://api.gyroflow.xyz/rate?good={}", is_good)).unwrap();
+            let mut url = url::Url::parse(&format!("https://api.gyroflow.xyz/rate?good={}&checksum={}", is_good, checksum)).unwrap();
             url.query_pairs_mut().append_pair("filename", &name.to_string());
 
             if let Ok(Ok(body)) = ureq::request_url("POST", &url).set("Content-Type", "application/json; charset=utf-8").send_string(&json.to_string()).map(|x| x.into_string()) {

@@ -27,6 +27,7 @@ MenuItem {
     property var distortionCoeffs: [];
     property string profileName;
     property string profileOriginalJson;
+    property string profileChecksum;
 
     FileDialog {
         id: fileDialog;
@@ -83,7 +84,7 @@ MenuItem {
             profilesUpdateTimer.fromDisk = fromDisk;
             profilesUpdateTimer.start();
         }
-        function onLens_profile_loaded(json_str: string, filepath: string) {
+        function onLens_profile_loaded(json_str: string, filepath: string, checksum: string) {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
@@ -111,6 +112,7 @@ MenuItem {
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
+                    root.profileChecksum = checksum;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (obj.calib_dimension.w != obj.output_dimension.w || obj.calib_dimension.h != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -242,7 +244,7 @@ MenuItem {
         Connections {
             target: officialInfo.t;
             function onLinkActivated(link: url) {
-                controller.rate_profile(root.profileName, root.profileOriginalJson, link === "#good");
+                controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, link === "#good");
                 officialInfo.thankYou = true;
                 officialInfo.canRate = false;
                 tyTimer.start();
