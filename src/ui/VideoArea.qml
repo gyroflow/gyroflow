@@ -21,6 +21,7 @@ Item {
     property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
     property alias stabEnabledBtn: stabEnabledBtn;
+    property alias fovOverviewBtn: fovOverviewBtn;
     property alias queue: queue.item;
     property alias statistics: statistics;
     property alias infoMessages: infoMessages;
@@ -35,7 +36,7 @@ Item {
     property var pendingGyroflowData: null;
     property url loadedFileUrl;
 
-    property bool fullScreen: false;
+    property int fullScreen: 0;
     property string detectedCamera: "";
 
     property Menu.VideoInformation vidInfo: null;
@@ -440,8 +441,8 @@ Item {
             property real orgW: root.outWidth || vid.videoWidth;
             property real orgH: root.outHeight || vid.videoHeight;
             property real ratio: orgW / Math.max(1, orgH);
-            property real w: parent.width - 20 * dpiScale;
-            property real h: parent.height - 20 * dpiScale;
+            property real w: parent.width  - (root.fullScreen? 0 : 20 * dpiScale);
+            property real h: parent.height - (root.fullScreen? 0 : 20 * dpiScale);
 
             width:  (ratio * h) > w? w : (ratio * h);
             height: (w / ratio) > h? h : (w / ratio);
@@ -468,8 +469,8 @@ Item {
                 transform: [
                     Scale {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
-                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / (vid.videoHeight / Math.max(1, vid.videoWidth)));
-                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / (vid.videoWidth / Math.max(1, vid.videoHeight)));
+                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / (vid.videoHeight / Math.max(1, vid.videoWidth))) * window.lensProfile.input_horizontal_stretch;
+                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / (vid.videoWidth / Math.max(1, vid.videoHeight))) * window.lensProfile.input_vertical_stretch;
                     },
                     Rotation {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
@@ -597,7 +598,7 @@ Item {
             MouseArea {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;
-                onDoubleClicked: root.fullScreen = !root.fullScreen;
+                onDoubleClicked: root.fullScreen = root.fullScreen? 0 : 1;
             }
         }
         Rectangle {
@@ -778,6 +779,14 @@ Item {
                 }
 
                 SmallLinkButton {
+                    id: fovOverviewBtn;
+                    iconName: "fov-overview";
+                    checked: false;
+                    onCheckedChanged: { controller.fov_overview = checked; if (checked && !stabEnabledBtn.checked) stabEnabledBtn.checked = true; vid.forceRedraw(); }
+                    tooltip: qsTr("Toggle stabilization overview");
+                }
+
+                SmallLinkButton {
                     id: stabEnabledBtn;
                     iconName: "gyroflow";
                     onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
@@ -825,8 +834,16 @@ Item {
             onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
             Connections {
                 target: root;
-                function onFullScreenChanged() { bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight); }
+                function onFullScreenChanged() {
+                    bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
+                    if (root.fullScreen == 2) {
+                        main_window.visibility = Window.FullScreen;
+                    } else {
+                        if (main_window.visibility == Window.FullScreen) main_window.visibility = Window.Windowed;
+                    }
+                }
             }
+            visible: root.fullScreen != 2;
             maxHeight: root.height - 50 * dpiScale;
             Timeline {
                 id: timeline;

@@ -118,6 +118,7 @@ pub struct Controller {
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
+    fov_overview: qt_property!(bool; WRITE set_fov_overview),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
@@ -760,7 +761,7 @@ impl Controller {
 
                     additional_obj.insert("frame_readout_time".to_owned(), serde_json::to_value(stab.params.read().frame_readout_time).unwrap());
                     if let Some(cam_id) = camera_id.as_ref() {
-                        additional_obj.insert("camera_id".to_owned(), serde_json::to_value(cam_id).unwrap());
+                        additional_obj.insert("camera_identifier".to_owned(), serde_json::to_value(cam_id).unwrap());
                     }
 
                     if let Some(md) = file_metadata {
@@ -1295,6 +1296,7 @@ impl Controller {
     wrap_simple_method!(set_show_optical_flow,      v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
+    wrap_simple_method!(set_fov_overview,       v: bool; recompute);
     wrap_simple_method!(set_fov,                v: f64; recompute);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);

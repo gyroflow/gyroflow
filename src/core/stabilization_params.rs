@@ -40,6 +40,7 @@ pub struct StabilizationParams {
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
     pub fov: f64,
+    pub fov_overview: bool,
     pub fovs: Vec<f64>,
     pub min_fov: f64,
     pub fps: f64,
@@ -77,6 +78,7 @@ impl Default for StabilizationParams {
     fn default() -> Self {
         Self {
             fov: 1.0,
+            fov_overview: false,
             min_fov: 1.0,
             fovs: vec![],
             stab_enabled: true,
@@ -126,6 +128,9 @@ impl Default for StabilizationParams {
 }
 
 impl StabilizationParams {
+    pub fn get_fov(&self) -> f64 {
+        self.fov + if self.fov_overview { 1.0 } else { 0.0 }
+    }
     pub fn get_scaled_duration_ms(&self) -> f64 {
         match self.fps_scale {
             Some(scale) => self.duration_ms / scale,

@@ -92,6 +92,12 @@ Item {
         onActivated: videoArea.stabEnabledBtn.checked = !videoArea.stabEnabledBtn.checked;
     }
 
+    // Stabilization overview on/off
+    Shortcut {
+        sequence: "d";
+        onActivated: videoArea.fovOverviewBtn.checked = !videoArea.fovOverviewBtn.checked;
+    }
+
     // Hide chart axis X
     Shortcut {
         sequence: "x";
@@ -180,7 +186,13 @@ Item {
     // Exit full screen mode
     Shortcut {
         sequence: "Esc";
-        onActivated: videoArea.fullScreen = false;
+        onActivated: videoArea.fullScreen = 0;
+    }
+
+    // Toggle full screen mode
+    Shortcut {
+        sequence: "F11";
+        onActivated: videoArea.fullScreen = (videoArea.fullScreen + 1) % 3;
     }
 
     // Toggle render queue

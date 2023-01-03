@@ -18,6 +18,9 @@ MenuItem {
     property int videoWidth: 0;
     property int videoHeight: 0;
 
+    property real input_horizontal_stretch: 1;
+    property real input_vertical_stretch: 1;
+
     property real cropFactor: 0;
 
     property var lensProfilesList: [];
@@ -124,11 +127,11 @@ MenuItem {
                         });
                     }
 
-                    const input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
-                    const input_vertical_stretch   = obj.input_vertical_stretch   > 0.01? obj.input_vertical_stretch   : 1.0;
+                    root.input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
+                    root.input_vertical_stretch   = obj.input_vertical_stretch   > 0.01? obj.input_vertical_stretch   : 1.0;
 
-                    root.calibWidth  = obj.calib_dimension.w / input_horizontal_stretch;
-                    root.calibHeight = obj.calib_dimension.h / input_vertical_stretch;
+                    root.calibWidth  = obj.calib_dimension.w / root.input_horizontal_stretch;
+                    root.calibHeight = obj.calib_dimension.h / root.input_vertical_stretch;
                     const coeffs = obj.fisheye_params.distortion_coeffs;
                     root.distortionCoeffs = coeffs;
                     const mtrx = obj.fisheye_params.camera_matrix;

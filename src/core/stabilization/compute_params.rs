@@ -62,7 +62,7 @@ impl ComputeParams {
             lens: lens.clone(),
 
             frame_count: params.frame_count,
-            fov_scale: params.fov,
+            fov_scale: params.get_fov(),
             fovs: params.fovs.clone(),
             width: params.size.0.max(1),
             height: params.size.1.max(1),

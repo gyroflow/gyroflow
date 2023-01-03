@@ -87,13 +87,14 @@ MenuItem {
             bottomToTop.checked = additional_data.frame_readout_time < 0;
 
             calib.resetMetadata();
-            if (additional_data.camera_id) {
-                const camera_id = additional_data.camera_id;
+            if (additional_data.camera_identifier) {
+                const camera_id = additional_data.camera_identifier;
                 if (camera_id) {
                     if (camera_id.brand)      { calib.calibrationInfo.camera_brand = camera_id.brand; }
                     if (camera_id.model)      { calib.calibrationInfo.camera_model = camera_id.model; }
                     if (camera_id.lens_model) { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_model : camera_id.lens_model; }
                     if (camera_id.lens_info)  { calib.calibrationInfo.lens_model   = calib.calibrationInfo.lens_model? calib.calibrationInfo.lens_model + " " + camera_id.lens_info  : camera_id.lens_info;  }
+                    if (camera_id.camera_setting) { calib.calibrationInfo.camera_setting = camera_id.camera_setting; }
                     if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
                     if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
