@@ -23,7 +23,9 @@ impl FrameTransform {
         frame_readout_time
     }
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
-        let img_dim_ratio = Self::get_ratio(params);
+        let horizontal_ratio = params.video_output_width as f64 / params.video_width.max(1) as f64;
+
+        let img_dim_ratio = Self::get_ratio(params) / horizontal_ratio;
 
         let out_dim = (params.output_width as f64, params.output_height as f64);
         //let focal_center = (params.video_width as f64 / 2.0, params.video_height as f64 / 2.0);

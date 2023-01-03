@@ -148,14 +148,16 @@ impl CameraIdentifier {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::LensZoomNative) as Option<&f32>) {
                                 id.lens_info = format!("{:.2}mm", v);
                             }
-                            if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::Name) as Option<&String>) {
-                                id.lens_model = v.clone();
+                            if brand != "Runcam" {
+                                if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::Name) as Option<&String>) {
+                                    id.lens_model = v.clone();
+                                }
                             }
                             if let Some(map) = tag_map.get(&GroupId::Default) {
                                 if let Some(v) = map.get_t(TagId::Metadata) as Option<&serde_json::Value> {
                                     log::debug!("Camera ID Brand: {}, Model: {}, Metadata: {:?}", id.brand, id.model, v);
                                     if let Some(v) = v.get("lens_info")             .and_then(|v| v.as_str()) { id.lens_info      = v.to_string(); }
-                                    if let Some(v)  = v.get("focal_length")          .and_then(|v| v.as_f64()) { id.lens_info      = format!("{:.2}mm", v); }
+                                    if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_f64()) { id.lens_info      = format!("{:.2}mm", v); }
                                     if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_str()) { id.lens_info      = v.to_string(); }
                                     if let Some(v) = v.get("lens_type")             .and_then(|v| v.as_str()) { id.lens_model     = v.to_string(); }
                                     if let Some(v) = v.get("resolution_format_name").and_then(|v| v.as_str()) { id.camera_setting = v.to_string(); }
