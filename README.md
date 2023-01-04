@@ -60,6 +60,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - Keyframes
 - Ability to create custom settings presets
 - [OpenFX plugin](https://github.com/gyroflow/gyroflow-ofx) (eg. for DaVinci Resolve), which allows you to apply stabilization in video editor without any transcoding
+- [Gyroflow Toolbox](https://github.com/latenitefilms/GyroflowToolbox) - A Final Cut Pro effect which allows you to import a Gyroflow Project without transcoding
 - Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
 - Visual display of smoothed quaternions
 - Modern responsive user interface with Dark and Light theme
@@ -149,6 +150,8 @@ There's also a ton of TODO comments throughout the code.
 
 ### Video editor plugins
 Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx). OpenFX plugin was tested in DaVinci Resolve
+
+[Gyroflow Toolbox](https://github.com/latenitefilms/GyroflowToolbox) allows you to import Gyroflow Projects into a Final Cut Pro effect.
 
 Adobe After Effects plugin is planned, but not ready yet
 
