@@ -17,6 +17,7 @@ pub struct ComputeParams {
 
     pub frame_count: usize,
     pub fov_scale: f64,
+    pub fov_overview: bool,
     pub width: usize,
     pub height: usize,
     pub output_width: usize,
@@ -62,7 +63,8 @@ impl ComputeParams {
             lens: lens.clone(),
 
             frame_count: params.frame_count,
-            fov_scale: params.get_fov(),
+            fov_scale: params.fov,
+            fov_overview: params.fov_overview,
             fovs: params.fovs.clone(),
             width: params.size.0.max(1),
             height: params.size.1.max(1),
@@ -116,6 +118,7 @@ impl std::fmt::Debug for ComputeParams {
 
          .field("frame_count",          &self.frame_count)
          .field("fov_scale",            &self.fov_scale)
+         .field("fov_overview",         &self.fov_overview)
          .field("width",                &self.width)
          .field("height",               &self.height)
          .field("output_width",         &self.output_width)

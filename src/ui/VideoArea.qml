@@ -469,8 +469,8 @@ Item {
                 transform: [
                     Scale {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
-                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / (vid.videoHeight / Math.max(1, vid.videoWidth))) * window.lensProfile.input_horizontal_stretch;
-                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / (vid.videoWidth / Math.max(1, vid.videoHeight))) * window.lensProfile.input_vertical_stretch;
+                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / ((vid.videoHeight * window.lensProfile.input_vertical_stretch) / Math.max(1, vid.videoWidth * window.lensProfile.input_horizontal_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
+                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / ((vid.videoWidth * window.lensProfile.input_horizontal_stretch) / Math.max(1, vid.videoHeight * window.lensProfile.input_vertical_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
                     },
                     Rotation {
                         origin.x: vid.width / 2; origin.y: vid.height / 2;
@@ -479,7 +479,7 @@ Item {
                 ]
 
                 function fovChanged() {
-                    const fov = controller.current_fov;
+                    const fov = controller.current_fov - (fovOverviewBtn.checked? 1 : 0);
                     const focal_length = controller.current_focal_length;
                     const crop_factor = window.lensProfile?.cropFactor || 1.0;
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
@@ -783,7 +783,7 @@ Item {
                     id: fovOverviewBtn;
                     iconName: "fov-overview";
                     checked: false;
-                    onCheckedChanged: { controller.fov_overview = checked; if (checked && !stabEnabledBtn.checked) stabEnabledBtn.checked = true; vid.forceRedraw(); }
+                    onCheckedChanged: { controller.fov_overview = checked; vid.forceRedraw(); }
                     tooltip: qsTr("Toggle stabilization overview");
                 }
 

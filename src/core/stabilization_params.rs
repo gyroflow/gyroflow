@@ -128,9 +128,6 @@ impl Default for StabilizationParams {
 }
 
 impl StabilizationParams {
-    pub fn get_fov(&self) -> f64 {
-        self.fov + if self.fov_overview { 1.0 } else { 0.0 }
-    }
     pub fn get_scaled_duration_ms(&self) -> f64 {
         match self.fps_scale {
             Some(scale) => self.duration_ms / scale,
