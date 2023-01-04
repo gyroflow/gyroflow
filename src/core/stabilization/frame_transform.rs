@@ -23,7 +23,7 @@ impl FrameTransform {
         frame_readout_time
     }
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
-        let horizontal_ratio = params.video_output_width as f64 / params.video_width.max(1) as f64;
+        let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 { params.lens.input_horizontal_stretch } else { 1.0 };
 
         let img_dim_ratio = Self::get_ratio(params) / horizontal_ratio;
 
@@ -40,12 +40,14 @@ impl FrameTransform {
     pub fn get_ratio(params: &ComputeParams) -> f64 {
         params.width as f64 / params.video_width.max(1) as f64
     }
-    fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64) -> f64 {
-        let fov_scale = params.keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_ms).unwrap_or(params.fov_scale);
+    fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64, for_ui: bool) -> f64 {
+        let mut fov_scale = params.keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_ms).unwrap_or(params.fov_scale);
+        fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(&1.0) * fov_scale } else { 1.0 }.max(0.001);
-        //fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
-        fov += if params.fov_overview && use_fovs { 1.0 } else { 0.0 };
-        fov *= params.width as f64 / params.output_width.max(1) as f64;
+        if !for_ui {
+            //fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
+            fov *= params.width as f64 / params.output_width.max(1) as f64;
+        }
         fov
     }
 
@@ -102,8 +104,8 @@ impl FrameTransform {
         // ----------- Lens -----------
 
         let img_dim_ratio = Self::get_ratio(params);
-        let mut fov = Self::get_fov(params, frame, true, timestamp_ms);
-        let mut ui_fov = fov / (params.width as f64 / params.output_width.max(1) as f64);
+        let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false);
+        let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true);
         if let Some(adj) = params.lens.optimal_fov {
             if params.fovs.is_empty() {
                 fov *= adj;
@@ -203,7 +205,7 @@ impl FrameTransform {
         let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
 
         let img_dim_ratio = Self::get_ratio(params);
-        let fov = Self::get_fov(params, 0, false, timestamp_ms);
+        let fov = Self::get_fov(params, 0, false, timestamp_ms, false);
 
         let scaled_k = camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, &camera_matrix, fov);

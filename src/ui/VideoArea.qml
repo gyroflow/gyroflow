@@ -479,7 +479,7 @@ Item {
                 ]
 
                 function fovChanged() {
-                    const fov = controller.current_fov - (fovOverviewBtn.checked? 1 : 0);
+                    const fov = controller.current_fov;
                     const focal_length = controller.current_focal_length;
                     const crop_factor = window.lensProfile?.cropFactor || 1.0;
                     // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
@@ -567,9 +567,7 @@ Item {
                 Item {
                     anchors.fill: parent;
                     layer.enabled: true;
-                    opacity: root.safeArea && safeAreaRect.fov > 1 && stabEnabledBtn.checked? 1 : 0;
-                    Ease on opacity { }
-                    visible: opacity > 0;
+                    visible: (root.safeArea || fovOverviewBtn.checked) && safeAreaRect.fov > 1 && stabEnabledBtn.checked;
                     Item {
                         id: safeAreaRect;
                         property real fov: window.stab.fovSlider.field.value + (fovOverviewBtn.checked? 1 : 0)
