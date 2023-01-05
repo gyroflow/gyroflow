@@ -50,8 +50,7 @@ MenuItem {
             window.lensProfile.videoHeight  = h;
         }
         if (typeof calibrator_window !== "undefined") {
-            calibrator_window.lensCalib.videoWidth   = w;
-            calibrator_window.lensCalib.videoHeight  = h;
+            calibrator_window.lensCalib.setVideoSize(w, h);
             calibrator_window.lensCalib.fps = framerate;
         }
 

@@ -24,9 +24,13 @@ MenuItem {
     property int videoWidth: 0;
     property int videoHeight: 0;
     property real fps: 0;
-    onVideoWidthChanged: {
+
+    function setVideoSize(w: int, h: int) {
+        videoWidth = w;
+        videoHeight = h;
         sizeTimer.start();
     }
+
     Timer {
         id: sizeTimer;
         interval: 1;
@@ -43,6 +47,8 @@ MenuItem {
             calib.calibrationInfo.fps = fps;
             list.updateEntryWithTrigger("Default output size", w + "x" + h);
             fovSlider.value = 2;
+            xStretch.valueChanged();
+            yStretch.valueChanged();
         }
     }
     function resetMetadata() {
@@ -411,6 +417,7 @@ MenuItem {
             position: Label.TopPosition;
             text: qsTr("Input horizontal stretch");
             SliderWithField {
+                id: xStretch;
                 from: 0.1;
                 to: 2;
                 value: 1.0;
@@ -427,6 +434,7 @@ MenuItem {
             position: Label.TopPosition;
             text: qsTr("Input vertical stretch");
             SliderWithField {
+                id: yStretch;
                 from: 0.1;
                 to: 2;
                 value: 1.0;
@@ -443,8 +451,8 @@ MenuItem {
             id: updateResolutionTimer;
             interval: 2000;
             onTriggered: {
-                let w = Math.round(calib.videoWidth * (calib.calibrationInfo.input_horizontal_stretch || 1));
-                let h = Math.round(calib.videoHeight * (calib.calibrationInfo.input_vertical_stretch || 1));
+                let w = Math.round(calib.videoWidth  * (xStretch.value || 1));
+                let h = Math.round(calib.videoHeight * (yStretch.value || 1));
                 if (calib.calibrationInfo.output_dimension.w != w || calib.calibrationInfo.output_dimension.h != h) {
                     messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "x" + h + "</b>"), [
                         { text: qsTr("Yes"), accent: true, clicked: () => {
