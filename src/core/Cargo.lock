@@ -1037,7 +1037,6 @@ dependencies = [
  "wgpu",
  "wgpu-hal",
  "wgpu-types",
- "win_dbg_logger",
  "winapi",
  "windows",
 ]
@@ -2363,7 +2362,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=42fc136#42fc13614f103de8855a144b08a6369467434fc1"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=267d4bc#267d4bc38a6e05a9b893c6bf4104999016b2f3e9"
 dependencies = [
  "argh",
  "byteorder",
@@ -2718,15 +2717,6 @@ checksum = "ae41ecad2489a1655c8ef8489444b0b113c0a0c795944a3572a0931cf7d2525c"
 dependencies = [
  "bytemuck",
  "safe_arch",
-]
-
-[[package]]
-name = "win_dbg_logger"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d1b4c22244dc27534d81e2f6fc3efd6b20e50c010f177efc20b719ec759a779"
-dependencies = [
- "log",
 ]
 
 [[package]]
