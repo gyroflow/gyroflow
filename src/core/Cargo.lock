@@ -46,7 +46,7 @@ dependencies = [
 [[package]]
 name = "ahrs"
 version = "0.5.0"
-source = "git+https://github.com/AdrianEddy/ahrs-rs.git?rev=5bdd344#5bdd3444954186d23c76c45a0beae52198e89d20"
+source = "git+https://github.com/jmagnuson/ahrs-rs?rev=d523b14#d523b14887d98dbc8948b049ed2e8a7a6c4bf5ae"
 dependencies = [
  "nalgebra 0.31.4",
  "num-traits 0.2.15",
@@ -907,9 +907,9 @@ dependencies = [
 
 [[package]]
 name = "glob"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
+checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
@@ -993,6 +993,7 @@ dependencies = [
  "crossbeam-channel",
  "cv-core",
  "cv-pinhole",
+ "d3d12",
  "dyn-clone",
  "eight-point",
  "enterpolation",
@@ -1006,6 +1007,8 @@ dependencies = [
  "include_dir",
  "itertools",
  "lazy_static",
+ "libc",
+ "libloading",
  "line_drawing",
  "log",
  "metal",
@@ -1034,6 +1037,8 @@ dependencies = [
  "wgpu",
  "wgpu-hal",
  "wgpu-types",
+ "win_dbg_logger",
+ "winapi",
  "windows",
 ]
 
@@ -1715,9 +1720,9 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.30.0"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "239da7f290cfa979f43f85a8efeee9a8a76d0827c356d37f9d3d7254d6b537fb"
+checksum = "8d864c91689fdc196779b98dba0aceac6118594c2df6ee5d943eb6a8df4d107a"
 dependencies = [
  "memchr",
 ]
@@ -2358,7 +2363,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=aa199e1#aa199e11113994779c388e127365cb1a75e3370e"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=42fc136#42fc13614f103de8855a144b08a6369467434fc1"
 dependencies = [
  "argh",
  "byteorder",
@@ -2616,7 +2621,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=metal-device-from-raw#ae87513a2fdece24f9667cf3662afbfd99865002"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
 dependencies = [
  "arrayvec 0.7.2",
  "cfg-if",
@@ -2638,7 +2643,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=metal-device-from-raw#ae87513a2fdece24f9667cf3662afbfd99865002"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
@@ -2660,7 +2665,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=metal-device-from-raw#ae87513a2fdece24f9667cf3662afbfd99865002"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.2",
@@ -2700,7 +2705,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=metal-device-from-raw#ae87513a2fdece24f9667cf3662afbfd99865002"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
 dependencies = [
  "bitflags",
 ]
@@ -2713,6 +2718,15 @@ checksum = "ae41ecad2489a1655c8ef8489444b0b113c0a0c795944a3572a0931cf7d2525c"
 dependencies = [
  "bytemuck",
  "safe_arch",
+]
+
+[[package]]
+name = "win_dbg_logger"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d1b4c22244dc27534d81e2f6fc3efd6b20e50c010f177efc20b719ec759a779"
+dependencies = [
+ "log",
 ]
 
 [[package]]

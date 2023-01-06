@@ -12,6 +12,7 @@ path = "lib.rs"
 #telemetry-parser = { path = "../../../telemetry-parser" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "42fc136" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
+ahrs = { git = "https://github.com/jmagnuson/ahrs-rs", rev = "d523b14", features = ["field_access"] }
 ahrs = { git = "https://github.com/AdrianEddy/ahrs-rs.git", rev = "5bdd344", features = ["field_access"] }
 
 #rs-sync = { path = "../../../rs-sync" }
@@ -54,15 +55,17 @@ image = "0.23"
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.0"
+libloading = "0.7"
+libc = "0.2"
 
 opencv = { version = "0.74.2", optional = true }
 
 #wgpu = "0.14"
 #wgpu-hal = "0.14"
 #wgpu-types = "0.14"
-wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
-wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
-wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "metal-device-from-raw" }
+wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
+wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
+wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
 bytemuck = "1.12.3"
 ash = "0.37.1"
 
@@ -87,7 +90,14 @@ version = "0.1.1"
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.43.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation",
-             "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi", "Win32_Security" ]
+             "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
+             "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming" ]
+[target.'cfg(target_os = "windows")'.dependencies.winapi]
+version = "0.3"
+features = ["profileapi", "libloaderapi", "windef", "winuser", "dcomp"]
+[target.'cfg(target_os = "windows")'.dependencies.d3d12]
+version = "0.5.0"
+features = ["libloading"]
 
 [features]
 default = []

@@ -29,7 +29,7 @@ const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
 impl QuaternionConverter {
     pub fn convert(org_quaternions: &TimeQuat, image_orientations : &TimeQuat, imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
-        let vqf_quats = ComplementaryIntegrator::integrate(imu_data, duration_ms);
+        let vqf_quats = VQFIntegrator::integrate(imu_data, duration_ms);
         let mut boost = 1;
         let mut ret : TimeQuat = BTreeMap::new();
         let mut corr_sm = UnitQuaternion::identity();
