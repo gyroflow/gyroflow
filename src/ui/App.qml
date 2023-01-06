@@ -64,7 +64,7 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw", "r3d" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -377,26 +377,37 @@ Rectangle {
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
 
+        let el = null;
+
         if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
-            const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
-                text: text,
-                type: type - 1,
-                opacity: 0
-            });
-            im.opacity = 1;
-            Qt.createQmlObject("import QtQuick; Timer { interval: 2000; running: true; }", im, "t1").onTriggered.connect(() => {
-                im.opacity = 0;
-                im.height = -5 * dpiScale;
-                im.destroy(700);
-            });
-            return;
+            let clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
+            if (buttons.length == 1) {
+                const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+                    text: text,
+                    type: type - 1,
+                    opacity: 0
+                });
+                im.opacity = 1;
+                Qt.createQmlObject("import QtQuick; Timer { interval: 2000; running: true; }", im, "t1").onTriggered.connect(() => {
+                    im.opacity = 0;
+                    im.height = -5 * dpiScale;
+                    im.destroy(700);
+                });
+                return;
+            } else {
+                console.log("previously clicked", clickedButton);
+                Qt.callLater(function() {
+                    if (el)
+                        el.clicked(clickedButton, true);
+                });
+            }
         }
 
-        const el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type, modalIdentifier: identifier || "" });
+        el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type, modalIdentifier: identifier || "" });
         el.text = text;
         el.onClicked.connect((index, dontShowAgain) => {
             if (identifier && dontShowAgain) {
-                window.settings.setValue("dontShowAgain-" + identifier, 1);
+                window.settings.setValue("dontShowAgain-" + identifier, index + 1);
             }
 
             let returnVal = undefined;

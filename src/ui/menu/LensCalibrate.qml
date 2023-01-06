@@ -449,7 +449,7 @@ MenuItem {
         }
         Timer {
             id: updateResolutionTimer;
-            interval: 2000;
+            interval: 1500;
             onTriggered: {
                 let w = Math.round(calib.videoWidth  * (xStretch.value || 1));
                 let h = Math.round(calib.videoHeight * (yStretch.value || 1));
@@ -459,7 +459,7 @@ MenuItem {
                             list.updateEntryWithTrigger("Default output size", w + "x" + h);
                         } },
                         { text: qsTr("No"), }
-                    ]);
+                    ], null, undefined, "update-resolution");
                 }
             }
         }

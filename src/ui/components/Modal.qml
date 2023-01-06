@@ -14,6 +14,7 @@ Rectangle {
     property alias mainColumn: mainColumn;
     property alias mainItem: pp;
     property alias btnsRow: btnsRow;
+    property alias dontShowAgain: dontShowAgain;
     property bool opened: false;
     property bool isWide: root.text.length > 200;
     property real widthRatio: 0.8;
@@ -134,13 +135,6 @@ Rectangle {
                 }
             }
             Item { height: 25 * dpiScale; width: 1; }
-            CheckBox {
-                x: 20 * dpiScale;
-                id: dontShowAgain;
-                visible: root.modalIdentifier && (btns.model?.length == 1);
-                text: qsTr("Don't show again");
-                checked: false;
-            }
             Flow {
                 id: btnsRow;
                 anchors.horizontalCenter: parent.horizontalCenter;
@@ -162,6 +156,15 @@ Rectangle {
                         accent: root.accentButton === index;
                     }
                 }
+            }
+            Item { visible: root.modalIdentifier; height: 15 * dpiScale; width: 1; }
+            CheckBox {
+                anchors.horizontalCenter: parent.horizontalCenter;
+                x: 20 * dpiScale;
+                id: dontShowAgain;
+                visible: root.modalIdentifier;
+                text: btns.model?.length == 1? qsTr("Don't show again") : qsTr("Remember this choice");
+                checked: false;
             }
         }
     }

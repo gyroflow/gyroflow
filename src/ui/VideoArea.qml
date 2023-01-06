@@ -170,6 +170,26 @@ Item {
                 }
             }
         }
+        // ---------- Temporary REDline conversion ----------
+        function onConvert_r3d_progress(percent: real, error_string: string, path: string) {
+            if (externalSdkModal !== null && externalSdkModal.loader !== null) {
+                externalSdkModal.loader.visible = percent < 1;
+                externalSdkModal.loader.active = percent < 1;
+                externalSdkModal.loader.progress = percent;
+                externalSdkModal.loader.text = qsTr("Converting to %1 (%2)").arg("<b>" + path + "</b>");
+                if (percent >= 1) {
+                    externalSdkModal.close();
+                    externalSdkModal = null;
+                    window.isDialogOpened = false;
+                    if (!error_string) {
+                        loadFile(controller.path_to_url(path), true);
+                    } else {
+                        messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
+                    }
+                }
+            }
+        }
+        // ---------- Temporary REDline conversion ----------
         function onMp4_merge_progress(percent: real, error_string: string, path: string) {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {
                 externalSdkModal.loader.visible = percent < 1;
@@ -275,6 +295,34 @@ Item {
             dlg.addLoader();
             return;
         }
+
+        // ---------- Temporary REDline conversion ----------
+        if (url.toString().toLowerCase().endsWith(".r3d")) {
+            const redline = controller.find_redline();
+            if (redline) {
+                const do_convert = (dlg, f) => {
+                    dlg.btnsRow.children[0].enabled = false;
+                    dlg.btnsRow.children[1].enabled = false;
+                    dlg.btnsRow.children[2].enabled = false;
+                    controller.convert_r3d(controller.url_to_path(url), f);
+                    return false;
+                };
+                const dlg = messageBox(Modal.Info, "This format can't be loaded directly at this time.\nDo you want to convert the file to ProRes?", [
+                    { text: "ProRes 422 Proxy", clicked: () => do_convert(dlg, 3), accent: true },
+                    { text: "ProRes 422 HQ",    clicked: () => do_convert(dlg, 0) },
+                    { text: "ProRes 4444",      clicked: () => do_convert(dlg, 4) },
+                    { text: qsTr("Cancel"),     clicked: () => { controller.cancel_current_operation(); externalSdkModal = null; } },
+                ], null, undefined, "convert-r3d");
+                externalSdkModal = dlg;
+                dlg.addLoader();
+            } else {
+                messageBox(Modal.Info, "This format can't be loaded directly at this time and REDline was not found in your system.\nOnce you install REDCINE-X Pro, Gyroflow will be able to convert the file using REDline.", [
+                    { text: qsTr("Close") },
+                ]);
+            }
+            return;
+        }
+        // ---------- Temporary REDline conversion ----------
 
         root.loadedFileUrl = url;
         if (!skip_detection) {
@@ -655,7 +703,7 @@ Item {
             }
             onDropped: (drop) => {
                 if (isCalibrator) {
-                    calibrator_window.loadFile(drop.urls[0]);
+                    calibrator_window.loadFiles(drop.urls);
                 } else {
                     root.loadMultipleFiles(drop.urls, false);
                 }

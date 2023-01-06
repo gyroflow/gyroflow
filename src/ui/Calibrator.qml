@@ -63,9 +63,18 @@ Window {
         }
     }
 
-    function batchProcess() {
-        batch.queue = [...fileDialog.selectedFiles];
-        batch.start();
+    function loadFiles(files: list<url>) {
+        if (files.length == 1)
+            return loadFile(files[0]);
+
+        const files2 = [...files];
+        messageBox(Modal.NoIcon, qsTr("You selected multiple files. Do you want to process them automatically and export lens profiles?"), [
+            { text: qsTr("Yes"), accent: true, clicked: () => {
+                batch.queue = files2;
+                batch.start();
+             } },
+            { text: qsTr("No") }
+        ]);
     }
     function loadFile(file: url) {
         lensCalib.rms = 0;
@@ -83,21 +92,15 @@ Window {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "png", "jpg", "exr", "dng", "braw" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "png", "jpg", "exr", "dng", "braw", "r3d" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
         type: "calib-video";
 
         onAccepted: {
-            if (fileDialog.selectedFiles.length > 1) {
-                messageBox(Modal.NoIcon, qsTr("You selected multiple files. Do you want to process them automatically and export lens profiles?"), [
-                    { text: qsTr("Yes"), accent: true, clicked: batchProcess },
-                    { text: qsTr("No") }
-                ]);
-            } else {
-                loadFile(fileDialog.selectedFile);
-            }
+            if (fileDialog.selectedFiles.length > 1) loadFiles(fileDialog.selectedFiles);
+            else                                     loadFile(fileDialog.selectedFile);
         }
         fileMode: FileDialog.OpenFiles;
     }
@@ -139,9 +142,15 @@ Window {
                     batch.runIn(2000, function() {
                         console.log('rms', rms);
                         if (rms < 2) {
-                            const pathParts = batch.currentFile.toString().split(".");
+                            let pathParts = batch.currentFile.toString().split(".");
                             pathParts.pop();
-                            const outputFilename = pathParts.join(".") + ".json";
+
+                            let outputFilename = pathParts.join(".") + ".json";
+                            if (lensCalib.calibrationInfo.camera_brand && lensCalib.calibrationInfo.camera_model && lensCalib.calibrationInfo.lens_model) {
+                                let parts = batch.currentFile.toString().replace("\\", "/").split("/");
+                                parts.pop();
+                                outputFilename = parts.join("/") + "/" + controller.export_lens_profile_filename(lensCalib.calibrationInfo);
+                            }
 
                             let output = outputFilename;
                             let i = 1;
