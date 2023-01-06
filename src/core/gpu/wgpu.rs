@@ -301,7 +301,7 @@ impl WgpuWrapper {
 
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-        let _temp_texture = handle_input_texture(&self.device, &buffers.input, &self.queue, &mut encoder, &self.in_texture, self.pixel_format);
+        let _temp_texture = handle_input_texture(&self.device, &buffers.input, &self.queue, &mut encoder, &self.in_texture, self.pixel_format, self.padded_out_stride);
 
         if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return false; }
 
@@ -374,27 +374,7 @@ impl WgpuWrapper {
                     return false;
                 }
             }
-            #[cfg(target_os = "windows")]
-            BufferSource::DirectX { texture, device_context, .. } => {
-                self.device.poll(wgpu::Maintain::Wait); // TODO: is this needed?
-
-                use windows::{ Win32::Graphics::Direct3D11::*, core::Vtable };
-                unsafe {
-                    let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
-                    let out_texture_d3d = ID3D11Texture2D::from_raw_borrowed(texture);
-                    if let Some(o) = &self.out_texture.d3d11_texture {
-                        device_context.CopyResource(out_texture_d3d, o);
-                    }
-                }
-            },
-            BufferSource::Vulkan { .. } => {
-                self.device.poll(wgpu::Maintain::Wait);
-            },
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => {
-                self.device.poll(wgpu::Maintain::Wait);
-            },
-            _ => { }
+            _ => { handle_output_texture_post(&self.device, &buffers.output, &self.out_texture, self.pixel_format); }
         }
 
         true
@@ -410,7 +390,10 @@ pub fn is_buffer_supported(buffers: &Buffers) -> bool {
         BufferSource::DirectX { .. } => false,
         #[cfg(feature = "use-opencl")]
         BufferSource::OpenCL  { .. } => false,
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan  { .. } => false,
+        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        BufferSource::CUDABuffer{ .. } => true,
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => true,
     }

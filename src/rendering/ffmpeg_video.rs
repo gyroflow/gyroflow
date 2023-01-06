@@ -389,7 +389,7 @@ impl<'a> VideoTranscoder<'a> {
 
                         ts = rate_control.out_timestamp_us;
 
-                        let mut output_hw_frame = None;
+                        let mut output_hw_frame;
 
                         if let Some(hw_upload_format) = hw_upload_format {
                             log::debug!("Uploading frame to the device, hw_upload_format {:?}, final_frame.format: {:?}", hw_upload_format, final_frame.format());

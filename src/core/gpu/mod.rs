@@ -9,6 +9,7 @@ pub mod wgpu_interop;
 #[cfg(not(any(target_os = "macos", target_os = "ios")))] pub mod wgpu_interop_vulkan;
 #[cfg(any(target_os = "macos", target_os = "ios"))]      pub mod wgpu_interop_metal;
 #[cfg(target_os = "windows")]                            pub mod wgpu_interop_directx;
+#[cfg(any(target_os = "windows", target_os = "linux"))]  pub mod wgpu_interop_cuda;
 
 pub mod drawing;
 use std::hash::Hasher;
@@ -45,6 +46,7 @@ pub enum BufferSource<'a> {
         texture: u32, // GLuint
         context: *mut std::ffi::c_void, // OpenGL context pointer
     },
+    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
     Vulkan {
         texture: u64,
         device: u64,
@@ -61,9 +63,10 @@ pub enum BufferSource<'a> {
         buffer: *mut metal::MTLBuffer,
         command_queue: *mut metal::MTLCommandQueue,
     },
-    /*Cuda {
-        input: u32
-    },*/
+    #[cfg(any(target_os = "windows", target_os = "linux"))]
+    CUDABuffer {
+        buffer: *mut std::ffi::c_void // Cudeviceptr
+    },
 }
 impl<'a> BufferDescription<'a> {
     pub fn get_checksum(&self) -> u32 {
@@ -101,6 +104,7 @@ impl<'a> BufferDescription<'a> {
                 hasher.write_u64(*device as u64);
                 hasher.write_u64(*device_context as u64);
             },
+            #[cfg(not(any(target_os = "macos", target_os = "ios")))]
             BufferSource::Vulkan { texture, instance, device, physical_device } => {
                 if !self.texture_copy {
                     hasher.write_u64(*texture);
@@ -108,6 +112,12 @@ impl<'a> BufferDescription<'a> {
                 hasher.write_u64(*instance);
                 hasher.write_u64(*device);
                 hasher.write_u64(*physical_device);
+            },
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            BufferSource::CUDABuffer { buffer } => {
+                if !self.texture_copy {
+                    hasher.write_u64(*buffer as u64);
+                }
             },
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             BufferSource::Metal { texture, command_queue } => {

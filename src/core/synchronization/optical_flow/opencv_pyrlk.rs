@@ -23,10 +23,8 @@ impl OFOpenCVPyrLK {
     pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
         let (w, h) = (width as i32, height as i32);
 
-        let mut features = Vec::new();
-
         #[cfg(feature = "use-opencv")]
-        {
+        let features = {
             let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, img.as_raw().as_ptr() as *mut std::ffi::c_void, img.width() as usize) };
 
             // opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());
@@ -38,8 +36,10 @@ impl OFOpenCVPyrLK {
             }) {
                 log::error!("OpenCV error {:?}", e);
             }
-            features = (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x, x.y))}).collect();
-        }
+            (0..pts.rows()).into_iter().filter_map(|i| { let x = pts.at::<Point2f>(i).ok()?; Some((x.x, x.y))}).collect()
+        };
+        #[cfg(not(feature = "use-opencv"))]
+        let features = Vec::new();
 
         Self {
             features,
