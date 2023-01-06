@@ -1,1 +1,1 @@
-forfiles /s /m *.ts /c "cmd /c ..\..\ext\6.4.1\msvc2019_64\bin\lupdate.exe ../../src/ui/ -ts @path"
+forfiles /s /m *.ts /c "cmd /c ..\..\ext\6.4.2\msvc2019_64\bin\lupdate.exe ../../src/ui/ -ts @path"

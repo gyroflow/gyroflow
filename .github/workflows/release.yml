@@ -101,7 +101,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: 6.4.1
+          version: 6.4.2
           dir: ${{ github.workspace }}/ext/
           cached: ${{ steps.extcache.outputs.cache-hit }}
 

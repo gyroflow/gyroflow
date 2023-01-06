@@ -1,6 +1,6 @@
 @echo off
 if "%1"=="" ( set "PROJECT_DIR=D:\programowanie\projekty\Rust\gyroflow" ) else ( set "PROJECT_DIR=%1" )
-if "%2"=="" ( set "QT_DIR=D:\Programy\Qt\6.4.1\msvc2019_64" ) else ( set "QT_DIR=%2" )
+if "%2"=="" ( set "QT_DIR=D:\Programy\Qt\6.4.2\msvc2019_64" ) else ( set "QT_DIR=%2" )
 if "%3"=="" ( set "OPENCV_DIR=%PROJECT_DIR%\ext\opencv-4.5.4\bin" ) else ( set "OPENCV_DIR=%3" )
 if "%4"=="" ( set "CARGO_TARGET=%PROJECT_DIR%\target\deploy" ) else ( set "CARGO_TARGET=%4" )
 if "%FFMPEG_DIR%"=="" ( set FFMPEG_DIR=%PROJECT_DIR%\ext\ffmpeg-master-windows-desktop-vs2022-gpl-lite )
