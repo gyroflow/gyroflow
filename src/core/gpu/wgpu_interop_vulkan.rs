@@ -105,6 +105,7 @@ pub fn format_wgpu_to_vulkan(format: wgpu::TextureFormat) -> vk::Format {
         Tf::Depth24Plus => F::D32_SFLOAT,
         Tf::Depth24PlusStencil8 => F::D24_UNORM_S8_UINT,
         Tf::Rgb9e5Ufloat => F::E5B9G9R9_UFLOAT_PACK32,
+        Tf::Stencil8 => F::S8_UINT,
         Tf::Bc1RgbaUnorm => F::BC1_RGBA_UNORM_BLOCK,
         Tf::Bc1RgbaUnormSrgb => F::BC1_RGBA_SRGB_BLOCK,
         Tf::Bc2RgbaUnorm => F::BC2_UNORM_BLOCK,
