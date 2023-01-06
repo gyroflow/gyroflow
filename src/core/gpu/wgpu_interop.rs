@@ -239,15 +239,16 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::MetalBuffer { .. } => {
             if buf.texture_copy {
-                let mtl_texture = in_texture.metal_texture.as_ref().unwrap();
-                if !mtl_texture.as_ptr().is_null() {
-                    temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+                if let Some(NativeTexture::Metal(mtl_texture)) = &in_texture.native_texture {
+                    if !mtl_texture.as_ptr().is_null() {
+                        temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
-                    encoder.copy_texture_to_texture(
-                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        size
-                    );
+                        encoder.copy_texture_to_texture(
+                            ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            size
+                        );
+                    }
                 }
             }
         },
@@ -294,15 +295,16 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::MetalBuffer { .. } => {
-            let mtl_texture = out_texture.metal_texture.as_ref().unwrap();
-            if !mtl_texture.as_ptr().is_null() {
-                temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+            if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
+                if !mtl_texture.as_ptr().is_null() {
+                    temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
-                encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    size
-                );
+                    encoder.copy_texture_to_texture(
+                        ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
+                }
             }
         }
         _ => { }
