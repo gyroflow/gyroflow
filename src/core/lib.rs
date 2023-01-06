@@ -932,7 +932,7 @@ impl<T: PixelType> StabilizationManager<T> {
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
 
                 // Load IMU data only if it's from another file
-                if !org_gyro_path.is_empty() && org_gyro_path != org_video_path {
+                if (!org_gyro_path.is_empty() && org_gyro_path != org_video_path) || !gyro_path.exists() {
                     let mut raw_imu = None;
                     let mut quaternions = None;
                     let mut image_orientations = None;
