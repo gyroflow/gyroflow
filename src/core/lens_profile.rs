@@ -152,7 +152,6 @@ impl LensProfile {
     pub fn get_name(&self) -> String {
         let setting = if self.camera_setting.is_empty() { &self.note } else { &self.camera_setting };
         format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, setting, self.get_size_str(), self.get_aspect_ratio().replace(':', "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
-            .replace(':', "-")
     }
 
     pub fn get_aspect_ratio(&self) -> String {

@@ -1595,7 +1595,17 @@ impl Controller {
             if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
                 profile.set_from_calibrator(cal);
             }
-            return QString::from(format!("{}.json", profile.get_name()));
+            let name = profile.get_name()
+                .replace(':', "-")
+                .replace("|", "_")
+                .replace("*", "_")
+                .replace(":", "_")
+                .replace("<", "")
+                .replace("\"", "")
+                .replace(">", "")
+                .replace("/", "")
+                .replace("\\", "");
+            return QString::from(format!("{}.json", name));
         }
         QString::default()
     }
