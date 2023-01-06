@@ -604,180 +604,187 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
       <translation>Kalibrointi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="149"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="153"/>
       <source>Reprojection error</source>
       <translation>Virhe arvioitaessa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="161"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="165"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>Hyvän linssin kalibroinnin osalta tämän arvon olisi oltava pienempi kuin 5, mieluiten pienempi kuin 1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="165"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="169"/>
       <source>Auto calibrate</source>
       <translation>Automaattikalibrointi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="176"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="180"/>
       <source>Max calibration points</source>
       <translation>Maksimi kalibrointipisteet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="128"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="292"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="132"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="296"/>
       <source>Export lens profile</source>
       <translation>Vie linssin profiili</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="129"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="133"/>
       <source>Lens profiles</source>
       <translation>Linssi profiilit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="133"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="137"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>Lataamalla linssiprofiilin tietokantaan, hyväksyt sen julkaisemisen ja jakelun Gyroflow GPLv3 ehdoilla.
 Haluatko lähettää profiilisi tähän?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="134"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="138"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
       <source>Yes</source>
       <translation>Kyllä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="135"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="139"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="461"/>
       <source>No</source>
       <translation>Ei</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="237"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="241"/>
       <source>Invalid format</source>
       <translation>Muoto ei kelpaa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="237"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="241"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="305"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="309"/>
       <source>Upload lens profile to the database</source>
       <translation>Lataa linssin profiili tietokantaan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="311"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="315"/>
       <source>FOV</source>
       <translation>Näkökenttä (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="328"/>
       <source>Analyze every n-th frame</source>
       <translation>Analysoi joka n:s kehys</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="340"/>
       <source>Sharpness limit</source>
       <translation>Terävyysraja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="344"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="349"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="357"/>
       <source>Digital lens</source>
       <translation type="unfinished">Digital lens</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="413"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="418"/>
       <source>Input horizontal stretch</source>
       <translation type="unfinished">Input horizontal stretch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="428"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="435"/>
       <source>Input vertical stretch</source>
       <translation type="unfinished">Input vertical stretch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="443"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="457"/>
+      <source>Do you want to update the output resolution to %1?</source>
+      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="468"/>
       <source>Iterations</source>
       <translation>Toistot</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="455"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="480"/>
       <source>Low pass filter</source>
       <translation>Alipäästösuodatin</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="464"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="489"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="479"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="504"/>
       <source>Focal length</source>
       <translation type="unfinished">Focal length</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="481"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="506"/>
       <source>Lens native focal length</source>
       <translation type="unfinished">Lens native focal length</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="485"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="510"/>
       <source>mm</source>
       <translation type="unfinished">mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="494"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
       <source>Crop factor</source>
       <translation type="unfinished">Crop factor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="498"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="523"/>
       <source>x</source>
       <translation type="unfinished">x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="510"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="535"/>
       <source>Preview resolution</source>
       <translation>Esikatselun resoluutio</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="531"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="556"/>
       <source>Radial distortion limit</source>
       <translation>Säde vääristymisen raja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="547"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="572"/>
       <source>Lens is asymmetrical</source>
       <translation type="unfinished">Lens is asymmetrical</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="554"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="579"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation type="unfinished">Plain chessboard pattern (previous version without dots in the middle)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="251"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="255"/>
       <source>Rolling shutter correction</source>
       <translation>Vierintäsulkimen korjaus</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="259"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="263"/>
       <source>Frame readout time</source>
       <translation>Kehyksen lukuaika</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="265"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="269"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="281"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="285"/>
       <source>Bottom to top</source>
       <translation>Alhaalta ylös</translation>
     </message>
@@ -790,77 +797,77 @@ Haluatko lähettää profiilisi tähän?</translation>
       <translation>Linssin profiili</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="32"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="36"/>
       <source>Choose a lens profile</source>
       <translation>Valitse linssi profiili</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="33"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="37"/>
       <source>Lens profiles</source>
       <translation>Linssi profiilit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="98"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="102"/>
       <source>Yes</source>
       <translation type="unfinished">Yes</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="177"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="182"/>
       <source>Search...</source>
       <translation>Hae...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="204"/>
       <source>Open file</source>
       <translation>Avaa tiedosto</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="204"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="209"/>
       <source>Create new</source>
       <translation>Luo uusi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="229"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Tämä linssin profiili on epävirallinen. Emme takaa oikeellisuutta. Käytä omalla vastuullasi.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="235"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation type="unfinished">Rate this profile: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="232"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="237"/>
       <source>Thank you for rating this profile.</source>
       <translation type="unfinished">Thank you for rating this profile.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="260"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="265"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Linssin profiilin kuvasuhde ei vastaa tiedoston kuvasuhdetta. Tulos ei tule näyttämään oikealta.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="261"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="266"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Linssin profiilin kuvasuhde ei vastaa tiedoston kuvasuhdetta. Tulos ei tule näyttämään oikealta.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="270"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="275"/>
       <source>Adjust parameters</source>
       <translation>Säädä parametreja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="303"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="308"/>
       <source>Pixel focal length</source>
       <translation>Pikselin polttoväli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="313"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="318"/>
       <source>Focal center</source>
       <translation>Polttopiste</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="328"/>
       <source>Distortion coefficients</source>
       <translation>Vääristymien kertoimet</translation>
     </message>
@@ -1117,7 +1124,7 @@ Haluatko lähettää profiilisi tähän?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="44"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="513"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="308"/>
       <source>Full</source>
       <translation>Täysi</translation>
@@ -2155,90 +2162,90 @@ Make sure you have proper rolling shutter value set before syncing.</translation
       <translation>Havaittu kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
       <source>Camera</source>
       <translation>Kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="53"/>
       <source>Lens</source>
       <translation>Linssi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
       <source>Setting</source>
       <translation>Asetukset</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Dimensions</source>
       <translation>Dimensiot</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Focal length</source>
       <translation type="unfinished">Focal length</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
       <source>Crop factor</source>
       <translation type="unfinished">Crop factor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="60"/>
       <source>Asymmetrical</source>
       <translation type="unfinished">Asymmetrical</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="61"/>
       <source>Distortion model</source>
       <translation type="unfinished">Distortion model</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="62"/>
       <source>Digital lens</source>
       <translation type="unfinished">Digital lens</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="59"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="62"/>
       <source>Camera brand</source>
       <translation>Kameran merkki</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="60"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
       <source>Camera model</source>
       <translation>Kameran malli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="61"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
       <source>Lens model</source>
       <translation>Linssimalli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="62"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
       <source>Camera setting</source>
       <translation>Kameran asetukset</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="51"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
       <source>Additional info</source>
       <translation>Lisätietoja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="67"/>
       <source>Default output size</source>
       <translation>Oletus vienti koko</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="68"/>
       <source>Identifier</source>
       <translation>Tunniste</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="53"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="69"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
       <source>Calibrated by</source>
       <translation>Kalibroitu käyttäen</translation>
     </message>
@@ -2473,27 +2480,27 @@ Oletko varma, että haluat jatkaa?</translation>
       <translation>Kvaternionit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="735"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="736"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
       <source>Control+Shift+Scroll</source>
       <translation type="unfinished">Control+Shift+Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="838"/>
       <source>Command+Scroll</source>
       <translation>Komento+Vieritä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="838"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+Vieritä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="834"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="835"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation type="unfinished">%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</translation>
     </message>
@@ -2518,24 +2525,24 @@ Oletko varma, että haluat jatkaa?</translation>
       <translation type="unfinished">Yaw smoothness</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="835"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
       <source>Scroll</source>
       <translation type="unfinished">Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
       <source>Alt+Scroll</source>
       <translation>Alt+Vieritä</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="688"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="788"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="795"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="789"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="796"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="815"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="816"/>
       <source>Save</source>
       <translation>Tallenna</translation>
     </message>
@@ -2599,65 +2606,65 @@ Oletko varma, että haluat jatkaa?</translation>
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="332"/>
+      <location filename="../../src/ui/VideoArea.qml" line="335"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>Tähän videoon liittyy tiedosto: %1 , haluatko ladata sen?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="262"/>
-      <location filename="../../src/ui/VideoArea.qml" line="297"/>
-      <location filename="../../src/ui/VideoArea.qml" line="333"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
+      <location filename="../../src/ui/VideoArea.qml" line="300"/>
+      <location filename="../../src/ui/VideoArea.qml" line="336"/>
       <source>Yes</source>
       <translation>Kyllä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="302"/>
-      <location filename="../../src/ui/VideoArea.qml" line="336"/>
+      <location filename="../../src/ui/VideoArea.qml" line="305"/>
+      <location filename="../../src/ui/VideoArea.qml" line="339"/>
       <source>No</source>
       <translation>Ei</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="483"/>
+      <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Zoom: %1</source>
       <translation>Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="532"/>
+      <location filename="../../src/ui/VideoArea.qml" line="535"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Valitun tiedoston lataaminen epäonnistui, sitä ei ehkä tueta tai se voi olla virheellinen.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="161"/>
-      <location filename="../../src/ui/VideoArea.qml" line="166"/>
-      <location filename="../../src/ui/VideoArea.qml" line="184"/>
-      <location filename="../../src/ui/VideoArea.qml" line="197"/>
-      <location filename="../../src/ui/VideoArea.qml" line="204"/>
-      <location filename="../../src/ui/VideoArea.qml" line="281"/>
-      <location filename="../../src/ui/VideoArea.qml" line="532"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
+      <location filename="../../src/ui/VideoArea.qml" line="168"/>
+      <location filename="../../src/ui/VideoArea.qml" line="186"/>
+      <location filename="../../src/ui/VideoArea.qml" line="200"/>
+      <location filename="../../src/ui/VideoArea.qml" line="207"/>
+      <location filename="../../src/ui/VideoArea.qml" line="284"/>
+      <location filename="../../src/ui/VideoArea.qml" line="535"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="280"/>
+      <location filename="../../src/ui/VideoArea.qml" line="283"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation type="unfinished">Image sequence has been detected.
 Please provide frame rate: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
-      <location filename="../../src/ui/VideoArea.qml" line="287"/>
-      <location filename="../../src/ui/VideoArea.qml" line="368"/>
+      <location filename="../../src/ui/VideoArea.qml" line="270"/>
+      <location filename="../../src/ui/VideoArea.qml" line="290"/>
+      <location filename="../../src/ui/VideoArea.qml" line="371"/>
       <source>Cancel</source>
       <translation type="unfinished">Cancel</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="154"/>
+      <location filename="../../src/ui/VideoArea.qml" line="156"/>
       <source>Downloading %1 (%2)</source>
       <translation type="unfinished">Downloading %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="161"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
@@ -2666,136 +2673,141 @@ You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="176"/>
+      <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Merging files to %1 (%2)</source>
       <translation type="unfinished">Merging files to %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="261"/>
+      <location filename="../../src/ui/VideoArea.qml" line="264"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
       <translation type="unfinished">This format requires an external SDK. Do you want to download it now?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="296"/>
+      <location filename="../../src/ui/VideoArea.qml" line="299"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
       <translation type="unfinished">Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="353"/>
+      <location filename="../../src/ui/VideoArea.qml" line="356"/>
       <source>You have opened multiple files. What do you want to do?</source>
       <translation type="unfinished">You have opened multiple files. What do you want to do?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="354"/>
+      <location filename="../../src/ui/VideoArea.qml" line="357"/>
       <source>Add to render queue</source>
       <translation type="unfinished">Add to render queue</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="358"/>
+      <location filename="../../src/ui/VideoArea.qml" line="361"/>
       <source>Merge them into one video</source>
       <translation type="unfinished">Merge them into one video</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="365"/>
+      <location filename="../../src/ui/VideoArea.qml" line="368"/>
       <source>Open the first file</source>
       <translation type="unfinished">Open the first file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="197"/>
+      <location filename="../../src/ui/VideoArea.qml" line="200"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
       <translation type="unfinished">File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="204"/>
+      <location filename="../../src/ui/VideoArea.qml" line="207"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
       <translation type="unfinished">Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="585"/>
+      <location filename="../../src/ui/VideoArea.qml" line="589"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Linssin profiilia ei ole ladattu, tulokset eivät välttämättä näytä oikeilta. Lataa linssiprofiili kameralle.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="617"/>
+      <location filename="../../src/ui/VideoArea.qml" line="621"/>
       <source>Loading %1...</source>
       <translation>Ladataan %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="617"/>
+      <location filename="../../src/ui/VideoArea.qml" line="621"/>
       <source>Drop video file here</source>
       <translation>Pudota video tiedosto tähän</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="234"/>
+      <location filename="../../src/ui/VideoArea.qml" line="237"/>
       <source>Analyzing %1...</source>
       <translation type="unfinished">Analyzing %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="243"/>
+      <location filename="../../src/ui/VideoArea.qml" line="246"/>
       <source>Loading gyro data %1...</source>
       <translation type="unfinished">Loading gyro data %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="487"/>
+      <location filename="../../src/ui/VideoArea.qml" line="490"/>
       <source>Focal length: %1 mm</source>
       <translation type="unfinished">Focal length: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="489"/>
+      <location filename="../../src/ui/VideoArea.qml" line="492"/>
       <source>full frame equiv.: %1 mm</source>
       <translation type="unfinished">full frame equiv.: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="745"/>
+      <location filename="../../src/ui/VideoArea.qml" line="749"/>
       <source>Trim start</source>
       <translation>Leikkaa alku</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="746"/>
+      <location filename="../../src/ui/VideoArea.qml" line="750"/>
       <source>Previous frame</source>
       <translation>Edellinen kuva</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="749"/>
+      <location filename="../../src/ui/VideoArea.qml" line="753"/>
       <source>Pause</source>
       <translation>Keskeytä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="749"/>
+      <location filename="../../src/ui/VideoArea.qml" line="753"/>
       <source>Play</source>
       <translation>Toista</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="752"/>
+      <location filename="../../src/ui/VideoArea.qml" line="756"/>
       <source>Next frame</source>
       <translation>Seuraava kuva</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="753"/>
+      <location filename="../../src/ui/VideoArea.qml" line="757"/>
       <source>Trim end</source>
       <translation>Leikkaa loppu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="780"/>
+      <location filename="../../src/ui/VideoArea.qml" line="785"/>
+      <source>Toggle stabilization overview</source>
+      <translation type="unfinished">Toggle stabilization overview</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="792"/>
       <source>Toggle stabilization</source>
       <translation>Valitse vakauttaminen</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="786"/>
+      <location filename="../../src/ui/VideoArea.qml" line="798"/>
       <source>Mute</source>
       <translation>Hiljennä</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="786"/>
+      <location filename="../../src/ui/VideoArea.qml" line="798"/>
       <source>Unmute</source>
       <translation>Poista mykistys</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="803"/>
+      <location filename="../../src/ui/VideoArea.qml" line="815"/>
       <source>Playback speed</source>
       <translation>Toistonopeus</translation>
     </message>
@@ -2808,7 +2820,7 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
       <translation>Videon tiedot</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/VideoInformation.qml" line="127"/>
+      <location filename="../../src/ui/menu/VideoInformation.qml" line="126"/>
       <source>Open file</source>
       <translation>Avaa tiedosto</translation>
     </message>

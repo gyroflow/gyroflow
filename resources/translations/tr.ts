@@ -603,180 +603,187 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
       <translation>Kalibrasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="149"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="153"/>
       <source>Reprojection error</source>
       <translation>Yeniden yansıtma hatası</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="161"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="165"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>İyi bir lens kalibrasyonu için, bu değer 5'ten, tercihen 1'den, az olmalı.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="165"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="169"/>
       <source>Auto calibrate</source>
       <translation>Otokalibrasyon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="176"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="180"/>
       <source>Max calibration points</source>
       <translation>Maksimum kalibrasyon noktaları</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="128"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="292"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="132"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="296"/>
       <source>Export lens profile</source>
       <translation>Lens profilini dışa aktar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="129"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="133"/>
       <source>Lens profiles</source>
       <translation>Lens profilleri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="133"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="137"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>Lens profilinizi veritabanına yükleyerek, profilinizin GPLv3 şartları kapsamında Gyroflow ile birlikte yayınlanmasını ve dağıtımını kabul etmiş olursunuz.
 Profilinizi yüklemek istiyor musunuz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="134"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="138"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="135"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="139"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="461"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="237"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="241"/>
       <source>Invalid format</source>
       <translation>Geçersiz format</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="237"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="241"/>
       <source>Ok</source>
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="305"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="309"/>
       <source>Upload lens profile to the database</source>
       <translation>Lens profilini veritabanına yükle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="311"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="315"/>
       <source>FOV</source>
       <translation>Görüş alanı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="328"/>
       <source>Analyze every n-th frame</source>
       <translation>Her n. frame'i analiz et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="340"/>
       <source>Sharpness limit</source>
       <translation>Keskinlik sınırı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="344"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="349"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="352"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="357"/>
       <source>Digital lens</source>
       <translation>Dijital lens</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="413"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="418"/>
       <source>Input horizontal stretch</source>
       <translation>Yatay esnemeyi yazın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="428"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="435"/>
       <source>Input vertical stretch</source>
       <translation>Dikey genişlemeyi yazın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="443"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="457"/>
+      <source>Do you want to update the output resolution to %1?</source>
+      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="468"/>
       <source>Iterations</source>
       <translation>Tekrarlamalar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="455"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="480"/>
       <source>Low pass filter</source>
       <translation>Alçak geçiş filtresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="464"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="489"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="479"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="504"/>
       <source>Focal length</source>
       <translation>Odak uzunluğu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="481"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="506"/>
       <source>Lens native focal length</source>
       <translation>Lense özgü odak uzunluğu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="485"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="510"/>
       <source>mm</source>
       <translation>milimetre</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="494"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
       <source>Crop factor</source>
       <translation>Kırpma çarpanı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="498"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="523"/>
       <source>x</source>
       <translation>x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="510"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="535"/>
       <source>Preview resolution</source>
       <translation>Çözünürlüğü önizle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="531"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="556"/>
       <source>Radial distortion limit</source>
       <translation>Radyal bozulma sınırı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="547"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="572"/>
       <source>Lens is asymmetrical</source>
       <translation>Lens asimetrik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="554"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="579"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation>Dama deseni (önceki versiyonun ortada nokta olmayan hali)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="251"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="255"/>
       <source>Rolling shutter correction</source>
       <translation>Jöle etkisi düzeltme</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="259"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="263"/>
       <source>Frame readout time</source>
       <translation>Frame okuma süresi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="265"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="269"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="281"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="285"/>
       <source>Bottom to top</source>
       <translation>Alttan üste</translation>
     </message>
@@ -789,77 +796,77 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <translation>Lens profili</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="32"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="36"/>
       <source>Choose a lens profile</source>
       <translation>Lens profili seç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="33"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="37"/>
       <source>Lens profiles</source>
       <translation>Lens profilleri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="98"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="102"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="177"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="182"/>
       <source>Search...</source>
       <translation>Ara...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="199"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="204"/>
       <source>Open file</source>
       <translation>Dosya aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="204"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="209"/>
       <source>Create new</source>
       <translation>Yeni oluştur</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="229"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="234"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee it&apos;s correctness. Use at your own risk.</source>
       <translation>Bu lens profili bizim tarafımızdan sağlanmış değil, doğruluğunu garanti edemeyiz. Kullanımından doğan riskler size aittir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="230"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="235"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Bu profili değerlendirin: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="232"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="237"/>
       <source>Thank you for rating this profile.</source>
       <translation>Bu profili değerlendirdiğiniz için teşekkür ederiz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="260"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="265"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Lens profili açıklık oranı dosyanın açıklık oranıyla uyumsuz. Sonuç doğru gözükmeyecek.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="261"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="266"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Lens profili ölçüleri dosyanın ölçüleri ile uyumsuz. Sonuç doğru gözükmeyebilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="270"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="275"/>
       <source>Adjust parameters</source>
       <translation>Parametreleri ayarla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="303"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="308"/>
       <source>Pixel focal length</source>
       <translation>Piksel odak uzunluğu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="313"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="318"/>
       <source>Focal center</source>
       <translation>Odak merkezi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="328"/>
       <source>Distortion coefficients</source>
       <translation>Bozulma sabitleri</translation>
     </message>
@@ -1116,7 +1123,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="44"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="513"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="308"/>
       <source>Full</source>
       <translation>Tam</translation>
@@ -2152,90 +2159,90 @@ Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin 
       <translation>Tespit edilmiş kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="48"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
       <source>Camera</source>
       <translation>Kamera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="49"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="53"/>
       <source>Lens</source>
       <translation>Lens</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="50"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
       <source>Setting</source>
       <translation>Ayar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="52"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Dimensions</source>
       <translation>Ölçüler</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="54"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Focal length</source>
       <translation>Odak uzunluğu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
       <source>Crop factor</source>
       <translation>Kırpma çarpanı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="60"/>
       <source>Asymmetrical</source>
       <translation>Asimetrik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="61"/>
       <source>Distortion model</source>
       <translation>Bozulma (distorsiyon) modeli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="62"/>
       <source>Digital lens</source>
       <translation>Dijital lens</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="59"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="62"/>
       <source>Camera brand</source>
       <translation>Kamera markası</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="60"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
       <source>Camera model</source>
       <translation>Kamera modeli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="61"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
       <source>Lens model</source>
       <translation>Lens modeli</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="62"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
       <source>Camera setting</source>
       <translation>Kamera ayarı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="51"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
       <source>Additional info</source>
       <translation>Ek bilgi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="67"/>
       <source>Default output size</source>
       <translation>Varsayılan çıktı boyutu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="65"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="68"/>
       <source>Identifier</source>
       <translation>Kimlik</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="66"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="53"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="69"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
       <source>Calibrated by</source>
       <translation>Kalibre eden</translation>
     </message>
@@ -2468,27 +2475,27 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
       <translation>Quaternionlar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="735"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="736"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
       <source>Control+Shift+Scroll</source>
       <translation>Ctrl + Shift + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="838"/>
       <source>Command+Scroll</source>
       <translation>Cmd + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="838"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl + Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="834"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="835"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 yatay zoom, %2 dikey zoom, %3 pan, zoomu sıfırlamak için çift tıkla</translation>
     </message>
@@ -2513,24 +2520,24 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
       <translation>Yaw yumuşaklığı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="835"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
       <source>Scroll</source>
       <translation>Scroll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="836"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="837"/>
       <source>Alt+Scroll</source>
       <translation>Alt + Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="688"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="788"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="795"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="789"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="796"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="815"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="816"/>
       <source>Save</source>
       <translation>Kaydet</translation>
     </message>
@@ -2594,65 +2601,65 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="332"/>
+      <location filename="../../src/ui/VideoArea.qml" line="335"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>Bu videoyla ilişkilendirilmiş bir dosya var %1. Yüklemek ister misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="262"/>
-      <location filename="../../src/ui/VideoArea.qml" line="297"/>
-      <location filename="../../src/ui/VideoArea.qml" line="333"/>
+      <location filename="../../src/ui/VideoArea.qml" line="265"/>
+      <location filename="../../src/ui/VideoArea.qml" line="300"/>
+      <location filename="../../src/ui/VideoArea.qml" line="336"/>
       <source>Yes</source>
       <translation>Evet</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="302"/>
-      <location filename="../../src/ui/VideoArea.qml" line="336"/>
+      <location filename="../../src/ui/VideoArea.qml" line="305"/>
+      <location filename="../../src/ui/VideoArea.qml" line="339"/>
       <source>No</source>
       <translation>Hayır</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="483"/>
+      <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Zoom: %1</source>
       <translation>Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="532"/>
+      <location filename="../../src/ui/VideoArea.qml" line="535"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Seçilen dosyanın yüklemesi başarısız oldu; desteklenmiyor veya bozuk olabilir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="161"/>
-      <location filename="../../src/ui/VideoArea.qml" line="166"/>
-      <location filename="../../src/ui/VideoArea.qml" line="184"/>
-      <location filename="../../src/ui/VideoArea.qml" line="197"/>
-      <location filename="../../src/ui/VideoArea.qml" line="204"/>
-      <location filename="../../src/ui/VideoArea.qml" line="281"/>
-      <location filename="../../src/ui/VideoArea.qml" line="532"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
+      <location filename="../../src/ui/VideoArea.qml" line="168"/>
+      <location filename="../../src/ui/VideoArea.qml" line="186"/>
+      <location filename="../../src/ui/VideoArea.qml" line="200"/>
+      <location filename="../../src/ui/VideoArea.qml" line="207"/>
+      <location filename="../../src/ui/VideoArea.qml" line="284"/>
+      <location filename="../../src/ui/VideoArea.qml" line="535"/>
       <source>Ok</source>
       <translation>Tamam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="280"/>
+      <location filename="../../src/ui/VideoArea.qml" line="283"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation>Görüntü sekansı seçildi.
 Lütfen frame rate'i belirtin: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="267"/>
-      <location filename="../../src/ui/VideoArea.qml" line="287"/>
-      <location filename="../../src/ui/VideoArea.qml" line="368"/>
+      <location filename="../../src/ui/VideoArea.qml" line="270"/>
+      <location filename="../../src/ui/VideoArea.qml" line="290"/>
+      <location filename="../../src/ui/VideoArea.qml" line="371"/>
       <source>Cancel</source>
       <translation>İptal et</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="154"/>
+      <location filename="../../src/ui/VideoArea.qml" line="156"/>
       <source>Downloading %1 (%2)</source>
       <translation>İndiriliyor %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="161"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
@@ -2661,136 +2668,141 @@ Değişikliklerin geçerli olması için Gyroflow'u yeniden başlatmalısınız.
 Render sıranız ve güncel dosyanız otomatik olarak kaydedildi.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="176"/>
+      <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Merging files to %1 (%2)</source>
       <translation>Dosyalar birleştiriliyor %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="261"/>
+      <location filename="../../src/ui/VideoArea.qml" line="264"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
       <translation>Bu format harici bir SDK'ya ihtiyaç duyar. Şimdi indirmek istiyor musunuz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="296"/>
+      <location filename="../../src/ui/VideoArea.qml" line="299"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
       <translation>Ayrık kayıt tespit edildi, tek bir tam klip oluşturmak için dosyaları (%1) otomatik olarak bir araya getirmek ister misiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="353"/>
+      <location filename="../../src/ui/VideoArea.qml" line="356"/>
       <source>You have opened multiple files. What do you want to do?</source>
       <translation>Birden fazla dosya açtınız. Ne yapmak istersiniz?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="354"/>
+      <location filename="../../src/ui/VideoArea.qml" line="357"/>
       <source>Add to render queue</source>
       <translation>Render sırasına ekle</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="358"/>
+      <location filename="../../src/ui/VideoArea.qml" line="361"/>
       <source>Merge them into one video</source>
       <translation>Tek bir video dosyasında birleştir</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="365"/>
+      <location filename="../../src/ui/VideoArea.qml" line="368"/>
       <source>Open the first file</source>
       <translation>İlk dosyayı aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="197"/>
+      <location filename="../../src/ui/VideoArea.qml" line="200"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
       <translation>Dosya formatı tespit edildi, ama herhangi bir hareket verisi bulunamadı.
 Muhtemelen kameranız bu çekim modunda hareket verisi kaydetmiyor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="204"/>
+      <location filename="../../src/ui/VideoArea.qml" line="207"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
       <translation>Hareket verisi örnekleme hızı çok düşük (%1 Hz).
 50 Hz mutlak alt limittir ve tavsiyemiz en az 200 Hz'tir.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="585"/>
+      <location filename="../../src/ui/VideoArea.qml" line="589"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Lens profili yüklenmedi, sonuçlar düzgün gözükmeyecek. Lütfen kameranızın lens profilini yükleyin.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="617"/>
+      <location filename="../../src/ui/VideoArea.qml" line="621"/>
       <source>Loading %1...</source>
       <translation>Yükleniyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="617"/>
+      <location filename="../../src/ui/VideoArea.qml" line="621"/>
       <source>Drop video file here</source>
       <translation>Video dosyasını buraya bırakın</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="234"/>
+      <location filename="../../src/ui/VideoArea.qml" line="237"/>
       <source>Analyzing %1...</source>
       <translation>Analiz ediliyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="243"/>
+      <location filename="../../src/ui/VideoArea.qml" line="246"/>
       <source>Loading gyro data %1...</source>
       <translation>Gyro verisi yükleniyor %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="487"/>
+      <location filename="../../src/ui/VideoArea.qml" line="490"/>
       <source>Focal length: %1 mm</source>
       <translation>Odak uzunluğu: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="489"/>
+      <location filename="../../src/ui/VideoArea.qml" line="492"/>
       <source>full frame equiv.: %1 mm</source>
       <translation>tam çerçeve eşit.: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="745"/>
+      <location filename="../../src/ui/VideoArea.qml" line="749"/>
       <source>Trim start</source>
       <translation>Kırpma başlangıcı</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="746"/>
+      <location filename="../../src/ui/VideoArea.qml" line="750"/>
       <source>Previous frame</source>
       <translation>Önceki frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="749"/>
+      <location filename="../../src/ui/VideoArea.qml" line="753"/>
       <source>Pause</source>
       <translation>Duraklat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="749"/>
+      <location filename="../../src/ui/VideoArea.qml" line="753"/>
       <source>Play</source>
       <translation>Oynat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="752"/>
+      <location filename="../../src/ui/VideoArea.qml" line="756"/>
       <source>Next frame</source>
       <translation>Sonraki frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="753"/>
+      <location filename="../../src/ui/VideoArea.qml" line="757"/>
       <source>Trim end</source>
       <translation>Kırpma sonu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="780"/>
+      <location filename="../../src/ui/VideoArea.qml" line="785"/>
+      <source>Toggle stabilization overview</source>
+      <translation type="unfinished">Toggle stabilization overview</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="792"/>
       <source>Toggle stabilization</source>
       <translation>Stabilizasyonu aç/kapa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="786"/>
+      <location filename="../../src/ui/VideoArea.qml" line="798"/>
       <source>Mute</source>
       <translation>Sesi kapat</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="786"/>
+      <location filename="../../src/ui/VideoArea.qml" line="798"/>
       <source>Unmute</source>
       <translation>Sesi aç</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="803"/>
+      <location filename="../../src/ui/VideoArea.qml" line="815"/>
       <source>Playback speed</source>
       <translation>Oynatma hızı</translation>
     </message>
@@ -2803,7 +2815,7 @@ Muhtemelen kameranız bu çekim modunda hareket verisi kaydetmiyor.</translation
       <translation>Video özellikleri</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/VideoInformation.qml" line="127"/>
+      <location filename="../../src/ui/menu/VideoInformation.qml" line="126"/>
       <source>Open file</source>
       <translation>Dosyayı aç</translation>
     </message>
