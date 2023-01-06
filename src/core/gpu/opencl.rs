@@ -407,13 +407,14 @@ pub fn is_buffer_supported(buffers: &Buffers) -> bool {
         BufferSource::None           => false,
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => true,
+        BufferSource::OpenCL  { .. } => true,
         #[cfg(target_os = "windows")]
         BufferSource::DirectX { .. } => true,
-        BufferSource::OpenCL  { .. } => true,
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan  { .. } => false,
+        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        BufferSource::CUDABuffer{ .. } => false,
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        BufferSource::Metal   { .. } => false,
-        #[cfg(any(target_os = "macos", target_os = "ios"))]
-        BufferSource::MetalBuffer { .. } => false,
+        BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => false,
     }
 }
