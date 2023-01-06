@@ -248,7 +248,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                 #[cfg(target_os = "windows")]
                 windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
                 #[cfg(target_os = "linux")]
-                libc::close(cuda_mem.shared_handle);
+                libc::close(cuda_mem.shared_handle as i32);
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
@@ -514,7 +514,7 @@ pub struct CUDA_EXTERNAL_MEMORY_BUFFER_DESC_st {
 #[cfg(target_os = "windows")]
 use libloading::os::windows as dl;
 #[cfg(target_os = "linux")]
-use libloading::os::linux as dl;
+use libloading::os::unix as dl;
 
 pub struct CudaFunctions {
     _cudart: dl::Library,
