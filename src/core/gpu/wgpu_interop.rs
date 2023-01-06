@@ -335,6 +335,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
                 super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, cuda_mem.vulkan_pitch_alignment);
             }
         },
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan { .. } => {
             device.poll(wgpu::Maintain::Wait);
         },
