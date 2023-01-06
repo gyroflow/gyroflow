@@ -1975,6 +1975,16 @@ impl Controller {
                 }
             }
         }
+        if let Some(paths) = std::env::var_os("PATH") {
+            for dir in std::env::split_paths(&paths) {
+                let full_path = dir.join(&"REDline");
+                if full_path.is_file() {
+                    if let Some(full_path) = full_path.to_str() {
+                        return full_path.to_string();
+                    }
+                }
+            }
+        }
         String::new()
     }
     fn convert_r3d(&self, file: QString, format: i32) {
@@ -1998,7 +2008,11 @@ impl Controller {
                 let re_progress    = regex::Regex::new(r#"Export Job frame complete. [0-9]+ ([0-9\.]+)"#).unwrap();
 
                 let result = (|| -> Result<()> {
-                    let mut child = Command::new(redline)
+                    let mut cmd = Command::new(redline);
+                    #[cfg(target_os = "windows")]
+                    { use std::os::windows::process::CommandExt; cmd.creation_flags(0x08000000); } // CREATE_NO_WINDOW
+
+                    let mut child = cmd
                         .args(["-i", &file])
                         .args(["-o", &output_file])
                         .args(["--format", "201"])
