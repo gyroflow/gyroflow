@@ -1012,6 +1012,7 @@ impl Controller {
                             None => false
                         }
                     },
+                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
                     4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
