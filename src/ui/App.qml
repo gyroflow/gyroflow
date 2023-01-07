@@ -380,7 +380,7 @@ Rectangle {
         let el = null;
 
         if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
-            let clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
+            const clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
             if (buttons.length == 1) {
                 const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
                     text: text,
@@ -396,10 +396,12 @@ Rectangle {
                 return;
             } else {
                 console.log("previously clicked", clickedButton);
-                Qt.callLater(function() {
-                    if (el)
-                        el.clicked(clickedButton, true);
-                });
+                if (clickedButton != buttons.length - 1) { // Don't auto-click the last button (it's always Cancel/Close)
+                    Qt.callLater(function() {
+                        if (el)
+                            el.clicked(clickedButton, true);
+                    });
+                }
             }
         }
 

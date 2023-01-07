@@ -313,6 +313,7 @@ Item {
                     { text: "ProRes 4444",      clicked: () => do_convert(dlg, 4) },
                     { text: qsTr("Cancel"),     clicked: () => { controller.cancel_current_operation(); externalSdkModal = null; } },
                 ], null, undefined, "convert-r3d");
+                dlg.accentButton = +window.settings.value("dontShowAgain-convert-r3d", 1) - 1;
                 externalSdkModal = dlg;
                 dlg.addLoader();
             } else {
