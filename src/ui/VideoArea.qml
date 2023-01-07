@@ -300,17 +300,18 @@ Item {
         if (url.toString().toLowerCase().endsWith(".r3d")) {
             const redline = controller.find_redline();
             if (redline) {
-                const do_convert = (dlg, f) => {
+                const do_convert = (btn, dlg, f) => {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
+                    dlg.accentButton = btn;
                     controller.convert_r3d(controller.url_to_path(url), f);
                     return false;
                 };
                 const dlg = messageBox(Modal.Info, "This format can't be loaded directly at this time.\nDo you want to convert the file to ProRes?", [
-                    { text: "ProRes 422 Proxy", clicked: () => do_convert(dlg, 3), accent: true },
-                    { text: "ProRes 422 HQ",    clicked: () => do_convert(dlg, 0) },
-                    { text: "ProRes 4444",      clicked: () => do_convert(dlg, 4) },
+                    { text: "ProRes 422 Proxy", clicked: () => do_convert(0, dlg, 3), accent: true },
+                    { text: "ProRes 422 HQ",    clicked: () => do_convert(1, dlg, 0) },
+                    { text: "ProRes 4444",      clicked: () => do_convert(2, dlg, 4) },
                     { text: qsTr("Cancel"),     clicked: () => { controller.cancel_current_operation(); externalSdkModal = null; } },
                 ], null, undefined, "convert-r3d");
                 dlg.accentButton = +window.settings.value("dontShowAgain-convert-r3d", 1) - 1;
