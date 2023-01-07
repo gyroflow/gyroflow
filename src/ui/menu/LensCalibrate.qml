@@ -53,7 +53,7 @@ MenuItem {
     }
     function resetMetadata() {
         calib.calibrationInfo = {
-            "calibrated_by": calib.calibrationInfo.calibrated_by || controller.get_username(),
+            "calibrated_by": calib.calibrationInfo.calibrated_by || settings.value("calibratedBy", "") || controller.get_username(),
             "output_dimension": { "w": 0, "h": 0 }
         };
     }
@@ -246,7 +246,7 @@ MenuItem {
                 "type": "text",
                 "width": 120,
                 "value": function() { return calib.calibrationInfo.calibrated_by || ""; },
-                "onChange": function(value) { calib.calibrationInfo.calibrated_by = value; list.updateEntry("Calibrated by", value);  }
+                "onChange": function(value) { calib.calibrationInfo.calibrated_by = value; list.updateEntry("Calibrated by", value); settings.setValue("calibratedBy", value); }
             }
         });
     }
