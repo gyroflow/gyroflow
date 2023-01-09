@@ -158,6 +158,7 @@ cp -f $QT_DIR/plugins/xcbglintegrations/*.so                                    
 
 cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
 cp -f "$CARGO_TARGET/libmdk-braw.so"                   "$TARGET/lib/"
+cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
 #cp -f "$CARGO_TARGET/libffmpeg.so.5"                  "$TARGET/"
 
 cp -f "$FFMPEG_DIR/lib/libavcodec.so.59"               "$TARGET/lib/"

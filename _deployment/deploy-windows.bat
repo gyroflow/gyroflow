@@ -95,6 +95,7 @@ del "%TARGET%\opencv_*videoio*"
 :: Copy Gyroflow
 xcopy /Y "%CARGO_TARGET%\mdk.dll"                                      "%TARGET%\"
 xcopy /Y "%CARGO_TARGET%\mdk-braw.dll"                                 "%TARGET%\"
+xcopy /Y "%CARGO_TARGET%\mdk-r3d.dll"                                  "%TARGET%\"
 echo F | xcopy /Y "%CARGO_TARGET%\gyroflow.exe"                        "%TARGET%\Gyroflow.exe"
 xcopy /Y "%PROJECT_DIR%\_deployment\windows\Gyroflow_with_console.bat" "%TARGET%\"
 xcopy /Y /E "%PROJECT_DIR%\resources\camera_presets\*"                 "%TARGET%\camera_presets\"
