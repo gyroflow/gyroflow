@@ -13,6 +13,7 @@ use qmetaobject::*;
 
 pub struct MDKProcessor {
     mdk: qml_video_rs::video_item::MDKVideoItem,
+    format: ffmpeg_next::format::Pixel,
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static>>,
 }
 
@@ -20,15 +21,18 @@ impl MDKProcessor {
     pub fn from_file(path: &str) -> Self {
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
         let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
+        let mut format = ffmpeg_next::format::Pixel::RGBA;
         if !*super::GPU_DECODING.read() && path.to_ascii_lowercase().ends_with("braw") {
             custom_decoder = "BRAW:gpu=no:scale=1920x1080".to_owned(); // Disable GPU decoding for BRAW
         }
         if path.to_ascii_lowercase().ends_with("r3d") {
+            format = ffmpeg_next::format::Pixel::BGRA;
             custom_decoder = "R3D:gpu=auto:scale=1920x1080".to_owned();
         }
         mdk.setUrl(crate::util::path_to_url(QString::from(path)), QString::from(custom_decoder));
         Self {
             mdk,
+            format,
             on_frame_callback: None
         }
     }
@@ -43,6 +47,7 @@ impl MDKProcessor {
 
         let mut converter = Converter::default();
         let mut ffmpeg_frame = None;
+        let format = self.format;
         self.mdk.startProcessing(0, 0, 0, false, ranges_ms, move |frame_num, timestamp_ms, width, height, data| {
             if frame_num == -1 || data.is_empty() {
                 let _ = tx.send(());
@@ -51,7 +56,7 @@ impl MDKProcessor {
             if let Some(ref mut cb) = cb {
                 let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
                 if ffmpeg_frame.is_none() {
-                    ffmpeg_frame = Some(ffmpeg_next::frame::Video::new(ffmpeg_next::format::Pixel::RGBA, width, height));
+                    ffmpeg_frame = Some(ffmpeg_next::frame::Video::new(format, width, height));
                 }
                 let ffmpeg_frame = ffmpeg_frame.as_mut().unwrap();
 

@@ -44,7 +44,7 @@ crc32fast = "1.3.2"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "90c5c9c" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "e678638" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "5.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
