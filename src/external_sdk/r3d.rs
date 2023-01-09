@@ -13,11 +13,15 @@ impl REDSdk {
                     exe_path.with_file_name("REDOpenCL-x64.dll").exists() &&
                     exe_path.with_file_name("REDCuda-x64.dll").exists();
             } else if cfg!(target_os = "macos") {
-                return
-                    exe_path.with_file_name("REDDecoder.dylib").exists() &&
-                    exe_path.with_file_name("REDMetal.dylib").exists() &&
-                    exe_path.with_file_name("REDOpenCL.dylib").exists() &&
-                    exe_path.with_file_name("REDR3D.dylib").exists();
+                if let Some(parent) = exe_path.parent() {
+                    let mut parent = parent.to_path_buf();
+                    parent.push("../Frameworks/_");
+                    return
+                        parent.with_file_name("REDDecoder.dylib").exists() &&
+                        parent.with_file_name("REDMetal.dylib").exists() &&
+                        parent.with_file_name("REDOpenCL.dylib").exists() &&
+                        parent.with_file_name("REDR3D.dylib").exists();
+                }
             } else if cfg!(target_os = "linux") {
                 if let Some(parent) = exe_path.parent() {
                     let mut lib = parent.to_path_buf();

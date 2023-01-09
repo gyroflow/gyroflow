@@ -42,7 +42,7 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                 io::copy(&mut reader, &mut buf)?;
 
                 let mut out_dir = std::env::current_exe()?.parent().ok_or_else(|| Error::new(ErrorKind::Other, "Cannot get exe parent"))?.to_path_buf();
-                if cfg!(target_os = "macos") && sdk_name != "RED SDK" {
+                if cfg!(target_os = "macos") {
                     out_dir.push("../Frameworks/");
                 }
                 if cfg!(target_os = "linux") {
