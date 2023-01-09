@@ -183,8 +183,12 @@ impl CameraIdentifier {
 
     fn get_identifier(&self) -> String {
         if self.brand.is_empty() || self.model.is_empty() || self.lens_info.is_empty() { return String::new(); }
+        let fps = match self.brand.as_ref() {
+            "RED" | "RED RAW" => 0, // RED doesn't do any sensor crop while maintaining the resolution, so we can skip fps
+            _ => self.fps
+        };
 
-        let mut id = format!("{}-{}-{}-{}-{}x{}@{}-{}", self.brand, self.model, self.lens_model, self.lens_info, self.video_width, self.video_height, self.fps, self.additional);
+        let mut id = format!("{}-{}-{}-{}-{}x{}@{}-{}", self.brand, self.model, self.lens_model, self.lens_info, self.video_width, self.video_height, fps, self.additional);
         id = id.replace(' ', "");
         id = id.replace("--", "-");
         id = id.replace("--", "-");
