@@ -2,6 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 mod braw;
+mod r3d;
 mod ffmpeg_gpl;
 
 pub use ffmpeg_gpl::FfmpegGpl;
@@ -12,6 +13,7 @@ use flate2::read::GzDecoder;
 
 pub fn requires_install(path: &str) -> bool {
     if path.to_lowercase().ends_with(".braw") { return !braw::BrawSdk::is_installed(); }
+    if path.to_lowercase().ends_with(".r3d") { return !r3d::REDSdk::is_installed(); }
     if path == "ffmpeg_gpl" { return !FfmpegGpl::is_installed(); }
     false
 }
@@ -19,6 +21,8 @@ pub fn requires_install(path: &str) -> bool {
 pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'static>(path: &str, cb: F) {
     let (url, sdk_name) = if path.to_lowercase().ends_with(".braw") {
         (braw::BrawSdk::get_download_url(), "Blackmagic RAW SDK")
+    } else if path.to_lowercase().ends_with(".r3d") {
+        (r3d::REDSdk::get_download_url(), "RED SDK")
     } else if path == "ffmpeg_gpl" {
         (FfmpegGpl::get_download_url(), "FFmpeg GPL codecs (x264, x265)")
     } else {

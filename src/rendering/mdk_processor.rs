@@ -23,6 +23,9 @@ impl MDKProcessor {
         if !*super::GPU_DECODING.read() && path.to_ascii_lowercase().ends_with("braw") {
             custom_decoder = "BRAW:gpu=no:scale=1920x1080".to_owned(); // Disable GPU decoding for BRAW
         }
+        if path.to_ascii_lowercase().ends_with("r3d") {
+            custom_decoder = "R3D:gpu=auto:scale=1920x1080".to_owned();
+        }
         mdk.setUrl(crate::util::path_to_url(QString::from(path)), QString::from(custom_decoder));
         Self {
             mdk,

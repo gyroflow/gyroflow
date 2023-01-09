@@ -316,6 +316,9 @@ impl Controller {
         if !*rendering::GPU_DECODING.read() && file_path.to_ascii_lowercase().ends_with("braw") {
             custom_decoder = QString::from("BRAW:gpu=no:scale=1920x1080"); // Disable GPU decoding for BRAW
         }
+        if file_path.to_ascii_lowercase().ends_with("r3d") {
+            custom_decoder = QString::from("R3D:gpu=auto:scale=1920x1080");
+        }
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()

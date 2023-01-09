@@ -17,7 +17,7 @@ pub struct VideoProcessor<'a> {
 
 impl<'a> VideoProcessor<'a> {
     pub fn from_file(path: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
-        if path.to_lowercase().ends_with(".braw") {
+        if path.to_lowercase().ends_with(".braw") || path.to_lowercase().ends_with(".r3d") {
             Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(path)) })
         } else {
             Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(path, gpu_decoding, gpu_decoder_index, decoder_options)?) })
