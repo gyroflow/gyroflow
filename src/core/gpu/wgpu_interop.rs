@@ -21,7 +21,7 @@ pub enum NativeTexture {
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     Cuda(CudaSharedMemory),
     #[cfg(target_os = "windows")]
-    D3D11(ID3D11Texture2D),
+    D3D11(DirectX11SharedTexture),
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     Metal(metal::Texture)
 }
@@ -34,7 +34,7 @@ pub struct TextureHolder  {
 
 pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferDescription, format: wgpu::TextureFormat, is_in: bool) -> TextureHolder {
     let usage = if is_in {
-        wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING
+        wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST
     } else {
         wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC
     };
@@ -95,7 +95,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                 wgpu::Backend::Vulkan => {
                     let (image, mem) = super::wgpu_interop_cuda::create_vk_image_backed_by_cuda_memory(&device, buf.size, format).unwrap(); // TODO: unwrap
                     TextureHolder {
-                        wgpu_texture: create_texture_from_vk_image(&device, image, desc.size.width, desc.size.height, format, is_in),
+                        wgpu_texture: create_texture_from_vk_image(&device, image, desc.size.width, desc.size.height, format, is_in, true),
                         wgpu_buffer: None,
                         native_texture: Some(NativeTexture::Cuda(mem))
                     }
@@ -134,35 +134,38 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
             }
         },
         #[cfg(target_os = "windows")]
-        BufferSource::DirectX { texture, device: d3d11_device, device_context } => {
+        BufferSource::DirectX11 { texture, device: d3d11_device, device_context } => {
             unsafe {
                 let d3d11_device = ID3D11Device::from_raw_borrowed(&d3d11_device);
                 // let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
                 let texture = ID3D11Texture2D::from_raw_borrowed(&texture);
-                let mut desc = D3D11_TEXTURE2D_DESC::default();
-                texture.GetDesc(&mut desc);
-                let conv_format = format_dxgi_to_wgpu(desc.Format);
+                let mut desc11 = D3D11_TEXTURE2D_DESC::default();
+                texture.GetDesc(&mut desc11);
+                let conv_format = format_dxgi_to_wgpu(desc11.Format);
                 assert_eq!(format, conv_format);
-                assert_eq!(desc.Width, buf.size.0 as u32);
-                assert_eq!(desc.Height, buf.size.1 as u32);
+                assert_eq!(desc11.Width, buf.size.0 as u32);
+                assert_eq!(desc11.Height, buf.size.1 as u32);
 
                 match backend {
                     wgpu::Backend::Vulkan => {
-                        let (image, dx_tex) = create_vk_image_from_d3d11_texture(&device, d3d11_device, texture).unwrap();
+                        let (image, dx_tex) = create_vk_image_from_d3d11_texture(&device, d3d11_device, texture).unwrap(); // TODO: unwrap
 
                         TextureHolder {
-                            wgpu_texture: create_texture_from_vk_image(&device, image, desc.Width, desc.Height, conv_format, is_in),
+                            wgpu_texture: create_texture_from_vk_image(&device, image, desc11.Width, desc11.Height, conv_format, is_in, true),
                             wgpu_buffer: None,
                             native_texture: dx_tex.map(|x| NativeTexture::D3D11(x))
                         }
                     },
-                    /*wgpu::Backend::Dx12 => {
-                        // TODO
+                    wgpu::Backend::Dx12 => {
+                        let (d3d12_resource, dx11_tex) = create_dx12_resource_from_d3d11_texture(&device, d3d11_device, texture).unwrap(); // TODO: unwrap
+
+                        TextureHolder {
+                            wgpu_texture: create_texture_from_dx12_resource(&device, d3d12_resource, &desc),
+                            wgpu_buffer: None,
+                            native_texture: dx11_tex.map(|x| NativeTexture::D3D11(x))
+                        }
                     },
-                    wgpu::Backend::Dx11 => {
-                        // TODO
-                    },
-                    wgpu::Backend::Gl => {
+                    /*wgpu::Backend::Gl => {
                         // TODO
                     },*/
                     _ => {
@@ -176,7 +179,11 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
             if backend != wgpu::Backend::Vulkan { panic!("Unable to use Vulkan texture on non-Vulkan backend!"); }
             use ash::vk::Handle;
             TextureHolder {
-                wgpu_texture: create_texture_from_vk_image(&device, vk::Image::from_raw(texture), buf.size.0 as u32, buf.size.1 as u32, format, is_in),
+                wgpu_texture: if buf.texture_copy {
+                    device.create_texture(&desc)
+                } else {
+                    create_texture_from_vk_image(&device, vk::Image::from_raw(texture), buf.size.0 as u32, buf.size.1 as u32, format, is_in, false)
+                },
                 wgpu_buffer: None,
                 native_texture: None
             }
@@ -202,12 +209,10 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             );
         },
         #[cfg(target_os = "windows")]
-        BufferSource::DirectX { texture, device_context, .. } => {
+        BufferSource::DirectX11 { texture, device_context, .. } => {
             unsafe {
-                let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
-                let texture = ID3D11Texture2D::from_raw_borrowed(texture);
                 if let Some(NativeTexture::D3D11(i)) = &in_texture.native_texture {
-                    device_context.CopyResource(i, texture);
+                    i.synchronized_copy_from(ID3D11DeviceContext::from_raw_borrowed(device_context), ID3D11Texture2D::from_raw_borrowed(texture)).unwrap(); // TODO: unwrap
                 }
             }
         },
@@ -228,6 +233,19 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         BufferSource::Metal { texture, .. } => {
             if buf.texture_copy {
                 temp_texture = Some(create_texture_from_metal(device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+
+                encoder.copy_texture_to_texture(
+                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    size
+                );
+            }
+        },
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+        BufferSource::Vulkan { texture, .. } => {
+            if buf.texture_copy {
+                use ash::vk::Handle;
+                temp_texture = Some(create_texture_from_vk_image(&device, vk::Image::from_raw(*texture), buf.size.0 as u32, buf.size.1 as u32, format, true, false));
 
                 encoder.copy_texture_to_texture(
                     ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
@@ -293,6 +311,19 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 );
             }
         },
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+        BufferSource::Vulkan { texture, .. } => {
+            if buf.texture_copy {
+                use ash::vk::Handle;
+                temp_texture = Some(create_texture_from_vk_image(&device, vk::Image::from_raw(*texture), buf.size.0 as u32, buf.size.1 as u32, format, false, false));
+
+                encoder.copy_texture_to_texture(
+                    ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    size
+                );
+            }
+        },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::MetalBuffer { .. } => {
             if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
@@ -316,15 +347,13 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
 pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat) {
     match &buf.data {
         #[cfg(target_os = "windows")]
-        BufferSource::DirectX { texture, device_context, .. } => {
+        BufferSource::DirectX11 { texture, device_context, .. } => {
             device.poll(wgpu::Maintain::Wait);
 
-            use windows::Win32::Graphics::Direct3D11::*;
             unsafe {
-                let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
-                let out_texture_d3d = ID3D11Texture2D::from_raw_borrowed(texture);
+                use windows::Win32::Graphics::Direct3D11::*;
                 if let Some(NativeTexture::D3D11(o)) = &out_texture.native_texture {
-                    device_context.CopyResource(out_texture_d3d, o);
+                    o.synchronized_copy_to(ID3D11DeviceContext::from_raw_borrowed(device_context), ID3D11Texture2D::from_raw_borrowed(texture)).unwrap(); // TODO: unwrap
                 }
             }
         },

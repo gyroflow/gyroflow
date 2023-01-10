@@ -387,11 +387,11 @@ pub fn is_buffer_supported(buffers: &Buffers) -> bool {
         BufferSource::Cpu     { .. } => true,
         BufferSource::OpenGL  { .. } => false,
         #[cfg(target_os = "windows")]
-        BufferSource::DirectX { .. } => false,
+        BufferSource::DirectX11 { .. } => true,
         #[cfg(feature = "use-opencl")]
         BufferSource::OpenCL  { .. } => false,
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-        BufferSource::Vulkan  { .. } => false,
+        BufferSource::Vulkan  { .. } => true,
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer{ .. } => true,
         #[cfg(any(target_os = "macos", target_os = "ios"))]

@@ -37,7 +37,7 @@ pub enum BufferSource<'a> {
         queue: ocl::ffi::cl_command_queue
     },
     #[cfg(target_os = "windows")]
-    DirectX {
+    DirectX11 {
         texture: *mut std::ffi::c_void, // ID3D11Texture2D*
         device: *mut std::ffi::c_void, // ID3D11Device*
         device_context: *mut std::ffi::c_void, // ID3D11DeviceContext*
@@ -97,7 +97,7 @@ impl<'a> BufferDescription<'a> {
                 hasher.write_u64(*context as u64);
             }
             #[cfg(target_os = "windows")]
-            BufferSource::DirectX { texture, device, device_context } => {
+            BufferSource::DirectX11 { texture, device, device_context } => {
                 if !self.texture_copy {
                     hasher.write_u64(*texture as u64);
                 }

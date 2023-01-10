@@ -5,12 +5,13 @@ use ash::vk;
 use wgpu::Device;
 use wgpu_hal::api::Vulkan;
 
-pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u32, height: u32, format: wgpu::TextureFormat, is_in: bool) -> wgpu::Texture {
+pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u32, height: u32, format: wgpu::TextureFormat, is_in: bool, drop: bool) -> wgpu::Texture {
     let size = wgpu::Extent3d {
         width: width,
         height: height,
         depth_or_array_layers: 1,
     };
+    let drop_guard = Box::new(());
 
     let texture = unsafe {
         <Vulkan as wgpu_hal::Api>::Device::texture_from_raw(
@@ -23,13 +24,13 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 dimension: wgpu::TextureDimension::D2,
                 format,
                 usage: if is_in {
-                    wgpu_hal::TextureUses::RESOURCE
+                    wgpu_hal::TextureUses::RESOURCE | wgpu_hal::TextureUses::COPY_SRC
                 } else {
-                    wgpu_hal::TextureUses::COLOR_TARGET
+                    wgpu_hal::TextureUses::COLOR_TARGET | wgpu_hal::TextureUses::COPY_DST
                 },
                 memory_flags: wgpu_hal::MemoryFlags::empty(),
             },
-            None,
+            if drop { None } else { Some(drop_guard) },
         )
     };
 
@@ -44,9 +45,9 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 dimension: wgpu::TextureDimension::D2,
                 format,
                 usage: if is_in {
-                    wgpu::TextureUsages::TEXTURE_BINDING
+                    wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_SRC
                 } else {
-                    wgpu::TextureUsages::RENDER_ATTACHMENT
+                    wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_DST
                 },
             },
         )

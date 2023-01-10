@@ -46,7 +46,7 @@ impl OclWrapper {
                     props = ocl_interop::get_properties_list();
                 }
                 #[cfg(target_os = "windows")]
-                BufferSource::DirectX { device, .. } => {
+                BufferSource::DirectX11 { device, .. } => {
                     props.set_property_value(ocl::enums::ContextPropertyValue::D3d11DeviceKhr(*device));
                 },
                 _ => { }
@@ -245,13 +245,13 @@ impl OclWrapper {
                         Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, Some(img)))
                     },
                     #[cfg(target_os = "windows")]
-                    BufferSource::DirectX { texture, .. } => {
+                    BufferSource::DirectX11 { texture, .. } => {
                         if is_in {
                             let img = Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().read_only(), desc, *texture, 0)?;
                             Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?, Some(img)))
                         } else {
                             let img = match &buffers.input.data {
-                                BufferSource::DirectX { texture: in_texture, .. } if *texture == *in_texture => {
+                                BufferSource::DirectX11 { texture: in_texture, .. } if *texture == *in_texture => {
                                     Some(_other_img.unwrap().clone())
                                 },
                                 _ => Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), desc, *texture, 0)?)
@@ -345,7 +345,7 @@ impl OclWrapper {
                 }
             },
             #[cfg(target_os = "windows")]
-            BufferSource::DirectX { .. } => {
+            BufferSource::DirectX11 { .. } => {
                 if let Some(ref tex) = self.image_src {
                     tex.cmd().d3d11_acquire().enq()?;
                     let _ = tex.cmd().copy_to_buffer(&self.src, 0).enq();
@@ -384,7 +384,7 @@ impl OclWrapper {
                 }
             },
             #[cfg(target_os = "windows")]
-            BufferSource::DirectX { .. } => {
+            BufferSource::DirectX11 { .. } => {
                 if let Some(ref tex) = self.image_dst {
                     tex.cmd().d3d11_acquire().enq()?;
                     if let SpatialDims::Three(w, h, d) = tex.dims() {
@@ -409,7 +409,7 @@ pub fn is_buffer_supported(buffers: &Buffers) -> bool {
         BufferSource::OpenGL  { .. } => true,
         BufferSource::OpenCL  { .. } => true,
         #[cfg(target_os = "windows")]
-        BufferSource::DirectX { .. } => true,
+        BufferSource::DirectX11 { .. } => true,
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan  { .. } => false,
         #[cfg(any(target_os = "windows", target_os = "linux"))]

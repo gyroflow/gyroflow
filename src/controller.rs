@@ -995,7 +995,8 @@ impl Controller {
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
-                                data: BufferSource::DirectX {
+                                texture_copy: true,
+                                data: BufferSource::DirectX11 {
                                     texture: ptr1 as *mut std::ffi::c_void,
                                     device:  ptr2 as *mut std::ffi::c_void,
                                     device_context: ptr3 as *mut std::ffi::c_void
@@ -1003,7 +1004,8 @@ impl Controller {
                             },
                             output: BufferDescription {
                                 size,
-                                data: BufferSource::DirectX {
+                                texture_copy: true,
+                                data: BufferSource::DirectX11 {
                                     texture: ptr1 as *mut std::ffi::c_void,
                                     device:  ptr2 as *mut std::ffi::c_void,
                                     device_context: ptr3 as *mut std::ffi::c_void
@@ -1011,7 +1013,7 @@ impl Controller {
                             },
                         });
                         match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX->{}", bk.backend); true },
+                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX11->{}", bk.backend); true },
                             None => false
                         }
                     },
@@ -1020,21 +1022,15 @@ impl Controller {
                         let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
-                                data: BufferSource::Vulkan {
-                                    texture: ptr1,
-                                    device: ptr2,
-                                    physical_device: ptr4,
-                                    instance: ptr5
-                                }, ..Default::default()
+                                texture_copy: false,
+                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                ..Default::default()
                             },
                             output: BufferDescription {
                                 size,
-                                data: BufferSource::Vulkan {
-                                    texture: ptr1,
-                                    device: ptr2,
-                                    physical_device: ptr4,
-                                    instance: ptr5
-                                }, ..Default::default()
+                                texture_copy: true,
+                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                ..Default::default()
                             },
                         });
                         match ret {

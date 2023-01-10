@@ -2637,7 +2637,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=e678638#e678638fdf8af9d754906f9f3021fcdfa1432815"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=47b792b#47b792b456c28d2125ccb8b8cf6d7bd0e09d94e0"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -2780,9 +2780,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.7.0"
+version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e076559ef8e241f2ae3479e36f97bd5741c0330689e217ad51ce2c76808b868a"
+checksum = "48aaa5748ba571fb95cd2c85c09f629215d3a6ece942baa100950af03a34f733"
 dependencies = [
  "aho-corasick",
  "memchr",
