@@ -72,7 +72,7 @@ ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = 
 version = "0.43.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
-             "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming" ]
+             "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading" ]
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
 version = "0.24.0"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.foreign-types]

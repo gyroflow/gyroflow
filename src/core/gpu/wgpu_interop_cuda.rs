@@ -67,10 +67,17 @@ pub fn cuda_2d_copy_on_device(size: (usize, usize, usize), dst: CUdeviceptr, src
         srcY: 0,
     };
     if let Ok(cuda) = CUDA.as_ref() {
-        unsafe {
-            (cuda.cuMemcpy2D_v2)(&desc as *const _);
-            (cuda.cudaDeviceSynchronize)();
-        }
+        // let mut base = 0;let mut size = 0;
+        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, src)); log::info!("cuSrc: {size}");
+        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, dst)); log::info!("cuDst: {size}");
+        cuda!(cuda.cuMemcpy2D_v2(&desc as *const _));
+    }
+}
+
+pub fn cuda_synchronize() {
+    if let Ok(cuda) = CUDA.as_ref() {
+        cuda!(cuda.cuCtxSynchronize());
+        //unsafe { (cuda.cudaDeviceSynchronize)(); }
     }
 }
 
@@ -262,6 +269,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// https://github.dev/Rust-GPU/Rust-CUDA/blob/master/crates/cust_raw/src/cuda.rs
 
 use ::std::os::raw::*;
 
@@ -534,6 +542,8 @@ pub struct CudaFunctions {
     pub cuMemcpy:                        dl::Symbol<unsafe extern "C" fn(dst: CUdeviceptr, src: CUdeviceptr, ByteCount: usize) -> CUresult>,
     pub cuMemcpy2D_v2:                   dl::Symbol<unsafe extern "C" fn(pCopy: *const CUDA_MEMCPY2D_st) -> CUresult>,
     pub cuMemAddressFree:                dl::Symbol<unsafe extern "C" fn(ptr: CUdeviceptr, size: usize) -> CUresult>,
+    pub cuCtxSynchronize:                dl::Symbol<unsafe extern "C" fn() -> CUresult>,
+    pub cuMemGetAddressRange_v2:         dl::Symbol<unsafe extern "C" fn(pbase: *mut CUdeviceptr, psize: *mut usize, dptr: CUdeviceptr) -> CUresult>,
 
     pub cuImportExternalMemory:          dl::Symbol<unsafe extern "C" fn(extMem_out: *mut CUexternalMemory, memHandleDesc: *const CUDA_EXTERNAL_MEMORY_HANDLE_DESC_st) -> CUresult>,
     pub cuExternalMemoryGetMappedBuffer: dl::Symbol<unsafe extern "C" fn(devPtr: *mut CUdeviceptr, extMem: CUexternalMemory, bufferDesc: *const CUDA_EXTERNAL_MEMORY_BUFFER_DESC_st) -> CUresult>,
@@ -589,6 +599,8 @@ impl CudaFunctions {
             cuMemcpy:                        nvcuda.get(b"cuMemcpy")?,
             cuMemcpy2D_v2:                   nvcuda.get(b"cuMemcpy2D_v2")?,
             cuMemAddressFree:                nvcuda.get(b"cuMemAddressFree")?,
+            cuCtxSynchronize:                nvcuda.get(b"cuCtxSynchronize")?,
+            cuMemGetAddressRange_v2:         nvcuda.get(b"cuMemGetAddressRange_v2")?,
 
             cuImportExternalMemory:          nvcuda.get(b"cuImportExternalMemory")?,
             cuExternalMemoryGetMappedBuffer: nvcuda.get(b"cuExternalMemoryGetMappedBuffer")?,

@@ -12,6 +12,13 @@ use crate::stabilization::ComputeParams;
 use crate::stabilization::KernelParams;
 use super::wgpu_interop::*;
 
+#[derive(Debug)]
+pub enum WgpuError {
+    RequestDevice(wgpu::RequestDeviceError),
+    ParamCheck,
+    NoAvailableAdapter,
+}
+
 pub struct WgpuWrapper  {
     pub device: wgpu::Device,
     queue: wgpu::Queue,
@@ -111,10 +118,12 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &Buffers, mut drawing_len: usize) -> Option<Self> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &Buffers, mut drawing_len: usize) -> Result<Self, WgpuError> {
         let max_matrix_count = 9 * params.height as usize;
 
-        if params.height < 4 || params.output_height < 4 || buffers.input.size.2 < 1 || params.width > 8192 || params.output_width > 8192 { return None; }
+        if params.height < 4 || params.output_height < 4 || buffers.input.size.2 < 1 || params.width > 8192 || params.output_width > 8192 {
+            return Err(WgpuError::ParamCheck);
+        }
 
         let output_height = buffers.output.size.1 as i32;
         let output_stride = buffers.output.size.2 as i32;
@@ -149,9 +158,10 @@ impl WgpuWrapper {
                             limits: wgpu::Limits {
                                 max_storage_buffers_per_shader_stage: 4,
                                 max_storage_textures_per_shader_stage: 4,
+                                max_buffer_size: (1 << 31) - 1,
                                 ..wgpu::Limits::default()
                             },
-                        }, None).unwrap()
+                        }, None).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
                 _ => {
@@ -161,9 +171,10 @@ impl WgpuWrapper {
                         limits: wgpu::Limits {
                             max_storage_buffers_per_shader_stage: 4,
                             max_storage_textures_per_shader_stage: 4,
+                            max_buffer_size: (1 << 31) - 1,
                             ..wgpu::Limits::default()
                         },
-                    }, None)).ok()?
+                    }, None)).map_err(|e| WgpuError::RequestDevice(e))?
                 }
             };
 
@@ -268,7 +279,7 @@ impl WgpuWrapper {
                 ],
             });
 
-            Some(Self {
+            Ok(Self {
                 device,
                 queue,
                 staging_buffer,
@@ -287,7 +298,7 @@ impl WgpuWrapper {
                 padded_out_stride: padded_out_stride as u32
             })
         } else {
-            None
+            Err(WgpuError::NoAvailableAdapter)
         }
     }
 
@@ -333,7 +344,7 @@ impl WgpuWrapper {
 
         let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, &self.staging_buffer, self.padded_out_stride);
 
-        self.queue.submit(Some(encoder.finish()));
+        let sub_index = self.queue.submit(Some(encoder.finish()));
 
         match &mut buffers.output.data {
             BufferSource::Cpu { buffer, .. } => {
@@ -374,7 +385,7 @@ impl WgpuWrapper {
                     return false;
                 }
             }
-            _ => { handle_output_texture_post(&self.device, &buffers.output, &self.out_texture, self.pixel_format); }
+            _ => { handle_output_texture_post(&self.device, &buffers.output, &self.out_texture, self.pixel_format, sub_index); }
         }
 
         true

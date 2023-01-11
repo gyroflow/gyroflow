@@ -313,7 +313,8 @@ impl<T: PixelType> Stabilization<T> {
                         wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
                     });
                     match wgpu {
-                        Ok(Some(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
+                        Ok(Ok(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
+                        Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize wgpu {}", s);
@@ -323,7 +324,6 @@ impl<T: PixelType> Stabilization<T> {
                                 log::error!("Failed to initialize wgpu {:?}", e);
                             }
                         },
-                        _ => { log::error!("Failed to initialize wgpu"); }
                     }
                 }
 

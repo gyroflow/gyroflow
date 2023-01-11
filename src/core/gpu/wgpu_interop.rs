@@ -175,17 +175,45 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
             }
         },
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-        BufferSource::Vulkan { texture, .. } => {
-            if backend != wgpu::Backend::Vulkan { panic!("Unable to use Vulkan texture on non-Vulkan backend!"); }
+        BufferSource::Vulkan { texture, device: vk_device, instance, .. } => {
             use ash::vk::Handle;
-            TextureHolder {
-                wgpu_texture: if buf.texture_copy {
-                    device.create_texture(&desc)
-                } else {
-                    create_texture_from_vk_image(&device, vk::Image::from_raw(texture), buf.size.0 as u32, buf.size.1 as u32, format, is_in, false)
+
+            match backend {
+                wgpu::Backend::Vulkan => {
+                    TextureHolder {
+                        wgpu_texture: if buf.texture_copy {
+                            device.create_texture(&desc)
+                        } else {
+                            create_texture_from_vk_image(&device, vk::Image::from_raw(texture), buf.size.0 as u32, buf.size.1 as u32, format, is_in, false)
+                        },
+                        wgpu_buffer: None,
+                        native_texture: None
+                    }
                 },
-                wgpu_buffer: None,
-                native_texture: None
+                /*wgpu::Backend::Dx12 => {
+                    let vk_image = vk::Image::from_raw(texture);
+                    let vk_device = vk::Device::from_raw(vk_device);
+                    let vk_instance = vk::Instance::from_raw(instance);
+                    let d3d12_resource = create_dx12_resource_from_vk_image(&device, vk_image.clone(), vk_device.clone(), vk_instance.clone()).unwrap(); // TODO: unwrap
+                    std::mem::forget(vk_image);
+                    std::mem::forget(vk_device);
+                    std::mem::forget(vk_instance);
+                    TextureHolder {
+                        wgpu_texture: if buf.texture_copy {
+                            device.create_texture(&desc)
+                        } else {
+                            create_texture_from_dx12_resource(&device, d3d12_resource, &desc)
+                        },
+                        wgpu_buffer: None,
+                        native_texture: None
+                    }
+                },*/
+                /*wgpu::Backend::Gl => {
+                    // TODO
+                },*/
+                _ => {
+                    panic!("Unsupported backend!")
+                }
             }
         },
         _ => {
@@ -218,8 +246,10 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         },
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { buffer } => {
+            super::wgpu_interop_cuda::cuda_synchronize();
             if let Some(NativeTexture::Cuda(cuda_mem)) = &in_texture.native_texture {
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, cuda_mem.device_ptr, *buffer as CUdeviceptr, cuda_mem.vulkan_pitch_alignment, 1)
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, cuda_mem.device_ptr, *buffer as CUdeviceptr, cuda_mem.vulkan_pitch_alignment, 1);
+                super::wgpu_interop_cuda::cuda_synchronize();
             }
             if let Some(in_buf) = &in_texture.wgpu_buffer {
                 encoder.copy_buffer_to_texture(
@@ -344,11 +374,11 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
     temp_texture
 }
 
-pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat) {
+pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat, sub_index: wgpu::SubmissionIndex) {
     match &buf.data {
         #[cfg(target_os = "windows")]
         BufferSource::DirectX11 { texture, device_context, .. } => {
-            device.poll(wgpu::Maintain::Wait);
+            device.poll(wgpu::Maintain::WaitForSubmissionIndex(sub_index));
 
             unsafe {
                 use windows::Win32::Graphics::Direct3D11::*;
@@ -359,18 +389,19 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
         },
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { buffer } => {
-            device.poll(wgpu::Maintain::Wait);
+            device.poll(wgpu::Maintain::WaitForSubmissionIndex(sub_index));
             if let Some(NativeTexture::Cuda(cuda_mem)) = &out_texture.native_texture {
                 super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, cuda_mem.vulkan_pitch_alignment);
             }
+            super::wgpu_interop_cuda::cuda_synchronize();
         },
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan { .. } => {
-            device.poll(wgpu::Maintain::Wait);
+            device.poll(wgpu::Maintain::WaitForSubmissionIndex(sub_index));
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => {
-            device.poll(wgpu::Maintain::Wait);
+            device.poll(wgpu::Maintain::WaitForSubmissionIndex(sub_index));
         },
         _ => { }
     }

@@ -12,7 +12,7 @@ MenuItem {
     text: qsTr("Calibration");
     iconName: "lens";
     innerItem.enabled: controller && !controller.calib_in_progress;
-    loader: controller && controller.calib_in_progress;
+    loader: false;//controller && controller.calib_in_progress;
     objectName: "lenscalib";
 
     property alias rms: rms.value;
