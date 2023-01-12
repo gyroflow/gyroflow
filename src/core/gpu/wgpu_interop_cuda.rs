@@ -33,14 +33,24 @@ impl Drop for CudaSharedMemory {
     fn drop(&mut self) {
         if let Ok(cuda) = CUDA.as_ref() {
             if let Some(ext) = self.external_memory {
+                log::debug!("Freeing CUDA pointer: 0x{:08x}", self.device_ptr);
                 cuda!(cuda.cuMemFree(self.device_ptr));
                 cuda!(cuda.cuDestroyExternalMemory(ext));
             } else {
+                log::debug!("Freeing CUDA address: 0x{:08x}", self.device_ptr);
                 cuda!(cuda.cuMemUnmap(self.device_ptr, self.cuda_alloc_size));
                 cuda!(cuda.cuMemAddressFree(self.device_ptr, self.cuda_alloc_size));
             }
         }
     }
+}
+
+pub fn get_current_cuda_device() -> i32 {
+    let mut dev = 0;
+    if let Ok(cuda) = CUDA.as_ref() {
+        unsafe { (cuda.cudaGetDevice)(&mut dev); }
+    }
+    dev
 }
 
 fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
@@ -67,9 +77,10 @@ pub fn cuda_2d_copy_on_device(size: (usize, usize, usize), dst: CUdeviceptr, src
         srcY: 0,
     };
     if let Ok(cuda) = CUDA.as_ref() {
-        // let mut base = 0;let mut size = 0;
-        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, src)); log::info!("cuSrc: {size}");
-        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, dst)); log::info!("cuDst: {size}");
+        // let mut base = 0; let mut size = 0; let mut size2 = 0;
+        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, src));
+        // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size2, dst));
+        // log::debug!("cuMemcpy2D_v2 | 0x{src:08x} ({size} bytes) => 0x{dst:08x} ({size2} bytes) | Device {}", get_current_cuda_device());
         cuda!(cuda.cuMemcpy2D_v2(&desc as *const _));
     }
 }
@@ -126,6 +137,9 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     };
 
     let cuda = CUDA.as_ref()?;
+    let mut dev = 0;
+    unsafe { (cuda.cudaGetDevice)(&mut dev); }
+    let location = CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: dev };
 
     let mut device_ptr: CUdeviceptr = 0u64;
     let mut shared_handle = 0usize;
@@ -134,7 +148,7 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     let mut prop = CUmemAllocationProp {
         type_: CU_MEM_ALLOCATION_TYPE_PINNED,
         requestedHandleTypes: share_type,
-        location: CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: 0 },
+        location,
         win32HandleMetaData: std::ptr::null_mut(),
         allocFlags: CUmemAllocationProp_st__bindgen_ty_1::default()
     };
@@ -176,26 +190,24 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     let mut granularity = 0usize;
     cuda!(cuda.cuMemGetAllocationGranularity(&mut granularity, &prop, CU_MEM_ALLOC_GRANULARITY_MINIMUM));
 
-    let size = align(size, granularity);
+    let asize = align(size, granularity);
+    drop(size);
 
-    cuda!(cuda.cuMemAddressReserve(&mut device_ptr, size, granularity, 0, 0));
-    cuda!(cuda.cuMemCreate(&mut cu_mem_handle, size, &prop, 0));
+    cuda!(cuda.cuMemAddressReserve(&mut device_ptr, asize, granularity, 0, 0));
+    cuda!(cuda.cuMemCreate(&mut cu_mem_handle, asize, &prop, 0));
     cuda!(cuda.cuMemExportToShareableHandle((&mut shared_handle) as *mut usize as *mut _, cu_mem_handle, share_type, 0));
+    log::debug!("Creating CUDA memory 0x{device_ptr:08x} (device {}) | size: {size}, aligned size: {asize}", dev);
 
-    cuda!(cuda.cuMemMap(device_ptr, size, 0, cu_mem_handle, 0));
+    cuda!(cuda.cuMemMap(device_ptr, asize, 0, cu_mem_handle, 0));
     cuda!(cuda.cuMemRelease(cu_mem_handle));
 
-    let access_descriptor = CUmemAccessDesc_st {
-        location: CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: 0 },
-        flags: CU_MEM_ACCESS_FLAGS_PROT_READWRITE
-    };
-    cuda!(cuda.cuMemSetAccess(device_ptr, size, &access_descriptor, 1));
+    cuda!(cuda.cuMemSetAccess(device_ptr, asize, &CUmemAccessDesc_st { location, flags: CU_MEM_ACCESS_FLAGS_PROT_READWRITE }, 1));
 
     Ok(CudaSharedMemory {
         device_ptr,
         shared_handle,
         external_memory: None,
-        cuda_alloc_size: size,
+        cuda_alloc_size: asize,
         vulkan_pitch_alignment: 1
     })
 }
@@ -529,6 +541,7 @@ pub struct CudaFunctions {
     _nvcuda: dl::Library,
     pub cudaDeviceSynchronize: dl::Symbol<unsafe extern "C" fn() -> i32>,
     pub cudaFree:              dl::Symbol<unsafe extern "C" fn(ptr: *mut c_void) -> i32>,
+    pub cudaGetDevice:         dl::Symbol<unsafe extern "C" fn(device: *mut c_int) -> i32>,
 
     pub cuMemExportToShareableHandle:    dl::Symbol<unsafe extern "C" fn(shareableHandle: *mut c_void, handle: CUmemGenericAllocationHandle, handleType: CUmemAllocationHandleType, flags: c_ulonglong) -> CUresult>,
     pub cuMemGetAllocationGranularity:   dl::Symbol<unsafe extern "C" fn(granularity: *mut usize, prop: *const CUmemAllocationProp, option: CUmemAllocationGranularity_flags) -> CUresult>,
@@ -585,6 +598,7 @@ impl CudaFunctions {
 
         Ok(Self {
             cudaDeviceSynchronize:           cudart.get(b"cudaDeviceSynchronize")?,
+            cudaGetDevice:                   cudart.get(b"cudaGetDevice")?,
             cudaFree:                        cudart.get(b"cudaFree")?,
 
             cuMemExportToShareableHandle:    nvcuda.get(b"cuMemExportToShareableHandle")?,

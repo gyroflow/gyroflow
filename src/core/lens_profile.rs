@@ -45,6 +45,8 @@ pub struct LensProfile {
     pub fps: f64,
 
     pub crop: Option<f64>,
+    pub crop_x: Option<f64>,
+    pub crop_y: Option<f64>,
 
     pub official: bool,
 
@@ -220,6 +222,8 @@ impl LensProfile {
                 mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
                 mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
             }
+            if let Some(crop) = self.crop_x { mat[(0, 0)] /= crop; }
+            if let Some(crop) = self.crop_y { mat[(1, 1)] /= crop; }
             if let Some(crop) = self.crop {
                 mat[(0, 0)] /= crop;
                 mat[(1, 1)] /= crop;
@@ -304,6 +308,8 @@ impl LensProfile {
                     }
                 }
                 if x.contains_key("crop") { cpy.crop = x["crop"].as_f64(); }
+                if x.contains_key("crop_x") { cpy.crop_x = x["crop_x"].as_f64(); }
+                if x.contains_key("crop_y") { cpy.crop_y = x["crop_y"].as_f64(); }
                 if x.contains_key("interpolations") { cpy.interpolations = x.get("interpolations").cloned(); }
                 if x.contains_key("digital_lens")   { cpy.digital_lens   = x.get("digital_lens").and_then(|x| x.as_str().map(|x| x.to_owned())); }
                 if x.contains_key("focal_length")   { cpy.focal_length   = x.get("focal_length").and_then(|x| x.as_f64()); }
@@ -442,6 +448,8 @@ impl LensProfile {
                                 }
                             }
                             cpy.crop = Some(l1.crop.unwrap_or(1.0) * (1.0 - fract) + (l2.crop.unwrap_or(1.0) * fract));
+                            cpy.crop_x = Some(l1.crop_x.unwrap_or(1.0) * (1.0 - fract) + (l2.crop_x.unwrap_or(1.0) * fract));
+                            cpy.crop_y = Some(l1.crop_y.unwrap_or(1.0) * (1.0 - fract) + (l2.crop_y.unwrap_or(1.0) * fract));
 
                             match (l1.focal_length, l2.focal_length) {
                                 (Some(fl1), Some(fl2)) => { cpy.focal_length = Some(fl1 * (1.0 - fract) + (fl2 * fract))},

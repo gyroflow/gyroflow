@@ -118,6 +118,7 @@ impl<'a> BufferDescription<'a> {
                 if !self.texture_copy {
                     hasher.write_u64(*buffer as u64);
                 }
+                hasher.write_i32(wgpu_interop_cuda::get_current_cuda_device());
             },
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             BufferSource::Metal { texture, command_queue } => {

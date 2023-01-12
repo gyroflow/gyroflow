@@ -297,7 +297,7 @@ Item {
         }
 
         // ---------- Temporary REDline conversion ----------
-        if (url.toString().toLowerCase().endsWith(".r3d")) {
+        /*if (url.toString().toLowerCase().endsWith(".r3d")) {
             const redline = controller.find_redline();
             if (redline) {
                 const do_convert = (btn, dlg, f) => {
@@ -323,7 +323,7 @@ Item {
                 ]);
             }
             return;
-        }
+        }*/
         // ---------- Temporary REDline conversion ----------
 
         root.loadedFileUrl = url;
