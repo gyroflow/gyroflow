@@ -220,6 +220,7 @@ pub struct Controller {
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
     clear_settings: qt_method!(fn(&self)),
+    copy_to_clipboard: qt_method!(fn(&self, text: QString)),
 
     url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
     path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
@@ -252,11 +253,13 @@ pub struct Controller {
     mp4_merge: qt_method!(fn(&self, file_list: QStringList)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
 
-    // ---------- Temporary REDline conversion ----------
-    find_redline: qt_method!(fn(&self) -> String),
-    convert_r3d: qt_method!(fn(&self, file: QString, format: i32)),
+    // ---------- REDline conversion ----------
+    find_redline: qt_method!(fn(&self) -> QString),
+    convert_r3d: qt_method!(fn(&self, file: String, format: i32)),
     convert_r3d_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
-    // ---------- Temporary REDline conversion ----------
+    // ---------- REDline conversion ----------
+
+    play_sound: qt_method!(fn(&mut self, typ: String)),
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
@@ -1946,118 +1949,38 @@ impl Controller {
         });
     }
 
-    // ---------- Temporary REDline conversion ----------
-    fn find_redline(&self) -> String {
-        let locations = if cfg!(target_os = "windows") {
-            vec![
-                "C:/Program Files/REDCINE-X PRO One-Off 64-bit/REDline.exe",
-                "C:/Program Files/REDCINE-X PRO 64-bit/REDline.exe",
-                "REDline.exe",
-                "G:/clips/___red/REDCINE-X_PRO_Build_60.2.2/REDCINE-X PRO 64-bit/REDline.exe",
-            ]
-        } else if cfg!(target_os = "macos") {
-            vec![
-                "/Applications/REDCINE-X Professional/REDCINE-X PRO.app/Contents/MacOS/REDline",
-                "REDline",
-            ]
-        } else if cfg!(target_os = "linux") {
-            vec!["REDline"]
-        } else {
-            vec![]
-        };
-
-        for l in locations {
-            if let Ok(p) = std::fs::canonicalize(&l) {
-                if p.exists() {
-                    if let Some(p) = p.to_str() {
-                        return p.to_string();
-                    }
-                }
-            }
-        }
-        if let Some(paths) = std::env::var_os("PATH") {
-            for dir in std::env::split_paths(&paths) {
-                let full_path = dir.join(&"REDline");
-                if full_path.is_file() {
-                    if let Some(full_path) = full_path.to_str() {
-                        return full_path.to_string();
-                    }
-                }
-            }
-        }
-        String::new()
+    // ---------- REDline conversion ----------
+    fn find_redline(&self) -> QString {
+        QString::from(crate::external_sdk::r3d::REDSdk::find_redline())
     }
-    fn convert_r3d(&self, file: QString, format: i32) {
-        let redline = self.find_redline();
-        if !redline.is_empty() {
-            let file = file.to_string();
-            let p = std::path::Path::new(&file);
-            let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string, path): (f64, String, String)| {
-                this.convert_r3d_progress(percent, QString::from(error_string), QString::from(path));
-            });
-
-            let output_file = p.with_extension("").to_string_lossy().to_owned().into_owned();
-
-            let cancel_flag = self.cancel_flag.clone();
-            cancel_flag.store(false, SeqCst);
-
-            core::run_threaded(move || {
-                use std::process::{ Command, Stdio };
-                use std::io::{ BufRead, BufReader, Error, ErrorKind, Result };
-                let re_output_name = regex::Regex::new(r#"ProRes Output Filename: (.+?), Codec:"#).unwrap();
-                let re_progress    = regex::Regex::new(r#"Export Job frame complete. [0-9]+ ([0-9\.]+)"#).unwrap();
-
-                let result = (|| -> Result<()> {
-                    let mut cmd = Command::new(redline);
-                    #[cfg(target_os = "windows")]
-                    { use std::os::windows::process::CommandExt; cmd.creation_flags(0x08000000); } // CREATE_NO_WINDOW
-
-                    let mut child = cmd
-                        .args(["-i", &file])
-                        .args(["-o", &output_file])
-                        .args(["--format", "201"])
-                        .args(["--PRcodec", &format!("{}", format)])
-                        .stderr(Stdio::piped())
-                        .spawn()?;
-
-                    let stderr = child.stderr.take().ok_or_else(|| Error::new(ErrorKind::Other,"Could not capture the command output."))?;
-
-                    let reader = BufReader::new(stderr);
-                    let mut out_filename = None;
-                    let mut any_progress = false;
-
-                    for line in reader.lines() {
-                        if let Ok(line) = line {
-                            if let Some(m) = re_output_name.captures(&line) {
-                                out_filename = Some(m.get(1).unwrap().as_str().to_owned());
-                            }
-                            if let Some(m) = re_progress.captures(&line) {
-                                if let Ok(p) = m.get(1).unwrap().as_str().parse::<f64>() {
-                                    progress((p, String::new(), out_filename.clone().unwrap_or_default()));
-                                    any_progress = true;
-                                }
-                            }
-                            ::log::debug!("REDline: {}", line);
-                            if cancel_flag.load(SeqCst) {
-                                child.kill()?;
-                                break;
-                            }
-                        }
-                    }
-                    if !any_progress || out_filename.is_none() {
-                        progress((1.0, "REDline failed to convert the file. See gyroflow.log for full REDline output and error messages.".into(), out_filename.unwrap_or_default()));
-                    } else {
-                        progress((1.0, String::new(), out_filename.unwrap_or_default()));
-                    }
-                    Ok(())
-                })();
-                if let Err(e) = result {
-                    progress((1.0, format!("An error occured: {:?}", e.to_string()), String::new()))
-                }
-            });
-        }
+    fn convert_r3d(&self, file: String, format: i32) {
+        let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string, path): (f64, String, String)| {
+            this.convert_r3d_progress(percent, QString::from(error_string), QString::from(path));
+        });
+        let cancel_flag = self.cancel_flag.clone();
+        core::run_threaded(move || {
+            crate::external_sdk::r3d::REDSdk::convert_r3d(&file, format, progress, cancel_flag);
+        });
     }
-    // ---------- Temporary REDline conversion ----------
+    // ---------- REDline conversion ----------
+
+    fn play_sound(&self, typ: String) {
+        core::run_threaded(move || {
+            use std::io::{ Cursor, Error, ErrorKind };
+            let _ = (|| -> Result<(), Box<dyn std::error::Error>> {
+                let audio_engine = audio_engine::AudioEngine::new()?;
+                let source = match typ.as_ref() {
+                    "success" => include_bytes!("../resources/success.ogg") as &[u8],
+                    "error"   => include_bytes!("../resources/error.ogg") as &[u8],
+                    _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
+                };
+                let mut sound = audio_engine.new_sound(audio_engine::OggDecoder::new(Cursor::new(source))?)?;
+                sound.play();
+                std::thread::sleep(std::time::Duration::from_millis(2000));
+                Ok(())
+            })();
+        });
+    }
 
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
@@ -2070,4 +1993,5 @@ impl Controller {
     fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn clear_settings(&self) { util::clear_settings() }
+    fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
 }

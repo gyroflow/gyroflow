@@ -105,6 +105,8 @@ cpp! {{
     #include <QBuffer>
     #include <QImage>
     #include <QSettings>
+    #include <QGuiApplication>
+    #include <QClipboard>
 }}
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
@@ -321,6 +323,13 @@ pub fn get_version() -> String {
 }
 pub fn clear_settings() {
     cpp!(unsafe [] { QSettings().clear(); })
+}
+pub fn get_setting(key: &str) -> String {
+    let key = QString::from(key);
+    cpp!(unsafe [key as "QString"] -> QString as "QString" { return QSettings().value(key).toString(); }).to_string()
+}
+pub fn copy_to_clipboard(text: QString) {
+    cpp!(unsafe [text as "QString"] { QGuiApplication::clipboard()->setText(text); })
 }
 
 pub fn image_data_to_base64(w: u32, h: u32, s: u32, data: &[u8]) -> QString {

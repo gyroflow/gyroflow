@@ -746,7 +746,7 @@ impl RenderQueue {
             let trim_ratio = params.trim_end - params.trim_start;
             let total_frame_count = params.frame_count;
             drop(params);
-            let input_file = stab.input_file.read().clone();
+            let mut input_file = stab.input_file.read().clone();
             let render_options = job.render_options.clone();
 
             progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false));
@@ -779,6 +779,28 @@ impl RenderQueue {
             }
 
             core::run_threaded(move || {
+                if input_file.path.to_ascii_lowercase().ends_with(".r3d") {
+                    let mov_path = std::path::Path::new(&input_file.path).with_extension("mov");
+                    if mov_path.exists() {
+                        input_file.path = mov_path.to_string_lossy().to_string();
+                    } else {
+                        let in_file = input_file.path.clone();
+
+                        let mut frame = 0;
+                        let r3d_progress = |(percent, error_str, out_path): (f64, String, String)| {
+                            if !error_str.is_empty() {
+                                err(("An error occured: %1".to_string(), error_str));
+                            } else {
+                                progress((percent * 0.98, frame, total_frame_count + 1, false));
+                                input_file.path = out_path;
+                                frame += 1;
+                            }
+                        };
+                        let format = crate::util::get_setting("r3dConvertFormat").parse::<i32>().unwrap_or(0);
+                        crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, r3d_progress, cancel_flag.clone());
+                    }
+                }
+
                 let mut i = 0;
                 loop {
                     let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());

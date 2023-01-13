@@ -212,18 +212,20 @@ Rectangle {
 
                     function updateModel() {
                         let m = [
-                            isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue")),
-                            QT_TRANSLATE_NOOP("Popup", "Create settings preset"),
-                            QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue"),
-                            QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)"),
-                            QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)"),
-                            QT_TRANSLATE_NOOP("Popup", "Export project file")
+                            ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
+                            ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
+                            ["apply_all",     QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue")],
+                            ["export_proj:2", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
+                            ["export_proj:1", QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
+                            ["export_proj:0", QT_TRANSLATE_NOOP("Popup", "Export project file")]
                         ];
-                        if (controller.project_file_path) m.push(QT_TRANSLATE_NOOP("Popup", "Save project file"));
-                        model = m;
+                        if (controller.project_file_path) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
+                        model   = m.map(x => x[1]);
+                        actions = m.map(x => x[0]);
                     }
 
                     model: [];
+                    property list<string> actions: [];
 
                     Connections {
                         target: controller;
@@ -237,7 +239,7 @@ Rectangle {
 
                     function render() {
                         const fname = vidInfo.item.filename.toLowerCase();
-                        if (fname.endsWith('.braw') || fname.endsWith('.r3d') || fname.endsWith('.dng')) {
+                        if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
                             messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use the [OpenFX plugin].").replace(/\[(.*?)\]/, '<a href="https://github.com/gyroflow/gyroflow-ofx/releases"><font color="' + styleTextColor + '">$1</font></a>'), [
                                 { text: qsTr("Ok"), accent: true }
                             ]);
@@ -299,14 +301,15 @@ Rectangle {
                         render();
                     }
                     popup.onClicked: (index) => {
-                        switch (index) {
-                            case 0: // Add to render queue or Export
+                        const action = actions[index];
+                        switch (action) {
+                            case "export": // Add to render queue or Export
                                 renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
                                 popup.close();
                                 renderBtn.clicked();
                             break;
-                            case 1: // Create preset
-                            case 2: // Apply settings to render queue
+                            case "create_preset": // Create preset
+                            case "apply_all": // Apply settings to render queue
                                 const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
                                 el.opened = true;
                                 el.onApply.connect((obj) => {
@@ -319,7 +322,7 @@ Rectangle {
                                     if (obj.synchronization && obj.synchronization.do_autosync) {
                                         finalData.synchronization.do_autosync = true;
                                     }
-                                    if (index == 1) { // Preset
+                                    if (action == "create_preset") { // Preset
                                         presetFileDialog.presetData = finalData;
                                         presetFileDialog.open2();
                                     } else { // Apply
@@ -327,12 +330,12 @@ Rectangle {
                                     }
                                 });
                             break;
-                            case 3: // Export project file (including processed gyro data)
-                            case 4: // Export project file (including gyro data)
-                            case 5: // Export project file
-                                controller.export_gyroflow_file(/*thin*/index == 5, /*ext*/index == 3, window.getAdditionalProjectData(), "", false);
+                            case "export_proj:2": // Export project file (including processed gyro data)
+                            case "export_proj:1": // Export project file (including gyro data)
+                            case "export_proj:0": // Export project file
+                                controller.export_gyroflow_file(/*thin*/action == "export_proj:0", /*ext*/action == "export_proj:2", window.getAdditionalProjectData(), "", false);
                             break;
-                            case 6: window.saveProject(); break;
+                            case "save": window.saveProject(); break;
                         }
                     }
                 }
@@ -404,6 +407,8 @@ Rectangle {
                 }
             }
         }
+        if (type == Modal.Error)   play_sound("error");
+        if (type == Modal.Success) play_sound("success");
 
         el = Qt.createComponent("components/Modal.qml").createObject(parent || window, { textFormat: textFormat, iconType: type, modalIdentifier: identifier || "" });
         el.text = text;
@@ -432,6 +437,10 @@ Rectangle {
         el.opened = true;
         window.isDialogOpened = true;
         return el;
+    }
+    function play_sound(type: string) {
+        if (settings.value("playSounds", "true") == "true")
+            controller.play_sound(type);
     }
 
     Connections {

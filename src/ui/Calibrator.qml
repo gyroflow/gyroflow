@@ -59,6 +59,8 @@ Window {
             videoArea.videoLoader.cancelable = true;
             if (!videoArea.videoLoader.active) {
                 Qt.callLater(controller.recompute_threaded);
+                if (rms > 5) window.play_sound("error");
+                else if (rms > 0) window.play_sound("success");
             }
         }
     }
@@ -132,7 +134,8 @@ Window {
                 videoArea.timeline.updateDurations();
 
                 if (!batch.active) return;
-                batch.runIn(2000, function() {
+                batch.runIn(3000, function tryStart() {
+                    if (window.isDialogOpened) return batch.runIn(2000, tryStart);
                     lensCalib.autoCalibBtn.clicked();
                 });
             }

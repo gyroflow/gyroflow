@@ -11,6 +11,7 @@ Row {
     property alias col2: col2;
     width: parent.width;
     property real spacing: 8 * dpiScale;
+    property bool copyable: false;
 
     property var editableFields: ({});
     property var editableKeys: Object.keys(editableFields);
@@ -61,6 +62,12 @@ Row {
                     text: modelData;
                     onTextChanged: Qt.callLater(updateHeights);
                     font.bold: true;
+                    MouseArea {
+                        enabled: tl.copyable;
+                        anchors.fill: parent;
+                        acceptedButtons: Qt.LeftButton;
+                        onDoubleClicked: controller.copy_to_clipboard(modelData);
+                    }
                 }
                 Loader {
                     height: parent.height;

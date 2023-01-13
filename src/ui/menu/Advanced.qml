@@ -25,6 +25,8 @@ MenuItem {
         property alias marginPixels: marginPixels.value;
         property alias featherPixels: featherPixels.value;
         property alias defaultSuffix: defaultSuffix.text;
+        property alias playSounds: playSounds.checked;
+        property alias r3dConvertFormat: r3dConvertFormat.currentIndex;
         property string lang: ui_tools.get_default_language();
     }
     property alias defaultSuffix: defaultSuffix;
@@ -213,6 +215,24 @@ MenuItem {
     }
     Label {
         position: Label.LeftPosition;
+        text: qsTr("Format for R3D conversion");
+        visible: !!controller.find_redline();
+        ComboBox {
+            id: r3dConvertFormat;
+            model: [
+                "ProRes 422 HQ",
+                "ProRes 422",
+                "ProRes 422 LT",
+                "ProRes 422 Proxy",
+                "ProRes 4444",
+                "ProRes 4444 XQ",
+            ];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
         text: qsTr("Preview pipeline");
 
         ComboBox {
@@ -300,6 +320,11 @@ MenuItem {
             width: parent.width;
             onTextChanged: render_queue.default_suffix = text;
         }
+    }
+    CheckBox {
+        id: playSounds;
+        text: qsTr("Notification sounds");
+        checked: true;
     }
     Item { width: 1; height: 10 * dpiScale; }
     LinkButton {
