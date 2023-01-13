@@ -144,7 +144,7 @@ Window {
                 if (ready > 0 && rms > 0) {
                     batch.runIn(2000, function() {
                         console.log('rms', rms);
-                        if (rms < 2) {
+                        if (rms < 5) {
                             let pathParts = batch.currentFile.toString().split(".");
                             pathParts.pop();
 
