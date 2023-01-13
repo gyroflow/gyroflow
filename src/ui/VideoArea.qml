@@ -278,6 +278,11 @@ Item {
         if (url.toString().endsWith(".gyroflow")) {
             return loadGyroflowData(url);
         }
+        if (url.toString().endsWith(".RDC")) {
+            let parts = url.toString().split("/");
+            parts.push(parts[parts.length - 1].replace(".RDC", "_001.R3D"));
+            url = parts.join("/");
+        }
         stabEnabledBtn.checked = false;
 
         if (controller.check_external_sdk(url.toString())) {
@@ -398,25 +403,26 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
-    function loadMultipleFiles(urls: list, skip_detection: bool) {
+    function loadMultipleFiles(urls: list<url>, skip_detection: bool) {
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
+            const urlsCopy = [...urls];
             const paths = urls.map(x => controller.url_to_path(x));
             const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
-                { text: qsTr("Add to render queue"), clicked: function() {
-                    queue.item.dt.loadFiles(urls);
+                { text: qsTr("Add to render queue"), clicked: () => {
+                    queue.item.dt.loadFiles(urlsCopy);
                     queue.item.shown = true;
                 } },
-                { text: qsTr("Merge them into one video"), clicked: function() {
+                { text: qsTr("Merge them into one video"), clicked: () => {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
                     controller.mp4_merge(paths);
                     return false;
                 } },
-                { text: qsTr("Open the first file"), clicked: function() {
-                    root.loadFile(urls[0], skip_detection);
+                { text: qsTr("Open the first file"), clicked: () => {
+                    root.loadFile(urlsCopy[0], skip_detection);
                 } },
                 { text: qsTr("Cancel") },
             ]);
@@ -701,7 +707,7 @@ Item {
 
             onEntered: (drag) => {
                 const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
-                drag.accepted = fileDialog.extensions.indexOf(ext) > -1;
+                drag.accepted = fileDialog.extensions.indexOf(ext) > -1 || ext == "rdc";
             }
             onDropped: (drop) => {
                 if (isCalibrator) {

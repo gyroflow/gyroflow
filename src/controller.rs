@@ -1966,19 +1966,21 @@ impl Controller {
 
     fn play_sound(&self, typ: String) {
         core::run_threaded(move || {
-            use std::io::{ Cursor, Error, ErrorKind };
-            let _ = (|| -> Result<(), Box<dyn std::error::Error>> {
-                let audio_engine = audio_engine::AudioEngine::new()?;
-                let source = match typ.as_ref() {
-                    "success" => include_bytes!("../resources/success.ogg") as &[u8],
-                    "error"   => include_bytes!("../resources/error.ogg") as &[u8],
-                    _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
-                };
-                let mut sound = audio_engine.new_sound(audio_engine::OggDecoder::new(Cursor::new(source))?)?;
-                sound.play();
-                std::thread::sleep(std::time::Duration::from_millis(2000));
-                Ok(())
-            })();
+            std::panic::catch_unwind(|| {
+                use std::io::{ Cursor, Error, ErrorKind };
+                let _ = (|| -> Result<(), Box<dyn std::error::Error>> {
+                    let audio_engine = audio_engine::AudioEngine::new()?;
+                    let source = match typ.as_ref() {
+                        "success" => include_bytes!("../resources/success.ogg") as &[u8],
+                        "error"   => include_bytes!("../resources/error.ogg") as &[u8],
+                        _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
+                    };
+                    let mut sound = audio_engine.new_sound(audio_engine::OggDecoder::new(Cursor::new(source))?)?;
+                    sound.play();
+                    std::thread::sleep(std::time::Duration::from_millis(2000));
+                    Ok(())
+                })();
+            });
         });
     }
 
