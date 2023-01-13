@@ -95,14 +95,19 @@ pub fn get_shared_texture_d3d11(device: &ID3D11Device, texture: &ID3D11Texture2D
         texture.GetDesc(&mut desc);
         desc.MiscFlags |= D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
 
-        let new_texture = device.CreateTexture2D(&desc, None)?;
-        let dxgi_resource: IDXGIResource1 = new_texture.cast::<IDXGIResource1>()?;
-        let handle = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, None)?;
+        let mut new_texture = None;
+        device.CreateTexture2D(&desc, None, Some(&mut new_texture))?;
+        if let Some(new_texture) = new_texture {
+            let dxgi_resource: IDXGIResource1 = new_texture.cast::<IDXGIResource1>()?;
+            let handle = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, None)?;
 
-        Ok((handle, Some(DirectX11SharedTexture {
-            intermediate_texture: new_texture,
-            fence: DirectX11Fence::new(device)?
-        })))
+            Ok((handle, Some(DirectX11SharedTexture {
+                intermediate_texture: new_texture,
+                fence: DirectX11Fence::new(device)?
+            })))
+        } else {
+            Err("Call to CreateTexture2D failed".into())
+        }
     }
 }
 
