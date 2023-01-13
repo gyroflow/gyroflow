@@ -462,7 +462,6 @@ MenuItem {
 
         Label {
             text: qsTr("Zooming center offset");
-            visible: croppingMode.currentIndex > 0;
             Column {
                 width: parent.width;
                 Label {
