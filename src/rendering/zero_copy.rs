@@ -130,7 +130,7 @@ pub mod mac_ffi {
     pub type CVMetalTextureCacheRef = CFTypeRef;
     pub type CVReturn = i32;
     pub type CVOptionFlags = u64;
-    pub type size_t = c_ulonglong;
+    pub type SizeT = c_ulonglong;
 
     #[link(name = "CoreVideo", kind = "framework")]
     extern "C" {
@@ -147,21 +147,21 @@ pub mod mac_ffi {
             sourceImage: CVImageBufferRef,
             textureAttributes: CFDictionaryRef,
             pixelFormat: metal::MTLPixelFormat,
-            width: size_t,
-            height: size_t,
-            planeIndex: size_t,
+            width: SizeT,
+            height: SizeT,
+            planeIndex: SizeT,
             textureOut: *mut CVMetalTextureRef,
         ) -> CVReturn;
         pub fn CVMetalTextureCacheFlush(textureCache: CVMetalTextureCacheRef, options: CVOptionFlags);
-        pub fn CVPixelBufferGetWidth(pixelBuffer: CVPixelBufferRef) -> size_t;
-        pub fn CVPixelBufferGetHeight(pixelBuffer: CVPixelBufferRef) -> size_t;
+        pub fn CVPixelBufferGetWidth(pixelBuffer: CVPixelBufferRef) -> SizeT;
+        pub fn CVPixelBufferGetHeight(pixelBuffer: CVPixelBufferRef) -> SizeT;
         pub fn CVPixelBufferGetPixelFormatType(pixelBuffer: CVPixelBufferRef) -> u32;
         pub fn CVPixelBufferGetBaseAddress(pixelBuffer: CVPixelBufferRef) -> *mut c_void;
-        pub fn CVPixelBufferGetBytesPerRow(pixelBuffer: CVPixelBufferRef) -> size_t;
+        pub fn CVPixelBufferGetBytesPerRow(pixelBuffer: CVPixelBufferRef) -> SizeT;
         pub fn CVPixelBufferIsPlanar(pixelBuffer: CVPixelBufferRef) -> Boolean;
-        pub fn CVPixelBufferGetPlaneCount(pixelBuffer: CVPixelBufferRef) -> size_t;
-        pub fn CVPixelBufferGetWidthOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: size_t) -> size_t;
-        pub fn CVPixelBufferGetHeightOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: size_t) -> size_t;
+        pub fn CVPixelBufferGetPlaneCount(pixelBuffer: CVPixelBufferRef) -> SizeT;
+        pub fn CVPixelBufferGetWidthOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: SizeT) -> SizeT;
+        pub fn CVPixelBufferGetHeightOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: SizeT) -> SizeT;
         pub fn CVMetalTextureGetTexture(image: CVMetalTextureRef) -> *mut metal::MTLTexture;
         pub fn CVMetalTextureIsFlipped(image: CVMetalTextureRef) -> Boolean;
     }

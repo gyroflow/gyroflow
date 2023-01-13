@@ -104,24 +104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "android_log-sys"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85965b6739a430150bdd138e2374a98af0c3ee0d030b3bb7fc3bddff58d0102e"
-
-[[package]]
-name = "android_logger"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9ed09b18365ed295d722d0b5ed59c01b79a826ff2d2a8f73d5ecca8e6fb2f66"
-dependencies = [
- "android_log-sys",
- "env_logger",
- "lazy_static",
- "log",
-]
-
-[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -328,19 +310,6 @@ dependencies = [
  "hermit-abi 0.1.19",
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "audio-engine"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d01f018a233fb8ef703a1b4618a52926f5a3cefa2297179f0fb9a0664e305728"
-dependencies = [
- "cpal",
- "gcd",
- "lewton",
- "log",
- "ndk-glue",
 ]
 
 [[package]]
@@ -743,7 +712,6 @@ dependencies = [
  "parking_lot",
  "stdweb",
  "thiserror",
- "wasm-bindgen",
  "web-sys",
  "windows 0.37.0",
 ]
@@ -1013,41 +981,6 @@ dependencies = [
  "bitflags",
  "libloading",
  "winapi",
-]
-
-[[package]]
-name = "darling"
-version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a01d95850c592940db9b8194bc39f4bc0e89dee5c4265e4b1807c34a9aba453c"
-dependencies = [
- "darling_core",
- "darling_macro",
-]
-
-[[package]]
-name = "darling_core"
-version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "859d65a907b6852c9361e3185c862aae7fafd2887876799fa55f5f99dc40d610"
-dependencies = [
- "fnv",
- "ident_case",
- "proc-macro2",
- "quote",
- "strsim",
- "syn",
-]
-
-[[package]]
-name = "darling_macro"
-version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c972679f83bdf9c42bd905396b6c3588a843a17f0f16dfcfa3e2c5d57441835"
-dependencies = [
- "darling_core",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -1332,12 +1265,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce81f49ae8a0482e4c55ea62ebbd7e5a686af544c00b9d090bba3ff9be97b3d"
 
 [[package]]
-name = "fnv"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
-
-[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1439,12 +1366,6 @@ checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
 dependencies = [
  "byteorder",
 ]
-
-[[package]]
-name = "gcd"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4b1b088ad0a967aa29540456b82fc8903f854775d33f71e9709c4efb3dfbfd2"
 
 [[package]]
 name = "generic-array"
@@ -1568,7 +1489,6 @@ name = "gyroflow"
 version = "1.4.2"
 dependencies = [
  "argh",
- "audio-engine",
  "breakpad-sys",
  "bytemuck",
  "cc",
@@ -1601,6 +1521,7 @@ dependencies = [
  "qml-video-rs",
  "qttypes",
  "regex",
+ "rodio",
  "rustfft",
  "semver 1.0.16",
  "serde",
@@ -1612,7 +1533,7 @@ dependencies = [
  "url",
  "walkdir",
  "whoami",
- "windows 0.43.0",
+ "windows 0.44.0",
  "winres",
 ]
 
@@ -1631,6 +1552,7 @@ dependencies = [
  "bitflags",
  "bytemuck",
  "byteorder",
+ "core-foundation-sys",
  "crc32fast",
  "crossbeam-channel",
  "cv-core",
@@ -1680,7 +1602,7 @@ dependencies = [
  "wgpu-hal",
  "wgpu-types",
  "winapi",
- "windows 0.43.0",
+ "windows 0.44.0",
 ]
 
 [[package]]
@@ -1781,12 +1703,6 @@ dependencies = [
  "cxx",
  "cxx-build",
 ]
-
-[[package]]
-name = "ident_case"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "idna"
@@ -1945,12 +1861,12 @@ dependencies = [
 [[package]]
 name = "keep-awake"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/keep-awake-rs.git?rev=eb66d52#eb66d520b627a1efc048100ca7227a9d16cd92cb"
+source = "git+https://github.com/AdrianEddy/keep-awake-rs.git?rev=314443f#314443f5c4e9933bd7342bffa0a7cf2f4b4257b8"
 dependencies = [
  "core-foundation",
  "libc",
  "mach",
- "windows 0.43.0",
+ "windows 0.44.0",
  "zbus",
 ]
 
@@ -2334,35 +2250,6 @@ name = "ndk-context"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27b02d87554356db9e9a873add8782d4ea6e3e58ea071a9adb9a2e8ddb884a8b"
-
-[[package]]
-name = "ndk-glue"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d0c4a7b83860226e6b4183edac21851f05d5a51756e97a1144b7f5a6b63e65f"
-dependencies = [
- "android_logger",
- "lazy_static",
- "libc",
- "log",
- "ndk 0.6.0",
- "ndk-context",
- "ndk-macro",
- "ndk-sys 0.3.0",
-]
-
-[[package]]
-name = "ndk-macro"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0df7ac00c4672f9d5aece54ee3347520b7e20f158656c7db2e6de01902eb7a6c"
-dependencies = [
- "darling",
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "ndk-sys"
@@ -3197,6 +3084,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rodio"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb10b653d5ec0e9411a2e7d46e2c7f4046fd87d35b9955bd73ba4108d69072b5"
+dependencies = [
+ "cpal",
+ "lewton",
+]
+
+[[package]]
 name = "rs-sync"
 version = "0.1.0"
 source = "git+https://github.com/gyroflow/rs-sync.git?rev=12ae9a3#12ae9a3ecac40765571c0741e0c9140249b9a150"
@@ -3588,12 +3485,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe895eb47f22e2ddd4dabc02bce419d2e643c8e3b585c78158b349195bc24d82"
 
 [[package]]
-name = "strsim"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
-
-[[package]]
 name = "superslice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3613,10 +3504,9 @@ dependencies = [
 [[package]]
 name = "system_shutdown"
 version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7bf59aec03436e30e37e56f226363623d7a9114a1358aae6835c3a6575d2fe7"
+source = "git+https://github.com/risoflora/system_shutdown.git?rev=7c10261#7c10261cc7ee14845c63a3ce3caf9401899cf42c"
 dependencies = [
- "windows 0.43.0",
+ "windows 0.44.0",
  "zbus",
 ]
 
@@ -4234,10 +4124,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "windows"
+version = "0.44.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e745dab35a0c4c77aa3ce42d595e13d2003d6902d6b08c9ef5fc326d08da12b"
+dependencies = [
+ "windows-targets",
+]
+
+[[package]]
 name = "windows-sys"
 version = "0.42.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a3e1820f08b8513f676f7ab6c1f99ff312fb97b553d30ff4dd86f9f15728aa7"
+dependencies = [
+ "windows_aarch64_gnullvm",
+ "windows_aarch64_msvc 0.42.1",
+ "windows_i686_gnu 0.42.1",
+ "windows_i686_msvc 0.42.1",
+ "windows_x86_64_gnu 0.42.1",
+ "windows_x86_64_gnullvm",
+ "windows_x86_64_msvc 0.42.1",
+]
+
+[[package]]
+name = "windows-targets"
+version = "0.42.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e2522491fbfcd58cc84d47aeb2958948c4b8982e9a2d8a2a35bbaed431390e7"
 dependencies = [
  "windows_aarch64_gnullvm",
  "windows_aarch64_msvc 0.42.1",

@@ -1163,6 +1163,7 @@ impl Controller {
         if !overwrite && std::path::Path::new(&gf_path).exists() {
             self.gyroflow_exists(QString::from(gf_path), thin, extended);
         } else {
+            util::set_setting("lastProject", &gf_path);
             match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
                 Ok(_) => {
                     self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default(), QString::from("gyroflow-exported"));
@@ -1966,21 +1967,21 @@ impl Controller {
 
     fn play_sound(&self, typ: String) {
         core::run_threaded(move || {
-            std::panic::catch_unwind(|| {
-                use std::io::{ Cursor, Error, ErrorKind };
-                let _ = (|| -> Result<(), Box<dyn std::error::Error>> {
-                    let audio_engine = audio_engine::AudioEngine::new()?;
-                    let source = match typ.as_ref() {
-                        "success" => include_bytes!("../resources/success.ogg") as &[u8],
-                        "error"   => include_bytes!("../resources/error.ogg") as &[u8],
-                        _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
-                    };
-                    let mut sound = audio_engine.new_sound(audio_engine::OggDecoder::new(Cursor::new(source))?)?;
-                    sound.play();
-                    std::thread::sleep(std::time::Duration::from_millis(2000));
-                    Ok(())
-                })();
-            });
+            use std::io::{ Cursor, Error, ErrorKind };
+            let _ = (|| -> Result<(), Box<dyn std::error::Error>> {
+                let source = match typ.as_ref() {
+                    "success" => include_bytes!("../resources/success.ogg") as &[u8],
+                    "error"   => include_bytes!("../resources/error.ogg") as &[u8],
+                    _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
+                };
+                {
+                    let (_stream, handle) = rodio::OutputStream::try_default()?;
+                    let sink = rodio::Sink::try_new(&handle)?;
+                    sink.append(rodio::Decoder::new(Cursor::new(source))?);
+                    sink.sleep_until_end();
+                }
+                Ok(())
+            })();
         });
     }
 

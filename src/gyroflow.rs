@@ -100,6 +100,8 @@ fn entry() {
         cpp!(unsafe [] { QLoggingCategory::setFilterRules("qt.qml.diskcache.debug=true"); });
     }
 
+    util::save_exe_location();
+
     //crate::core::util::rename_calib_videos();
 
     if cfg!(any(target_os = "android", target_os = "ios")) {

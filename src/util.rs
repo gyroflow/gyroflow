@@ -328,8 +328,32 @@ pub fn get_setting(key: &str) -> String {
     let key = QString::from(key);
     cpp!(unsafe [key as "QString"] -> QString as "QString" { return QSettings().value(key).toString(); }).to_string()
 }
+pub fn set_setting(key: &str, value: &str) {
+    let key = QString::from(key);
+    let value = QString::from(value);
+    cpp!(unsafe [key as "QString", value as "QString"] { QSettings().setValue(key, value); });
+}
 pub fn copy_to_clipboard(text: QString) {
     cpp!(unsafe [text as "QString"] { QGuiApplication::clipboard()->setText(text); })
+}
+
+pub fn save_exe_location() {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if cfg!(target_os = "macos") {
+            if let Some(parent) = exe_path.parent() { // MacOS
+                if let Some(parent) = parent.parent() { // Contents
+                    if let Some(parent) = parent.parent() { // Gyroflow.app
+                        set_setting("exeLocation", &parent.to_string_lossy().to_string());
+                    }
+                }
+            }
+        } else if cfg!(target_os = "linux") {
+            // TODO: AppImage
+            set_setting("exeLocation", &exe_path.to_string_lossy().to_string());
+        } else {
+            set_setting("exeLocation", &exe_path.to_string_lossy().to_string());
+        }
+    }
 }
 
 pub fn image_data_to_base64(w: u32, h: u32, s: u32, data: &[u8]) -> QString {

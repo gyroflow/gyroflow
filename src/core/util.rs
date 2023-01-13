@@ -90,6 +90,68 @@ pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
     }
 }
 
+pub fn get_setting(key: &str) -> Option<String> {
+    #[cfg(target_os = "windows")]
+    unsafe {
+        use windows::Win32::System::Registry::*;
+        use windows::Win32::Foundation::NO_ERROR;
+        use windows::core::PCSTR;
+        let mut hkey = HKEY::default();
+        if RegOpenKeyExA(HKEY_CURRENT_USER, PCSTR::from_raw("Software\\Gyroflow\\Gyroflow\0".as_ptr()), 0, KEY_READ, &mut hkey) == NO_ERROR {
+            let key = format!("{}\0", key);
+            let key = PCSTR::from_raw(key.as_ptr());
+            let mut size: u32 = 0;
+            let mut typ = REG_VALUE_TYPE::default();
+            if RegQueryValueExA(hkey, key, None, None, None, Some(&mut size)) == NO_ERROR {
+                if size > 0 {
+                    let mut buf: Vec<u8> = vec![0u8; size as usize];
+                    if RegQueryValueExA(hkey, key, None, Some(&mut typ), Some(buf.as_mut_ptr()), Some(&mut size)) == NO_ERROR {
+                        if typ == REG_SZ {
+                            if let Ok(v) = std::str::from_utf8(&buf[..size as usize - 1]) {
+                                RegCloseKey(hkey);
+                                return Some(v.to_owned());
+                            }
+                        }
+                    }
+                }
+            }
+            RegCloseKey(hkey);
+        }
+    }
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    unsafe {
+        use core_foundation_sys::{ base::*, string::*, propertylist::* };
+        extern "C" {
+            pub fn CFPreferencesCopyValue(key: CFStringRef, applicationID: CFStringRef, userName: CFStringRef, hostName: CFStringRef) -> CFPropertyListRef;
+        }
+        unsafe fn cfstr(v: &str) -> CFStringRef {
+            CFStringCreateWithBytes(kCFAllocatorDefault, v.as_ptr(), v.len() as CFIndex, kCFStringEncodingUTF8, false as Boolean)
+        }
+        let key = cfstr(key);
+        let app = cfstr("com.gyroflow-xyz.Gyroflow");
+        let user = cfstr("kCFPreferencesCurrentUser");
+        let host = cfstr("kCFPreferencesAnyHost");
+        let ret = CFPreferencesCopyValue(key, app, user, host);
+        CFRelease(key as CFTypeRef);
+        CFRelease(app as CFTypeRef);
+        CFRelease(user as CFTypeRef);
+        CFRelease(host as CFTypeRef);
+        if !ret.is_null() {
+            let typ = CFGetTypeID(ret);
+            if typ == CFStringGetTypeID() {
+                let c_string = CFStringGetCStringPtr(ret as CFStringRef, kCFStringEncodingUTF8);
+                if !c_string.is_null() {
+                    let v = std::ffi::CStr::from_ptr(c_string).to_string_lossy().to_string();
+                    CFRelease(ret as CFTypeRef);
+                    return Some(v);
+                }
+            }
+        }
+    }
+    // TODO: linux $HOME/.config/Gyroflow/Gyroflow.conf
+    None
+}
+
 /*
 pub fn rename_calib_videos() {
     use telemetry_parser::Input;
