@@ -71,7 +71,7 @@ impl WgpuWrapper {
         ADAPTERS.read().iter().map(|x| { let x = x.get_info(); format!("{} ({:?})", x.name, x.backend) }).collect()
     }
 
-    pub fn set_device(index: usize, _buffers: &Buffers) -> Option<()> {
+    pub fn set_device(index: usize) -> Option<()> {
         let mut i = 0;
         for a in ADAPTERS.read().iter() {
             if i == index {

@@ -262,7 +262,7 @@ impl<T: PixelType> Stabilization<T> {
                 let first_ind = gpu_list.iter().enumerate().find(|(_, m)| m.starts_with("[wgpu]")).map(|(idx, _)| idx).unwrap_or(0);
                 let wgpu_ind = i - first_ind as isize;
                 if wgpu_ind >= 0 {
-                    match wgpu::WgpuWrapper::set_device(wgpu_ind as usize, buffers) {
+                    match wgpu::WgpuWrapper::set_device(wgpu_ind as usize) {
                         Some(_) => { self.next_backend = Some("wgpu"); return true; },
                         None => {
                             log::error!("Failed to set wgpu device {}", name);

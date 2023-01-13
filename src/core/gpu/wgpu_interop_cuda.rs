@@ -236,13 +236,6 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                     .handle_type(handle_type)
                     .fd(cuda_mem.shared_handle as std::ffi::c_int);
 
-                let allocate_info = vk::MemoryAllocateInfo::builder()
-                    .allocation_size(cuda_mem.cuda_alloc_size as u64)
-                    .push_next(&mut import_memory_info)
-                    .memory_type_index(0);
-
-                let allocated_memory = raw_device.allocate_memory(&allocate_info, None)?;
-
                 let mut ext_create_info = vk::ExternalMemoryImageCreateInfo::builder().handle_types(handle_type);
 
                 let image_create_info = ImageCreateInfo::builder()
@@ -261,6 +254,30 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 
                 let layout = raw_device.get_image_subresource_layout(raw_image, vk::ImageSubresource::default());
                 cuda_mem.vulkan_pitch_alignment = layout.row_pitch as usize;
+
+                let memory_type_index = {
+                    let mem_requirements = raw_device.get_image_memory_requirements(raw_image);
+                    let memory_properties = device.shared_instance().raw_instance().get_physical_device_memory_properties(device.raw_physical_device());
+                    let mut memory_type_index = 0;
+                    for i in 0..memory_properties.memory_type_count as usize {
+                        if (mem_requirements.memory_type_bits & (1 << i)) == 0 {
+                            continue;
+                        }
+                        let properties = memory_properties.memory_types[i].property_flags;
+                        if properties.contains(vk::MemoryPropertyFlags::DEVICE_LOCAL) {
+                            memory_type_index = i;
+                            break;
+                        }
+                    }
+                    memory_type_index as u32
+                };
+
+                let allocate_info = vk::MemoryAllocateInfo::builder()
+                    .allocation_size(cuda_mem.cuda_alloc_size as u64)
+                    .push_next(&mut import_memory_info)
+                    .memory_type_index(memory_type_index);
+
+                let allocated_memory = raw_device.allocate_memory(&allocate_info, None)?;
 
                 raw_device.bind_image_memory(raw_image, allocated_memory, 0)?;
 
