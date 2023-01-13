@@ -268,6 +268,7 @@ MenuItem {
 
     TableList {
         id: info;
+        copyable: true;
         model: ({ })
     }
     LinkButton {
