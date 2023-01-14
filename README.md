@@ -287,7 +287,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.
 
-As additional permission under section 7, you are allowed to distribute the software through an app store, even if that store has restrictive terms and conditions that are incompatible with the GPL, provided that the source is also available under the GPL with or without this permission through a channel without those restrictive terms and conditions.
+As additional permission under section 7, you are allowed to distribute [`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core) through an app store, even if that store has restrictive terms and conditions that are incompatible with the GPL, provided that the source is also available under the GPL with or without this permission through a channel without those restrictive terms and conditions.
 
 ## Authors
 
