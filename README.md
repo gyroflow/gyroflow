@@ -287,6 +287,8 @@ The project also supports UI live reload, it's a super quick way of working with
 
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.
 
+As additional permission under section 7, you are allowed to distribute the software through an app store, even if that store has restrictive terms and conditions that are incompatible with the GPL, provided that the source is also available under the GPL with or without this permission through a channel without those restrictive terms and conditions.
+
 ## Authors
 
 * [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing, rolling shutter correction and advanced rendering features*
@@ -298,6 +300,7 @@ Distributed under the GPLv3 License. See [LICENSE](https://github.com/gyroflow/g
 * [Marc Roeschlin](https://github.com/marcroe/) - *Author of the adaptive zoom algorithm*
 * [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author of the OpenFX plugin*
 * [Vladimir Pinchuk](https://github.com/VladimirP1/) - *Author of robust gyro-to-video synchronization algorithm*
+* [Chris Hocking](https://github.com/latenitefilms) - *Author of the BRAW Toolbox Final Cut Pro Plugin*
 
 ## Acknowledgements
 
