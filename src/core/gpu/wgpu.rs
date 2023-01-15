@@ -76,7 +76,7 @@ impl WgpuWrapper {
         for a in ADAPTERS.read().iter() {
             if i == index {
                 let info = a.get_info();
-                log::debug!("WGPU adapter: {:?}", &info);
+                log::debug!("WGPU adapter ({i}): {:?}", &info);
 
                 ADAPTER.store(i, SeqCst);
                 return Some(());
@@ -134,10 +134,19 @@ impl WgpuWrapper {
 
         let drawing_enabled = (params.flags & 8) == 8;
 
-        let adapter_initialized = ADAPTERS.read().get(ADAPTER.load(SeqCst)).is_some();
+        let mut adapter_id = ADAPTER.load(SeqCst);
+        let adapter_initialized = ADAPTERS.read().get(adapter_id).is_some();
         if !adapter_initialized { Self::initialize_context(); }
         let lock = ADAPTERS.read();
-        if let Some(adapter) = lock.get(ADAPTER.load(SeqCst)) {
+        adapter_id = ADAPTER.load(SeqCst);
+
+        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        if let BufferSource::CUDABuffer { .. } = buffers.input.data {
+            adapter_id = super::wgpu_interop_cuda::get_current_cuda_device() as usize;
+        }
+
+        if let Some(adapter) = lock.get(adapter_id) {
+            log::debug!("WGPU initializing adapter #{adapter_id}");
             let (device, queue) = match &buffers.input.data {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 BufferSource::Metal { command_queue, .. } |

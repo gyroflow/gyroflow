@@ -664,6 +664,16 @@ impl<T: PixelType> StabilizationManager<T> {
             smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
             input_file: Arc::new(RwLock::new(self.input_file.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
+
+            // NOT cloned:
+            // stabilization
+            // pose_estimator
+            // lens_calibrator
+            // current_compute_id
+            // smoothing_checksum
+            // zooming_checksum
+            // prevent_recompute
+            // camera_id
             ..Default::default()
         }
     }

@@ -12,7 +12,7 @@ path = "lib.rs"
 #telemetry-parser = { path = "../../../telemetry-parser" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "1b9b2ce" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
-ahrs = { git = "https://github.com/jmagnuson/ahrs-rs", rev = "d523b14", features = ["field_access"] }
+ahrs = { version = "0.6.0", features = ["field_access"] }
 
 
 #rs-sync = { path = "../../../rs-sync" }
