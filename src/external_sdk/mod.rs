@@ -45,7 +45,7 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                 if cfg!(target_os = "macos") {
                     out_dir.push("../Frameworks/");
                 }
-                if cfg!(target_os = "linux") {
+                if cfg!(target_os = "linux") && sdk_name != "RED SDK" {
                     out_dir.push("lib/");
                 }
                 let size = buf.len().max(1) as f64;

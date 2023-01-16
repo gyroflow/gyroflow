@@ -26,15 +26,11 @@ impl REDSdk {
                         parent.with_file_name("REDR3D.dylib").exists();
                 }
             } else if cfg!(target_os = "linux") {
-                if let Some(parent) = exe_path.parent() {
-                    let mut lib = parent.to_path_buf();
-                    lib.push("lib/_");
-                    return
-                        lib.with_file_name("REDCuda-x64.so").exists() &&
-                        lib.with_file_name("REDDecoder-x64.so").exists() &&
-                        lib.with_file_name("REDOpenCL-x64.so").exists() &&
-                        lib.with_file_name("REDR3D-x64.so").exists();
-                }
+                return
+                    exe_path.with_file_name("REDCuda-x64.so").exists() &&
+                    exe_path.with_file_name("REDDecoder-x64.so").exists() &&
+                    exe_path.with_file_name("REDOpenCL-x64.so").exists() &&
+                    exe_path.with_file_name("REDR3D-x64.so").exists();
             }
         }
 

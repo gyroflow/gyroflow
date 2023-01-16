@@ -148,7 +148,19 @@ pub fn get_setting(key: &str) -> Option<String> {
             }
         }
     }
-    // TODO: linux $HOME/.config/Gyroflow/Gyroflow.conf
+    #[cfg(target_os = "linux")]
+    {
+        let key = format!("{}=", key);
+        if let Ok(home) = std::env::var("HOME") {
+            if let Ok(contents) = std::fs::read_to_string(format!("{home}/.config/Gyroflow/Gyroflow.conf")) {
+                for line in contents.lines()  {
+                    if line.starts_with(&key) {
+                        return Some((&line[key.len()..]).trim().trim_matches('"').replace("\\\"", "\"").to_string());
+                    }
+                }
+            }
+        }
+    }
     None
 }
 
