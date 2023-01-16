@@ -85,7 +85,7 @@ impl Default for StabilizationParams {
             show_detected_features: true,
             show_optical_flow: true,
             frame_readout_time: 0.0,
-            adaptive_zoom_window: 0.0,
+            adaptive_zoom_window: 4.0,
             adaptive_zoom_center_offset: (0.0, 0.0),
             adaptive_zoom_method: 0,
 

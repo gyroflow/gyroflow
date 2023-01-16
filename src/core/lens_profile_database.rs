@@ -5,14 +5,14 @@ use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
 
-#[cfg(target_os = "android")]
+#[cfg(any(target_os = "android", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: include_dir::Dir = include_dir::include_dir!("$CARGO_MANIFEST_DIR/../../resources/camera_presets/");
 
 #[derive(Default)]
 pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
-    loaded: bool
+    pub loaded: bool
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
@@ -116,14 +116,14 @@ impl LensProfileDatabase {
             }
         };
 
-        #[cfg(target_os = "android")]
+        #[cfg(any(target_os = "android", feature = "bundle-lens-profiles"))]
         for entry in LENS_PROFILES_STATIC.find("**/*").unwrap() {
             if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
                 load(data, &entry.path().display().to_string());
             }
         }
 
-        #[cfg(not(target_os = "android"))]
+        #[cfg(not(any(target_os = "android", feature = "bundle-lens-profiles")))]
         walkdir::WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
             if let Ok(entry) = e {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");

@@ -1165,6 +1165,53 @@ impl<T: PixelType> StabilizationManager<T> {
         Ok(obj)
     }
 
+    pub fn load_video_file(&self, filepath: &str, mut metadata: Option<(usize, usize, f64, f64)>) -> std::io::Result<()> { //  (width, height, fps, duration_s)
+        if metadata.is_none() {
+            metadata = Some(util::get_video_metadata(filepath)?);
+        }
+        let (width, height, fps, duration_s) = metadata.unwrap();
+
+        if width > 0 && height > 0 && duration_s > 0.0 && fps > 0.0 {
+            let video_size = (width as usize, height as usize);
+            let frame_count = (duration_s * fps).ceil() as usize;
+
+            self.init_from_video_data(filepath, duration_s * 1000.0, fps, frame_count, video_size)?;
+            let _ = self.load_gyro_data(filepath, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+
+            let camera_id = self.camera_id.read();
+
+            let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
+            if !id_str.is_empty() {
+                let mut db = self.lens_profile_db.write();
+                if !db.loaded {
+                    db.load_all();
+                }
+                if db.contains_id(&id_str) {
+                    match self.load_lens_profile(&id_str) {
+                        Ok(_) => {
+                            if let Some(fr) = self.lens.read().frame_readout_time {
+                                self.params.write().frame_readout_time = fr;
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("An error occured: {e:?}");
+                            return Err(std::io::ErrorKind::Other.into());
+                        }
+                    }
+                }
+            }
+            let mut output_width = width;
+            let mut output_height = height;
+            if let Some(output_dim) = self.lens.read().output_dimension.clone() {
+                output_width = output_dim.w;
+                output_height = output_dim.h;
+            }
+            self.set_size(video_size.0, video_size.1);
+            self.set_output_size(output_width, output_height);
+        }
+        Ok(())
+    }
+
     pub fn set_device(&self, i: i32) {
         self.params.write().current_device = i;
         let mut l = self.stabilization.write();

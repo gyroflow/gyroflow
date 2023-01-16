@@ -81,6 +81,8 @@ ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/Ad
 
 rustfft = "6.1.0"
 
+include_dir = { version = "0.7.3", features = ["glob"] }
+
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
 version = "0.24.0"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.foreign-types]
@@ -105,11 +107,9 @@ features = ["libloading"]
 default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
+bundle-lens-profiles = []
 
 [profile.deploy]
 inherits = "release"
 lto = true
 codegen-units = 1
-
-[target.'cfg(target_os = "android")'.dependencies]
-include_dir = { version = "0.7.3", features = ["glob"] }
