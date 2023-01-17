@@ -57,12 +57,12 @@ pub struct InputFile {
     pub image_sequence_start: i32
 }
 
-pub struct StabilizationManager<T: PixelType> {
+pub struct StabilizationManager {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
     pub smoothing: Arc<RwLock<Smoothing>>,
 
-    pub stabilization: Arc<RwLock<Stabilization<T>>>,
+    pub stabilization: Arc<RwLock<Stabilization>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
     #[cfg(feature = "opencv")]
@@ -83,14 +83,14 @@ pub struct StabilizationManager<T: PixelType> {
     pub params: Arc<RwLock<StabilizationParams>>
 }
 
-impl<T: PixelType> Default for StabilizationManager<T> {
+impl Default for StabilizationManager {
     fn default() -> Self {
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
             params: Arc::new(RwLock::new(StabilizationParams::default())),
 
-            stabilization: Arc::new(RwLock::new(Stabilization::<T>::default())),
+            stabilization: Arc::new(RwLock::new(Stabilization::default())),
             gyro: Arc::new(RwLock::new(GyroSource::new())),
             lens: Arc::new(RwLock::new(LensProfile::default())),
 
@@ -115,7 +115,7 @@ impl<T: PixelType> Default for StabilizationManager<T> {
     }
 }
 
-impl<T: PixelType> StabilizationManager<T> {
+impl StabilizationManager {
     pub fn init_from_video_data(&self, _path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) -> std::io::Result<()> {
         {
             let mut params = self.params.write();
@@ -465,7 +465,7 @@ impl<T: PixelType> StabilizationManager<T> {
         }
     }
 
-    pub fn process_pixels(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Option<stabilization::ProcessedInfo> {
+    pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Option<stabilization::ProcessedInfo> {
         if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return None; } }
         if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return None; } }
 
@@ -476,11 +476,11 @@ impl<T: PixelType> StabilizationManager<T> {
         {
             let mut undist = self.stabilization.write();
             self.draw_overlays(&mut undist.drawing, timestamp_us);
-            undist.ensure_ready_for_processing(timestamp_us, buffers);
+            undist.ensure_ready_for_processing::<T>(timestamp_us, buffers);
         }
 
         let undist = self.stabilization.read();
-        undist.process_pixels(timestamp_us, buffers)
+        undist.process_pixels::<T>(timestamp_us, buffers)
     }
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
@@ -655,7 +655,7 @@ impl<T: PixelType> StabilizationManager<T> {
         self.smoothing.read().get_names()
     }
 
-    pub fn get_cloned(&self) -> StabilizationManager<T> {
+    pub fn get_cloned(&self) -> StabilizationManager {
         StabilizationManager {
             params: Arc::new(RwLock::new(self.params.read().clone())),
             gyro:   Arc::new(RwLock::new(self.gyro.read().clone())),

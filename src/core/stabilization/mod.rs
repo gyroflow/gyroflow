@@ -84,7 +84,7 @@ unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
 
 #[derive(Default)]
-pub struct Stabilization<T: PixelType> {
+pub struct Stabilization {
     pub stab_data: BTreeMap<i64, FrameTransform>,
     last_frame_data: RefCell<FrameTransform>,
 
@@ -106,9 +106,7 @@ pub struct Stabilization<T: PixelType> {
 
     pub drawing: DrawCanvas,
     pub pending_device_change: Option<isize>,
-    next_backend: Option<&'static str>,
-
-    _d: std::marker::PhantomData<T>
+    next_backend: Option<&'static str>
 }
 
 #[derive(Debug)]
@@ -118,13 +116,13 @@ pub struct ProcessedInfo {
     pub backend: &'static str,
 }
 
-impl<T: PixelType> Stabilization<T> {
+impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
     }
 
-    pub fn ensure_stab_data_at_timestamp(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
@@ -274,7 +272,7 @@ impl<T: PixelType> Stabilization<T> {
         false
     }
 
-    pub fn init_backends(&mut self, timestamp_us: i64, buffers: &Buffers) {
+    pub fn init_backends<T: PixelType>(&mut self, timestamp_us: i64, buffers: &Buffers) {
         let tuple = (
             buffers.get_checksum(),
             crc32fast::hash(format!("{}{}", self.compute_params.distortion_model.id(), self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default()).as_bytes())
@@ -332,16 +330,16 @@ impl<T: PixelType> Stabilization<T> {
         }
     }
 
-    pub fn ensure_ready_for_processing(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
+    pub fn ensure_ready_for_processing<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         if let Some(dev) = self.pending_device_change.take() {
             log::debug!("Setting device {dev}");
             self.update_device(dev, buffers);
         }
 
-        self.ensure_stab_data_at_timestamp(timestamp_us, buffers);
-        self.init_backends(timestamp_us, buffers);
+        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers);
+        self.init_backends::<T>(timestamp_us, buffers);
     }
-    pub fn process_pixels(&self, timestamp_us: i64, buffers: &mut Buffers) -> Option<ProcessedInfo> {
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers) -> Option<ProcessedInfo> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return None; }
 
         let mut _last_frame_data = None;
@@ -392,9 +390,9 @@ impl<T: PixelType> Stabilization<T> {
 
             // CPU path
             let ok = match self.interpolation {
-                Interpolation::Bilinear => { Self::undistort_image_cpu::<2>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
-                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
-                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
             };
             if ok {
                 ret.backend = "CPU";
@@ -407,5 +405,5 @@ impl<T: PixelType> Stabilization<T> {
     }
 }
 
-unsafe impl<T: PixelType> Send for Stabilization<T> { }
-unsafe impl<T: PixelType> Sync for Stabilization<T> { }
+unsafe impl Send for Stabilization { }
+unsafe impl Sync for Stabilization { }

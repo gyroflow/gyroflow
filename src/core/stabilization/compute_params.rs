@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use super::StabilizationManager;
-use super::PixelType;
 use super::distortion_models::DistortionModel;
 use crate::GyroSource;
 use crate::keyframes::KeyframeManager;
@@ -50,7 +49,7 @@ pub struct ComputeParams {
     pub digital_lens_params: Option<Vec<f64>>
 }
 impl ComputeParams {
-    pub fn from_manager<T: PixelType>(mgr: &StabilizationManager<T>, full_gyro: bool) -> Self {
+    pub fn from_manager(mgr: &StabilizationManager, full_gyro: bool) -> Self {
         let params = mgr.params.read();
 
         let lens = mgr.lens.read();

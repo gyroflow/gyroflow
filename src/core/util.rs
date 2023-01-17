@@ -144,7 +144,11 @@ pub fn get_setting(key: &str) -> Option<String> {
                     let v = std::ffi::CStr::from_ptr(c_string).to_string_lossy().to_string();
                     CFRelease(ret as CFTypeRef);
                     return Some(v);
+                } else {
+                    CFRelease(ret as CFTypeRef);
                 }
+            } else {
+                CFRelease(ret as CFTypeRef);
             }
         }
     }

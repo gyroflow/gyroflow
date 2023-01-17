@@ -33,7 +33,7 @@ pub struct AutosyncProcess {
 }
 
 impl AutosyncProcess {
-    pub fn from_manager<T: crate::stabilization::PixelType>(stab: &StabilizationManager<T>, timestamps_fract: &[f64], sync_params: SyncParams, mode: String, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
+    pub fn from_manager(stab: &StabilizationManager, timestamps_fract: &[f64], sync_params: SyncParams, mode: String, cancel_flag: Arc<AtomicBool>) -> Result<Self, ()> {
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();

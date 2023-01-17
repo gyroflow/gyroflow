@@ -141,7 +141,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
+pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone,
           F2: Fn(String) + Send + Sync + Clone
 {
@@ -404,7 +404,7 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                         params.video_output_size = params.output_size;
                         params.background
                     };
-                    let mut plane = Stabilization::<$t>::default();
+                    let mut plane = Stabilization::default();
                     plane.interpolation = Interpolation::Lanczos4;
                     plane.set_device(stab.params.read().current_device as isize);
 
@@ -425,13 +425,13 @@ pub fn render<T: PixelType, F, F2>(stab: Arc<StabilizationManager<T>>, progress:
                             output: get_plane_buffer(out_frame_data, out_size, plane_index, &mut g, wgpu_format)
                         };
 
-                        plane.ensure_ready_for_processing(timestamp_us, &mut buffers);
+                        plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
                         if fill_with_background {
                             if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
                                 transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                             }
                         }
-                        plane.process_pixels(timestamp_us, &mut buffers);
+                        plane.process_pixels::<$t>(timestamp_us, &mut buffers);
                     }));
                 })*
             };

@@ -150,7 +150,7 @@ pub fn run(open_file: &mut String) -> bool {
         let time = Instant::now();
         let mut queue_printed = false;
 
-        let stab = Arc::new(StabilizationManager::<stabilization::RGBA8>::default());
+        let stab = Arc::new(StabilizationManager::default());
         stab.lens_profile_db.write().load_all();
 
         let mut queue = RenderQueue::new(stab.clone());
@@ -408,7 +408,7 @@ fn get_saved_settings() -> HashMap<String, String> {
     map
 }
 
-fn setup_defaults(stab: Arc<StabilizationManager<stabilization::RGBA8>>, queue: &mut RenderQueue) -> serde_json::Value {
+fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
     let settings = get_saved_settings();
     dbg!(&settings);
 

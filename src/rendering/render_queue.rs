@@ -4,7 +4,7 @@
 use qmetaobject::*;
 
 use crate::{ core, rendering, util };
-use crate::core::{ stabilization, StabilizationManager };
+use crate::core::StabilizationManager;
 use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
 use std::collections::{ HashMap, HashSet };
@@ -48,7 +48,7 @@ struct Job {
     render_options: RenderOptions,
     additional_data: String,
     cancel_flag: Arc<AtomicBool>,
-    stab: Arc<StabilizationManager<stabilization::RGBA8>>
+    stab: Arc<StabilizationManager>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -204,7 +204,7 @@ pub struct RenderQueue {
 
     paused_timestamp: Option<u64>,
 
-    stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>,
+    stabilizer: Arc<StabilizationManager>,
 }
 
 macro_rules! update_model {
@@ -225,7 +225,7 @@ macro_rules! update_model {
 }
 
 impl RenderQueue {
-    pub fn new(stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>) -> Self {
+    pub fn new(stabilizer: Arc<StabilizationManager>) -> Self {
         Self {
             status: QString::from("stopped"),
             default_suffix: QString::from("_stabilized"),
@@ -234,7 +234,7 @@ impl RenderQueue {
         }
     }
 
-    pub fn get_stab_for_job(&self, job_id: u32) -> Option<Arc<StabilizationManager<stabilization::RGBA8>>> {
+    pub fn get_stab_for_job(&self, job_id: u32) -> Option<Arc<StabilizationManager>> {
         Some(self.jobs.get(&job_id)?.stab.clone())
     }
 
@@ -312,7 +312,7 @@ impl RenderQueue {
         job_id
     }
 
-    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager<stabilization::RGBA8>>, render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
+    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager>, render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
         let size = stab.params.read().video_size;
         stab.set_render_params(size, (render_options.output_width, render_options.output_height));
 
@@ -1125,7 +1125,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, stab: Arc<StabilizationManager<stabilization::RGBA8>>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, stab: Arc<StabilizationManager>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
         let (has_gyro, has_sync_points) = {
             let gyro = stab.gyro.read();
             (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())

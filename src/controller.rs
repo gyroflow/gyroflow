@@ -17,7 +17,6 @@ use crate::core::StabilizationManager;
 #[cfg(feature = "opencv")]
 use crate::core::calibration::LensCalibrator;
 use crate::core::synchronization::AutosyncProcess;
-use crate::core::stabilization;
 use crate::core::stabilization::KernelParamsFlags;
 use crate::core::synchronization;
 use crate::core::keyframes::*;
@@ -277,7 +276,7 @@ pub struct Controller {
 
     ongoing_computations: BTreeSet<u64>,
 
-    pub stabilizer: Arc<StabilizationManager<stabilization::RGBA8>>,
+    pub stabilizer: Arc<StabilizationManager>,
 }
 
 impl Controller {
@@ -890,6 +889,8 @@ impl Controller {
         }
     }
     fn init_player(&self, player: QJSValue) {
+        use gyroflow_core::stabilization::RGBA8;
+
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid1 = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -951,10 +952,9 @@ impl Controller {
                 if preview_pipeline.load(SeqCst) > 1 { return false; }
 
                 let size = (width as usize, height as usize, width as usize * 4);
-
                 let ret = match backend_id {
                     1 => { // OpenGL, ptr1: texture, ptr2: opengl context
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
                                 data: BufferSource::OpenGL {
@@ -977,7 +977,7 @@ impl Controller {
                     },
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
                                 data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
@@ -995,7 +995,7 @@ impl Controller {
                     },
                     #[cfg(target_os = "windows")]
                     3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
                                 texture_copy: true,
@@ -1022,7 +1022,7 @@ impl Controller {
                     },
                     #[cfg(not(any(target_os = "macos", target_os = "ios")))]
                     4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
-                        let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
                             input: BufferDescription {
                                 size,
                                 texture_copy: false,
@@ -1066,7 +1066,7 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
                     input: BufferDescription {
                         size: (width as usize, height as usize, stride as usize),
                         data: BufferSource::Cpu { buffer: pixels },
@@ -1198,7 +1198,7 @@ impl Controller {
                     self.image_sequence_fps = seq_fps;
                 }
                 if !org_video_path.is_empty() {
-                    let video_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&org_video_path, Some(path.clone()), self.image_sequence_start as u32);
+                    let video_path = StabilizationManager::get_new_videofile_path(&org_video_path, Some(path.clone()), self.image_sequence_start as u32);
                     ret[0] = QString::from(core::util::path_to_str(&video_path));
                 }
 
@@ -1206,7 +1206,7 @@ impl Controller {
                     let gyro_path = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
 
                     if !gyro_path.is_empty() {
-                        let gyro_path = StabilizationManager::<stabilization::RGBA8>::get_new_videofile_path(&gyro_path, Some(path), self.image_sequence_start as u32);
+                        let gyro_path = StabilizationManager::get_new_videofile_path(&gyro_path, Some(path), self.image_sequence_start as u32);
                         ret[1] = QString::from(core::util::path_to_str(&gyro_path));
                     }
                 }
