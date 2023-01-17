@@ -1182,9 +1182,14 @@ impl<T: PixelType> StabilizationManager<T> {
 
             let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
             if !id_str.is_empty() {
-                let mut db = self.lens_profile_db.write();
+                let mut db = self.lens_profile_db.read();
                 if !db.loaded {
-                    db.load_all();
+                    drop(db);
+                    {
+                        let mut db = self.lens_profile_db.write();
+                        db.load_all();
+                    }
+                    db = self.lens_profile_db.read();
                 }
                 if db.contains_id(&id_str) {
                     match self.load_lens_profile(&id_str) {
