@@ -367,7 +367,7 @@ impl WgpuWrapper {
                     let data = buffer_slice.get_mapped_range();
                     if self.padded_out_stride == buffers.output.size.2 as u32 {
                         // Fast path
-                        buffer.copy_from_slice(data.as_ref());
+                        (&mut buffer[..buffers.output.size.1 * buffers.output.size.2]).copy_from_slice(data.as_ref());
                     } else {
                         // data.as_ref()
                         //     .chunks(self.padded_out_stride as usize)
