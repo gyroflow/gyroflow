@@ -18,6 +18,7 @@ MenuItem {
     property alias videoSpeed: videoSpeed;
     property alias zoomingCenterX: zoomingCenterX;
     property alias zoomingCenterY: zoomingCenterY;
+    property alias croppingMode: croppingMode;
 
     Settings {
         id: settings;

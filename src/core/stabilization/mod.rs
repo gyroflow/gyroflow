@@ -112,6 +112,7 @@ pub struct Stabilization {
 #[derive(Debug)]
 pub struct ProcessedInfo {
     pub fov: f64,
+    pub minimal_fov: f64,
     pub focal_length: Option<f64>,
     pub backend: &'static str,
 }
@@ -354,6 +355,7 @@ impl Stabilization {
         if let Some(itm) = itm {
             let mut ret = ProcessedInfo {
                 fov: itm.fov,
+                minimal_fov: itm.minimal_fov,
                 focal_length: itm.focal_length,
                 backend: ""
             };

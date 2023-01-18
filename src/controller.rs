@@ -267,6 +267,7 @@ pub struct Controller {
     processing_resolution: i32,
 
     current_fov: qt_property!(f64; NOTIFY processing_info_changed),
+    current_minimal_fov: qt_property!(f64; NOTIFY processing_info_changed),
     current_focal_length: qt_property!(f64; NOTIFY processing_info_changed),
     processing_info: qt_property!(QString; NOTIFY processing_info_changed),
     processing_info_changed: qt_signal!(),
@@ -536,8 +537,10 @@ impl Controller {
 
             if let Some(gyro) = self.stabilizer.gyro.try_read() {
                 if let Some(params) = self.stabilizer.params.try_read() {
-                    chart.setFromGyroSource(&gyro, &params, &series);
-                    return true;
+                    if let Some(keyframes) = self.stabilizer.keyframes.try_read() {
+                        chart.setFromGyroSource(&gyro, &params, &keyframes, &series);
+                        return true;
+                    }
                 }
             }
         }
@@ -919,8 +922,9 @@ impl Controller {
             let stab = self.stabilizer.clone();
             let preview_pipeline = self.preview_pipeline.clone();
             let out_pixels = RefCell::new(Vec::new());
-            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, focal_length, info): (f64, Option<f64>, QString)| {
+            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, minimal_fov, focal_length, info): (f64, f64, Option<f64>, QString)| {
                 this.current_fov = fov;
+                this.current_minimal_fov = minimal_fov;
                 this.current_focal_length = focal_length.unwrap_or_default();
                 this.processing_info = info;
                 this.processing_info_changed();
@@ -932,9 +936,6 @@ impl Controller {
                 if !stab.params.read().stab_enabled { return false; }
 
                 let _time = std::time::Instant::now();
-                let mut backend = String::new();
-                let mut fov = 1.0;
-                let mut focal_length = None;
 
                 if preview_pipeline.load(SeqCst) == 0 {
                     let mut buffers = Buffers{
@@ -942,9 +943,9 @@ impl Controller {
                         output: BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                     };
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
-                        update_info2((ret.fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
-                        update_info2((fov, focal_length, QString::from("---")));
+                        update_info2((1.0, 1.0, None, QString::from("---")));
                     }
                     return true;
                 }
@@ -952,103 +953,97 @@ impl Controller {
                 if preview_pipeline.load(SeqCst) > 1 { return false; }
 
                 let size = (width as usize, height as usize, width as usize * 4);
-                let ret = match backend_id {
-                    1 => { // OpenGL, ptr1: texture, ptr2: opengl context
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                data: BufferSource::OpenGL {
-                                    texture: ptr1 as u32,
-                                    context: ptr2 as *mut std::ffi::c_void
-                                }, ..Default::default()
+
+                let mut buffers =
+                    match backend_id {
+                        1 => { // OpenGL, ptr1: texture, ptr2: opengl context
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    data: BufferSource::OpenGL {
+                                        texture: ptr1 as u32,
+                                        context: ptr2 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    data: BufferSource::OpenGL {
+                                        texture: ptr1 as u32,
+                                        context: ptr2 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
                             },
-                            output: BufferDescription {
-                                size,
-                                data: BufferSource::OpenGL {
-                                    texture: ptr1 as u32,
-                                    context: ptr2 as *mut std::ffi::c_void
-                                }, ..Default::default()
+                            "OpenGL"))
+                        },
+                        #[cfg(any(target_os = "macos", target_os = "ios"))]
+                        2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                },
                             },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("OpenGL->{}", bk.backend); true },
-                            None => false
+                            "Metal"))
+                        },
+                        #[cfg(target_os = "windows")]
+                        3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::DirectX11 {
+                                        texture: ptr1 as *mut std::ffi::c_void,
+                                        device:  ptr2 as *mut std::ffi::c_void,
+                                        device_context: ptr3 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::DirectX11 {
+                                        texture: ptr1 as *mut std::ffi::c_void,
+                                        device:  ptr2 as *mut std::ffi::c_void,
+                                        device_context: ptr3 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                            },
+                            "DirectX11"))
+                        },
+                        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+                        4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    texture_copy: false,
+                                    data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                    ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                    ..Default::default()
+                                },
+                            },
+                            "Vulkan"))
                         }
-                    },
-                    #[cfg(any(target_os = "macos", target_os = "ios"))]
-                    2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Metal->{}", bk.backend); true },
-                            None => false
-                        }
-                    },
-                    #[cfg(target_os = "windows")]
-                    3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::DirectX11 {
-                                    texture: ptr1 as *mut std::ffi::c_void,
-                                    device:  ptr2 as *mut std::ffi::c_void,
-                                    device_context: ptr3 as *mut std::ffi::c_void
-                                }, ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::DirectX11 {
-                                    texture: ptr1 as *mut std::ffi::c_void,
-                                    device:  ptr2 as *mut std::ffi::c_void,
-                                    device_context: ptr3 as *mut std::ffi::c_void
-                                }, ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX11->{}", bk.backend); true },
-                            None => false
-                        }
-                    },
-                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-                    4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                texture_copy: false,
-                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
-                                ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
-                                ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Vulkan->{}", bk.backend); true },
-                            None => false
-                        }
+                        _ => None
+                    };
+
+                if let Some((ref mut buffers, backend)) = buffers {
+                    if let Some(ret) = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, buffers) {
+                        update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {backend}->{} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        return true;
                     }
-                    _ => false
-                };
-                if ret {
-                    update_info2((fov, focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, backend, _time.elapsed().as_micros() as f64 / 1000.0))));
-                } else {
-                    update_info2((fov, focal_length, QString::from("---")));
                 }
-                ret
+
+                update_info2((1.0, 1.0, None, QString::from("---")));
+                return false;
             }));
 
             let stab = self.stabilizer.clone();
@@ -1080,11 +1075,11 @@ impl Controller {
                 });
                 match ret {
                     Some(bk) => {
-                        update_info2((bk.fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((bk.fov, bk.minimal_fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                         (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                     },
                     None => {
-                        update_info2((1.0, None, QString::from("---")));
+                        update_info2((1.0, 1.0, None, QString::from("---")));
                         (0, 0, 0, std::ptr::null_mut())
                     }
                 }
@@ -1307,7 +1302,7 @@ impl Controller {
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
-    wrap_simple_method!(set_fov,                v: f64; recompute);
+    wrap_simple_method!(set_fov,                v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);

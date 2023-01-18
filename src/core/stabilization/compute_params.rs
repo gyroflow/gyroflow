@@ -11,6 +11,7 @@ use crate::lens_profile::LensProfile;
 pub struct ComputeParams {
     pub gyro: GyroSource,
     pub fovs: Vec<f64>,
+    pub minimal_fovs: Vec<f64>,
     pub keyframes: KeyframeManager,
     pub lens: LensProfile,
 
@@ -65,6 +66,7 @@ impl ComputeParams {
             fov_scale: params.fov,
             fov_overview: params.fov_overview,
             fovs: params.fovs.clone(),
+            minimal_fovs: params.minimal_fovs.clone(),
             width: params.size.0.max(1),
             height: params.size.1.max(1),
             video_width: params.video_size.0.max(1),

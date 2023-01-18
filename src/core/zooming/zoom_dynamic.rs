@@ -22,12 +22,14 @@ struct DataPerTimestamp {
 impl ZoomingAlgorithm for ZoomDynamic {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
 
-    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<(f64, Point2D)> {
+    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<((f64, f64), Point2D)> {
         if timestamps.is_empty() {
             return Vec::new();
         }
 
         let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
+
+        let fov_minimal = fov_values.clone();
 
         if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (self.compute_params.video_speed_affects_zooming && (self.compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
             // Keyframed window
@@ -86,7 +88,7 @@ impl ZoomingAlgorithm for ZoomDynamic {
             }
         }
 
-        fov_values.iter().copied().zip(center_position.iter().copied()).collect()
+        fov_values.into_iter().zip(fov_minimal.into_iter()).zip(center_position.into_iter()).collect()
     }
 
     fn compute_params(&self) -> &ComputeParams {

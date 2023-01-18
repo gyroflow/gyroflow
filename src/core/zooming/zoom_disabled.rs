@@ -5,12 +5,19 @@ use super::*;
 use std::collections::BTreeMap;
 
 pub struct ZoomDisabled {
+    fov_estimator: Box<dyn FieldOfViewAlgorithm>,
     compute_params: ComputeParams,
 }
 
 impl ZoomingAlgorithm for ZoomDisabled {
-    fn compute(&self, _timestamps: &[f64], _keyframes: &KeyframeManager, _method: ZoomMethod) -> Vec<(f64, Point2D)> {
-        Vec::new()
+    fn compute(&self, timestamps: &[f64], _keyframes: &KeyframeManager, _method: ZoomMethod) -> Vec<((f64, f64), Point2D)> {
+        if timestamps.is_empty() {
+            return Vec::new();
+        }
+
+        let (fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
+
+        fov_values.into_iter().map(|x| (1.0, x)).zip(center_position.into_iter()).collect()
     }
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { Default::default() }
 
@@ -26,8 +33,9 @@ impl ZoomingAlgorithm for ZoomDisabled {
 }
 
 impl ZoomDisabled {
-    pub fn new(compute_params: ComputeParams) -> Self {
+    pub fn new(fov_estimator: Box<dyn FieldOfViewAlgorithm>, compute_params: ComputeParams) -> Self {
         Self {
+            fov_estimator,
             compute_params
         }
     }

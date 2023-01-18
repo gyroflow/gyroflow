@@ -250,31 +250,29 @@ impl StabilizationManager {
         false
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> Vec<f64> {
-        let (window, frames, fps, method) = {
+    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> (Vec<f64>, Vec<f64>) {
+        let (frames, fps, method) = {
             let params = params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
+            (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
-        if window > 0.0 || window < -0.9 {
-            let mut timestamps = Vec::with_capacity(frames);
-            for i in 0..frames {
-                timestamps.push(i as f64 * 1000.0 / fps);
-            }
-
-            let fovs = zoom.compute(&timestamps, &keyframes, method.into());
-            fovs.iter().map(|v| v.0).collect()
-        } else {
-            Vec::new()
+        let mut timestamps = Vec::with_capacity(frames);
+        for i in 0..frames {
+            timestamps.push(i as f64 * 1000.0 / fps);
         }
+
+        let fovs = zoom.compute(&timestamps, &keyframes, method.into());
+
+        fovs.iter().map(|v| v.0).unzip()
     }
     pub fn recompute_adaptive_zoom(&self) {
         let params = stabilization::ComputeParams::from_manager(self, false);
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let mut zoom = zooming::from_compute_params(params);
-        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
+        let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
 
         let mut stab_params = self.params.write();
         stab_params.set_fovs(fovs, lens_fov_adjustment);
+        stab_params.minimal_fovs = minimal_fovs;
         stab_params.zooming_debug_points = zoom.get_debug_points();
     }
 
@@ -350,12 +348,15 @@ impl StabilizationManager {
 
             let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
+                let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
+                params.fovs = fovs;
+                params.minimal_fovs = minimal_fovs;
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut stab_params = stabilization_params.write();
                 stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
+                stab_params.minimal_fovs = params.minimal_fovs.clone();
                 stab_params.zooming_debug_points = zoom.get_debug_points();
             }
 
