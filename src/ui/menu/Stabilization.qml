@@ -470,7 +470,7 @@ MenuItem {
                     position: Label.LeftPosition;
                     SliderWithField {
                         id: zoomingCenterX;
-                        precision: 0;
+                        precision: 2;
                         value: 0;
                         defaultValue: 0;
                         from: -100;
@@ -487,7 +487,7 @@ MenuItem {
                     position: Label.LeftPosition;
                     SliderWithField {
                         id: zoomingCenterY;
-                        precision: 0;
+                        precision: 2;
                         value: 0;
                         defaultValue: 0;
                         from: -100;

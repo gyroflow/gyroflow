@@ -640,7 +640,8 @@ Item {
                     visible: (root.safeArea || fovOverviewBtn.checked) && safeAreaRect.fov > 1 && stabEnabledBtn.checked;
                     Item {
                         id: safeAreaRect;
-                        property real fov: (window.stab.fovSlider.field.value + (fovOverviewBtn.checked? 1 : 0)) / (window.stab.croppingMode.currentIndex == 0? controller.current_minimal_fov : 1.0)
+                        property real fov: fovOverviewBtn.checked? ((window.stab.croppingMode.currentIndex == 0? 1 : 1 / window.stab.fovSlider.field.value) + 1)
+                                                                 : window.stab.fovSlider.field.value / (window.stab.croppingMode.currentIndex == 0? controller.current_minimal_fov : 1);
                         width: parent.width;
                         height: parent.height;
                         anchors.centerIn: parent;
