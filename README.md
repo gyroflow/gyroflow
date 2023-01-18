@@ -98,6 +98,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] WitMotion (WT901SDCL binary and *.txt)
 - [x] Vuze (VuzeXR)
 - [x] KanDao (Obisidian Pro)
+- [x] [CAMM format](https://developers.google.com/streetview/publish/camm-spec)
 
 ### Info for cameras not on the list
 
