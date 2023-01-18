@@ -721,7 +721,7 @@ impl Controller {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
                             // Ignore the error here, video file may not contain the telemetry and it's ok
-                            if let Ok(md) = stab.load_gyro_data(&s, &Default::default(), progress, cancel_flag) {
+                            if let Ok(md) = stab.load_gyro_data(&s, is_main_video, &Default::default(), progress, cancel_flag) {
                                 file_metadata = Some(md);
                             }
 
@@ -735,7 +735,7 @@ impl Controller {
                             options.sample_index = Some(sample_index as usize);
                         }
 
-                        match stab.load_gyro_data(&s, &options, progress, cancel_flag) {
+                        match stab.load_gyro_data(&s, is_main_video, &options, progress, cancel_flag) {
                             Ok(md) => {
                                 file_metadata = Some(md);
                             },

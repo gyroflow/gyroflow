@@ -131,7 +131,7 @@ impl StabilizationManager {
         Ok(())
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -171,18 +171,20 @@ impl StabilizationManager {
         let quats = self.gyro.read().quaternions.clone();
         self.smoothing.write().update_quats_checksum(&quats);
 
-        if let Some(ref lens) = md.lens_profile {
-            let mut l = self.lens.write();
-            if let Some(lens_str) = lens.as_str() {
-                let db = self.lens_profile_db.read();
-                if let Some(found) = db.find(lens_str) {
-                    *l = found.clone();
+        if is_main_video {
+            if let Some(ref lens) = md.lens_profile {
+                let mut l = self.lens.write();
+                if let Some(lens_str) = lens.as_str() {
+                    let db = self.lens_profile_db.read();
+                    if let Some(found) = db.find(lens_str) {
+                        *l = found.clone();
+                    }
+                } else if lens.is_object() {
+                    l.load_from_json_value(lens);
+                    l.filename = path.to_string();
+                    let db = self.lens_profile_db.read();
+                    l.resolve_interpolations(&db);
                 }
-            } else if lens.is_object() {
-                l.load_from_json_value(lens);
-                l.filename = path.to_string();
-                let db = self.lens_profile_db.read();
-                l.resolve_interpolations(&db);
             }
         }
         if let Some(ref id) = md.camera_identifier {
@@ -1013,12 +1015,12 @@ impl StabilizationManager {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() && blocking {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() && blocking {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }
@@ -1177,7 +1179,7 @@ impl StabilizationManager {
             let frame_count = (duration_s * fps).ceil() as usize;
 
             self.init_from_video_data(filepath, duration_s * 1000.0, fps, frame_count, video_size)?;
-            let _ = self.load_gyro_data(filepath, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+            let _ = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let camera_id = self.camera_id.read();
 
