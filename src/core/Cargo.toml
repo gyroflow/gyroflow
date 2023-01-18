@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "acc6e3d" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "ad97349" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.6.0", features = ["field_access"] }
 

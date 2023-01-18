@@ -210,31 +210,33 @@ impl TimelineGyroChart {
 
         ////////////////////////////////////////////////////
 
-        p.set_pen(QPen::from_style(PenStyle::NoPen));
-        p.set_brush(QBrush::from_color(QColor::from_name("#30ff0000"))); // semi-transparent red
+        if self.gyro.is_empty() || self.quats.is_empty() {
+            p.set_pen(QPen::from_style(PenStyle::NoPen));
+            p.set_brush(QBrush::from_color(QColor::from_name("#30ff0000"))); // semi-transparent red
 
-        let duration_us = self.duration_ms * 1000.0;
+            let duration_us = self.duration_ms * 1000.0;
 
-        let mut region: Option<QRectF> = None;
-        for x in &self.minimal_fovs {
-            if x.values[0] < 1.0 {
-                let x_pos = map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width;
-                if let Some(region) = &mut region {
-                    region.width = x_pos - region.x;
-                } else {
-                    region = Some(QRectF {
-                        x: map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width,
-                        y: 0.0,
-                        width: 1.0 / (self.visibleAreaRight - self.visibleAreaLeft),
-                        height: rect.height
-                    });
+            let mut region: Option<QRectF> = None;
+            for x in &self.minimal_fovs {
+                if x.values[0] < 0.99 {
+                    let x_pos = map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width;
+                    if let Some(region) = &mut region {
+                        region.width = x_pos - region.x;
+                    } else {
+                        region = Some(QRectF {
+                            x: map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width,
+                            y: 0.0,
+                            width: 1.0 / (self.visibleAreaRight - self.visibleAreaLeft),
+                            height: rect.height
+                        });
+                    }
+                } else if let Some(region) = region.take() {
+                    p.draw_rect(region);
                 }
-            } else if let Some(region) = region.take() {
+            }
+            if let Some(region) = region.take() {
                 p.draw_rect(region);
             }
-        }
-        if let Some(region) = region.take() {
-            p.draw_rect(region);
         }
     }
     fn drawSyncPoints(&mut self, p: &mut QPainter) {

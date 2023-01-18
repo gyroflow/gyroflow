@@ -312,20 +312,34 @@ impl Controller {
         };
         self.project_file_path_changed();
 
-        let mut custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
+        let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
         if self.image_sequence_start > 0 {
-            custom_decoder = QString::from(format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start));
+            custom_decoder = format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start);
         }
-        if !*rendering::GPU_DECODING.read() && file_path.to_ascii_lowercase().ends_with("braw") {
-            custom_decoder = QString::from("BRAW:gpu=no:scale=1920x1080"); // Disable GPU decoding for BRAW
+
+        let options = {
+            let target_height = self.preview_resolution;
+            if target_height > 0 {
+                format!(":scale={}x{}", (target_height * 16) / 9, target_height)
+            } else {
+                "".to_owned()
+            }
+        };
+
+        if file_path.to_ascii_lowercase().ends_with("braw") {
+            let gpu = if *rendering::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
+            custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
         if file_path.to_ascii_lowercase().ends_with("r3d") {
-            custom_decoder = QString::from("R3D:gpu=auto:scale=1920x1080");
+            custom_decoder = format!("R3D:gpu=auto{}", options);
+        }
+        if !custom_decoder.is_empty() {
+            ::log::debug!("Custom decoder: {custom_decoder}");
         }
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            vid.setUrl(url, custom_decoder);
+            vid.setUrl(url, QString::from(custom_decoder));
         }
     }
 
@@ -437,6 +451,10 @@ impl Controller {
                 if input_file.image_sequence_start > 0 {
                     decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
                 }
+                if proc_height > 0 {
+                    decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+                }
+                ::log::debug!("Decoder options: {:?}", decoder_options);
 
                 let sync = std::rc::Rc::new(sync);
 
@@ -1458,10 +1476,26 @@ impl Controller {
             let total_read = Arc::new(AtomicUsize::new(0));
             let processed = Arc::new(AtomicUsize::new(0));
 
+            let processing_resolution = self.processing_resolution;
+
             let input_file = stab.input_file.read().clone();
             core::run_threaded(move || {
+
+                let mut decoder_options = ffmpeg_next::Dictionary::new();
+                if input_file.image_sequence_fps > 0.0 {
+                    let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
+                    decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                }
+                if input_file.image_sequence_start > 0 {
+                    decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+                }
+                if processing_resolution > 0 {
+                    decoder_options.set("scale", &format!("{}x{}", (processing_resolution * 16) / 9, processing_resolution));
+                }
+
+                ::log::debug!("Decoder options: {:?}", decoder_options);
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, None) {
+                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let progress = progress.clone();
                         let err2 = err.clone();
@@ -1469,6 +1503,8 @@ impl Controller {
                         let total_read = total_read.clone();
                         let processed = processed.clone();
                         let cancel_flag2 = cancel_flag.clone();
+                        let dims = proc.get_org_dimensions();
+
                         proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
@@ -1480,8 +1516,8 @@ impl Controller {
                                 let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = (input_frame.height() as f64 * input_vertical_stretch).round() as u32;
                                 let mut pt_scale = 1.0;
-                                if height > 2160 {
-                                    pt_scale = height as f32 / 2160.0;
+                                if processing_resolution > 0 && height > processing_resolution as u32 {
+                                    pt_scale = height as f32 / processing_resolution as f32;
                                     width = (width as f32 / pt_scale).round() as u32;
                                     height = (height as f32 / pt_scale).round() as u32;
                                 }
@@ -1496,6 +1532,13 @@ impl Controller {
                                             cal.forced_frames.insert(frame);
                                         }
                                         cal.no_marker = no_marker;
+
+                                        if let Some(dims) = &dims {
+                                            let (w, h) = (dims.0.load(SeqCst), dims.1.load(SeqCst));
+                                            if w > 0 && h > 0 {
+                                                pt_scale *= h as f32 / height as f32;
+                                            }
+                                        }
                                         cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {

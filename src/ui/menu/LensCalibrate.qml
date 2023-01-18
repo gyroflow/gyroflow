@@ -19,6 +19,7 @@ MenuItem {
     property alias autoCalibBtn: autoCalibBtn;
     property alias uploadProfile: uploadProfile;
     property alias noMarker: noMarker.checked;
+    property alias previewResolution: previewResolution.currentIndex;
     property var calibrationInfo: ({});
 
     property int videoWidth: 0;
@@ -537,21 +538,50 @@ MenuItem {
             text: qsTr("Preview resolution");
 
             ComboBox {
-                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "1080p", "720p", "480p"];
+                id: previewResolution;
+                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 0;
                 onCurrentIndexChanged: {
                     let target_height = -1; // Full
                     switch (currentIndex) {
-                        case 1: target_height = 1080; break;
-                        case 2: target_height = 720; break;
-                        case 3: target_height = 480; break;
+                        case 0: calibrator_window.videoArea.vid.setProperty("scale", ""); break;
+                        case 1: target_height = 2160; calibrator_window.videoArea.vid.setProperty("scale", "3840x2160"); break;
+                        case 2: target_height = 1080; calibrator_window.videoArea.vid.setProperty("scale", "1920x1080"); break;
+                        case 3: target_height = 720;  calibrator_window.videoArea.vid.setProperty("scale", "1280x720");  break;
+                        case 4: target_height = 480;  calibrator_window.videoArea.vid.setProperty("scale", "640x480");   break;
                     }
-
                     controller.set_preview_resolution(target_height, calibrator_window.videoArea.vid);
                 }
             }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Processing resolution");
+            ComboBox {
+                id: processingResolution;
+                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 1;
+                Component.onCompleted: currentIndexChanged();
+                onCurrentIndexChanged: {
+                    let target_height = -1; // Full
+                    switch (currentIndex) {
+                        case 1: target_height = 2160; break;
+                        case 2: target_height = 1080; break;
+                        case 3: target_height = 720;  break;
+                        case 4: target_height = 480;  break;
+                    }
+
+                    controller.set_processing_resolution(target_height);
+                }
+            }
+        }
+        InfoMessageSmall {
+            show: processingResolution.currentIndex > 1;
+            text: qsTr("Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you're doing.");
         }
         CheckBoxWithContent {
             id: rLimitCb;

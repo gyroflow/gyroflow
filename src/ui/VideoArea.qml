@@ -283,6 +283,20 @@ Item {
             parts.push(parts[parts.length - 1].replace(".RDC", "_001.R3D"));
             url = parts.join("/");
         }
+
+        if (url.toString().toLowerCase().endsWith(".r3d") || url.toString().toLowerCase().endsWith(".braw")) {
+            // Preview resolution to 1080p
+            if (isCalibrator && calibrator_window.lensCalib) {
+                if (calibrator_window.lensCalib.previewResolution == 0) {
+                    calibrator_window.lensCalib.previewResolution = 2;
+                }
+            } else {
+                if (window.advanced.previewResolution == 0) {
+                    window.advanced.previewResolution = 2;
+                }
+            }
+        }
+
         stabEnabledBtn.checked = false;
 
         if (controller.check_external_sdk(url.toString())) {
