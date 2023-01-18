@@ -121,3 +121,36 @@ name = "android.permission.WRITE_EXTERNAL_STORAGE"
 # ndk = { version = "*", features = ["trace"] }
 # ndk-glue = { version = "*", features = ["logger"] }
 ndk-sys = { version = "0.4.1" }
+
+# -------------------------- iOS stuff --------------------------
+
+[lib]
+crate-type = ["staticlib"]
+
+[package.metadata.ios]
+
+# Specifies the array of targets to build for.
+build_targets = ["aarch64-apple-ios", "aarch64-apple-ios-sim", "x86_64-apple-ios"]
+
+# Specifies the array of dependencies sdk. Empty by default.
+#dependencies = ["OpenGLES.framework", "GLKit.framework", "Security.framework", "UIKit.framework"]
+dependencies = ["Metal.framework", "Security.framework", "UIKit.framework"]
+
+# Specifies deployment target. "12" by default.
+#deployment_target = "13.0"
+
+# Specifies bundleIdPrefix. "com.rust" by default.
+bundle_id_prefix = "xyz.gyroflow.ios"
+
+# Specifies CODE_SIGN_IDENTITY.
+code_sign_identity = "Developer ID Application: LateNite Films Pty Ltd"
+
+# Specifies DEVELOPMENT_TEAM.
+development_team = "LateNite Films Pty Ltd"
+
+# Specifies device id and device type.
+#device_id = "BC982C5E-2F51-4A4D-83E1-A8FDC7E54ED6"
+device_type = "simulator" # or "device".
+
+# Specifies an assets folder.
+#assets = ["assets/"]
