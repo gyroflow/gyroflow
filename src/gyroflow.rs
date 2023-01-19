@@ -130,6 +130,9 @@ fn entry() {
     let rqpinned = unsafe { QObjectPinned::new(&rq) };
 
     let mut engine = QmlEngine::new();
+    util::catch_qt_file_open(|url| {
+        engine.set_property("openFileOnStart".into(), QString::from(util::url_to_path(url)).into());
+    });
     let mut dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     if cfg!(target_os = "android") { dpi *= 0.85; }
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
