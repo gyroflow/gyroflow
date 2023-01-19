@@ -12,3 +12,4 @@ ext/*.tar
 ext/*.log
 *.code-workspace
 gyroflow.log
+.DS_Store
