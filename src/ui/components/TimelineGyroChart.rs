@@ -77,8 +77,8 @@ impl TimelineGyroChart {
     pub fn setDurationMs(&mut self, v: f64) { self.duration_ms = v; }
     fn setVisibleAreaLeft (&mut self, v: f64) { self.visibleAreaLeft = v; self.update(); }
     fn setVisibleAreaRight(&mut self, v: f64) { self.visibleAreaRight = v; self.update(); }
-    fn setAxisVisible     (&mut self, a: usize, v: bool) { self.series[a].visible = v; self.update(); self.axisVisibleChanged(); }
-    fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
+    fn setAxisVisible     (&mut self, a: usize, v: bool) { if let Some(a) = self.series.get_mut(a) { a.visible = v; self.update(); self.axisVisibleChanged(); } }
+    fn getAxisVisible     (&self, a: usize) -> bool { self.series.get(a).map(|x| x.visible).unwrap_or_default() }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
     fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(""); self.viewModeChanged(); }
 

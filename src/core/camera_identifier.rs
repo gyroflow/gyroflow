@@ -14,6 +14,7 @@ pub struct CameraIdentifier {
     pub model: String,
     pub lens_model: String,
     pub lens_info: String,
+    pub focal_length: Option<f64>,
     pub camera_setting: String,
     pub fps: usize,
     pub video_width: usize,
@@ -104,6 +105,7 @@ impl CameraIdentifier {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::LensZoomNative) as Option<&f32>) {
                                 id.lens_info = format!("{:.2}mm", v);
+                                id.focal_length = Some(*v as f64);
                             }
                             if let Some(v) = tag_map.get(&GroupId::Custom("LensDistortion".into())).and_then(|map| map.get_t(TagId::Data) as Option<&serde_json::Value>) {
                                 if id.lens_info.is_empty() {
@@ -147,6 +149,7 @@ impl CameraIdentifier {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::LensZoomNative) as Option<&f32>) {
                                 id.lens_info = format!("{:.2}mm", v);
+                                id.focal_length = Some(*v as f64);
                             }
                             if brand != "Runcam" {
                                 if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::Name) as Option<&String>) {
@@ -157,8 +160,8 @@ impl CameraIdentifier {
                                 if let Some(v) = map.get_t(TagId::Metadata) as Option<&serde_json::Value> {
                                     log::debug!("Camera ID Brand: {}, Model: {}, Metadata: {:?}", id.brand, id.model, v);
                                     if let Some(v) = v.get("lens_info")             .and_then(|v| v.as_str()) { id.lens_info      = v.to_string(); }
-                                    if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_f64()) { id.lens_info      = format!("{:.2}mm", v); }
-                                    if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_str()) { id.lens_info      = v.to_string(); }
+                                    if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_f64()) { id.lens_info      = format!("{:.2}mm", v); id.focal_length = Some(v); }
+                                    if let Some(v) = v.get("focal_length")          .and_then(|v| v.as_str()) { id.lens_info      = v.to_string(); id.focal_length = v.replace("mm", "").parse::<f64>().ok(); }
                                     if let Some(v) = v.get("lens_type")             .and_then(|v| v.as_str()) { id.lens_model     = v.to_string(); }
                                     if let Some(v) = v.get("resolution_format_name").and_then(|v| v.as_str()) { id.camera_setting = v.to_string(); }
                                 }

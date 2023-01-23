@@ -15,11 +15,12 @@ MenuItem {
     loader: false;//controller && controller.calib_in_progress;
     objectName: "lenscalib";
 
-    property alias rms: rms.value;
     property alias autoCalibBtn: autoCalibBtn;
     property alias uploadProfile: uploadProfile;
     property alias noMarker: noMarker.checked;
     property alias previewResolution: previewResolution.currentIndex;
+    property alias infoList: infoList;
+    property alias maxSharpness: maxSharpness;
     property var calibrationInfo: ({});
 
     property int videoWidth: 0;
@@ -102,6 +103,7 @@ MenuItem {
                     if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
                     if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
+                    if (+camera_id.focal_length > 0) { flcb.checked = true; fl.value = +camera_id.focal_length; }
 
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
@@ -147,26 +149,23 @@ MenuItem {
         }
     }
 
-    Item {
-        width: parent.width;
-        height: rmsLabel.height;
-        Label {
-            id: rmsLabel;
-            position: Label.LeftPosition;
-            text: qsTr("Reprojection error") + ":";
-
-            BasicText {
-                id: rms;
-                property real value: 0;
-                font.bold: true;
-                text: value == 0? "---" : value.toLocaleString(Qt.locale(), "f", 5)
-                color: value == 0? styleTextColor : value < 1? "#1ae921" : value < 5? "#f6a10c" : "#f41717";
-                anchors.verticalCenter: parent.verticalCenter;
-            }
-        }
-        MouseArea { id: rmsMa; anchors.fill: parent; hoverEnabled: true; }
-        ToolTip { visible: rmsMa.containsMouse; text: qsTr("For a good lens calibration, this value should be less than 5, ideally less than 1.") }
+    InfoMessageSmall {
+        show: infoList.rms > 5 && infoList.rms < 100;
+        text: qsTr("For a good lens calibration, this value should be less than 5, ideally less than 1.");
     }
+    TableList {
+        id: infoList;
+        spacing: 10 * dpiScale;
+        property real rms: 0;
+        onModelChanged: {
+            Qt.callLater(() => {
+                if (infoList.col2.children.length > 0 && infoList.col2.children[0].children.length > 0) {
+                    infoList.col2.children[0].children[0].color = rms == 0? styleTextColor : rms < 1? "#1ae921" : rms < 5? "#f6a10c" : "#f41717";
+                }
+            });
+        }
+    }
+
     Button {
         id: autoCalibBtn;
         text: qsTr("Auto calibrate");
@@ -299,7 +298,7 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         iconName: "save"
-        enabled: rms.value > 0 && rms.value < 100 && calibrator_window.videoArea.vid.loaded;
+        enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();

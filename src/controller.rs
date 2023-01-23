@@ -168,7 +168,7 @@ pub struct Controller {
 
     calib_in_progress: qt_property!(bool; NOTIFY calib_in_progress_changed),
     calib_in_progress_changed: qt_signal!(),
-    calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize),
+    calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize, sharpness: f64),
 
     loading_gyro_in_progress: qt_property!(bool; NOTIFY loading_gyro_in_progress_changed),
     loading_gyro_in_progress_changed: qt_signal!(),
@@ -1418,7 +1418,7 @@ impl Controller {
 
             self.calib_in_progress = true;
             self.calib_in_progress_changed();
-            self.calib_progress(0.0, 0.0, 0, 0, 0);
+            self.calib_progress(0.0, 0.0, 0, 0, 0, 0.0);
 
             let stab = self.stabilizer.clone();
 
@@ -1451,10 +1451,10 @@ impl Controller {
                 cal.max_sharpness = max_sharpness;
             }
 
-            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
+            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms, sharpness): (usize, usize, usize, f64, f64)| {
                 this.calib_in_progress = ready < total;
                 this.calib_in_progress_changed();
-                this.calib_progress(ready as f64 / total as f64, rms, ready, total, good);
+                this.calib_progress(ready as f64 / total as f64, rms, ready, total, good, sharpness);
                 if rms > 0.0 {
                     this.update_calib_model();
                 }
@@ -1568,11 +1568,14 @@ impl Controller {
                 if let Err(e) = cal.calibrate(is_forced) {
                     err(("An error occured: %1".to_string(), format!("{:?}", e)));
                 } else {
-                    stab.lens.write().set_from_calibrator(cal);
+                    if cal.rms < 100.0 {
+                        stab.lens.write().set_from_calibrator(cal);
+                    }
                     ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
                 }
 
-                progress((total, total, 0, cal.rms));
+                let good = cal.image_points.read().len();
+                progress((total, total, good, cal.rms, *cal.sum_sharpness.read() / good.max(1) as f64));
 
                 stab.params.write().is_calibrator = true;
             });
@@ -1630,7 +1633,7 @@ impl Controller {
             }
             self.update_calib_model();
             if rms > 0.0 {
-                self.calib_progress(1.0, rms, 1, 1, 1);
+                self.calib_progress(1.0, rms, 1, 1, 1, 0.0);
             }
         }
     }
