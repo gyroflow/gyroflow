@@ -107,6 +107,9 @@ MenuItem {
 
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
+
+                    // RED KOMODO is global shutter
+                    gs.checked = camera_id.model.startsWith("KOMODO");
                 }
             }
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
@@ -604,6 +607,13 @@ MenuItem {
             checked: false;
             width: parent.width;
             onCheckedChanged: controller.lens_is_asymmetrical = checked;
+        }
+        CheckBox {
+            id: gs;
+            text: qsTr("Sensor is global shutter");
+            checked: false;
+            width: parent.width;
+            onCheckedChanged: calib.calibrationInfo.global_shutter = checked;
         }
         CheckBox {
             id: noMarker;

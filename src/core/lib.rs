@@ -201,6 +201,38 @@ impl StabilizationManager {
         } else {
             let mut lens = self.lens.write();
             let result = lens.load_from_file(path);
+            let matching = lens.get_all_matching_profiles();
+            if matching.len() > 1 {
+                let (width, height, aspect, id) = {
+                    let params = self.params.read();
+                    (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default())
+                };
+                let mut found = false;
+                // Find best match for:
+                // 1. Identifier
+                for x in &matching {
+                    if !id.is_empty() && x.identifier == id {
+                        *lens = x.clone(); found = true; break;
+                    }
+                }
+                if !found {
+                    // 2. Resolution
+                    for x in &matching {
+                        if width == x.calib_dimension.w && height == x.calib_dimension.h {
+                            *lens = x.clone(); found = true; break;
+                        }
+                    }
+                }
+                if !found {
+                    // 3. Aspect ratio
+                    for x in &matching {
+                        let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                        if a == aspect {
+                            *lens = x.clone(); break;
+                        }
+                    }
+                }
+            }
             lens.resolve_interpolations(&db);
             result
         }
@@ -1148,7 +1180,7 @@ impl StabilizationManager {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     input_file.image_sequence_fps = seq_fps;
                 }
-                if !org_video_path.is_empty() {
+                if !org_video_path.is_empty() && std::fs::File::open(&video_path).is_ok() {
                     input_file.path = util::path_to_str(&video_path);
                 }
             }

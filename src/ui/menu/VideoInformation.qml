@@ -23,6 +23,7 @@ MenuItem {
         const fields = [
             QT_TRANSLATE_NOOP("TableList", "File name"),
             QT_TRANSLATE_NOOP("TableList", "Detected camera"),
+            QT_TRANSLATE_NOOP("TableList", "Detected lens"),
             QT_TRANSLATE_NOOP("TableList", "Dimensions"),
             QT_TRANSLATE_NOOP("TableList", "Duration"),
             QT_TRANSLATE_NOOP("TableList", "Frame rate"),

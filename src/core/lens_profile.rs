@@ -45,8 +45,6 @@ pub struct LensProfile {
     pub fps: f64,
 
     pub crop: Option<f64>,
-    pub crop_x: Option<f64>,
-    pub crop_y: Option<f64>,
 
     pub official: bool,
 
@@ -71,6 +69,7 @@ pub struct LensProfile {
 
     pub focal_length: Option<f64>,
     pub crop_factor: Option<f64>,
+    pub global_shutter: bool,
 
     #[serde(skip)]
     pub filename: String,
@@ -222,8 +221,6 @@ impl LensProfile {
                 mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
                 mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
             }
-            if let Some(crop) = self.crop_x { mat[(0, 0)] /= crop; }
-            if let Some(crop) = self.crop_y { mat[(1, 1)] /= crop; }
             if let Some(crop) = self.crop {
                 mat[(0, 0)] /= crop;
                 mat[(1, 1)] /= crop;
@@ -278,24 +275,30 @@ impl LensProfile {
                 if x.contains_key("width") && x.contains_key("height") {
                     let (new_w, new_h) = (x["width"].as_u64().unwrap_or_default(), x["height"].as_u64().unwrap_or_default());
                     if new_w > 0 && new_h > 0 {
-                        let ratio = new_w as f64 / cpy.calib_dimension.w as f64;
-                        let scale = |val: &mut usize, pad: bool| {
+                        let ratiow = new_w as f64 / cpy.calib_dimension.w as f64;
+                        let ratioh = new_h as f64 / cpy.calib_dimension.h as f64;
+                        fn scale(val: &mut usize, ratio: f64, pad: bool) {
                             *val = (*val as f64 * ratio).round() as usize;
                             if pad && *val % 2 != 0 { *val -= 1; }
-                        };
-                        scale(&mut cpy.calib_dimension.w, true);
-                        scale(&mut cpy.calib_dimension.h, true);
-                        scale(&mut cpy.orig_dimension.w, true);
-                        scale(&mut cpy.orig_dimension.h, true);
+                        }
+                        scale(&mut cpy.calib_dimension.w, ratiow, true);
+                        scale(&mut cpy.calib_dimension.h, ratioh, true);
+                        scale(&mut cpy.orig_dimension.w, ratiow, true);
+                        scale(&mut cpy.orig_dimension.h, ratioh, true);
                         if cpy.fisheye_params.camera_matrix.len() > 1 {
-                            cpy.fisheye_params.camera_matrix[0][0] *= ratio;
-                            cpy.fisheye_params.camera_matrix[0][2] *= ratio;
-                            cpy.fisheye_params.camera_matrix[1][1] *= ratio;
-                            cpy.fisheye_params.camera_matrix[1][2] *= ratio;
+                            // If aspect ratio is different, then we treat it as a sensor crop.
+                            // In this case, we don't want to scale the camera matrix
+                            // Otherwise, it's not a crop, but sub- or super-sampling so we simply "zoom" the entire video
+                            if (ratiow - ratioh).abs() < 0.001 { // if x and y aspect ratios are the same
+                                cpy.fisheye_params.camera_matrix[0][0] *= ratiow;
+                                cpy.fisheye_params.camera_matrix[0][2] *= ratiow;
+                                cpy.fisheye_params.camera_matrix[1][1] *= ratioh;
+                                cpy.fisheye_params.camera_matrix[1][2] *= ratioh;
+                            }
                         }
                         if let Some(ref mut odim) = cpy.output_dimension {
-                            scale(&mut odim.w, true);
-                            scale(&mut odim.h, true);
+                            scale(&mut odim.w, ratiow, true);
+                            scale(&mut odim.h, ratioh, true);
                         }
                     }
                 }
@@ -308,8 +311,6 @@ impl LensProfile {
                     }
                 }
                 if x.contains_key("crop") { cpy.crop = x["crop"].as_f64(); }
-                if x.contains_key("crop_x") { cpy.crop_x = x["crop_x"].as_f64(); }
-                if x.contains_key("crop_y") { cpy.crop_y = x["crop_y"].as_f64(); }
                 if x.contains_key("interpolations") { cpy.interpolations = x.get("interpolations").cloned(); }
                 if x.contains_key("digital_lens")   { cpy.digital_lens   = x.get("digital_lens").and_then(|x| x.as_str().map(|x| x.to_owned())); }
                 if x.contains_key("focal_length")   { cpy.focal_length   = x.get("focal_length").and_then(|x| x.as_f64()); }
@@ -448,8 +449,6 @@ impl LensProfile {
                                 }
                             }
                             cpy.crop = Some(l1.crop.unwrap_or(1.0) * (1.0 - fract) + (l2.crop.unwrap_or(1.0) * fract));
-                            cpy.crop_x = Some(l1.crop_x.unwrap_or(1.0) * (1.0 - fract) + (l2.crop_x.unwrap_or(1.0) * fract));
-                            cpy.crop_y = Some(l1.crop_y.unwrap_or(1.0) * (1.0 - fract) + (l2.crop_y.unwrap_or(1.0) * fract));
 
                             match (l1.focal_length, l2.focal_length) {
                                 (Some(fl1), Some(fl2)) => { cpy.focal_length = Some(fl1 * (1.0 - fract) + (fl2 * fract))},

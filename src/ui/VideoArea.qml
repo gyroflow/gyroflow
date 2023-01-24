@@ -213,6 +213,16 @@ Item {
             if (is_main_video) {
                 root.detectedCamera = camera;
                 vidInfo.updateEntry("Detected camera", camera || "---");
+
+                let lens = "";
+                if (additional_data.camera_identifier) {
+                    const camera_id = additional_data.camera_identifier;
+                    if (camera_id) {
+                        if (camera_id.lens_model) { lens += camera_id.lens_model; }
+                        if (camera_id.lens_info)  { lens += (lens? " " : "") + camera_id.lens_info; }
+                    }
+                }
+                vidInfo.updateEntry("Detected lens", lens || "---");
                 vidInfo.updateEntry("Contains gyro", additional_data.contains_motion? "Yes" : "No");
                 // If source was detected, but gyro data is empty
                 if (camera) {
@@ -414,6 +424,7 @@ Item {
         dropText.loadingFile = filename;
         vidInfo.updateEntry("File name", filename);
         vidInfo.updateEntry("Detected camera", "---");
+        vidInfo.updateEntry("Detected lens", "---");
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
