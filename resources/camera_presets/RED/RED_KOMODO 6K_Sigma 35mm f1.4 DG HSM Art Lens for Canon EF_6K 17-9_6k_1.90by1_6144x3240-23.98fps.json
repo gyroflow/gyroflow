@@ -1,11 +1,11 @@
 {
-  "name": "RED_KOMODO_Canon 16mm 2.8_23.96 R3D_6k_1.90by1_6144x3240-23.98fps",
+  "name": "RED_KOMODO 6K_Sigma 35mm f/1.4 DG HSM Art Lens for Canon EF_6K 17-9_6k_1.90by1_6144x3240-23.98fps",
   "note": "",
-  "calibrated_by": "Clayton Simoncic",
+  "calibrated_by": "SCAN2FX",
   "camera_brand": "RED",
-  "camera_model": "KOMODO",
-  "lens_model": "Canon 16mm 2.8",
-  "camera_setting": "23.96 R3D",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 35mm f/1.4 DG HSM Art Lens for Canon EF",
+  "camera_setting": "6K 17:9",
   "calib_dimension": {
     "w": 6144,
     "h": 3240
@@ -22,23 +22,23 @@
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 5,
+  "num_images": 14,
   "fps": 23.976025,
   "crop": null,
   "official": false,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.41112770539047255,
+    "RMS_error": 0.6607090966647391,
     "camera_matrix": [
       [
-        3837.447337843455,
+        7573.509771859435,
         0.0,
-        3072.2865810361086
+        3084.3137420680278
       ],
       [
         0.0,
-        3838.552169587465,
-        1618.8134104030494
+        7578.180296191601,
+        1611.1540179970132
       ],
       [
         0.0,
@@ -47,20 +47,22 @@
       ]
     ],
     "distortion_coeffs": [
-      0.16387539000115753,
-      0.04134438409826667,
-      0.03966992957316306,
-      -0.013899189322722253
+      0.25508886833201855,
+      -0.1662965734398574,
+      4.943862705271358,
+      -19.17284710111031
     ],
     "radial_distortion_limit": null
   },
-  "identifier": "",
-  "calibrator_version": "1.3.0",
-  "date": "",
+  "identifier": "red-komodo6k-35mmf1.4dghsm|art012-35.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-05",
   "compatible_settings": [],
   "sync_settings": null,
   "distortion_model": null,
   "digital_lens": null,
   "digital_lens_params": null,
-  "interpolations": null
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
 }

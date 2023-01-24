@@ -1,11 +1,11 @@
 {
-  "name": "RED_KOMODO_Canon 16mm 2.8_23.96 R3D_6k_1.90by1_6144x3240-23.98fps",
+  "name": "RED_KOMODO 6K_Sigma 135mm f/1.8 DG HSM Art Lens for Canon EF_6K 17-9_6k_1.90by1_6144x3240-23.98fps",
   "note": "",
-  "calibrated_by": "Clayton Simoncic",
+  "calibrated_by": "SCAN2FX",
   "camera_brand": "RED",
-  "camera_model": "KOMODO",
-  "lens_model": "Canon 16mm 2.8",
-  "camera_setting": "23.96 R3D",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 135mm f/1.8 DG HSM Art Lens for Canon EF",
+  "camera_setting": "6K 17:9",
   "calib_dimension": {
     "w": 6144,
     "h": 3240
@@ -22,23 +22,23 @@
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 5,
+  "num_images": 7,
   "fps": 23.976025,
   "crop": null,
   "official": false,
   "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.41112770539047255,
+    "RMS_error": 1.1657131885437026,
     "camera_matrix": [
       [
-        3837.447337843455,
+        33297.28383013373,
         0.0,
-        3072.2865810361086
+        3835.0707212914203
       ],
       [
         0.0,
-        3838.552169587465,
-        1618.8134104030494
+        33518.45252500198,
+        1677.1080813344329
       ],
       [
         0.0,
@@ -47,20 +47,22 @@
       ]
     ],
     "distortion_coeffs": [
-      0.16387539000115753,
-      0.04134438409826667,
-      0.03966992957316306,
-      -0.013899189322722253
+      1.1185528795429678,
+      -89.46567977333777,
+      8359.87576217567,
+      -325970.69310446153
     ],
     "radial_distortion_limit": null
   },
-  "identifier": "",
-  "calibrator_version": "1.3.0",
-  "date": "",
+  "identifier": "red-komodo6k-135mmf1.8dghsm|art017-135.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-05",
   "compatible_settings": [],
   "sync_settings": null,
   "distortion_model": null,
   "digital_lens": null,
   "digital_lens_params": null,
-  "interpolations": null
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
 }

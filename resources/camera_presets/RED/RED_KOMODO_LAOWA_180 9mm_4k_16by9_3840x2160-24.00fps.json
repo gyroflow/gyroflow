@@ -18,7 +18,7 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": 0.01,
+  "global_shutter": true,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "num_images": 5,

@@ -1,9 +1,9 @@
 {
-  "name": "RED_Komodo___4k_16by9_3840x2160-25.00fps",
+  "name": "RED_KOMODO___4k_16by9_3840x2160-25.00fps",
   "note": "",
   "calibrated_by": "Maiko Astariz",
   "camera_brand": "RED",
-  "camera_model": "Komodo",
+  "camera_model": "KOMODO",
   "lens_model": "",
   "camera_setting": "",
   "calib_dimension": {
@@ -18,7 +18,7 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": 0.01,
+  "global_shutter": true,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "num_images": 11,
