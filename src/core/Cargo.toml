@@ -58,7 +58,7 @@ enterpolation = "0.2.0"
 libloading = "0.7"
 libc = "0.2"
 
-opencv = { version = "0.75", optional = true }
+opencv = { version = "0.76", optional = true }
 
 #wgpu = "0.14"
 #wgpu-hal = "0.14"
