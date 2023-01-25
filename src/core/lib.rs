@@ -497,6 +497,20 @@ impl StabilizationManager {
                     }
                 }
             }
+            if p.fov_overview_rect && p.fov_overview {
+                let fov = self.keyframes.try_read().and_then(|k| k.value_at_video_timestamp(&KeyframeType::Fov, timestamp_us as f64 / 1000.0)).unwrap_or(p.fov);
+                let f = if p.adaptive_zoom_window == 0.0 { 1.0 } else { 1.0 / fov } + 1.0;
+                let pos_x = ((p.output_size.0 as f64 - (p.output_size.0 as f64 / f)) / 2.0).round() as i32;
+                let pos_y = ((p.output_size.1 as f64 - (p.output_size.1 as f64 / f)) / 2.0).round() as i32;
+                for x in pos_x..p.output_size.0 as i32 - pos_x {
+                    drawing.put_pixel(x, pos_y,                          Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
+                    drawing.put_pixel(x, p.output_size.1 as i32 - pos_y, Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
+                }
+                for y in pos_y..p.output_size.1 as i32 - pos_y {
+                    drawing.put_pixel(pos_x, y,                          Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
+                    drawing.put_pixel(p.output_size.0 as i32 - pos_x, y, Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
+                }
+            }
         }
     }
 
