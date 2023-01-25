@@ -350,11 +350,11 @@ impl Stabilization {
     }
 }
 
-pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, params: &ComputeParams) -> Vec<(f32, f32)> {
+pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, params: &ComputeParams, lens_correction_amount: f64) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount)
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.video_width.max(1) as f64;//FrameTransform::get_ratio(params);
@@ -363,10 +363,10 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     let scaled_k = camera_matrix * img_dim_ratio;
 
-    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params)
+    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64) -> Vec<(f32, f32)> {
     let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
     let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
 
@@ -411,7 +411,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
-            if params.lens_correction_amount < 1.0 {
+            if lens_correction_amount < 1.0 {
                 let mut out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
                 if params.lens.input_horizontal_stretch > 0.001 { out_c.0 /= params.lens.input_horizontal_stretch as f32; }
                 if params.lens.input_vertical_stretch   > 0.001 { out_c.1 /= params.lens.input_vertical_stretch as f32; }
@@ -437,8 +437,8 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                 }
 
                 pt = (
-                    new_pt.0 * (1.0 - params.lens_correction_amount as f32) + (pt.0 * params.lens_correction_amount as f32),
-                    new_pt.1 * (1.0 - params.lens_correction_amount as f32) + (pt.1 * params.lens_correction_amount as f32),
+                    new_pt.0 * (1.0 - lens_correction_amount as f32) + (pt.0 * lens_correction_amount as f32),
+                    new_pt.1 * (1.0 - lens_correction_amount as f32) + (pt.1 * lens_correction_amount as f32),
                 );
             }
             pt

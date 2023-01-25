@@ -39,10 +39,18 @@ impl FieldOfViewAlgorithm for FovIterative {
 
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
         let center_positions: Vec<Point2D> = timestamps.iter().map(|_| cp).collect();
+        let keyframe_values: Vec<(f64, f64, f64)> = timestamps.iter().map(|ts| {
+            let adaptive_zoom_center_x = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, *ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.0);
+            let adaptive_zoom_center_y = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, *ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.1);
+            let lens_correction_amount = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, *ts).unwrap_or(self.compute_params.lens_correction_amount);
+
+            (adaptive_zoom_center_x, adaptive_zoom_center_y, lens_correction_amount)
+        }).collect();
 
         let mut fov_values: Vec<f64> = timestamps.into_par_iter()
             .zip(&center_positions)
-            .map(|(&ts, center)| self.find_fov(&rect, ts, center))
+            .zip(&keyframe_values)
+            .map(|((&ts, center), kv)| self.find_fov(&rect, ts, center, kv))
             .collect();
 
         if range.0 > 0.0 || range.1 < 1.0 {
@@ -79,13 +87,14 @@ impl FovIterative {
         }
     }
 
-    fn find_fov(&self, rect: &[(f32, f32)], ts: f64, center: &Point2D) -> f64 {
+    fn find_fov(&self, rect: &[(f32, f32)], ts: f64, center: &Point2D, keyframe_values: &(f64, f64, f64)) -> f64 {
         let ts_us = (ts * 1000.0).round() as i64;
 
-        let adaptive_zoom_center_x = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.0);
-        let adaptive_zoom_center_y = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.1);
+        let adaptive_zoom_center_x = keyframe_values.0;
+        let adaptive_zoom_center_y = keyframe_values.1;
+        let lens_correction_amount = keyframe_values.2;
 
-        let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params);
+        let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params, lens_correction_amount);
         for (x, y) in polygon.iter_mut() {
             *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
             *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
@@ -109,7 +118,7 @@ impl FovIterative {
                 ];
 
                 let distorted = interpolate_points(&relevant, 30);
-                polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params);
+                polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params, lens_correction_amount);
                 for (x, y) in polygon.iter_mut() {
                     *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
                     *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
