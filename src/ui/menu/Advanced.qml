@@ -207,7 +207,7 @@ MenuItem {
         text: qsTr("Safe area guide");
         tooltip: qsTr("When FOV > 1, show an rectangle simulating FOV = 1 over the preview video.\nNote that this is only a visual indicator, it doesn't affect rendering.");
         checked: false;
-        onCheckedChanged: window.videoArea.safeArea = checked;
+        onCheckedChanged: controller.show_safe_area = checked;
     }
     CheckBox {
         id: gpudecode;

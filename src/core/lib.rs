@@ -497,20 +497,6 @@ impl StabilizationManager {
                     }
                 }
             }
-            if p.fov_overview_rect && p.fov_overview {
-                let fov = self.keyframes.try_read().and_then(|k| k.value_at_video_timestamp(&KeyframeType::Fov, timestamp_us as f64 / 1000.0)).unwrap_or(p.fov);
-                let f = if p.adaptive_zoom_window == 0.0 { 1.0 } else { 1.0 / fov } + 1.0;
-                let pos_x = ((p.output_size.0 as f64 - (p.output_size.0 as f64 / f)) / 2.0).round() as i32;
-                let pos_y = ((p.output_size.1 as f64 - (p.output_size.1 as f64 / f)) / 2.0).round() as i32;
-                for x in pos_x..p.output_size.0 as i32 - pos_x {
-                    drawing.put_pixel(x, pos_y,                          Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
-                    drawing.put_pixel(x, p.output_size.1 as i32 - pos_y, Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
-                }
-                for y in pos_y..p.output_size.1 as i32 - pos_y {
-                    drawing.put_pixel(pos_x, y,                          Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
-                    drawing.put_pixel(p.output_size.0 as i32 - pos_x, y, Color::Blue2, Alpha::Alpha100, Stage::OnOutput, y_inverted, 4);
-                }
-            }
         }
     }
 
@@ -548,6 +534,7 @@ impl StabilizationManager {
     pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;        self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
+    pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
@@ -729,6 +716,7 @@ impl StabilizationManager {
     pub fn set_render_params(&self, size: (usize, usize), output_size: (usize, usize)) {
         self.params.write().framebuffer_inverted = false;
         self.params.write().fov_overview = false;
+        self.params.write().show_safe_area = false;
         self.stabilization.write().kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, false);
         self.set_size(size.0, size.1);
         self.set_output_size(output_size.0, output_size.1);

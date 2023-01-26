@@ -33,6 +33,7 @@ struct KernelParams {
     source_rect:        vec4<i32>, // 16 - x, y, w, h
     output_rect:        vec4<i32>, // 16 - x, y, w, h
     digital_lens_params:vec4<f32>, // 16
+    safe_area_rect:     vec4<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -68,6 +69,22 @@ fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
             let alphaf = coeffs[484u + alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);
             pix.w = 255.0 / bg_scaler;
+        }
+    }
+    return pix;
+}
+fn draw_safe_area(in_pix: vec4<f32>, x: f32, y: f32) -> vec4<f32> {
+    var pix = in_pix;
+    let isSafeArea = x >= params.safe_area_rect.x && x <= params.safe_area_rect.z &&
+                     y >= params.safe_area_rect.y && y <= params.safe_area_rect.w;
+    if (!isSafeArea) {
+        pix.x *= 0.5;
+        pix.y *= 0.5;
+        pix.z *= 0.5;
+        let isBorder = x > params.safe_area_rect.x - 5.0 && x < params.safe_area_rect.z + 5.0 &&
+                       y > params.safe_area_rect.y - 5.0 && y < params.safe_area_rect.w + 5.0;
+        if (isBorder) {
+           pix = vec4<f32>(40.0, 40.0, 40.0, 255.0) / bg_scaler;
         }
     }
     return pix;
@@ -259,11 +276,13 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
             let c2 = sample_input_at(pt2);
             pixel = c1 * alpha + c2 * (1.0 - alpha);
             pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
+            pixel = draw_safe_area(pixel, p.x, p.y);
             return vec4<SCALAR>(pixel);
         }
 
         pixel = sample_input_at(uv);
     }
     pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
+    pixel = draw_safe_area(pixel, p.x, p.y);
     return vec4<SCALAR>(pixel);
 }

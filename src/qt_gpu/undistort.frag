@@ -43,6 +43,7 @@ layout(std140, binding = 2) uniform KernelParams {
     ivec4 source_rect;              // 16 - x, y, w, h - unused in this kernel
     ivec4 output_rect;              // 16 - x, y, w, h - unused in this kernel
     vec4 digital_lens_params;       // 16
+    vec4 safe_area_rect;            // 16
 } params;
 
 LENS_MODEL_FUNCTIONS;
@@ -79,6 +80,23 @@ void draw_pixel(inout vec4 out_pix, float x, float y, bool isInput) {
             float alphaf = alphas[alpha];
             out_pix = colorf * alphaf + out_pix * (1.0 - alphaf);
             out_pix.a = 1.0;
+        }
+    }
+}
+void draw_safe_area(inout vec4 out_pix, float x, float y) {
+    bool isSafeArea = x >= params.safe_area_rect.x && x <= params.safe_area_rect.z &&
+                      y >= params.safe_area_rect.y && y <= params.safe_area_rect.w;
+    if (!isSafeArea) {
+        out_pix.x *= 0.5;
+        out_pix.y *= 0.5;
+        out_pix.z *= 0.5;
+        bool isBorder = x >= params.safe_area_rect.x - 5.0 && x <= params.safe_area_rect.z + 5.0 &&
+                        y >= params.safe_area_rect.y - 5.0 && y <= params.safe_area_rect.w + 5.0;
+        if (isBorder) {
+            out_pix.x = 40.0;
+            out_pix.y = 40.0;
+            out_pix.z = 40.0;
+            out_pix.w = 255.0;
         }
     }
 }
@@ -188,6 +206,7 @@ void main() {
             }
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
+            draw_safe_area(fragColor, outPos.x, outPos.y);
             return;
         }
 
@@ -195,10 +214,12 @@ void main() {
             fragColor = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
+            draw_safe_area(fragColor, outPos.x, outPos.y);
             return;
         }
     }
 
     fragColor = params.background / 255.0;
     draw_pixel(fragColor, outPos.x, outPos.y, false);
+    draw_safe_area(fragColor, outPos.x, outPos.y);
 }

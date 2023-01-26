@@ -32,7 +32,6 @@ Item {
     property alias dropRect: dropRect;
     property bool isCalibrator: false;
 
-    property bool safeArea: false;
     property var pendingGyroflowData: null;
     property url loadedFileUrl;
 
@@ -573,11 +572,6 @@ Item {
                             currentFovText.text += " (" + qsTr("full frame equiv.: %1 mm").arg((fl * crop_factor).toFixed(2)) + ")";
                         }
                     }
-
-                    if (window.stab && safeAreaRect.fov > 1) {
-                        safeAreaRect.width = safeAreaRect.parent.width / safeAreaRect.fov;
-                        safeAreaRect.height = safeAreaRect.parent.height / safeAreaRect.fov;
-                    }
                 }
 
                 onCurrentFrameChanged: {
@@ -644,23 +638,6 @@ Item {
                     radius: 5 * dpiScale;
                     anchors.fill: parent;
                     anchors.margins: -border.width;
-                }
-                Item {
-                    anchors.fill: parent;
-                    layer.enabled: true;
-                    visible: (root.safeArea || fovOverviewBtn.checked) && safeAreaRect.fov > 1 && stabEnabledBtn.checked;
-                    Item {
-                        id: safeAreaRect;
-                        property real fov: fovOverviewBtn.checked? ((window.stab.croppingMode.currentIndex == 0? 1 : 1 / window.stab.fovSlider.field.value) + 1)
-                                                                 : window.stab.fovSlider.field.value / (window.stab.croppingMode.currentIndex == 0? controller.current_minimal_fov : 1);
-                        width: parent.width;
-                        height: parent.height;
-                        anchors.centerIn: parent;
-                    }
-                    Rectangle { x: -1; width: parent.width + 2; height: safeAreaRect.y; color: "#80000000"; } // Top
-                    Rectangle { x: -1; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Left
-                    Rectangle { x: -1; y: safeAreaRect.y + safeAreaRect.height; width: parent.width + 2; height: parent.height - y; color: "#80000000"; } // Bottom
-                    Rectangle { x: safeAreaRect.x + safeAreaRect.width; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Right
                 }
             }
 

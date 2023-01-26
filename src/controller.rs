@@ -118,6 +118,7 @@ pub struct Controller {
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
+    show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
@@ -1320,6 +1321,7 @@ impl Controller {
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
+    wrap_simple_method!(set_show_safe_area,     v: bool; recompute);
     wrap_simple_method!(set_fov,                v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);

@@ -41,7 +41,7 @@ pub struct StabilizationParams {
     pub adaptive_zoom_method: i32,
     pub fov: f64,
     pub fov_overview: bool,
-    pub fov_overview_rect: bool,
+    pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
     pub min_fov: f64,
@@ -81,7 +81,7 @@ impl Default for StabilizationParams {
         Self {
             fov: 1.0,
             fov_overview: false,
-            fov_overview_rect: false,
+            show_safe_area: false,
             min_fov: 1.0,
             fovs: vec![],
             minimal_fovs: vec![],

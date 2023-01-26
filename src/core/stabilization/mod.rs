@@ -79,6 +79,7 @@ pub struct KernelParams {
     pub source_rect:           [i32; 4], // 16 - x, y, w, h
     pub output_rect:           [i32; 4], // 16 - x, y, w, h
     pub digital_lens_params:   [f32; 4], // 16
+    pub safe_area_rect:        [f32; 4], // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
@@ -153,6 +154,24 @@ impl Stabilization {
 
             transform.kernel_params.stride        = buffers.input.size.2 as i32;
             transform.kernel_params.output_stride = buffers.output.size.2 as i32;
+
+            let sa_fov =
+                if self.compute_params.show_safe_area || self.compute_params.fov_overview  {
+                    let fov = self.compute_params.keyframes.value_at_video_timestamp(&crate::keyframes::KeyframeType::Fov, timestamp_ms).unwrap_or(self.compute_params.fov_scale) as f32;
+                    if self.compute_params.fov_overview {
+                        (if self.compute_params.adaptive_zoom_window == 0.0 { 1.0 } else { 1.0 / fov }) + 1.0
+                    } else {
+                        fov / (if self.compute_params.adaptive_zoom_window == 0.0 { transform.minimal_fov as f32 } else { 1.0 })
+                    }
+                } else {
+                    1.0
+                };
+            let pos_x = (self.output_size.0 as f32 - (self.output_size.0 as f32 / sa_fov)) / 2.0;
+            let pos_y = (self.output_size.1 as f32 - (self.output_size.1 as f32 / sa_fov)) / 2.0;
+            transform.kernel_params.safe_area_rect[0] = pos_x;
+            transform.kernel_params.safe_area_rect[1] = pos_y;
+            transform.kernel_params.safe_area_rect[2] = self.output_size.0 as f32 - pos_x;
+            transform.kernel_params.safe_area_rect[3] = self.output_size.1 as f32 - pos_y;
 
             if let Some(r) = buffers.input.rect {
                 transform.kernel_params.source_rect[0] = r.0 as i32;
