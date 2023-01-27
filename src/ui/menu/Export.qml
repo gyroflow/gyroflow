@@ -191,6 +191,11 @@ MenuItem {
         visible: model.length > 0;
         onVisibleChanged: if (!visible) { root.outCodecOptions = ""; } else { root.outCodecOptions = currentText; }
         onCurrentTextChanged: root.outCodecOptions = currentText;
+        onModelChanged: {
+            const format = exportFormats[codec.currentIndex];
+            if (format.name == "ProRes") currentIndex = 3; // ProRes HQ by default
+            if (format.name == "DNxHD") currentIndex = 2; // DNxHR HQ by default
+        }
     }
     Label {
         position: Label.LeftPosition;
