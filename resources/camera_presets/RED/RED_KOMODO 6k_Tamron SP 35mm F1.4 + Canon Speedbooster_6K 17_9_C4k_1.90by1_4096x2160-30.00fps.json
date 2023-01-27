@@ -62,5 +62,16 @@
   "identifier": "",
   "calibrator_version": "1.0.0-rc5",
   "date": "2022-06-06",
-  "compatible_settings": []
+  "compatible_settings": [],
+  "frame_readout_time": null,
+  "focal_length": 35.0,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.5,
+    "max_sync_points": 3,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true
+  }
 }

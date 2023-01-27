@@ -58,11 +58,20 @@
   "calibrator_version": "1.4.2",
   "date": "2023-01-23",
   "compatible_settings": [],
-  "sync_settings": null,
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.5,
+    "max_sync_points": 3,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true
+  },
   "distortion_model": null,
   "digital_lens": null,
   "digital_lens_params": null,
   "interpolations": null,
   "focal_length": 35.0,
-  "crop_factor": 1.33
+  "crop_factor": 1.33,
+  "global_shutter": true
 }

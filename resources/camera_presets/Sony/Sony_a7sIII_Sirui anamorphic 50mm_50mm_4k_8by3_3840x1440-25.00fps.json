@@ -18,14 +18,14 @@
     "w": 3840,
     "h": 1440
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 8.7,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "sync_settings": {
     "initial_offset": 0,
     "initial_offset_inv": false,
     "search_size": 0.5,
-    "max_sync_points": 5,
+    "max_sync_points": 3,
     "every_nth_frame": 1,
     "time_per_syncpoint": 0.5,
     "do_autosync": true
