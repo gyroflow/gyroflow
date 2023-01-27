@@ -68,7 +68,7 @@ dependencies = [
 [[package]]
 name = "akaze"
 version = "0.7.0"
-source = "git+https://github.com/rust-cv/cv.git?rev=511024f#511024feaa077a9af377cca7b654ad3d57d3bd6a"
+source = "git+https://github.com/rust-cv/cv.git?rev=d8ac7d3#d8ac7d343157c76184be061a9bda6942047cb402"
 dependencies = [
  "bitarray",
  "cv-core",
@@ -609,6 +609,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
+name = "com-rs"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf43edc576402991846b093a7ca18a3477e0ef9c588cde84964b5d3e43016642"
+
+[[package]]
 name = "combine"
 version = "4.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -909,7 +915,7 @@ checksum = "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
 [[package]]
 name = "cv-core"
 version = "0.15.0"
-source = "git+https://github.com/rust-cv/cv.git?rev=511024f#511024feaa077a9af377cca7b654ad3d57d3bd6a"
+source = "git+https://github.com/rust-cv/cv.git?rev=d8ac7d3#d8ac7d343157c76184be061a9bda6942047cb402"
 dependencies = [
  "derive_more",
  "nalgebra 0.30.1",
@@ -920,7 +926,7 @@ dependencies = [
 [[package]]
 name = "cv-pinhole"
 version = "0.6.0"
-source = "git+https://github.com/rust-cv/cv.git?rev=511024f#511024feaa077a9af377cca7b654ad3d57d3bd6a"
+source = "git+https://github.com/rust-cv/cv.git?rev=d8ac7d3#d8ac7d343157c76184be061a9bda6942047cb402"
 dependencies = [
  "cv-core",
  "derive_more",
@@ -975,9 +981,8 @@ dependencies = [
 
 [[package]]
 name = "d3d12"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "827914e1f53b1e0e025ecd3d967a7836b7bcb54520f90e21ef8df7b4d88a2759"
+version = "0.6.0"
+source = "git+https://github.com/gfx-rs/d3d12-rs?rev=b940b1d71#b940b1d71ab7083ae80eec697872672dc1f2bd32"
 dependencies = [
  "bitflags",
  "libloading",
@@ -1075,7 +1080,7 @@ checksum = "c9b0705efd4599c15a38151f4721f7bc388306f61084d3bfd50bd07fbca5cb60"
 [[package]]
 name = "eight-point"
 version = "0.8.0"
-source = "git+https://github.com/rust-cv/cv.git?rev=511024f#511024feaa077a9af377cca7b654ad3d57d3bd6a"
+source = "git+https://github.com/rust-cv/cv.git?rev=d8ac7d3#d8ac7d343157c76184be061a9bda6942047cb402"
 dependencies = [
  "arrayvec",
  "cv-core",
@@ -1087,9 +1092,9 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
+checksum = "7fcaabb2fef8c910e7f4c7ce9f67a1283a1715879a7c230ca9d6d1ae31f16d91"
 
 [[package]]
 name = "encode_unicode"
@@ -1424,8 +1429,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.11.2"
-source = "git+https://github.com/grovesNL/glow?rev=c8a011fcd57a5c68cc917ed394baa484bdefc909#c8a011fcd57a5c68cc917ed394baa484bdefc909"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8edf6019dff2d92ad27c1e3ff82ad50a0aea5b01370353cc928bfdc33e95925c"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1555,7 +1561,6 @@ dependencies = [
  "byteorder",
  "core-foundation-sys",
  "crc32fast",
- "crossbeam-channel",
  "cv-core",
  "cv-pinhole",
  "d3d12",
@@ -1637,6 +1642,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
  "ahash 0.8.3",
+]
+
+[[package]]
+name = "hassle-rs"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "90601c6189668c7345fc53842cb3f3a3d872203d523be1b3cb44a36a3e62fb85"
+dependencies = [
+ "bitflags",
+ "com-rs",
+ "libc",
+ "libloading",
+ "thiserror",
+ "widestring",
+ "winapi",
 ]
 
 [[package]]
@@ -2146,8 +2166,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.10.0"
-source = "git+https://github.com/gfx-rs/naga?rev=e7fc8e6#e7fc8e64f2f23397b149217ecce6e123c5aa5092"
+version = "0.11.0"
+source = "git+https://github.com/gfx-rs/naga?rev=f0edae8#f0edae8ce9e55eeef489fc53b10dc95fb79561cc"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -3980,8 +4000,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu"
-version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
+version = "0.15.0"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b1593add19956a4d5eb4eb9d2e8d30fb8335e275"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -3989,6 +4009,7 @@ dependencies = [
  "log",
  "naga",
  "parking_lot",
+ "profiling",
  "raw-window-handle",
  "smallvec",
  "static_assertions",
@@ -4002,8 +4023,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
+version = "0.15.0"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b1593add19956a4d5eb4eb9d2e8d30fb8335e275"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4024,8 +4045,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
+version = "0.15.1"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b1593add19956a4d5eb4eb9d2e8d30fb8335e275"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4041,6 +4062,7 @@ dependencies = [
  "gpu-alloc",
  "gpu-allocator",
  "gpu-descriptor",
+ "hassle-rs",
  "js-sys",
  "khronos-egl",
  "libc",
@@ -4064,10 +4086,12 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.14.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b4c48e800f10da2ecfd9c068c31599bb251a3fe8"
+version = "0.15.0"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#b1593add19956a4d5eb4eb9d2e8d30fb8335e275"
 dependencies = [
  "bitflags",
+ "js-sys",
+ "web-sys",
 ]
 
 [[package]]
@@ -4089,6 +4113,12 @@ dependencies = [
  "bytemuck",
  "safe_arch",
 ]
+
+[[package]]
+name = "widestring"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17882f045410753661207383517a6f62ec3dbeb6a4ed2acce01f0728238d1983"
 
 [[package]]
 name = "winapi"

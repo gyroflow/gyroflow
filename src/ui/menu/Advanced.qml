@@ -208,6 +208,7 @@ MenuItem {
         tooltip: qsTr("When FOV > 1, show an rectangle simulating FOV = 1 over the preview video.\nNote that this is only a visual indicator, it doesn't affect rendering.");
         checked: false;
         onCheckedChanged: controller.show_safe_area = checked;
+        Component.onCompleted: Qt.callLater(checkedChanged);
     }
     CheckBox {
         id: gpudecode;

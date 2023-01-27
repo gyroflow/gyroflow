@@ -44,8 +44,8 @@ struct KernelParams {
 
 LENS_MODEL_FUNCTIONS;
 
-let INTER_BITS: u32 = 5u;
-let INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
+const INTER_BITS: u32 = 5u;
+const INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
 
 fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
     if (!bool(params.flags & 8)) { // Drawing not enabled

@@ -23,6 +23,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
                 format,
+                view_formats: vec![],
                 usage: if is_in {
                     wgpu_hal::TextureUses::RESOURCE | wgpu_hal::TextureUses::COPY_SRC
                 } else {
@@ -44,6 +45,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
                 format,
+                view_formats: &[],
                 usage: if is_in {
                     wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_SRC
                 } else {

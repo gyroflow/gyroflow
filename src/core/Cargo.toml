@@ -18,17 +18,16 @@ ahrs = { version = "0.6.0", features = ["field_access"] }
 #rs-sync = { path = "../../../rs-sync" }
 rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "12ae9a3" }
 
-mimalloc = { version = "0.1.32", default-features = false }
+mimalloc = { version = "0.1.34", default-features = false }
 nalgebra = { version = "0.31", features = ["serde-serialize"] }
 rayon = "1.5"
 biquad = "0.4.2"
 fastrand = "1.8.0"
 lazy_static = "1.4.0"
-crossbeam-channel = "0.5.6"
 parking_lot = "0.12.1"
 bincode = "1.3.3"
-serde = "1.0.151"
-serde_json = "1.0.90"
+serde = "1.0.152"
+serde_json = "1.0.91"
 crc32fast = "1.3.2"
 byteorder = "1.4.3"
 line_drawing = "1.0.0"
@@ -39,15 +38,15 @@ num = "0.4.0"
 base91 = "0.1.0"
 bitflags = "1.3.2"
 enum_delegate = "0.2.0"
-simple-easing = "1.0.0"
-half = "2.1.0"
+simple-easing = "1.0.1"
+half = "2.2.1"
 
 dyn-clone = "1.0.10"
 
-akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
-eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
-cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
-cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "511024f" }
+akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d8ac7d3" }
+eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d8ac7d3" }
+cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d8ac7d3" }
+cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d8ac7d3" }
 sample-consensus = "1.0.2"
 arrsac = "0.10.0"
 rand_xoshiro = "0.6.0"
@@ -60,14 +59,14 @@ libc = "0.2"
 
 opencv = { version = "0.76", optional = true }
 
-#wgpu = "0.14"
-#wgpu-hal = "0.14"
-#wgpu-types = "0.14"
+#wgpu = "0.15"
+#wgpu-hal = "0.15"
+#wgpu-types = "0.15"
 wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
 wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
 wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
-bytemuck = "1.12.3"
-ash = "0.37.1"
+bytemuck = "1.13.0"
+ash = "0.37.2"
 
 pollster = "0.2.5"
 futures-intrusive = "0.5.0"
@@ -100,7 +99,9 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 version = "0.3"
 features = ["profileapi", "libloaderapi", "windef", "winuser", "dcomp"]
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
-version = "0.5.0"
+version = "0.6.0"
+git = "https://github.com/gfx-rs/d3d12-rs"
+rev = "b940b1d71"
 features = ["libloading"]
 
 [features]

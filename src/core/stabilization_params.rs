@@ -230,6 +230,8 @@ impl StabilizationParams {
             of_method:                 self.of_method,
             current_device:            self.current_device,
             adaptive_zoom_method:      self.adaptive_zoom_method,
+            fov_overview:              self.fov_overview,
+            show_safe_area:            self.show_safe_area,
             ..Default::default()
         };
     }
