@@ -106,31 +106,6 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>ari</string>
-				<string>arx</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Arri</string>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>LSHandlerRank</key>
-			<string>Alternate</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>CRM</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Canon RAW</string>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>LSHandlerRank</key>
-			<string>Alternate</string>
-		</dict>
-		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
 				<string>R3D</string>
 			</array>
 			<key>CFBundleTypeName</key>
