@@ -131,7 +131,7 @@ impl StabilizationManager {
         Ok(())
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -171,18 +171,20 @@ impl StabilizationManager {
         let quats = self.gyro.read().quaternions.clone();
         self.smoothing.write().update_quats_checksum(&quats);
 
-        if let Some(ref lens) = md.lens_profile {
-            let mut l = self.lens.write();
-            if let Some(lens_str) = lens.as_str() {
-                let db = self.lens_profile_db.read();
-                if let Some(found) = db.find(lens_str) {
-                    *l = found.clone();
+        if is_main_video {
+            if let Some(ref lens) = md.lens_profile {
+                let mut l = self.lens.write();
+                if let Some(lens_str) = lens.as_str() {
+                    let db = self.lens_profile_db.read();
+                    if let Some(found) = db.find(lens_str) {
+                        *l = found.clone();
+                    }
+                } else if lens.is_object() {
+                    l.load_from_json_value(lens);
+                    l.filename = path.to_string();
+                    let db = self.lens_profile_db.read();
+                    l.resolve_interpolations(&db);
                 }
-            } else if lens.is_object() {
-                l.load_from_json_value(lens);
-                l.filename = path.to_string();
-                let db = self.lens_profile_db.read();
-                l.resolve_interpolations(&db);
             }
         }
         if let Some(ref id) = md.camera_identifier {
@@ -199,6 +201,38 @@ impl StabilizationManager {
         } else {
             let mut lens = self.lens.write();
             let result = lens.load_from_file(path);
+            let matching = lens.get_all_matching_profiles();
+            if matching.len() > 1 {
+                let (width, height, aspect, id) = {
+                    let params = self.params.read();
+                    (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default())
+                };
+                let mut found = false;
+                // Find best match for:
+                // 1. Identifier
+                for x in &matching {
+                    if !id.is_empty() && x.identifier == id {
+                        *lens = x.clone(); found = true; break;
+                    }
+                }
+                if !found {
+                    // 2. Resolution
+                    for x in &matching {
+                        if width == x.calib_dimension.w && height == x.calib_dimension.h {
+                            *lens = x.clone(); found = true; break;
+                        }
+                    }
+                }
+                if !found {
+                    // 3. Aspect ratio
+                    for x in &matching {
+                        let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                        if a == aspect {
+                            *lens = x.clone(); break;
+                        }
+                    }
+                }
+            }
             lens.resolve_interpolations(&db);
             result
         }
@@ -250,31 +284,29 @@ impl StabilizationManager {
         false
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> Vec<f64> {
-        let (window, frames, fps, method) = {
+    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> (Vec<f64>, Vec<f64>) {
+        let (frames, fps, method) = {
             let params = params.read();
-            (params.adaptive_zoom_window, params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
+            (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
-        if window > 0.0 || window < -0.9 {
-            let mut timestamps = Vec::with_capacity(frames);
-            for i in 0..frames {
-                timestamps.push(i as f64 * 1000.0 / fps);
-            }
-
-            let fovs = zoom.compute(&timestamps, &keyframes, method.into());
-            fovs.iter().map(|v| v.0).collect()
-        } else {
-            Vec::new()
+        let mut timestamps = Vec::with_capacity(frames);
+        for i in 0..frames {
+            timestamps.push(i as f64 * 1000.0 / fps);
         }
+
+        let fovs = zoom.compute(&timestamps, &keyframes, method.into());
+
+        fovs.iter().map(|v| v.0).unzip()
     }
     pub fn recompute_adaptive_zoom(&self) {
         let params = stabilization::ComputeParams::from_manager(self, false);
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let mut zoom = zooming::from_compute_params(params);
-        let fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
+        let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
 
         let mut stab_params = self.params.write();
         stab_params.set_fovs(fovs, lens_fov_adjustment);
+        stab_params.minimal_fovs = minimal_fovs;
         stab_params.zooming_debug_points = zoom.get_debug_points();
     }
 
@@ -350,12 +382,15 @@ impl StabilizationManager {
 
             let mut zoom = zooming::from_compute_params(params.clone());
             if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
-                params.fovs = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
+                let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
+                params.fovs = fovs;
+                params.minimal_fovs = minimal_fovs;
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut stab_params = stabilization_params.write();
                 stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
+                stab_params.minimal_fovs = params.minimal_fovs.clone();
                 stab_params.zooming_debug_points = zoom.get_debug_points();
             }
 
@@ -499,6 +534,7 @@ impl StabilizationManager {
     pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;        self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
+    pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
@@ -680,6 +716,7 @@ impl StabilizationManager {
     pub fn set_render_params(&self, size: (usize, usize), output_size: (usize, usize)) {
         self.params.write().framebuffer_inverted = false;
         self.params.write().fov_overview = false;
+        self.params.write().show_safe_area = false;
         self.stabilization.write().kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, false);
         self.set_size(size.0, size.1);
         self.set_output_size(output_size.0, output_size.1);
@@ -821,7 +858,7 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
-                "quaternions":        if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.org_quaternions) } else { None },
+                "quaternions":        if !thin && (input_file.path != gyro.file_path || !gyro.org_quaternions.is_empty()) { util::compress_to_base91(&gyro.org_quaternions) } else { None },
                 "image_orientations": if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.image_orientations) } else { None },
                 "gravity_vectors":    if !thin && input_file.path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
                 // "smoothed_quaternions": smooth_quats
@@ -1012,12 +1049,12 @@ impl StabilizationManager {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() && blocking {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() && blocking {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), &Default::default(), progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }
@@ -1145,7 +1182,7 @@ impl StabilizationManager {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     input_file.image_sequence_fps = seq_fps;
                 }
-                if !org_video_path.is_empty() {
+                if !org_video_path.is_empty() && std::fs::File::open(&video_path).is_ok() {
                     input_file.path = util::path_to_str(&video_path);
                 }
             }
@@ -1176,7 +1213,7 @@ impl StabilizationManager {
             let frame_count = (duration_s * fps).ceil() as usize;
 
             self.init_from_video_data(filepath, duration_s * 1000.0, fps, frame_count, video_size)?;
-            let _ = self.load_gyro_data(filepath, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+            let _ = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let camera_id = self.camera_id.read();
 

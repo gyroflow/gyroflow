@@ -46,6 +46,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         dimension: wgpu::TextureDimension::D2,
         format,
         usage,
+        view_formats: &[]
     };
 
     match buf.data {

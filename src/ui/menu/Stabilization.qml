@@ -18,6 +18,7 @@ MenuItem {
     property alias videoSpeed: videoSpeed;
     property alias zoomingCenterX: zoomingCenterX;
     property alias zoomingCenterY: zoomingCenterY;
+    property alias croppingMode: croppingMode;
 
     Settings {
         id: settings;
@@ -469,7 +470,7 @@ MenuItem {
                     position: Label.LeftPosition;
                     SliderWithField {
                         id: zoomingCenterX;
-                        precision: 0;
+                        precision: 2;
                         value: 0;
                         defaultValue: 0;
                         from: -100;
@@ -486,7 +487,7 @@ MenuItem {
                     position: Label.LeftPosition;
                     SliderWithField {
                         id: zoomingCenterY;
-                        precision: 0;
+                        precision: 2;
                         value: 0;
                         defaultValue: 0;
                         from: -100;

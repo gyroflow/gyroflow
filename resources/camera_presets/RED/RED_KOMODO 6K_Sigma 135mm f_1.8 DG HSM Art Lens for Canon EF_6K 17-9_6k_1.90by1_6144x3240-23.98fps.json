@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Sigma 135mm f/1.8 DG HSM Art Lens for Canon EF_6K 17-9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 135mm f/1.8 DG HSM Art Lens for Canon EF",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "global_shutter": true,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1657131885437026,
+    "camera_matrix": [
+      [
+        33297.28383013373,
+        0.0,
+        3835.0707212914203
+      ],
+      [
+        0.0,
+        33518.45252500198,
+        1677.1080813344329
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.1185528795429678,
+      -89.46567977333777,
+      8359.87576217567,
+      -325970.69310446153
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-135mmf1.8dghsm|art017-135.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

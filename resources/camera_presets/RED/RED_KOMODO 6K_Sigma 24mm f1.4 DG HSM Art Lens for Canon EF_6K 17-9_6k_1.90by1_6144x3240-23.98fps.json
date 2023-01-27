@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Sigma 24mm f/1.4 DG HSM Art Lens for Canon EF_6K 17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 24mm f/1.4 DG HSM Art Lens for Canon EF",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "global_shutter": true,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5577365157328367,
+    "camera_matrix": [
+      [
+        5517.576860906233,
+        0.0,
+        3066.031235397905
+      ],
+      [
+        0.0,
+        5520.3884649745005,
+        1642.8125274279469
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2871434532854679,
+      -0.18629696707849158,
+      1.9338245124850337,
+      -3.353107145053167
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-24mmf1.4dghsm|art015-24.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

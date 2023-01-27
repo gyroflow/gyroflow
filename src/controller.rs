@@ -118,6 +118,7 @@ pub struct Controller {
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
+    show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
     frame_readout_time: qt_property!(f64; WRITE set_frame_readout_time),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
@@ -168,7 +169,7 @@ pub struct Controller {
 
     calib_in_progress: qt_property!(bool; NOTIFY calib_in_progress_changed),
     calib_in_progress_changed: qt_signal!(),
-    calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize),
+    calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize, sharpness: f64),
 
     loading_gyro_in_progress: qt_property!(bool; NOTIFY loading_gyro_in_progress_changed),
     loading_gyro_in_progress_changed: qt_signal!(),
@@ -267,6 +268,7 @@ pub struct Controller {
     processing_resolution: i32,
 
     current_fov: qt_property!(f64; NOTIFY processing_info_changed),
+    current_minimal_fov: qt_property!(f64; NOTIFY processing_info_changed),
     current_focal_length: qt_property!(f64; NOTIFY processing_info_changed),
     processing_info: qt_property!(QString; NOTIFY processing_info_changed),
     processing_info_changed: qt_signal!(),
@@ -311,20 +313,34 @@ impl Controller {
         };
         self.project_file_path_changed();
 
-        let mut custom_decoder = QString::default(); // eg. BRAW:format=rgba64le
+        let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
         if self.image_sequence_start > 0 {
-            custom_decoder = QString::from(format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start));
+            custom_decoder = format!("FFmpeg:avformat_options=start_number={}", self.image_sequence_start);
         }
-        if !*rendering::GPU_DECODING.read() && file_path.to_ascii_lowercase().ends_with("braw") {
-            custom_decoder = QString::from("BRAW:gpu=no:scale=1920x1080"); // Disable GPU decoding for BRAW
+
+        let options = {
+            let target_height = self.preview_resolution;
+            if target_height > 0 {
+                format!(":scale={}x{}", (target_height * 16) / 9, target_height)
+            } else {
+                "".to_owned()
+            }
+        };
+
+        if file_path.to_ascii_lowercase().ends_with("braw") {
+            let gpu = if *rendering::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
+            custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
         if file_path.to_ascii_lowercase().ends_with("r3d") {
-            custom_decoder = QString::from("R3D:gpu=auto:scale=1920x1080");
+            custom_decoder = format!("R3D:gpu=auto{}", options);
+        }
+        if !custom_decoder.is_empty() {
+            ::log::debug!("Custom decoder: {custom_decoder}");
         }
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            vid.setUrl(url, custom_decoder);
+            vid.setUrl(url, QString::from(custom_decoder));
         }
     }
 
@@ -436,6 +452,10 @@ impl Controller {
                 if input_file.image_sequence_start > 0 {
                     decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
                 }
+                if proc_height > 0 {
+                    decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+                }
+                ::log::debug!("Decoder options: {:?}", decoder_options);
 
                 let sync = std::rc::Rc::new(sync);
 
@@ -536,8 +556,10 @@ impl Controller {
 
             if let Some(gyro) = self.stabilizer.gyro.try_read() {
                 if let Some(params) = self.stabilizer.params.try_read() {
-                    chart.setFromGyroSource(&gyro, &params, &series);
-                    return true;
+                    if let Some(keyframes) = self.stabilizer.keyframes.try_read() {
+                        chart.setFromGyroSource(&gyro, &params, &keyframes, &series);
+                        return true;
+                    }
                 }
             }
         }
@@ -718,7 +740,7 @@ impl Controller {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         } else {
                             // Ignore the error here, video file may not contain the telemetry and it's ok
-                            if let Ok(md) = stab.load_gyro_data(&s, &Default::default(), progress, cancel_flag) {
+                            if let Ok(md) = stab.load_gyro_data(&s, is_main_video, &Default::default(), progress, cancel_flag) {
                                 file_metadata = Some(md);
                             }
 
@@ -732,7 +754,7 @@ impl Controller {
                             options.sample_index = Some(sample_index as usize);
                         }
 
-                        match stab.load_gyro_data(&s, &options, progress, cancel_flag) {
+                        match stab.load_gyro_data(&s, is_main_video, &options, progress, cancel_flag) {
                             Ok(md) => {
                                 file_metadata = Some(md);
                             },
@@ -919,8 +941,9 @@ impl Controller {
             let stab = self.stabilizer.clone();
             let preview_pipeline = self.preview_pipeline.clone();
             let out_pixels = RefCell::new(Vec::new());
-            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, focal_length, info): (f64, Option<f64>, QString)| {
+            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, minimal_fov, focal_length, info): (f64, f64, Option<f64>, QString)| {
                 this.current_fov = fov;
+                this.current_minimal_fov = minimal_fov;
                 this.current_focal_length = focal_length.unwrap_or_default();
                 this.processing_info = info;
                 this.processing_info_changed();
@@ -932,9 +955,6 @@ impl Controller {
                 if !stab.params.read().stab_enabled { return false; }
 
                 let _time = std::time::Instant::now();
-                let mut backend = String::new();
-                let mut fov = 1.0;
-                let mut focal_length = None;
 
                 if preview_pipeline.load(SeqCst) == 0 {
                     let mut buffers = Buffers{
@@ -942,9 +962,9 @@ impl Controller {
                         output: BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                     };
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
-                        update_info2((ret.fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
-                        update_info2((fov, focal_length, QString::from("---")));
+                        update_info2((1.0, 1.0, None, QString::from("---")));
                     }
                     return true;
                 }
@@ -952,103 +972,97 @@ impl Controller {
                 if preview_pipeline.load(SeqCst) > 1 { return false; }
 
                 let size = (width as usize, height as usize, width as usize * 4);
-                let ret = match backend_id {
-                    1 => { // OpenGL, ptr1: texture, ptr2: opengl context
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                data: BufferSource::OpenGL {
-                                    texture: ptr1 as u32,
-                                    context: ptr2 as *mut std::ffi::c_void
-                                }, ..Default::default()
+
+                let mut buffers =
+                    match backend_id {
+                        1 => { // OpenGL, ptr1: texture, ptr2: opengl context
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    data: BufferSource::OpenGL {
+                                        texture: ptr1 as u32,
+                                        context: ptr2 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    data: BufferSource::OpenGL {
+                                        texture: ptr1 as u32,
+                                        context: ptr2 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
                             },
-                            output: BufferDescription {
-                                size,
-                                data: BufferSource::OpenGL {
-                                    texture: ptr1 as u32,
-                                    context: ptr2 as *mut std::ffi::c_void
-                                }, ..Default::default()
+                            "OpenGL"))
+                        },
+                        #[cfg(any(target_os = "macos", target_os = "ios"))]
+                        2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                },
                             },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("OpenGL->{}", bk.backend); true },
-                            None => false
+                            "Metal"))
+                        },
+                        #[cfg(target_os = "windows")]
+                        3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::DirectX11 {
+                                        texture: ptr1 as *mut std::ffi::c_void,
+                                        device:  ptr2 as *mut std::ffi::c_void,
+                                        device_context: ptr3 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::DirectX11 {
+                                        texture: ptr1 as *mut std::ffi::c_void,
+                                        device:  ptr2 as *mut std::ffi::c_void,
+                                        device_context: ptr3 as *mut std::ffi::c_void
+                                    }, ..Default::default()
+                                },
+                            },
+                            "DirectX11"))
+                        },
+                        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+                        4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
+                            Some((Buffers {
+                                input: BufferDescription {
+                                    size,
+                                    texture_copy: false,
+                                    data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                    ..Default::default()
+                                },
+                                output: BufferDescription {
+                                    size,
+                                    texture_copy: true,
+                                    data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
+                                    ..Default::default()
+                                },
+                            },
+                            "Vulkan"))
                         }
-                    },
-                    #[cfg(any(target_os = "macos", target_os = "ios"))]
-                    2 => { // Metal, ptr1: texture, ptr2: device, ptr3: command queue
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Metal->{}", bk.backend); true },
-                            None => false
-                        }
-                    },
-                    #[cfg(target_os = "windows")]
-                    3 => { // D3D11, ptr1: texture, ptr2: device, ptr3: device context
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::DirectX11 {
-                                    texture: ptr1 as *mut std::ffi::c_void,
-                                    device:  ptr2 as *mut std::ffi::c_void,
-                                    device_context: ptr3 as *mut std::ffi::c_void
-                                }, ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::DirectX11 {
-                                    texture: ptr1 as *mut std::ffi::c_void,
-                                    device:  ptr2 as *mut std::ffi::c_void,
-                                    device_context: ptr3 as *mut std::ffi::c_void
-                                }, ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("DirectX11->{}", bk.backend); true },
-                            None => false
-                        }
-                    },
-                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-                    4 => { // Vulkan, ptr1: VkImage, ptr2: VkDevice, ptr3: VkCommandBuffer, ptr4: VkPhysicalDevice, ptr5: VkInstance
-                        let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
-                            input: BufferDescription {
-                                size,
-                                texture_copy: false,
-                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
-                                ..Default::default()
-                            },
-                            output: BufferDescription {
-                                size,
-                                texture_copy: true,
-                                data: BufferSource::Vulkan { texture: ptr1, device: ptr2, physical_device: ptr4, instance: ptr5 },
-                                ..Default::default()
-                            },
-                        });
-                        match ret {
-                            Some(bk) => { fov = bk.fov; focal_length = bk.focal_length; backend = format!("Vulkan->{}", bk.backend); true },
-                            None => false
-                        }
+                        _ => None
+                    };
+
+                if let Some((ref mut buffers, backend)) = buffers {
+                    if let Some(ret) = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, buffers) {
+                        update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {backend}->{} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        return true;
                     }
-                    _ => false
-                };
-                if ret {
-                    update_info2((fov, focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, backend, _time.elapsed().as_micros() as f64 / 1000.0))));
-                } else {
-                    update_info2((fov, focal_length, QString::from("---")));
                 }
-                ret
+
+                update_info2((1.0, 1.0, None, QString::from("---")));
+                return false;
             }));
 
             let stab = self.stabilizer.clone();
@@ -1080,11 +1094,11 @@ impl Controller {
                 });
                 match ret {
                     Some(bk) => {
-                        update_info2((bk.fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                        update_info2((bk.fov, bk.minimal_fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                         (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                     },
                     None => {
-                        update_info2((1.0, None, QString::from("---")));
+                        update_info2((1.0, 1.0, None, QString::from("---")));
                         (0, 0, 0, std::ptr::null_mut())
                     }
                 }
@@ -1307,7 +1321,8 @@ impl Controller {
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
-    wrap_simple_method!(set_fov,                v: f64; recompute);
+    wrap_simple_method!(set_show_safe_area,     v: bool; recompute);
+    wrap_simple_method!(set_fov,                v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_frame_readout_time, v: f64; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
@@ -1405,7 +1420,7 @@ impl Controller {
 
             self.calib_in_progress = true;
             self.calib_in_progress_changed();
-            self.calib_progress(0.0, 0.0, 0, 0, 0);
+            self.calib_progress(0.0, 0.0, 0, 0, 0, 0.0);
 
             let stab = self.stabilizer.clone();
 
@@ -1438,10 +1453,10 @@ impl Controller {
                 cal.max_sharpness = max_sharpness;
             }
 
-            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms): (usize, usize, usize, f64)| {
+            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms, sharpness): (usize, usize, usize, f64, f64)| {
                 this.calib_in_progress = ready < total;
                 this.calib_in_progress_changed();
-                this.calib_progress(ready as f64 / total as f64, rms, ready, total, good);
+                this.calib_progress(ready as f64 / total as f64, rms, ready, total, good, sharpness);
                 if rms > 0.0 {
                     this.update_calib_model();
                 }
@@ -1463,10 +1478,26 @@ impl Controller {
             let total_read = Arc::new(AtomicUsize::new(0));
             let processed = Arc::new(AtomicUsize::new(0));
 
+            let processing_resolution = self.processing_resolution;
+
             let input_file = stab.input_file.read().clone();
             core::run_threaded(move || {
+
+                let mut decoder_options = ffmpeg_next::Dictionary::new();
+                if input_file.image_sequence_fps > 0.0 {
+                    let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
+                    decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                }
+                if input_file.image_sequence_start > 0 {
+                    decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+                }
+                if processing_resolution > 0 {
+                    decoder_options.set("scale", &format!("{}x{}", (processing_resolution * 16) / 9, processing_resolution));
+                }
+
+                ::log::debug!("Decoder options: {:?}", decoder_options);
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, None) {
+                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let progress = progress.clone();
                         let err2 = err.clone();
@@ -1474,6 +1505,8 @@ impl Controller {
                         let total_read = total_read.clone();
                         let processed = processed.clone();
                         let cancel_flag2 = cancel_flag.clone();
+                        let dims = proc.get_org_dimensions();
+
                         proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
 
@@ -1485,8 +1518,8 @@ impl Controller {
                                 let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = (input_frame.height() as f64 * input_vertical_stretch).round() as u32;
                                 let mut pt_scale = 1.0;
-                                if height > 2160 {
-                                    pt_scale = height as f32 / 2160.0;
+                                if processing_resolution > 0 && height > processing_resolution as u32 {
+                                    pt_scale = height as f32 / processing_resolution as f32;
                                     width = (width as f32 / pt_scale).round() as u32;
                                     height = (height as f32 / pt_scale).round() as u32;
                                 }
@@ -1501,6 +1534,13 @@ impl Controller {
                                             cal.forced_frames.insert(frame);
                                         }
                                         cal.no_marker = no_marker;
+
+                                        if let Some(dims) = &dims {
+                                            let (w, h) = (dims.0.load(SeqCst), dims.1.load(SeqCst));
+                                            if w > 0 && h > 0 {
+                                                pt_scale *= h as f32 / height as f32;
+                                            }
+                                        }
                                         cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
@@ -1530,11 +1570,14 @@ impl Controller {
                 if let Err(e) = cal.calibrate(is_forced) {
                     err(("An error occured: %1".to_string(), format!("{:?}", e)));
                 } else {
-                    stab.lens.write().set_from_calibrator(cal);
+                    if cal.rms < 100.0 {
+                        stab.lens.write().set_from_calibrator(cal);
+                    }
                     ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
                 }
 
-                progress((total, total, 0, cal.rms));
+                let good = cal.image_points.read().len();
+                progress((total, total, good, cal.rms, *cal.sum_sharpness.read() / good.max(1) as f64));
 
                 stab.params.write().is_calibrator = true;
             });
@@ -1592,7 +1635,7 @@ impl Controller {
             }
             self.update_calib_model();
             if rms > 0.0 {
-                self.calib_progress(1.0, rms, 1, 1, 1);
+                self.calib_progress(1.0, rms, 1, 1, 1, 0.0);
             }
         }
     }

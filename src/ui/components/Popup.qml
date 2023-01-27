@@ -9,7 +9,7 @@ import QtQuick.Controls.Material.impl as QQCMI
 QQC.Popup {
     id: popup;
     width: parent.width;
-    implicitHeight: contentItem.implicitHeight + 4 * dpiScale;
+    implicitHeight: (lv.count * itemHeight) + 4 * dpiScale;
     padding: 2 * dpiScale;
     property alias model: lv.model;
     property alias currentIndex: lv.currentIndex;
@@ -96,7 +96,6 @@ QQC.Popup {
     contentItem: ListView {
         id: lv;
         clip: true;
-        implicitHeight: contentHeight;
         QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
         delegate: dlgC;
         highlightFollowsCurrentItem: true;

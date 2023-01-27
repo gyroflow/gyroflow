@@ -41,7 +41,9 @@ pub struct StabilizationParams {
     pub adaptive_zoom_method: i32,
     pub fov: f64,
     pub fov_overview: bool,
+    pub show_safe_area: bool,
     pub fovs: Vec<f64>,
+    pub minimal_fovs: Vec<f64>,
     pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
@@ -79,8 +81,10 @@ impl Default for StabilizationParams {
         Self {
             fov: 1.0,
             fov_overview: false,
+            show_safe_area: false,
             min_fov: 1.0,
             fovs: vec![],
+            minimal_fovs: vec![],
             stab_enabled: true,
             show_detected_features: true,
             show_optical_flow: true,
@@ -153,7 +157,7 @@ impl StabilizationParams {
         self.fovs = fovs;
     }
 
-    pub fn calculate_ramped_timestamps(&mut self, keyframes: &KeyframeManager) {
+    pub fn calculate_ramped_timestamps(&mut self, keyframes: &KeyframeManager, speed_inverse: bool, map_inverse: bool) {
         if keyframes.is_keyframed(&KeyframeType::VideoSpeed) || self.video_speed != 1.0 {
             let fps = self.fps; // get_scaled_fps();
             let mut ramped_ts = 0.0;
@@ -162,10 +166,19 @@ impl StabilizationParams {
             for i in 0..self.frame_count {
                 let ts = crate::timestamp_at_frame(i as i32, fps);
                 let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(self.video_speed);
+                let vid_speed = if speed_inverse {
+                    1.0 / vid_speed
+                } else {
+                    vid_speed
+                };
                 let current_interval = ((ts - prev_real_ts) as f64) / vid_speed;
                 ramped_ts += current_interval;
                 prev_real_ts = ts;
-                map.insert((ramped_ts * 1000.0).round() as i64, (ts * 1000.0).round() as i64);
+                if map_inverse {
+                    map.insert((ts * 1000.0).round() as i64, (ramped_ts * 1000.0).round() as i64);
+                } else {
+                    map.insert((ramped_ts * 1000.0).round() as i64, (ts * 1000.0).round() as i64);
+                }
             }
 
             self.speed_ramped_timestamps = Some(map);
@@ -217,6 +230,8 @@ impl StabilizationParams {
             of_method:                 self.of_method,
             current_device:            self.current_device,
             adaptive_zoom_method:      self.adaptive_zoom_method,
+            fov_overview:              self.fov_overview,
+            show_safe_area:            self.show_safe_area,
             ..Default::default()
         };
     }

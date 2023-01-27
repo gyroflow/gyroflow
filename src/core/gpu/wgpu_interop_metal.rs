@@ -54,6 +54,7 @@ pub fn create_texture_from_metal(device: &Device, image: *mut metal::MTLTexture,
                 dimension: wgpu::TextureDimension::D2,
                 format,
                 usage,
+                view_formats: &[],
             },
         )
     }

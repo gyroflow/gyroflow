@@ -69,6 +69,9 @@ impl FindOffsetsRssync<'_> {
         if frame_readout_time == 0.0 {
             frame_readout_time = 1000.0 / params.scaled_fps / 2.0;
         }
+        if params.lens.global_shutter {
+            frame_readout_time = 0.01;
+        }
         frame_readout_time /= 1000.0;
 
         let mut ret = FindOffsetsRssync {

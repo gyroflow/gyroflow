@@ -55,7 +55,7 @@ impl HorizonLock {
     }
 
     pub fn lock(&self, quats: &TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, keyframes: &KeyframeManager) -> TimeQuat {
-        if self.lock_enabled {
+        if self.lock_enabled || keyframes.is_keyframed(&KeyframeType::LockHorizonAmount) {
             if let Some(gvec) = grav {
                 if !gvec.is_empty() && use_grav {
                     let z_axis = nalgebra::Vector3::<f64>::z_axis();

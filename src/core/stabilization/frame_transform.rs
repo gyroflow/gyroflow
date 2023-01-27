@@ -11,6 +11,7 @@ pub struct FrameTransform {
     pub matrices: Vec<[f32; 9]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
+    pub minimal_fov: f64,
     pub focal_length: Option<f64>,
 }
 
@@ -193,6 +194,7 @@ impl FrameTransform {
             matrices,
             kernel_params,
             fov: ui_fov,
+            minimal_fov: *params.minimal_fovs.get(frame).unwrap_or(&1.0),
             focal_length
         }
     }

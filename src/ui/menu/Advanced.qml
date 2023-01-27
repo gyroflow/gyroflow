@@ -30,12 +30,13 @@ MenuItem {
         property string lang: ui_tools.get_default_language();
     }
     property alias defaultSuffix: defaultSuffix;
+    property alias previewResolution: previewResolution.currentIndex;
 
     function loadGyroflow(obj) {
         if (obj.hasOwnProperty("background_mode")) backgroundMode.currentIndex = +obj.background_mode;
-        if (obj,hasOwnProperty("background_margin")) marginPixels.value =+ obj.background_margin;
-        if (obj,hasOwnProperty("background_margin_feather")) featherPixels.value = +obj.background_margin_feather;
-        if (obj,hasOwnProperty("background_color")) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
+        if (obj.hasOwnProperty("background_margin")) marginPixels.value = +obj.background_margin;
+        if (obj.hasOwnProperty("background_margin_feather")) featherPixels.value = +obj.background_margin_feather;
+        if (obj.hasOwnProperty("background_color")) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
     }
     Label {
         position: Label.LeftPosition;
@@ -50,10 +51,11 @@ MenuItem {
             onCurrentIndexChanged: {
                 let target_height = -1; // Full
                 switch (currentIndex) {
-                    case 1: target_height = 2160; break;
-                    case 2: target_height = 1080; break;
-                    case 3: target_height = 720; break;
-                    case 4: target_height = 480; break;
+                    case 0: window.videoArea.vid.setProperty("scale", ""); break;
+                    case 1: target_height = 2160; window.videoArea.vid.setProperty("scale", "3840x2160"); break;
+                    case 2: target_height = 1080; window.videoArea.vid.setProperty("scale", "1920x1080"); break;
+                    case 3: target_height = 720;  window.videoArea.vid.setProperty("scale", "1280x720");  break;
+                    case 4: target_height = 480;  window.videoArea.vid.setProperty("scale", "640x480");   break;
                 }
 
                 controller.set_preview_resolution(target_height, window.videoArea.vid);
@@ -205,7 +207,8 @@ MenuItem {
         text: qsTr("Safe area guide");
         tooltip: qsTr("When FOV > 1, show an rectangle simulating FOV = 1 over the preview video.\nNote that this is only a visual indicator, it doesn't affect rendering.");
         checked: false;
-        onCheckedChanged: window.videoArea.safeArea = checked;
+        onCheckedChanged: controller.show_safe_area = checked;
+        Component.onCompleted: Qt.callLater(checkedChanged);
     }
     CheckBox {
         id: gpudecode;

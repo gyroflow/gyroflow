@@ -106,8 +106,23 @@ cpp! {{
     #include <QImage>
     #include <QSettings>
     #include <QGuiApplication>
+    #include <QObject>
     #include <QClipboard>
+    #include <QEvent>
+
+    class QtEventFilter : public QObject {
+    public:
+        QtEventFilter(std::function<void(QUrl)> cb) : m_cb(cb) { }
+        bool eventFilter(QObject *obj, QEvent *event) override {
+            if (event->type() == QEvent::FileOpen) {
+                m_cb(static_cast<QFileOpenEvent *>(event)->url());
+            }
+            return QObject::eventFilter(obj, event);
+        }
+        std::function<void(QUrl)> m_cb;
+    };
 }}
+
 pub fn resolve_android_url(url: QString) -> QString {
     cpp!(unsafe [url as "QString"] -> QString as "QString" {
         #ifdef Q_OS_ANDROID
@@ -130,6 +145,19 @@ pub fn resolve_android_url(url: QString) -> QString {
             return url;
         #endif
     })
+}
+pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
+    let func: Box<dyn FnMut(QUrl)> = Box::new(cb);
+    let cb_ptr = Box::into_raw(func);
+    cpp!(unsafe [cb_ptr as "TraitObject2"] {
+        qGuiApp->installEventFilter(new QtEventFilter([cb_ptr](QUrl url) {
+            rust!(Rust_catch_qt_file_open [cb_ptr: *mut dyn FnMut(QUrl) as "TraitObject2", url: QUrl as "QUrl"] {
+                let mut cb = unsafe { Box::from_raw(cb_ptr) };
+                cb(url.clone());
+                let _ = Box::into_raw(cb); // leak again so it doesn't get deleted here
+            });
+        }));
+    });
 }
 
 pub fn open_file_externally(path: QString) {

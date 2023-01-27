@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Canon EF 35mm f/2 IS USM Lens_6K 17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Canon EF 35mm f/2 IS USM Lens",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "global_shutter": true,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7201064696137925,
+    "camera_matrix": [
+      [
+        7764.606345694962,
+        0.0,
+        3027.9131690706245
+      ],
+      [
+        0.0,
+        7766.797764787514,
+        1617.0219992406157
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2482746156060437,
+      0.16183007508267927,
+      -0.21934471919785462,
+      0.382319588208394
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-ef35mmf/2isusm-35.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

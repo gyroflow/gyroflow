@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Canon EF 50mm f/1.4 USM_6K 17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Canon EF 50mm f/1.4 USM",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "global_shutter": true,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7626404522375745,
+    "camera_matrix": [
+      [
+        11202.865460098348,
+        0.0,
+        2938.0495226315834
+      ],
+      [
+        0.0,
+        11205.730158953684,
+        1542.046426807682
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20035889703502685,
+      -0.6895451137394432,
+      7.447318710490739,
+      -30.89426884497348
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-ef50mmf/1.4-50.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

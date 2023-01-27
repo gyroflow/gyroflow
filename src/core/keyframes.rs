@@ -3,6 +3,7 @@
 
 use std::{ collections::BTreeMap, collections::btree_map::Entry, str::FromStr };
 use crate::gyro_source::GyroSource;
+use std::sync::{ Arc, Mutex }; // parking_lot::Mutex can't be used across catch_unwind
 
 macro_rules! define_keyframes {
     ($($name:ident, $color:literal, $text:literal, $format:expr,)*) => {
@@ -63,12 +64,16 @@ pub struct Keyframe {
 pub struct KeyframeManager {
     keyframes: BTreeMap<KeyframeType, BTreeMap<i64, Keyframe>>,
     gyro_offsets: BTreeMap<i64, f64>,
+    custom_provider: Option<Arc<Mutex<dyn FnMut(&KeyframeManager, &KeyframeType, f64) -> Option<f64> + Send + 'static>>>,
     pub timestamp_scale: Option<f64>,
 }
 
 impl KeyframeManager {
     pub fn new() -> Self { Self::default() }
 
+    pub fn set_custom_provider(&mut self, cb: impl FnMut(&KeyframeManager, &KeyframeType, f64) -> Option<f64> + Send + 'static) {
+        self.custom_provider = Some(Arc::new(Mutex::new(cb)));
+    }
     pub fn set(&mut self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
         let kf = Keyframe {
             value,
@@ -98,13 +103,30 @@ impl KeyframeManager {
             x.remove(&timestamp_us);
         }
     }
-    pub fn is_keyframed(&self, typ: &KeyframeType) -> bool {
+    pub fn is_keyframed_internally(&self, typ: &KeyframeType) -> bool {
         if let Some(x) = self.keyframes.get(typ) {
             return x.len() > 0;
         }
         false
     }
+    pub fn is_keyframed(&self, typ: &KeyframeType) -> bool {
+        if let Some(custom) = &self.custom_provider {
+            if let Ok(mut custom) = custom.lock() {
+                if let Some(_) = (*custom)(self, typ, 0.0) {
+                    return true;
+                }
+            }
+        }
+        self.is_keyframed_internally(typ)
+    }
     pub fn value_at_video_timestamp(&self, typ: &KeyframeType, timestamp_ms: f64) -> Option<f64> {
+        if let Some(custom) = &self.custom_provider {
+            if let Ok(mut custom) = custom.lock() {
+                if let Some(v) = (*custom)(self, typ, timestamp_ms) {
+                    return Some(v);
+                }
+            }
+        }
         let keyframes = self.keyframes.get(typ)?;
         match keyframes.len() {
             0 => None,

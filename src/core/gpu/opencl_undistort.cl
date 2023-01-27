@@ -43,6 +43,7 @@ typedef struct {
     int4 source_rect;                // 16
     int4 output_rect;                // 16
     float4 digital_lens_params;      // 16
+    float4 safe_area_rect;           // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -127,6 +128,20 @@ void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, __glo
             float alphaf = alphas[alpha];
 
             *out_pix = DATA_CONVERT(colorf * alphaf + DATA_CONVERTF(*out_pix) * (1.0f - alphaf));
+        }
+    }
+}
+void draw_safe_area(DATA_TYPE *pix, float x, float y, __global KernelParams *params) {
+    bool isSafeArea = x >= params->safe_area_rect.x && x <= params->safe_area_rect.z &&
+                      y >= params->safe_area_rect.y && y <= params->safe_area_rect.w;
+    if (!isSafeArea) {
+        pix->x *= 0.5;
+        pix->y *= 0.5;
+        pix->z *= 0.5;
+        bool isBorder = x >= params->safe_area_rect.x - 5.0 && x <= params->safe_area_rect.z + 5.0 &&
+                        y >= params->safe_area_rect.y - 5.0 && y <= params->safe_area_rect.w + 5.0;
+        if (isBorder) {
+            *pix = DATA_CONVERT((float4)(40.0, 40.0, 40.0, 255.0));
         }
     }
 }
@@ -309,6 +324,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                     DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, drawing, bg);
                     final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
                     draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
+                    draw_safe_area(&final_pix, x, y, params);
                     *out_pix = final_pix;
                     return;
                 } break;
@@ -319,6 +335,8 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             final_pix = DATA_CONVERT(bg);
         }
         draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
+        draw_safe_area(&final_pix, x, y, params);
+
         *out_pix = final_pix;
     }
 }

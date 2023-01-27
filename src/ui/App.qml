@@ -73,7 +73,9 @@ Rectangle {
         onAccepted: videoArea.loadMultipleFiles(selectedFiles, false);
     }
 
-    property string pendingOpenFile: openFileOnStart;
+    property string pendingOpenFileOrg: openFileOnStart;
+    property string pendingOpenFile: pendingOpenFileOrg;
+    onPendingOpenFileOrgChanged: { pendingOpenFile = pendingOpenFileOrg; onItemLoaded(); }
     function onItemLoaded() {
         if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile) {
             videoArea.loadFile(controller.path_to_url(pendingOpenFile));

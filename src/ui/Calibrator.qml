@@ -48,10 +48,11 @@ Window {
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
-        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
-            lensCalib.rms = rms;
+        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real) {
+            lensCalib.infoList.rms = rms;
             videoArea.videoLoader.active = progress < 1 || rms == 0;
             videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
+            videoArea.videoLoader.additionalLine = "<br>" + qsTr("Pattern sharpness: %1").arg(sharpness > 0? sharpness.toFixed(2) + "px" : "---");
             videoArea.videoLoader.currentFrame = ready;
             videoArea.videoLoader.totalFrames = total;
             videoArea.videoLoader.text = progress < 1? qsTr("Analyzing %1...") : "";
@@ -59,8 +60,23 @@ Window {
             videoArea.videoLoader.cancelable = true;
             if (!videoArea.videoLoader.active) {
                 Qt.callLater(controller.recompute_threaded);
-                if (rms > 5) window.play_sound("error");
-                else if (rms > 0) window.play_sound("success");
+                let model = [];
+                model[QT_TRANSLATE_NOOP("TableList", "Reprojection error")] = rms == 0? "---" : rms.toLocaleString(Qt.locale(), "f", 5);
+                model[QT_TRANSLATE_NOOP("TableList", "Good frames")] = good;
+                model[QT_TRANSLATE_NOOP("TableList", "Average pattern sharpness")] = sharpness.toLocaleString(Qt.locale(), "f", 2) + " px";
+                lensCalib.infoList.model = model;
+                if (rms > 5) {
+                    window.play_sound("error");
+                    if (good < 5 && sharpness < lensCalib.maxSharpness.value) {
+                        const msg = sharpness > 0? qsTr("Some patterns were detected, but their average sharpness was <b>%1 px</b> and max limit is <b>%2 px</b>.").arg(sharpness.toLocaleString(Qt.locale(), "f", 2)).arg(lensCalib.maxSharpness.value.toLocaleString(Qt.locale(), "f", 2))
+                                                 : qsTr("No calibration patterns were detected.")
+                        messageBox(Modal.Warning, msg + "\n" + qsTr("Make sure your calibration footage is as sharp as possible:\n- Use high shutter speed\n- Use good lighting\n- Move the camera slowly\n- Avoid motion blur\n- Make sure the pattern stays in focus.\n\nYou can increase the sharpness limit in the Advanced section."), [
+                            { text: qsTr("Ok") }
+                        ]);
+                    }
+                } else if (rms > 0) {
+                    window.play_sound("success");
+                }
             }
         }
     }
@@ -79,7 +95,7 @@ Window {
         ]);
     }
     function loadFile(file: url) {
-        lensCalib.rms = 0;
+        lensCalib.infoList.rms = 0;
         controller.reset_player(videoArea.vid);
         Qt.callLater(() => {
             ui_tools.init_calibrator();
@@ -139,7 +155,7 @@ Window {
                     lensCalib.autoCalibBtn.clicked();
                 });
             }
-            function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int) {
+            function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real) {
                 if (!batch.active) return;
                 if (ready > 0 && rms > 0) {
                     batch.runIn(2000, function() {
@@ -212,6 +228,7 @@ Window {
                 height: parent.height;
                 vidInfo: vidInfo;
                 isCalibrator: true;
+                Component.onCompleted: videoArea.timeline.chart.setAxisVisible(8, false);
 
                 Column {
                     parent: videoArea.dropRect;

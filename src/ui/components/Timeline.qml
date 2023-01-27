@@ -28,6 +28,7 @@ Item {
     onVisibleAreaRightChanged: Qt.callLater(redrawChart);
     property alias pressed: ma.pressed;
     property alias inner: inner;
+    property alias chart: chart;
 
     property bool fullScreen: false;
 
@@ -38,7 +39,6 @@ Item {
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
 
     function redrawChart() { chart.update(); keyframes.item.update(); }
-    function getChart(): TimelineGyroChart { return chart; }
     function getKeyframesView(): TimelineKeyframesView { return keyframes.item; }
 
     function getTimestampUs(): real {

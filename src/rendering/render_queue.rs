@@ -1069,8 +1069,9 @@ impl RenderQueue {
                                     err(("An error occured: %1".to_string(), e.to_string()));
                                     return;
                                 }
+                                let is_main_video = gyro_path.is_empty();
                                 let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                let _ = stab.load_gyro_data(&gyro_path, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+                                let _ = stab.load_gyro_data(&gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
                                 let camera_id = stab.camera_id.read();
 

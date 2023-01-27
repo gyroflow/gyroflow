@@ -50,7 +50,7 @@ impl From<i32> for ZoomMethod {
 }
 
 pub trait ZoomingAlgorithm {
-    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<(f64, Point2D)>;
+    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<((f64, f64), Point2D)>;
     fn compute_params(&self) -> &ComputeParams;
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
     fn hash(&self, hasher: &mut dyn Hasher);
@@ -64,6 +64,7 @@ pub trait FieldOfViewAlgorithm {
 pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn ZoomingAlgorithm> {
     compute_params.fov_scale = 1.0;
     compute_params.fovs.clear();
+    compute_params.minimal_fovs.clear();
 
     // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
     // Then we can use real `output_dim` to fit the fov
@@ -84,7 +85,7 @@ pub fn from_compute_params(mut compute_params: ComputeParams) -> Box<dyn Zooming
     // let fov_estimator = Box::new(fov_direct::FovDirect::new(compute_params.clone()));
     // let fov_estimator = Box::new(fov_default::FovDefault::new(compute_params.clone()));
     match mode {
-        Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(compute_params)),
+        Mode::Disabled            => Box::new(zoom_disabled::ZoomDisabled::new(fov_estimator, compute_params)),
         Mode::Static              => Box::new(zoom_static::ZoomStatic::new(fov_estimator, compute_params)),
         Mode::Dynamic(window) => Box::new(zoom_dynamic::ZoomDynamic::new(window, fov_estimator, compute_params)),
     }

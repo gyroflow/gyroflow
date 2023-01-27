@@ -63,7 +63,7 @@ impl Camera {
 
         let rot = na::Matrix3::<f32>::from(rotation.fixed_slice::<3, 3>(0, 0));
 
-        let pt = undistort_points(&[(coords[0] * vw, coords[1] * vh)], camera_matrix, &distortion_coeffs, na::convert(rot), Some(camera_matrix), None, &self.compute_params)[0];
+        let pt = undistort_points(&[(coords[0] * vw, coords[1] * vh)], camera_matrix, &distortion_coeffs, na::convert(rot), Some(camera_matrix), None, &self.compute_params, 1.0)[0];
 
         na::Point2::new(pt.0 / vw, pt.1 / vh) - coords
     }

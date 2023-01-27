@@ -10,50 +10,36 @@ Item {
 
     // Play/Pause
     Shortcut {
-        sequence: "Space";
+        sequences: ["Space", "F3"];
         onActivated: {
-            videoArea.timeline.focus = true;
             if (videoArea.vid.playing) videoArea.vid.pause();
             else                       videoArea.vid.play();
         }
     }
     // Previous frame
     Shortcut {
-        sequences: ["Left", "Page Up", ","];
-        onActivated: {
-            videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame -= 1;
-        }
+        sequences: ["Left", "Page Up", ",", "F2"];
+        onActivated:  videoArea.vid.currentFrame -= 1;
     }
     // Previous 10 frames
     Shortcut {
-        sequences: ["Ctrl+Left", "Ctrl+Page Up", "Ctrl+,"];
-        onActivated: {
-            videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame -= 10;
-        }
+        sequences: ["Ctrl+Left", "Ctrl+Page Up", "Ctrl+,", "F5"];
+        onActivated: videoArea.vid.currentFrame -= 10;
     }
     // Next frame
     Shortcut {
-        sequences: ["Right", "Page Down","."];
-        onActivated: {
-            videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame += 1;
-        }
+        sequences: ["Right", "Page Down", ".", "F4"];
+        onActivated: videoArea.vid.currentFrame += 1;
     }
     // Next 10 frames
     Shortcut {
-        sequences: ["Ctrl+Right", "Ctrl+Page Down","Ctrl+."];
-        onActivated: {
-            videoArea.timeline.focus = true;
-            videoArea.vid.currentFrame += 10;
-        }
+        sequences: ["Ctrl+Right", "Ctrl+Page Down", "Ctrl+.", "F6"];
+        onActivated: videoArea.vid.currentFrame += 10;
     }
     // Go to trim start
     Shortcut {
         sequence: "Home";
         onActivated: {
-            videoArea.timeline.focus = true;
             videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimStart) + 1;
         }
     }
@@ -61,7 +47,6 @@ Item {
     Shortcut {
         sequence: "End";
         onActivated: {
-            videoArea.timeline.focus = true;
             videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimEnd) - 1;
         }
     }
@@ -69,7 +54,6 @@ Item {
     Shortcut {
         sequences: ["i", "["];
         onActivated: {
-            videoArea.timeline.focus = true;
             videoArea.timeline.setTrim(videoArea.timeline.position, videoArea.timeline.trimEnd);
         }
     }
@@ -77,7 +61,6 @@ Item {
     Shortcut {
         sequences: ["o", "]"];
         onActivated: {
-            videoArea.timeline.focus = true;
             videoArea.timeline.setTrim(videoArea.timeline.trimStart, videoArea.timeline.position);
         }
     }

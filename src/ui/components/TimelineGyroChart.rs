@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 
 use gyroflow_core::stabilization_params::StabilizationParams;
+use gyroflow_core::keyframes::{ KeyframeManager, KeyframeType };
 use nalgebra::Vector4;
 use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
@@ -61,6 +62,7 @@ pub struct TimelineGyroChart {
     magn: Vec<ChartData>,
     quats: Vec<ChartData>,
     fovs: Vec<ChartData>,
+    minimal_fovs: Vec<ChartData>,
     smoothed_quats: Vec<ChartData>,
     sync_results: Vec<ChartData>,
     org_sync_results: Vec<ChartData>,
@@ -75,8 +77,8 @@ impl TimelineGyroChart {
     pub fn setDurationMs(&mut self, v: f64) { self.duration_ms = v; }
     fn setVisibleAreaLeft (&mut self, v: f64) { self.visibleAreaLeft = v; self.update(); }
     fn setVisibleAreaRight(&mut self, v: f64) { self.visibleAreaRight = v; self.update(); }
-    fn setAxisVisible     (&mut self, a: usize, v: bool) { self.series[a].visible = v; self.update(); self.axisVisibleChanged(); }
-    fn getAxisVisible     (&self, a: usize) -> bool { self.series[a].visible }
+    fn setAxisVisible     (&mut self, a: usize, v: bool) { if let Some(a) = self.series.get_mut(a) { a.visible = v; self.update(); self.axisVisibleChanged(); } }
+    fn getAxisVisible     (&self, a: usize) -> bool { self.series.get(a).map(|x| x.visible).unwrap_or_default() }
     fn setVScale          (&mut self, v: f64) { self.vscale = v.max(0.1); self.update(); }
     fn setViewMode        (&mut self, v: u32) { self.viewMode = v; self.update_data(""); self.viewModeChanged(); }
 
@@ -183,6 +185,8 @@ impl TimelineGyroChart {
     fn drawOverlay(&mut self, p: &mut QPainter, a: usize, color: &str) {
         let rect = (self as &dyn QQuickItem).bounding_rect();
 
+        let map_to_visible_area = |v: f64| -> f64 { (v - self.visibleAreaLeft) / (self.visibleAreaRight - self.visibleAreaLeft) };
+
         let mut pen = QPen::from_color(QColor::from_name(color));
         pen.set_width_f(1.5); // TODO * dpiScale
         p.set_pen(pen);
@@ -201,6 +205,37 @@ impl TimelineGyroChart {
                 }
                 points.push(QPointF { x: rect.width + 2.0, y: rect.height });
                 p.draw_polygon(&points);
+            }
+        }
+
+        ////////////////////////////////////////////////////
+
+        if self.gyro.is_empty() || self.quats.is_empty() {
+            p.set_pen(QPen::from_style(PenStyle::NoPen));
+            p.set_brush(QBrush::from_color(QColor::from_name("#30ff0000"))); // semi-transparent red
+
+            let duration_us = self.duration_ms * 1000.0;
+
+            let mut region: Option<QRectF> = None;
+            for x in &self.minimal_fovs {
+                if x.values[0] < 0.99 {
+                    let x_pos = map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width;
+                    if let Some(region) = &mut region {
+                        region.width = x_pos - region.x;
+                    } else {
+                        region = Some(QRectF {
+                            x: map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width,
+                            y: 0.0,
+                            width: 1.0 / (self.visibleAreaRight - self.visibleAreaLeft),
+                            height: rect.height
+                        });
+                    }
+                } else if let Some(region) = region.take() {
+                    p.draw_rect(region);
+                }
+            }
+            if let Some(region) = region.take() {
+                p.draw_rect(region);
             }
         }
     }
@@ -287,7 +322,7 @@ impl TimelineGyroChart {
         }
     }
 
-    pub fn setFromGyroSource(&mut self, gyro: &GyroSource, params: &StabilizationParams, series: &str) {
+    pub fn setFromGyroSource(&mut self, gyro: &GyroSource, params: &StabilizationParams, keyframes: &KeyframeManager, series: &str) {
         if series.is_empty() {
             self.gyro = Vec::with_capacity(gyro.raw_imu.len());
             self.accl = Vec::with_capacity(gyro.raw_imu.len());
@@ -370,6 +405,17 @@ impl TimelineGyroChart {
                 values: [max - *x, 0.0, 0.0, 0.0]
             }).collect();
             Self::normalize_height(&mut self.fovs, None);
+
+            self.minimal_fovs = params.minimal_fovs.iter().zip(params.fovs.iter()).enumerate().map(|(i, (min_fov, fov))| {
+                let timestamp_us = (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
+
+                let fov_scale = keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_us as f64 / 1000.0).unwrap_or(params.fov);
+
+                ChartData {
+                    timestamp_us,
+                    values: [min_fov / (fov * fov_scale), 0.0, 0.0, 0.0]
+                }
+            }).collect();
         }
 
         self.update_data(series);

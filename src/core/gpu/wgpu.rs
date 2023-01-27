@@ -41,7 +41,7 @@ pub struct WgpuWrapper  {
 }
 
 lazy_static::lazy_static! {
-    static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(wgpu::Instance::new(wgpu::Backends::all()));
+    static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(wgpu::Instance::new(wgpu::InstanceDescriptor::default()));
     static ref ADAPTERS: RwLock<Vec<Adapter>> = RwLock::new(Vec::new());
     static ref ADAPTER: AtomicUsize = AtomicUsize::new(0);
 }

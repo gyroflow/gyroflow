@@ -5,7 +5,7 @@ use super::*;
 use super::mdk_processor::*;
 use super::ffmpeg_video::RateControl;
 use ffmpeg_next::{ frame, Dictionary };
-use std::sync::{ Arc, atomic::AtomicBool };
+use std::sync::{ Arc, atomic::{ AtomicI32, AtomicBool } };
 
 pub enum Processor<'a> {
     Ffmpeg(FfmpegProcessor<'a>),
@@ -18,9 +18,16 @@ pub struct VideoProcessor<'a> {
 impl<'a> VideoProcessor<'a> {
     pub fn from_file(path: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
         if path.to_lowercase().ends_with(".braw") || path.to_lowercase().ends_with(".r3d") {
-            Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(path)) })
+            Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(path, decoder_options)) })
         } else {
             Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(path, gpu_decoding, gpu_decoder_index, decoder_options)?) })
+        }
+    }
+
+    pub fn get_org_dimensions(&self) -> Option<(Arc<AtomicI32>, Arc<AtomicI32>)> {
+        match &self.inner {
+            Processor::Ffmpeg(_) => None,
+            Processor::Mdk(x) => x.get_org_dimensions(),
         }
     }
 

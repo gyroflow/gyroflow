@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Canon EF 85mm f/1.4L IS USM_6K 17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Canon EF 85mm f/1.4L IS USM",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "global_shutter": true,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9250659301295858,
+    "camera_matrix": [
+      [
+        18326.909419839547,
+        0.0,
+        3036.521794793772
+      ],
+      [
+        0.0,
+        18334.23623269878,
+        1648.2365517827027
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4698367487141757,
+      -7.469893492700993,
+      395.99602134722466,
+      -5487.931510584174
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-ef85mmf/1.4lisusm-85.00mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

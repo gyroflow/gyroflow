@@ -32,7 +32,6 @@ Item {
     property alias dropRect: dropRect;
     property bool isCalibrator: false;
 
-    property bool safeArea: false;
     property var pendingGyroflowData: null;
     property url loadedFileUrl;
 
@@ -213,6 +212,16 @@ Item {
             if (is_main_video) {
                 root.detectedCamera = camera;
                 vidInfo.updateEntry("Detected camera", camera || "---");
+
+                let lens = "";
+                if (additional_data.camera_identifier) {
+                    const camera_id = additional_data.camera_identifier;
+                    if (camera_id) {
+                        if (camera_id.lens_model) { lens += camera_id.lens_model; }
+                        if (camera_id.lens_info)  { lens += (lens? " " : "") + camera_id.lens_info; }
+                    }
+                }
+                vidInfo.updateEntry("Detected lens", lens || "---");
                 vidInfo.updateEntry("Contains gyro", additional_data.contains_motion? "Yes" : "No");
                 // If source was detected, but gyro data is empty
                 if (camera) {
@@ -283,6 +292,20 @@ Item {
             parts.push(parts[parts.length - 1].replace(".RDC", "_001.R3D"));
             url = parts.join("/");
         }
+
+        if (url.toString().toLowerCase().endsWith(".r3d") || url.toString().toLowerCase().endsWith(".braw")) {
+            // Preview resolution to 1080p
+            if (isCalibrator && calibrator_window.lensCalib) {
+                if (calibrator_window.lensCalib.previewResolution == 0) {
+                    calibrator_window.lensCalib.previewResolution = 2;
+                }
+            } else {
+                if (window.advanced.previewResolution == 0) {
+                    window.advanced.previewResolution = 2;
+                }
+            }
+        }
+
         stabEnabledBtn.checked = false;
 
         if (controller.check_external_sdk(url.toString())) {
@@ -400,6 +423,7 @@ Item {
         dropText.loadingFile = filename;
         vidInfo.updateEntry("File name", filename);
         vidInfo.updateEntry("Detected camera", "---");
+        vidInfo.updateEntry("Detected lens", "---");
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
@@ -548,11 +572,6 @@ Item {
                             currentFovText.text += " (" + qsTr("full frame equiv.: %1 mm").arg((fl * crop_factor).toFixed(2)) + ")";
                         }
                     }
-
-                    if (window.stab && safeAreaRect.fov > 1) {
-                        safeAreaRect.width = safeAreaRect.parent.width / safeAreaRect.fov;
-                        safeAreaRect.height = safeAreaRect.parent.height / safeAreaRect.fov;
-                    }
                 }
 
                 onCurrentFrameChanged: {
@@ -619,22 +638,6 @@ Item {
                     radius: 5 * dpiScale;
                     anchors.fill: parent;
                     anchors.margins: -border.width;
-                }
-                Item {
-                    anchors.fill: parent;
-                    layer.enabled: true;
-                    visible: (root.safeArea || fovOverviewBtn.checked) && safeAreaRect.fov > 1 && stabEnabledBtn.checked;
-                    Item {
-                        id: safeAreaRect;
-                        property real fov: window.stab.fovSlider.field.value + (fovOverviewBtn.checked? 1 : 0)
-                        width: parent.width;
-                        height: parent.height;
-                        anchors.centerIn: parent;
-                    }
-                    Rectangle { x: -1; width: parent.width + 2; height: safeAreaRect.y; color: "#80000000"; } // Top
-                    Rectangle { x: -1; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Left
-                    Rectangle { x: -1; y: safeAreaRect.y + safeAreaRect.height; width: parent.width + 2; height: parent.height - y; color: "#80000000"; } // Bottom
-                    Rectangle { x: safeAreaRect.x + safeAreaRect.width; y: safeAreaRect.y; width: safeAreaRect.x + 1; height: safeAreaRect.height; color: "#80000000"; } // Right
                 }
             }
 

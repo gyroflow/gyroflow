@@ -50,6 +50,7 @@ pub struct LensCalibrator {
     pub k: Matrix3<f64>,
     pub d: Vector4<f64>,
 
+    pub sum_sharpness: Arc<RwLock<f64>>,
     pub r_limit: f64,
 
     pub forced_frames: HashSet<i32>,
@@ -67,6 +68,9 @@ pub struct LensCalibrator {
 
 impl LensCalibrator {
     pub fn new() -> Self {
+        #[cfg(feature = "opencv")]
+        ::log::info!("OpenCV: {}", opencv::core::get_version_string().unwrap_or_default());
+
         let mut ret = Self {
             columns: 14,
             rows: 8,
@@ -75,6 +79,7 @@ impl LensCalibrator {
             iterations: 1000,
 
             max_sharpness: 5.0,
+            sum_sharpness: Arc::new(RwLock::new(0.0)),
 
             width: 0,
             height: 0,
@@ -98,7 +103,7 @@ impl LensCalibrator {
     }
 
     pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pt_scale: f32, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
-    where F: Fn((usize, usize, usize, f64)) + Send + Sync + Clone + 'static {
+    where F: Fn((usize, usize, usize, f64, f64)) + Send + Sync + Clone + 'static {
 
         self.width = (width as f32 * pt_scale).round() as usize;
         self.height = (height as f32 * pt_scale).round() as usize;
@@ -109,6 +114,7 @@ impl LensCalibrator {
         let img_points = self.image_points.clone();
         let all_matches = self.all_matches.clone();
         let is_forced = self.forced_frames.contains(&frame);
+        let sum_sharpness = self.sum_sharpness.clone();
 
         let digital_lens = self.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x));
         let digital_lens_params_opt = self.digital_lens_params.clone();
@@ -117,15 +123,16 @@ impl LensCalibrator {
         if let Some(detected) = all_matches.read().get(&frame) {
             if detected.avg_sharpness < max_sharpness {
                 img_points.write().insert(frame, detected.clone());
+                *sum_sharpness.write() += detected.avg_sharpness;
             }
-            progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0));
+            progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0, detected.avg_sharpness));
             return;
         }
 
         crate::run_threaded(move || {
-            let _ = (|| -> Result<(), opencv::Error> {
+            let avg_sharpness = (|| -> Result<f64, opencv::Error> {
                 if cancel_flag.load(std::sync::atomic::Ordering::Relaxed) {
-                    return Ok(());
+                    return Ok(0.0);
                 }
 
                 // Apply contrast and brightness
@@ -184,14 +191,15 @@ impl LensCalibrator {
                         log::debug!("avg sharpness: {:.5}, max: {:.5}", avg_sharpness, max_sharpness);
                         if avg_sharpness < max_sharpness || is_forced {
                             img_points.write().insert(frame, Detected { points: points.clone(), timestamp_us, frame, avg_sharpness, is_forced });
+                            *sum_sharpness.write() += avg_sharpness;
                         }
                         all_matches.write().insert(frame, Detected { points, timestamp_us, avg_sharpness, frame, is_forced });
-                        return Ok(());
+                        return Ok(avg_sharpness);
                     }
                 }
                 Err(opencv::Error::new(0, "Chessboard not found".to_string()))
             })();
-            progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0));
+            progress((processed_imgs.fetch_add(1, SeqCst) + 1, total, img_points.read().len(), 0.0, avg_sharpness.unwrap_or(0.0)));
         });
     }
 
@@ -269,12 +277,19 @@ impl LensCalibrator {
 
             let mut k  = Mat::default(); let mut d  = Mat::default();
             let mut rv = Mat::default(); let mut tv = Mat::default();
+            // let mut nop = Mat::default();
 
-            if let Ok(rms) = opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
-                if let Ok(k) = cv_to_mat3(k) {
-                    if let Ok(d) = cv_to_vec4(d) {
-                        return (rms, k, d, final_frames);
+            // match opencv::calib3d::calibrate_camera_ro(&objpoints, &imgpoints, size, 13, &mut k, &mut d, &mut rv, &mut tv, &mut nop, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
+            match opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
+                Ok(rms) => {
+                    if let Ok(k) = cv_to_mat3(k) {
+                        if let Ok(d) = cv_to_vec4(d) {
+                            return (rms, k, d, final_frames);
+                        }
                     }
+                },
+                Err(e) => {
+                    log::warn!("Failed to calibrate! {:?}", e);
                 }
             }
             (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), Vec::new())
