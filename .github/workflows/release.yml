@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: 42cc830d874f8e24eb4eb05bd5bb28496e3d498c
+          vcpkgGitCommitId: ac12118f02e127ef1fe9806ffe1a23e7db7ef988
           doNotCache: true
 
       - name: Setup MacOS deployment target
