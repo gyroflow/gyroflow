@@ -367,17 +367,17 @@ MenuItem {
         ... // dir /b | clip
     ];
     Shortcut {
-        sequences: ["F2"];
+        sequences: ["F8"];
         onActivated: {
             root.fileno = Math.abs(++fileno % files.length);
-            controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
+            controller.load_lens_profile_url("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     Shortcut {
-        sequences: ["F1"];
+        sequences: ["F7"];
         onActivated: {
             root.fileno = Math.abs(--fileno % files.length);
-            controller.load_lens_profile_url("file:///d:/submitted_lens_profiles/" + root.files[root.fileno]);
+            controller.load_lens_profile_url("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     Shortcut {

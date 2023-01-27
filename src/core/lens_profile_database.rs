@@ -250,9 +250,9 @@ impl LensProfileDatabase {
     // -------------------------------------------------------------------
 
     pub fn list_all_metadata(&self) {
-        fn q(s: &String) -> String {
-            serde_json::to_string(&serde_json::Value::String(s.clone())).unwrap()
-        }
+        fn q(s: &String) -> String { serde_json::to_string(&serde_json::Value::String(s.clone())).unwrap() }
+        // fn qf(s: &Option<f64>) -> String { serde_json::to_string::<Option<f64>>(&s.clone().into()).unwrap() }
+        // fn qb(s: bool) -> String { serde_json::to_string(&serde_json::Value::Bool(s)).unwrap() }
 
         let mut lines = Vec::new();
         let path = Self::get_path().to_string_lossy().replace('\\', "/");
