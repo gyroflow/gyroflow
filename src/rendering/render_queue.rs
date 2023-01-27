@@ -798,6 +798,12 @@ impl RenderQueue {
                         };
                         let format = crate::util::get_setting("r3dConvertFormat").parse::<i32>().unwrap_or(0);
                         crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, r3d_progress, cancel_flag.clone());
+                        if cancel_flag.load(SeqCst) {
+                            std::thread::sleep(std::time::Duration::from_secs(2));
+                            let _ = std::fs::remove_file(mov_path);
+                            err(("Conversion cancelled%1".to_string(), "".to_string()));
+                            return;
+                        }
                     }
                 }
 

@@ -242,10 +242,15 @@ Rectangle {
                     function render() {
                         const fname = vidInfo.item.filename.toLowerCase();
                         if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
-                            messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use the [OpenFX plugin].").replace(/\[(.*?)\]/, '<a href="https://github.com/gyroflow/gyroflow-ofx/releases"><font color="' + styleTextColor + '">$1</font></a>'), [
+                            messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use one of [video editor plugins] (%1).").replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
                                 { text: qsTr("Ok"), accent: true }
                             ]);
                             return;
+                        }
+                        if (fname.endsWith('.r3d') && controller.find_redline()) {
+                            messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
+                                { text: qsTr("Ok"), accent: true }
+                            ], undefined, Text.StyledText, "r3d-conversion" );
                         }
 
                         if (!controller.lens_loaded && !allowLens) {
@@ -335,6 +340,7 @@ Rectangle {
                             case "export_proj:2": // Export project file (including processed gyro data)
                             case "export_proj:1": // Export project file (including gyro data)
                             case "export_proj:0": // Export project file
+                                videoArea.videoLoader.show(qsTr("Saving..."), false);
                                 controller.export_gyroflow_file(/*thin*/action == "export_proj:0", /*ext*/action == "export_proj:2", window.getAdditionalProjectData(), "", false);
                             break;
                             case "save": window.saveProject(); break;
@@ -392,6 +398,7 @@ Rectangle {
                     type: type - 1,
                     opacity: 0
                 });
+                im.t.textFormat = textFormat;
                 im.opacity = 1;
                 Qt.createQmlObject("import QtQuick; Timer { interval: 2000; running: true; }", im, "t1").onTriggered.connect(() => {
                     im.opacity = 0;
@@ -472,6 +479,7 @@ Rectangle {
         function onGyroflow_exists(path: string, thin: bool, extended: bool) {
             messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
                 { text: qsTr("Overwrite"), "accent": true, clicked: () => {
+                    videoArea.videoLoader.show(qsTr("Saving..."), false);
                     controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), path, true);
                 } },
                 { text: qsTr("Rename"), clicked: () => {
@@ -487,6 +495,7 @@ Rectangle {
                     if (!controller.file_exists(newVideoPath)) {
                         outputFile.text = newVideoPath;
                     }
+                    videoArea.videoLoader.show(qsTr("Saving..."), false);
                     controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), output, true);
                 } },
                 { text: qsTr("Choose a different location"), clicked: () => {
@@ -507,7 +516,10 @@ Rectangle {
         type: "output-project";
         property bool thin: true;
         property bool extended: true;
-        onAccepted: controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), controller.url_to_path(selectedFile), true);
+        onAccepted: {
+            videoArea.videoLoader.show(qsTr("Saving..."), false);
+            controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), controller.url_to_path(selectedFile), true);
+        }
     }
     FileDialog {
         id: presetFileDialog;
@@ -618,6 +630,7 @@ Rectangle {
     function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
 
     function saveProject() {
+        videoArea.videoLoader.show(qsTr("Saving..."), false);
         controller.export_gyroflow_file(false, false, window.getAdditionalProjectData(), controller.project_file_path, !!controller.project_file_path);
     }
 

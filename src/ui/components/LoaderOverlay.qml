@@ -55,6 +55,16 @@ Item {
         }
     }
 
+    function show(text: string, cancelable: bool) {
+        videoLoader.active = true;
+        videoLoader.currentFrame = 0;
+        videoLoader.totalFrames = 0;
+        videoLoader.additional = "";
+        videoLoader.text = text;
+        videoLoader.progress = -1;
+        videoLoader.cancelable = cancelable;
+    }
+
     signal cancel();
     signal hide();
 

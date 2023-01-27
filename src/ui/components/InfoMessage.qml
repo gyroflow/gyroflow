@@ -50,5 +50,6 @@ Rectangle {
         visible: false;
         text: t.text;
         font: t.font;
+        textFormat: t.textFormat;
     }
 }

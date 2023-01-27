@@ -44,6 +44,8 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let qt_path = std::path::Path::new(qt_library_path).parent().unwrap();
     let compiler_path = if qt_path.join("libexec/qmlcachegen").exists() {
         qt_path.join("libexec/qmlcachegen").to_string_lossy().to_string()
+    } else if qt_path.join("../macos/libexec/qmlcachegen").exists() {
+        qt_path.join("../macos/libexec/qmlcachegen").to_string_lossy().to_string()
     } else {
         "qmlcachegen".to_string()
     };

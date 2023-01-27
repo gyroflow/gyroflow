@@ -1178,17 +1178,24 @@ impl Controller {
             self.gyroflow_exists(QString::from(gf_path), thin, extended);
         } else {
             util::set_setting("lastProject", &gf_path);
-            match self.stabilizer.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
-                Ok(_) => {
-                    self.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", gf_path)), QString::default(), QString::from("gyroflow-exported"));
-                },
-                Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
-                    self.request_location(QString::from(gf_path), thin, extended);
-                },
-                Err(e) => {
-                    self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            let finished = util::qt_queued_callback(self, move |this, (res, arg)| {
+                match res {
+                    "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", arg)), QString::default(), QString::from("gyroflow-exported")),
+                    "location" => this.request_location(QString::from(arg), thin, extended),
+                    "err" => this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default()),
+                    _ => { }
                 }
-            }
+                this.request_recompute();
+            });
+
+            let stab = self.stabilizer.clone();
+            core::run_threaded(move || {
+                match stab.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
+                    Ok(_) => finished(("ok", gf_path)),
+                    Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => finished(("location", gf_path)),
+                    Err(e) => finished(("err", e.to_string()))
+                }
+            });
         }
     }
 
