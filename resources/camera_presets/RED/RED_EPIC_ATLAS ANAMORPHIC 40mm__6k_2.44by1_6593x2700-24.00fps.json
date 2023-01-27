@@ -1,0 +1,68 @@
+{
+  "name": "RED_EPIC_ATLAS ANAMORPHIC 40mm__6k_2.44by1_6593x2700-24.00fps",
+  "note": "",
+  "calibrated_by": "David Pou",
+  "camera_brand": "RED",
+  "camera_model": "EPIC",
+  "lens_model": "ATLAS ANAMORPHIC 40mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6593,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 6593,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 3296,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 2.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6902660826079885,
+    "camera_matrix": [
+      [
+        8217.369163889101,
+        0.0,
+        2800.6272313832096
+      ],
+      [
+        0.0,
+        8217.244362011033,
+        1739.5005530564224
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17259929264298093,
+      0.48737987288919826,
+      -0.3483996907262914,
+      -0.9367164518527398
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Vivo_X90Pro+_Main Camera_Raw video crop_C4k_16by9_4096x2304-24.00fps",
+  "note": "",
+  "calibrated_by": "Sulaiman",
+  "camera_brand": "Vivo",
+  "camera_model": "X90Pro+",
+  "lens_model": "Main Camera",
+  "camera_setting": "Raw video crop",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2304
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.004969,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5957906763163717,
+    "camera_matrix": [
+      [
+        2698.424386596008,
+        0.0,
+        2067.897477591845
+      ],
+      [
+        0.0,
+        2695.8282710070184,
+        1154.868005459335
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6323769565327105,
+      -2.3026705977115363,
+      7.506515144345698,
+      -7.851598703899215
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

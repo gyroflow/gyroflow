@@ -1,0 +1,68 @@
+{
+  "name": "Xiaomi_Poco X3_Sony IMX682__4k_16by9_3840x2160-29.87fps",
+  "note": "",
+  "calibrated_by": "Chien de feu",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Poco X3",
+  "lens_model": "Sony IMX682",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.865898,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5871454873686384,
+    "camera_matrix": [
+      [
+        3647.510727930514,
+        0.0,
+        1929.027108839323
+      ],
+      [
+        0.0,
+        3646.4759969358665,
+        1092.1564849587114
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5142160074120816,
+      -1.9013348006180135,
+      13.892124609988889,
+      -32.38153609624543
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

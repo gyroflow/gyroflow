@@ -1,0 +1,68 @@
+{
+  "name": "RED_EPIC_ATLAS ORION 25MM__6k_2.44by1_6593x2700-24.00fps",
+  "note": "",
+  "calibrated_by": "David Pou",
+  "camera_brand": "RED",
+  "camera_model": "EPIC",
+  "lens_model": "ATLAS ORION 25MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6593,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 6593,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 3296,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 2.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3440485196334588,
+    "camera_matrix": [
+      [
+        4570.643845272135,
+        0.0,
+        3343.767446294458
+      ],
+      [
+        0.0,
+        4583.717893633749,
+        1391.923661701726
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09304912875073693,
+      -0.2753951908696312,
+      0.6264542364389739,
+      -0.4652082766092606
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

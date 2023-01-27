@@ -1,0 +1,76 @@
+{
+  "name": "Runcam_ThumbPW_wide_4k30_4k_16by9_2160x3840-30.00fps",
+  "note": "",
+  "calibrated_by": "Elvin",
+  "camera_brand": "Runcam",
+  "camera_model": "ThumbPW",
+  "lens_model": "wide",
+  "camera_setting": "4k30",
+  "calib_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "orig_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 70.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": true,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.803734640947894,
+    "camera_matrix": [
+      [
+        1943.3158116821542,
+        0.0,
+        1048.5459124859437
+      ],
+      [
+        0.0,
+        1953.063754937831,
+        1969.0856834323338
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.003051607907228662,
+      -0.03673817989629011,
+      0.05632541075737612,
+      -0.029964782809113143
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-thumbpw-wide-2160x3840@30000",
+  "calibrator_version": "1.3.0",
+  "date": "2022-11-14",
+  "compatible_settings": [
+    { "width": 2160, "height": 3840, "identifier": "runcam-thumbpw-wide-2160x3840@25000", "fps": 25.00 }
+  ],
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 3.0,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.7,
+    "do_autosync": true
+  },
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

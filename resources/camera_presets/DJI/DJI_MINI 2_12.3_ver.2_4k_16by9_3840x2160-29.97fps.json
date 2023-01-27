@@ -1,0 +1,68 @@
+{
+  "name": "DJI_MINI 2_1/2.3”_ver.2_4k_16by9_3840x2160-29.97fps",
+  "note": "ver.2",
+  "calibrated_by": "Matěj Dostál",
+  "camera_brand": "DJI",
+  "camera_model": "MINI 2",
+  "lens_model": "1/2.3”",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2264018978651234,
+    "camera_matrix": [
+      [
+        3013.5008076895047,
+        0.0,
+        1884.4394155407765
+      ],
+      [
+        0.0,
+        3014.8282092399454,
+        1047.130225143412
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.37664090019850704,
+      -0.5802208243237638,
+      5.189677236276527,
+      -11.884551510019016
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

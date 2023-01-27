@@ -1,0 +1,68 @@
+{
+  "name": "Insta360_OneRS_4K Boost_NO-EIS_4k_4by3_4000x3000-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "4FM EZ",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "4K Boost",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "frame_readout_time": -16.244583129882812,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4994647606661074,
+    "camera_matrix": [
+      [
+        1852.2267424775523,
+        0.0,
+        1998.0811784149184
+      ],
+      [
+        0.0,
+        1850.387601117475,
+        1477.2297206523142
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06997798141216628,
+      -0.0330669017080329,
+      0.01895551749404977,
+      -0.012236143271856096
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-insta360-oners-unknown196-4000x3000@29970-no-eis",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

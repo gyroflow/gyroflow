@@ -1,0 +1,68 @@
+{
+  "name": "SJCAM_M10+__Wide_1080p_16by9_1920x1080-60.00fps",
+  "note": "WDR",
+  "calibrated_by": "Fabian Louwers",
+  "camera_brand": "SJCAM",
+  "camera_model": "M10+",
+  "lens_model": "",
+  "camera_setting": "Wide",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4081248690151473,
+    "camera_matrix": [
+      [
+        951.3022158825456,
+        0.0,
+        999.4268574374915
+      ],
+      [
+        0.0,
+        961.6169629027546,
+        587.9755152315855
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.012485891569481407,
+      -0.04359828032009968,
+      0.06940649029974,
+      -0.035970857524867325
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

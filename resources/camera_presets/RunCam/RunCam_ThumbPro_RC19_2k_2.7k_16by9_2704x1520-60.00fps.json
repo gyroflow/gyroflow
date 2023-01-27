@@ -1,0 +1,68 @@
+{
+  "name": "RunCam_ThumbPro_RC19_2k_2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "RamboFPV",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPro",
+  "lens_model": "RC19",
+  "camera_setting": "2k",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 15.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.27882690993980197,
+    "camera_matrix": [
+      [
+        910.1300600525624,
+        0.0,
+        1361.051094484028
+      ],
+      [
+        0.0,
+        913.9404047172644,
+        730.8961359548899
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.016656665598313594,
+      0.018969234570083888,
+      -0.01587979922192534,
+      0.004029551583323891
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

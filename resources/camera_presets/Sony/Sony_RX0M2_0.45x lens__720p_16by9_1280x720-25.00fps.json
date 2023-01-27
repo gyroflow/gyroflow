@@ -1,0 +1,68 @@
+{
+  "name": "Sony_RX0M2_0.45x lens__720p_16by9_1280x720-25.00fps",
+  "note": "",
+  "calibrated_by": "CP FPV",
+  "camera_brand": "Sony",
+  "camera_model": "RX0M2",
+  "lens_model": "0.45x lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 39.99,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.848396623279287,
+    "camera_matrix": [
+      [
+        666.1171483526932,
+        0.0,
+        654.4281304887814
+      ],
+      [
+        0.0,
+        664.867095893862,
+        364.12020781284633
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.01601609487756508,
+      0.06249479376397761,
+      -0.3088707032722732,
+      0.1631600085271184
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-dsc-rx0m2-a02efe9c-1280x720@25000",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

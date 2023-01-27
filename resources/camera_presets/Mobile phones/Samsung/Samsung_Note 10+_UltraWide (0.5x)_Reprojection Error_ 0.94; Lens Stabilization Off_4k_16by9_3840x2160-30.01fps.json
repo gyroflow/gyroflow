@@ -1,0 +1,66 @@
+{
+  "name": "Samsung_Note 10+_UltraWide (0.5x)_Reprojection Error: 0.94; Lens Stabilization Off_4k_16by9_3840x2160-30.01fps",
+  "note": "Reprojection Error: 0.94; Lens Stabilization Off",
+  "calibrated_by": "TaleSlinger",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 10+",
+  "lens_model": "UltraWide (0.5x)",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.006245,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9416402272256128,
+    "camera_matrix": [
+      [
+        1747.7880408285582,
+        0.0,
+        1917.95331696846
+      ],
+      [
+        0.0,
+        1746.8962826531351,
+        1112.3258521809428
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31554418474976653,
+      0.19826047005689637,
+      0.02091536031545722,
+      -0.09258576987051632
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

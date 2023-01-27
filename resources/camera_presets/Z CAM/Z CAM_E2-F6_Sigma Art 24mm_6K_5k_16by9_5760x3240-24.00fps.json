@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-F6_Sigma Art 24mm_6K_5k_16by9_5760x3240-24.00fps",
+  "note": "24fps ProRes422",
+  "calibrated_by": "Skybound MBK",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Sigma Art 24mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.282965708232899,
+    "camera_matrix": [
+      [
+        4043.31682208373,
+        0.0,
+        2918.182959109686
+      ],
+      [
+        0.0,
+        4062.7395010348664,
+        1668.7490020175348
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28645447713844235,
+      0.14595074124176535,
+      -0.2512700266948375,
+      0.8357286723002844
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

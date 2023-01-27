@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_ZEISSCompact Prime CP.3 18mm/T2.9_Shutter 1/250_2k_1.90by1_2048x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "ZEISSCompact Prime CP.3 18mm/T2.9",
+  "camera_setting": "Shutter 1/250",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2727365787841229,
+    "camera_matrix": [
+      [
+        1432.0369787403306,
+        0.0,
+        1021.8493953465918
+      ],
+      [
+        0.0,
+        1430.265565290623,
+        521.4152037502931
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2884641539352952,
+      0.18208607493113327,
+      -0.21459140576106325,
+      0.5181309884758559
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 18.0,
+  "crop_factor": 1.33
+}

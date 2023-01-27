@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7III_Sigma 35mm 1.4 DG Art__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "SETDA",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Sigma 35mm 1.4 DG Art",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4641830325024314,
+    "camera_matrix": [
+      [
+        2170.998938489863,
+        0.0,
+        950.3752963494524
+      ],
+      [
+        0.0,
+        2166.844797218027,
+        490.9296459452647
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2424920433087153,
+      0.30757409823584264,
+      2.5860394808305416,
+      -14.602828311450592
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

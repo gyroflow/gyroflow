@@ -1,10 +1,10 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "XTU_XTUMAX2_GK766__4k_16by9_3840x2160-59.94fps",
   "note": "",
-  "calibrated_by": "schuu101",
-  "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
+  "calibrated_by": "YUTU",
+  "camera_brand": "XTU",
+  "camera_model": "XTUMAX2",
+  "lens_model": "GK766",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -18,26 +18,26 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 10.0,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 24,
-  "fps": 50.0,
+  "num_images": 14,
+  "fps": 59.94006,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.45255747848074135,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        1756.200200068035,
         0.0,
-        1932.8118262365876
+        1941.5546634071889
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        1755.8818014931232,
+        1167.9602702602392
       ],
       [
         0.0,
@@ -46,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.06062985518963704,
+      -0.005889179352401978,
+      0.013264170455535271,
+      -0.006562215648274119
     ],
     "radial_distortion_limit": null
   },
@@ -62,7 +62,7 @@
   },
   "identifier": "",
   "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
+  "date": "2022-12-22",
   "compatible_settings": [],
   "is_superview": false,
   "distortion_model_id": 0

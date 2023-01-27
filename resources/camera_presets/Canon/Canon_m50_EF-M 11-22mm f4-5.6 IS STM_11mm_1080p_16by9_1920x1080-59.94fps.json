@@ -1,43 +1,43 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
-  "note": "",
-  "calibrated_by": "schuu101",
-  "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
+  "name": "Canon_m50_EF-M 11-22mm f/4-5.6 IS STM_11mm_1080p_16by9_1920x1080-59.94fps",
+  "note": "11mm",
+  "calibrated_by": "Сергей Мальгота",
+  "camera_brand": "Canon",
+  "camera_model": "m50",
+  "lens_model": "EF-M 11-22mm f/4-5.6 IS STM",
   "camera_setting": "",
   "calib_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 1920,
+    "h": 1080
   },
   "orig_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 1920,
+    "h": 1080
   },
   "output_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 1920,
+    "h": 1080
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 0.0,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 24,
-  "fps": 50.0,
+  "num_images": 15,
+  "fps": 59.94006,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.4122628684530205,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        993.1447055587508,
         0.0,
-        1932.8118262365876
+        965.200787551526
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        994.2506225783244,
+        537.9521521484861
       ],
       [
         0.0,
@@ -46,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.26004802442989333,
+      -0.028607472237249253,
+      0.5724074137878634,
+      -0.2363043132587705
     ],
     "radial_distortion_limit": null
   },
@@ -61,8 +61,8 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
+  "calibrator_version": "1.0.1",
+  "date": "2023-01-22",
   "compatible_settings": [],
   "is_superview": false,
   "distortion_model_id": 0

@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_Z5_14-30__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Jose",
+  "camera_brand": "Nikon",
+  "camera_model": "Z5",
+  "lens_model": "14-30",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.358709612013948,
+    "camera_matrix": [
+      [
+        762.9038779145578,
+        0.0,
+        964.4472292665127
+      ],
+      [
+        0.0,
+        764.1052206642927,
+        541.1544703206856
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3248515117819524,
+      0.16465835666966128,
+      -0.021454206458314785,
+      0.08208212078828662
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

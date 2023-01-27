@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS 250D_EFS 18-135_f4.5_1080p_16by9_1920x1080-50.00fps",
+  "note": "50",
+  "calibrated_by": "natalia melnikov",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 250D",
+  "lens_model": "EFS 18-135",
+  "camera_setting": "f4.5",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6349192764062412,
+    "camera_matrix": [
+      [
+        1785.6745200159671,
+        0.0,
+        956.8269542579292
+      ],
+      [
+        0.0,
+        1785.0295083813155,
+        575.089304363216
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12292228499739748,
+      0.28680473636787784,
+      -0.11223612884004049,
+      -0.050763668089171675
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2023-01-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

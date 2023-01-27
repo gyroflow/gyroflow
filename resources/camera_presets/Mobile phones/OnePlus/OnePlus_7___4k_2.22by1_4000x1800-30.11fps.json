@@ -1,0 +1,68 @@
+{
+  "name": "OnePlus_7___4k_2.22by1_4000x1800-30.11fps",
+  "note": "",
+  "calibrated_by": "Василий",
+  "camera_brand": "OnePlus",
+  "camera_model": "7",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 1800
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 1800
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 1800
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 30.110161,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.1145280830349305,
+    "camera_matrix": [
+      [
+        2159.989233368136,
+        0.0,
+        1910.069390251648
+      ],
+      [
+        0.0,
+        2157.198170144125,
+        871.9470616305882
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.429538660503079,
+      0.1703147201893865,
+      -1.478056986285461,
+      2.7034332484618657
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

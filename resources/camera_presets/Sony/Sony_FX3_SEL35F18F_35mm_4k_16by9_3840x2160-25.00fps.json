@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FX3_SEL35F18F_35mm_4k_16by9_3840x2160-25.00fps",
+  "note": "with Standard Stabilization",
+  "calibrated_by": "Michael Lam",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "SEL35F18F",
+  "camera_setting": "35mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.828859866294341,
+    "camera_matrix": [
+      [
+        4194.274009174651,
+        0.0,
+        1931.8530439661963
+      ],
+      [
+        0.0,
+        4209.277650886525,
+        887.9901231282997
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5996309573301408,
+      -1.3973263675999386,
+      19.199143490522736,
+      -54.57632676688703
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx3-35.00mm-3840x2160@25000",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

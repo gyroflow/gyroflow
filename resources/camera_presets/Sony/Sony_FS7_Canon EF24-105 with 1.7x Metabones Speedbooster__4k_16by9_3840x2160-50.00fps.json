@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FS7_Canon EF24-105 with 1.7x Metabones Speedbooster__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "CFW_Zane",
+  "camera_brand": "Sony",
+  "camera_model": "FS7",
+  "lens_model": "Canon EF24-105 with 1.7x Metabones Speedbooster",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2561824425368942,
+    "camera_matrix": [
+      [
+        2935.9272382101262,
+        0.0,
+        1917.2289076504585
+      ],
+      [
+        0.0,
+        2935.881051365659,
+        1080.940098966952
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19144623222550777,
+      -0.07163397581403483,
+      0.6649617067261738,
+      -0.6570941895229262
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-pxw-fs7-16.80mm-3840x2160@50000",
+  "calibrator_version": "1.4.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

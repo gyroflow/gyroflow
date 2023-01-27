@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S2 PRO__-_1080p_16by9_1920x1080-60.00fps",
+  "note": "NO EIS",
+  "calibrated_by": "yoshihiro",
+  "camera_brand": "XTU",
+  "camera_model": "S2 PRO",
+  "lens_model": "",
+  "camera_setting": "-",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.517732301510825,
+    "camera_matrix": [
+      [
+        1062.56493686385,
+        0.0,
+        980.2644602217906
+      ],
+      [
+        0.0,
+        1061.4574671195928,
+        531.7627069267132
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04623428897792946,
+      0.017034778894120462,
+      -0.03955328295231259,
+      0.038963233623428066
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

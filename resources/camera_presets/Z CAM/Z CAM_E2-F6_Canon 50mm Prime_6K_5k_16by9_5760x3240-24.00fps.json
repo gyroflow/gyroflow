@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-F6_Canon 50mm Prime_6K_5k_16by9_5760x3240-24.00fps",
+  "note": "ProRes422",
+  "calibrated_by": "SkyboundMBK",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Canon 50mm Prime",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5073492858216987,
+    "camera_matrix": [
+      [
+        9525.985460717353,
+        0.0,
+        3095.345581336968
+      ],
+      [
+        0.0,
+        9580.220863379183,
+        1993.8408440891703
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3758121615432282,
+      -3.1812672073219717,
+      37.93899319400036,
+      -138.8385303414315
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

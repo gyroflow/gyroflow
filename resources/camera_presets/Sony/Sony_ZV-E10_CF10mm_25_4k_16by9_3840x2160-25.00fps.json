@@ -1,0 +1,68 @@
+{
+  "name": "Sony_ZV-E10_CF10mm_25_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "LIN",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "CF10mm",
+  "camera_setting": "25",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29468621956768365,
+    "camera_matrix": [
+      [
+        1759.0487873606044,
+        0.0,
+        1931.642577732913
+      ],
+      [
+        0.0,
+        1745.8393361283977,
+        1072.0413632014418
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2621230940859239,
+      0.5293013646493883,
+      -2.4208431794113863,
+      5.291774446433656
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

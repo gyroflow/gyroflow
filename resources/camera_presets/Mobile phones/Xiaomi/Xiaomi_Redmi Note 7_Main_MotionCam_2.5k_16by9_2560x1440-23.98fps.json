@@ -1,0 +1,66 @@
+{
+  "name": "Xiaomi_Redmi Note 7_Main_MotionCam_2.5k_16by9_2560x1440-23.98fps",
+  "note": "",
+  "calibrated_by": "Bogdan",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 7",
+  "lens_model": "Main",
+  "camera_setting": "MotionCam",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6162852353606557,
+    "camera_matrix": [
+      [
+        3158.057864030051,
+        0.0,
+        1292.618751526592
+      ],
+      [
+        0.0,
+        3155.9281419237063,
+        683.6598612404669
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3418224984157463,
+      0.6171750717728557,
+      0.8685861622576573,
+      -10.203857663291048
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

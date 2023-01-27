@@ -1,0 +1,68 @@
+{
+  "name": "Eachine_TX06 700tvl_130°_mini camera FPV_720p_4by3_1440x1080-30.00fps",
+  "note": "mini camera FPV",
+  "calibrated_by": "Matheus Milonas",
+  "camera_brand": "Eachine",
+  "camera_model": "TX06 700tvl",
+  "lens_model": "130°",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.001463,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.49768994565843594,
+    "camera_matrix": [
+      [
+        579.7396392530732,
+        0.0,
+        815.7618710874394
+      ],
+      [
+        0.0,
+        547.0326487975823,
+        445.81894852386233
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4655139181760356,
+      0.5835234504805263,
+      -1.2101710888956794,
+      0.5964711066322292
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2023-01-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

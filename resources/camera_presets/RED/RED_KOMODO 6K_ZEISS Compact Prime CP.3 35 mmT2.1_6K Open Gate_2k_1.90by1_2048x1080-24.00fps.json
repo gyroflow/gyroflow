@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_ZEISS Compact Prime CP.3 35 mm/T2.1_6K Open Gate_2k_1.90by1_2048x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "ZEISS Compact Prime CP.3 35 mm/T2.1",
+  "camera_setting": "6K Open Gate",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.31111547646034293,
+    "camera_matrix": [
+      [
+        2813.876630620843,
+        0.0,
+        1006.293265677011
+      ],
+      [
+        0.0,
+        2811.2057723864827,
+        546.4713984632058
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24804412066592288,
+      -0.4258863206138628,
+      6.056658888710966,
+      -17.015238377263458
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": 1.33
+}

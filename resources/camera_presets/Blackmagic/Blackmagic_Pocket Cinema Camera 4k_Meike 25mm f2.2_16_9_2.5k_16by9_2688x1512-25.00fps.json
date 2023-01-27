@@ -1,0 +1,63 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4k_Meike 25mm f2.2_16:9_2.5k_16by9_2688x1512-25.00fps",
+  "note": "16:9",
+  "calibrated_by": "DiWhite",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4k",
+  "lens_model": "Meike 25mm f2.2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2364505919329128,
+    "camera_matrix": [
+      [
+        5248.024998914075,
+        0.0,
+        1490.9120480022368
+      ],
+      [
+        0.0,
+        5235.188619289515,
+        760.1742955689263
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24499595011220288,
+      1.4502325366989506,
+      -22.913137102645234,
+      143.66300841842602
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

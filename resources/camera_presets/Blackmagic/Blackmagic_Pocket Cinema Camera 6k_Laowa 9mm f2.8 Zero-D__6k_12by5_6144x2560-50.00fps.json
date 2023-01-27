@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Laowa 9mm f/2.8 Zero-D__6k_12by5_6144x2560-50.00fps",
+  "note": "",
+  "calibrated_by": "Yan S",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Laowa 9mm f/2.8 Zero-D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.401711203934439,
+    "camera_matrix": [
+      [
+        2421.4262773420446,
+        0.0,
+        3148.300642329511
+      ],
+      [
+        0.0,
+        2422.405923197312,
+        1343.8699655330893
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3506834557980094,
+      0.042879876050535615,
+      0.1688034598560593,
+      -0.05456928822455226
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

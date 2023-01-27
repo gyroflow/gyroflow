@@ -1,9 +1,9 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "Sony_a7IV_24.00mm__4k_16by9_3840x2160-50.00fps",
   "note": "",
-  "calibrated_by": "schuu101",
+  "calibrated_by": "Aleksei Tatarnikov",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
+  "camera_model": "a7IV",
   "lens_model": "24.00mm",
   "camera_setting": "",
   "calib_dimension": {
@@ -22,22 +22,23 @@
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 24,
+  "num_images": 5,
   "fps": 50.0,
+  "crop": null,
   "official": false,
-  "use_opencv_fisheye": true,
+  "asymmetrical": false,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.6439130312828575,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        4989.834951918198,
         0.0,
-        1932.8118262365876
+        1983.6044378435977
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        4966.409192232129,
+        1123.1819763085236
       ],
       [
         0.0,
@@ -46,24 +47,22 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.3135548897342176,
+      1.022879847635586,
+      4.243145259375076,
+      -47.74980805082033
     ],
     "radial_distortion_limit": null
   },
-  "use_opencv_standard": false,
-  "calib_params": {
-    "RMS_error": 0.0,
-    "camera_matrix": [],
-    "distortion_coeffs": [],
-    "radial_distortion_limit": null
-  },
   "identifier": "",
-  "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-24",
   "compatible_settings": [],
-  "is_superview": false,
-  "distortion_model_id": 0
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": 1.5
 }

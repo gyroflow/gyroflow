@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy A52s__Open Camera Sensors_4k_16by9_3840x2160-29.94fps",
+  "note": "Open Camera Sensors",
+  "calibrated_by": "Josiah Mos",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy A52s",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 33,
+  "fps": 29.942003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8092586857318972,
+    "camera_matrix": [
+      [
+        2738.4191646559043,
+        0.0,
+        1899.040071121996
+      ],
+      [
+        0.0,
+        2739.110174524907,
+        1070.2963406216531
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6079626866588703,
+      -1.438157819974049,
+      5.245053445762051,
+      -6.793308867899066
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Gear360_360__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "joabe Soares",
+  "camera_brand": "Samsung",
+  "camera_model": "Gear360",
+  "lens_model": "360",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 1.0782350312952962,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5681481525793385,
+    "camera_matrix": [
+      [
+        634.3972846092184,
+        0.0,
+        963.3836508644234
+      ],
+      [
+        0.0,
+        634.7944106376525,
+        550.1276148203314
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.118107678867752,
+      -0.02153974746791667,
+      -0.0010337523055496194,
+      -0.0008147217543407645
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

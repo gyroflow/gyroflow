@@ -1,0 +1,68 @@
+{
+  "name": "RED_V-RAPTOR_ZEISS CP3 85MM_6K_5k_16by9_5760x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "teodor görtz",
+  "camera_brand": "RED",
+  "camera_model": "V-RAPTOR",
+  "lens_model": "ZEISS CP3 85MM",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4041002706689283,
+    "camera_matrix": [
+      [
+        17557.49607059683,
+        0.0,
+        2864.5977622763103
+      ],
+      [
+        0.0,
+        17569.66180432879,
+        1413.8914762769627
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4358032528210876,
+      -7.38618842746957,
+      321.99417648814045,
+      -5073.408199602844
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

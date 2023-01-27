@@ -1,11 +1,11 @@
 {
-  "name": "Sony_FX3_Canon FD 24mm f2.8__4k_16by9_3840x2160-23.98fps",
+  "name": "Sony_ZV-E10_laowa_9mm_4k_16by9_3840x2160-25.00fps",
   "note": "",
-  "calibrated_by": "Grigory Pesochin",
+  "calibrated_by": "Ka kei Leung",
   "camera_brand": "Sony",
-  "camera_model": "FX3",
-  "lens_model": "Canon FD 24mm f2.8",
-  "camera_setting": "",
+  "camera_model": "ZV-E10",
+  "lens_model": "laowa",
+  "camera_setting": "9mm",
   "calib_dimension": {
     "w": 3840,
     "h": 2160
@@ -21,31 +21,23 @@
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "sync_settings": {
-    "initial_offset": 0,
-    "initial_offset_inv": false,
-    "search_size": 0.5,
-    "max_sync_points": 5,
-    "every_nth_frame": 1,
-    "time_per_syncpoint": 0.5,
-    "do_autosync": true
-  },
+  "input_vertical_stretch": 1.0,
   "num_images": 15,
-  "fps": 23.976025,
+  "fps": 25.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.5964696086838754,
+    "RMS_error": 0.5610221719614747,
     "camera_matrix": [
       [
-        2699.8308251313483,
+        1512.2608967534186,
         0.0,
-        1919.353978781775
+        1925.1923900614136
       ],
       [
         0.0,
-        2701.9803736572903,
-        1077.7891039429408
+        1512.7089147472698,
+        1075.6097928141153
       ],
       [
         0.0,
@@ -54,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.2245916407150483,
-      0.1100069011176411,
-      0.11855819735934946,
-      0.27383213622887637
+      0.33690368329484105,
+      0.15847196540208588,
+      -0.1914051908431896,
+      0.368471213970141
     ],
     "radial_distortion_limit": null
   },
@@ -69,7 +61,9 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc3",
-  "date": "2022-02-21",
-  "compatible_settings": []
+  "calibrator_version": "1.1.0",
+  "date": "2023-01-18",
+  "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0
 }

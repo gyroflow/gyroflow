@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_TTARTISAN 7.5MM FISHEYE_17/9_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "teodor görtz",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "TTARTISAN 7.5MM FISHEYE",
+  "camera_setting": "17/9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2744415897254381,
+    "camera_matrix": [
+      [
+        2226.903193789549,
+        0.0,
+        3117.813047800997
+      ],
+      [
+        0.0,
+        2227.014748002895,
+        1586.9149702630154
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.006244680897975985,
+      -0.0023133479148439214,
+      -0.003332112331323695,
+      0.00044354093623648946
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

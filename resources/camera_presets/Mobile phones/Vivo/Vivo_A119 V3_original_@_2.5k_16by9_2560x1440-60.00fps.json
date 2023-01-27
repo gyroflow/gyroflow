@@ -1,0 +1,68 @@
+{
+  "name": "Vivo_A119 V3_original_@_2.5k_16by9_2560x1440-60.00fps",
+  "note": "mp4 | bitrate, high | firmware v2.6",
+  "calibrated_by": "Vladimir Kostenko",
+  "camera_brand": "Vivo",
+  "camera_model": "A119 V3",
+  "lens_model": "original",
+  "camera_setting": "@",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 0.49905951744465554,
+    "camera_matrix": [
+      [
+        1671.0563175412171,
+        0.0,
+        1287.8062019457952
+      ],
+      [
+        0.0,
+        1671.1026580235468,
+        890.7706594791341
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05327796381464608,
+      0.008082808029207746,
+      -0.02642460131760531,
+      0.00939595888711349
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

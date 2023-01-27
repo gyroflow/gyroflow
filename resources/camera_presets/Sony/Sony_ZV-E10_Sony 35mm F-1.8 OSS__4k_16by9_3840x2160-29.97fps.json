@@ -1,0 +1,68 @@
+{
+  "name": "Sony_ZV-E10_Sony 35mm F-1.8 OSS__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Aman",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Sony 35mm F-1.8 OSS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7187336116676251,
+    "camera_matrix": [
+      [
+        7194.778576296209,
+        0.0,
+        1917.2457557753903
+      ],
+      [
+        0.0,
+        7161.458011331635,
+        1184.7579502831431
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33430921616285414,
+      -0.3109381514658635,
+      12.459354149756644,
+      -248.45023057984653
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-6e0ad1b-3840x2160@29970",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

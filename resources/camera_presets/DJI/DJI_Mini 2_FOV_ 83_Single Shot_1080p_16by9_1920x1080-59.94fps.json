@@ -1,0 +1,63 @@
+{
+  "name": "DJI_Mini 2_FOV: 83°_Single Shot_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "israel romero",
+  "camera_brand": "DJI",
+  "camera_model": "Mini 2",
+  "lens_model": "FOV: 83°",
+  "camera_setting": "Single Shot",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3270060472777423,
+    "camera_matrix": [
+      [
+        1415.5740051795217,
+        0.0,
+        970.8934921309911
+      ],
+      [
+        0.0,
+        1413.1096297359868,
+        523.9144612117803
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34839145762140944,
+      0.03334327194060061,
+      -0.005690395971532902,
+      0.38650028693516214
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2023-01-06",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

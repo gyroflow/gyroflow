@@ -1,0 +1,68 @@
+{
+  "name": "Canon_60D_50mm_f2.8_1080p_16by9_1920x1080-29.97fps",
+  "note": "have a nice day",
+  "calibrated_by": "Tiago Baptistella",
+  "camera_brand": "Canon",
+  "camera_model": "60D",
+  "lens_model": "50mm",
+  "camera_setting": "f2.8",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2605624423698347,
+    "camera_matrix": [
+      [
+        5207.895454753021,
+        0.0,
+        899.7675724958041
+      ],
+      [
+        0.0,
+        5210.888138444533,
+        418.5989559322994
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12267166346900212,
+      1.855797686053855,
+      124.28389444770936,
+      -3203.6730394182823
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

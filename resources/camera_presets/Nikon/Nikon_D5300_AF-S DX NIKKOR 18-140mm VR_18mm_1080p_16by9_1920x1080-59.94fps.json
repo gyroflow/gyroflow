@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_D5300_AF-S DX NIKKOR 18-140mm VR_18mm_1080p_16by9_1920x1080-59.94fps",
+  "note": "18mm",
+  "calibrated_by": "Mateo",
+  "camera_brand": "Nikon",
+  "camera_model": "D5300",
+  "lens_model": "AF-S DX NIKKOR 18-140mm VR",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4449731975447423,
+    "camera_matrix": [
+      [
+        1466.620402425733,
+        0.0,
+        954.5769580021304
+      ],
+      [
+        0.0,
+        1475.2098696024473,
+        543.826261215129
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1632250507042088,
+      0.004563465716382197,
+      0.33351173288691977,
+      -0.2052653327125359
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

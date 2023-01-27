@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6k_Super Takumar 35mm f/2_Lens adapted with Canon Mount Adaptor 0.71x_6k_1.90by1_6144x3240-24.00fps",
+  "note": "Lens adapted with Canon Mount Adaptor 0.71x",
+  "calibrated_by": "Timothy Adamson",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6k",
+  "lens_model": "Super Takumar 35mm f/2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9064143508548916,
+    "camera_matrix": [
+      [
+        5953.32852110906,
+        0.0,
+        3078.948986584381
+      ],
+      [
+        0.0,
+        5954.664247977349,
+        1631.026448494658
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10694178056341903,
+      1.1346261545625884,
+      -3.785149609582694,
+      8.071772779443762
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FX30_Sigma 30mm F1.4 DC DN__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "DerFetzer",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Sigma 30mm F1.4 DC DN",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.76,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.40764770895604224,
+    "camera_matrix": [
+      [
+        5541.897338988008,
+        0.0,
+        1991.810722804556
+      ],
+      [
+        0.0,
+        5537.079912623397,
+        1043.7323407061835
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2864726453559706,
+      2.6201770082302382,
+      -29.285600998499305,
+      123.05713011132652
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx30-30.00mm-3840x2160@23976",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

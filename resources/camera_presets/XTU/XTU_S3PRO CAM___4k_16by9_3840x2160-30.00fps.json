@@ -1,0 +1,66 @@
+{
+  "name": "XTU_S3PRO CAM___4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "gfshen",
+  "camera_brand": "XTU",
+  "camera_model": "S3PRO CAM",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.027425734194782,
+    "camera_matrix": [
+      [
+        1505.4539188018734,
+        0.0,
+        1938.988301834805
+      ],
+      [
+        0.0,
+        1507.993821547598,
+        1160.0418452638366
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3446264214804773,
+      0.12969711402837794,
+      0.03370959862943031,
+      0.0670868797499529
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

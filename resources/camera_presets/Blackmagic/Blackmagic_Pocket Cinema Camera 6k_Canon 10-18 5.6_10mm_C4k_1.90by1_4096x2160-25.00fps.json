@@ -1,43 +1,43 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Canon 10-18 5.6_10mm_C4k_1.90by1_4096x2160-25.00fps",
   "note": "",
-  "calibrated_by": "schuu101",
-  "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
-  "camera_setting": "",
+  "calibrated_by": "bombay aerials",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Canon 10-18 5.6",
+  "camera_setting": "10mm",
   "calib_dimension": {
-    "w": 3840,
+    "w": 4096,
     "h": 2160
   },
   "orig_dimension": {
-    "w": 3840,
+    "w": 4096,
     "h": 2160
   },
   "output_dimension": {
-    "w": 3840,
+    "w": 4096,
     "h": 2160
   },
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 24,
-  "fps": 50.0,
+  "num_images": 9,
+  "fps": 25.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.35271693483918615,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        1931.1021670490895,
         0.0,
-        1932.8118262365876
+        1965.0481423511387
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        1931.4412371928677,
+        1056.4688331793448
       ],
       [
         0.0,
@@ -46,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.32252737154147737,
+      0.13330119662324763,
+      -0.005243215174411415,
+      0.00023889419143829777
     ],
     "radial_distortion_limit": null
   },
@@ -62,7 +62,7 @@
   },
   "identifier": "",
   "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
+  "date": "2023-01-13",
   "compatible_settings": [],
   "is_superview": false,
   "distortion_model_id": 0

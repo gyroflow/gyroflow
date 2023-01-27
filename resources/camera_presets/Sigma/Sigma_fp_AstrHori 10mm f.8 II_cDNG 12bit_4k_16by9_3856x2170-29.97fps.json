@@ -1,0 +1,68 @@
+{
+  "name": "Sigma_fp_AstrHori 10mm f.8 II_cDNG 12bit_4k_16by9_3856x2170-29.97fps",
+  "note": "FullFrame V2",
+  "calibrated_by": "nicecrash-23",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "AstrHori 10mm f.8 II",
+  "camera_setting": "cDNG 12bit",
+  "calib_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "orig_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "output_dimension": {
+    "w": 3856,
+    "h": 2170
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7448524894628124,
+    "camera_matrix": [
+      [
+        1322.4141766759533,
+        0.0,
+        1930.6026795713428
+      ],
+      [
+        0.0,
+        1322.5204858262252,
+        1086.456882105695
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06570313885058984,
+      -0.007852865401528577,
+      -0.004704029395063879,
+      -0.001854809643705775
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

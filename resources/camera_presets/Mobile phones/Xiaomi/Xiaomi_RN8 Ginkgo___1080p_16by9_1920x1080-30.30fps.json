@@ -1,0 +1,68 @@
+{
+  "name": "Xiaomi_RN8 Ginkgo___1080p_16by9_1920x1080-30.30fps",
+  "note": "",
+  "calibrated_by": "T430",
+  "camera_brand": "Xiaomi",
+  "camera_model": "RN8 Ginkgo",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.298576,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3207849808309888,
+    "camera_matrix": [
+      [
+        1453.0357256009847,
+        0.0,
+        961.8885429520304
+      ],
+      [
+        0.0,
+        1452.5236773404986,
+        543.0815252866697
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.38625769012253186,
+      -0.26132340307003243,
+      4.1078324694238075,
+      -10.584484297927675
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

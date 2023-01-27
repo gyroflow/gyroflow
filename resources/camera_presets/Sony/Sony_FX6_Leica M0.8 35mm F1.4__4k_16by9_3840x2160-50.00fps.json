@@ -1,10 +1,10 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "Sony_FX6_Leica M0.8 35mm F1.4__4k_16by9_3840x2160-50.00fps",
   "note": "",
-  "calibrated_by": "schuu101",
+  "calibrated_by": "Benoit Finck",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
+  "camera_model": "FX6",
+  "lens_model": "Leica M0.8 35mm F1.4",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -18,26 +18,27 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 8.7,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
-  "num_images": 24,
+  "num_images": 6,
   "fps": 50.0,
   "official": false,
+  "focal_length": 35.0,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.6301724450935012,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        6498.511464553996,
         0.0,
-        1932.8118262365876
+        1916.2374896998392
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        6513.885259872066,
+        1076.4253274612724
       ],
       [
         0.0,
@@ -46,10 +47,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.06487799801012703,
+      -0.33903968020167724,
+      28.415752751979294,
+      -187.19332813512267
     ],
     "radial_distortion_limit": null
   },
@@ -62,7 +63,7 @@
   },
   "identifier": "",
   "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
+  "date": "2022-07-06",
   "compatible_settings": [],
   "is_superview": false,
   "distortion_model_id": 0

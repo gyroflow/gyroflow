@@ -1,43 +1,42 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "Hawkeye_裸狗V4.0___2.5k_16by9_2560x1440-50.00fps",
   "note": "",
-  "calibrated_by": "schuu101",
-  "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
+  "calibrated_by": "绿豆眼小狮子",
+  "camera_brand": "Hawkeye",
+  "camera_model": "裸狗V4.0",
+  "lens_model": "",
   "camera_setting": "",
   "calib_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 2560,
+    "h": 1440
   },
   "orig_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 2560,
+    "h": 1440
   },
   "output_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 2560,
+    "h": 1440
   },
   "frame_readout_time": null,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "input_vertical_stretch": 1.0,
-  "num_images": 24,
+  "num_images": 11,
   "fps": 50.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.6140158003308855,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        1077.9174719574426,
         0.0,
-        1932.8118262365876
+        1252.1351164923644
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        1076.7946610853649,
+        696.6545728433382
       ],
       [
         0.0,
@@ -46,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.1330272298109974,
+      0.06215725834970737,
+      -0.13474878011522856,
+      0.07073959962838054
     ],
     "radial_distortion_limit": null
   },
@@ -61,9 +60,7 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
-  "compatible_settings": [],
-  "is_superview": false,
-  "distortion_model_id": 0
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-12-31",
+  "compatible_settings": []
 }

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS R_Canon 24-105_F4.0_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Chi Woodruff",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R",
+  "lens_model": "Canon 24-105",
+  "camera_setting": "F4.0",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4339898555094095,
+    "camera_matrix": [
+      [
+        1322.5701445583084,
+        0.0,
+        965.7669377835218
+      ],
+      [
+        0.0,
+        1321.6540063167986,
+        539.2954473858254
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33728447126070726,
+      0.040660152987558346,
+      0.07655861918123198,
+      0.43636457898633024
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

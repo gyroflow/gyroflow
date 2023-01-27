@@ -1,0 +1,68 @@
+{
+  "name": "Insta360_OneR_Ultrawide 88_NO-EIS_4k_16by9_3840x2160-50.00fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Hermes",
+  "camera_brand": "Insta360",
+  "camera_model": "OneR",
+  "lens_model": "Ultrawide 88",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5680551715193631,
+    "camera_matrix": [
+      [
+        1931.2363410190817,
+        0.0,
+        1895.758607771528
+      ],
+      [
+        0.0,
+        1929.770092230223,
+        1076.5633903766725
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.007233405916154281,
+      0.08297874672739136,
+      -0.2048974329745019,
+      0.17116377996600282
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-insta360-oner-ultrawide88-3840x2160@50000-no-eis",
+  "calibrator_version": "1.4.0",
+  "date": "2023-01-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-F6_Canon EF24mm f/2.8 is USM Lens_H2.64_4k_16by9_3840x2160-59.94fps",
+  "note": "H2.64",
+  "calibrated_by": "Skybound_MBK",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Canon EF24mm f/2.8 is USM Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2642089254544088,
+    "camera_matrix": [
+      [
+        4558.894540400393,
+        0.0,
+        1936.6123148437616
+      ],
+      [
+        0.0,
+        4580.903573362362,
+        1063.2763672477697
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3739973326163511,
+      -0.8881438644136516,
+      4.466524521796204,
+      -5.108624893945962
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

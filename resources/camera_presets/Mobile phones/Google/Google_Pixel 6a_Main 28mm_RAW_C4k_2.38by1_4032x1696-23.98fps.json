@@ -1,0 +1,68 @@
+{
+  "name": "Google_Pixel 6a_Main 28mm_RAW_C4k_2.38by1_4032x1696-23.98fps",
+  "note": "MotionCam",
+  "calibrated_by": "Hylierr",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 6a",
+  "lens_model": "Main 28mm",
+  "camera_setting": "RAW",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 1696
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 1696
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 1696
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.613890976310167,
+    "camera_matrix": [
+      [
+        2975.0478846766814,
+        0.0,
+        2007.6521890225315
+      ],
+      [
+        0.0,
+        2969.0540387246187,
+        825.7064255683352
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5780327627088382,
+      -1.7656565526925936,
+      6.572841633968968,
+      -7.719094459883155
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

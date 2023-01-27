@@ -1,0 +1,68 @@
+{
+  "name": "LG V30_Motion cam_Ultra Wide__2k_4by3_2016x1504-24.00fps",
+  "note": "",
+  "calibrated_by": "max yurakh",
+  "camera_brand": "LG V30",
+  "camera_model": "Motion cam",
+  "lens_model": "Ultra Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "orig_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "output_dimension": {
+    "w": 2016,
+    "h": 1504
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.001528,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3270756954438989,
+    "camera_matrix": [
+      [
+        967.9091239496764,
+        0.0,
+        1016.7993566235205
+      ],
+      [
+        0.0,
+        968.085248942474,
+        728.7975935623547
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3313035855242307,
+      -0.18604088792194828,
+      0.7893285330226555,
+      -0.5563129650995245
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_Z30_16-50 DX__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Jose",
+  "camera_brand": "Nikon",
+  "camera_model": "Z30",
+  "lens_model": "16-50 DX",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3823664763248937,
+    "camera_matrix": [
+      [
+        1314.6484200192483,
+        0.0,
+        964.2608640583328
+      ],
+      [
+        0.0,
+        1314.64296387358,
+        535.3266667852112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34969672911416266,
+      -0.001177265570721362,
+      0.4371717599021595,
+      -0.32949751323195536
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

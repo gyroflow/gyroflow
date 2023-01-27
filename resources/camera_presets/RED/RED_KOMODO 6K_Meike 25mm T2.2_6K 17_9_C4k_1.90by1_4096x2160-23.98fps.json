@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Meike 25mm T2.2_6K 17:9_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Vortex Aerial",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Meike 25mm T2.2",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.15623366956918494,
+    "camera_matrix": [
+      [
+        3803.902262596427,
+        0.0,
+        2042.8973036272291
+      ],
+      [
+        0.0,
+        3802.651716203276,
+        1068.3871949724498
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24435821720353695,
+      0.23862952630717785,
+      -0.42278577995727745,
+      1.5607277181581791
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

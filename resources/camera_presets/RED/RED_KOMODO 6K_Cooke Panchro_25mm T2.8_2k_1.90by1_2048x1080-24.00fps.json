@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Cooke Panchro_25mm T2.8_2k_1.90by1_2048x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "BHA RENDER MACHINE",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Cooke Panchro",
+  "camera_setting": "25mm T2.8",
+  "calib_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 2048,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.26267437000210514,
+    "camera_matrix": [
+      [
+        1887.2575856694352,
+        0.0,
+        1018.3231312860198
+      ],
+      [
+        0.0,
+        1887.5664343687151,
+        532.9690220692702
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21717803715147813,
+      0.3821137764289447,
+      -1.7528559005004467,
+      3.796570944547853
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,66 @@
+{
+  "name": "Canon_EOS M_Risespray 7.5mm_1416_2.5k_16by9_2520x1416-24.29fps",
+  "note": "",
+  "calibrated_by": "Dronotron",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Risespray 7.5mm",
+  "camera_setting": "1416",
+  "calib_dimension": {
+    "w": 2520,
+    "h": 1416
+  },
+  "orig_dimension": {
+    "w": 2520,
+    "h": 1416
+  },
+  "output_dimension": {
+    "w": 2520,
+    "h": 1416
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.289,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.3309278347378233,
+    "camera_matrix": [
+      [
+        2366.269844542812,
+        0.0,
+        1111.698878060654
+      ],
+      [
+        0.0,
+        2371.27000301506,
+        643.786795767547
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04913740088230952,
+      -1.4775727201621816,
+      6.086678566976338,
+      -7.391270056677383
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "DJI_FPV_4K60p__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Marek Ševčík",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "4K60p",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2656060793777292,
+    "camera_matrix": [
+      [
+        756.5599612724618,
+        0.0,
+        955.2091114307168
+      ],
+      [
+        0.0,
+        756.6740654518145,
+        531.6208858176733
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.14475595432531632,
+      0.0036428007886918695,
+      -0.003038773697825994,
+      -0.003803198539126085
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

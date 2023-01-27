@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7sIII_16.00mm F1.8 Youngnuo on Sony FF__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Eric Ginsburg",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "16.00mm F1.8 Youngnuo on Sony FF",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2716560336220332,
+    "camera_matrix": [
+      [
+        1747.6682366481762,
+        0.0,
+        1914.704209094485
+      ],
+      [
+        0.0,
+        1748.05373548159,
+        1077.1662482039148
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23212316245971887,
+      0.15331734364667818,
+      -0.094093271384098,
+      0.33623100141165674
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-sony-ilce-7sm3-16.00mm-3840x2160@59940",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

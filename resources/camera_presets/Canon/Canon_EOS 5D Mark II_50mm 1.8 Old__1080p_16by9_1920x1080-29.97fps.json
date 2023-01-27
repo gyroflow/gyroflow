@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS 5D Mark II_50mm 1.8 Old__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Victor Albuquerque",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 5D Mark II",
+  "lens_model": "50mm 1.8 Old",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34376325853913253,
+    "camera_matrix": [
+      [
+        3072.559194084813,
+        0.0,
+        976.8558443099554
+      ],
+      [
+        0.0,
+        3076.5701224431696,
+        534.2442441118401
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27088650879570364,
+      -1.260425516664293,
+      17.05901121601248,
+      -70.45473507881728
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 50.0,
+  "crop_factor": null
+}

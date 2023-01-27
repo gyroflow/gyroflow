@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6300_kit 16-50_16mm_1080p_16by9_1920x1080-100.00fps",
+  "note": "HD 100fps",
+  "calibrated_by": "niksun",
+  "camera_brand": "Sony",
+  "camera_model": "a6300",
+  "lens_model": "kit 16-50",
+  "camera_setting": "16mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "num_images": 15,
+  "fps": 100.0,
+  "official": false,
+  "use_opencv_fisheye": true,
+  "fisheye_params": {
+    "RMS_error": 0.3947332561859981,
+    "camera_matrix": [
+      [
+        1438.025992043349,
+        0.0,
+        966.9814658206042
+      ],
+      [
+        0.0,
+        1440.236212888696,
+        528.1345726850536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31273235666372684,
+      0.049061155696126915,
+      0.20036114019222592,
+      0.12124868794568608
+    ],
+    "radial_distortion_limit": null
+  },
+  "use_opencv_standard": false,
+  "calib_params": {
+    "RMS_error": 0.0,
+    "camera_matrix": [],
+    "distortion_coeffs": [],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2023-01-12",
+  "compatible_settings": []
+}

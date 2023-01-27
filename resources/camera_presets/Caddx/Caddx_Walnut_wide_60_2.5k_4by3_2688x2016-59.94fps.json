@@ -1,0 +1,68 @@
+{
+  "name": "Caddx_Walnut_wide_60_2.5k_4by3_2688x2016-59.94fps",
+  "note": "",
+  "calibrated_by": "Iker Blanco Rodríguez",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "wide",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2016
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2016
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.28515249694927186,
+    "camera_matrix": [
+      [
+        1227.3595548467797,
+        0.0,
+        1273.1663284861022
+      ],
+      [
+        0.0,
+        1227.1138531267563,
+        1043.857292953575
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.06278267706913344,
+      -0.02423705621170748,
+      0.05901099004433356,
+      -0.03478202557358421
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-caddx-walnutcam-wide-2688x2016@59940",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

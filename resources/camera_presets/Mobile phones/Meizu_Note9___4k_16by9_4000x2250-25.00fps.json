@@ -1,0 +1,68 @@
+{
+  "name": "Meizu_Note9___4k_16by9_4000x2250-25.00fps",
+  "note": "",
+  "calibrated_by": "user",
+  "camera_brand": "Meizu",
+  "camera_model": "Note9",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.996613,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7222109566386529,
+    "camera_matrix": [
+      [
+        3221.9853212119547,
+        0.0,
+        1974.1492691659073
+      ],
+      [
+        0.0,
+        3215.891813769503,
+        1131.9174436773428
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5517012478118467,
+      -1.5866635485100855,
+      9.339288835070043,
+      -17.782938218673827
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

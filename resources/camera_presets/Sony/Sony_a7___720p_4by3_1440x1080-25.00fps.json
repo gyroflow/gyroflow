@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a7___720p_4by3_1440x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "natalia melnikov",
+  "camera_brand": "Sony",
+  "camera_model": "a7",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5415824683854316,
+    "camera_matrix": [
+      [
+        1327.7317401458834,
+        0.0,
+        705.4554781225385
+      ],
+      [
+        0.0,
+        1769.1795408844357,
+        553.8715807900505
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3128224099583229,
+      0.012435201492054487,
+      1.5093245172248495,
+      -3.145821068082173
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2023-01-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

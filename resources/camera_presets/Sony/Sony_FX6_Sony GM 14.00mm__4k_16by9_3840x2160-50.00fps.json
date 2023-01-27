@@ -1,10 +1,10 @@
 {
-  "name": "Sony_FX6V_24.00mm__4k_16by9_3840x2160-50.00fps",
+  "name": "Sony_FX6_Sony GM 14.00mm__4k_16by9_3840x2160-50.00fps",
   "note": "",
-  "calibrated_by": "schuu101",
+  "calibrated_by": "Benoit Finck",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
-  "lens_model": "24.00mm",
+  "camera_model": "FX6",
+  "lens_model": "Sony GM 14.00mm",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -18,26 +18,26 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 8.7,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "input_vertical_stretch": 1.0,
-  "num_images": 24,
+  "num_images": 10,
   "fps": 50.0,
-  "official": false,
+  "official": true,
+  "focal_length": 14.0,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.3681531550609564,
+    "RMS_error": 0.5851226697129571,
     "camera_matrix": [
       [
-        2603.1596073200767,
+        1585.6953450705228,
         0.0,
-        1932.8118262365876
+        1939.340502538506
       ],
       [
         0.0,
-        2600.714969672013,
-        1065.2601492543622
+        1585.9656809184569,
+        1088.508886017752
       ],
       [
         0.0,
@@ -46,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.27397945366610466,
-      0.874426752549344,
-      -6.330015975164779,
-      17.30487732225816
+      0.32791829920951915,
+      0.18446483865321756,
+      -0.08447523736213833,
+      0.13804332212116133
     ],
     "radial_distortion_limit": null
   },
@@ -60,10 +60,8 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "",
-  "calibrator_version": "1.1.0",
-  "date": "2022-06-27",
-  "compatible_settings": [],
-  "is_superview": false,
-  "distortion_model_id": 0
+  "identifier": "sony-ilme-fx6v-14.00mm-3840x2160@50000",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2022-02-25",
+  "compatible_settings": []
 }

@@ -1,10 +1,10 @@
 {
-  "name": "Sony_FX3_Canon FD 24mm f2.8__4k_16by9_3840x2160-23.98fps",
+  "name": "Sony_FX6_Leica M0.8 Summilux 35mm F1.4__4k_16by9_3840x2160-50.00fps",
   "note": "",
-  "calibrated_by": "Grigory Pesochin",
+  "calibrated_by": "Benoit Finck",
   "camera_brand": "Sony",
-  "camera_model": "FX3",
-  "lens_model": "Canon FD 24mm f2.8",
+  "camera_model": "FX6",
+  "lens_model": "Leica M0.8 Summilux 35mm F1.4",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -18,34 +18,26 @@
     "w": 3840,
     "h": 2160
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 8.7,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "sync_settings": {
-    "initial_offset": 0,
-    "initial_offset_inv": false,
-    "search_size": 0.5,
-    "max_sync_points": 5,
-    "every_nth_frame": 1,
-    "time_per_syncpoint": 0.5,
-    "do_autosync": true
-  },
   "num_images": 15,
-  "fps": 23.976025,
-  "official": false,
+  "fps": 50.0,
+  "official": true,
+  "focal_length": 35.0,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.5964696086838754,
+    "RMS_error": 0.545243365788338,
     "camera_matrix": [
       [
-        2699.8308251313483,
+        3963.145485212961,
         0.0,
-        1919.353978781775
+        1917.2576642780384
       ],
       [
         0.0,
-        2701.9803736572903,
-        1077.7891039429408
+        3963.335398809656,
+        1071.4013839413735
       ],
       [
         0.0,
@@ -54,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.2245916407150483,
-      0.1100069011176411,
-      0.11855819735934946,
-      0.27383213622887637
+      0.24651756567997224,
+      0.08087790355506369,
+      0.47468579036777714,
+      0.8747713394301491
     ],
     "radial_distortion_limit": null
   },
@@ -69,7 +61,7 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc3",
-  "date": "2022-02-21",
+  "calibrator_version": "1.0.0-rc4",
+  "date": "2023-01-26",
   "compatible_settings": []
 }

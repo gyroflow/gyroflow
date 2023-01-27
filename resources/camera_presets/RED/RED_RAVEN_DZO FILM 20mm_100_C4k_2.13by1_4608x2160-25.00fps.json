@@ -1,0 +1,66 @@
+{
+  "name": "RED_RAVEN_DZO FILM 20mm_100_C4k_2.13by1_4608x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Francesco Thilo Silj",
+  "camera_brand": "RED",
+  "camera_model": "RAVEN",
+  "lens_model": "DZO FILM 20mm",
+  "camera_setting": "100",
+  "calib_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4608,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 0,
+    "h": 0
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34341361123542,
+    "camera_matrix": [
+      [
+        4318.550548310768,
+        0.0,
+        2311.180178263347
+      ],
+      [
+        0.0,
+        4324.2381944936515,
+        1100.692308149253
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15766681547475878,
+      -0.14666521166903074,
+      2.2233899320884594,
+      -4.5395421949679164
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

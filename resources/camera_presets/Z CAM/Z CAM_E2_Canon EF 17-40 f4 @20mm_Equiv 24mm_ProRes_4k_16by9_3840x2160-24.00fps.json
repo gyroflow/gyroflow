@@ -1,0 +1,66 @@
+{
+  "name": "Z CAM_E2_Canon EF 17-40 f/4 @20mm_Equiv 24mm_ProRes_4k_16by9_3840x2160-24.00fps",
+  "note": "Metabones Speedbooster XL 0.64",
+  "calibrated_by": "Bob Beresh",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Canon EF 17-40 f/4 @20mm_Equiv 24mm",
+  "camera_setting": "ProRes",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4247804728004588,
+    "camera_matrix": [
+      [
+        2802.689978741775,
+        0.0,
+        1897.852250541559
+      ],
+      [
+        0.0,
+        2803.450954263961,
+        1062.7369488262466
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2107105110937481,
+      0.07844195947617268,
+      0.26074663696351125,
+      -0.1695470224061003
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

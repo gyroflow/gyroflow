@@ -1,0 +1,68 @@
+{
+  "name": "Xiaomi_Redmi Note 11 Pro+ 5G_OpenCamera Sensors__1440p_4by3_1920x1440-29.74fps",
+  "note": "",
+  "calibrated_by": "Демидов Леонид Игоревич",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 11 Pro+ 5G",
+  "lens_model": "OpenCamera Sensors",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.744318,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4194108300690825,
+    "camera_matrix": [
+      [
+        975.1536894557344,
+        0.0,
+        971.7546077174272
+      ],
+      [
+        0.0,
+        975.865791471557,
+        724.5383938841613
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4509405436433248,
+      -0.4843506650263581,
+      1.4371030593719798,
+      -0.9880850152913856
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

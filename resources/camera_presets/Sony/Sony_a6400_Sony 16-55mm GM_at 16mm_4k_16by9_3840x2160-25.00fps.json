@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a6400_Sony 16-55mm GM_at 16mm_4k_16by9_3840x2160-25.00fps",
+  "note": "at 16mm",
+  "calibrated_by": "kobe weyts",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Sony 16-55mm GM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9039687615050408,
+    "camera_matrix": [
+      [
+        2519.734094258683,
+        0.0,
+        1990.455488272524
+      ],
+      [
+        0.0,
+        2519.312765684742,
+        1053.8803202586353
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3022140809748271,
+      0.0263920537938767,
+      0.7250333608087849,
+      -0.6834295492476817
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

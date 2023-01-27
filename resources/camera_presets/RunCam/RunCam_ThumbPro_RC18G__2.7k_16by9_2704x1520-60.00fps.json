@@ -1,0 +1,68 @@
+{
+  "name": "Runcam_ThumbPro_RC18G__2.7k_16by9_2704x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Marco Huerta",
+  "camera_brand": "Runcam",
+  "camera_model": "ThumbPro",
+  "lens_model": "RC18G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.873568813843986,
+    "camera_matrix": [
+      [
+        927.5837393517588,
+        0.0,
+        1355.176437519454
+      ],
+      [
+        0.0,
+        929.7972835780791,
+        771.4281213002898
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.018672109201961173,
+      -0.007665650945301197,
+      0.0179646039115864,
+      -0.012787511254630748
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

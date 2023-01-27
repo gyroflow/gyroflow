@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7rII_28F2_P_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "马建军",
+  "camera_brand": "Sony",
+  "camera_model": "a7rII",
+  "lens_model": "28F2",
+  "camera_setting": "P",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.40562124059262405,
+    "camera_matrix": [
+      [
+        2385.438974516306,
+        0.0,
+        938.6880141488688
+      ],
+      [
+        0.0,
+        2381.2282405578912,
+        539.1915670177017
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35935191764146973,
+      -0.7434229431777704,
+      8.80387871689799,
+      -27.71671238829593
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

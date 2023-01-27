@@ -1,0 +1,68 @@
+{
+  "name": "AKASO_V50 Elite_-_Wide_2.7k_16by9_2720x1520-60.00fps",
+  "note": "",
+  "calibrated_by": "Hermann",
+  "camera_brand": "AKASO",
+  "camera_model": "V50 Elite",
+  "lens_model": "-",
+  "camera_setting": "Wide",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 1520
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 1520
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 1520
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.38649701371889966,
+    "camera_matrix": [
+      [
+        1524.673566641734,
+        0.0,
+        1368.7037759016457
+      ],
+      [
+        0.0,
+        1506.8145164560467,
+        752.6309264575083
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0351900013598517,
+      -0.019255643130065916,
+      0.01826345956364695,
+      -0.009980604475636435
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

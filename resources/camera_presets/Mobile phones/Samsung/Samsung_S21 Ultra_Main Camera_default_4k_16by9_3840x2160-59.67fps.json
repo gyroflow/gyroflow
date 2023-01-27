@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_S21 Ultra_Main Camera_default_4k_16by9_3840x2160-59.67fps",
+  "note": "",
+  "calibrated_by": "Gregor Mönks",
+  "camera_brand": "Samsung",
+  "camera_model": "S21 Ultra",
+  "lens_model": "Main Camera",
+  "camera_setting": "default",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.669464,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.271360313395854,
+    "camera_matrix": [
+      [
+        2404.40865130731,
+        0.0,
+        1891.5200989283192
+      ],
+      [
+        0.0,
+        2444.083581882783,
+        864.9864417723135
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4578031868293404,
+      0.37898760947749927,
+      -1.2963763724681585,
+      2.199358551827996
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

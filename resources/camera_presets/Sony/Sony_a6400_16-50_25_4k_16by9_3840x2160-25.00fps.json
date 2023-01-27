@@ -1,0 +1,66 @@
+{
+  "name": "Sony_a6400_16-50_25_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Asus",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "16-50",
+  "camera_setting": "25",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.503988027166495,
+    "camera_matrix": [
+      [
+        2793.8365221369268,
+        0.0,
+        1928.1696741777569
+      ],
+      [
+        0.0,
+        2794.491263601201,
+        1086.9939948099484
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3229846112104837,
+      0.1858909350284703,
+      -0.2573250003966088,
+      0.9068755813417348
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2022-12-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

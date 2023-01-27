@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2_Loawa 7.5mm f2__720p_16by9_1280x720-59.94fps",
+  "note": "",
+  "calibrated_by": "Eu Junn",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Loawa 7.5mm f2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2451371616023224,
+    "camera_matrix": [
+      [
+        562.0793910281886,
+        0.0,
+        644.6547847525742
+      ],
+      [
+        0.0,
+        561.4668598098949,
+        352.76461241980894
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34570374510950685,
+      -0.05150875538663599,
+      0.4725007502923861,
+      -0.39325567211122064
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

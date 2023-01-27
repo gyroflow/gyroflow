@@ -1,0 +1,68 @@
+{
+  "name": "Insta360_OneRS_Leica 1inch_5.3K_5k_16by9_5312x2988-29.97fps",
+  "note": "NO-EIS",
+  "calibrated_by": "4FM EZ",
+  "camera_brand": "Insta360",
+  "camera_model": "OneRS",
+  "lens_model": "Leica 1inch",
+  "camera_setting": "5.3K",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6803075276635844,
+    "camera_matrix": [
+      [
+        2215.589523676201,
+        0.0,
+        2688.539627640004
+      ],
+      [
+        0.0,
+        2212.6350638205613,
+        1565.9081318439935
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.039117908063525005,
+      0.029195108862446657,
+      -0.02218539318595284,
+      0.004760596186139133
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-insta360-oners-ultrawide110-5312x2988@29970-no-eis",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

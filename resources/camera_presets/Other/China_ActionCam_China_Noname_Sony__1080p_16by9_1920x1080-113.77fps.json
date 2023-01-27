@@ -1,0 +1,68 @@
+{
+  "name": "China_ActionCam_China_Noname_Sony__1080p_16by9_1920x1080-113.77fps",
+  "note": "",
+  "calibrated_by": "Dmitrij Solovev",
+  "camera_brand": "China_ActionCam",
+  "camera_model": "China_Noname",
+  "lens_model": "Sony",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 113.769165,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4075927407978067,
+    "camera_matrix": [
+      [
+        1452.600011921956,
+        0.0,
+        944.238988068888
+      ],
+      [
+        0.0,
+        1461.253219650769,
+        505.52724325098075
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.012320467004347867,
+      0.008532821326463423,
+      0.10596099579083808,
+      -0.250488889001405
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

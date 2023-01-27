@@ -1,0 +1,68 @@
+{
+  "name": "RunCam_Wasp_DJI V2 DVR_FPV_480p_4by3_960x720-60.00fps",
+  "note": "WASP-Google dvr",
+  "calibrated_by": "Akos Pajdusak",
+  "camera_brand": "RunCam",
+  "camera_model": "Wasp",
+  "lens_model": "DJI V2 DVR",
+  "camera_setting": "FPV",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 540
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.33171638436066697,
+    "camera_matrix": [
+      [
+        423.81039441181986,
+        0.0,
+        503.8784663870627
+      ],
+      [
+        0.0,
+        423.68076866595743,
+        384.73313362526017
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.024154840957179145,
+      -0.006658030640342288,
+      0.011310056597032532,
+      -0.004201911009275523
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

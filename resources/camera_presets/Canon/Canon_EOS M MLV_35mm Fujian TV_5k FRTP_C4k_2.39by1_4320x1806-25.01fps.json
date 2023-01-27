@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS M MLV_35mm Fujian TV_5k FRTP_C4k_2.39by1_4320x1806-25.01fps",
+  "note": "",
+  "calibrated_by": "Martyn Day MP",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M MLV",
+  "lens_model": "35mm Fujian TV",
+  "camera_setting": "5k FRTP",
+  "calib_dimension": {
+    "w": 4320,
+    "h": 1806
+  },
+  "orig_dimension": {
+    "w": 4320,
+    "h": 1806
+  },
+  "output_dimension": {
+    "w": 4320,
+    "h": 1806
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 25.007,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0310744465290798,
+    "camera_matrix": [
+      [
+        7974.348166074931,
+        0.0,
+        2073.8735186509693
+      ],
+      [
+        0.0,
+        7995.824304078394,
+        424.35995734029575
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6523768290797505,
+      -12.470397683457092,
+      291.4116863173949,
+      -2241.738616779067
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

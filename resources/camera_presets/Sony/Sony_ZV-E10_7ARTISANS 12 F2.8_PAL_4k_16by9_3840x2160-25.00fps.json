@@ -1,0 +1,68 @@
+{
+  "name": "Sony_ZV-E10_7ARTISANS 12 F2.8_PAL_4k_16by9_3840x2160-25.00fps",
+  "note": "F16 MAN FOCUS",
+  "calibrated_by": "MAB",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "7ARTISANS 12 F2.8",
+  "camera_setting": "PAL",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7051773215054694,
+    "camera_matrix": [
+      [
+        2409.0889096372275,
+        0.0,
+        1894.546162525796
+      ],
+      [
+        0.0,
+        2409.0591810201686,
+        1069.0594018509994
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24930973760908387,
+      0.383163986635946,
+      -0.6497856815360827,
+      0.8041067842116008
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

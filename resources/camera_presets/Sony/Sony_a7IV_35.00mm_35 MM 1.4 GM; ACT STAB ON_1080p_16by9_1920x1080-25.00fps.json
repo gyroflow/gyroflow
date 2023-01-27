@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7IV_35.00mm_35 MM 1.4 GM; ACT STAB ON_1080p_16by9_1920x1080-25.00fps",
+  "note": "S-LOG3, 1080p 50Mb",
+  "calibrated_by": "Roman Elizarenko",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "35.00mm",
+  "camera_setting": "35 MM 1.4 GM; ACT STAB ON",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2500099264354311,
+    "camera_matrix": [
+      [
+        2085.7099019961865,
+        0.0,
+        951.268536151019
+      ],
+      [
+        0.0,
+        2085.9442207068273,
+        529.165885167008
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28818953472707254,
+      0.5216358322215554,
+      -1.7501669063163456,
+      2.641683141988979
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-35.00mm-1920x1080@25000",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

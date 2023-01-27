@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6k_Laowa Nanomorph 35mm T2.4 1.5x 35mm_6K 17:9_8k_2.84by1_9216x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6k",
+  "lens_model": "Laowa Nanomorph 35mm T2.4 1.5x 35mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 9216,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 9216,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 9216,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.5,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.103151525173202,
+    "camera_matrix": [
+      [
+        10551.979574522113,
+        0.0,
+        4215.863596181895
+      ],
+      [
+        0.0,
+        10572.727422499793,
+        1090.3573399397417
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4543014193475655,
+      -2.185469455591323,
+      33.63361667146464,
+      -125.280889848855
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-laowananomorph35mmt2.41.5x-35mm-6144x3240@0",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

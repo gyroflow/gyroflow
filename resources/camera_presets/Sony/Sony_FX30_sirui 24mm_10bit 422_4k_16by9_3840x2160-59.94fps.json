@@ -1,0 +1,63 @@
+{
+  "name": "Sony_FX30_sirui 24mm_10bit 422_4k_16by9_3840x2160-59.94fps",
+  "note": "10bit 422",
+  "calibrated_by": "john zulueta",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "sirui 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3385868363855833,
+    "camera_matrix": [
+      [
+        7124.814958716248,
+        0.0,
+        2987.3119779062545
+      ],
+      [
+        0.0,
+        9085.812681826566,
+        -276.5643689885973
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.522667547620669,
+      19.817273751225397,
+      -200.62755404882452,
+      707.2290438343392
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

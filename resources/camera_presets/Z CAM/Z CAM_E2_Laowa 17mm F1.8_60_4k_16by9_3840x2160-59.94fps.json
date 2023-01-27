@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2_Laowa 17mm F1.8_60_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "channing watson",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2",
+  "lens_model": "Laowa 17mm F1.8",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 11.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5576184375224532,
+    "camera_matrix": [
+      [
+        3727.163628613368,
+        0.0,
+        1894.6782609561403
+      ],
+      [
+        0.0,
+        3727.578795323742,
+        1025.9856996793158
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18422367266346223,
+      0.39031610591824034,
+      -1.3787028095585545,
+      3.140247466875709
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

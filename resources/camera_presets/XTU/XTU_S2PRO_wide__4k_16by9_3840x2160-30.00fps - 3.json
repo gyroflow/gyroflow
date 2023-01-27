@@ -1,0 +1,68 @@
+{
+  "name": "XTU_S2PRO_wide_再々修正_4k_16by9_3840x2160-30.00fps",
+  "note": "再々修正",
+  "calibrated_by": "ああああ",
+  "camera_brand": "XTU",
+  "camera_model": "S2PRO",
+  "lens_model": "wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 50,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6733477930541965,
+    "camera_matrix": [
+      [
+        2128.675470785157,
+        0.0,
+        2094.958946631237
+      ],
+      [
+        0.0,
+        2095.137915463898,
+        1142.9306110572654
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04544683990238543,
+      0.009623466787324475,
+      -0.016776099423905542,
+      0.01108136773500362
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "-xtu-s2pro-wide-3840x2160@30000",
+  "calibrator_version": "1.4.2",
+  "date": "2022-12-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

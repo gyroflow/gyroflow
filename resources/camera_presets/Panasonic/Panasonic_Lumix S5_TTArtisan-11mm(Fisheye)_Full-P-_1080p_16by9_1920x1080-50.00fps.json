@@ -1,0 +1,68 @@
+{
+  "name": "Panasonic_Lumix S5_TTArtisan-11mm(Fisheye)_Full-P-_1080p_16by9_1920x1080-50.00fps",
+  "note": "1920*1072",
+  "calibrated_by": "Carl Mystery",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix S5",
+  "lens_model": "TTArtisan-11mm(Fisheye)",
+  "camera_setting": "Full-P-",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 21,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.36077901431584664,
+    "camera_matrix": [
+      [
+        787.3389515842223,
+        0.0,
+        969.0628036683688
+      ],
+      [
+        0.0,
+        789.1308859825549,
+        533.1289150841833
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.013674147131864337,
+      -0.013352975191722188,
+      0.006994533881573347,
+      -0.0023094970004899095
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

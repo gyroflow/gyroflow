@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Laowa Nanomorph 6__8k_2.84by1_9216x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "le daim",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Laowa Nanomorph 6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 9216,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 9216,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.5,
+  "input_vertical_stretch": 1.0,
+  "num_images": 19,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.8204842126615897,
+    "camera_matrix": [
+      [
+        11925.37616180611,
+        0.0,
+        6063.343487977281
+      ],
+      [
+        0.0,
+        12228.711477295685,
+        1188.53951339627
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7407953759317282,
+      -7.748348658025194,
+      51.47526928612552,
+      -122.84970040174132
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Panasonic_Lumix GH6_9MM/F1.7__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "TTFPV",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH6",
+  "lens_model": "9MM/F1.7",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.21878492880492784,
+    "camera_matrix": [
+      [
+        2057.637722459373,
+        0.0,
+        1917.0244623858785
+      ],
+      [
+        0.0,
+        2058.2135902068535,
+        1066.0482029449256
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3213427379769269,
+      0.1079005336547552,
+      0.05112175673486507,
+      0.03582348869676288
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

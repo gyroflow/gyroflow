@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Sigma 50mm 1.4 EX_6K HQ R3D_6k_1.90by1_6144x3240-24.00fps",
+  "note": "",
+  "calibrated_by": "Derek Frampton Davis",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 50mm 1.4 EX",
+  "camera_setting": "6K HQ R3D",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 17,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4561323892877685,
+    "camera_matrix": [
+      [
+        10741.47052764016,
+        0.0,
+        3232.81515426516
+      ],
+      [
+        0.0,
+        10743.423547730265,
+        1485.7866870996584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1493835202397472,
+      1.962838435849348,
+      -38.32236150459718,
+      279.737792167189
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

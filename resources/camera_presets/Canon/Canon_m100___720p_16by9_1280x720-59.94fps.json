@@ -1,0 +1,68 @@
+{
+  "name": "Canon_m100___720p_16by9_1280x720-59.94fps",
+  "note": "",
+  "calibrated_by": "Felipe Romero Aguirre",
+  "camera_brand": "Canon",
+  "camera_model": "m100",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9453239805110468,
+    "camera_matrix": [
+      [
+        1075.951993039415,
+        0.0,
+        635.4352310242823
+      ],
+      [
+        0.0,
+        1074.5755130977673,
+        359.61223814657535
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08056300094207902,
+      3.662322908187999,
+      -16.899400333951903,
+      27.31559698166316
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

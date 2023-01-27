@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Note 10 plus_UltraWide_Stab off,_4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "Jackmin",
+  "camera_brand": "Samsung",
+  "camera_model": "Note 10 plus",
+  "lens_model": "UltraWide",
+  "camera_setting": "Stab off,",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.010361,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8250476395025187,
+    "camera_matrix": [
+      [
+        1545.668472307845,
+        0.0,
+        1957.369252250175
+      ],
+      [
+        0.0,
+        1545.4835299395622,
+        1082.9363190637655
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30831664349184723,
+      0.28665972342564733,
+      -0.12309125341888634,
+      -0.00127060002996037
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

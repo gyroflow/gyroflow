@@ -1,0 +1,68 @@
+{
+  "name": "Mobius_1S_4.35mm__2.5k_16by9_2560x1440-30.00fps",
+  "note": "",
+  "calibrated_by": "Roger Harris",
+  "camera_brand": "Mobius",
+  "camera_model": "1S",
+  "lens_model": "4.35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.43406742106786805,
+    "camera_matrix": [
+      [
+        2905.1898304490655,
+        0.0,
+        1386.4711283240674
+      ],
+      [
+        0.0,
+        2904.6382658276384,
+        701.0262627470096
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5373052014824858,
+      -2.2996516687464092,
+      38.573796619455585,
+      -208.18115455084776
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.0",
+  "date": "2022-12-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}
