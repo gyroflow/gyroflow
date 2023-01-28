@@ -1,43 +1,42 @@
 {
-  "name": "RED_KOMODO_Canon RF16mm_2.4:1 6K ( ProRes)_C4k_2.37by1_4096x1728-25.00fps",
-  "note": "",
-  "calibrated_by": "Radovan Leitman",
+  "name": "RED_KOMODO_Laowa 9mm_30 fps prores_4k_16by9_3840x2160-29.97fps",
+  "note": "30 fps prores",
+  "calibrated_by": "Nils & Pollo",
   "camera_brand": "RED",
   "camera_model": "KOMODO",
-  "lens_model": "Canon RF16mm",
-  "camera_setting": "2.4:1 6K ( ProRes)",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "",
   "calib_dimension": {
-    "w": 4096,
-    "h": 1728
+    "w": 3840,
+    "h": 2160
   },
   "orig_dimension": {
-    "w": 4096,
-    "h": 1728
+    "w": 3840,
+    "h": 2160
   },
   "output_dimension": {
-    "w": 4096,
-    "h": 1728
+    "w": 3840,
+    "h": 2160
   },
   "global_shutter": true,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "input_vertical_stretch": 1.0,
-  "num_images": 17,
-  "fps": 25.0,
+  "num_images": 15,
+  "fps": 29.97003,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.2220506673182711,
+    "RMS_error": 0.5635843536275646,
     "camera_matrix": [
       [
-        2492.8668751266123,
+        2105.0227298862164,
         0.0,
-        2051.2824377728425
+        1933.007882735341
       ],
       [
         0.0,
-        2493.333038055214,
-        873.8347718755289
+        2104.10793572046,
+        1074.6948671502678
       ],
       [
         0.0,
@@ -46,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.15423396296234573,
-      0.08967466727346401,
-      -0.06127021332359256,
-      0.07112032134286828
+      0.3288491796300002,
+      0.1583023118262125,
+      -0.11355493485757308,
+      0.18361370812563216
     ],
     "radial_distortion_limit": null
   },
@@ -61,13 +60,11 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.1.0",
-  "date": "2022-07-05",
+  "calibrator_version": "1.0.0-rc2",
+  "date": "2022-02-11",
   "compatible_settings": [],
-  "is_superview": false,
-  "distortion_model_id": 0,
   "frame_readout_time": null,
-  "focal_length": 16.0,
+  "focal_length": 9.0,
   "sync_settings": {
     "initial_offset": 0,
     "initial_offset_inv": false,

@@ -1,10 +1,10 @@
 {
-  "name": "RED_KOMODO_9MM LAOWA_6K ProRes_4k_16by9_3840x2160-25.00fps",
+  "name": "RED_KOMODO_Laowa 9mm_6K ProRes_4k_16by9_3840x2160-25.00fps",
   "note": "25 FPS",
   "calibrated_by": "ZZ",
   "camera_brand": "RED",
   "camera_model": "KOMODO",
-  "lens_model": "9MM LAOWA",
+  "lens_model": "Laowa 9mm",
   "camera_setting": "6K ProRes",
   "calib_dimension": {
     "w": 3840,

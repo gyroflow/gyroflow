@@ -1,10 +1,10 @@
 {
-  "name": "Panasonic_BGH6_:AOWA 9MM T2.9 CINE_5.7K_5k_1.89by1_5727x3024-59.94fps",
+  "name": "Panasonic_BGH6_LAOWA 9MM T2.9 CINE_5.7K_5k_1.89by1_5727x3024-59.94fps",
   "note": "",
   "calibrated_by": "嬉皮咸鱼",
   "camera_brand": "Panasonic",
   "camera_model": "BGH6",
-  "lens_model": ":AOWA 9MM T2.9 CINE",
+  "lens_model": "LAOWA 9MM T2.9 CINE",
   "camera_setting": "5.7K",
   "calib_dimension": {
     "w": 5727,

@@ -1,42 +1,43 @@
 {
-  "name": "RED_KOMODO_Loawa 9mm__4k_16by9_3840x2160-29.97fps",
+  "name": "RED_KOMODO_Canon RF 16mm_2.4:1 6K ( ProRes)_C4k_2.37by1_4096x1728-25.00fps",
   "note": "",
-  "calibrated_by": "Imperial Imaging",
+  "calibrated_by": "Radovan Leitman",
   "camera_brand": "RED",
   "camera_model": "KOMODO",
-  "lens_model": "Loawa 9mm",
-  "camera_setting": "",
+  "lens_model": "Canon RF 16mm",
+  "camera_setting": "2.4:1 6K (ProRes)",
   "calib_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 4096,
+    "h": 1728
   },
   "orig_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 4096,
+    "h": 1728
   },
   "output_dimension": {
-    "w": 3840,
-    "h": 2160
+    "w": 4096,
+    "h": 1728
   },
   "global_shutter": true,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 11,
-  "fps": 29.97003,
+  "input_vertical_stretch": 1.0,
+  "num_images": 17,
+  "fps": 25.0,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 4.454983803352379,
+    "RMS_error": 0.2220506673182711,
     "camera_matrix": [
       [
-        1269.46828220243,
+        2492.8668751266123,
         0.0,
-        1910.671378320282
+        2051.2824377728425
       ],
       [
         0.0,
-        1293.0532445140982,
-        1132.6049106403736
+        2493.333038055214,
+        873.8347718755289
       ],
       [
         0.0,
@@ -45,10 +46,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.6273285668475538,
-      -0.5493416632334561,
-      0.6329477414338157,
-      -0.06330489573736539
+      0.15423396296234573,
+      0.08967466727346401,
+      -0.06127021332359256,
+      0.07112032134286828
     ],
     "radial_distortion_limit": null
   },
@@ -60,11 +61,13 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc5",
-  "date": "2022-04-15",
+  "calibrator_version": "1.1.0",
+  "date": "2022-07-05",
   "compatible_settings": [],
+  "is_superview": false,
+  "distortion_model_id": 0,
   "frame_readout_time": null,
-  "focal_length": 9.0,
+  "focal_length": 16.0,
   "sync_settings": {
     "initial_offset": 0,
     "initial_offset_inv": false,

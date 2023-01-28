@@ -1,11 +1,11 @@
 {
-  "name": "RED_KOMODO_Sigma 18-35_17:9, 23,976fps, 6k_C4k_1.90by1_4096x2160-23.98fps",
+  "name": "RED_KOMODO_Sigma 18-35_17:9_C4k_1.90by1_4096x2160-23.98fps",
   "note": "35mm",
   "calibrated_by": "Linas Lang",
   "camera_brand": "RED",
   "camera_model": "KOMODO",
   "lens_model": "Sigma 18-35",
-  "camera_setting": "17:9, 23,976fps, 6k",
+  "camera_setting": "17:9",
   "calib_dimension": {
     "w": 4096,
     "h": 2160

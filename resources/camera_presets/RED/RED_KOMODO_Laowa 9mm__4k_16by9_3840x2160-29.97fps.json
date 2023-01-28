@@ -1,10 +1,10 @@
 {
-  "name": "RED_KOMODO_laowa 9 mm_30 fps prores_4k_16by9_3840x2160-29.97fps",
-  "note": "30 fps prores",
-  "calibrated_by": "Nils & Pollo",
+  "name": "RED_KOMODO_Laowa 9mm__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Imperial Imaging",
   "camera_brand": "RED",
   "camera_model": "KOMODO",
-  "lens_model": "laowa 9 mm",
+  "lens_model": "Laowa 9mm",
   "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
@@ -21,22 +21,22 @@
   "global_shutter": true,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
-  "num_images": 15,
+  "num_images": 11,
   "fps": 29.97003,
   "official": false,
   "use_opencv_fisheye": true,
   "fisheye_params": {
-    "RMS_error": 0.5635843536275646,
+    "RMS_error": 4.454983803352379,
     "camera_matrix": [
       [
-        2105.0227298862164,
+        1269.46828220243,
         0.0,
-        1933.007882735341
+        1910.671378320282
       ],
       [
         0.0,
-        2104.10793572046,
-        1074.6948671502678
+        1293.0532445140982,
+        1132.6049106403736
       ],
       [
         0.0,
@@ -45,10 +45,10 @@
       ]
     ],
     "distortion_coeffs": [
-      0.3288491796300002,
-      0.1583023118262125,
-      -0.11355493485757308,
-      0.18361370812563216
+      0.6273285668475538,
+      -0.5493416632334561,
+      0.6329477414338157,
+      -0.06330489573736539
     ],
     "radial_distortion_limit": null
   },
@@ -60,8 +60,8 @@
     "radial_distortion_limit": null
   },
   "identifier": "",
-  "calibrator_version": "1.0.0-rc2",
-  "date": "2022-02-11",
+  "calibrator_version": "1.0.0-rc5",
+  "date": "2022-04-15",
   "compatible_settings": [],
   "frame_readout_time": null,
   "focal_length": 9.0,
