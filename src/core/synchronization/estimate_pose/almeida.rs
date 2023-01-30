@@ -61,7 +61,7 @@ impl Camera {
         let vh = self.compute_params.video_height as f32;
         let (camera_matrix, distortion_coeffs, _, _, _, _) = FrameTransform::get_lens_data_at_timestamp(&self.compute_params, timestamp_ms);
 
-        let rot = na::Matrix3::<f32>::from(rotation.fixed_slice::<3, 3>(0, 0));
+        let rot = na::Matrix3::<f32>::from(rotation.fixed_view::<3, 3>(0, 0));
 
         let pt = undistort_points(&[(coords[0] * vw, coords[1] * vh)], camera_matrix, &distortion_coeffs, na::convert(rot), Some(camera_matrix), None, &self.compute_params, 1.0)[0];
 

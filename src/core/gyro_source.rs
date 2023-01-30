@@ -399,14 +399,14 @@ impl GyroSource {
     }
 
     fn line_fit(offsets: &BTreeMap<i64, f64>) -> Option<[f64; 3]> {
-        let a = OMatrix::<f64, nalgebra::Dynamic, U2>::from_row_iterator(offsets.len(), offsets.iter().flat_map(|(k, _)| [*k as f64, 1.0]));
-        let b = OVector::<f64, nalgebra::Dynamic>::from_iterator(offsets.len(), offsets.iter().map(|(_, v)| *v));
+        let a = OMatrix::<f64, nalgebra::Dyn, U2>::from_row_iterator(offsets.len(), offsets.iter().flat_map(|(k, _)| [*k as f64, 1.0]));
+        let b = OVector::<f64, nalgebra::Dyn>::from_iterator(offsets.len(), offsets.iter().map(|(_, v)| *v));
 
         let svd = nalgebra::linalg::SVD::new(a.clone(), true, true);
         let solution = svd.solve(&b, 1e-14).ok()?;
         if solution.len() >= 2 {
-            let model: OVector<f64, nalgebra::Dynamic> = a * &solution;
-            let l1: OVector<f64, nalgebra::Dynamic> = model - b;
+            let model: OVector<f64, nalgebra::Dyn> = a * &solution;
+            let l1: OVector<f64, nalgebra::Dyn> = model - b;
             let residuals: f64 = l1.dot(&l1);
 
             Some([solution[0], solution[1], residuals])
