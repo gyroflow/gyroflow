@@ -62,10 +62,16 @@ fn entry() {
 
         QMessageLogger("", 0, "main").debug(QLoggingCategory("gyroflow")) << "Qt version:" << qVersion();
     });
+    ::log::debug!("Gyroflow {}", util::get_version());
 
     let mut open_file = String::new();
     if cli::run(&mut open_file) {
         return;
+    }
+
+    if cfg!(compiled_qml) {
+        // For some reason on some devices QML detects that debugger is connected and fails to load pre-compiled qml files
+        cpp!(unsafe [] { qputenv("QML_FORCE_DISK_CACHE", "1"); });
     }
 
     crate::resources::rsrc();
@@ -96,9 +102,6 @@ fn entry() {
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
     });
-    if cfg!(compiled_qml) {
-        cpp!(unsafe [] { QLoggingCategory::setFilterRules("qt.qml.diskcache.debug=true"); });
-    }
 
     util::save_exe_location();
 
