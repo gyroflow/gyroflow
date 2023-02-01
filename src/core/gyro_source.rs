@@ -322,6 +322,16 @@ impl GyroSource {
 
         if let Some(imu) = &telemetry.raw_imu {
             self.org_raw_imu = imu.clone();
+            let len = self.org_raw_imu.len() as f64;
+            let first_ts = self.org_raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
+            let last_ts  = self.org_raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
+            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
+            if (imu_duration - self.duration_ms).abs() > 0.01 {
+                log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
+                if imu_duration > 0.0 {
+                    self.duration_ms = imu_duration;
+                }
+            }
             self.apply_transforms();
         } else if self.quaternions.is_empty() {
             self.integrate();
