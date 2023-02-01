@@ -200,9 +200,6 @@ impl Stabilization {
         }
     }
 
-    pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), output_size: (usize, usize)) {
-        self.background = bg;
-
     pub fn init_size(&mut self, size: (usize, usize), output_size: (usize, usize)) {
         self.backend_initialized = None;
         #[cfg(feature = "use-opencl")]
