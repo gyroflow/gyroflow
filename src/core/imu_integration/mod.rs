@@ -101,9 +101,13 @@ impl GyroIntegrator for ComplementaryIntegrator {
 ///////////////////////////////////////////////////////////////////////////////
 
 impl GyroIntegrator for VQFIntegrator {
-    fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+    fn integrate(imu_data: &[TimeIMU], _video_duration_ms: f64) -> TimeQuat {
         if imu_data.is_empty() { return BTreeMap::new(); }
         let mut out_quats = BTreeMap::new();
+        let duration_ms = (
+                imu_data.last().unwrap().timestamp_ms - 
+                imu_data.first().unwrap().timestamp_ms
+            ) * (imu_data.len() + 1) as f64 / imu_data.len() as f64; 
         let sample_time = duration_ms / (imu_data.len() * 1000) as f64;
 
         let num_samples = imu_data.len();
