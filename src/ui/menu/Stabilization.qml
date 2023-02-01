@@ -163,10 +163,12 @@ MenuItem {
             }
         }
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
-            if (Math.abs(+additional_data.frame_readout_time) > 0) {
-                root.setFrameReadoutTime(additional_data.frame_readout_time);
-            } else {
-                controller.frame_readout_time = shutter.value;
+            if (is_main_video) {
+                if (Math.abs(+additional_data.frame_readout_time) > 0) {
+                    root.setFrameReadoutTime(additional_data.frame_readout_time);
+                } else {
+                    controller.frame_readout_time = shutter.value;
+                }
             }
         }
         function onRolling_shutter_estimated(rolling_shutter: real) {

@@ -206,7 +206,7 @@ pub fn run(open_file: &mut String) -> bool {
                     cpp!(unsafe [] { qApp->quit(); });
                 }
             });
-            connect!(queue_ptr, q, render_progress, |job_id: &u32, _progress: &f64, current_frame: &usize, total_frames: &usize, _finished: &bool, _start_time: &f64| {
+            connect!(queue_ptr, q, render_progress, |job_id: &u32, _progress: &f64, current_frame: &usize, total_frames: &usize, _finished: &bool, _start_time: &f64, _is_conversion: &bool| {
                 let pb = pbs.get(job_id).unwrap();
                 let queue = &mut *queue.as_ptr();
                 let qi = queue.queue.borrow();

@@ -31,6 +31,7 @@ MenuItem {
     }
     property alias defaultSuffix: defaultSuffix;
     property alias previewResolution: previewResolution.currentIndex;
+    property alias r3dConvertFormat: r3dConvertFormat;
 
     function loadGyroflow(obj) {
         if (obj.hasOwnProperty("background_mode")) backgroundMode.currentIndex = +obj.background_mode;

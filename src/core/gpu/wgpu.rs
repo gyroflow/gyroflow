@@ -165,9 +165,10 @@ impl WgpuWrapper {
                             label: None,
                             features: wgpu::Features::empty(),
                             limits: wgpu::Limits {
-                                max_storage_buffers_per_shader_stage: 4,
+                                max_storage_buffers_per_shader_stage: 6,
                                 max_storage_textures_per_shader_stage: 4,
                                 max_buffer_size: (1 << 31) - 1,
+                                max_storage_buffer_binding_size: (1 << 31) - 1,
                                 ..wgpu::Limits::default()
                             },
                         }, None).map_err(|e| WgpuError::RequestDevice(e))?
@@ -178,9 +179,10 @@ impl WgpuWrapper {
                         label: None,
                         features: wgpu::Features::empty(),
                         limits: wgpu::Limits {
-                            max_storage_buffers_per_shader_stage: 4,
+                            max_storage_buffers_per_shader_stage: 6,
                             max_storage_textures_per_shader_stage: 4,
                             max_buffer_size: (1 << 31) - 1,
+                            max_storage_buffer_binding_size: (1 << 31) - 1,
                             ..wgpu::Limits::default()
                         },
                     }, None)).map_err(|e| WgpuError::RequestDevice(e))?

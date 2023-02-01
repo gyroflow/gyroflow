@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::collections::BTreeMap;
-use nalgebra::Vector4;
 use std::cell::RefCell;
 
 #[cfg(feature = "use-opencl")]
@@ -25,7 +24,7 @@ pub use cpu_undistort::*;
 pub enum Interpolation {
     #[default]
     Bilinear = 2,
-    Bicubic = 4,
+    Bicubic  = 4,
     Lanczos4 = 8
 }
 
@@ -91,7 +90,6 @@ pub struct Stabilization {
 
     size:        (usize, usize), // width, height
     output_size: (usize, usize), // width, height
-    pub background: Vector4<f32>,
 
     pub interpolation: Interpolation,
     pub kernel_flags: KernelParamsFlags,
@@ -146,7 +144,7 @@ impl Stabilization {
             transform.kernel_params.height = self.size.1 as i32;
             transform.kernel_params.output_width  = self.output_size.0 as i32;
             transform.kernel_params.output_height = self.output_size.1 as i32;
-            transform.kernel_params.background = [self.background[0], self.background[1], self.background[2], self.background[3]];
+            transform.kernel_params.background = [self.compute_params.background[0], self.compute_params.background[1], self.compute_params.background[2], self.compute_params.background[3]];
             transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
             transform.kernel_params.pix_element_count = T::COUNT as i32;
             transform.kernel_params.canvas_scale = self.drawing.scale as f32;
@@ -205,6 +203,7 @@ impl Stabilization {
     pub fn init_size(&mut self, bg: Vector4<f32>, size: (usize, usize), output_size: (usize, usize)) {
         self.background = bg;
 
+    pub fn init_size(&mut self, size: (usize, usize), output_size: (usize, usize)) {
         self.backend_initialized = None;
         #[cfg(feature = "use-opencl")]
         { self.cl = None; }
@@ -220,8 +219,7 @@ impl Stabilization {
         self.stab_data.clear();
     }
 
-    pub fn set_background(&mut self, bg: Vector4<f32>) {
-        self.background = bg;
+    pub fn clear_stab_data(&mut self) {
         self.stab_data.clear();
     }
 
@@ -379,7 +377,9 @@ impl Stabilization {
                 backend: ""
             };
             let drawing_buffer = self.drawing.get_buffer();
-            *self.last_frame_data.borrow_mut() = itm.clone();
+            if let Ok(mut last_frame_data) = self.last_frame_data.try_borrow_mut() {
+                *last_frame_data = itm.clone();
+            }
 
             if self.size        != (itm.kernel_params.width as usize,        itm.kernel_params.height as usize) ||
                self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) {

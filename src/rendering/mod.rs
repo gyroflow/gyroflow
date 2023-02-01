@@ -142,7 +142,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
 }
 
 pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
-    where F: Fn((f64, usize, usize, bool)) + Send + Sync + Clone,
+    where F: Fn((f64, usize, usize, bool, bool)) + Send + Sync + Clone,
           F2: Fn(String) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
@@ -396,14 +396,14 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 $({
                     let in_size = zero_copy::get_plane_size($in_frame, $ind);
                     let out_size = zero_copy::get_plane_size($out_frame, $ind);
-                    let bg = {
+                    {
                         let mut params = stab.params.write();
                         params.size        = (in_size.0,  in_size.1);
                         params.output_size = (out_size.0, out_size.1);
                         params.video_size  = params.size;
                         params.video_output_size = params.output_size;
-                        params.background
-                    };
+                        params.background = <$t as PixelType>::from_rgb_color(params.background, &$yuvi, $max_val);
+                    }
                     let mut plane = Stabilization::default();
                     plane.interpolation = Interpolation::Lanczos4;
                     plane.set_device(stab.params.read().current_device as isize);
@@ -413,7 +413,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         plane.kernel_flags.set(KernelParamsFlags::FIX_COLOR_RANGE, true);
                     }
 
-                    plane.init_size(<$t as PixelType>::from_rgb_color(bg, &$yuvi, $max_val), in_size, out_size);
+                    plane.init_size(in_size, out_size);
                     plane.set_compute_params(ComputeParams::from_manager(&stab, false));
                     let render_globals = render_globals.clone();
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
@@ -544,7 +544,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             for (i, cb) in planes.iter_mut().enumerate() {
                 (*cb)(timestamp_us, frame, out_frame, i, fill_with_background);
             }
-            progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count, false));
+            progress2((process_frame as f64 / render_frame_count as f64, process_frame, render_frame_count, false, false));
         };
 
         match input_frame.format() {
@@ -583,7 +583,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         ::log::debug!("Removing {}", render_options.output_path);
         let _ = std::fs::remove_file(&render_options.output_path);
     }
-    progress((1.0, render_frame_count, render_frame_count, true));
+    progress((1.0, render_frame_count, render_frame_count, true, false));
 
     Ok(())
 }

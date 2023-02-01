@@ -172,7 +172,7 @@ pub struct RenderQueue {
     pub queue_changed: qt_signal!(),
     pub status_changed: qt_signal!(),
 
-    pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool, start_time: f64),
+    pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool, start_time: f64, is_conversion: bool),
     pub encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
     pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
@@ -652,7 +652,7 @@ impl RenderQueue {
 
             let rendered_frames = Arc::new(AtomicUsize::new(0));
             let rendered_frames2 = rendered_frames.clone();
-            let progress = util::qt_queued_callback_mut(self, move |this, (progress, current_frame, total_frames, finished): (f64, usize, usize, bool)| {
+            let progress = util::qt_queued_callback_mut(self, move |this, (progress, current_frame, total_frames, finished, is_conversion): (f64, usize, usize, bool, bool)| {
                 rendered_frames2.store(current_frame, SeqCst);
 
                 let mut start_time = 0;
@@ -678,7 +678,7 @@ impl RenderQueue {
                 });
 
                 this.end_timestamp = Self::current_timestamp();
-                this.render_progress(job_id, progress, current_frame, total_frames, finished, start_time as f64);
+                this.render_progress(job_id, progress, current_frame, total_frames, finished, start_time as f64, is_conversion);
                 this.progress_changed();
 
                 if finished {
@@ -712,7 +712,7 @@ impl RenderQueue {
                 });
 
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
-                this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
+                this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
                 if this.get_pending_count() > 0 {
                     // Start the next one
@@ -734,7 +734,7 @@ impl RenderQueue {
                 });
 
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
-                this.render_progress(job_id, 1.0, 0, 0, true, 0.0);
+                this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
                 if this.get_pending_count() > 0 {
                     // Start the next one
@@ -749,7 +749,7 @@ impl RenderQueue {
             let mut input_file = stab.input_file.read().clone();
             let render_options = job.render_options.clone();
 
-            progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false));
+            progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false, false));
 
             job.cancel_flag.store(false, SeqCst);
             let cancel_flag = job.cancel_flag.clone();
@@ -773,7 +773,7 @@ impl RenderQueue {
                 if let Err(e) = result {
                     err((e.to_string(), String::new()));
                 } else {
-                    progress((1.0, 1, 1, true));
+                    progress((1.0, 1, 1, true, false));
                 }
                 return;
             }
@@ -791,7 +791,7 @@ impl RenderQueue {
                             if !error_str.is_empty() {
                                 err(("An error occured: %1".to_string(), error_str));
                             } else {
-                                progress((percent * 0.98, frame, total_frame_count + 1, false));
+                                progress((percent * 0.98, frame, total_frame_count + 1, false, true));
                                 input_file.path = out_path;
                                 frame += 1;
                             }

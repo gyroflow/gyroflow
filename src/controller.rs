@@ -1115,6 +1115,7 @@ impl Controller {
 
             let bg = color.get_rgba_f();
             self.stabilizer.set_background_color(Vector4::new(bg.0 as f32 * 255.0, bg.1 as f32 * 255.0, bg.2 as f32 * 255.0, bg.3 as f32 * 255.0));
+            self.request_recompute();
         }
     }
 

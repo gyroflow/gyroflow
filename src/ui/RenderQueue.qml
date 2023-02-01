@@ -126,13 +126,13 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool, start_time: real) {
+            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool, start_time: real, is_conversion: bool) {
                 if (job_id == render_queue.main_job_id) {
                     window.videoArea.videoLoader.active = !finished;
                     window.videoArea.videoLoader.currentFrame = frame;
                     window.videoArea.videoLoader.totalFrames = total_frames;
                     window.videoArea.videoLoader.additional = "";
-                    window.videoArea.videoLoader.text = window.videoArea.videoLoader.active? qsTr("Rendering %1...") : "";
+                    window.videoArea.videoLoader.text = window.videoArea.videoLoader.active? (is_conversion? qsTr("Converting to %1 %2...").arg(window.advanced.r3dConvertFormat.currentText) : qsTr("Rendering %1...")) : "";
                     window.videoArea.videoLoader.progress = window.videoArea.videoLoader.active? progress : -1;
                     window.videoArea.videoLoader.cancelable = true;
                     window.videoArea.videoLoader.startTime = start_time;

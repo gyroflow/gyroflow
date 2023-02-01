@@ -239,13 +239,13 @@ impl StabilizationManager {
     }
 
     fn init_size(&self) {
-        let (w, h, ow, oh, bg) = {
+        let (w, h, ow, oh) = {
             let params = self.params.read();
-            (params.size.0, params.size.1, params.output_size.0, params.output_size.1, params.background)
+            (params.size.0, params.size.1, params.output_size.0, params.output_size.1)
         };
 
         if w > 0 && ow > 0 && h > 0 && oh > 0 {
-            self.stabilization.write().init_size(bg, (w, h), (ow, oh));
+            self.stabilization.write().init_size((w, h), (ow, oh));
             self.lens.write().optimal_fov = None;
 
             self.invalidate_smoothing();
@@ -536,6 +536,7 @@ impl StabilizationManager {
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
     pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
     pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
@@ -654,11 +655,6 @@ impl StabilizationManager {
                 _ => { }
             }
         }
-    }
-
-    pub fn set_background_color(&self, bg: Vector4<f32>) {
-        self.params.write().background = bg;
-        self.stabilization.write().set_background(bg);
     }
 
     pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
