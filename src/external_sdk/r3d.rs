@@ -114,6 +114,7 @@ impl REDSdk {
                     .args(["-i", file])
                     .args(["-o", &output_file])
                     .args(["--format", "201"])
+                    .args(["--primaryDev"])
                     .args(["--PRcodec", &format!("{}", format)])
                     .stderr(Stdio::piped())
                     .spawn()?;
