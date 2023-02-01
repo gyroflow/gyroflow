@@ -135,13 +135,15 @@ void draw_safe_area(DATA_TYPE *pix, float x, float y, __global KernelParams *par
     bool isSafeArea = x >= params->safe_area_rect.x && x <= params->safe_area_rect.z &&
                       y >= params->safe_area_rect.y && y <= params->safe_area_rect.w;
     if (!isSafeArea) {
-        pix->x *= 0.5;
-        pix->y *= 0.5;
-        pix->z *= 0.5;
+        float4 factorf4 = (float4)(0.5, 0.5, 0.5, 1.0);
+        DATA_TYPEF factorf = *(DATA_TYPEF *)&factorf4;
+        *pix = DATA_CONVERT(DATA_CONVERTF(*pix) * factorf);
         bool isBorder = x >= params->safe_area_rect.x - 5.0 && x <= params->safe_area_rect.z + 5.0 &&
                         y >= params->safe_area_rect.y - 5.0 && y <= params->safe_area_rect.w + 5.0;
         if (isBorder) {
-            *pix = DATA_CONVERT((float4)(40.0, 40.0, 40.0, 255.0));
+            float4 borderf4 = (float4)(40.0, 40.0, 40.0, 255.0);
+            DATA_TYPEF borderf = *(DATA_TYPEF *)&borderf4;
+            *pix = DATA_CONVERT(borderf);
         }
     }
 }
