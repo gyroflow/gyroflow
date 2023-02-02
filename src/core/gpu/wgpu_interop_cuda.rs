@@ -29,7 +29,6 @@ pub struct CudaSharedMemory {
     pub cuda_alloc_size: usize,
     pub vulkan_pitch_alignment: usize
 }
-unsafe impl Send for CudaSharedMemory { }
 impl Drop for CudaSharedMemory {
     fn drop(&mut self) {
         if let Ok(cuda) = CUDA.as_ref() {
