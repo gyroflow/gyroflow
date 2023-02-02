@@ -126,7 +126,6 @@ impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
-        self.share_wgpu_instances = true;
     }
 
     pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
