@@ -5,7 +5,7 @@
 #![allow(non_camel_case_types)]
 
 use wgpu_hal::api::Vulkan;
-use ash::vk::{ self, ImageCreateInfo };
+use ash::vk::{ self, ImageCreateInfo, BufferCreateInfo };
 
 use CUmemAllocationType::*;
 use CUmemAllocationHandleType::*;
@@ -29,6 +29,7 @@ pub struct CudaSharedMemory {
     pub cuda_alloc_size: usize,
     pub vulkan_pitch_alignment: usize
 }
+unsafe impl Send for CudaSharedMemory { }
 impl Drop for CudaSharedMemory {
     fn drop(&mut self) {
         if let Ok(cuda) = CUDA.as_ref() {
@@ -81,6 +82,7 @@ pub fn cuda_2d_copy_on_device(size: (usize, usize, usize), dst: CUdeviceptr, src
         // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size, src));
         // cuda!(cuda.cuMemGetAddressRange_v2(&mut base, &mut size2, dst));
         // log::debug!("cuMemcpy2D_v2 | 0x{src:08x} ({size} bytes) => 0x{dst:08x} ({size2} bytes) | Device {}", get_current_cuda_device());
+        // cuda!(cuda.cuMemcpy(dst, src, size.2 * size.1));
         cuda!(cuda.cuMemcpy2D_v2(&desc as *const _));
     }
 }
@@ -293,6 +295,81 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
         Ok((raw_image, cuda_mem))
     }
 }
+
+pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usize, usize, usize)) -> Result<(vk::Buffer, CudaSharedMemory), Box<dyn std::error::Error>> {
+    let buffer_size = size.2 * size.1;
+    let cuda_mem = allocate_shared_cuda_memory(buffer_size)?;
+
+    let handle_type = if cfg!(target_os = "windows") {
+        vk::ExternalMemoryHandleTypeFlags::OPAQUE_WIN32
+    } else {
+        vk::ExternalMemoryHandleTypeFlags::OPAQUE_FD
+    };
+
+    unsafe {
+        let raw_buffer = device.as_hal::<Vulkan, _, _>(|device| {
+            device.map(|device| {
+                let raw_device = device.raw_device();
+
+                #[cfg(target_os = "windows")]
+                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::builder()
+                    .handle_type(handle_type)
+                    .handle(cuda_mem.shared_handle as *mut std::ffi::c_void);
+
+                #[cfg(target_os = "linux")]
+                let mut import_memory_info = vk::ImportMemoryFdInfoKHR::builder()
+                    .handle_type(handle_type)
+                    .fd(cuda_mem.shared_handle as std::ffi::c_int);
+
+                let mut ext_create_info = vk::ExternalMemoryBufferCreateInfo::builder().handle_types(handle_type);
+
+                let buffer_create_info = BufferCreateInfo::builder()
+                    .push_next(&mut ext_create_info)
+                    .size(cuda_mem.cuda_alloc_size as vk::DeviceSize)
+                    .usage(vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_SRC | vk::BufferUsageFlags::TRANSFER_DST)
+                    .sharing_mode(vk::SharingMode::EXCLUSIVE);
+
+                let raw_buffer = raw_device.create_buffer(&buffer_create_info, None)?;
+
+                let memory_type_index = {
+                    let mem_requirements = raw_device.get_buffer_memory_requirements(raw_buffer);
+                    let memory_properties = device.shared_instance().raw_instance().get_physical_device_memory_properties(device.raw_physical_device());
+                    let mut memory_type_index = 0;
+                    for i in 0..memory_properties.memory_type_count as usize {
+                        if (mem_requirements.memory_type_bits & (1 << i)) == 0 {
+                            continue;
+                        }
+                        let properties = memory_properties.memory_types[i].property_flags;
+                        if properties.contains(vk::MemoryPropertyFlags::DEVICE_LOCAL) {
+                            memory_type_index = i;
+                            break;
+                        }
+                    }
+                    memory_type_index as u32
+                };
+
+                let allocate_info = vk::MemoryAllocateInfo::builder()
+                    .allocation_size(cuda_mem.cuda_alloc_size as u64)
+                    .push_next(&mut import_memory_info)
+                    .memory_type_index(memory_type_index);
+
+                let allocated_memory = raw_device.allocate_memory(&allocate_info, None)?;
+
+                raw_device.bind_buffer_memory(raw_buffer, allocated_memory, 0)?;
+
+                #[cfg(target_os = "windows")]
+                windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
+                #[cfg(target_os = "linux")]
+                libc::close(cuda_mem.shared_handle as i32);
+
+                Ok::<ash::vk::Buffer, vk::Result>(raw_buffer)
+            })
+        }).unwrap()?; // TODO: unwrap
+
+        Ok((raw_buffer, cuda_mem))
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////

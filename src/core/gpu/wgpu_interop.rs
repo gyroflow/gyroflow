@@ -28,7 +28,7 @@ pub enum NativeTexture {
 
 pub struct TextureHolder  {
     pub native_texture: Option<NativeTexture>,
-    pub wgpu_texture: wgpu::Texture,
+    pub wgpu_texture: Option<wgpu::Texture>,
     pub wgpu_buffer: Option<wgpu::Buffer>
 }
 
@@ -52,7 +52,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
     match buf.data {
         BufferSource::Cpu { .. } => {
             TextureHolder {
-                wgpu_texture: device.create_texture(&desc),
+                wgpu_texture: Some(device.create_texture(&desc)),
                 wgpu_buffer: None,
                 native_texture: None
             }
@@ -61,11 +61,11 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         BufferSource::Metal { texture, .. } => {
             if backend != wgpu::Backend::Metal { panic!("Unsupported backend!"); }
             TextureHolder {
-                wgpu_texture: if buf.texture_copy {
+                wgpu_texture: Some(if buf.texture_copy {
                     device.create_texture(&desc)
                 } else {
                     create_texture_from_metal(&device, texture, buf.size.0 as u32, buf.size.1 as u32, format, usage)
-                },
+                }),
                 wgpu_buffer: None,
                 native_texture: None
             }
@@ -73,39 +73,69 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::MetalBuffer { buffer, .. } => {
             if backend != wgpu::Backend::Metal { panic!("Unsupported backend!"); }
-            let metal_usage = if is_in { metal::MTLTextureUsage::ShaderRead }
-                              else     { metal::MTLTextureUsage::RenderTarget };
-            let metal_texture = create_metal_texture_from_buffer(buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-            if metal_texture.as_ptr().is_null() {
-                log::error!("Failed to create Metal texture from MTLBuffer!");
-            }
 
-            TextureHolder {
-                wgpu_texture: if buf.texture_copy {
-                    device.create_texture(&desc)
-                } else {
-                    create_texture_from_metal(&device, metal_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, usage)
-                },
-                wgpu_buffer: None,
-                native_texture: Some(NativeTexture::Metal(metal_texture))
+            let use_buffer_directly = true;
+            if use_buffer_directly {
+                let usage = wgpu::BufferUsages::STORAGE | if is_in { wgpu::BufferUsages::COPY_SRC } else { wgpu::BufferUsages::COPY_DST };
+
+                TextureHolder {
+                    wgpu_texture: None,
+                    wgpu_buffer: Some(create_buffer_from_metal(&device, buffer, (buf.size.2 * buf.size.1) as u64, usage)),
+                    native_texture: None
+                }
+            } else {
+                let metal_usage = if is_in { metal::MTLTextureUsage::ShaderRead }
+                                  else     { metal::MTLTextureUsage::RenderTarget };
+                let metal_texture = create_metal_texture_from_buffer(buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
+                if metal_texture.as_ptr().is_null() {
+                    log::error!("Failed to create Metal texture from MTLBuffer!");
+                }
+
+                TextureHolder {
+                    wgpu_texture: Some(if buf.texture_copy {
+                        device.create_texture(&desc)
+                    } else {
+                        create_texture_from_metal(&device, metal_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, usage)
+                    }),
+                    wgpu_buffer: None,
+                    native_texture: Some(NativeTexture::Metal(metal_texture))
+                }
             }
         },
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { .. } => {
             match backend {
                 wgpu::Backend::Vulkan => {
-                    let (image, mem) = super::wgpu_interop_cuda::create_vk_image_backed_by_cuda_memory(&device, buf.size, format).unwrap(); // TODO: unwrap
-                    TextureHolder {
-                        wgpu_texture: create_texture_from_vk_image(&device, image, desc.size.width, desc.size.height, format, is_in, true),
-                        wgpu_buffer: None,
-                        native_texture: Some(NativeTexture::Cuda(mem))
+                    let use_buffer_directly = true;
+                    if use_buffer_directly {
+                        let (buffer, mem) = super::wgpu_interop_cuda::create_vk_buffer_backed_by_cuda_memory(&device, buf.size).unwrap(); // TODO: unwrap
+                        TextureHolder {
+                            wgpu_texture: None,
+                            wgpu_buffer: Some(create_buffer_from_vk_buffer(&device, buffer, (buf.size.2 * buf.size.1) as u64, is_in)),
+                            native_texture: Some(NativeTexture::Cuda(mem))
+                        }
+                    } else {
+                        let (image, mem) = super::wgpu_interop_cuda::create_vk_image_backed_by_cuda_memory(&device, buf.size, format).unwrap(); // TODO: unwrap
+                        TextureHolder {
+                            wgpu_texture: Some(create_texture_from_vk_image(&device, image, desc.size.width, desc.size.height, format, is_in, true)),
+                            wgpu_buffer: None,
+                            native_texture: Some(NativeTexture::Cuda(mem))
+                        }
                     }
                 },
                 #[cfg(target_os = "windows")]
                 wgpu::Backend::Dx12 => {
-                    fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
-                    let size = buf.size.1 * align(buf.size.2, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as usize);
-                    let (dx12_texture, shared_handle, actual_size) = create_native_shared_buffer_dx12(device, size).unwrap(); // TODO: unwrap
+                    let use_buffer_directly = false;
+                    let size = if use_buffer_directly {
+                        (buf.size.2 * buf.size.1) as usize
+                    } else {
+                        fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
+                        buf.size.1 * align(buf.size.2, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as usize)
+                    };
+                    let (dx12_texture, shared_handle, mut actual_size) = create_native_shared_buffer_dx12(device, size).unwrap(); // TODO: unwrap
+                    if use_buffer_directly {
+                        actual_size = size;
+                    }
 
                     unsafe {
                         let buffer = <wgpu_hal::api::Dx12 as wgpu_hal::Api>::Device::buffer_from_raw(dx12_texture, actual_size as u64);
@@ -113,7 +143,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                         let wgpu_buffer = device.create_buffer_from_hal::<wgpu_hal::api::Dx12>(buffer, &wgpu::BufferDescriptor {
                             label: None,
                             size: actual_size as u64,
-                            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+                            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
                             mapped_at_creation: false
                         });
 
@@ -122,7 +152,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                         windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(shared_handle as isize));
 
                         TextureHolder {
-                            wgpu_texture: device.create_texture(&desc),
+                            wgpu_texture: if use_buffer_directly { None } else { Some(device.create_texture(&desc)) },
                             wgpu_buffer: Some(wgpu_buffer),
                             native_texture: Some(NativeTexture::Cuda(cuda_mem))
                         }
@@ -152,7 +182,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                         let (image, dx_tex) = create_vk_image_from_d3d11_texture(&device, d3d11_device, texture).unwrap(); // TODO: unwrap
 
                         TextureHolder {
-                            wgpu_texture: create_texture_from_vk_image(&device, image, desc11.Width, desc11.Height, conv_format, is_in, true),
+                            wgpu_texture: Some(create_texture_from_vk_image(&device, image, desc11.Width, desc11.Height, conv_format, is_in, true)),
                             wgpu_buffer: None,
                             native_texture: dx_tex.map(|x| NativeTexture::D3D11(x))
                         }
@@ -161,7 +191,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                         let (d3d12_resource, dx11_tex) = create_dx12_resource_from_d3d11_texture(&device, d3d11_device, texture).unwrap(); // TODO: unwrap
 
                         TextureHolder {
-                            wgpu_texture: create_texture_from_dx12_resource(&device, d3d12_resource, &desc),
+                            wgpu_texture: Some(create_texture_from_dx12_resource(&device, d3d12_resource, &desc)),
                             wgpu_buffer: None,
                             native_texture: dx11_tex.map(|x| NativeTexture::D3D11(x))
                         }
@@ -182,11 +212,11 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
             match backend {
                 wgpu::Backend::Vulkan => {
                     TextureHolder {
-                        wgpu_texture: if buf.texture_copy {
+                        wgpu_texture: Some(if buf.texture_copy {
                             device.create_texture(&desc)
                         } else {
                             create_texture_from_vk_image(&device, vk::Image::from_raw(texture), buf.size.0 as u32, buf.size.1 as u32, format, is_in, false)
-                        },
+                        }),
                         wgpu_buffer: None,
                         native_texture: None
                     }
@@ -200,11 +230,11 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     std::mem::forget(vk_device);
                     std::mem::forget(vk_instance);
                     TextureHolder {
-                        wgpu_texture: if buf.texture_copy {
+                        wgpu_texture: Some(if buf.texture_copy {
                             device.create_texture(&desc)
                         } else {
                             create_texture_from_dx12_resource(&device, d3d12_resource, &desc)
-                        },
+                        }),
                         wgpu_buffer: None,
                         native_texture: None
                     }
@@ -231,7 +261,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
     match &buf.data {
         BufferSource::Cpu { buffer } => {
             queue.write_texture(
-                in_texture.wgpu_texture.as_image_copy(),
+                in_texture.wgpu_texture.as_ref().unwrap().as_image_copy(),
                 bytemuck::cast_slice(buffer),
                 ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(buf.size.2 as u32), rows_per_image: None },
                 size,
@@ -253,11 +283,13 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                 super::wgpu_interop_cuda::cuda_synchronize();
             }
             if let Some(in_buf) = &in_texture.wgpu_buffer {
-                encoder.copy_buffer_to_texture(
-                    ImageCopyBuffer { buffer: in_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
-                    ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    size
-                );
+                if let Some(in_tex) = &in_texture.wgpu_texture {
+                    encoder.copy_buffer_to_texture(
+                        ImageCopyBuffer { buffer: in_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
+                        ImageCopyTexture { texture: in_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
+                }
             }
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -267,7 +299,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
 
                 encoder.copy_texture_to_texture(
                     ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -280,7 +312,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
 
                 encoder.copy_texture_to_texture(
                     ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -294,7 +326,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
 
                         encoder.copy_texture_to_texture(
                             ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                            ImageCopyTexture { texture: &in_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                             size
                         );
                     }
@@ -315,7 +347,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
     match &buf.data {
         BufferSource::Cpu { .. } => {
             encoder.copy_texture_to_buffer(
-                ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                 ImageCopyBuffer { buffer: staging_buffer, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
                 size
             );
@@ -323,11 +355,13 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { buffer } => {
             if let Some(out_buf) = &out_texture.wgpu_buffer {
-                encoder.copy_texture_to_buffer(
-                    ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyBuffer { buffer: out_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
-                    size
-                );
+                if let Some(out_tex) = &out_texture.wgpu_texture {
+                    encoder.copy_texture_to_buffer(
+                        ImageCopyTexture { texture: out_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        ImageCopyBuffer { buffer: out_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
+                        size
+                    );
+                }
             }
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -336,7 +370,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 temp_texture = Some(create_texture_from_metal(&device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
@@ -349,7 +383,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 temp_texture = Some(create_texture_from_vk_image(&device, vk::Image::from_raw(*texture), buf.size.0 as u32, buf.size.1 as u32, format, false, false));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
@@ -362,7 +396,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                     temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                     encoder.copy_texture_to_texture(
-                        ImageCopyTexture { texture: &out_texture.wgpu_texture, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         size
                     );

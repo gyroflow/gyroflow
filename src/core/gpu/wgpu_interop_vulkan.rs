@@ -56,6 +56,22 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
     }
 }
 
+pub fn create_buffer_from_vk_buffer(device: &Device, buffer: vk::Buffer, size: u64, is_in: bool) -> wgpu::Buffer {
+    let buffer = unsafe { <Vulkan as wgpu_hal::Api>::Device::buffer_from_raw(buffer) };
+
+    unsafe {
+        device.create_buffer_from_hal::<Vulkan>(
+            buffer,
+            &wgpu::BufferDescriptor {
+                label: None,
+                size,
+                mapped_at_creation: false,
+                usage: wgpu::BufferUsages::STORAGE | (if is_in { wgpu::BufferUsages::COPY_SRC } else { wgpu::BufferUsages::COPY_DST })
+            },
+        )
+    }
+}
+
 pub fn format_wgpu_to_vulkan(format: wgpu::TextureFormat) -> vk::Format {
     use ash::vk::Format as F;
     use wgpu::TextureFormat as Tf;

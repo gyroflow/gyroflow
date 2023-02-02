@@ -19,15 +19,21 @@ pub enum WgpuError {
     NoAvailableAdapter,
 }
 
+enum PipelineType {
+    Render(wgpu::RenderPipeline),
+    Compute(wgpu::ComputePipeline)
+}
+
 pub struct WgpuWrapper  {
     pub device: wgpu::Device,
     queue: wgpu::Queue,
     staging_buffer: wgpu::Buffer,
     buf_matrices: wgpu::Buffer,
     buf_params: wgpu::Buffer,
+    buf_lens_data: wgpu::Buffer,
     buf_drawing: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
-    render_pipeline: wgpu::RenderPipeline,
+    pipeline: PipelineType,
     pixel_format: wgpu::TextureFormat,
 
     in_texture: TextureHolder,
@@ -202,10 +208,34 @@ impl WgpuWrapper {
             // Replace it in source to allow for loop unrolling when compiling shader
             kernel = kernel.replace("params.interpolation", &format!("{}u", params.interpolation));
 
+            let lens_data_len = 16; // TODO
+
             if !drawing_enabled {
                 drawing_len = 16;
-                kernel = kernel.replace("bool(params.flags & 8)", "false"); // It makes it much faster for some reason
             }
+            kernel = kernel.replace("params.pix_element_count >= 1", &format!("{}", params.pix_element_count >= 1));
+            kernel = kernel.replace("params.pix_element_count >= 2", &format!("{}", params.pix_element_count >= 2));
+            kernel = kernel.replace("params.pix_element_count >= 3", &format!("{}", params.pix_element_count >= 3));
+            kernel = kernel.replace("params.pix_element_count >= 4", &format!("{}", params.pix_element_count >= 4));
+            kernel = kernel.replace("bool(params.flags & 1)", &format!("{}", (params.flags & 1) > 0)); // fix_range
+            kernel = kernel.replace("bool(params.flags & 2)", &format!("{}", (params.flags & 2) > 0)); // has_digital_lens
+            kernel = kernel.replace("bool(params.flags & 8)", &format!("{}", (params.flags & 8) > 0)); // has_drawing
+
+            let backend = adapter.get_info().backend;
+            let in_texture = init_texture(&device, backend, &buffers.input, wgpu_format.0, true);
+            let out_texture = init_texture(&device, backend, &buffers.output, wgpu_format.0, false);
+
+            let uses_textures = in_texture.wgpu_texture.is_some();
+            if uses_textures {
+                while let Some(pos) = kernel.find("{buffer_input}") {
+                    kernel.replace_range(pos..kernel.find("{/buffer_input}").unwrap() + 15, "");
+                }
+            } else {
+                while let Some(pos) = kernel.find("{texture_input}") {
+                    kernel.replace_range(pos..kernel.find("{/texture_input}").unwrap() + 16, "");
+                }
+            }
+            // log::info!("Using kernel: {kernel}");
 
             let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
                 source: wgpu::ShaderSource::Wgsl(Cow::Owned(kernel)),
@@ -222,73 +252,112 @@ impl WgpuWrapper {
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
+            let buf_lens_data = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
-            let backend = adapter.get_info().backend;
-            let in_texture = init_texture(&device, backend, &buffers.input, wgpu_format.0, true);
-            let out_texture = init_texture(&device, backend, &buffers.output, wgpu_format.0, false);
-
-            let sample_type = match wgpu_format.1 {
-                "f32" => wgpu::TextureSampleType::Float { filterable: false },
-                "u32" => wgpu::TextureSampleType::Uint,
-                _ => { log::error!("Unknown texture scalar: {:?}", wgpu_format); wgpu::TextureSampleType::Float { filterable: false } }
+            let bind_group_layout = if uses_textures {
+                let sample_type = match wgpu_format.1 {
+                    "f32" => wgpu::TextureSampleType::Float { filterable: false },
+                    "u32" => wgpu::TextureSampleType::Uint,
+                    _ => { log::error!("Unknown texture scalar: {:?}", wgpu_format); wgpu::TextureSampleType::Float { filterable: false } }
+                };
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    entries: &[
+                        wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(lens_data_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 5, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Texture { sample_type, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false }, count: None },
+                    ],
+                    label: None,
+                })
+            } else {
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    entries: &[
+                        wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(lens_data_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 5, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(in_size as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 6, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: false }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(out_size as _) }, count: None },
+                    ],
+                    label: None,
+                })
             };
 
-            let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[
-                    wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
-                    wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
-                    wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Texture { sample_type, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false }, count: None },
-                    wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
-                    wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
-                ],
-                label: None,
-            });
             let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: None,
                 bind_group_layouts: &[&bind_group_layout],
                 push_constant_ranges: &[],
             });
 
-            let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: None,
-                layout: Some(&pipeline_layout),
-                vertex: wgpu::VertexState {
+            let pipeline = if uses_textures {
+                PipelineType::Render(device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: None,
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &shader,
+                        entry_point: "undistort_vertex",
+                        buffers: &[],
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &shader,
+                        entry_point: "undistort_fragment",
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: wgpu_format.0,
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::default(),
+                        })],
+                    }),
+                    primitive: wgpu::PrimitiveState {
+                        topology: wgpu::PrimitiveTopology::TriangleStrip,
+                        ..wgpu::PrimitiveState::default()
+                    },
+                    multiview: None,
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                }))
+            } else {
+                PipelineType::Compute(device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                     module: &shader,
-                    entry_point: "undistort_vertex",
-                    buffers: &[],
-                },
-                fragment: Some(wgpu::FragmentState {
-                    module: &shader,
-                    entry_point: "undistort_fragment",
-                    targets: &[Some(wgpu::ColorTargetState {
-                        format: wgpu_format.0,
-                        blend: None,
-                        write_mask: wgpu::ColorWrites::default(),
-                    })],
-                }),
-                primitive: wgpu::PrimitiveState {
-                    topology: wgpu::PrimitiveTopology::TriangleStrip,
-                    ..wgpu::PrimitiveState::default()
-                },
-                multiview: None,
-                depth_stencil: None,
-                multisample: wgpu::MultisampleState::default(),
-            });
+                    entry_point: "undistort_compute",
+                    label: None,
+                    layout: Some(&pipeline_layout),
+                }))
+            };
 
-            let view = in_texture.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
-
-            let bind_group_layout = render_pipeline.get_bind_group_layout(0);
-            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-                label: None,
-                layout: &bind_group_layout,
-                entries: &[
-                    wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&view) },
-                    wgpu::BindGroupEntry { binding: 3, resource: buf_coeffs.as_entire_binding() },
-                    wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
-                ],
-            });
+            let bind_group = match &pipeline {
+                PipelineType::Render(p) => {
+                    device.create_bind_group(&wgpu::BindGroupDescriptor {
+                        label: None,
+                        layout: &p.get_bind_group_layout(0),
+                        entries: &[
+                            wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 2, resource: buf_coeffs.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 3, resource: buf_lens_data.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(&in_texture.wgpu_texture.as_ref().unwrap().create_view(&wgpu::TextureViewDescriptor::default())) },
+                        ],
+                    })
+                },
+                PipelineType::Compute(p) => {
+                    device.create_bind_group(&wgpu::BindGroupDescriptor {
+                        label: None,
+                        layout: &p.get_bind_group_layout(0),
+                        entries: &[
+                            wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 2, resource: buf_coeffs.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 3, resource: buf_lens_data.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 5, resource: in_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 6, resource: out_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
+                        ],
+                    })
+                }
+            };
 
             Ok(Self {
                 device,
@@ -299,8 +368,9 @@ impl WgpuWrapper {
                 buf_matrices,
                 buf_params,
                 buf_drawing,
+                buf_lens_data,
                 bind_group,
-                render_pipeline,
+                pipeline,
                 in_size,
                 out_size,
                 params_size,
@@ -334,23 +404,31 @@ impl WgpuWrapper {
             self.queue.write_buffer(&self.buf_drawing, 0, drawing_buffer);
         }
 
-        let view = self.out_texture.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
-        {
-            let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: None,
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
-                    },
-                })],
-                depth_stencil_attachment: None,
-            });
-            rpass.set_pipeline(&self.render_pipeline);
-            rpass.set_bind_group(0, &self.bind_group, &[]);
-            rpass.draw(0..6, 0..1);
+        match &self.pipeline {
+            PipelineType::Compute(p) => {
+                let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None });
+                cpass.set_pipeline(p);
+                cpass.set_bind_group(0, &self.bind_group, &[]);
+                cpass.dispatch_workgroups((buffers.output.size.0 as f32 / 8.0).ceil() as u32, (buffers.output.size.1 as f32 / 8.0).ceil() as u32, 1);
+            },
+            PipelineType::Render(p) => {
+                let view = self.out_texture.wgpu_texture.as_ref().unwrap().create_view(&wgpu::TextureViewDescriptor::default());
+                let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: None,
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        view: &view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                            store: true,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                });
+                rpass.set_pipeline(p);
+                rpass.set_bind_group(0, &self.bind_group, &[]);
+                rpass.draw(0..6, 0..1);
+            }
         }
 
         let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, &self.staging_buffer, self.padded_out_stride);

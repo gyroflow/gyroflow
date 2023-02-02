@@ -60,6 +60,22 @@ pub fn create_texture_from_metal(device: &Device, image: *mut metal::MTLTexture,
     }
 }
 
+pub fn create_buffer_from_metal(device: &Device, buffer: *mut metal::MTLBuffer, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
+    let buffer = unsafe { metal::BufferRef::from_ptr(buffer) }.to_owned();
+    let buffer = unsafe { <Metal as wgpu_hal::Api>::Device::buffer_from_raw(buffer, size) };
+    unsafe {
+        device.create_buffer_from_hal::<Metal>(
+            buffer,
+            &wgpu::BufferDescriptor {
+                label: None,
+                size,
+                mapped_at_creation: false,
+                usage,
+            },
+        )
+    }
+}
+
 pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> metal::MTLPixelFormat {
     use wgpu::TextureFormat as Tf;
     use wgpu::{AstcBlock, AstcChannel};

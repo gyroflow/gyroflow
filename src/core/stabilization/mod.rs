@@ -30,6 +30,7 @@ pub enum Interpolation {
 
 lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
+    static ref CACHED_WGPU: parking_lot::Mutex<lru::LruCache<u32, wgpu::WgpuWrapper>> = parking_lot::Mutex::new(lru::LruCache::new(std::num::NonZeroUsize::new(10).unwrap()));
 }
 
 bitflags::bitflags! {
@@ -99,12 +100,15 @@ pub struct Stabilization {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
-    backend_initialized: Option<(u32, u32)>, // (buffer_checksum, lens models)
+    backend_initialized: Option<u32>,
+    wgpu_ever_cached: bool,
 
     compute_params: ComputeParams,
 
     pub drawing: DrawCanvas,
     pub pending_device_change: Option<isize>,
+
+    pub share_wgpu_instances: bool,
     next_backend: Option<&'static str>
 }
 
@@ -120,6 +124,7 @@ impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
+        self.share_wgpu_instances = true;
     }
 
     pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
@@ -200,6 +205,22 @@ impl Stabilization {
         }
     }
 
+    pub fn get_current_key(&self, buffers: &Buffers) -> String {
+        format!(
+            "{}{}{}{}{}{:?}{:?}",
+            buffers.get_checksum(),
+            self.compute_params.distortion_model.id(),
+            self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default(),
+            self.interpolation as u32,
+            self.kernel_flags.bits(),
+            self.size,
+            self.output_size
+        )
+    }
+    pub fn get_current_checksum(&self, buffers: &Buffers) -> u32 {
+        crc32fast::hash(self.get_current_key(buffers).as_bytes())
+    }
+
     pub fn init_size(&mut self, size: (usize, usize), output_size: (usize, usize)) {
         self.backend_initialized = None;
         #[cfg(feature = "use-opencl")]
@@ -248,15 +269,12 @@ impl Stabilization {
         { self.cl = None; }
         self.wgpu = None;
 
-        let tuple = (
-            buffers.get_checksum(),
-            crc32fast::hash(format!("{}{}", self.compute_params.distortion_model.id(), self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default()).as_bytes())
-        );
+        let hash = self.get_current_checksum(buffers);
         if i < 0 { // CPU
             #[cfg(feature = "use-opencl")]
             { self.cl = None; }
             self.wgpu = None;
-            self.backend_initialized = Some(tuple);
+            self.backend_initialized = Some(hash);
             return true;
         }
         let gpu_list = GPU_LIST.read();
@@ -288,11 +306,9 @@ impl Stabilization {
     }
 
     pub fn init_backends<T: PixelType>(&mut self, timestamp_us: i64, buffers: &Buffers) {
-        let tuple = (
-            buffers.get_checksum(),
-            crc32fast::hash(format!("{}{}", self.compute_params.distortion_model.id(), self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default()).as_bytes())
-        );
-        if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != tuple {
+        let hash = self.get_current_checksum(buffers);
+
+        if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != hash {
             let mut gpu_initialized = false;
             if let Some(itm) = self.stab_data.get(&timestamp_us) {
                 let params = itm.kernel_params;
@@ -321,26 +337,37 @@ impl Stabilization {
                     }
                 }
                 if !gpu_initialized && T::wgpu_format().is_some() && next_backend != "opencl" && std::env::var("NO_WGPU").unwrap_or_default().is_empty() && wgpu::is_buffer_supported(buffers) {
-                    self.wgpu = None;
-                    let wgpu = std::panic::catch_unwind(|| {
-                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
-                    });
-                    match wgpu {
-                        Ok(Ok(wgpu)) => { self.wgpu = Some(wgpu); log::info!("Initialized wgpu for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
-                        Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); },
-                        Err(e) => {
-                            if let Some(s) = e.downcast_ref::<&str>() {
-                                log::error!("Failed to initialize wgpu {}", s);
-                            } else if let Some(s) = e.downcast_ref::<String>() {
-                                log::error!("Failed to initialize wgpu {}", s);
-                            } else {
-                                log::error!("Failed to initialize wgpu {:?}", e);
-                            }
-                        },
+                    if !self.share_wgpu_instances || CACHED_WGPU.lock().get(&hash).is_none() {
+                        self.wgpu = None;
+                        let wgpu = std::panic::catch_unwind(|| {
+                            wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
+                        });
+                        match wgpu {
+                            Ok(Ok(wgpu)) => {
+                                if self.share_wgpu_instances {
+                                    self.wgpu_ever_cached = true;
+                                    CACHED_WGPU.lock().put(hash, wgpu);
+                                } else {
+                                    self.wgpu = Some(wgpu);
+                                }
+                                log::info!("Initialized wgpu for {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                            },
+                            Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.lock().clear(); } },
+                            Err(e) => {
+                                if let Some(s) = e.downcast_ref::<&str>() {
+                                    log::error!("Failed to initialize wgpu {}", s);
+                                } else if let Some(s) = e.downcast_ref::<String>() {
+                                    log::error!("Failed to initialize wgpu {}", s);
+                                } else {
+                                    log::error!("Failed to initialize wgpu {:?}", e);
+                                }
+                                if self.share_wgpu_instances { CACHED_WGPU.lock().clear(); }
+                            },
+                        }
                     }
                 }
 
-                self.backend_initialized = Some(tuple);
+                self.backend_initialized = Some(hash);
             }
         }
     }
@@ -353,6 +380,16 @@ impl Stabilization {
 
         self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers);
         self.init_backends::<T>(timestamp_us, buffers);
+
+        if self.share_wgpu_instances && self.wgpu_ever_cached {
+            let hash = self.get_current_checksum(buffers);
+            let has_cached = CACHED_WGPU.lock().contains(&hash);
+            if !has_cached {
+                log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
+                self.backend_initialized = None;
+                self.init_backends::<T>(timestamp_us, buffers);
+            }
+        }
     }
     pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers) -> Option<ProcessedInfo> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return None; }
@@ -398,11 +435,25 @@ impl Stabilization {
             }
 
             // wgpu path
-            if let Some(ref wgpu) = self.wgpu {
-                if wgpu::is_buffer_supported(buffers) {
-                    wgpu.undistort_image(buffers, &itm, drawing_buffer);
-                    ret.backend = "wgpu";
-                    return Some(ret);
+            if wgpu::is_buffer_supported(buffers) {
+                if self.share_wgpu_instances {
+                    let hash = self.get_current_checksum(buffers);
+
+                    let mut locked = CACHED_WGPU.lock();
+                    if let Some(wgpu) = locked.get(&hash) {
+                        wgpu.undistort_image(buffers, &itm, drawing_buffer);
+                        ret.backend = "wgpu";
+                        return Some(ret);
+                    } else {
+                        log::error!("Failed to find cached wgpu in process_pixels. Key: {}", self.get_current_key(buffers));
+                        return None;
+                    }
+                } else {
+                    if let Some(ref wgpu) = self.wgpu {
+                        wgpu.undistort_image(buffers, &itm, drawing_buffer);
+                        ret.backend = "wgpu";
+                        return Some(ret);
+                    }
                 }
             }
 

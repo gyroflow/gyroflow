@@ -38,9 +38,16 @@ struct KernelParams {
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
 @group(0) @binding(1) @fragment var<storage, read> matrices: array<f32>;
-@group(0) @binding(2) @fragment var input_tex: texture_2d<SCALAR>;
-@group(0) @binding(3) @fragment var<storage, read> coeffs: array<f32>;
+@group(0) @binding(2) @fragment var<storage, read> coeffs: array<f32>;
+@group(0) @binding(3) @fragment var<storage, read> lens_data: array<f32>;
 @group(0) @binding(4) @fragment var<storage, read> drawing: array<u32>;
+// {texture_input}
+@group(0) @binding(5) @fragment var input_texture: texture_2d<SCALAR>;
+// {/texture_input}
+// {buffer_input}
+@group(0) @binding(5) @fragment var<storage, read> input_buffer: array<SCALAR>;
+@group(0) @binding(6) @fragment var<storage, read_write> output_buffer: array<SCALAR>;
+// {/buffer_input}
 
 LENS_MODEL_FUNCTIONS;
 
@@ -99,6 +106,22 @@ fn map_coord(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f3
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+fn read_input_at(uv: vec2<i32>) -> vec4<f32> {
+    // {texture_input}
+    return vec4<f32>(textureLoad(input_texture, uv, 0));
+    // {/texture_input}
+    // {buffer_input}
+    let stride_px = params.stride / (params.bytes_per_pixel / params.pix_element_count);
+    let buffer_pos = u32((uv.y * stride_px) + uv.x * params.pix_element_count);
+    return vec4<f32>(
+        input_buffer[buffer_pos + 0u],
+        input_buffer[buffer_pos + 1u],
+        input_buffer[buffer_pos + 2u],
+        input_buffer[buffer_pos + 3u]
+    );
+    // {/buffer_input}
+}
+
 fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let fix_range = bool(params.flags & 1);
 
@@ -133,7 +156,7 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
             for (var xp: i32 = 0; xp < i32(params.interpolation); xp = xp + 1) {
                 var pixel: vec4<f32>;
                 if (sx + xp >= params.source_rect.x && sx + xp < params.source_rect.x + params.source_rect.z) {
-                    pixel = vec4<f32>(textureLoad(input_tex, vec2<i32>(sx + xp, sy + yp), 0));
+                    pixel = read_input_at(vec2<i32>(sx + xp, sy + yp));
                     pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
                     if (fix_range) {
                         pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1);
@@ -175,20 +198,10 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
     return vec2<f32>(-99999.0, -99999.0);
 }
 
-@vertex
-fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) @invariant vec4<f32> {
-    var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0),
-        vec2<f32>( 1.0,  1.0), vec2<f32>(-1.0,  1.0), vec2<f32>(-1.0, -1.0),
-    );
-    return vec4<f32>(positions[in_vertex_index], 0.0, 1.0);
-}
-
 // Adapted from OpenCV: initUndistortRectifyMap + remap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-@fragment
-fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
+fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     let bg = vec4<f32>(params.background.x / bg_scaler, params.background.y / bg_scaler, params.background.z / bg_scaler, params.background.w / bg_scaler);
 
     if (bool(params.flags & 4)) { // Fill with background
@@ -286,3 +299,31 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
     pixel = draw_safe_area(pixel, p.x, p.y);
     return vec4<SCALAR>(pixel);
 }
+
+// {texture_input}
+@vertex
+fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) @invariant vec4<f32> {
+    var positions: array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+        vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0),
+        vec2<f32>( 1.0,  1.0), vec2<f32>(-1.0,  1.0), vec2<f32>(-1.0, -1.0),
+    );
+    return vec4<f32>(positions[in_vertex_index], 0.0, 1.0);
+}
+@fragment
+fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
+    return undistort(position.xy);
+}
+// {/texture_input}
+
+// {buffer_input}
+@compute @workgroup_size(8, 8)
+fn undistort_compute(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let final_px = undistort(vec2<f32>(f32(global_id.x), f32(global_id.y)));
+    let stride_px = params.output_stride / (params.bytes_per_pixel / params.pix_element_count);
+    let buffer_pos = (global_id.y * u32(stride_px) + global_id.x * u32(params.pix_element_count));
+    if (params.pix_element_count >= 1) { output_buffer[buffer_pos + 0u] = final_px.x; }
+    if (params.pix_element_count >= 2) { output_buffer[buffer_pos + 1u] = final_px.y; }
+    if (params.pix_element_count >= 3) { output_buffer[buffer_pos + 2u] = final_px.z; }
+    if (params.pix_element_count >= 4) { output_buffer[buffer_pos + 3u] = final_px.w; }
+}
+// {/buffer_input}
