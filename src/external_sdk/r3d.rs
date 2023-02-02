@@ -91,7 +91,7 @@ impl REDSdk {
         String::new()
     }
 
-    pub fn convert_r3d<F: FnMut((f64, String, String))>(file: &str, format: i32, mut progress: F, cancel_flag: Arc<AtomicBool>) {
+    pub fn convert_r3d<F: FnMut((f64, String, String))>(file: &str, format: i32, force_primary: bool, mut progress: F, cancel_flag: Arc<AtomicBool>) {
         let redline = Self::find_redline();
         if !redline.is_empty() {
             let p = std::path::Path::new(file);
@@ -110,13 +110,17 @@ impl REDSdk {
                 #[cfg(target_os = "windows")]
                 { use std::os::windows::process::CommandExt; cmd.creation_flags(0x08000000); } // CREATE_NO_WINDOW
 
-                let mut child = cmd
+                cmd
                     .args(["-i", file])
                     .args(["-o", &output_file])
                     .args(["--format", "201"])
-                    .args(["--primaryDev"])
-                    .args(["--useMeta"])
                     .args(["--PRcodec", &format!("{}", format)])
+                    .args(["--useMeta"])
+                    .args(["--useRMD", "2"]);
+                if force_primary {
+                    cmd.args(["--primaryDev"]);
+                }
+                let mut child = cmd
                     .stderr(Stdio::piped())
                     .spawn()?;
 

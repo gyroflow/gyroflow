@@ -27,6 +27,7 @@ MenuItem {
         property alias defaultSuffix: defaultSuffix.text;
         property alias playSounds: playSounds.checked;
         property alias r3dConvertFormat: r3dConvertFormat.currentIndex;
+        property alias r3dColorMode: r3dColorMode.currentIndex;
         property string lang: ui_tools.get_default_language();
     }
     property alias defaultSuffix: defaultSuffix;
@@ -218,6 +219,7 @@ MenuItem {
         onCheckedChanged: controller.set_gpu_decoding(checked);
     }
     Label {
+        id: r3dConvertFormatLabel;
         position: Label.LeftPosition;
         text: qsTr("Format for R3D conversion");
         visible: !!controller.find_redline();
@@ -231,6 +233,17 @@ MenuItem {
                 "ProRes 4444",
                 "ProRes 4444 XQ",
             ];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: "Colors for R3D conversion";
+        visible: r3dConvertFormatLabel.visible;
+        ComboBox {
+            id: r3dColorMode;
+            model: ["Fully graded in REDCINE-X", "Primary development only"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
         }

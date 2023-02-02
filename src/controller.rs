@@ -255,7 +255,7 @@ pub struct Controller {
 
     // ---------- REDline conversion ----------
     find_redline: qt_method!(fn(&self) -> QString),
-    convert_r3d: qt_method!(fn(&self, file: String, format: i32)),
+    convert_r3d: qt_method!(fn(&self, file: String, format: i32, force_primary: bool)),
     convert_r3d_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
     // ---------- REDline conversion ----------
 
@@ -2005,13 +2005,13 @@ impl Controller {
     fn find_redline(&self) -> QString {
         QString::from(crate::external_sdk::r3d::REDSdk::find_redline())
     }
-    fn convert_r3d(&self, file: String, format: i32) {
+    fn convert_r3d(&self, file: String, format: i32, force_primary: bool) {
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string, path): (f64, String, String)| {
             this.convert_r3d_progress(percent, QString::from(error_string), QString::from(path));
         });
         let cancel_flag = self.cancel_flag.clone();
         core::run_threaded(move || {
-            crate::external_sdk::r3d::REDSdk::convert_r3d(&file, format, progress, cancel_flag);
+            crate::external_sdk::r3d::REDSdk::convert_r3d(&file, format, force_primary, progress, cancel_flag);
         });
     }
     // ---------- REDline conversion ----------

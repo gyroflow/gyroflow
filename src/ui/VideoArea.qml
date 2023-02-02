@@ -333,7 +333,7 @@ Item {
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
                     dlg.accentButton = btn;
-                    controller.convert_r3d(controller.url_to_path(url), f);
+                    controller.convert_r3d(controller.url_to_path(url), f, true);
                     return false;
                 };
                 const dlg = messageBox(Modal.Info, "This format can't be loaded directly at this time.\nDo you want to convert the file to ProRes?", [

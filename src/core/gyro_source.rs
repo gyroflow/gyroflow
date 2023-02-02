@@ -325,7 +325,7 @@ impl GyroSource {
             let len = self.org_raw_imu.len() as f64;
             let first_ts = self.org_raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
             let last_ts  = self.org_raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
-            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
+            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
             if (imu_duration - self.duration_ms).abs() > 0.01 {
                 log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
                 if imu_duration > 0.0 {

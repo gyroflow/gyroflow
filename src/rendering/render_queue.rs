@@ -797,7 +797,8 @@ impl RenderQueue {
                             }
                         };
                         let format = crate::util::get_setting("r3dConvertFormat").parse::<i32>().unwrap_or(0);
-                        crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, r3d_progress, cancel_flag.clone());
+                        let force_primary = crate::util::get_setting("r3dColorMode").parse::<i32>().unwrap_or(0);
+                        crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, r3d_progress, cancel_flag.clone());
                         if cancel_flag.load(SeqCst) {
                             std::thread::sleep(std::time::Duration::from_secs(2));
                             let _ = std::fs::remove_file(mov_path);
