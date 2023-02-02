@@ -171,8 +171,7 @@ Not: Bu yalnızca görsel bir işarettir, render işlemini etkilemez.</translati
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Render'a uygun olmayan bir format. Proje dosyasının dışa aktarılıp [video editor plugins] seçeneklerinden birinin kullanılması tavsiye edilir (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -256,7 +255,7 @@ Lütfen render işlemi sonrası dosyanızın bitrate'ini kontrol edin ve bu bug'
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Kaydediliyor...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>

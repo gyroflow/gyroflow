@@ -171,8 +171,8 @@ Je to len vizuálny indikátor - neovplyvňuje výsledný render.</translation>
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Tento formát nieje dostupný na renderovanie.
+Odporúčaný postup je exportovať súbor projektu a použit plugin pre video editor (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -256,7 +256,7 @@ Prosím skontroluj dátový tok po renderovaní, či sa táto chyba prejavila, p
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Ukladá sa...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>

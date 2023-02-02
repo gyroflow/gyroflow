@@ -171,8 +171,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>無法渲染此格式。
+推薦的工作流程是匯出項目文件並使用 [視頻編輯器插件] (%1)。</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -256,7 +256,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>儲存中...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>

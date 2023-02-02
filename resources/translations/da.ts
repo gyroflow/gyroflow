@@ -68,7 +68,7 @@ Bemærk, at dette kun er en visuel indikator og påvirker ikke resultatet.</tran
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="221"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Format til R3D-konvertering</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="239"/>
@@ -93,7 +93,7 @@ Bemærk, at dette kun er en visuel indikator og påvirker ikke resultatet.</tran
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="329"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Notifikation lyde</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="334"/>
@@ -171,8 +171,8 @@ Bemærk, at dette kun er en visuel indikator og påvirker ikke resultatet.</tran
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Dette format er ikke tilgængelig for rendering.
+Den anbefalede workflow er at eksportere og bruge en af [video editor plugins] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -256,7 +256,7 @@ Tjek venligst filens bitrate efter eksport. Hvis du er påvirket af denne fejl, 
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Gemmer...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -419,17 +419,17 @@ Hvis du har en moderne enhed, seneste GPU drivere, og du tror, at dette ikke bø
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="55"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Mønster skarphed: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Nogle mønstre blev fundet, men deres gennemsnitlige skarphed var &lt;b&gt;%1 px&lt;/b&gt; og max grænse er &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Der blev ikke fundet nogen kalibrerings mønstre.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="73"/>
@@ -441,14 +441,14 @@ Hvis du har en moderne enhed, seneste GPU drivere, og du tror, at dette ikke bø
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Sørg for, at dine kalibreringsoptagelser er så skarpe som muligt:
+- Brug høj lukkerhastighed
+- Brug god belysning
+- Flyt kameraet langsomt
+- Undgå bevægelsessløring
+- Sørg for, at mønsteret forbliver i fokus.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+Du kan øge skarphedsgrænsen i sektionen Avanceret.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -757,7 +757,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="462"/>
       <source>Do you want to update the output resolution to %1?</source>
-      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+      <translation>Vil du opdatere output opløsningen til %1?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="473"/>
@@ -807,12 +807,12 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Behandler opløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>Linse kalibrering bør behandles ved fuld opløsning eller mindst 4k. Skift kun denne indstilling, hvis du ved, hvad du gør.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -827,7 +827,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Sensor er global lukker</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>
@@ -984,7 +984,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Husk dette valg</translation>
     </message>
   </context>
   <context>
@@ -2324,7 +2324,7 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Registreret linse</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2364,17 +2364,17 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="64"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Reprojektions fejl</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Gode billeder</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
       <source>Average pattern sharpness</source>
-      <translation type="unfinished">Average pattern sharpness</translation>
+      <translation>Gennemsnitlig mønster skarphed</translation>
     </message>
   </context>
   <context>
@@ -2837,7 +2837,7 @@ Kameraet har sandsynligvis ikke optaget bevægelsesdata i denne særlige optagel
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Converting to %1 (%2)</source>
-      <translation type="unfinished">Converting to %1 (%2)</translation>
+      <translation>Konverterer til %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>
@@ -2887,7 +2887,7 @@ Kameraet har sandsynligvis ikke optaget bevægelsesdata i denne særlige optagel
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="844"/>
       <source>Toggle stabilization overview</source>
-      <translation type="unfinished">Toggle stabilization overview</translation>
+      <translation>Skift stabiliserings oversigt</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="851"/>
