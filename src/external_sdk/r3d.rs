@@ -56,7 +56,6 @@ impl REDSdk {
                 "C:/Program Files/REDCINE-X PRO One-Off 64-bit/REDline.exe",
                 "C:/Program Files/REDCINE-X PRO 64-bit/REDline.exe",
                 "REDline.exe",
-                "G:/clips/___red/REDCINE-X_PRO_Build_60.2.2/REDCINE-X PRO 64-bit/REDline.exe",
             ]
         } else if cfg!(target_os = "macos") {
             vec![

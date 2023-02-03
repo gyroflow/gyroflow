@@ -300,7 +300,7 @@ Item {
                     calibrator_window.lensCalib.previewResolution = 2;
                 }
             } else {
-                if (window.advanced.previewResolution == 0) {
+                if (settings.value("previewResolution", -1) == -1 && window.advanced.previewResolution == 0) {
                     window.advanced.previewResolution = 2;
                 }
             }
