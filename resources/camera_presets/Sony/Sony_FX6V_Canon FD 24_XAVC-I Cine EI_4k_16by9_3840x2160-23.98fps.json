@@ -1,9 +1,9 @@
 {
-  "name": "Sony_FX6V_Canon FD 24_XAVC-I Cine EI_4k_16by9_3840x2160-23.98fps",
+  "name": "Sony_FX6_Canon FD 24_XAVC-I Cine EI_4k_16by9_3840x2160-23.98fps",
   "note": "60FPS",
   "calibrated_by": "Caleb des Cognets",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
+  "camera_model": "FX6",
   "lens_model": "Canon FD 24",
   "camera_setting": "XAVC-I Cine EI",
   "calib_dimension": {

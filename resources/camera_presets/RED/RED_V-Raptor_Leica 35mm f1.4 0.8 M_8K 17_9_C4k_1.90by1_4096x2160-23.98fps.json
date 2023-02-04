@@ -1,0 +1,68 @@
+{
+  "name": "RED_V-Raptor_Leica 35mm f/1.4 0.8 M_8K 17:9_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Spencer Whiting",
+  "camera_brand": "RED",
+  "camera_model": "V-Raptor",
+  "lens_model": "Leica 35mm f/1.4 0.8 M",
+  "camera_setting": "8K 17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8677444224608837,
+    "camera_matrix": [
+      [
+        3409.60047220192,
+        0.0,
+        2143.256307440683
+      ],
+      [
+        0.0,
+        3410.8755248094053,
+        1060.8877289777888
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26297902010577384,
+      0.09766205125204226,
+      0.017235462817009897,
+      1.6474654556029442
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

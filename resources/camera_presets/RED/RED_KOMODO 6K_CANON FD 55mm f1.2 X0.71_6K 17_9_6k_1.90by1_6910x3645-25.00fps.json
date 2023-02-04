@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_CANON FD 55mm f1.2 X0.71_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "CANON FD 55mm f1.2 X0.71",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7171833770525777,
+    "camera_matrix": [
+      [
+        13565.43396810832,
+        0.0,
+        3477.79617515872
+      ],
+      [
+        0.0,
+        13568.236280963498,
+        1757.355100164874
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5095873444402362,
+      -8.650097257556245,
+      212.5938301934035,
+      -1220.6172414556927
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

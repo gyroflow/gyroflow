@@ -1,0 +1,68 @@
+{
+  "name": "Hawkeye_FireflyXLite II_wide__2.7k_4by3_2704x2028-59.94fps",
+  "note": "",
+  "calibrated_by": "Mathis",
+  "camera_brand": "Hawkeye",
+  "camera_model": "FireflyXLite II",
+  "lens_model": "wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8352884898739774,
+    "camera_matrix": [
+      [
+        1333.9608536065962,
+        0.0,
+        1352.9955290051118
+      ],
+      [
+        0.0,
+        1332.679173878153,
+        945.0894773506308
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.019492876503048776,
+      -0.018325859687757524,
+      0.02158999381380355,
+      -0.01807731580889891
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

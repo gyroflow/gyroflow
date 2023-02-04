@@ -1,0 +1,68 @@
+{
+  "name": "RED_EPIC_ATLAS ORION 40MM__C4k_2.44by1_4096x1680-24.00fps",
+  "note": "",
+  "calibrated_by": "David Pou",
+  "camera_brand": "RED",
+  "camera_model": "EPIC",
+  "lens_model": "ATLAS ORION 40MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1680
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1680
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1680
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8763230123956537,
+    "camera_matrix": [
+      [
+        8825.586757433895,
+        0.0,
+        1014.3932407719092
+      ],
+      [
+        0.0,
+        8886.808605964668,
+        490.2665047484986
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8213181656887516,
+      -14.234321770026089,
+      153.09716668512473,
+      -575.9606737555915
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Canon_5D Mark III_Canon EF 24-70 f2.8_focal length 35mm_1080p_16by9_1920x1080-25.00fps",
+  "note": "focal length 35mm",
+  "calibrated_by": "fahrison",
+  "camera_brand": "Canon",
+  "camera_model": "5D Mark III",
+  "lens_model": "Canon EF 24-70 f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.708028477846503,
+    "camera_matrix": [
+      [
+        2393.2668811985222,
+        0.0,
+        902.0013258711374
+      ],
+      [
+        0.0,
+        2381.5433028565512,
+        563.8281857581524
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3335685101723705,
+      -0.3783810214704047,
+      4.075656582921967,
+      -7.9213764948335
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

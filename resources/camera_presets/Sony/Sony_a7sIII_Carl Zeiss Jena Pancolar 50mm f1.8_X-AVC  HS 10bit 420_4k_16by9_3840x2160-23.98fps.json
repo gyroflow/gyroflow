@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7sIII_Carl Zeiss Jena Pancolar 50mm f1.8_X-AVC  HS 10bit 420_4k_16by9_3840x2160-23.98fps",
+  "note": "Steadyshot OFF",
+  "calibrated_by": "Yoon Tae-Hun",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Carl Zeiss Jena Pancolar 50mm f1.8",
+  "camera_setting": "X-AVC  HS 10bit 420",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4895525767229889,
+    "camera_matrix": [
+      [
+        5742.787290387684,
+        0.0,
+        2094.002443654934
+      ],
+      [
+        0.0,
+        5746.631321083211,
+        982.0338590522836
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2341900229649347,
+      0.01951840526727876,
+      -1.2084332845921446,
+      11.207884482428817
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

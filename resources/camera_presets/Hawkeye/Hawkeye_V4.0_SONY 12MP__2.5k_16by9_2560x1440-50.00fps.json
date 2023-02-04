@@ -1,0 +1,68 @@
+{
+  "name": "Hawkeye_卡录V4.0_SONY 12MP__2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "和谐汇聚",
+  "camera_brand": "Hawkeye",
+  "camera_model": "卡录V4.0",
+  "lens_model": "SONY 12MP",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.28044193035716336,
+    "camera_matrix": [
+      [
+        1162.5594602808133,
+        0.0,
+        1300.3234501202246
+      ],
+      [
+        0.0,
+        1160.085822615286,
+        675.1762524056957
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12460284240929942,
+      0.026493526372957227,
+      -0.07564670456044413,
+      0.0282170832760093
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

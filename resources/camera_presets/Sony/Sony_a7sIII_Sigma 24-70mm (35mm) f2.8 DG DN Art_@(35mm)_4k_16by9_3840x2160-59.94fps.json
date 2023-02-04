@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7sIII_Sigma 24-70mm (35mm) f/2.8 DG DN Art_@(35mm)_4k_16by9_3840x2160-59.94fps",
+  "note": "@(35mm)",
+  "calibrated_by": "Joshua Hardee",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Sigma 24-70mm (35mm) f/2.8 DG DN Art",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3949135150297208,
+    "camera_matrix": [
+      [
+        3832.541169435961,
+        0.0,
+        1954.450621107276
+      ],
+      [
+        0.0,
+        3829.112000004099,
+        1067.7457828630568
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3639208920734784,
+      0.008911761662443856,
+      0.013456412255773927,
+      1.1536019014879804
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-35.40mm-3840x2160@59940",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

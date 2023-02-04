@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS R5C_RF 24-70 f2.8_@24mm_8k_1.90by1_8192x4320-25.00fps",
+  "note": "",
+  "calibrated_by": "ElSaso",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5C",
+  "lens_model": "RF 24-70 f2.8",
+  "camera_setting": "@24mm",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0247966630967782,
+    "camera_matrix": [
+      [
+        5614.364058359405,
+        0.0,
+        4094.3086922167618
+      ],
+      [
+        0.0,
+        5609.68350167016,
+        2129.566320749901
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2232849613681663,
+      -0.06414479735839325,
+      0.9755009536268756,
+      -0.8627202137796974
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

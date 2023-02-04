@@ -1,9 +1,9 @@
 {
-  "name": "Sony_FX6V_18.00mm__4k_16by9_3840x2160-23.98fps",
+  "name": "Sony_FX6_18.00mm__4k_16by9_3840x2160-23.98fps",
   "note": "",
   "calibrated_by": "Manuel Diaz",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
+  "camera_model": "FX6",
   "lens_model": "18.00mm",
   "camera_setting": "",
   "calib_dimension": {

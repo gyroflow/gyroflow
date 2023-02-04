@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Laowa Nanomorph 35mm_6K  1.5x_8k_2.67by1_8636x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Laowa Nanomorph 35mm",
+  "camera_setting": "6K  1.5x",
+  "calib_dimension": {
+    "w": 8636,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 8636,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 0.667,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 4.802104528005905,
+    "camera_matrix": [
+      [
+        8916.984923377797,
+        0.0,
+        4451.667526810402
+      ],
+      [
+        0.0,
+        8908.041422546288,
+        1867.8859293400603
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5006720568113303,
+      -1.35410658034829,
+      3.2307788200689824,
+      4.851615132996726
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

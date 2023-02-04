@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_MEIKE 10mm_17:9_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Kisssy",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "MEIKE 10mm",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6793555710669769,
+    "camera_matrix": [
+      [
+        2518.17510332199,
+        0.0,
+        3087.2667045802136
+      ],
+      [
+        0.0,
+        2518.0313497451816,
+        1609.1379255283086
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3703119866113311,
+      0.1891984293160075,
+      -0.18918248784976432,
+      0.14737708996563628
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

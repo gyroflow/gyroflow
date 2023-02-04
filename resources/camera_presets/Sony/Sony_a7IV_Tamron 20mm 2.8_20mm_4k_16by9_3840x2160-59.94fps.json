@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7IV_Tamron 20mm 2.8_20mm_4k_16by9_3840x2160-59.94fps",
+  "note": "20mm",
+  "calibrated_by": "Martin Ammon",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "Tamron 20mm 2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6804603448422384,
+    "camera_matrix": [
+      [
+        3264.4222010750755,
+        0.0,
+        1884.133628890911
+      ],
+      [
+        0.0,
+        3291.610553735585,
+        1019.202812640704
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1484264147963188,
+      0.20616200508307497,
+      -0.6774942028714708,
+      0.962008689157353
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

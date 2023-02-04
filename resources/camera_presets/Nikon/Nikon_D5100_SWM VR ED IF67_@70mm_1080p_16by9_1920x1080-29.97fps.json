@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_D5100_SWM VR ED IF67_@70mm_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Leonard Sander",
+  "camera_brand": "Nikon",
+  "camera_model": "D5100",
+  "lens_model": "SWM VR ED IF67",
+  "camera_setting": "@70mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3571358886011499,
+    "camera_matrix": [
+      [
+        6168.329857989303,
+        0.0,
+        1157.844020961153
+      ],
+      [
+        0.0,
+        6131.032792725571,
+        509.7046873349112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.09472836766088805,
+      3.7614151727880496,
+      -121.42870747939216,
+      2467.734205274534
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

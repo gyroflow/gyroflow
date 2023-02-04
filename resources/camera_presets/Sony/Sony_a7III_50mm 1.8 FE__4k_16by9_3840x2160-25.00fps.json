@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7III_50mm 1.8 FE__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Thomas' Nitro 5",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "50mm 1.8 FE",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6237744099028323,
+    "camera_matrix": [
+      [
+        5118.017994298895,
+        0.0,
+        2040.6173087118095
+      ],
+      [
+        0.0,
+        5112.807026219701,
+        1077.7299010575607
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25188132418322323,
+      1.6115027075705315,
+      -15.051215363755746,
+      47.04543400594444
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

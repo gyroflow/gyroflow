@@ -1,9 +1,9 @@
 {
-  "name": "Sony_FX6V_Sigma 24-70mm_@24mm_4k_16by9_3840x2160-23.98fps",
+  "name": "Sony_FX6_Sigma 24-70mm_@24mm_4k_16by9_3840x2160-23.98fps",
   "note": "shutter 180 f4",
   "calibrated_by": "Mauro",
   "camera_brand": "Sony",
-  "camera_model": "FX6V",
+  "camera_model": "FX6",
   "lens_model": "Sigma 24-70mm",
   "camera_setting": "@24mm",
   "calib_dimension": {

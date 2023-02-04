@@ -1,0 +1,68 @@
+{
+  "name": "SJCAM_sj6 legend___2.7k_4by3_2880x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Liam Schouppe",
+  "camera_brand": "SJCAM",
+  "camera_model": "sj6 legend",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2880,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 2880,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 2880,
+    "h": 1620
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0748383665462793,
+    "camera_matrix": [
+      [
+        1711.3631161760625,
+        0.0,
+        1510.2580590127477
+      ],
+      [
+        0.0,
+        2275.6161850968406,
+        1154.3424688232233
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.010802471594787736,
+      -0.095731825804165,
+      0.11409597462805508,
+      -0.054891616013924345
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

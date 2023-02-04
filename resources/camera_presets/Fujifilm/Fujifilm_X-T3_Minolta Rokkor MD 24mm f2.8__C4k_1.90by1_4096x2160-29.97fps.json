@@ -1,0 +1,68 @@
+{
+  "name": "Fujifilm_X-T3_Minolta Rokkor MD 24mm f/2.8__C4k_1.90by1_4096x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Isaac Arias",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Minolta Rokkor MD 24mm f/2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 9.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5624168252880966,
+    "camera_matrix": [
+      [
+        4492.7522287476495,
+        0.0,
+        2030.0344615115184
+      ],
+      [
+        0.0,
+        4491.253973684188,
+        966.4196125572656
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22399132090098123,
+      0.30881499647494054,
+      0.2644228328043359,
+      -4.2737556941853185
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

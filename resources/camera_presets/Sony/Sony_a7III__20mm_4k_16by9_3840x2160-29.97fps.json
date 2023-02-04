@@ -4,8 +4,8 @@
   "calibrated_by": "Francesco Schorn",
   "camera_brand": "Sony",
   "camera_model": "a7III",
-  "lens_model": "",
-  "camera_setting": "20mm",
+  "lens_model": "20mm",
+  "camera_setting": "",
   "calib_dimension": {
     "w": 3840,
     "h": 2160

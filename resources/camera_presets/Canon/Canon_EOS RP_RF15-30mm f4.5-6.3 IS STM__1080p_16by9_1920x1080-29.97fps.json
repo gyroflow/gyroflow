@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS RP_RF15-30mm f4.5-6.3 IS STM__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Zonko",
+  "camera_brand": "Canon",
+  "camera_model": "EOS RP",
+  "lens_model": "RF15-30mm f4.5-6.3 IS STM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 22,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3932737881138874,
+    "camera_matrix": [
+      [
+        835.2097433123648,
+        0.0,
+        957.692042981175
+      ],
+      [
+        0.0,
+        835.5659829224481,
+        539.0254130736664
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3369267663180819,
+      0.14207788276948963,
+      0.040131766910050146,
+      0.041736576449614336
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

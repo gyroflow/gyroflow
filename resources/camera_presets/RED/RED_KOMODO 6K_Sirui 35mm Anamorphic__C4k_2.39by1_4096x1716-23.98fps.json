@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO 6K_Sirui 35mm Anamorphic__C4k_2.39by1_4096x1716-23.98fps",
+  "note": "",
+  "calibrated_by": "David Renna",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sirui 35mm Anamorphic",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 1716
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 1716
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 1716
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.1222429144616415,
+    "camera_matrix": [
+      [
+        40389.59890173446,
+        0.0,
+        2024.3131011916164
+      ],
+      [
+        0.0,
+        41507.07543443493,
+        741.4288348336162
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      24.773969466590422,
+      3432.539887291516,
+      -6058599.331703364,
+      1681072487.440433
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

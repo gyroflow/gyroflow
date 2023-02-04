@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-M4_MZUIKO 9-18_VFR 150_4k_2.37by1_3840x1620-25.00fps",
+  "note": "FLAT H265",
+  "calibrated_by": "Dario Della Mora",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "MZUIKO 9-18",
+  "camera_setting": "VFR 150",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 1620
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3487564363651598,
+    "camera_matrix": [
+      [
+        1949.5154404839584,
+        0.0,
+        1913.622942888764
+      ],
+      [
+        0.0,
+        1936.0164623728049,
+        801.0966960331613
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25295694556089293,
+      0.3489048361886749,
+      -0.4893410053875637,
+      0.21118506322846056
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

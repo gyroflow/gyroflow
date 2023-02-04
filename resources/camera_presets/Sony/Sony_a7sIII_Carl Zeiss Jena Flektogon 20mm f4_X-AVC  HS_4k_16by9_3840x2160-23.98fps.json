@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7sIII_Carl Zeiss Jena Flektogon 20mm f4_X-AVC  HS_4k_16by9_3840x2160-23.98fps",
+  "note": "Full Frame",
+  "calibrated_by": "Yoon Tae-Hun",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Carl Zeiss Jena Flektogon 20mm f4",
+  "camera_setting": "X-AVC  HS",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4134508948904627,
+    "camera_matrix": [
+      [
+        2298.055826564867,
+        0.0,
+        1900.3916232496256
+      ],
+      [
+        0.0,
+        2298.796224061837,
+        1074.8402127303812
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24396160675626177,
+      -0.08791042688704773,
+      0.9736690473464302,
+      -1.1642048152435027
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

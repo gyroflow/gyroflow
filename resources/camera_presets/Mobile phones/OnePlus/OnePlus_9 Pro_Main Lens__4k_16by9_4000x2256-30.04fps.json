@@ -1,0 +1,68 @@
+{
+  "name": "OnePlus_9 Pro_Main Lens__4k_16by9_4000x2256-30.04fps",
+  "note": "",
+  "calibrated_by": "Leonard Sander",
+  "camera_brand": "OnePlus",
+  "camera_model": "9 Pro",
+  "lens_model": "Main Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2256
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.039873,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8658089219222683,
+    "camera_matrix": [
+      [
+        2732.8101066336067,
+        0.0,
+        1994.2510602105883
+      ],
+      [
+        0.0,
+        2735.176208734488,
+        1132.000202494576
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3143541682414571,
+      0.238545933908348,
+      0.7519497825020537,
+      -2.001002364970405
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

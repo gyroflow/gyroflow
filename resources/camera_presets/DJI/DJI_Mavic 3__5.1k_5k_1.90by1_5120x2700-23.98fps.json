@@ -1,0 +1,68 @@
+{
+  "name": "DJI_Mavic 3__5.1k_5k_1.90by1_5120x2700-23.98fps",
+  "note": "",
+  "calibrated_by": "黃柏瑜",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic 3",
+  "lens_model": "",
+  "camera_setting": "5.1k",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29537020471788067,
+    "camera_matrix": [
+      [
+        3614.115335828749,
+        0.0,
+        2567.3092580218467
+      ],
+      [
+        0.0,
+        3616.4535126553383,
+        1348.311453618472
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35203700738159943,
+      0.11500132629332167,
+      -0.2437429369803508,
+      0.8613570695850731
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

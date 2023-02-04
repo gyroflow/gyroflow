@@ -1,0 +1,68 @@
+{
+  "name": "Pentax_K3_Tamron 17-50_17mm f2.8_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Armen Bogush",
+  "camera_brand": "Pentax",
+  "camera_model": "K3",
+  "lens_model": "Tamron 17-50",
+  "camera_setting": "17mm f2.8",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.47254879857265014,
+    "camera_matrix": [
+      [
+        1390.2956001462849,
+        0.0,
+        985.4878271625132
+      ],
+      [
+        0.0,
+        1390.1743474804005,
+        503.6498341351923
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18950716754724473,
+      0.2015908190664139,
+      -0.06447737795770099,
+      0.30877745753949143
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

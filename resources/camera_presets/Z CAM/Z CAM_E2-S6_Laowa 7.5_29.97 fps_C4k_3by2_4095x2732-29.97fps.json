@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-S6_Laowa 7.5_29.97 fps_C4k_3by2_4095x2732-29.97fps",
+  "note": "29.97 fps",
+  "calibrated_by": "DiegoFPV",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Laowa 7.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2732
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2732
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2732
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4308427725146285,
+    "camera_matrix": [
+      [
+        1353.7062882609118,
+        0.0,
+        2074.035045744913
+      ],
+      [
+        0.0,
+        1352.9554333546762,
+        1396.3809070818213
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.350759037926703,
+      0.01348450046565598,
+      0.1502763106044501,
+      -0.03788556200226671
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

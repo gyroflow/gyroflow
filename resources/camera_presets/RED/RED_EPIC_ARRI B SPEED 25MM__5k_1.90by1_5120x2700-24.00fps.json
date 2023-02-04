@@ -1,0 +1,68 @@
+{
+  "name": "RED_EPIC_ARRI B SPEED 25MM__5k_1.90by1_5120x2700-24.00fps",
+  "note": "",
+  "calibrated_by": "David Pou",
+  "camera_brand": "RED",
+  "camera_model": "EPIC",
+  "lens_model": "ARRI B SPEED 25MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5792918570479305,
+    "camera_matrix": [
+      [
+        4863.621604116615,
+        0.0,
+        2588.577790664935
+      ],
+      [
+        0.0,
+        4856.799326133932,
+        1355.958043793525
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21575200066242864,
+      -0.1293671950340206,
+      1.5264170088100626,
+      -1.4852832897139512
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

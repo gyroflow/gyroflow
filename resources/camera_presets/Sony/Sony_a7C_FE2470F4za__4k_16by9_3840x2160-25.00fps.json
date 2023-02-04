@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7C_FE2470F4za__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "AK47",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "FE2470F4za",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 96,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1206123775265824,
+    "camera_matrix": [
+      [
+        2657.5155912524833,
+        0.0,
+        1955.9827880204589
+      ],
+      [
+        0.0,
+        2656.8619829012896,
+        1051.337307722372
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31365172973840927,
+      0.021232252932676283,
+      0.5229181099156116,
+      -0.4805035669137528
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS RP_EF-S 24mm f2.8 STM_No Software Stabilisation_720p_16by9_1280x720-29.97fps",
+  "note": "No Software Stabilisation",
+  "calibrated_by": "Roman",
+  "camera_brand": "Canon",
+  "camera_model": "EOS RP",
+  "lens_model": "EF-S 24mm f2.8 STM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 3.2238357520161065,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2847453584183008,
+    "camera_matrix": [
+      [
+        1554.4532991164997,
+        0.0,
+        642.6504726959769
+      ],
+      [
+        0.0,
+        1553.6429330595165,
+        351.569967291691
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16792365432255618,
+      0.2906558522057483,
+      -0.3715248048641598,
+      0.7122430815396075
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}
