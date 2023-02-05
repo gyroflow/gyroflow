@@ -116,7 +116,7 @@ impl REDSdk {
                     .args(["-o", &output_file])
                     .args(["--format", "201"])
                     .args(["--PRcodec", &format!("{}", format)])
-                    .args(["--useMeta", "--metaIgnoreFrameGuide"])
+                    .args(["--useMeta", "--metaIgnoreFrameGuide", "--fit", "3"])
                     .args(["--useRMD", "2"]);
                 if force_primary {
                     cmd.args(["--primaryDev"]);
