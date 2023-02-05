@@ -68,15 +68,6 @@ impl REDSdk {
             vec![]
         };
 
-        for l in locations {
-            if let Ok(p) = std::fs::canonicalize(&l) {
-                if p.exists() {
-                    if let Some(p) = p.to_str() {
-                        return p.to_string();
-                    }
-                }
-            }
-        }
         if let Some(paths) = std::env::var_os("PATH") {
             for dir in std::env::split_paths(&paths) {
                 let full_path = dir.join(&"REDline");
@@ -87,6 +78,17 @@ impl REDSdk {
                 }
             }
         }
+
+        for l in locations {
+            if let Ok(p) = std::fs::canonicalize(&l) {
+                if p.exists() {
+                    if let Some(p) = p.to_str() {
+                        return p.to_string();
+                    }
+                }
+            }
+        }
+
         String::new()
     }
 
