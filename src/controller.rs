@@ -878,7 +878,6 @@ impl Controller {
                 let mut gyro = stab.gyro.write();
                 gyro.integration_method = index;
                 gyro.integrate();
-                stab.smoothing.write().update_quats_checksum(&gyro.quaternions);
             }
             stab.invalidate_smoothing();
             finished(());

@@ -74,7 +74,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         BufferSource::MetalBuffer { buffer, .. } => {
             if backend != wgpu::Backend::Metal { panic!("Unsupported backend!"); }
 
-            let use_buffer_directly = true;
+            let use_buffer_directly = false;
             if use_buffer_directly {
                 let usage = wgpu::BufferUsages::STORAGE | if is_in { wgpu::BufferUsages::COPY_SRC } else { wgpu::BufferUsages::COPY_DST };
 
@@ -391,15 +391,17 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::MetalBuffer { .. } => {
-            if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
-                if !mtl_texture.as_ptr().is_null() {
-                    temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+            if buf.texture_copy {
+                if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
+                    if !mtl_texture.as_ptr().is_null() {
+                        temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
-                    encoder.copy_texture_to_texture(
-                        ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        size
-                    );
+                        encoder.copy_texture_to_texture(
+                            ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            size
+                        );
+                    }
                 }
             }
         }

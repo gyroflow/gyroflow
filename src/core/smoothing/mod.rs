@@ -34,7 +34,6 @@ clone_trait_object!(SmoothingAlgorithm);
 pub struct Smoothing {
     algs: Vec<Box<dyn SmoothingAlgorithm>>,
     current_id: usize,
-    quats_checksum: u64,
 
     pub horizon_lock: horizon::HorizonLock
 }
@@ -51,7 +50,6 @@ impl Default for Smoothing {
                 Box::new(self::fixed::Fixed::default())
             ],
 
-            quats_checksum: 0,
             current_id: 1,
 
             horizon_lock: horizon::HorizonLock::default(),
@@ -95,26 +93,13 @@ impl Smoothing {
         &mut self.algs[self.current_id]
     }
 
-    pub fn get_state_checksum(&self) -> u64 {
+    pub fn get_state_checksum(&self, gyro_checksum: u64) -> u64 {
         let mut hasher = DefaultHasher::new();
-        hasher.write_u64(self.quats_checksum);
+        hasher.write_u64(gyro_checksum);
         hasher.write_usize(self.current_id);
         hasher.write_u64(self.algs[self.current_id].get_checksum());
         hasher.write_u64(self.horizon_lock.get_checksum());
         hasher.finish()
-    }
-
-    pub fn update_quats_checksum(&mut self, quats: &TimeQuat) {
-        let mut hasher = DefaultHasher::new();
-        for (&k, v) in quats {
-            hasher.write_i64(k);
-            let vec = v.quaternion().as_vector();
-            hasher.write_u64(vec[0].to_bits());
-            hasher.write_u64(vec[1].to_bits());
-            hasher.write_u64(vec[2].to_bits());
-            hasher.write_u64(vec[3].to_bits());
-        }
-        self.quats_checksum = hasher.finish();
     }
 
     pub fn get_names(&self) -> Vec<String> {

@@ -363,6 +363,11 @@ impl GyroSource {
                         log::error!("Filter error {:?}", e);
                     }
                 }
+                if let Some(rot) = self.imu_rotation {
+                    for (_ts, q) in &mut self.quaternions {
+                        *q = rot * *q;
+                    }
+                }
             },
             1 => self.quaternions = ComplementaryIntegrator::integrate(&self.raw_imu, self.duration_ms),
             2 => self.quaternions = VQFIntegrator::integrate(&self.raw_imu, self.duration_ms),
@@ -524,12 +529,7 @@ impl GyroSource {
 
     pub fn apply_transforms(&mut self) {
         self.raw_imu = self.org_raw_imu.clone();
-        if self.imu_lpf > 0.0 && !self.org_raw_imu.is_empty() && self.duration_ms > 0.0 {
-            let sample_rate = self.org_raw_imu.len() as f64 / (self.duration_ms / 1000.0);
-            if let Err(e) = super::filtering::Lowpass::filter_gyro_forward_backward(self.imu_lpf, sample_rate, &mut self.raw_imu) {
-                log::error!("Filter error {:?}", e);
-            }
-        }
+
         if let Some(bias) = self.gyro_bias {
             for x in &mut self.raw_imu {
                 if let Some(g) = x.gyro.as_mut() {
@@ -541,6 +541,7 @@ impl GyroSource {
                 }
             }
         }
+
         if let Some(ref orientation) = self.imu_orientation {
             pub fn orient(inp: &[f64; 3], io: &[u8]) -> [f64; 3] {
                 let map = |o: u8| -> f64 {
@@ -595,6 +596,13 @@ impl GyroSource {
                 if let Some(g) = x.gyro.as_mut() { if let Some(grot) = grot { *g = rotate(g, grot); } }
                 if let Some(a) = x.accl.as_mut() { if let Some(arot) = arot { *a = rotate(a, arot); } }
                 if let Some(m) = x.magn.as_mut() { if let Some(grot) = grot { *m = rotate(m, grot); } }
+            }
+        }
+
+        if self.imu_lpf > 0.0 && !self.org_raw_imu.is_empty() && self.duration_ms > 0.0 {
+            let sample_rate = self.org_raw_imu.len() as f64 / (self.duration_ms / 1000.0);
+            if let Err(e) = super::filtering::Lowpass::filter_gyro_forward_backward(self.imu_lpf, sample_rate, &mut self.raw_imu) {
+                log::error!("Filter error {:?}", e);
             }
         }
 
@@ -670,6 +678,33 @@ impl GyroSource {
             integration_method:   self.integration_method,
             ..Default::default()
         }
+    }
+
+    pub fn get_checksum(&self) -> u64 {
+        use std::hash::Hasher;
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        if let Some(v) = &self.detected_source { hasher.write(v.as_bytes()); }
+        if let Some(v) = &self.imu_orientation { hasher.write(v.as_bytes()); }
+        if let Some(v) = &self.imu_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
+        if let Some(v) = &self.acc_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
+        if let Some(v) = &self.gyro_bias { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
+        hasher.write(self.file_path.as_bytes());
+        hasher.write_u64(self.duration_ms.to_bits());
+        hasher.write_u64(self.imu_lpf.to_bits());
+        hasher.write_usize(self.raw_imu.len());
+        hasher.write_usize(self.org_raw_imu.len());
+        hasher.write_usize(self.quaternions.len());
+        hasher.write_usize(self.org_quaternions.len());
+        hasher.write_usize(self.image_orientations.len());
+        hasher.write_usize(self.lens_positions.as_ref().map(|v| v.len()).unwrap_or_default());
+        hasher.write_u32(if self.use_gravity_vectors { 1 } else { 0 });
+        hasher.write_usize(self.integration_method);
+        for (ts, v) in &self.offsets {
+            hasher.write_i64(*ts);
+            hasher.write_u64(v.to_bits());
+        }
+
+        hasher.finish()
     }
 
     pub fn get_sample_rate(&self) -> f64 {

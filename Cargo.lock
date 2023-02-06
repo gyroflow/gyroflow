@@ -1459,15 +1459,15 @@ dependencies = [
 
 [[package]]
 name = "gpu-allocator"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "434618454f74b63f9b39328298097256977c41ea0ba9d75a47238b77790b6163"
+checksum = "ce95f9e2e11c2c6fadfce42b5af60005db06576f231f5c92550fdded43c423e8"
 dependencies = [
  "backtrace",
  "log",
  "thiserror",
  "winapi",
- "windows 0.43.0",
+ "windows 0.44.0",
 ]
 
 [[package]]
@@ -2167,7 +2167,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.11.0"
-source = "git+https://github.com/gfx-rs/naga?rev=f0edae8#f0edae8ce9e55eeef489fc53b10dc95fb79561cc"
+source = "git+https://github.com/gfx-rs/naga?rev=4b796b157cb2b67b0ab166a2238fe4e9473bfd52#4b796b157cb2b67b0ab166a2238fe4e9473bfd52"
 dependencies = [
  "bit-set",
  "bitflags",
@@ -4014,7 +4014,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.15.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#c6449a1e5221714909f9198dbf5b9b838c5310c9"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#532285e3abd69494715eba5675e808459cadee3d"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4037,7 +4037,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.15.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#c6449a1e5221714909f9198dbf5b9b838c5310c9"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#532285e3abd69494715eba5675e808459cadee3d"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4059,7 +4059,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.15.1"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#c6449a1e5221714909f9198dbf5b9b838c5310c9"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#532285e3abd69494715eba5675e808459cadee3d"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4100,7 +4100,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.15.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=all-changes#c6449a1e5221714909f9198dbf5b9b838c5310c9"
+source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#532285e3abd69494715eba5675e808459cadee3d"
 dependencies = [
  "bitflags",
  "js-sys",
@@ -4175,21 +4175,6 @@ dependencies = [
  "windows_i686_msvc 0.37.0",
  "windows_x86_64_gnu 0.37.0",
  "windows_x86_64_msvc 0.37.0",
-]
-
-[[package]]
-name = "windows"
-version = "0.43.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04662ed0e3e5630dfa9b26e4cb823b817f1a9addda855d973a9458c236556244"
-dependencies = [
- "windows_aarch64_gnullvm",
- "windows_aarch64_msvc 0.42.1",
- "windows_i686_gnu 0.42.1",
- "windows_i686_msvc 0.42.1",
- "windows_x86_64_gnu 0.42.1",
- "windows_x86_64_gnullvm",
- "windows_x86_64_msvc 0.42.1",
 ]
 
 [[package]]

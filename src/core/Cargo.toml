@@ -63,9 +63,9 @@ opencv = { version = "0.76", optional = true }
 #wgpu = "0.15"
 #wgpu-hal = "0.15"
 #wgpu-types = "0.15"
-wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
-wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
-wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "all-changes" }
+wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
+wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
+wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 bytemuck = "1.13.0"
 ash = "0.37.2"
 

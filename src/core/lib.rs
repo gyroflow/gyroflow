@@ -168,8 +168,6 @@ impl StabilizationManager {
             gyro.file_load_options = options.clone();
         }
         self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
-        let quats = self.gyro.read().quaternions.clone();
-        self.smoothing.write().update_quats_checksum(&quats);
 
         if is_main_video {
             if let Some(ref lens) = md.lens_profile {
@@ -360,7 +358,8 @@ impl StabilizationManager {
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut smoothing_changed = false;
-            if smoothing.read().get_state_checksum() != smoothing_checksum.load(SeqCst) {
+            let mut gyro_checksum = gyro.read().get_checksum();
+            if smoothing.read().get_state_checksum(gyro_checksum) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
@@ -370,11 +369,15 @@ impl StabilizationManager {
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
                 let mut lib_gyro = gyro.write();
-                lib_gyro.quaternions = params.gyro.quaternions.clone();
+                if lib_gyro.quaternions != params.gyro.quaternions {
+                    // This computation was for different input quaternions (outdated)
+                    return cb((compute_id, true));
+                }
                 lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
                 lib_gyro.max_angles = params.gyro.max_angles;
                 lib_gyro.org_smoothed_quaternions = params.gyro.org_smoothed_quaternions.clone();
                 lib_gyro.smoothing_status = smoothing.get_status_json();
+                gyro_checksum = lib_gyro.get_checksum();
                 smoothing_changed = true;
             }
 
@@ -398,7 +401,7 @@ impl StabilizationManager {
 
             stabilization.write().set_compute_params(params);
 
-            smoothing_checksum.store(smoothing.read().get_state_checksum(), SeqCst);
+            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
             zooming_checksum.store(zooming::get_checksum(&zoom), SeqCst);
             cb((compute_id, false));
         });
@@ -622,7 +625,7 @@ impl StabilizationManager {
     }
     pub fn recompute_gyro(&self) {
         self.gyro.write().apply_transforms();
-        self.smoothing.write().update_quats_checksum(&self.gyro.read().quaternions);
+        self.invalidate_smoothing();
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
