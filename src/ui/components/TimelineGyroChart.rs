@@ -7,7 +7,6 @@ use std::collections::BTreeMap;
 
 use gyroflow_core::stabilization_params::StabilizationParams;
 use gyroflow_core::keyframes::{ KeyframeManager, KeyframeType };
-use nalgebra::Vector4;
 use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
 use crate::util;
@@ -360,22 +359,13 @@ impl TimelineGyroChart {
 
             if self.viewMode == 3 {
                 let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
-                    let mut prev_vec: Option<Vector4<f64>> = None;
-                    let mut inv = false;
                     for x in quats {
                         let mut ts = *x.0 as f64 / 1000.0;
                         ts += gyro.offset_at_gyro_timestamp(ts);
-
                         let q = x.1.as_vector();
-
-                        if prev_vec.is_some() && (prev_vec.unwrap() - q).norm() > 1.5 {
-                            inv = !inv;
-                        }
-                        prev_vec = Some(q.clone());
-
                         out_quats.push(ChartData {
                             timestamp_us: (ts * 1000.0) as i64,
-                            values: if inv { [-q[0], -q[1], -q[2], -q[3]] } else { [q[0], q[1], q[2], q[3]] }
+                            values: [q[0], q[1], q[2], q[3]]
                         });
                     }
                 };

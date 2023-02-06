@@ -140,7 +140,7 @@ impl Stabilization {
         }
         if insert {
             let timestamp_ms = (timestamp_us as f64) / 1000.0;
-            let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.gyro.fps) as usize; // Only for FOVs
+            let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
 
             self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
 

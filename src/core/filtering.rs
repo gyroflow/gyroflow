@@ -3,7 +3,7 @@
 
 use biquad::{Biquad, Coefficients, Type, DirectForm2Transposed, ToHertz};
 
-use super::gyro_source::TimeIMU;
+use super::gyro_source::{ TimeIMU, TimeQuat };
 
 pub struct Lowpass {
     filters: [DirectForm2Transposed<f64>; 6]
@@ -68,6 +68,27 @@ impl Lowpass {
                 a[1] = backward.run(4, a[1]);
                 a[2] = backward.run(5, a[2]);
             }
+        }
+        Ok(())
+    }
+    pub fn filter_quats_forward_backward(freq: f64, sample_rate: f64, data: &mut TimeQuat) -> Result<(), biquad::Errors> {
+        let mut forward = Self::new(freq, sample_rate)?;
+        let mut backward = Self::new(freq, sample_rate)?;
+        for (_ts, uq) in data.iter_mut() {
+            let mut q = uq.quaternion().clone();
+            q.coords[0] = forward.run(0, q.coords[0]);
+            q.coords[1] = forward.run(1, q.coords[1]);
+            q.coords[2] = forward.run(2, q.coords[2]);
+            q.coords[3] = forward.run(3, q.coords[3]);
+            *uq = crate::Quat64::from_quaternion(q);
+        }
+        for (_ts, uq) in data.iter_mut().rev() {
+            let mut q = uq.quaternion().clone();
+            q.coords[0] = backward.run(0, q.coords[0]);
+            q.coords[1] = backward.run(1, q.coords[1]);
+            q.coords[2] = backward.run(2, q.coords[2]);
+            q.coords[3] = backward.run(3, q.coords[3]);
+            *uq = crate::Quat64::from_quaternion(q);
         }
         Ok(())
     }

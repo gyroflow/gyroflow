@@ -12,7 +12,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
     let mut final_offsets = Vec::new();
 
     let next_frame_no = 2;
-    let fps = params.gyro.fps;
+    let fps = params.scaled_fps;
     let ranges_len = ranges.len() as f64;
 
     let keys: Vec<i64> = estimator.sync_results.read().keys().copied().collect();

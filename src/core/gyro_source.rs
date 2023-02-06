@@ -52,7 +52,6 @@ pub struct GyroSource {
     pub file_load_options: FileLoadOptions,
 
     pub duration_ms: f64,
-    pub fps: f64,
 
     pub raw_imu: Vec<TimeIMU>,
     pub org_raw_imu: Vec<TimeIMU>,
@@ -111,7 +110,6 @@ impl GyroSource {
         self.use_gravity_vectors = v;
     }
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
-        self.fps = stabilization_params.get_scaled_fps();
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
     }
     pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
@@ -286,10 +284,6 @@ impl GyroSource {
             ::log::error!("Invalid duration_ms {}", self.duration_ms);
             return;
         }
-        if self.fps <= 0.0 {
-            ::log::error!("Invalid fps {}", self.fps);
-            return;
-        }
 
         self.quaternions.clear();
         self.org_quaternions.clear();
@@ -320,16 +314,33 @@ impl GyroSource {
         self.gravity_vectors = telemetry.gravity_vectors.clone();
         self.lens_positions = telemetry.lens_positions.clone();
 
+        if !self.org_quaternions.is_empty() {
+            let len = self.org_quaternions.len() as f64;
+            if len > 0.0 {
+                let first_ts = self.org_quaternions.iter().next()      .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+                let last_ts  = self.org_quaternions.iter().next_back() .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+                let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
+                if (imu_duration - self.duration_ms).abs() > 0.01 {
+                    log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
+                    if imu_duration > 0.0 {
+                        self.duration_ms = imu_duration;
+                    }
+                }
+            }
+        }
+
         if let Some(imu) = &telemetry.raw_imu {
             self.org_raw_imu = imu.clone();
             let len = self.org_raw_imu.len() as f64;
-            let first_ts = self.org_raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
-            let last_ts  = self.org_raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
-            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
-            if (imu_duration - self.duration_ms).abs() > 0.01 {
-                log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
-                if imu_duration > 0.0 {
-                    self.duration_ms = imu_duration;
+            if len > 0.0 {
+                let first_ts = self.org_raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
+                let last_ts  = self.org_raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
+                let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
+                if (imu_duration - self.duration_ms).abs() > 0.01 {
+                    log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
+                    if imu_duration > 0.0 {
+                        self.duration_ms = imu_duration;
+                    }
                 }
             }
             self.apply_transforms();
@@ -339,12 +350,20 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         match self.integration_method {
-            0 => self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && (self.gravity_vectors.is_none() || !self.use_gravity_vectors) {
+            0 => {
+                self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && (self.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
                     QuaternionConverter::convert(&self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
                 } else {
                     self.org_quaternions.clone()
-                },
+                };
+                if self.imu_lpf > 0.0 && !self.quaternions.is_empty() && self.duration_ms > 0.0 {
+                    let sample_rate = self.quaternions.len() as f64 / (self.duration_ms / 1000.0);
+                    if let Err(e) = super::filtering::Lowpass::filter_quats_forward_backward(self.imu_lpf, sample_rate, &mut self.quaternions) {
+                        log::error!("Filter error {:?}", e);
+                    }
+                }
+            },
             1 => self.quaternions = ComplementaryIntegrator::integrate(&self.raw_imu, self.duration_ms),
             2 => self.quaternions = VQFIntegrator::integrate(&self.raw_imu, self.duration_ms),
             3 => self.quaternions = SimpleGyroIntegrator::integrate(&self.raw_imu, self.duration_ms),
@@ -641,7 +660,6 @@ impl GyroSource {
     pub fn clone_quaternions(&self) -> Self {
         Self {
             duration_ms:          self.duration_ms,
-            fps:                  self.fps,
             quaternions:          self.quaternions.clone(),
             smoothed_quaternions: self.smoothed_quaternions.clone(),
             offsets:              self.offsets.clone(),
