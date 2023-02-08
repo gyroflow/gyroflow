@@ -60,16 +60,13 @@ libc = "0.2"
 
 opencv = { version = "0.76", optional = true }
 
-#wgpu = "0.15"
-#wgpu-hal = "0.15"
-#wgpu-types = "0.15"
 wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 bytemuck = "1.13.0"
 ash = "0.37.2"
 
-pollster = "0.2.5"
+pollster = "0.3.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.25"
 walkdir = "2.3.2"

@@ -243,11 +243,11 @@ The recommended workflow is to export project file and use one of [video editor 
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation type="unfinished">Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.
+      <translation>Некоторые энкодеры AMD GPU имеют ошибку, при которой битрейт ограничивается до 20 Мбит/с, если целевой битрейт превышает 100 Мбит/с.
 
-Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
-- Set output bitrate to less than 100 Mbps
-- Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+Проверьте битрейт файла после рендеринга, и если вы затронуты этой ошибкой, вы можете либо:
+- установить выходной битрейт менее 100 Мбит/с.
+- использовать &quot;Дополнительные параметры энкодера&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="343"/>
@@ -256,7 +256,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Сохранение...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -377,7 +377,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="595"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Невозможно обработать входной аудио поток. Попробуйте отключить опцию &quot;Экспорт аудио&quot; в настройках экспорта.</translation>
     </message>
   </context>
   <context>
@@ -757,7 +757,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="462"/>
       <source>Do you want to update the output resolution to %1?</source>
-      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+      <translation>Вы хотите изменить разрешение вывода на %1?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="473"/>
@@ -812,7 +812,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>Калибровка объектива должна обрабатываться в полном разрешении или хотя бы в 4k. Изменяйте этот параметр, только если вы знаете, что делаете.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -1482,7 +1482,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Действие при перезаписи</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="675"/>
@@ -1769,7 +1769,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Вы также можете сохранить свой шаблон как `default.gyroflow` в каталоге `camera_presets`, и он будет автоматически применяться к каждому загруженному видеофайлу.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
