@@ -9,123 +9,123 @@
       <translation>Avanzado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="43"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="45"/>
       <source>Preview resolution</source>
       <translation>Resolución vista previa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="70"/>
       <source>Background mode</source>
       <translation>Tipo de fondo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="82"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="84"/>
       <source>Margin</source>
       <translation>Marxe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="98"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="100"/>
       <source>Feather</source>
       <translation>Pluma</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="117"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
       <source>Render background</source>
       <translation>Renderizar fondo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="130"/>
       <source>Theme</source>
       <translation>Tema</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="144"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="146"/>
       <source>UI scaling</source>
       <translation>Modificar tamaño UI</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="158"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="160"/>
       <source>Language</source>
       <translation>Lenguaxe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="207"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="209"/>
       <source>Safe area guide</source>
       <translation>Guía de zona de seguridade</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="208"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="210"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Se o FOV &gt; é superior a 1.0, mostrarase un rectángulo simulando un FOV de 1.0 na vista previa. O rectángulo é só unha axuda visual e NON &apos; afecta a representación.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="215"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Use GPU decoding</source>
       <translation>Usa a decodificación da GPU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="221"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
       <translation type="unfinished">Format for R3D conversion</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="239"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
       <source>Preview pipeline</source>
       <translation>Vista previa do fluxo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="262"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Device for video processing</source>
       <translation>Dispositivo para o procesado do vídeo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>CPU only</source>
       <translation>Solo CPU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="318"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="332"/>
       <source>Default file suffix</source>
       <translation>Sufixo de ficheiro predeterminado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="329"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
       <translation type="unfinished">Notification sounds</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="334"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
       <source>Reset all settings to default</source>
       <translation>Restablece todos os axustes predeterminados</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="338"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
       <translation>Está seguro de que queres borrar toda a configuración e restaurar ós valores predeterminados?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="339"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="353"/>
       <source>Yes</source>
       <translation>Si</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="347"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="361"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
       <translation>Borrouse a configuración. Reinicie Gyroflow para que os cambios teñan efecto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="362"/>
       <source>Exit</source>
       <translation>Saír</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="349"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="363"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="366"/>
       <source>No</source>
       <translation>Non</translation>
     </message>
@@ -1192,7 +1192,7 @@ Quere envialo seu perfil?</translation>
       <translation>Gardar ficheiro do proxecto</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="47"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="544"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="566"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="308"/>
@@ -1200,32 +1200,32 @@ Quere envialo seu perfil?</translation>
       <translation>Completo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Solid color</source>
       <translation>Cor sólido</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Repeat edge pixels</source>
       <translation>Repita píxeles do bordo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Mirror edge pixels</source>
       <translation>Píxeles da beira de espello</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Margin with feather</source>
       <translation>Marxe con pluma</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Light</source>
       <translation>Lixeiro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Dark</source>
       <translation>Escuro</translation>
     </message>
@@ -1240,37 +1240,37 @@ Quere envialo seu perfil?</translation>
       <translation>Ningún</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="178"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
       <source>No smoothing</source>
       <translation>Sen suavizado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="179"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
       <source>Default</source>
       <translation>Por defecto</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
       <source>Plain 3D</source>
       <translation>Plano 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Fixed camera</source>
       <translation>Cámara fixa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>No zooming</source>
       <translation>Sen zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Dynamic zooming</source>
       <translation>Zoom dinámico</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Static zoom</source>
       <translation>Zoom estático</translation>
     </message>
@@ -1369,6 +1369,11 @@ Quere envialo seu perfil?</translation>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Rendering %1...</source>
       <translation>Renderizado %1...</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <source>Converting to %1 %2...</source>
+      <translation type="unfinished">Converting to %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -1806,207 +1811,207 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Estabilización</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Pitch smoothness</source>
       <translation>Suavidade eixe Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
       <source>Yaw smoothness</source>
       <translation>Suavidade eixe Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
       <source>Roll smoothness</source>
       <translation>Suavidade eixe Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
       <source>Smoothness</source>
       <translation>Suavizado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
       <source>Per axis</source>
       <translation>Por eixe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
       <source>Max smoothness</source>
       <translation>Suavidade máxima</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
       <source>Max smoothness at high velocity</source>
       <translation>Máximo suavizado en velocidade alta</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
       <source>Second smoothing pass</source>
       <translation>Segundo pase de suavizado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>Only within trim range</source>
       <translation>Só dentro do rango de corte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
       <source>Yaw angle correction</source>
       <translation>Corrección do ángulo Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
       <source>Pitch angle correction</source>
       <translation>Corrección do ángulo Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="346"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="348"/>
       <source>Roll angle correction</source>
       <translation>Corrección do ángulo Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
       <source>Yaw angle</source>
       <translation>Ángulo Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="198"/>
       <source>Pitch angle</source>
       <translation>Ángulo Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
       <source>Roll angle</source>
       <translation>Ángulo Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="203"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="205"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Se FOV é maior que 1.0, pode ver bordos negros</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="210"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="322"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="324"/>
       <source>Lock horizon</source>
       <translation>Fixar horizonte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="329"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Bloquear valor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="335"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="495"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="337"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="480"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="354"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="356"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="364"/>
       <source>Use gravity vectors</source>
       <translation>Usa vectores gravitacionais</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="374"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Se o horizonte non está ben bloqueado, probe un método de integración diferente na sección &quot;Datos de movemento&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="395"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Rotación máxima: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="398"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
       <source>Max zoom: %1</source>
       <translation>Zoom máximo: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="421"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="423"/>
       <source>Zooming speed</source>
       <translation>Velocidade de Zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="431"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Cando se usan fotogramas clave para controlar a velocidade do zoom, débese empregar o método "Seguidor de envolventes".
 O "filtro gaussiano" pode crear bordos negros na imaxe.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
       <source>Zooming method</source>
       <translation>Método de zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="465"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
       <source>Zooming center offset</source>
       <translation>Desplazamento central do zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="469"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="488"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="508"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="510"/>
       <source>Rolling shutter correction</source>
       <translation>Corrección da obturación</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="516"/>
       <source>Frame readout time</source>
       <translation>Tempo de lectura de cadro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="522"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="532"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="534"/>
       <source>Bottom to top</source>
       <translation>De inferior a superior</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="539"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="541"/>
       <source>Lens correction strength</source>
       <translation>Intensidade de corrección da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
       <source>Video speed</source>
       <translation>Velocidade do vídeo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="593"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="595"/>
       <source>Link with smoothing</source>
       <translation>Enlace co suavizado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="606"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="608"/>
       <source>Link with zooming speed</source>
       <translation>Enlace coa velocidade de ampliación</translation>
     </message>

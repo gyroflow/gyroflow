@@ -9,124 +9,124 @@
       <translation>Pokročilé</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="43"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="45"/>
       <source>Preview resolution</source>
       <translation>Rozlíšenie náhľadu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="70"/>
       <source>Background mode</source>
       <translation>Pozadie za videom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="82"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="84"/>
       <source>Margin</source>
       <translation>Presah</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="98"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="100"/>
       <source>Feather</source>
       <translation>Rozostrenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="117"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
       <source>Render background</source>
       <translation>Farba pozadia videa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="130"/>
       <source>Theme</source>
       <translation>Vzhľad programu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="144"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="146"/>
       <source>UI scaling</source>
       <translation>Veľkosť textu rozhrania</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="158"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="160"/>
       <source>Language</source>
       <translation>Jazyk programu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="207"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="209"/>
       <source>Safe area guide</source>
       <translation>Zobraziť bezpečnú oblasť</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="208"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="210"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Ak je zorné pole (FOV) &gt; 1, zobrazí sa obdĺžnik simulujúci FOV = 1 v náhľade videa.
 Je to len vizuálny indikátor - neovplyvňuje výsledný render.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="215"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Use GPU decoding</source>
       <translation>Použiť GPU dekóder</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="221"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
       <translation>Formát pre konverziu R3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="239"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
       <source>Preview pipeline</source>
       <translation>Metóda náhľadu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="262"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Device for video processing</source>
       <translation>Zariadenie na spracovanie videa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>CPU only</source>
       <translation>Len CPU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="318"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="332"/>
       <source>Default file suffix</source>
       <translation>Predvolená prípona súboru</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="329"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
       <translation>Zvuky upozornenia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="334"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
       <source>Reset all settings to default</source>
       <translation>Obnoviť predvolené nastavenia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="338"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
       <translation>Si si istý, že chceš resetovať všetky nastavenia na predvolené?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="339"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="353"/>
       <source>Yes</source>
       <translation>Áno</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="347"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="361"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
       <translation>Nastavenia sú obnovené, prosím reštartuj Gyroflow pre aktiváciu zmien.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="362"/>
       <source>Exit</source>
       <translation>Skončiť</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="349"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="363"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="366"/>
       <source>No</source>
       <translation>Nie</translation>
     </message>
@@ -1194,7 +1194,7 @@ Chceš nahrať tvoj profil?</translation>
       <translation>Uložiť projekt</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="47"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="544"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="566"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="308"/>
@@ -1202,32 +1202,32 @@ Chceš nahrať tvoj profil?</translation>
       <translation>Plné</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Solid color</source>
       <translation>Plná farba</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Repeat edge pixels</source>
       <translation>Opakuj pixely z okraja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Mirror edge pixels</source>
       <translation>Odzrkadliť pixely z okraja</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Margin with feather</source>
       <translation>Rozostrená kópia okraju</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Light</source>
       <translation>Svetlý</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Dark</source>
       <translation>Tmavý</translation>
     </message>
@@ -1242,37 +1242,37 @@ Chceš nahrať tvoj profil?</translation>
       <translation>Žiadne</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="178"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
       <source>No smoothing</source>
       <translation>Bez stabilizácie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="179"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
       <source>Default</source>
       <translation>Predvolená GYROflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
       <source>Plain 3D</source>
       <translation>Jednoduchá 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Fixed camera</source>
       <translation>Pevne nastavená pozícia kamery</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>No zooming</source>
       <translation>Bez priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Dynamic zooming</source>
       <translation>Dynamické priblíženie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Static zoom</source>
       <translation>Pevné priblíženie</translation>
     </message>
@@ -1371,6 +1371,11 @@ Chceš nahrať tvoj profil?</translation>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Rendering %1...</source>
       <translation>Renderuje sa %1...</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <source>Converting to %1 %2...</source>
+      <translation type="unfinished">Converting to %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -1808,206 +1813,206 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
       <translation>Stabilizácia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Pitch smoothness</source>
       <translation>Pitch (náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
       <source>Yaw smoothness</source>
       <translation>Yaw (rotácia)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
       <source>Roll smoothness</source>
       <translation>Roll (bočný náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
       <source>Smoothness</source>
       <translation>Vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
       <source>Per axis</source>
       <translation>Pre os</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
       <source>Max smoothness</source>
       <translation>Maximálne vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
       <source>Max smoothness at high velocity</source>
       <translation>Max vyhl. pri rýchlom pohybe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
       <source>Second smoothing pass</source>
       <translation>Dodatočné vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>Only within trim range</source>
       <translation>Iba v označenom rozsahu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
       <source>Yaw angle correction</source>
       <translation>Yaw - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
       <source>Pitch angle correction</source>
       <translation>Pitch - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="346"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="348"/>
       <source>Roll angle correction</source>
       <translation>Roll - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
       <source>Yaw angle</source>
       <translation>Yaw uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="198"/>
       <source>Pitch angle</source>
       <translation>Pitch uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
       <source>Roll angle</source>
       <translation>Roll uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="203"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="205"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Zorné pole je väčšie ako 1.0, je možné, že uvidíš čierne okraje</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="210"/>
       <source>FOV</source>
       <translation>Zorné pole (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="322"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="324"/>
       <source>Lock horizon</source>
       <translation>Zamknutý horizont</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="329"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Činiteľ zamknutia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="335"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="495"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="337"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="480"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="354"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="356"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="364"/>
       <source>Use gravity vectors</source>
       <translation>Použiť vektory gravitácie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="374"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Ak horizont nie je v správnom uhle, skús inú metódu integrácie v časti &quot;Pohybové dáta&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="395"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Max. rotácia: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="398"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
       <source>Max zoom: %1</source>
       <translation>Max. zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="421"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="423"/>
       <source>Zooming speed</source>
       <translation>Rýchlosť priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="431"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Ak sa kľúčuje rýchlosť priblíženia odporúča sa použiť metóda "Envelope follower". Gaussov filter môže viesť k čiernym okrajom v zobrazení.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
       <source>Zooming method</source>
       <translation>Metóda priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="465"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
       <source>Zooming center offset</source>
       <translation>Odchýlka stredu približenia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="469"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="488"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="508"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="510"/>
       <source>Rolling shutter correction</source>
       <translation>Korekcia rolling-shutter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="516"/>
       <source>Frame readout time</source>
       <translation>Čas načítania snímku</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="522"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="532"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="534"/>
       <source>Bottom to top</source>
       <translation>Zdola hore</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="539"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="541"/>
       <source>Lens correction strength</source>
       <translation>Sila korekcie skreslenia šošovky</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
       <source>Video speed</source>
       <translation>Rýchlosť videa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="593"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="595"/>
       <source>Link with smoothing</source>
       <translation>Prepojiť so stabilizáciou</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="606"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="608"/>
       <source>Link with zooming speed</source>
       <translation>Prepojiť s rýchlosťou priblíženia</translation>
     </message>

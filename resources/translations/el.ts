@@ -9,124 +9,124 @@
       <translation>Προηγμένες Ρυθμίσεις</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="43"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="45"/>
       <source>Preview resolution</source>
       <translation>Ανάλυση προεπισκόπησης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="68"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="70"/>
       <source>Background mode</source>
       <translation>Λειτουργία φόντο</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="82"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="84"/>
       <source>Margin</source>
       <translation>Περιθώριο</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="98"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="100"/>
       <source>Feather</source>
       <translation>Φτερό</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="117"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="119"/>
       <source>Render background</source>
       <translation>Αποτύπωση φόντου</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="128"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="130"/>
       <source>Theme</source>
       <translation>Θέμα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="144"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="146"/>
       <source>UI scaling</source>
       <translation>Μέγεθος μενού</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="158"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="160"/>
       <source>Language</source>
       <translation>Γλώσσα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="207"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="209"/>
       <source>Safe area guide</source>
       <translation>Οδηγός ασφαλούς περιοχής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="208"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="210"/>
       <source>When FOV &gt; 1, show an rectangle simulating FOV = 1 over the preview video.
 Note that this is only a visual indicator, it doesn&apos;t affect rendering.</source>
       <translation>Όταν το οπτικό πεδίο &gt; 1, εμφάνισε ένα ορθογώνιο που προσομοιάζει το οπτικό πεδίο = 1 πάνω από το βίντεο προεπισκόπησης.
 Σημειώστε ότι αυτό είναι μόνο μια οπτική ένδειξη, δεν επηρεάζει την απόδοση.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="215"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Use GPU decoding</source>
       <translation>Χρησιμοποίησε την κάρτα γραφικών για αποκωδικοποίηση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="221"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
       <translation>Μορφή για μετατροπή R3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="239"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
       <source>Preview pipeline</source>
       <translation>Προεπισκόπηση του αγωγού</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="262"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
       <source>Device for video processing</source>
       <translation>Συσκευή για επεξεργασία βίντεο</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="290"/>
       <source>CPU only</source>
       <translation>Μόνο επεξεργαστής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="318"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="332"/>
       <source>Default file suffix</source>
       <translation>Προεπιλεγμένη κατάληξη αρχείου</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="329"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
       <translation>Ήχοι ειδοποίησης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="334"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
       <source>Reset all settings to default</source>
       <translation>Επαναφέρετε όλες τις ρυθμίσεις στις προεπιλεγμένες</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="338"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
       <translation>Είστε βέβαιοι ότι θέλετε να επαναφέρετε όλες τις ρυθμίσεις στις προεπιλεγμένες ρυθμίσεις;</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="339"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="353"/>
       <source>Yes</source>
       <translation>Ναί</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="347"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="361"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
       <translation>Οι ρυθμίσεις εκκαθαρίστηκαν, παρακαλώ επανεκκινήστε το Gyroflow για να τεθούν σε ισχύ οι αλλαγές.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="362"/>
       <source>Exit</source>
       <translation>Έξοδος</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="349"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="363"/>
       <source>Ok</source>
       <translation>Εντάξει</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="366"/>
       <source>No</source>
       <translation>Όχι</translation>
     </message>
@@ -1194,7 +1194,7 @@ Do you want to submit your profile?</source>
       <translation type="unfinished">Save project file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="47"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="544"/>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="566"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="308"/>
@@ -1202,32 +1202,32 @@ Do you want to submit your profile?</source>
       <translation>Πλήρης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Solid color</source>
       <translation>Συμπαγές χρώμα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Repeat edge pixels</source>
       <translation>Επανάληψη ακριανών εικονοστοιχείων</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Mirror edge pixels</source>
       <translation>Κατοπτρισμός ακριανών εικονοστοιχείων</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="71"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="73"/>
       <source>Margin with feather</source>
       <translation>Περιθώριο με φτερό</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Light</source>
       <translation>Ανοιχτόχρωμο</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Advanced.qml" line="132"/>
+      <location filename="../../src/ui/menu/Advanced.qml" line="134"/>
       <source>Dark</source>
       <translation>Σκούρο</translation>
     </message>
@@ -1242,37 +1242,37 @@ Do you want to submit your profile?</source>
       <translation>Κανένα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="178"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
       <source>No smoothing</source>
       <translation>Χωρίς εξομάλυνση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="179"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
       <source>Default</source>
       <translation>Προεπιλογή</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="180"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="182"/>
       <source>Plain 3D</source>
       <translation>Απλό 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="181"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
       <source>Fixed camera</source>
       <translation>Σταθερή κάμερα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>No zooming</source>
       <translation>Χωρίς μεγέθυνση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Dynamic zooming</source>
       <translation>Δυναμική μεγέθυνση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="408"/>
       <source>Static zoom</source>
       <translation>Στατική μεγέθυνση</translation>
     </message>
@@ -1371,6 +1371,11 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Rendering %1...</source>
       <translation>Αποτύπωση %1...</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <source>Converting to %1 %2...</source>
+      <translation type="unfinished">Converting to %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -1809,206 +1814,206 @@ Do you want to convert to a different supported pixel format or keep the origina
       <translation>Σταθεροποίηση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="183"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
       <source>Pitch smoothness</source>
       <translation>Ομαλότητα γωνίας</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="184"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
       <source>Yaw smoothness</source>
       <translation>Ομαλότητα εκτροπής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="185"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
       <source>Roll smoothness</source>
       <translation>Ομαλότητα κύλισης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="186"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
       <source>Smoothness</source>
       <translation>Ομαλότητα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="187"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
       <source>Per axis</source>
       <translation>Ανά άξονα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="188"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
       <source>Max smoothness</source>
       <translation>Μέγιστη ομαλότητα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="189"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
       <source>Max smoothness at high velocity</source>
       <translation>Μέγιστη ομαλότητα σε υψηλή ταχύτητα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="190"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
       <source>Second smoothing pass</source>
       <translation>Δεύτερο πέρασμα εξομάλυνσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="191"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>Only within trim range</source>
       <translation type="unfinished">Only within trim range</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="192"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
       <source>Yaw angle correction</source>
       <translation>Διόρθωση γωνίας εκτροπής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
       <source>Pitch angle correction</source>
       <translation>Διόρθωση γωνίας κλίσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="346"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="348"/>
       <source>Roll angle correction</source>
       <translation>Διόρθωση γωνίας κλίσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="195"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
       <source>Yaw angle</source>
       <translation>Γωνία εκτροπής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="196"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="198"/>
       <source>Pitch angle</source>
       <translation>Γωνία κλίσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="197"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
       <source>Roll angle</source>
       <translation>Γωνία περιστροφής</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="203"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="205"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Οπτικό πεδίο είναι μεγαλύτερο από 1.0, μπορεί να δείτε μαύρα σύνορα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="210"/>
       <source>FOV</source>
       <translation>Οπτικό Πεδίο (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="322"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="324"/>
       <source>Lock horizon</source>
       <translation>Κλείδωμα ορίζοντα</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="327"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="329"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Ένταση κλειδώματος</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="335"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="495"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="337"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="480"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="354"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="356"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="362"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="364"/>
       <source>Use gravity vectors</source>
       <translation>Χρησιμοποιήστε διανύσματα βαρύτητας</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="374"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Εάν ο ορίζοντας δεν είναι καλά κλειδωμένος, δοκιμάστε μια διαφορετική μέθοδο ενσωμάτωσης στην ενότητα &quot;Δεδομένα Κίνησης&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="395"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Μέγιστη περιστροφή: Κλίση: %1, Εκτροπή: %2, Περιστροφή: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="398"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
       <source>Max zoom: %1</source>
       <translation>Μέγιστη μεγέθυνση: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="421"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="423"/>
       <source>Zooming speed</source>
       <translation>Ταχύτητα μεγέθυνσης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="431"/>
       <source>s</source>
       <translation>δ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
       <source>Zooming method</source>
       <translation type="unfinished">Zooming method</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="465"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
       <source>Zooming center offset</source>
       <translation>Μεγέθυνση μετατόπισης στο κέντρο X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="469"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="488"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="508"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="510"/>
       <source>Rolling shutter correction</source>
       <translation>Διόρθωση κλείστρου κύλισης</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="516"/>
       <source>Frame readout time</source>
       <translation>Χρόνος ανάγνωσης καρέ</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="522"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="532"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="534"/>
       <source>Bottom to top</source>
       <translation>Από κάτω προς τα πάνω</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="539"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="541"/>
       <source>Lens correction strength</source>
       <translation>Ένταση διόρθωσης φακού</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
       <source>Video speed</source>
       <translation>Ταχύτητα Βίντεο</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="593"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="595"/>
       <source>Link with smoothing</source>
       <translation>Σύνδεση με εξομάλυνση</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="606"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="608"/>
       <source>Link with zooming speed</source>
       <translation>Σύνδεση με ταχύτητα μεγέθυνσης</translation>
     </message>
