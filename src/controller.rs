@@ -1389,18 +1389,25 @@ impl Controller {
         core::run_threaded(move || {
             if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/releases").call().map(|x| x.into_string()) {
                 if let Ok(v) = serde_json::from_str(&body) as serde_json::Result<serde_json::Value> {
-                    if let Some(obj) = v.as_array().and_then(|x| x.first()).and_then(|x| x.as_object()) {
-                        let name = obj.get("name").and_then(|x| x.as_str());
-                        let body = obj.get("body").and_then(|x| x.as_str());
+                    if let Some(v) = v.as_array() {
+                        for itm in v {
+                            if let Some(obj) = itm.as_object() {
+                                let name = obj.get("name").and_then(|x| x.as_str());
+                                let body = obj.get("body").and_then(|x| x.as_str());
+                                let is_prerelease = obj.get("prerelease").and_then(|x| x.as_bool()).unwrap_or_default();
+                                if is_prerelease { continue; }
 
-                        if let Some(name) = name {
-                            ::log::info!("Latest version: {}, current version: {}", name, util::get_version());
+                                if let Some(name) = name {
+                                    ::log::info!("Latest version: {}, current version: {}", name, util::get_version());
 
-                            if let Ok(latest_version) = semver::Version::parse(name.trim_start_matches('v')) {
-                                if let Ok(this_version) = semver::Version::parse(env!("CARGO_PKG_VERSION")) {
-                                    if latest_version > this_version {
-                                        update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                                    if let Ok(latest_version) = semver::Version::parse(name.trim_start_matches('v')) {
+                                        if let Ok(this_version) = semver::Version::parse(env!("CARGO_PKG_VERSION")) {
+                                            if latest_version > this_version {
+                                                update((name.to_owned(), body.unwrap_or_default().to_owned()));
+                                            }
+                                        }
                                     }
+                                    break;
                                 }
                             }
                         }
