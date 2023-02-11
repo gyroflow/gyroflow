@@ -498,7 +498,7 @@ Item {
             if (match && match[1]) {
                 let list = [];
                 const firstNum = parseInt(match[2], 10);
-                for (let i = firstNum; i < firstNum + 20; ++i) { // Try 20 parts
+                for (let i = firstNum; i < firstNum + 99; ++i) { // Max 99 parts
                     const newPath = urlStr.replace(match[1], x[1](match[1], i));
                     if (controller.file_exists(newPath) && (x[2]? x[2](newPath, list) : true)) {
                         list.push(newPath);
