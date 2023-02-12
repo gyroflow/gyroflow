@@ -1,0 +1,77 @@
+{
+  "name": "RED_KOMODO 6K_Atlas Orion 65mm@T5.6_6K 17-9_8k_3.79by1_12288x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "SCAN2FX",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Atlas Orion 65mm@T5.6",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 12288,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 12288,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 12288,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 2.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 23.976,
+  "crop": null,
+  "official": true,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.8058081197908542,
+    "camera_matrix": [
+      [
+        20974.45273853788,
+        0.0,
+        7899.079131285334
+      ],
+      [
+        0.0,
+        20893.80113519165,
+        3435.7472448383887
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1389159424066208,
+      2.6688388793873226,
+      -9.779410592956436,
+      7.139138429042054
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-01-04",
+  "compatible_settings": [],
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.5,
+    "max_sync_points": 3,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true
+  },
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "global_shutter": true,
+  "focal_length": 65.0,
+  "crop_factor": null
+}
