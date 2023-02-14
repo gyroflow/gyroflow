@@ -54,7 +54,7 @@
     ],
     "radial_distortion_limit": null
   },
-  "identifier": "gopro-hero5session-narrow-1920x1080@47950-no-eis",
+  "identifier": "gopro-hero5session-narrow-1920x1080@47952-no-eis",
   "calibrator_version": "1.4.2",
   "date": "2023-02-14",
   "compatible_settings": [
@@ -71,7 +71,7 @@
     { "width": 1280, "height": 720,  "fps": 23.976, "identifier": "gopro-hero5session-narrow-1280x720@23976-no-eis", "frame_readout_time": 25.02500 },
     { "width": 1280, "height": 720,  "fps": 25.0  , "identifier": "gopro-hero5session-narrow-1280x720@25000-no-eis", "frame_readout_time": 25.20000 },
     { "width": 1280, "height": 720,  "fps": 29.97 , "identifier": "gopro-hero5session-narrow-1280x720@29970-no-eis", "frame_readout_time": 25.69233 },
-    { "width": 1280, "height": 720,  "fps": 47.95 , "identifier": "gopro-hero5session-narrow-1280x720@47950-no-eis", "frame_readout_time": 13.88888 },
+    { "width": 1280, "height": 720,  "fps": 47.95 , "identifier": "gopro-hero5session-narrow-1280x720@47952-no-eis", "frame_readout_time": 13.88888 },
     { "width": 1280, "height": 720,  "fps": 50.0  , "identifier": "gopro-hero5session-narrow-1280x720@50000-no-eis", "frame_readout_time": 10.00000 },
     { "width": 1280, "height": 720,  "fps": 59.94 , "identifier": "gopro-hero5session-narrow-1280x720@59940-no-eis", "frame_readout_time": 12.51250 },
     { "width": 1280, "height": 720,  "fps": 90.0  , "identifier": "gopro-hero5session-narrow-1280x720@90000-no-eis", "frame_readout_time": 11.11111 },

@@ -275,8 +275,13 @@ impl LensProfile {
                 if x.contains_key("width") && x.contains_key("height") {
                     let (new_w, new_h) = (x["width"].as_u64().unwrap_or_default(), x["height"].as_u64().unwrap_or_default());
                     if new_w > 0 && new_h > 0 {
-                        let ratiow = new_w as f64 / cpy.calib_dimension.w as f64;
+                        let mut ratiow = new_w as f64 / cpy.calib_dimension.w as f64;
                         let ratioh = new_h as f64 / cpy.calib_dimension.h as f64;
+                        match x.get("digital_lens").and_then(|x| x.as_str()) {
+                            Some("gopro_superview") => { ratiow /= 1.33333333333; },
+                            Some("gopro_hyperview") => { ratiow /= 1.55555555555; },
+                            _ => { }
+                        }
                         fn scale(val: &mut usize, ratio: f64, pad: bool) {
                             *val = (*val as f64 * ratio).round() as usize;
                             if pad && *val % 2 != 0 { *val -= 1; }

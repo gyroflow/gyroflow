@@ -80,6 +80,7 @@ impl CameraIdentifier {
                                         "H" => id.lens_info = "Hyper".into(),
                                         "L" => id.lens_info = "Linear".into(),
                                         "N" => id.lens_info = "Narrow".into(),
+                                        "M" => id.lens_info = "Medium".into(),
                                         _ => id.lens_info = v.into()
                                     };
                                 }
