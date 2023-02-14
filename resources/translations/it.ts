@@ -68,7 +68,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Formato per la conversione R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
@@ -93,7 +93,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Suoni di notifica</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
@@ -171,8 +171,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Questo formato non è disponibile per il rendering.
+Il procedimento raccomandato è quello di esportare il file del progetto e utilizzare uno dei [plugin dell'editor video] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -256,7 +256,7 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Salvataggio...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -417,17 +417,17 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="55"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Nitidezza modello: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Sono stati rilevati alcuni modelli, ma la loro nitidezza media è stata &lt;b&gt;%1 px&lt;/b&gt; e il limite massimo è &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Non sono stati rilevati modelli di calibrazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="73"/>
@@ -439,14 +439,14 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Assicurati che il tuo filmato di calibrazione sia il più nitido possibile:
+- Usa un tempo di esposizione elevato
+- Usa una buona illuminazione
+- Sposta la fotocamera lentamente
+- Evita il mosso
+- Assicurati che il modello rimanga a fuoco.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+È possibile aumentare il limite di nitidezza nella sezione Avanzate.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -504,7 +504,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="13"/>
       <source>Export settings</source>
-      <translation>Esporta le impostazioni</translation>
+      <translation>Impostazioni di esportazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="202"/>
@@ -805,12 +805,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Risoluzione di elaborazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>La calibrazione dell&apos;obiettivo dovrebbe essere eseguita alla risoluzione massima o almeno a 4k. Cambia questa impostazione solo se sai cosa stai facendo.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -825,7 +825,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Il sensore è a otturatore globale</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>
@@ -982,7 +982,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Ricorda questa scelta</translation>
     </message>
   </context>
   <context>
@@ -2326,7 +2326,7 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Lente rilevata</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2366,17 +2366,17 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="64"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Errore di riproiezione</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Frame buoni</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
       <source>Average pattern sharpness</source>
-      <translation type="unfinished">Average pattern sharpness</translation>
+      <translation>Nitidezza media del modello</translation>
     </message>
   </context>
   <context>
@@ -2839,7 +2839,7 @@ Probabilmente la camera non registra dati di movimento in questa particolare mod
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Converting to %1 (%2)</source>
-      <translation type="unfinished">Converting to %1 (%2)</translation>
+      <translation>Conversione a %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>

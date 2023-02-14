@@ -93,7 +93,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Звуки уведомлений</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
@@ -827,7 +827,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Датчик является глобальной затвор</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>
@@ -1022,7 +1022,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="160"/>
       <source>Select log</source>
-      <translation type="unfinished">Select log</translation>
+      <translation>Выберите лог</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
@@ -2373,7 +2373,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Хорошие кадры</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
@@ -2667,7 +2667,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="106"/>
       <source>Zoom in and loop</source>
-      <translation type="unfinished">Zoom in and loop</translation>
+      <translation>Увеличить и увеличить</translation>
     </message>
   </context>
   <context>
@@ -2855,7 +2855,7 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="572"/>
       <source>full frame equiv.: %1 mm</source>
-      <translation type="unfinished">full frame equiv.: %1 mm</translation>
+      <translation>полный кадр.: %1 мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="808"/>
@@ -2890,7 +2890,7 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="844"/>
       <source>Toggle stabilization overview</source>
-      <translation type="unfinished">Toggle stabilization overview</translation>
+      <translation>Вкл/выкл обзор стабилизации</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="851"/>
