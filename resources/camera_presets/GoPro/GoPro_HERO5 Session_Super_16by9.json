@@ -1,0 +1,82 @@
+{
+  "name": "GoPro_HERO5 Session_Superview_16by9",
+  "note": "",
+  "calibrated_by": "Eddy",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO5 Session",
+  "lens_model": "Superview",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 33.37,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97,
+  "crop": null,
+  "official": true,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7529017391725531,
+    "camera_matrix": [
+      [
+        1161.2475853427329,
+        0.0,
+        1362.5867810283933
+      ],
+      [
+        0.0,
+        1162.9601368452295,
+        1019.2710546729567
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12748188244021216,
+      -0.060689342895118265,
+      0.015992340823867475,
+      0.0008021430251371082
+    ],
+    "radial_distortion_limit": null
+  },
+  "digital_lens": "gopro_superview",
+  "identifier": "gopro-hero5session-super-2704x2028@29970-no-eis",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-14",
+  "compatible_settings": [
+    { "width": 1920, "height": 1080, "fps": 23.976, "identifier": "gopro-hero5session-super-1920x1080@23976-no-eis", "frame_readout_time": 33.36667 },
+    { "width": 1920, "height": 1080, "fps": 25.0  , "identifier": "gopro-hero5session-super-1920x1080@25000-no-eis", "frame_readout_time": 32.00000 },
+    { "width": 1920, "height": 1080, "fps": 29.97 , "identifier": "gopro-hero5session-super-1920x1080@29970-no-eis", "frame_readout_time": 33.36667 },
+    { "width": 1920, "height": 1080, "fps": 47.95 , "identifier": "gopro-hero5session-super-1920x1080@47950-no-eis", "frame_readout_time": 16.05771 },
+    { "width": 1920, "height": 1080, "fps": 50.0  , "identifier": "gopro-hero5session-super-1920x1080@50000-no-eis", "frame_readout_time": 16.00000 },
+    { "width": 1920, "height": 1080, "fps": 59.94 , "identifier": "gopro-hero5session-super-1920x1080@59940-no-eis", "frame_readout_time": 16.68333 },
+
+    { "width": 2704, "height": 1520, "fps": 23.976, "identifier": "gopro-hero5session-super-2704x1520@23976-no-eis", "frame_readout_time": 33.36667 },
+    { "width": 2704, "height": 1520, "fps": 25.0  , "identifier": "gopro-hero5session-super-2704x1520@25000-no-eis", "frame_readout_time": 34.00000 },
+    { "width": 2704, "height": 1520, "fps": 29.97 , "identifier": "gopro-hero5session-super-2704x1520@29970-no-eis", "frame_readout_time": 33.36667 }
+  ],
+  "sync_settings": {
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "search_size": 0.5,
+    "max_sync_points": 5,
+    "every_nth_frame": 1,
+    "time_per_syncpoint": 0.5,
+    "do_autosync": true
+  }
+}

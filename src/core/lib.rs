@@ -193,47 +193,72 @@ impl StabilizationManager {
 
     pub fn load_lens_profile(&self, path: &str) -> Result<(), serde_json::Error> {
         let db = self.lens_profile_db.read();
-        if let Some(lens) = db.get_by_id(path) {
+        let (result, from_db) = if let Some(lens) = db.get_by_id(path) {
             *self.lens.write() = lens.clone();
-            Ok(())
+            (Ok(()), true)
         } else {
-            let mut lens = self.lens.write();
-            let result = lens.load_from_file(path);
-            let matching = lens.get_all_matching_profiles();
-            if matching.len() > 1 {
-                let (width, height, aspect, id) = {
-                    let params = self.params.read();
-                    (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default())
-                };
-                let mut found = false;
-                // Find best match for:
+            (self.lens.write().load_from_file(path), false)
+        };
+
+        let mut lens = self.lens.write();
+        let matching = lens.get_all_matching_profiles();
+        if matching.len() > 1 {
+            let (width, height, aspect, id, fps) = {
+                let params = self.params.read();
+                (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
+            };
+            let mut found = false;
+            if !id.is_empty() && lens.identifier == id {
+                found = true;
+            }
+            // Find best match for:
+            if !found {
                 // 1. Identifier
                 for x in &matching {
                     if !id.is_empty() && x.identifier == id {
                         *lens = x.clone(); found = true; break;
                     }
                 }
-                if !found {
-                    // 2. Resolution
-                    for x in &matching {
-                        if width == x.calib_dimension.w && height == x.calib_dimension.h {
-                            *lens = x.clone(); found = true; break;
-                        }
-                    }
-                }
-                if !found {
-                    // 3. Aspect ratio
-                    for x in &matching {
-                        let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
-                        if a == aspect {
-                            *lens = x.clone(); break;
-                        }
+            }
+            if !found {
+                // 2. Resolution and fps
+                for x in &matching {
+                    if width == x.calib_dimension.w && height == x.calib_dimension.h && fps == (x.fps * 100.0).round() as i32 {
+                        *lens = x.clone(); found = true; break;
                     }
                 }
             }
-            lens.resolve_interpolations(&db);
-            result
+            if !found {
+                // 3. Aspect ratio and fps
+                for x in &matching {
+                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                    if a == aspect && fps == (x.fps * 100.0).round() as i32 {
+                        *lens = x.clone(); break;
+                    }
+                }
+            }
+            if !found {
+                // 4. Resolution
+                for x in &matching {
+                    if width == x.calib_dimension.w && height == x.calib_dimension.h {
+                        *lens = x.clone(); found = true; break;
+                    }
+                }
+            }
+            if !found {
+                // 5. Aspect ratio
+                for x in &matching {
+                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                    if a == aspect {
+                        *lens = x.clone(); break;
+                    }
+                }
+            }
         }
+        if !from_db {
+            lens.resolve_interpolations(&db);
+        }
+        result
     }
 
     fn init_size(&self) {
