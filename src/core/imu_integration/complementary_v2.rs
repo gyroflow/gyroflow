@@ -411,7 +411,7 @@ impl ComplementaryFilterV2 {
 
         if self.do_adaptive_gain {
             let a_mag = (ax * ax + ay * ay + az * az).sqrt();
-            let w_mag = (self.w_prev.0*self.w_prev.0 + self.w_prev.2*self.w_prev.2 + self.w_prev.2*self.w_prev.2).sqrt();
+            let w_mag = (self.w_prev.0*self.w_prev.0 + self.w_prev.1*self.w_prev.1 + self.w_prev.2*self.w_prev.2).sqrt();
             let error = (a_mag - self.gravity).abs() / self.gravity;
 
             let gain_iir_alpha = 1.0 - (-dt/0.15).exp(); // 0.15s time constant filtering for gain
