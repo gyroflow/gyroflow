@@ -1301,6 +1301,7 @@ impl Controller {
                     let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
                     self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
+                self.update_offset_model();
                 self.request_recompute();
                 self.chart_data_changed();
                 self.keyframes_changed();

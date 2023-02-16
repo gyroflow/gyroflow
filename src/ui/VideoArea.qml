@@ -145,6 +145,7 @@ Item {
                 }
             }
             controller.set_prevent_recompute(false);
+            Qt.callLater(controller.recompute_gyro);
             Qt.callLater(controller.recompute_threaded);
         }
         function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {

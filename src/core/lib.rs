@@ -1168,6 +1168,7 @@ impl StabilizationManager {
                 gyro.set_offsets(offsets.iter().filter_map(|(k, v)| Some((k.parse().ok()?, v.as_f64()?))).collect());
                 self.keyframes.write().update_gyro(&gyro);
             }
+            obj.remove("offsets");
 
             if let Some(keyframes) = obj.get("keyframes") {
                 self.keyframes.write().deserialize(keyframes);

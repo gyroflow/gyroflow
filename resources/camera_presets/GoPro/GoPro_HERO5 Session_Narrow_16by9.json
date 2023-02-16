@@ -71,11 +71,31 @@
     { "width": 1280, "height": 720,  "fps": 23.976, "identifier": "gopro-hero5session-narrow-1280x720@23976-no-eis", "frame_readout_time": 25.02500 },
     { "width": 1280, "height": 720,  "fps": 25.0  , "identifier": "gopro-hero5session-narrow-1280x720@25000-no-eis", "frame_readout_time": 25.20000 },
     { "width": 1280, "height": 720,  "fps": 29.97 , "identifier": "gopro-hero5session-narrow-1280x720@29970-no-eis", "frame_readout_time": 25.69233 },
-    { "width": 1280, "height": 720,  "fps": 47.95 , "identifier": "gopro-hero5session-narrow-1280x720@47952-no-eis", "frame_readout_time": 13.88888 },
+    { "width": 1280, "height": 720,  "fps": 47.952, "identifier": "gopro-hero5session-narrow-1280x720@47952-no-eis", "frame_readout_time": 13.88888 },
     { "width": 1280, "height": 720,  "fps": 50.0  , "identifier": "gopro-hero5session-narrow-1280x720@50000-no-eis", "frame_readout_time": 10.00000 },
     { "width": 1280, "height": 720,  "fps": 59.94 , "identifier": "gopro-hero5session-narrow-1280x720@59940-no-eis", "frame_readout_time": 12.51250 },
     { "width": 1280, "height": 720,  "fps": 90.0  , "identifier": "gopro-hero5session-narrow-1280x720@90000-no-eis", "frame_readout_time": 11.11111 },
-    { "width": 1280, "height": 720,  "fps": 119.88, "identifier": "gopro-hero5session-narrow-1280x720@119880-no-eis", "frame_readout_time": 8.33 }
+    { "width": 1280, "height": 720,  "fps": 119.88, "identifier": "gopro-hero5session-narrow-1280x720@119880-no-eis", "frame_readout_time": 8.33 },
+
+    { "width": 1920, "height": 1080, "fps": 23.976, "identifier": "gopro-hero5session-narrow-1920x1080@23976-eis-y", "frame_readout_time": 25.02500 },
+    { "width": 1920, "height": 1080, "fps": 25.0  , "identifier": "gopro-hero5session-narrow-1920x1080@25000-eis-y", "frame_readout_time": 25.20000 },
+    { "width": 1920, "height": 1080, "fps": 29.97 , "identifier": "gopro-hero5session-narrow-1920x1080@29970-eis-y", "frame_readout_time": 25.69233 },
+    { "width": 2704, "height": 1520, "fps": 47.952, "identifier": "gopro-hero5session-narrow-1920x1080@47952-eis-y", "frame_readout_time": 26.69333 },
+    { "width": 1920, "height": 1080, "fps": 50.0  , "identifier": "gopro-hero5session-narrow-1920x1080@50000-eis-y", "frame_readout_time": 10.00000 },
+    { "width": 1920, "height": 1080, "fps": 59.94 , "identifier": "gopro-hero5session-narrow-1920x1080@59940-eis-y", "frame_readout_time": 12.51250 },
+    { "width": 1920, "height": 1080, "fps": 90.0  , "identifier": "gopro-hero5session-narrow-1920x1080@90000-eis-y", "frame_readout_time": 11.11111 },
+    { "width": 2704, "height": 1520, "fps": 23.976, "identifier": "gopro-hero5session-narrow-2704x1520@23976-eis-y", "frame_readout_time": 26.27625 },
+    { "width": 2704, "height": 1520, "fps": 25.0  , "identifier": "gopro-hero5session-narrow-2704x1520@25000-eis-y", "frame_readout_time": 25.20000 },
+    { "width": 2704, "height": 1520, "fps": 29.97 , "identifier": "gopro-hero5session-narrow-2704x1520@29970-eis-y", "frame_readout_time": 26.69333 },
+
+    { "width": 1280, "height": 720,  "fps": 23.976, "identifier": "gopro-hero5session-narrow-1280x720@23976-eis-y", "frame_readout_time": 25.02500 },
+    { "width": 1280, "height": 720,  "fps": 25.0  , "identifier": "gopro-hero5session-narrow-1280x720@25000-eis-y", "frame_readout_time": 25.20000 },
+    { "width": 1280, "height": 720,  "fps": 29.97 , "identifier": "gopro-hero5session-narrow-1280x720@29970-eis-y", "frame_readout_time": 25.69233 },
+    { "width": 1280, "height": 720,  "fps": 47.952, "identifier": "gopro-hero5session-narrow-1280x720@47952-eis-y", "frame_readout_time": 13.88888 },
+    { "width": 1280, "height": 720,  "fps": 50.0  , "identifier": "gopro-hero5session-narrow-1280x720@50000-eis-y", "frame_readout_time": 10.00000 },
+    { "width": 1280, "height": 720,  "fps": 59.94 , "identifier": "gopro-hero5session-narrow-1280x720@59940-eis-y", "frame_readout_time": 12.51250 },
+    { "width": 1280, "height": 720,  "fps": 90.0  , "identifier": "gopro-hero5session-narrow-1280x720@90000-eis-y", "frame_readout_time": 11.11111 },
+    { "width": 1280, "height": 720,  "fps": 119.88, "identifier": "gopro-hero5session-narrow-1280x720@119880-eis-y", "frame_readout_time": 8.33 }
   ],
   "sync_settings": {
     "initial_offset": 0,
