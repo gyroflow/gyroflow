@@ -135,9 +135,9 @@ checksum = "64cb94155d965e3d37ffbbe7cc5b82c3dd79dd33bd48e536f73d2cfb8d85506f"
 
 [[package]]
 name = "argmin"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f55c3d3a0aedc2017286d1f154ace0dabd6a61cdc8ee29b7db0e851a0200b14c"
+checksum = "897c18cfe995220bdd94a27455e5afedc7c688cbf62ad2be88ce7552452aa1b2"
 dependencies = [
  "anyhow",
  "argmin-math",
@@ -382,7 +382,7 @@ dependencies = [
 [[package]]
 name = "cl-sys"
 version = "0.4.2"
-source = "git+https://github.com/AdrianEddy/ocl#c7a0503e36fd9ddedb0226901d97fcf5a190ced3"
+source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
 dependencies = [
  "libc",
 ]
@@ -399,9 +399,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.4.0"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa2e27ae6ab525c3d369ded447057bca5438d86dc3a68f6faafb8269ba82ebf3"
+checksum = "77ed9a53e5d4d9c573ae844bfac6872b159cb1d1585a83b29e7a64b7eef7332a"
 dependencies = [
  "glob",
  "libc",
@@ -915,9 +915,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8edf6019dff2d92ad27c1e3ff82ad50a0aea5b01370353cc928bfdc33e95925c"
+checksum = "4e007a07a24de5ecae94160f141029e9a347282cfe25d1d58d85d845cf3130f1"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1036,7 +1036,7 @@ dependencies = [
  "simple-easing",
  "space",
  "telemetry-parser",
- "time 0.3.17",
+ "time 0.3.19",
  "walkdir",
  "wgpu",
  "wgpu-hal",
@@ -1754,7 +1754,7 @@ dependencies = [
 [[package]]
 name = "ocl"
 version = "0.19.4"
-source = "git+https://github.com/AdrianEddy/ocl#c7a0503e36fd9ddedb0226901d97fcf5a190ced3"
+source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
 dependencies = [
  "futures",
  "nodrop",
@@ -1767,7 +1767,7 @@ dependencies = [
 [[package]]
 name = "ocl-core"
 version = "0.11.3"
-source = "git+https://github.com/AdrianEddy/ocl#c7a0503e36fd9ddedb0226901d97fcf5a190ced3"
+source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
 dependencies = [
  "bitflags",
  "cl-sys",
@@ -1782,7 +1782,7 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.1"
-source = "git+https://github.com/AdrianEddy/ocl#c7a0503e36fd9ddedb0226901d97fcf5a190ced3"
+source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
 dependencies = [
  "num-traits 0.2.15",
 ]
@@ -1790,7 +1790,7 @@ dependencies = [
 [[package]]
 name = "ocl-interop"
 version = "0.1.5"
-source = "git+https://github.com/AdrianEddy/ocl#c7a0503e36fd9ddedb0226901d97fcf5a190ced3"
+source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
 dependencies = [
  "cgl",
  "gl_generator",
@@ -2467,9 +2467,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.17"
+version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a561bf4617eebd33bca6434b988f39ed798e527f51a1e797d0ee4f61c0a38376"
+checksum = "53250a3b3fed8ff8fd988587d8925d26a83ac3845d9e03b220b37f34c2b8d6c2"
 dependencies = [
  "libc",
  "num_threads",

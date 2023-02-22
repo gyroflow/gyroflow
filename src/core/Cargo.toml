@@ -73,8 +73,8 @@ walkdir = "2.3.2"
 
 log = "0.4.17"
 
-ocl = { version = "0.19.4", optional = true, git = "https://github.com/AdrianEddy/ocl" }
-ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/AdrianEddy/ocl" }
+ocl = { version = "0.19.4", optional = true, git = "https://github.com/cogciprocate/ocl" }
+ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/cogciprocate/ocl" }
 
 rustfft = "6.1.0"
 

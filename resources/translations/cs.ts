@@ -68,7 +68,7 @@ Obdélník je pouze vizuální pomůcka, která NEMÁ vliv na vykreslování.</t
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Formát pro konverzi R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
@@ -93,7 +93,7 @@ Obdélník je pouze vizuální pomůcka, která NEMÁ vliv na vykreslování.</t
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Zvuky upozornění</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
@@ -123,7 +123,7 @@ Obdélník je pouze vizuální pomůcka, která NEMÁ vliv na vykreslování.</t
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="363"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ok</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="366"/>
@@ -171,8 +171,8 @@ Obdélník je pouze vizuální pomůcka, která NEMÁ vliv na vykreslování.</t
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Tento formát není k dispozici pro renderování.
+Doporučený postup je exportovat soubor projektu a použít [pluginy video editoru] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -243,11 +243,11 @@ The recommended workflow is to export project file and use one of [video editor 
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation type="unfinished">Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.
+      <translation>Některé grafické enkodéry AMD mají chybu, kde je bitrate omezen na 20 Mb/s, pokud je cílový bitrate větší než 100 Mb/s.
 
-Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
-- Set output bitrate to less than 100 Mbps
-- Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+Prosím zkontrolujte bitrate souboru po renderování a pokud jste postiženi touto chybou, můžete buď:
+- Nastavte výstupní bitrate na méně než 100 Mbps
+- Použijte &quot;Vlastní nastavení enkodéru&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="343"/>
@@ -256,7 +256,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Ukládání...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -377,7 +377,7 @@ Pokud máte moderní zařízení, nejnovější GPU ovladače a myslíte, že se
     <message>
       <location filename="../../src/ui/App.qml" line="595"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Audio enkodér nemohl zpracovat vstupní data. Zkuste odškrtnout &quot;Exportovat audio&quot; v nastavení exportu.</translation>
     </message>
   </context>
   <context>
@@ -419,17 +419,17 @@ Pokud máte moderní zařízení, nejnovější GPU ovladače a myslíte, že se
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="55"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Ostrost vzoru: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Byly zjištěny nějaké vzory, ale jejich průměrná ostrost byla &lt;b&gt;%1 px&lt;/b&gt; a maximální limit je &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Nebyly nalezeny žádné kalibrační vzorce.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="73"/>
@@ -441,14 +441,14 @@ Pokud máte moderní zařízení, nejnovější GPU ovladače a myslíte, že se
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Ujistěte se, že vaše kalibrační záběry jsou co nejostrější:
+- Použijte vysokou rychlost závěrky
+- Použijte dobré osvětlení
+- Pohybujte kamerou pomalu
+- Vyhněte se rozostření pohybu
+- Ujistěte se, že vzor zůstane zaostřený.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+Limit ostrosti můžete zvýšit v sekci Pokročilé.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -757,7 +757,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="462"/>
       <source>Do you want to update the output resolution to %1?</source>
-      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+      <translation>Chcete aktualizovat výstupní rozlišení na %1?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="473"/>
@@ -777,27 +777,27 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="509"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Ohnisková vzdálenost</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="511"/>
       <source>Lens native focal length</source>
-      <translation type="unfinished">Lens native focal length</translation>
+      <translation>Nativní ohnisková délka objektivu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="515"/>
       <source>mm</source>
-      <translation type="unfinished">mm</translation>
+      <translation>mm</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="524"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Crop snímače</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="528"/>
       <source>x</source>
-      <translation type="unfinished">x</translation>
+      <translation>x</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="540"/>
@@ -807,12 +807,12 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Zpracovávané rozlišení</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>Kalibrace objektivu by měla být zpracována v plném rozlišení nebo alespoň 4k. Změňte toto nastavení pouze pokud víte, co děláte.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -827,7 +827,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Senzor má globální závěrku</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>

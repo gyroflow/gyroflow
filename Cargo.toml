@@ -41,7 +41,7 @@ argh = "0.1.10"
 indicatif = "0.17"
 rustfft = "6.1.0"
 crc32fast = "1.3.2"
-rodio = { default-features = false, features = ["vorbis"], version = "0.16.0" }
+rodio = { default-features = false, features = ["vorbis"], version = "0.17.0" }
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}

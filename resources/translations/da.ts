@@ -424,7 +424,7 @@ Hvis du har en moderne enhed, seneste GPU drivere, og du tror, at dette ikke bø
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation>Nogle mønstre blev fundet, men deres gennemsnitlige skarphed var &lt;b&gt;%1 px&lt;/b&gt; og max grænse er &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Nogle mønstre blev fundet, men deres gennemsnitlige skarphed var &lt;b&gt;%1 px&lt;/b&gt; og maks. grænse er &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
@@ -807,7 +807,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation>Behandler opløsning</translation>
+      <translation>Behandlingsopløsning</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
@@ -1375,7 +1375,7 @@ Vil du indsende din profil?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Converting to %1 %2...</source>
-      <translation type="unfinished">Converting to %1 %2...</translation>
+      <translation>Konverterer til %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -2369,7 +2369,7 @@ Sørg for at du har en ordentlig rolling shutter værdi før synkronisering.</tr
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="64"/>
       <source>Reprojection error</source>
-      <translation>Reprojektions fejl</translation>
+      <translation>Afvigelse i genprojektion</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
