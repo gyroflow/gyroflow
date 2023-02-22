@@ -184,7 +184,7 @@ pub struct RenderQueue {
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
-    apply_to_all: qt_method!(fn(&mut self, data: String, additional_data: String)),
+    apply_to_all: qt_method!(fn(&mut self, data: String, additional_data: String, to_job_id: u32)),
 
     pause_flag: Arc<AtomicBool>,
 
@@ -888,6 +888,17 @@ impl RenderQueue {
             this.processing_progress(job_id, progress);
         });
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
+            if let Some(job) = this.jobs.get(&job_id) {
+                if std::path::Path::new(&job.render_options.output_path).exists() {
+                    let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
+                    update_model!(this, job_id, itm {
+                        itm.error_string = msg.clone();
+                        itm.status = JobStatus::Error;
+                    });
+                    this.error(job_id, msg, QString::default(), QString::default());
+                }
+            }
+
             this.processing_done(job_id, false);
         });
 
@@ -955,25 +966,24 @@ impl RenderQueue {
                     let stab = Arc::new(stab);
 
                     let stab2 = stab.clone();
-                    let loaded = util::qt_queued_callback_mut(self, move |this, (render_options, ask_path): (RenderOptions, bool)| {
-                        let out_path = render_options.output_path.clone();
+                    let loaded = util::qt_queued_callback_mut(self, move |this, render_options: RenderOptions| {
                         this.add_internal(job_id, stab2.clone(), render_options, additional_data2.clone(), QString::default());
-
-                        if ask_path && std::path::Path::new(&out_path).exists() {
-                            let msg = QString::from(format!("file_exists:{}", out_path));
-                            update_model!(this, job_id, itm {
-                                itm.error_string = msg.clone();
-                                itm.status = JobStatus::Error;
-                            });
-                            this.error(job_id, msg, QString::default(), QString::default());
-                        }
                     });
                     let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
                         update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
                     });
-                    let apply_preset = util::qt_queued_callback_mut(self, move |this, preset: String| {
-                        this.apply_to_all(preset, additional_data3.clone());
+                    let apply_preset = util::qt_queued_callback_mut(self, move |this, (preset, to_job_id): (String, u32)| {
+                        this.apply_to_all(preset, additional_data3.clone(), to_job_id);
                         this.added(job_id);
+                    });
+                    let processing2 = processing.clone();
+                    let err2 = err.clone();
+                    let do_autosync_queued = util::qt_queued_callback_mut(self, move |_this, (path, duration_ms, stab, sync_options): (String, f64, Arc<StabilizationManager>, serde_json::Value)| {
+                        let processing2 = processing2.clone();
+                        let err2 = err2.clone();
+                        core::run_threaded(move || {
+                            Self::do_autosync(&path, duration_ms, stab, processing2, err2, sync_options);
+                        });
                     });
 
                     core::run_threaded(move || {
@@ -1007,7 +1017,7 @@ impl RenderQueue {
                                 if video_path.is_empty() {
                                     // It's a preset
                                     if let Ok(data) = std::fs::read_to_string(&path) {
-                                        apply_preset(data);
+                                        apply_preset((data, 0));
                                     }
                                     return;
                                 }
@@ -1024,7 +1034,7 @@ impl RenderQueue {
                                 Ok(obj) => {
                                     if let Some(out) = obj.get("output") {
                                         if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
-                                            loaded((render_options2, true));
+                                            loaded(render_options2);
                                         }
                                     }
                                     if let Some(out) = obj.get("videofile").and_then(|x| x.as_str()) {
@@ -1111,13 +1121,18 @@ impl RenderQueue {
 
                                 // println!("{}", stab.export_gyroflow_data(true, serde_json::to_string(&render_options).unwrap_or_default()));
 
-                                loaded((render_options, true));
+                                loaded(render_options);
+
+                                let default_preset = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
+                                if let Ok(data) = std::fs::read_to_string(&default_preset) {
+                                    // Apply default preset
+                                    apply_preset((data, job_id));
+                                }
+                                do_autosync_queued((path.clone(), info.duration_ms, stab.clone(), sync_options));
 
                                 if let Err(e) = fetch_thumb(&path, ratio) {
                                     err(("An error occured: %1".to_string(), e.to_string()));
                                 }
-
-                                Self::do_autosync(&path, info.duration_ms, stab.clone(), processing, err.clone(), sync_options);
 
                                 processing_done(());
                             }
@@ -1140,7 +1155,18 @@ impl RenderQueue {
         };
         let fps = stab.params.read().fps;
 
-        let sync_settings = stab.lens.read().sync_settings.clone();
+        let mut sync_settings = stab.lens.read().sync_settings.clone();
+        if let serde_json::Value::Object(obj) = &sync_options {
+            if obj.len() > 1 {
+                if let Some(serde_json::Value::Object(ref mut sync_settings)) = sync_settings {
+                    for (k, v) in obj {
+                        sync_settings.insert(k.clone(), v.clone());
+                    }
+                } else {
+                    sync_settings = Some(sync_options.clone());
+                }
+            }
+        }
         if let Some(sync_settings) = sync_settings {
             if has_gyro && !has_sync_points && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
                 // ----------------------------------------------------------------------------
@@ -1253,10 +1279,11 @@ impl RenderQueue {
         }
     }
 
-    pub fn apply_to_all(&mut self, data: String, additional_data: String) {
+    pub fn apply_to_all(&mut self, data: String, additional_data: String, to_job_id: u32) {
         ::log::debug!("Applying preset {}", &data);
+        let data_parsed: serde_json::Result<serde_json::Value> = serde_json::from_str(&data);
         let mut new_output_options = None;
-        if let Ok(obj) = serde_json::from_str(&data) as serde_json::Result<serde_json::Value> {
+        if let Ok(obj) = &data_parsed {
             if let Some(output) = obj.get("output") {
                 new_output_options = Some(output.clone());
             }
@@ -1277,6 +1304,7 @@ impl RenderQueue {
         let data = data.as_bytes();
         let mut q = self.queue.borrow_mut();
         for (job_id, job) in self.jobs.iter_mut() {
+            if to_job_id > 0 && *job_id != to_job_id { continue; }
             if job.queue_index < q.row_count() as usize {
                 let mut itm = q[job.queue_index].clone();
                 if itm.status == JobStatus::Queued {
@@ -1286,6 +1314,11 @@ impl RenderQueue {
                     let mut sync_options = serde_json::Value::default();
                     if let Ok(additional_data) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
                         if let Some(sync) = additional_data.get("synchronization") {
+                            sync_options = sync.clone();
+                        }
+                    }
+                    if let Ok(obj) = &data_parsed {
+                        if let Some(sync) = obj.get("synchronization") {
                             sync_options = sync.clone();
                         }
                     }

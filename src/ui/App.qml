@@ -333,7 +333,7 @@ Rectangle {
                                         presetFileDialog.presetData = finalData;
                                         presetFileDialog.open2();
                                     } else { // Apply
-                                        render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson());
+                                        render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson(), 0);
                                     }
                                 });
                             break;

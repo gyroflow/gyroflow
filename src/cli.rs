@@ -321,10 +321,10 @@ pub fn run(open_file: &mut String) -> bool {
                         for preset in &presets {
                             log::info!("Applying preset {}", preset);
                             if preset.starts_with('{') {
-                                queue.apply_to_all(preset.clone(), additional_data.to_string());
+                                queue.apply_to_all(preset.clone(), additional_data.to_string(), 0);
                                 applying_preset = true;
                             } else if let Ok(data) = std::fs::read_to_string(&preset) {
-                                queue.apply_to_all(data, additional_data.to_string());
+                                queue.apply_to_all(data, additional_data.to_string(), 0);
                                 applying_preset = true;
                             }
                         }
