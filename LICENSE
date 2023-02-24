@@ -1,12 +1,3 @@
-**Gyroflow Core - Additional Permissions:**
-As additional permission under section 7, you are allowed to distribute
-[`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core) through an app store, even if that store has restrictive
-terms and conditions that are incompatible with the GPL, provided that
-the source is also available under the GPL with or without this permission
-through a channel without those restrictive terms and conditions.
-
----
-
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
@@ -681,3 +672,13 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+---
+
+**Additional terms:**
+As an additional permission under section 7, you are allowed to distribute
+Gyroflow and [`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core)
+through an app store, even if that store has restrictive terms and conditions
+that are incompatible with the GPLv3 license, provided that
+the source is also available under the GPLv3 with or without this permission
+through a channel without those restrictive terms and conditions.
