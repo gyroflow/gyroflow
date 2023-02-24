@@ -882,9 +882,9 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
-                "quaternions":        if !thin && (input_file.path != gyro.file_path || !gyro.org_quaternions.is_empty()) { util::compress_to_base91(&gyro.org_quaternions) } else { None },
-                "image_orientations": if !thin && input_file.path != gyro.file_path { util::compress_to_base91(&gyro.image_orientations) } else { None },
-                "gravity_vectors":    if !thin && input_file.path != gyro.file_path && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
+                "quaternions":        if !thin && !gyro.org_quaternions.is_empty() { util::compress_to_base91(&gyro.org_quaternions) } else { None },
+                "image_orientations": if !thin { util::compress_to_base91(&gyro.image_orientations) } else { None },
+                "gravity_vectors":    if !thin && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
                 // "smoothed_quaternions": smooth_quats
             },
 

@@ -382,7 +382,7 @@ dependencies = [
 [[package]]
 name = "cl-sys"
 version = "0.4.2"
-source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
+source = "git+https://github.com/cogciprocate/ocl#d0f4b61a872cb7e7fb4c04091a0d34ba774c6ec6"
 dependencies = [
  "libc",
 ]
@@ -1754,7 +1754,7 @@ dependencies = [
 [[package]]
 name = "ocl"
 version = "0.19.4"
-source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
+source = "git+https://github.com/cogciprocate/ocl#d0f4b61a872cb7e7fb4c04091a0d34ba774c6ec6"
 dependencies = [
  "futures",
  "nodrop",
@@ -1767,7 +1767,7 @@ dependencies = [
 [[package]]
 name = "ocl-core"
 version = "0.11.3"
-source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
+source = "git+https://github.com/cogciprocate/ocl#d0f4b61a872cb7e7fb4c04091a0d34ba774c6ec6"
 dependencies = [
  "bitflags",
  "cl-sys",
@@ -1782,7 +1782,7 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.1"
-source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
+source = "git+https://github.com/cogciprocate/ocl#d0f4b61a872cb7e7fb4c04091a0d34ba774c6ec6"
 dependencies = [
  "num-traits 0.2.15",
 ]
@@ -1790,7 +1790,7 @@ dependencies = [
 [[package]]
 name = "ocl-interop"
 version = "0.1.5"
-source = "git+https://github.com/cogciprocate/ocl#56ab71d21efd88c8a2eef8078a206aee6735319a"
+source = "git+https://github.com/cogciprocate/ocl#d0f4b61a872cb7e7fb4c04091a0d34ba774c6ec6"
 dependencies = [
  "cgl",
  "gl_generator",
@@ -1972,9 +1972,9 @@ checksum = "74605f360ce573babfe43964cbe520294dcb081afbf8c108fc6e23036b4da2df"
 
 [[package]]
 name = "prost"
-version = "0.11.6"
+version = "0.11.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21dc42e00223fc37204bd4aa177e69420c604ca4a183209a8f9de30c6d934698"
+checksum = "3933d3ac2717077b3d5f42b40f59edfb1fb6a8c14e1c7de0f38075c4bac8e314"
 dependencies = [
  "bytes",
  "prost-derive",
@@ -1982,9 +1982,9 @@ dependencies = [
 
 [[package]]
 name = "prost-derive"
-version = "0.11.6"
+version = "0.11.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bda8c0881ea9f722eb9629376db3d0b903b462477c1aafcb0566610ac28ac5d"
+checksum = "8e9935362e8369bc3acd874caeeae814295c504c2bdbcde5c024089cf8b4dc12"
 dependencies = [
  "anyhow",
  "itertools",
@@ -2376,9 +2376,9 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "syn"
-version = "1.0.107"
+version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f4064b5b16e03ae50984a5a8ed5d4f8803e6bc1fd170a3cda91a1be4b18e3f5"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2747,9 +2747,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.6"
+version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "feff0a412894d67223777b6cc8d68c0dab06d52d95e9890d5f2d47f10dd9366c"
+checksum = "b3c11d2adfe89e9da42f01023d2c2998c53aa916ef4d26ca716dbb983725c0d2"
 dependencies = [
  "bytemuck",
  "safe_arch",
