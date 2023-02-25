@@ -881,6 +881,7 @@ impl StabilizationManager {
                 "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
+                "detected_source":    gyro.detected_source,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
                 "quaternions":        if !thin && !gyro.org_quaternions.is_empty() { util::compress_to_base91(&gyro.org_quaternions) } else { None },
                 "image_orientations": if !thin { util::compress_to_base91(&gyro.image_orientations) } else { None },
@@ -1057,7 +1058,7 @@ impl StabilizationManager {
                     if raw_imu.is_some() {
                         let md = crate::gyro_source::FileMetadata {
                             imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
-                            detected_source: Some("Gyroflow file".to_string()),
+                            detected_source: Some(obj.get("detected_source").and_then(|x| x.as_str()).unwrap_or("Gyroflow file").to_string()),
                             quaternions,
                             gravity_vectors,
                             image_orientations,
