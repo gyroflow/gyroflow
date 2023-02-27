@@ -154,7 +154,7 @@ if [ "$1" == "deploy" ] || [ "$1" == "deploy-universal" ]; then
         # Certificate needs to be "Developer ID Application"
 
         OBJECTS=(
-            "Frameworks/mdk.framework/Versions/A/libffmpeg.5.dylib"
+            "Frameworks/mdk.framework/Versions/A/libffmpeg.6.dylib"
             #"Frameworks/mdk.framework/Versions/A/libass.9.dylib"
             "Frameworks/mdk.framework/Versions/A/libmdk-braw.dylib"
             "Frameworks/mdk.framework/Versions/A/libmdk-r3d.dylib"
