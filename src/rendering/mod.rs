@@ -76,7 +76,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_nvenc",        true),
-                #[cfg(target_os = "windows")]
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_amf",          true),
                 #[cfg(target_os = "linux")]
                 ("h264_vaapi",        true),
@@ -95,7 +95,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_videotoolbox", true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_nvenc",        true),
-                #[cfg(target_os = "windows")]
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_amf",          true),
                 #[cfg(target_os = "linux")]
                 ("hevc_vaapi",        true),
@@ -108,6 +108,17 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 #[cfg(target_os = "android")]
                 ("hevc_mediacodec",   true),
                 ("libx265",           false),
+            ],
+            "AV1" => vec![
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("av1_nvenc",        true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("av1_amf",          true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("av1_qsv",          true),
+                ("librav1e",         false),
+                ("libaom-av1",       false),
+                ("libsvtav1",        false),
             ],
             "ProRes" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -123,6 +134,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "H.265/HEVC" => vec![("libx265", false)],
             "ProRes"     => vec![("prores_ks", false)],
             "DNxHD"      => vec![("dnxhd", false)],
+            "AV1"        => vec![("librav1e", false), ("libaom-av1", false), ("libsvtav1", false)],
             _            => vec![]
         }
     };

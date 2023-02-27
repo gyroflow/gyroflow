@@ -73,7 +73,7 @@ pub struct RenderOptions {
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
         let codec_info = match self.codec.as_ref() {
-            "H.264/AVC" | "H.265/HEVC" => format!("{} {:.0} Mbps", self.codec, self.bitrate),
+            "H.264/AVC" | "H.265/HEVC" | "AV1" => format!("{} {:.0} Mbps", self.codec, self.bitrate),
             "DNxHD" => self.codec_options.clone(),
             "ProRes" => format!("{} {}", self.codec, self.codec_options),
             _ => self.codec.clone()

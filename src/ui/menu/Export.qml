@@ -21,15 +21,21 @@ MenuItem {
 
     property bool isOsx: Qt.platform.os == "osx";
 
-    // If changing, make sure it's in sync with render_queue.rs:get_output_path
-    property var exportFormats: [
-        { "name": "H.264/AVC",     "max_size": [4096, 2160],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
-        { "name": "H.265/HEVC",    "max_size": [8192, 8192],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
-        { "name": "ProRes",        "max_size": [16384, 16384], "extension": ".mov",      "gpu": isOsx, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
-        { "name": "DNxHD",         "max_size": [8192, 8192],   "extension": ".mov",      "gpu": false, "audio": true,  "variants": [/*"DNxHD", */"DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"] },
-        { "name": "EXR Sequence",  "max_size": false,          "extension": "_%05d.exr", "gpu": false, "audio": false, "variants": [] },
-        { "name": "PNG Sequence",  "max_size": false,          "extension": "_%05d.png", "gpu": false, "audio": false, "variants": ["8-bit", "16-bit"] },
-    ];
+    property var exportFormats: {
+        let list = [
+            // If changing, make sure it's in sync with render_queue.rs:get_output_path
+            { "name": "H.264/AVC",     "max_size": [4096, 2160],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+            { "name": "H.265/HEVC",    "max_size": [8192, 8192],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+            { "name": "ProRes",        "max_size": [16384, 16384], "extension": ".mov",      "gpu": isOsx, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
+            { "name": "DNxHD",         "max_size": [8192, 8192],   "extension": ".mov",      "gpu": false, "audio": true,  "variants": [/*"DNxHD", */"DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"] },
+            { "name": "EXR Sequence",  "max_size": false,          "extension": "_%05d.exr", "gpu": false, "audio": false, "variants": [] },
+            { "name": "PNG Sequence",  "max_size": false,          "extension": "_%05d.png", "gpu": false, "audio": false, "variants": ["8-bit", "16-bit"] },
+        ];
+        // if (Qt.platform.os == "windows" || Qt.platform.os == "linux") {
+        //     list.push({ "name": "AV1", "max_size": [8192, 8192], "extension": ".mp4", "gpu": true, "audio": true, "variants": [ ] });
+        // }
+        return list;
+    };
 
     Settings {
         id: settings;
@@ -320,7 +326,7 @@ MenuItem {
     Label {
         position: Label.LeftPosition;
         text: qsTr("Bitrate");
-        visible: outCodec === "H.264/AVC" || outCodec === "H.265/HEVC";
+        visible: outCodec === "H.264/AVC" || outCodec === "H.265/HEVC" || outCodec === "AV1";
 
         NumberField {
             id: bitrate;

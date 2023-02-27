@@ -419,6 +419,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
         "DNxHD",
         "EXR Sequence",
         "PNG Sequence",
+        "AV1",
     ];
 
     // Default settings - project file will override this
