@@ -32,7 +32,7 @@ crc32fast = "1.3.2"
 byteorder = "1.4.3"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = { version = "0.3.17", features = ["local-offset"] }
+time = { version = "0.3.20", features = ["local-offset"] }
 itertools = "0.10.5"
 num = "0.4.0"
 base91 = "0.1.0"

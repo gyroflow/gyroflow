@@ -67,7 +67,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Formato para conversión R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
@@ -92,7 +92,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Sons de notificación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
@@ -170,8 +170,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Este formato non está dispoñible para renderizar.
+O fluxo de traballo recomendado é exportar o ficheiro do proxecto e utilizar un dos [complementos do editor de vídeo] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -255,7 +255,7 @@ Comprobe a taxa de bits do ficheiro despois da renderización e se &apos;está a
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Gardando...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -417,17 +417,17 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="55"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Nitidez do patrón: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Detectáronse algúns patróns, pero a súa nitidez media foi de &lt;b&gt;%1 px&lt;/b&gt; e o límite máximo é &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Non se detectaron patróns de calibración.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="73"/>
@@ -439,14 +439,14 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Asegúrese de que a imaxe de calibración sexa o máis nítida posible:
+- Use alta velocidade de obturación
+- Use unha boa iluminación
+- Mova a cámara lentamente
+- Evite o desenfoque de movemento
+- Asegúrese de que o patrón permaneza enfocado.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -805,12 +805,12 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Resolución do procesamento</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>A calibración da lente debe procesarse a resolución completa ou polo menos a 4k. Cambie esta configuración só se sabe o que está&apos; a facer.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -825,7 +825,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>O sensor é o obturador global</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>
@@ -982,7 +982,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Lembrar esta opción</translation>
     </message>
   </context>
   <context>
@@ -1373,7 +1373,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Converting to %1 %2...</source>
-      <translation type="unfinished">Converting to %1 %2...</translation>
+      <translation>Convertindo a %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -2328,7 +2328,7 @@ Asegúrese de ter configurado o valor do efecto xelatina adecuado antes de sincr
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Lente detectada</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2368,17 +2368,17 @@ Asegúrese de ter configurado o valor do efecto xelatina adecuado antes de sincr
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="64"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Erro de reproxección</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Fotogramas bos</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
       <source>Average pattern sharpness</source>
-      <translation type="unfinished">Average pattern sharpness</translation>
+      <translation>Nitidez media do patrón</translation>
     </message>
   </context>
   <context>
@@ -2841,7 +2841,7 @@ Probablemente, a cámara non&apos; grava datos de movemento neste modo de dispar
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Converting to %1 (%2)</source>
-      <translation type="unfinished">Converting to %1 (%2)</translation>
+      <translation>Convertendo a %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>

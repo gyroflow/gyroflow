@@ -135,7 +135,7 @@ impl<'a> FfmpegProcessor<'a> {
         let decoder_fps = stream.rate().into();
 
         let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?;
-        decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3, safe: false });
+        decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3 });
 
         let mut hw_backend = String::new();
         if gpu_decoding {

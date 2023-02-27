@@ -58,14 +58,14 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf6
+          key: gf7
 
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-6
+          key: ${{ runner.os }}-gf-ext-7
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: ac12118f02e127ef1fe9806ffe1a23e7db7ef988
+          vcpkgGitCommitId: 223d33be7d3ec6c3d64381ca37f501b8c87dda6a
           doNotCache: true
 
       - name: Setup MacOS deployment target
