@@ -103,7 +103,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="352"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation>Sei sicuro di voler cancellare tutte le impostazioni e ripristinare i valori standard?</translation>
+      <translation>Sei sicuro di voler cancellare tutte le impostazioni e ripristinare i valori di default?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="353"/>
@@ -325,7 +325,7 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
       <translation>Questo encoder richiede una libreria esterna con licenza GPL.
-Accetti la [licenza GPL] e vuoi scaricare il codec aggiuntivo?</translation>
+Vuoi accettare la [licenza GPL] e scaricare il codec aggiuntivo?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="555"/>
@@ -353,7 +353,7 @@ Se il problema persiste dopo l'aggiornamento, probabilmente la tua GPU non suppo
       <location filename="../../src/ui/App.qml" line="580"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>L'encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
+      <translation>L&apos; encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="586"/>
@@ -375,7 +375,7 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
     <message>
       <location filename="../../src/ui/App.qml" line="595"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation>L'encoder audio non è riuscito ad elaborare i dati in ingresso. Prova a deselezionare &quot;Esporta audio&quot; nelle impostazioni di Esportazione.</translation>
+      <translation>L&apos; encoder audio non è riuscito a elaborare i dati in ingresso. Prova a deselezionare &quot;Esporta audio&quot; nelle impostazioni di Esportazione.</translation>
     </message>
   </context>
   <context>
@@ -941,7 +941,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation>predefinito</translation>
+      <translation>preset</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
@@ -1407,7 +1407,7 @@ Vuoi inviare il tuo profilo?</translation>
       <location filename="../../src/ui/RenderQueue.qml" line="170"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
-      <translation>L'encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
+      <translation>L&apos; encoder con accelerazione GPU non supporta questo formato di pixel (%1). Vuoi convertire il formato in uno supportato o mantenere quello originale e renderizzare sulla CPU?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="189"/>

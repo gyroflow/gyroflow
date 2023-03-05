@@ -817,7 +817,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
       <source>Radial distortion limit</source>
-      <translation>辐射扭曲限制</translation>
+      <translation>径向畸变限制</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="606"/>
@@ -935,7 +935,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="329"/>
       <source>Distortion coefficients</source>
-      <translation>失真系数</translation>
+      <translation>畸变系数</translation>
     </message>
   </context>
   <context>
@@ -1110,7 +1110,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="369"/>
       <source>Integration method</source>
-      <translation>集成方式</translation>
+      <translation>积分方法</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="377"/>
@@ -2188,7 +2188,7 @@ Then try to match these angles to gyroscope angles.</source>
       <source>Undistort optical flow points using gyro and candidate offset.
 Then calculate lengths of the optical flow lines.
 Resulting offset is the one where lines were the shortest, meaning the video was moving the least visually.</source>
-      <translation>使用陀螺仪和预选偏移量来消除失真的光学流量点。
+      <translation>使用陀螺仪和预选偏移量来消除畸变的光学流量点。
 然后计算光学流量线的长度。
 最短的线即是结果偏移量，这意味着在此处视频在视觉上的位移是最小的。</translation>
     </message>
@@ -2277,7 +2277,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="61"/>
       <source>Distortion model</source>
-      <translation>失真模型</translation>
+      <translation>畸变模型</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="62"/>

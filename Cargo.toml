@@ -59,7 +59,7 @@ ureq = "2.6.2"
 url = "2.3.1"
 whoami = "1.3.0"
 tar = "0.4.38"
-lru = "0.9.0"
+lru = "0.10.0"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 

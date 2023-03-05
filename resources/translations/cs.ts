@@ -875,7 +875,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="102"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ano</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="182"/>
@@ -979,12 +979,12 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Don&apos;t show again</source>
-      <translation type="unfinished">Don&apos;t show again</translation>
+      <translation>Již nezobrazovat</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Zapamatovat tuto volbu</translation>
     </message>
   </context>
   <context>
@@ -1022,7 +1022,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="160"/>
       <source>Select log</source>
-      <translation type="unfinished">Select log</translation>
+      <translation>Vyberte protokol</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="178"/>
@@ -1191,7 +1191,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="224"/>
       <source>Save project file</source>
-      <translation type="unfinished">Save project file</translation>
+      <translation>Uložit projekt</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
@@ -1234,7 +1234,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="166"/>
       <source>All logs combined</source>
-      <translation type="unfinished">All logs combined</translation>
+      <translation>Všechny logy kombinované</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="374"/>
@@ -1284,12 +1284,12 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Essential matrix</source>
-      <translation type="unfinished">Essential matrix</translation>
+      <translation>Základní matice</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Visual features</source>
-      <translation type="unfinished">Visual features</translation>
+      <translation>Vizuální funkce</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="595"/>
@@ -1375,7 +1375,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Converting to %1 %2...</source>
-      <translation type="unfinished">Converting to %1 %2...</translation>
+      <translation>Převádí se na %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -1477,77 +1477,77 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="624"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Nastavení fronty</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Počet paralelních renderování</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Výchozí akce přepsání</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="675"/>
       <source>Ask</source>
-      <translation type="unfinished">Ask</translation>
+      <translation>Zeptat se</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="677"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Přepsat soubor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="678"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Přejmenovat soubor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="679"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Přeskočit soubor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="684"/>
       <source>Export mode</source>
-      <translation type="unfinished">Export mode</translation>
+      <translation>Režim exportu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="685"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Stabilizované video</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="686"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>Soubor projektu</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="687"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>Soubor projektu (včetně gyroskopických dat)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Soubor projektu (včetně zpracovaných gyroskopických údajů)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Show queue when adding an item</source>
-      <translation type="unfinished">Show queue when adding an item</translation>
+      <translation>Zobrazit frontu při přidání položky</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="693"/>
       <source>Clear render queue</source>
-      <translation type="unfinished">Clear render queue</translation>
+      <translation>Vymazat frontu renderování</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="694"/>
       <source>Are you sure you want to remove all items from the render queue?</source>
-      <translation type="unfinished">Are you sure you want to remove all items from the render queue?</translation>
+      <translation>Opravdu chcete odstranit všechny položky z fronty renderování?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="395"/>
@@ -1774,7 +1774,7 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Svou předvolbu můžete také uložit jako `default.gyroflow` v adresáři `camera_presets` a bude vždy použita na každý nahraný video soubor.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
@@ -1855,7 +1855,7 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>Only within trim range</source>
-      <translation type="unfinished">Only within trim range</translation>
+      <translation>Stabilizovat pouze v rozsahu ořezu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
@@ -1954,12 +1954,12 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>Při upravování rychlosti přiblížení pomocí keyframů se doporučuje použít metodu Envelope. Gaussovský filtr může vést k černým okrajům v zorném poli.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>Metoda přiblížení</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
@@ -2169,12 +2169,12 @@ Toto zdvojnásobí čas výpočtu, takže zkontrolujte pouze počáteční bod a
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="344"/>
       <source>Pose method</source>
-      <translation type="unfinished">Pose method</translation>
+      <translation>Posuzní metoda</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="357"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>Metoda posunu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="367"/>
@@ -2262,27 +2262,27 @@ Před synchronizací se ujistěte, že máte nastavenou hodnotu pohybové neostr
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Ohnisková vzdálenost</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Crop snímače</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="60"/>
       <source>Asymmetrical</source>
-      <translation type="unfinished">Asymmetrical</translation>
+      <translation>Asymetrický</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="61"/>
       <source>Distortion model</source>
-      <translation type="unfinished">Distortion model</translation>
+      <translation>Typ zkreslení</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="62"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Digitální čočka</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
@@ -2329,7 +2329,7 @@ Před synchronizací se ujistěte, že máte nastavenou hodnotu pohybové neostr
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="26"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Detekovaná čočka</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2369,17 +2369,17 @@ Před synchronizací se ujistěte, že máte nastavenou hodnotu pohybové neostr
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="64"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Chyba projekce</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Dobré snímky</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
       <source>Average pattern sharpness</source>
-      <translation type="unfinished">Average pattern sharpness</translation>
+      <translation>Průměrný vzor ostrosti</translation>
     </message>
   </context>
   <context>
@@ -2603,7 +2603,7 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="188"/>
       <source>Sync points debug layer</source>
-      <translation type="unfinished">Sync points debug layer</translation>
+      <translation>Synchronizovat body ve vrstvě ladění</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="354"/>
@@ -2668,7 +2668,7 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="106"/>
       <source>Zoom in and loop</source>
-      <translation type="unfinished">Zoom in and loop</translation>
+      <translation>Přiblížit a smyčka</translation>
     </message>
   </context>
   <context>
@@ -2841,7 +2841,7 @@ Kamera pravděpodobně nezaznamenává údaje o pohybu v tomto konkrétním mód
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="178"/>
       <source>Converting to %1 (%2)</source>
-      <translation type="unfinished">Converting to %1 (%2)</translation>
+      <translation>Převádí se na %1 %2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="275"/>
@@ -2851,12 +2851,12 @@ Kamera pravděpodobně nezaznamenává údaje o pohybu v tomto konkrétním mód
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="570"/>
       <source>Focal length: %1 mm</source>
-      <translation type="unfinished">Focal length: %1 mm</translation>
+      <translation>Ohnisková vzdálenost: %1 mm</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="572"/>
       <source>full frame equiv.: %1 mm</source>
-      <translation type="unfinished">full frame equiv.: %1 mm</translation>
+      <translation>full frame ekvivalent: %1 mm</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="808"/>
@@ -2891,7 +2891,7 @@ Kamera pravděpodobně nezaznamenává údaje o pohybu v tomto konkrétním mód
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="844"/>
       <source>Toggle stabilization overview</source>
-      <translation type="unfinished">Toggle stabilization overview</translation>
+      <translation>Přepínač stabilizace</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="851"/>
