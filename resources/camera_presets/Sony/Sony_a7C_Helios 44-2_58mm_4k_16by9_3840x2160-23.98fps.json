@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a7C_Helios 44-2_58mm_4k_16by9_3840x2160-23.98fps",
+  "note": "58mm",
+  "calibrated_by": "Malin Dean",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Helios 44-2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.712800322634232,
+    "camera_matrix": [
+      [
+        20570.671780149496,
+        0.0,
+        1790.5922761335935
+      ],
+      [
+        0.0,
+        21865.353718002483,
+        1221.755807384791
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      2.2661796469934328,
+      952.8570297537216,
+      -216727.03805097064,
+      14349985.182469668
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

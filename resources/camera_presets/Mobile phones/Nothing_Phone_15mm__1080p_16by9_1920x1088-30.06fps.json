@@ -1,0 +1,68 @@
+{
+  "name": "Nothing_Phone_15mm__1080p_16by9_1920x1088-30.06fps",
+  "note": "",
+  "calibrated_by": "Алексей Ежков",
+  "camera_brand": "Nothing",
+  "camera_model": "Phone",
+  "lens_model": "15mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 30.06012,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4646210944598044,
+    "camera_matrix": [
+      [
+        854.1778640626145,
+        0.0,
+        972.0630566271512
+      ],
+      [
+        0.0,
+        852.2591971621433,
+        532.4341631212682
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2958595099277522,
+      0.1263410186527298,
+      0.3607746879366864,
+      -0.2963139303828842
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

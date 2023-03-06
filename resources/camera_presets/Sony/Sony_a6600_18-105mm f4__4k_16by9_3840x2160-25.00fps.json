@@ -1,0 +1,68 @@
+{
+  "name": "Sony_a6600_18-105mm f4__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Jakub Straňanek",
+  "camera_brand": "Sony",
+  "camera_model": "a6600",
+  "lens_model": "18-105mm f4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7127763167087166,
+    "camera_matrix": [
+      [
+        3100.0605770880634,
+        0.0,
+        1948.0802964440047
+      ],
+      [
+        0.0,
+        3102.9850326379064,
+        1077.618670947776
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34535615152816324,
+      -0.0016761905924802664,
+      0.9603463468423364,
+      -2.2626068059606013
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

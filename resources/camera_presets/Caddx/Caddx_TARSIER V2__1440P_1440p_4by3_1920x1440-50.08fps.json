@@ -1,0 +1,68 @@
+{
+  "name": "Caddx_TARSIER V2__1440P_1440p_4by3_1920x1440-50.08fps",
+  "note": "4/3",
+  "calibrated_by": "Christos",
+  "camera_brand": "Caddx",
+  "camera_model": "TARSIER V2",
+  "lens_model": "",
+  "camera_setting": "1440P",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 50.083473,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.48249974493412406,
+    "camera_matrix": [
+      [
+        1109.9637431738456,
+        0.0,
+        876.6022239040437
+      ],
+      [
+        0.0,
+        1111.2218526051909,
+        666.1675545701862
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04587242167126791,
+      -0.029703828443835508,
+      0.029557449133480688,
+      0.010201054035802078
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

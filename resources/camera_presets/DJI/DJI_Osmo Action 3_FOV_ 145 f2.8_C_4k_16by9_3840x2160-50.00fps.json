@@ -1,0 +1,68 @@
+{
+  "name": "DJI_Osmo Action 3_FOV: 145° f/2.8_C_4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Alexandros  Oikonomidis",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action 3",
+  "lens_model": "FOV: 145° f/2.8",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.31955694076648056,
+    "camera_matrix": [
+      [
+        1402.5124732211332,
+        0.0,
+        1930.5060571876409
+      ],
+      [
+        0.0,
+        1402.7265599391417,
+        1082.7249767569722
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2802531248697946,
+      -0.05568966014348414,
+      0.00436797163533084,
+      -0.009104331504250092
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

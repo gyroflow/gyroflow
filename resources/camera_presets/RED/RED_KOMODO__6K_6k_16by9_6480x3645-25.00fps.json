@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO__6K_6k_16by9_6480x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "younes benbessa",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8210906557718405,
+    "camera_matrix": [
+      [
+        3260.15516358506,
+        0.0,
+        3299.2220620483176
+      ],
+      [
+        0.0,
+        3258.3272334731164,
+        1812.8871925424544
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2207475062588784,
+      0.21252232537891297,
+      -0.16888761406705707,
+      0.17620525704486678
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

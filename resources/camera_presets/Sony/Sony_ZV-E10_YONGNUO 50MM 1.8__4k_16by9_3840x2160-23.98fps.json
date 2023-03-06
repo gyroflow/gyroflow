@@ -1,0 +1,68 @@
+{
+  "name": "Sony_ZV-E10_YONGNUO 50MM 1.8__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "USUARIO",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "YONGNUO 50MM 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 41.71,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6207751592061961,
+    "camera_matrix": [
+      [
+        65646.41996542251,
+        0.0,
+        1810.3248090939364
+      ],
+      [
+        0.0,
+        75567.89228138901,
+        1123.866122954503
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      21.502515661389616,
+      12141.02934934589,
+      -11612128.404117672,
+      4203291778.6155705
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-b93ccd74-3840x2160@23976",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

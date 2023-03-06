@@ -1,0 +1,63 @@
+{
+  "name": "Fufifilm_XT200_KIT 15-45__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Veleri",
+  "camera_brand": "Fufifilm",
+  "camera_model": "XT200",
+  "lens_model": "KIT 15-45",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6264479339611215,
+    "camera_matrix": [
+      [
+        1216.494770606044,
+        0.0,
+        926.8132001417208
+      ],
+      [
+        0.0,
+        1218.2794106317206,
+        556.57006066601
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20770287401765536,
+      0.9334239830976392,
+      -1.9024981946035189,
+      1.6173367572362225
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2023-02-14",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

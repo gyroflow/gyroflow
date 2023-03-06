@@ -1,0 +1,68 @@
+{
+  "name": "Realme_X3 Zoom___720p_4by3_1600x1200-29.81fps",
+  "note": "",
+  "calibrated_by": "User",
+  "camera_brand": "Realme",
+  "camera_model": "X3 Zoom",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "orig_dimension": {
+    "w": 1600,
+    "h": 1200
+  },
+  "output_dimension": {
+    "w": 1600,
+    "h": 900
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.811144,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.546971056824595,
+    "camera_matrix": [
+      [
+        1174.5749655446327,
+        0.0,
+        799.7173343578812
+      ],
+      [
+        0.0,
+        1172.856863106138,
+        602.0828414892081
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4193322848841298,
+      -0.3416388072462476,
+      2.720195643985987,
+      -5.684921336398576
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

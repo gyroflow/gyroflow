@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_COOLPIX P900_2000 mm__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "William",
+  "camera_brand": "Nikon",
+  "camera_model": "COOLPIX P900",
+  "lens_model": "2000 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2164115340773058,
+    "camera_matrix": [
+      [
+        1418.9071721123444,
+        0.0,
+        957.7079870036767
+      ],
+      [
+        0.0,
+        1416.8775761455938,
+        541.4093405639844
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32390841321590147,
+      0.2508197492850284,
+      0.18176397976472505,
+      -0.8825917787994505
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

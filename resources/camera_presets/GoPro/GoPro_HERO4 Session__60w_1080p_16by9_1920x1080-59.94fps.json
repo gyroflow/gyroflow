@@ -1,0 +1,68 @@
+{
+  "name": "GoPro_HERO4 Session__60w_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Grzegorz",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO4 Session",
+  "lens_model": "",
+  "camera_setting": "60w",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.870159156695642,
+    "camera_matrix": [
+      [
+        1559.6868177964238,
+        0.0,
+        1047.2179118802048
+      ],
+      [
+        0.0,
+        1546.9056069368537,
+        855.6490792571701
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2097804928233081,
+      -0.7742869634656672,
+      2.617364869345291,
+      -3.712345258916452
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

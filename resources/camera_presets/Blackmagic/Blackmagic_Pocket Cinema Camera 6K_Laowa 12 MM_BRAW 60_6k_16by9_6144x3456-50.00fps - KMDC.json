@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Laowa 12 MM_BRAW 60_6k_16by9_6144x3456-50.00fps",
+  "note": "BRAW 60",
+  "calibrated_by": "KMDC",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Laowa 12 MM",
+  "camera_setting": "BRAW 60",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4876448256647959,
+    "camera_matrix": [
+      [
+        3396.9969454322177,
+        0.0,
+        3148.027272132581
+      ],
+      [
+        0.0,
+        3397.87636158065,
+        1744.000470622297
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.312391609998995,
+      0.2002217216797177,
+      -0.015507740885864882,
+      0.04131613847892395
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6_Rokinon 24.00mm__C4k_1.90by1_4095x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "BHA RENDER MACHINE",
+  "camera_brand": "Sony",
+  "camera_model": "FX6",
+  "lens_model": "Rokinon 24.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8678428532594559,
+    "camera_matrix": [
+      [
+        2636.181927440271,
+        0.0,
+        1970.5390276370208
+      ],
+      [
+        0.0,
+        2632.425603104802,
+        1029.6653157095825
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34626650769925826,
+      0.023588216016052887,
+      0.6437017046210423,
+      -0.8697395394665569
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-24.00mm-4096x2160@23976",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

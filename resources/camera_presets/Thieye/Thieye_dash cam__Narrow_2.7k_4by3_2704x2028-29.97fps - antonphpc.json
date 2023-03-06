@@ -1,0 +1,68 @@
+{
+  "name": "Thieye_dash cam__Narrow_2.7k_4by3_2704x2028-29.97fps",
+  "note": "",
+  "calibrated_by": "antonphpc",
+  "camera_brand": "Thieye",
+  "camera_model": "dash cam",
+  "lens_model": "",
+  "camera_setting": "Narrow",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2028
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 1520
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6343347501648349,
+    "camera_matrix": [
+      [
+        2361.334235440685,
+        0.0,
+        1422.6516133913765
+      ],
+      [
+        0.0,
+        2360.5993110056997,
+        1057.9360294678077
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0020990696945647606,
+      -0.025810436379299695,
+      0.3862674676493989,
+      -0.884530347687182
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

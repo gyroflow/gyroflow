@@ -1,0 +1,68 @@
+{
+  "name": "RunCam_Nano3___480p_3by2_720x480-60.00fps",
+  "note": "",
+  "calibrated_by": "p.trayber",
+  "camera_brand": "RunCam",
+  "camera_model": "Nano3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 720,
+    "h": 480
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3096803256400949,
+    "camera_matrix": [
+      [
+        383.32868068320687,
+        0.0,
+        365.9240752876208
+      ],
+      [
+        0.0,
+        338.33843279859786,
+        261.26144303933194
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.093546964880926,
+      -0.402561624627544,
+      0.5372866825498506,
+      -0.2482848036418745
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

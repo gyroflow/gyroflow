@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO_Canon EF 50mm 1.4_6K R3D_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Dylan Clarke",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Canon EF 50mm 1.4",
+  "camera_setting": "6K R3D",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.38502664053419816,
+    "camera_matrix": [
+      [
+        11325.016642553332,
+        0.0,
+        2969.6149708295675
+      ],
+      [
+        0.0,
+        11320.322735682565,
+        1605.9812655041185
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1897298053639148,
+      -1.03093580281934,
+      24.690669127627885,
+      -165.0762822355412
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

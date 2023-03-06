@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Laowa FF 11mm_DCI_C4k_1.90by1_4096x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Matthew Lavin",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Laowa FF 11mm",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 19.77,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.20313067555610032,
+    "camera_matrix": [
+      [
+        3059.7227484753903,
+        0.0,
+        2120.598218373874
+      ],
+      [
+        0.0,
+        3064.368970697334,
+        1026.9756926437765
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3373510581681983,
+      -0.19728932475884145,
+      1.8724865248032336,
+      -3.9815681040861697
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

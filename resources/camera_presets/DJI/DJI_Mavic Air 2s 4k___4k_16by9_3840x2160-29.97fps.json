@@ -1,0 +1,68 @@
+{
+  "name": "DJI_Mavic Air 2s 4k___4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Michal Ďurík",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic Air 2s 4k",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.312487033522598,
+    "camera_matrix": [
+      [
+        2533.866883889366,
+        0.0,
+        1913.4416242965765
+      ],
+      [
+        0.0,
+        2534.763163924593,
+        1076.2380127137496
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31810699288713656,
+      -0.30612483647375366,
+      0.9427788952457627,
+      -0.2178481009756567
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

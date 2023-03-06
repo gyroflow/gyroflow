@@ -1,0 +1,68 @@
+{
+  "name": "Hawkeye_Firefly naked II___4k_4by3_4000x3000-29.97fps",
+  "note": "",
+  "calibrated_by": "Mathis",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly naked II",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 2250
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8715651240466085,
+    "camera_matrix": [
+      [
+        1986.3961064509283,
+        0.0,
+        2014.41772892639
+      ],
+      [
+        0.0,
+        1989.336125232858,
+        1394.8179575637148
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04339616572099558,
+      0.08475414509570971,
+      -0.18711824251044656,
+      0.11925271308036184
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

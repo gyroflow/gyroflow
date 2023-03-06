@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S22_Selfie_4k_2.7k_16by9_3648x2056-24.05fps",
+  "note": "Motion Cam Raw 4k Preset",
+  "calibrated_by": "Taylor",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S22",
+  "lens_model": "Selfie",
+  "camera_setting": "4k",
+  "calib_dimension": {
+    "w": 3648,
+    "h": 2056
+  },
+  "orig_dimension": {
+    "w": 3648,
+    "h": 2056
+  },
+  "output_dimension": {
+    "w": 3648,
+    "h": 2056
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 24.047796,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9306202754175362,
+    "camera_matrix": [
+      [
+        2594.680125870239,
+        0.0,
+        1814.9807459101833
+      ],
+      [
+        0.0,
+        2596.406039559271,
+        1004.1653247134676
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4208487493475829,
+      0.3593014079706553,
+      -1.755577250135184,
+      2.5660344127710415
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

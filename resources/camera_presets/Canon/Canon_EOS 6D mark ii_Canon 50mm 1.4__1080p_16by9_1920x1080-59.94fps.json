@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS 6D mark ii_Canon 50mm 1.4__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Jonathan Boone",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6D mark ii",
+  "lens_model": "Canon 50mm 1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.24015877576122177,
+    "camera_matrix": [
+      [
+        2863.1468905935853,
+        0.0,
+        988.4886490439264
+      ],
+      [
+        0.0,
+        2796.851777667865,
+        536.8306114632151
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.15694435538738025,
+      0.7665147686293763,
+      -9.506787385205737,
+      43.886587560327506
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

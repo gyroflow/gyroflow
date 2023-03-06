@@ -1,0 +1,63 @@
+{
+  "name": "Sigma_fp_SIGMA 90mm f2.8_DC crop ON_1080p_16by9_1920x1080-59.94fps",
+  "note": "DC crop ON",
+  "calibrated_by": "Lloyd Kershaw",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "SIGMA 90mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 10.4,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.25719226403771644,
+    "camera_matrix": [
+      [
+        26241.247335009855,
+        0.0,
+        993.9829624239017
+      ],
+      [
+        0.0,
+        24599.70290907191,
+        466.857498317741
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      9.019386523065457,
+      -12112.312256494428,
+      13198317.176465089,
+      -4650961809.157387
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.2.0",
+  "date": "2023-03-04",
+  "compatible_settings": [],
+  "is_superview": false,
+  "sync_settings": null,
+  "distortion_model_id": 0
+}

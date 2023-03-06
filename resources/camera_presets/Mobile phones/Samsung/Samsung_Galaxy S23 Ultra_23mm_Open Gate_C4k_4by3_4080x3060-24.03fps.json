@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S23 Ultra_23mm_Open Gate_C4k_4by3_4080x3060-24.03fps",
+  "note": "",
+  "calibrated_by": "fafalone",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S23 Ultra",
+  "lens_model": "23mm",
+  "camera_setting": "Open Gate",
+  "calib_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "orig_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "output_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.029036,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8893020259545538,
+    "camera_matrix": [
+      [
+        2723.226177905239,
+        0.0,
+        2020.537044822613
+      ],
+      [
+        0.0,
+        2721.089141840137,
+        1535.9876587296255
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5076102379206047,
+      -0.6479898873679817,
+      1.7102286931118464,
+      -1.219666219970625
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "DJI_Mavic 3 Pro Hasselblad 4/3_24mm_84 deg_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Tom Herriman",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic 3 Pro Hasselblad 4/3",
+  "lens_model": "24mm",
+  "camera_setting": "84 deg",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5762129840441238,
+    "camera_matrix": [
+      [
+        2539.8373124525065,
+        0.0,
+        1935.583788652464
+      ],
+      [
+        0.0,
+        2542.898041070332,
+        1117.2520163554375
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3243963608574629,
+      0.34610252823642534,
+      -0.9760449035974832,
+      1.5654103456683377
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

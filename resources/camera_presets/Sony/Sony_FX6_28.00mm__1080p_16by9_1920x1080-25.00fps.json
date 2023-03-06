@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FX6_28.00mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Mateusz Kucharz",
+  "camera_brand": "Sony",
+  "camera_model": "FX6",
+  "lens_model": "28.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3953860291323278,
+    "camera_matrix": [
+      [
+        1534.9084337846314,
+        0.0,
+        966.3322772937112
+      ],
+      [
+        0.0,
+        1539.3007405693663,
+        557.3760594021129
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3106942942138156,
+      -0.05496377788681417,
+      2.079558812773051,
+      -6.018059038441776
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-28.00mm-1920x1080@25000",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

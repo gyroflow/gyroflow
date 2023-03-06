@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Laowa Nanomorph 35mm 2,4T Sony E__720p_16by9_1280x720-25.00fps",
+  "note": "",
+  "calibrated_by": "Kacper ",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Laowa Nanomorph 35mm 2,4T Sony E",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9927236338426084,
+    "camera_matrix": [
+      [
+        3713.456952858763,
+        0.0,
+        560.7626539631704
+      ],
+      [
+        0.0,
+        5605.385159875669,
+        348.518570171924
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      4.29141699884507,
+      -217.31108466282865,
+      6600.0446613627355,
+      -67761.74657979062
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

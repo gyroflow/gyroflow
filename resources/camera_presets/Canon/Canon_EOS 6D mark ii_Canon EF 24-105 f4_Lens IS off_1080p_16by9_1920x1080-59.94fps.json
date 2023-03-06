@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS 6D mark ii_Canon EF 24-105 f4_Lens IS off_1080p_16by9_1920x1080-59.94fps",
+  "note": "Lens IS off",
+  "calibrated_by": "Jonathan Boone",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 6D mark ii",
+  "lens_model": "Canon EF 24-105 f4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2702481736779476,
+    "camera_matrix": [
+      [
+        1285.1382905642783,
+        0.0,
+        954.6077719423968
+      ],
+      [
+        0.0,
+        1256.1647795834808,
+        540.1436773537858
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1864080891609195,
+      0.14318631459658443,
+      -0.1077738421439664,
+      0.24714320212311103
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

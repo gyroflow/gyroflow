@@ -1,0 +1,68 @@
+{
+  "name": "Google_Pixel 6___1080p_16by9_1920x1080-29.99fps",
+  "note": "",
+  "calibrated_by": "Alenushka",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 6",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.989096,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2023294163696026,
+    "camera_matrix": [
+      [
+        90174.6554278142,
+        0.0,
+        938.64566057236
+      ],
+      [
+        0.0,
+        62803.56561417009,
+        817.9858520789742
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      246.91262599658523,
+      -2528154.003943555,
+      14498467834.358353,
+      -25162726913790.85
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

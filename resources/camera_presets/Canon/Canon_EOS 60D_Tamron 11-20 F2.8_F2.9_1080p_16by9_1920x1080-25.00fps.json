@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS 60D_Tamron 11-20 F2.8_F2.9_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "younes benbessa",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 60D",
+  "lens_model": "Tamron 11-20 F2.8",
+  "camera_setting": "F2.9",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2184494285606713,
+    "camera_matrix": [
+      [
+        823.345891689267,
+        0.0,
+        953.216300570166
+      ],
+      [
+        0.0,
+        823.9077632969273,
+        589.0821362408126
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3348198254717736,
+      0.10602144049345522,
+      -0.10584851877154836,
+      0.7662036999690087
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket OG_Laowa 7.5mm F2.0_ProresHQ_1080p_16by9_1920x1080-25.00fps",
+  "note": "ProresHQ",
+  "calibrated_by": "Axel Depinois",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket OG",
+  "lens_model": "Laowa 7.5mm F2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2270134121756658,
+    "camera_matrix": [
+      [
+        1183.94334998543,
+        0.0,
+        962.5280872782048
+      ],
+      [
+        0.0,
+        1182.9800808218272,
+        540.3965393498812
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3316100962499869,
+      0.12317535845077324,
+      -0.0952371859400694,
+      0.17730592886019722
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Panasonic_LUMIX GH6_7Artisans 7.5mm_5.8K open gate_5k_4by3_5760x4320-23.98fps",
+  "note": "",
+  "calibrated_by": "niks",
+  "camera_brand": "Panasonic",
+  "camera_model": "LUMIX GH6",
+  "lens_model": "7Artisans 7.5mm",
+  "camera_setting": "5.8K open gate",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 4320
+  },
+  "frame_readout_time": 7.656609911038253,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7784343231699116,
+    "camera_matrix": [
+      [
+        3043.2324906894023,
+        0.0,
+        2925.8884289737775
+      ],
+      [
+        0.0,
+        3043.0732082589752,
+        2123.665527908678
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04545370937023942,
+      -0.014709390530348415,
+      0.020759681901212954,
+      -0.006569648741913685
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

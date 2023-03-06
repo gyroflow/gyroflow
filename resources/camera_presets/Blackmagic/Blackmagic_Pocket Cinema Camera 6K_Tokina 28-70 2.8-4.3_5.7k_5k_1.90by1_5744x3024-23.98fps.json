@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Tokina 28-70 2.8-4.3_5.7k_5k_1.90by1_5744x3024-23.98fps",
+  "note": "28mm",
+  "calibrated_by": "Foothill7tv",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Tokina 28-70 2.8-4.3",
+  "camera_setting": "5.7k",
+  "calib_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976028,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5872038665855391,
+    "camera_matrix": [
+      [
+        6769.228595081674,
+        0.0,
+        2718.4012251660365
+      ],
+      [
+        0.0,
+        6780.344490926744,
+        1277.977303524537
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24681785248713087,
+      0.36889709233073814,
+      -3.605386479968512,
+      13.552774440536998
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

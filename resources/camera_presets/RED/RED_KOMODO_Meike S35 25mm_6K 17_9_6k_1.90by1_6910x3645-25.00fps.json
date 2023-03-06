@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Meike S35 25mm_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Shikijo",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Meike S35 25mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5912128734562387,
+    "camera_matrix": [
+      [
+        6570.229997660257,
+        0.0,
+        3422.4271678005016
+      ],
+      [
+        0.0,
+        6571.4723953627035,
+        1815.5168992965375
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25685799520399416,
+      -0.07687935079525149,
+      1.2934397232275618,
+      -2.4755581394847908
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

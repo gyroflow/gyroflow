@@ -1,0 +1,68 @@
+{
+  "name": "Caddx_Nebula Pro Nano___720p_16by9_1280x720-60.00fps",
+  "note": "",
+  "calibrated_by": "PC",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro Nano",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.23534244463848109,
+    "camera_matrix": [
+      [
+        631.6763845113578,
+        0.0,
+        622.5992505741576
+      ],
+      [
+        0.0,
+        633.0927093764259,
+        409.81723197027134
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.022407681419746896,
+      -0.09747343794352369,
+      0.07519994220398032,
+      -0.023755781265838456
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-M4_LUMIX G 14-42_FLAT 14mm_4k_16by9_3840x2160-25.00fps",
+  "note": "FLAT 14mm",
+  "calibrated_by": "Dario Della Mora",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "LUMIX G 14-42",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.634113438272594,
+    "camera_matrix": [
+      [
+        3247.7701961632492,
+        0.0,
+        1873.9097075669504
+      ],
+      [
+        0.0,
+        3244.8380061846137,
+        1044.1326655135492
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.038325322674767466,
+      1.0416976017909685,
+      -3.5123249674827934,
+      4.932754814170733
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

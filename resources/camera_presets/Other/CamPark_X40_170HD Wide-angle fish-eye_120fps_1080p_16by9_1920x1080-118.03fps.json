@@ -1,0 +1,68 @@
+{
+  "name": "CamPark_X40_170°HD Wide-angle fish-eye_120fps_1080p_16by9_1920x1080-118.03fps",
+  "note": "",
+  "calibrated_by": "Rene",
+  "camera_brand": "CamPark",
+  "camera_model": "X40",
+  "lens_model": "170°HD Wide-angle fish-eye",
+  "camera_setting": "120fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 118.031776,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5587185759209832,
+    "camera_matrix": [
+      [
+        1125.3540886319572,
+        0.0,
+        952.0440170981192
+      ],
+      [
+        0.0,
+        1124.511636818079,
+        537.8757930232919
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.004626142788096809,
+      0.06563174770464301,
+      -0.09051193238432476,
+      0.036322056399565705
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

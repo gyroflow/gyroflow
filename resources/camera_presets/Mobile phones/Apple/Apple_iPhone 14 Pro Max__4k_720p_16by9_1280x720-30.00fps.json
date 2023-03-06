@@ -1,0 +1,68 @@
+{
+  "name": "Apple_iPhone 14 Pro Max__4k_720p_16by9_1280x720-30.00fps",
+  "note": "60 fps",
+  "calibrated_by": "Datto",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 14 Pro Max",
+  "lens_model": "",
+  "camera_setting": "4k",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2736653789422925,
+    "camera_matrix": [
+      [
+        1055.645365063292,
+        0.0,
+        636.2808576342073
+      ],
+      [
+        0.0,
+        1055.2248678026797,
+        357.8255337001884
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.38763562272923857,
+      2.192202683768595,
+      -15.377171069076295,
+      30.411240238548547
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

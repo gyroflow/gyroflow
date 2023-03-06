@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FX6_Sony GM 24-27 F2.8 Mk II_24 mm focal length_4k_16by9_3840x2160-25.00fps",
+  "note": "24 mm focal length",
+  "calibrated_by": "Juri Verstappen",
+  "camera_brand": "Sony",
+  "camera_model": "FX6",
+  "lens_model": "Sony GM 24-27 F2.8 Mk II",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5214580592503486,
+    "camera_matrix": [
+      [
+        3070.6527426290454,
+        0.0,
+        1910.520888206633
+      ],
+      [
+        0.0,
+        3074.310221776503,
+        1091.0398241038924
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3201998673185821,
+      0.013857089363628576,
+      0.8178199396916715,
+      -1.3557686748432642
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

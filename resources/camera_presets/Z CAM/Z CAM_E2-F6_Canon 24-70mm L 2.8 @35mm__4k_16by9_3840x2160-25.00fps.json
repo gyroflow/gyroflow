@@ -1,0 +1,68 @@
+{
+  "name": "Z CAM_E2-F6_Canon 24-70mm L 2.8 @35mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Rasmus Bjerkan",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-F6",
+  "lens_model": "Canon 24-70mm L 2.8 @35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3588851499034372,
+    "camera_matrix": [
+      [
+        4303.456152199153,
+        0.0,
+        1973.7821982238077
+      ],
+      [
+        0.0,
+        4289.012807173258,
+        933.0466066966007
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2937476077401916,
+      0.008968737059462491,
+      1.5141831578398013,
+      -2.432017899117376
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

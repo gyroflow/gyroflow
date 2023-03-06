@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Laowa 9mm_17:9_5k_1.90by1_5120x2700-24.00fps",
+  "note": "GOOD CALIB",
+  "calibrated_by": "PedroBraulio Alvarez",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Laowa 9mm",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.568190908090233,
+    "camera_matrix": [
+      [
+        2076.1069949449006,
+        0.0,
+        2570.561657766106
+      ],
+      [
+        0.0,
+        2072.3106511522997,
+        1323.7680137638097
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3505107828793787,
+      0.07832787359141453,
+      0.03345449146053858,
+      0.08050758658806055
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S23_24mm_MotionCam 4k_C4k_4by3_4080x3060-23.98fps",
+  "note": "",
+  "calibrated_by": "Taylor",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S23",
+  "lens_model": "24mm",
+  "camera_setting": "MotionCam 4k",
+  "calib_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "orig_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "output_dimension": {
+    "w": 4080,
+    "h": 2294
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6704559919774854,
+    "camera_matrix": [
+      [
+        2746.4272605354213,
+        0.0,
+        2018.1138199661727
+      ],
+      [
+        0.0,
+        2748.588337376252,
+        1528.7519798395497
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.432298711522659,
+      -0.046656138352812966,
+      0.6532590609101205,
+      -0.8664505836825226
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

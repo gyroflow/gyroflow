@@ -1,0 +1,68 @@
+{
+  "name": "Realme_C2__Full HD_1080p_16by9_1920x1080-29.53fps",
+  "note": "",
+  "calibrated_by": "Alika Jehan",
+  "camera_brand": "Realme",
+  "camera_model": "C2",
+  "lens_model": "",
+  "camera_setting": "Full HD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.528395,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3513374878063716,
+    "camera_matrix": [
+      [
+        1424.3601874499177,
+        0.0,
+        973.0740126955294
+      ],
+      [
+        0.0,
+        1424.1274061618824,
+        550.5567683290617
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.581651357921559,
+      -2.0591041526890472,
+      9.362166297502364,
+      -13.903283360832727
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S22 Ultra_0.7x_Motioncam PRO_4k_4by3_4000x3000-25.03fps",
+  "note": "Motioncam PRO",
+  "calibrated_by": "Roman Mihalik",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S22 Ultra",
+  "lens_model": "0.7x",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.027704,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5568673833608182,
+    "camera_matrix": [
+      [
+        1632.4119620874408,
+        0.0,
+        2001.9585920820205
+      ],
+      [
+        0.0,
+        1632.6323263959214,
+        1510.997834570337
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3440197937332646,
+      0.039267969472551546,
+      0.3627493574684028,
+      -0.24155016133206775
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy Note 9_12 Мп - Samsung S5K2L3_Autozoom_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Tesla",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy Note 9",
+  "lens_model": "12 Мп - Samsung S5K2L3",
+  "camera_setting": "Autozoom",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.000309,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.35775152346793365,
+    "camera_matrix": [
+      [
+        1453.462043070942,
+        0.0,
+        962.7940523587138
+      ],
+      [
+        0.0,
+        1452.9211571675455,
+        517.4838008298561
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7509378569217695,
+      -2.887971072096557,
+      9.275907501370062,
+      -9.441443051323771
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

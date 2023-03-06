@@ -1,0 +1,68 @@
+{
+  "name": "EKEN_HR9S__30fps_1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Steve Black",
+  "camera_brand": "EKEN",
+  "camera_model": "HR9S",
+  "lens_model": "",
+  "camera_setting": "30fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2510469833165828,
+    "camera_matrix": [
+      [
+        1109.7083873396386,
+        0.0,
+        983.8719965807544
+      ],
+      [
+        0.0,
+        1109.2552593098485,
+        566.456814748616
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1015962287287108,
+      -0.02702833689038074,
+      0.03627827330647571,
+      -0.01399831333340496
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

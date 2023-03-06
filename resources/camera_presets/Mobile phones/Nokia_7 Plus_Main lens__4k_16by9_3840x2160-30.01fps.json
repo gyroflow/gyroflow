@@ -1,0 +1,68 @@
+{
+  "name": "Nokia_7 Plus_Main lens__4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "Jan Alwin de Jong",
+  "camera_brand": "Nokia",
+  "camera_model": "7 Plus",
+  "lens_model": "Main lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.011288,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5310324824798265,
+    "camera_matrix": [
+      [
+        2953.4718556796615,
+        0.0,
+        1923.8116575251256
+      ],
+      [
+        0.0,
+        2953.6146226421592,
+        1068.6105677949556
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6437795460434682,
+      -1.774745304135954,
+      5.225797524911402,
+      -5.076146051753801
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

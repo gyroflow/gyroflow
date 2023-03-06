@@ -1,0 +1,68 @@
+{
+  "name": "RED_KOMODO_DULENS 43mm_43mm_1080p_16by9_1920x1080-30.00fps",
+  "note": "43mm",
+  "calibrated_by": "LIAN",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "DULENS 43mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.12121788010155424,
+    "camera_matrix": [
+      [
+        2307.159435707572,
+        0.0,
+        958.3228321273648
+      ],
+      [
+        0.0,
+        2306.7325309102653,
+        535.2042513311793
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18262892738785888,
+      1.0305640937664875,
+      -3.863475668451759,
+      23.044188141459458
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

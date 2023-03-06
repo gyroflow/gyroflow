@@ -1,0 +1,68 @@
+{
+  "name": "NICEBOY_VEGA___720p_4by3_1440x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Jakub Pluta",
+  "camera_brand": "NICEBOY",
+  "camera_model": "VEGA",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7269915928589761,
+    "camera_matrix": [
+      [
+        1326.330867463662,
+        0.0,
+        754.5414138122111
+      ],
+      [
+        0.0,
+        1324.0810711834715,
+        580.2610687783682
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.18938820569669476,
+      -0.23684318680116537,
+      0.9069171778392928,
+      -1.3284235721893043
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

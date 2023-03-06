@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S22_24mm F1.8_MotionCam_1080p_16by9_1920x1088-24.00fps",
+  "note": "",
+  "calibrated_by": "Felipe Yamahata",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S22",
+  "lens_model": "24mm F1.8",
+  "camera_setting": "MotionCam",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.999817,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3952824231288264,
+    "camera_matrix": [
+      [
+        1267.548929210249,
+        0.0,
+        950.0818546428976
+      ],
+      [
+        0.0,
+        1277.5164349633883,
+        529.4106625601969
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4370291744091485,
+      -0.18822413765368165,
+      0.8580108263827376,
+      -0.8240743534895542
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Samsung_Galaxy S9__sin estabilizador_1080p_16by9_1920x1080-30.01fps",
+  "note": "sin estabilizador",
+  "calibrated_by": "Osmel Caña",
+  "camera_brand": "Samsung",
+  "camera_model": "Galaxy S9",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.006525,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7265872405693873,
+    "camera_matrix": [
+      [
+        1533.1581369253609,
+        0.0,
+        930.3034877576944
+      ],
+      [
+        0.0,
+        1531.2762011898087,
+        539.1865994140262
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7635591669888205,
+      -3.085510503222636,
+      9.833680055702288,
+      -9.623974932711748
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

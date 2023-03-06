@@ -1,0 +1,68 @@
+{
+  "name": "VIVO_V23 5G___1080p_16by9_1920x1080-29.86fps",
+  "note": "",
+  "calibrated_by": "Carl Lucido",
+  "camera_brand": "VIVO",
+  "camera_model": "V23 5G",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.861795,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4090543866345483,
+    "camera_matrix": [
+      [
+        1686.3743915681675,
+        0.0,
+        953.24407133185
+      ],
+      [
+        0.0,
+        1701.2459200297685,
+        517.3076975283036
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4439221976545757,
+      -1.173222194943646,
+      7.562035122365795,
+      -14.024997836431078
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

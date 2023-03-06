@@ -1,0 +1,68 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_7Artisans 25mm F1.8_DCI_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "BRAW 5:1",
+  "calibrated_by": "Migu",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "7Artisans 25mm F1.8",
+  "camera_setting": "DCI",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8731771135575134,
+    "camera_matrix": [
+      [
+        5575.902370235803,
+        0.0,
+        2125.131889866007
+      ],
+      [
+        0.0,
+        5549.1354893569915,
+        1080.9179771644244
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10755124888432754,
+      4.517576634139366,
+      -84.66967572473145,
+      565.113136189328
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 25.0,
+  "crop_factor": 1.9
+}

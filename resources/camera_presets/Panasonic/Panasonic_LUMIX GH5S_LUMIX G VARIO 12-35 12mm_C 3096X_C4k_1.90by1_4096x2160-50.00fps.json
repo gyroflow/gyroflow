@@ -1,0 +1,68 @@
+{
+  "name": "Panasonic_LUMIX GH5S_LUMIX G VARIO 12-35 12mm_C 3096X_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "MP4 (LPCM)",
+  "calibrated_by": "ibonk.media",
+  "camera_brand": "Panasonic",
+  "camera_model": "LUMIX GH5S",
+  "lens_model": "LUMIX G VARIO 12-35 12mm",
+  "camera_setting": "C 3096X",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.711338422721637,
+    "camera_matrix": [
+      [
+        2591.8081869179705,
+        0.0,
+        2047.961007716048
+      ],
+      [
+        0.0,
+        2587.0444758515996,
+        1060.7384088904664
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29162491528574086,
+      0.0948444914438185,
+      0.1103947656242025,
+      -0.054121082447447205
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

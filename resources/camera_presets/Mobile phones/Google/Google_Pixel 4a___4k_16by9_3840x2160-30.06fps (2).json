@@ -1,0 +1,68 @@
+{
+  "name": "Google_Pixel 4a___4k_16by9_3840x2160-30.06fps",
+  "note": "",
+  "calibrated_by": "Marek Kocúr",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 4a",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.061125,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4663868938246474,
+    "camera_matrix": [
+      [
+        2995.9909479590374,
+        0.0,
+        1890.0674835754064
+      ],
+      [
+        0.0,
+        2999.184423318274,
+        1024.1456202308104
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5644074437630566,
+      -1.3729975787319928,
+      4.700933957144085,
+      -4.958663640073503
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

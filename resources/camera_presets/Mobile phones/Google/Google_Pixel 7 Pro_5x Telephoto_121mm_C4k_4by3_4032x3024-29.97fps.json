@@ -1,0 +1,68 @@
+{
+  "name": "Google_Pixel 7 Pro_5x Telephoto_121mm_C4k_4by3_4032x3024-29.97fps",
+  "note": "",
+  "calibrated_by": "Atharva Rathore",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 7 Pro",
+  "lens_model": "5x Telephoto",
+  "camera_setting": "121mm",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4885659417309889,
+    "camera_matrix": [
+      [
+        13473.47345399174,
+        0.0,
+        2022.6534517547948
+      ],
+      [
+        0.0,
+        13584.021102707364,
+        1892.0492926891973
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6404440599089753,
+      -7.284442400084071,
+      1150.113766583244,
+      -39299.34170324141
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

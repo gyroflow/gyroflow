@@ -1,0 +1,68 @@
+{
+  "name": "Canon_EOS R5_Tamron 24-70mm F2.8 Di VC G2 EF__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Kevin",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5",
+  "lens_model": "Tamron 24-70mm F2.8 Di VC G2 EF",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7499331932162558,
+    "camera_matrix": [
+      [
+        2691.6521502327255,
+        0.0,
+        1931.5353884365757
+      ],
+      [
+        0.0,
+        2691.326061805525,
+        1070.1818065495686
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1821394151558403,
+      0.07259782926415248,
+      0.2112259801690614,
+      0.03791250183355288
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null
+}

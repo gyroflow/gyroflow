@@ -1,0 +1,66 @@
+{
+  "name": "OLYMPUS_OM-D EM 10 MARK IIIS_ZUIKO 45MM 1.8_P A 25FPS_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Emilio Duran Maestre",
+  "camera_brand": "OLYMPUS",
+  "camera_model": "OM-D EM 10 MARK IIIS",
+  "lens_model": "ZUIKO 45MM 1.8",
+  "camera_setting": "P A 25FPS",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5248893907645206,
+    "camera_matrix": [
+      [
+        5634.001457597536,
+        0.0,
+        975.5573612824192
+      ],
+      [
+        0.0,
+        5639.873747568586,
+        521.7653590984173
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3264914346394071,
+      17.37847499777643,
+      -591.5987836712397,
+      8295.467232029392
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2023-02-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

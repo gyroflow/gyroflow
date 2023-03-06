@@ -1,0 +1,68 @@
+{
+  "name": "Apple_iPhone 12_26mm__4k_16by9_3840x2160-30.00fps",
+  "note": "",
+  "calibrated_by": "Georges Fursin",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 12",
+  "lens_model": "26mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.001648,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5301512991545004,
+    "camera_matrix": [
+      [
+        2763.2497219375305,
+        0.0,
+        1908.7433255207743
+      ],
+      [
+        0.0,
+        2761.7866961292884,
+        1008.9235692722252
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5441830656427464,
+      -1.0920434028872092,
+      4.189108485179133,
+      -5.5976095238305215
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

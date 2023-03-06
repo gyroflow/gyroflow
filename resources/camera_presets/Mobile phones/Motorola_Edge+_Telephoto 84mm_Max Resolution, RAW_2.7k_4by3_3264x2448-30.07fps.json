@@ -1,0 +1,68 @@
+{
+  "name": "Motorola_Edge+_Telephoto 84mm_Max Resolution, RAW_2.7k_4by3_3264x2448-30.07fps",
+  "note": "",
+  "calibrated_by": "@luivitoo",
+  "camera_brand": "Motorola",
+  "camera_model": "Edge+",
+  "lens_model": "Telephoto 84mm",
+  "camera_setting": "Max Resolution, RAW",
+  "calib_dimension": {
+    "w": 3264,
+    "h": 2448
+  },
+  "orig_dimension": {
+    "w": 3264,
+    "h": 2448
+  },
+  "output_dimension": {
+    "w": 3264,
+    "h": 1836
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 222,
+  "fps": 30.070812,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7142874640740142,
+    "camera_matrix": [
+      [
+        15848.278224464271,
+        0.0,
+        1459.669619740603
+      ],
+      [
+        0.0,
+        16416.217771099182,
+        1194.155099614772
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      3.344226352223294,
+      181.10565255957036,
+      -28050.471987367324,
+      851219.0678994652
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 84.0,
+  "crop_factor": 1.0
+}

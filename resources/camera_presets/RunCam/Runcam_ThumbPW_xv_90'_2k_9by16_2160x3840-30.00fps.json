@@ -1,0 +1,68 @@
+{
+  "name": "Runcam_ThumbPW_xv_90'_2k_9by16_2160x3840-30.00fps",
+  "note": "90'",
+  "calibrated_by": "omar",
+  "camera_brand": "Runcam",
+  "camera_model": "ThumbPW",
+  "lens_model": "xv",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "orig_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29680971380428306,
+    "camera_matrix": [
+      [
+        1343.7771742718014,
+        0.0,
+        1064.6281476291863
+      ],
+      [
+        0.0,
+        1789.6153951376966,
+        1930.118542405569
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0004475421306570717,
+      -0.03485572084643562,
+      0.06132028289165103,
+      -0.03637744584010113
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-thumbpw-xv-2160x3840@30000",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

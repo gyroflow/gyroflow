@@ -1,0 +1,68 @@
+{
+  "name": "Sony_ZV-E10_lw10__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "顾逸骏",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "lw10",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7547771925077866,
+    "camera_matrix": [
+      [
+        2064.246958721501,
+        0.0,
+        1925.8527612921907
+      ],
+      [
+        0.0,
+        2060.6342238268403,
+        1091.5567002559862
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30675050948257093,
+      0.03944980409443372,
+      0.23409288193518857,
+      -0.14141322967030456
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

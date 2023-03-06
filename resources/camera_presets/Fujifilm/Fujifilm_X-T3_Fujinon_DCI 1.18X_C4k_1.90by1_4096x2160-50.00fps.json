@@ -1,0 +1,68 @@
+{
+  "name": "Fujifilm_X-T3_Fujinon_DCI 1.18X_C4k_1.90by1_4096x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Wan Yi",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T3",
+  "lens_model": "Fujinon",
+  "camera_setting": "DCI 1.18X",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.6239701808257476,
+    "camera_matrix": [
+      [
+        2983.9337615644245,
+        0.0,
+        1981.271042380912
+      ],
+      [
+        0.0,
+        3005.375478414714,
+        708.1749516547833
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32852764573744053,
+      0.0562341918229319,
+      0.4481056856721883,
+      -0.2717578270575062
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-02-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}
