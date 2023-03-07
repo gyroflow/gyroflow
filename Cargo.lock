@@ -59,7 +59,7 @@ name = "ahrs"
 version = "0.6.0"
 source = "git+https://github.com/jmagnuson/ahrs-rs.git?rev=bf7b41d#bf7b41d09115b47ce8f6060624ed6a8a9bc445d4"
 dependencies = [
- "nalgebra 0.32.1",
+ "nalgebra 0.32.2",
  "num-traits 0.2.15",
  "simba 0.8.0",
 ]
@@ -179,7 +179,7 @@ checksum = "a8798ca7447753fcb3dd98d9095335b1564812a68c6e7c3d1926e1d5cf094e37"
 dependencies = [
  "anyhow",
  "cfg-if",
- "nalgebra 0.32.1",
+ "nalgebra 0.32.2",
  "num-complex",
  "num-integer",
  "num-traits 0.2.15",
@@ -1240,7 +1240,7 @@ dependencies = [
 [[package]]
 name = "ffmpeg-sys-next"
 version = "6.0.0"
-source = "git+https://github.com/AdrianEddy/rust-ffmpeg-sys.git#e00b3f71575775f5268ec23f7a37e91d0659814c"
+source = "git+https://github.com/AdrianEddy/rust-ffmpeg-sys.git#d4e00892eb1a85c712b4449a05e57a762e5fe718"
 dependencies = [
  "bindgen 0.64.0",
  "cc",
@@ -1528,7 +1528,7 @@ dependencies = [
  "lru",
  "metal",
  "mp4-merge",
- "nalgebra 0.32.1",
+ "nalgebra 0.32.2",
  "ndk-sys",
  "parking_lot",
  "pollster",
@@ -1592,7 +1592,7 @@ dependencies = [
  "lru",
  "metal",
  "mimalloc",
- "nalgebra 0.32.1",
+ "nalgebra 0.32.2",
  "num",
  "objc-foundation",
  "ocl",
@@ -2233,9 +2233,9 @@ dependencies = [
 
 [[package]]
 name = "nalgebra"
-version = "0.32.1"
+version = "0.32.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6515c882ebfddccaa73ead7320ca28036c4bc84c9bcca3cc0cbba8efe89223a"
+checksum = "d68d47bba83f9e2006d117a9a33af1524e655516b8919caac694427a6fb1e511"
 dependencies = [
  "approx",
  "matrixmultiply",
@@ -3116,7 +3116,7 @@ dependencies = [
  "argmin-math",
  "libm 0.2.6",
  "log",
- "nalgebra 0.32.1",
+ "nalgebra 0.32.2",
  "rand",
  "rayon",
  "superslice",
@@ -3250,18 +3250,18 @@ checksum = "58bc9567378fc7690d6b2addae4e60ac2eeea07becb2c64b9f218b53865cba2a"
 
 [[package]]
 name = "serde"
-version = "1.0.152"
+version = "1.0.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb7d1f0d3021d347a83e556fc4683dea2ea09d87bccdf88ff5c12545d89d5efb"
+checksum = "3a382c72b4ba118526e187430bb4963cd6d55051ebf13d9b25574d379cc98d20"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.152"
+version = "1.0.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af487d118eecd09402d70a5d72551860e788df87b464af30e5ea6a38c75c541e"
+checksum = "1ef476a5790f0f6decbc66726b6e5d63680ed518283e64c7df415989d880954f"
 dependencies = [
  "proc-macro2",
  "quote",

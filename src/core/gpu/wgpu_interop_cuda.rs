@@ -660,6 +660,7 @@ impl CudaFunctions {
     pub unsafe fn new() -> Result<Self, libloading::Error> {
         let candidates = if cfg!(target_os = "windows") {
             vec![
+                "cudart64_121.dll",
                 "cudart64_120.dll",
                 "cudart64_110.dll",
                 "cudart64_101.dll",
