@@ -1,4 +1,5 @@
 $PROJECT_DIR="$PSScriptRoot\.."
+$Env:CARGO_TARGET_DIR = "$PROJECT_DIR\target"
 
 $BUILD_PROFILE = "release" # change to release for testing, it's much faster
 $QT_LIBS = "$PROJECT_DIR\ext\6.4.2\android_arm64_v8a\lib"
@@ -41,7 +42,7 @@ mkdir "$PROJECT_DIR\target\android-build" -ErrorAction SilentlyContinue
 mkdir "$PROJECT_DIR\target\android-build\libs" -ErrorAction SilentlyContinue
 Copy-Item -Path "$PROJECT_DIR\target\$BUILD_PROFILE\apk\lib\*" -Destination "$PROJECT_DIR\target\android-build\libs\" -Recurse -Force
 Copy-Item -Path "$PROJECT_DIR\_deployment\android\src" -Destination "$PROJECT_DIR\target\android-build\" -Recurse -Force
-# Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\$BUILD_PROFILE\libffmpeg.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
+Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\$BUILD_PROFILE\libffmpeg.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
 # Copy-Item -Path "$PROJECT_DIR\target\aarch64-linux-android\$BUILD_PROFILE\libqtav-mediacodec.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\" -Force
 Move-Item -Path "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$PROJECT_DIR\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
