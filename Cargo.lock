@@ -2918,7 +2918,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=cc535f5#cc535f50e5f80026e826c80e1163199e02b4d586"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=e031e12#e031e123b6b328b6a3c2b2ca199de5543aebc181"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3110,7 +3110,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=fa3afd5#fa3afd518ca3a5b6342da40f61d8d49bce400adc"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=eaabbc3#eaabbc32a6b6b1b08f3771032548dc521776ac80"
 dependencies = [
  "argmin",
  "argmin-math",
@@ -3477,7 +3477,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=e13b295#e13b2957222bbd587e3de6e74f5aafa945726fdc"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=26aec61#26aec61b3d8ae1ae52876c293d706f1bb5020907"
 dependencies = [
  "argh",
  "byteorder",

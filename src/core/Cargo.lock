@@ -2135,7 +2135,7 @@ checksum = "f1382d1f0a252c4bf97dc20d979a2fdd05b024acd7c2ed0f7595d7817666a157"
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=fa3afd5#fa3afd518ca3a5b6342da40f61d8d49bce400adc"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=eaabbc3#eaabbc32a6b6b1b08f3771032548dc521776ac80"
 dependencies = [
  "argmin",
  "argmin-math",
@@ -2394,7 +2394,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=e13b295#e13b2957222bbd587e3de6e74f5aafa945726fdc"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=26aec61#26aec61b3d8ae1ae52876c293d706f1bb5020907"
 dependencies = [
  "argh",
  "byteorder",
