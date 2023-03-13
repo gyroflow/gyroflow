@@ -8,7 +8,7 @@ use windows::Win32::Graphics::Dxgi::*;
 use windows::Win32::Graphics::Direct3D11::*;
 use windows::Win32::Foundation::{ CloseHandle, HANDLE, E_NOINTERFACE, E_FAIL };
 use windows::Win32::System::Threading::{ CreateEventA, WaitForSingleObject };
-use windows::core::Interface;
+use windows::core::ComInterface;
 use ash::vk::{ self, ImageCreateInfo };
 
 pub struct DirectX11Fence {

@@ -9,7 +9,7 @@ use crate::gpu::{ BufferDescription, BufferSource };
 #[cfg(not(any(target_os = "macos", target_os = "ios")))] use { super::wgpu_interop_vulkan::*, ash::vk };
 #[cfg(any(target_os = "windows", target_os = "linux"))]  use super::wgpu_interop_cuda::*;
 #[cfg(any(target_os = "macos", target_os = "ios"))]      use super::wgpu_interop_metal::*;
-#[cfg(target_os = "windows")]                            use { super::wgpu_interop_directx::*, windows::{ Win32::Graphics::Direct3D11::*, core::Vtable } };
+#[cfg(target_os = "windows")]                            use { super::wgpu_interop_directx::*, windows::{ Win32::Graphics::Direct3D11::*, core::Interface } };
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use foreign_types::ForeignTypeRef;
@@ -167,9 +167,9 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         #[cfg(target_os = "windows")]
         BufferSource::DirectX11 { texture, device: d3d11_device, device_context } => {
             unsafe {
-                let d3d11_device = ID3D11Device::from_raw_borrowed(&d3d11_device);
+                let d3d11_device = ID3D11Device::from_raw_borrowed(&d3d11_device).unwrap(); // TODO: unwrap
                 // let device_context = ID3D11DeviceContext::from_raw_borrowed(device_context);
-                let texture = ID3D11Texture2D::from_raw_borrowed(&texture);
+                let texture = ID3D11Texture2D::from_raw_borrowed(&texture).unwrap(); // TODO: unwrap
                 let mut desc11 = D3D11_TEXTURE2D_DESC::default();
                 texture.GetDesc(&mut desc11);
                 let conv_format = format_dxgi_to_wgpu(desc11.Format);
@@ -271,7 +271,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         BufferSource::DirectX11 { texture, device_context, .. } => {
             unsafe {
                 if let Some(NativeTexture::D3D11(i)) = &in_texture.native_texture {
-                    i.synchronized_copy_from(ID3D11DeviceContext::from_raw_borrowed(device_context), ID3D11Texture2D::from_raw_borrowed(texture)).unwrap(); // TODO: unwrap
+                    i.synchronized_copy_from(ID3D11DeviceContext::from_raw_borrowed(device_context).unwrap(), ID3D11Texture2D::from_raw_borrowed(texture).unwrap()).unwrap(); // TODO: unwrap
                 }
             }
         },
@@ -420,7 +420,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
             unsafe {
                 use windows::Win32::Graphics::Direct3D11::*;
                 if let Some(NativeTexture::D3D11(o)) = &out_texture.native_texture {
-                    o.synchronized_copy_to(ID3D11DeviceContext::from_raw_borrowed(device_context), ID3D11Texture2D::from_raw_borrowed(texture)).unwrap(); // TODO: unwrap
+                    o.synchronized_copy_to(ID3D11DeviceContext::from_raw_borrowed(device_context).unwrap(), ID3D11Texture2D::from_raw_borrowed(texture).unwrap()).unwrap(); // TODO: unwrap
                 }
             }
         },

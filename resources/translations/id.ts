@@ -11,7 +11,7 @@
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="45"/>
       <source>Preview resolution</source>
-      <translation>Resolusi pratinjau</translation>
+      <translation>Resolusi gambar preview</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="70"/>
@@ -64,17 +64,17 @@ Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada renderi
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="217"/>
       <source>Use GPU decoding</source>
-      <translation>Pakai GPU decoding</translation>
+      <translation>Gunakan GPU decoding</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Format untuk konversi R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
       <source>Preview pipeline</source>
-      <translation type="unfinished">Preview pipeline</translation>
+      <translation>Preview pipeline</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="276"/>
@@ -94,7 +94,7 @@ Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada renderi
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="343"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Bunyi notifikasi</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="348"/>
@@ -124,7 +124,7 @@ Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada renderi
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="363"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Oke</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="366"/>
@@ -172,8 +172,8 @@ Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada renderi
       <location filename="../../src/ui/App.qml" line="245"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Format ini tidak tersedia untuk rendering.
+Alur kerja yang disarankan adalah mengekspor file proyek dan menggunakan salah satu [plugin editor video] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
@@ -244,11 +244,11 @@ The recommended workflow is to export project file and use one of [video editor 
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation type="unfinished">Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.
+      <translation>Beberapa pembuat enkoder GPU AMD memiliki bug yang membatasi kecepatan bit hingga 20 Mbps, jika kecepatan bit target lebih besar dari 100 Mbps.
 
-Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
-- Set output bitrate to less than 100 Mbps
-- Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+Harap periksa kecepatan bit file setelah perenderan dan jika Anda terpengaruh oleh bug ini, Anda dapat:
+- Tetapkan bitrate keluaran hingga kurang dari 100 Mbps
+- Gunakan &quot;Opsi pembuat enkoder khusus&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="343"/>
@@ -257,7 +257,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="520"/>
       <location filename="../../src/ui/App.qml" line="633"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Menyimpan...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="469"/>
@@ -375,7 +375,7 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/App.qml" line="595"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Pembuat enkode audio tidak dapat memproses data masukan. Coba hapus centang &quot;Ekspor audio&quot; di setelan Ekspor.</translation>
     </message>
   </context>
   <context>
@@ -417,17 +417,17 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="55"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Ketajaman pola: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="71"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Beberapa pola terdeteksi, tetapi ketajaman rata-ratanya adalah &lt;b&gt;%1 px&lt;/b&gt; dan batas maksimalnya adalah &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="72"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Tidak ada pola kalibrasi yang terdeteksi.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="73"/>
@@ -439,14 +439,14 @@ Jika Anda memiliki perangkat modern, driver GPU terbaru, dan menurut Anda hal in
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Pastikan hasil rekaman kalibrasi Anda setajam mungkin:
+- Gunakan kecepatan rana tinggi
+- Gunakan pencahayaan yang baik
+- Gerakkan kamera secara perlahan
+- Hindari buram gerakan
+- Pastikan pola tetap fokus.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -594,7 +594,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="357"/>
       <source>Audio export not available when changing video speed.</source>
-      <translation type="unfinished">Audio export not available when changing video speed.</translation>
+      <translation>Ekspor audio tidak tersedia saat mengubah kecepatan video.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="364"/>
@@ -647,7 +647,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
       <source>%1 Hz</source>
-      <translation type="unfinished">%1 Hz</translation>
+      <translation>%1 Hz</translation>
     </message>
   </context>
   <context>
@@ -739,7 +739,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Lensa digital</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="423"/>
@@ -774,27 +774,27 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="509"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Focal length</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="511"/>
       <source>Lens native focal length</source>
-      <translation type="unfinished">Lens native focal length</translation>
+      <translation>Panjang asli focal lengh</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="515"/>
       <source>mm</source>
-      <translation type="unfinished">mm</translation>
+      <translation>mm</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="524"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Krop faktor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="528"/>
       <source>x</source>
-      <translation type="unfinished">x</translation>
+      <translation>x</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="540"/>
@@ -804,12 +804,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="563"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Resolusi pemrosesan</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="586"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>Kalibrasi lensa harus diproses dengan resolusi penuh atau setidaknya 4k. Ubah pengaturan ini hanya jika Anda tahu apa yang Anda lakukan.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="590"/>
@@ -824,7 +824,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Sensor adalah rana global</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="620"/>
@@ -872,7 +872,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="102"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Ya</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="182"/>
@@ -976,12 +976,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Don&apos;t show again</source>
-      <translation type="unfinished">Don&apos;t show again</translation>
+      <translation>Jangan tampilkan lagi</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="166"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Ingat pilihan ini</translation>
     </message>
   </context>
   <context>
@@ -1127,7 +1127,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="488"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Statistik</translation>
     </message>
   </context>
   <context>
@@ -1188,7 +1188,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="224"/>
       <source>Save project file</source>
-      <translation type="unfinished">Save project file</translation>
+      <translation>Menyimpan file project</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="49"/>
@@ -1281,7 +1281,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
       <source>Essential matrix</source>
-      <translation type="unfinished">Essential matrix</translation>
+      <translation>Matriks esensial</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="362"/>
@@ -1372,7 +1372,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="135"/>
       <source>Converting to %1 %2...</source>
-      <translation type="unfinished">Converting to %1 %2...</translation>
+      <translation>Mengkonversi ke %1%2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="143"/>
@@ -1473,77 +1473,77 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="624"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Pengaturan antrian</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Jumlah pararel render</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Tindakan penimpaan default</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="675"/>
       <source>Ask</source>
-      <translation type="unfinished">Ask</translation>
+      <translation>Minta izin</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="677"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Timpa file</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="678"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Ubah nama file</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="679"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Lewati file</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="684"/>
       <source>Export mode</source>
-      <translation type="unfinished">Export mode</translation>
+      <translation>Mode Ekspor</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="685"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Video yang telah stabil</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="686"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>File project</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="687"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>File project (termasuk data gyro)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Ekspor file project (termasuk data gyro yang sudah diproses)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Show queue when adding an item</source>
-      <translation type="unfinished">Show queue when adding an item</translation>
+      <translation>Tampilkan antrean saat menambahkan item</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="693"/>
       <source>Clear render queue</source>
-      <translation type="unfinished">Clear render queue</translation>
+      <translation>Kosongkan antrian render</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="694"/>
       <source>Are you sure you want to remove all items from the render queue?</source>
-      <translation type="unfinished">Are you sure you want to remove all items from the render queue?</translation>
+      <translation>Apakah anda yakin ingin mengosongkan semua item dari antrian render?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="395"/>
@@ -1765,12 +1765,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="204"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation>Petunjuk: Anda dapat memiliki prasetel Anda di kotak pencarian profil lensa, jika Anda menyimpan preset Anda (file `.gyroflow`) di direktori `camera_presets`.</translation>
+      <translation>Petunjuk: Anda dapat memiliki preset Anda di kotak pencarian profil lensa, jika Anda menyimpan preset Anda (file `.gyroflow`) di direktori `camera_presets`.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Anda juga dapat menyimpan preset Anda sebagai `default.gyroflow` di direktori `camera_presets` dan itu akan selalu diterapkan ke setiap file video yang dimuat.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
@@ -1851,7 +1851,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="193"/>
       <source>Only within trim range</source>
-      <translation type="unfinished">Only within trim range</translation>
+      <translation>Hanya dalam rentang trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="194"/>
@@ -1950,12 +1950,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="442"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>Saat memperbesar kecepatan keyframing, disarankan untuk menggunakan metode Envelope follower. Filter Gaussian dapat menyebabkan batas hitam terlihat.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="447"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>Metode pembesaran</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
@@ -2000,7 +2000,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Kecepatan video</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="595"/>
