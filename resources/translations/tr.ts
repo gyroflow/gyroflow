@@ -2836,15 +2836,13 @@ Muhtemelen kameranız bu çekim modunda hareket verisi kaydetmiyor.</translation
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Bu durum genelde salt okunur dosya sisteminden kaynaklanır. Gyroflow uygulamasını, doğrudan .dmg'den çalıştırmak yerine Uygulamalar klasörüne kopyaladığınızdan emin olun.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Bu durum genelde salt okunur dosya sisteminden kaynaklanır. Gyroflow uygulaması Program Files klasörünüzdeyse, SDK'i bu klasöre ayıklamak için uygulamayı yönetici olarak çalıştırmanız gerekir.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>

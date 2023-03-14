@@ -2842,15 +2842,15 @@ Kamera pravdepodobne nezaznamenáva údaje o pohybe v tomto konkrétnom móde.</
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Toto je zvyčajne spôsobené, pretože je súborový systém "iba na čítanie".
+Uisti sa, že je Gyroflow umiestnený v "Applications folder" namiesto spúštania z .dmg súboru priamo.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Toto je zvyčajne spôsobené pretože je súborový systém "iba na čítanie"
+Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Administrátor, pretože je potrebné extrahovať SDK do adresára Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>
