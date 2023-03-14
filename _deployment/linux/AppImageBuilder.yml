@@ -140,7 +140,7 @@ AppDir:
     - usr/share/doc/*/NEWS.*
     - usr/share/doc/*/TODO.*
     - usr/share/glib-2.0/schemas/*
-    - usr/lib/x86_64-linux-gnu/libxkb*
+    - usr/lib/x86_64-linux-gnu/*
 AppImage:
   arch: x86_64
   update-information: guess
