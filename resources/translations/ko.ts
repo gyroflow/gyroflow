@@ -508,137 +508,137 @@ You can increase the sharpness limit in the Advanced section.</source>
       <translation>내보내기 설정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="202"/>
+      <location filename="../../src/ui/menu/Export.qml" line="208"/>
       <source>Output size</source>
       <translation>출력 해상도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="208"/>
+      <location filename="../../src/ui/menu/Export.qml" line="214"/>
       <source>Width</source>
       <translation>너비</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="227"/>
+      <location filename="../../src/ui/menu/Export.qml" line="233"/>
       <source>Height</source>
       <translation>높이</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="260"/>
+      <location filename="../../src/ui/menu/Export.qml" line="266"/>
       <source>Lock aspect ratio</source>
       <translation>종횡비 고정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="272"/>
+      <location filename="../../src/ui/menu/Export.qml" line="278"/>
       <source>Output size preset</source>
       <translation>출력 해상도 프리셋</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="288"/>
+      <location filename="../../src/ui/menu/Export.qml" line="294"/>
       <source>Original (%1 x %2)</source>
       <translation>원본 (%1 x %2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="310"/>
+      <location filename="../../src/ui/menu/Export.qml" line="316"/>
       <source>This resolution is not supported by the selected codec.</source>
       <translation>이 해상도는 선택한 코덱에서 지원되지 않습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="311"/>
+      <location filename="../../src/ui/menu/Export.qml" line="317"/>
       <source>Maximum supported resolution is %1.</source>
       <translation>최대 지원 해상도는 %1 입니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="317"/>
+      <location filename="../../src/ui/menu/Export.qml" line="323"/>
       <source>Resolution must be divisible by 2.</source>
       <translation>해상도는 짝수여야 합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="322"/>
+      <location filename="../../src/ui/menu/Export.qml" line="328"/>
       <source>Bitrate</source>
       <translation>비트 전송률</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="329"/>
+      <location filename="../../src/ui/menu/Export.qml" line="335"/>
       <source>Mbps</source>
       <translation>Mbps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="336"/>
+      <location filename="../../src/ui/menu/Export.qml" line="342"/>
       <source>Use GPU encoding</source>
       <translation>GPU 인코딩 사용</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="345"/>
+      <location filename="../../src/ui/menu/Export.qml" line="351"/>
       <source>GPU encoders typically generate output of lower quality than software encoders, but are significantly faster.</source>
       <translation>GPU 인코더는 일반적으로 소프트웨어 인코더보다 품질이 낮지만 훨씬 빠릅니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="346"/>
+      <location filename="../../src/ui/menu/Export.qml" line="352"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
       <translation>시각적으로 동일한 품질을 얻으려면 더 높은 비트 전송률이 필요합니다. 비트 전송률이 동일하면 출력 화질이 열화됩니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="347"/>
+      <location filename="../../src/ui/menu/Export.qml" line="353"/>
       <source>Uncheck this option for maximum possible quality.</source>
       <translation>가능한 최상의 품질을 얻으려면 이 옵션을 해제합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="349"/>
+      <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>GPU acceleration is not available for the pixel format of this video.</source>
       <translation>이 영상의 픽셀 형식은 GPU 가속을 지원하지 않습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="353"/>
+      <location filename="../../src/ui/menu/Export.qml" line="359"/>
       <source>Export audio</source>
       <translation>음성 내보내기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="357"/>
+      <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Audio export not available when changing video speed.</source>
       <translation>영상 속도를 조절한 경우 음성 내보내기를 지원하지 않습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="364"/>
+      <location filename="../../src/ui/menu/Export.qml" line="370"/>
       <source>Custom encoder options</source>
       <translation>사용자 지정 인코더 옵션</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="387"/>
+      <location filename="../../src/ui/menu/Export.qml" line="393"/>
       <source>Show available options</source>
       <translation>사용 가능한 옵션 보이기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="390"/>
+      <location filename="../../src/ui/menu/Export.qml" line="396"/>
       <source>Ok</source>
       <translation>확인</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="397"/>
+      <location filename="../../src/ui/menu/Export.qml" line="403"/>
       <source>Keyframe distance</source>
       <translation>키프레임 간격</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="406"/>
+      <location filename="../../src/ui/menu/Export.qml" line="412"/>
       <source>s</source>
       <translation>초</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="411"/>
+      <location filename="../../src/ui/menu/Export.qml" line="417"/>
       <source>Preserve other tracks</source>
       <translation>여타 기존 트랙 유지</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="413"/>
+      <location filename="../../src/ui/menu/Export.qml" line="419"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
       <translation>이 옵션을 선택하면 잘라내기 범위가 비활성화되며 .mov 확장자를 사용해야 합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="418"/>
+      <location filename="../../src/ui/menu/Export.qml" line="424"/>
       <source>Use black frames outside trim range and keep original file duration</source>
       <translation>잘라내기 범위 밖은 검게 처리하고 원본 파일 길이 유지</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Export.qml" line="425"/>
+      <location filename="../../src/ui/menu/Export.qml" line="431"/>
       <source>Device for rendering</source>
       <translation>렌더링에 사용할 장치</translation>
     </message>
@@ -2702,66 +2702,66 @@ Are you sure you want to continue?</source>
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="413"/>
+      <location filename="../../src/ui/VideoArea.qml" line="420"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>이 영상과 연결된 %1 파일이 있습니다. 로드하시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="313"/>
-      <location filename="../../src/ui/VideoArea.qml" line="378"/>
-      <location filename="../../src/ui/VideoArea.qml" line="414"/>
+      <location filename="../../src/ui/VideoArea.qml" line="320"/>
+      <location filename="../../src/ui/VideoArea.qml" line="385"/>
+      <location filename="../../src/ui/VideoArea.qml" line="421"/>
       <source>Yes</source>
       <translation>예</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="383"/>
-      <location filename="../../src/ui/VideoArea.qml" line="417"/>
+      <location filename="../../src/ui/VideoArea.qml" line="390"/>
+      <location filename="../../src/ui/VideoArea.qml" line="424"/>
       <source>No</source>
       <translation>아니요</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="566"/>
+      <location filename="../../src/ui/VideoArea.qml" line="573"/>
       <source>Zoom: %1</source>
       <translation>확대: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="610"/>
+      <location filename="../../src/ui/VideoArea.qml" line="617"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>선택된 파일 로드에 실패했습니다, 지원되지 않거나 유효하지 않습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="162"/>
-      <location filename="../../src/ui/VideoArea.qml" line="167"/>
-      <location filename="../../src/ui/VideoArea.qml" line="186"/>
-      <location filename="../../src/ui/VideoArea.qml" line="205"/>
-      <location filename="../../src/ui/VideoArea.qml" line="229"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
+      <location filename="../../src/ui/VideoArea.qml" line="174"/>
+      <location filename="../../src/ui/VideoArea.qml" line="193"/>
+      <location filename="../../src/ui/VideoArea.qml" line="212"/>
       <location filename="../../src/ui/VideoArea.qml" line="236"/>
-      <location filename="../../src/ui/VideoArea.qml" line="362"/>
-      <location filename="../../src/ui/VideoArea.qml" line="610"/>
+      <location filename="../../src/ui/VideoArea.qml" line="243"/>
+      <location filename="../../src/ui/VideoArea.qml" line="369"/>
+      <location filename="../../src/ui/VideoArea.qml" line="617"/>
       <source>Ok</source>
       <translation>확인</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="361"/>
+      <location filename="../../src/ui/VideoArea.qml" line="368"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation>이미지 시퀀스가 감지되었습니다.
 프레임률을 입력하세요: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="318"/>
-      <location filename="../../src/ui/VideoArea.qml" line="368"/>
-      <location filename="../../src/ui/VideoArea.qml" line="451"/>
+      <location filename="../../src/ui/VideoArea.qml" line="325"/>
+      <location filename="../../src/ui/VideoArea.qml" line="375"/>
+      <location filename="../../src/ui/VideoArea.qml" line="458"/>
       <source>Cancel</source>
       <translation>취소</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="155"/>
+      <location filename="../../src/ui/VideoArea.qml" line="156"/>
       <source>Downloading %1 (%2)</source>
       <translation>%1 다운로드 중 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="162"/>
+      <location filename="../../src/ui/VideoArea.qml" line="163"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
@@ -2770,146 +2770,160 @@ Your render queue and current file is saved automatically.</source>
 렌더링 대기열과 현재 파일은 자동 저장되었습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="197"/>
+      <location filename="../../src/ui/VideoArea.qml" line="204"/>
       <source>Merging files to %1 (%2)</source>
       <translation>%1(으)로 파일 병합 중 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="312"/>
+      <location filename="../../src/ui/VideoArea.qml" line="319"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
       <translation>이 형식은 외부 SDK가 필요합니다. 다운로드하시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="377"/>
+      <location filename="../../src/ui/VideoArea.qml" line="384"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
       <translation>분할된 영상이 감지되었습니다. 파일들을 (%1) 자동으로 연결하여 하나의 영상으로 만드시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="436"/>
+      <location filename="../../src/ui/VideoArea.qml" line="443"/>
       <source>You have opened multiple files. What do you want to do?</source>
       <translation>여러 파일을 열었습니다. 무엇을 하시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="437"/>
+      <location filename="../../src/ui/VideoArea.qml" line="444"/>
       <source>Add to render queue</source>
       <translation>렌더링 대기열에 추가</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="441"/>
+      <location filename="../../src/ui/VideoArea.qml" line="448"/>
       <source>Merge them into one video</source>
       <translation>하나의 영상으로 병합</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="448"/>
+      <location filename="../../src/ui/VideoArea.qml" line="455"/>
       <source>Open the first file</source>
       <translation>첫 번째 파일 열기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="229"/>
+      <location filename="../../src/ui/VideoArea.qml" line="236"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
       <translation>파일 형식이 감지되었으나, 흔들림 데이터를 찾을 수 없습니다.
 카메라가 특정 촬영 모드에서 흔들림 데이터를 기록하지 않을 수 있습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="236"/>
+      <location filename="../../src/ui/VideoArea.qml" line="243"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
       <translation>흔들림 데이터의 샘플링 속도가 너무 느립니다 (%1 Hz).
 못 해도 50 Hz, 최소 200 Hz를 권장합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="648"/>
+      <location filename="../../src/ui/VideoArea.qml" line="655"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>렌즈 프로필이 로드되지 않아 결과가 올바르지 않을 수 있습니다. 카메라에 맞는 렌즈 프로필을 로드해주세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="680"/>
+      <location filename="../../src/ui/VideoArea.qml" line="687"/>
       <source>Loading %1...</source>
       <translation>%1 로드 중...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="680"/>
+      <location filename="../../src/ui/VideoArea.qml" line="687"/>
       <source>Drop video file here</source>
       <translation>여기에 영상 파일을 놓으세요</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="266"/>
+      <location filename="../../src/ui/VideoArea.qml" line="273"/>
       <source>Analyzing %1...</source>
       <translation>%1 분석 중...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="178"/>
+      <location filename="../../src/ui/VideoArea.qml" line="169"/>
+      <source>This is often caused by read-only file system.
+Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
+      <translation type="unfinished">This is often caused by read-only file system.
+Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="172"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation type="unfinished">This is often caused by read-only file system.
+If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="185"/>
       <source>Converting to %1 (%2)</source>
       <translation>%1 (%2) (으)로 변환 중</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="275"/>
+      <location filename="../../src/ui/VideoArea.qml" line="282"/>
       <source>Loading gyro data %1...</source>
       <translation>자이로 데이터 %1 로드 중...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="570"/>
+      <location filename="../../src/ui/VideoArea.qml" line="577"/>
       <source>Focal length: %1 mm</source>
       <translation>초점 거리: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="572"/>
+      <location filename="../../src/ui/VideoArea.qml" line="579"/>
       <source>full frame equiv.: %1 mm</source>
       <translation>풀프레임 환산: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="808"/>
+      <location filename="../../src/ui/VideoArea.qml" line="815"/>
       <source>Trim start</source>
       <translation>잘라내기 시작점</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="809"/>
+      <location filename="../../src/ui/VideoArea.qml" line="816"/>
       <source>Previous frame</source>
       <translation>이전 프레임</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="812"/>
+      <location filename="../../src/ui/VideoArea.qml" line="819"/>
       <source>Pause</source>
       <translation>일시 정지</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="812"/>
+      <location filename="../../src/ui/VideoArea.qml" line="819"/>
       <source>Play</source>
       <translation>재생</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="815"/>
+      <location filename="../../src/ui/VideoArea.qml" line="822"/>
       <source>Next frame</source>
       <translation>다음 프레임</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="816"/>
+      <location filename="../../src/ui/VideoArea.qml" line="823"/>
       <source>Trim end</source>
       <translation>잘라내기 종료점</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="844"/>
+      <location filename="../../src/ui/VideoArea.qml" line="851"/>
       <source>Toggle stabilization overview</source>
       <translation>안정화 개요 켜기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="851"/>
+      <location filename="../../src/ui/VideoArea.qml" line="858"/>
       <source>Toggle stabilization</source>
       <translation>안정화 켜기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="857"/>
+      <location filename="../../src/ui/VideoArea.qml" line="864"/>
       <source>Mute</source>
       <translation>음소거</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="857"/>
+      <location filename="../../src/ui/VideoArea.qml" line="864"/>
       <source>Unmute</source>
       <translation>음소거 해제</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="874"/>
+      <location filename="../../src/ui/VideoArea.qml" line="881"/>
       <source>Playback speed</source>
       <translation>재생 속도</translation>
     </message>
