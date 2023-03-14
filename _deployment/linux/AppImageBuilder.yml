@@ -40,8 +40,6 @@ AppDir:
     - libpulse-dev:amd64
     - libasound2:amd64
     - libasound-dev:amd64
-    - libxkbcommon0:amd64
-    - libxkbcommon-dev:amd64
     - libc++-dev:amd64
     - libcanberra-gtk0:amd64
     - libcanberra-gtk3-module:amd64
@@ -142,6 +140,7 @@ AppDir:
     - usr/share/doc/*/NEWS.*
     - usr/share/doc/*/TODO.*
     - usr/share/glib-2.0/schemas/*
+    - usr/lib/x86_64-linux-gnu/libxkb*
 AppImage:
   arch: x86_64
   update-information: guess
