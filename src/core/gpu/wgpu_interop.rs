@@ -263,7 +263,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             queue.write_texture(
                 in_texture.wgpu_texture.as_ref().unwrap().as_image_copy(),
                 bytemuck::cast_slice(buffer),
-                ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(buf.size.2 as u32), rows_per_image: None },
+                ImageDataLayout { offset: 0, bytes_per_row: Some(buf.size.2 as u32), rows_per_image: None },
                 size,
             );
         },
@@ -285,7 +285,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             if let Some(in_buf) = &in_texture.wgpu_buffer {
                 if let Some(in_tex) = &in_texture.wgpu_texture {
                     encoder.copy_buffer_to_texture(
-                        ImageCopyBuffer { buffer: in_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
+                        ImageCopyBuffer { buffer: in_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
                         ImageCopyTexture { texture: in_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         size
                     );
@@ -348,7 +348,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         BufferSource::Cpu { .. } => {
             encoder.copy_texture_to_buffer(
                 ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                ImageCopyBuffer { buffer: staging_buffer, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
+                ImageCopyBuffer { buffer: staging_buffer, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
                 size
             );
         },
@@ -358,7 +358,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 if let Some(out_tex) = &out_texture.wgpu_texture {
                     encoder.copy_texture_to_buffer(
                         ImageCopyTexture { texture: out_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyBuffer { buffer: out_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: NonZeroU32::new(padded_stride), rows_per_image: None } },
+                        ImageCopyBuffer { buffer: out_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
                         size
                     );
                 }
