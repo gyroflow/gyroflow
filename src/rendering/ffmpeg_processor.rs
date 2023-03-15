@@ -122,6 +122,23 @@ impl<'a> FfmpegProcessor<'a> {
             let mut decoder: *const ffi::AVCodec = std::ptr::null();
             let index = ffi::av_find_best_stream(input_context.as_mut_ptr(), media::Type::Video.into(), -1i32, -1i32, &mut decoder, 0);
             if index >= 0 && !decoder.is_null() {
+                if gpu_decoding && cfg!(target_os = "android") {
+                    let decoder_name = match (*decoder).id {
+                        ffi::AVCodecID::AV_CODEC_ID_H264 => Some("h264_mediacodec"),
+                        ffi::AVCodecID::AV_CODEC_ID_HEVC => Some("hevc_mediacodec"),
+                        ffi::AVCodecID::AV_CODEC_ID_VP8  => Some("vp8_mediacodec"),
+                        ffi::AVCodecID::AV_CODEC_ID_VP9  => Some("vp9_mediacodec"),
+                        ffi::AVCodecID::AV_CODEC_ID_AV1  => Some("av1_mediacodec"),
+                        _ => None
+                    };
+                    if let Some(name) = decoder_name {
+                        let name = std::ffi::CString::new(name).unwrap();
+                        let mc_ptr = ffi::avcodec_find_decoder_by_name(name.as_ptr());
+                        if !mc_ptr.is_null() {
+                            decoder = mc_ptr;
+                        }
+                    }
+                }
                 Ok((Stream::wrap(&input_context, index as usize), decoder))
             } else {
                 Err(Error::StreamNotFound)
@@ -134,12 +151,20 @@ impl<'a> FfmpegProcessor<'a> {
 
         let decoder_fps = stream.rate().into();
 
-        let mut decoder_ctx = codec::context::Context::from_parameters(stream.parameters())?;
+        let mut decoder_ctx = unsafe { codec::context::Context::wrap(ffi::avcodec_alloc_context3(decoder), None) };
+        unsafe {
+            if ffi::avcodec_parameters_to_context(decoder_ctx.as_mut_ptr(), stream.parameters().as_ptr()) < 0 {
+                ::log::error!("avcodec_parameters_to_context failed");
+                return Err(FFmpegError::DecoderNotFound);
+            }
+        }
         decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 3 });
+
+        let codec = decoder_ctx.codec().ok_or(FFmpegError::DecoderNotFound)?;
 
         let mut hw_backend = String::new();
         if gpu_decoding {
-            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, decoder, &mut decoder_ctx, hwaccel_device.as_deref())?;
+            let hw = ffmpeg_hw::init_device_for_decoding(gpu_decoder_index, unsafe { codec.as_ptr() }, &mut decoder_ctx, hwaccel_device.as_deref())?;
             log::debug!("Selected HW backend {:?} ({}) with format {:?}", hw.1, hw.2, hw.3);
             hw_backend = hw.2;
         }
@@ -169,7 +194,7 @@ impl<'a> FfmpegProcessor<'a> {
                     options: Dictionary::new(),
                     ..EncoderParams::default()
                 },
-                decoder: Some(decoder_ctx.decoder().video()?),
+                decoder: Some(decoder_ctx.decoder().open_as(codec)?.video()?),
                 ..VideoTranscoder::default()
             },
 

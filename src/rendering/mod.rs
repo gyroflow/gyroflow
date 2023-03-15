@@ -788,23 +788,19 @@ pub fn test() {
 // use std::os::raw::c_void;
 
 pub fn test_decode() {
-    let mut proc = FfmpegProcessor::from_file("E:/clips/GoPro/rs/C0752.MP4", true).unwrap();
+    let mut proc = FfmpegProcessor::from_file("/storage/self/primary/Download/gf/h8.MP4", true, 0, None).unwrap();
 
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
-    proc.on_frame(move |timestamp_us, input_frame, converter, _rate_control| {
-        let small_frame = converter.scale(input_frame, Pixel::GRAY8, 1280, 720);
-        ::log::debug!("ts: {} width: {}", timestamp_us, small_frame.plane_width(0));
+    proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+        ::log::debug!("ts: {} width: {}, format: {:?}", timestamp_us, input_frame.plane_width(0), input_frame.format());
 
         /*let (w, h) = (small_frame.plane_width(0) as i32, small_frame.plane_height(0) as i32);
         let mut bytes = small_frame.data_mut(0);
         let inp = unsafe { Mat::new_size_with_data(Size::new(w, h), CV_8UC1, bytes.as_mut_ptr() as *mut c_void, w as usize) }.unwrap();
         opencv::imgcodecs::imwrite("D:/test.jpg", &inp, &opencv::types::VectorOfi32::new());*/
-
+        Ok(())
     });
-    let _ = proc.start_decoder_only(vec![
-        (100, 2000),
-        (3000, 5000),
-        (11000, 999999)
-    ], Arc::new(AtomicBool::new(false)));
-}
-*/
+    let _time = std::time::Instant::now();
+    let _ = proc.start_decoder_only(vec![(0.0, 1000.0)], Arc::new(AtomicBool::new(false)));
+    ::log::debug!("Done in {:.3} ms", _time.elapsed().as_micros() as f64 / 1000.0);
+}*/
