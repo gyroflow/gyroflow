@@ -442,15 +442,18 @@ MenuItem {
                     target: controller;
                     function onGpu_list_loaded(list) {
                         const saved = settings.value("renderingDevice", defaultInitializedDevice);
-                        const hasOpencl = !!list.find(x => x.includes("[OpenCL]"));
-                        const hasWgpu   = !!list.find(x => x.includes("[wgpu]"));
-                        if (hasOpencl && hasWgpu) {
-                                 if (defaultInitializedDevice.includes("[OpenCL]")) list = list.filter(x => !x.includes("[wgpu]"));
-                            else if (defaultInitializedDevice.includes("[wgpu]"))   list = list.filter(x => !x.includes("[OpenCL]"));
-                        }
+                        const toRemove = [ "[OpenCL]", "[wgpu]", "(Vulkan)", "(Metal)", "(Dx12)", "(Dx11)", "(Gl)" ];
+                        list = list.map(x => {
+                            for (const keyword of toRemove) {
+                                x = x.replace(keyword, "").trim()
+                            }
+                            return x;
+                        });
+                        list = [...new Set(list)];
+
                         renderingDevice.orgList = list;
                         renderingDevice.preventChange = true;
-                        renderingDevice.model = list.map(x => x.replace("[OpenCL] ", "").replace("[wgpu] ", ""));
+                        renderingDevice.model = list;
                         for (let i = 0; i < list.length; ++i) {
                             if (list[i] == saved) {
                                 renderingDevice.currentIndex = i;

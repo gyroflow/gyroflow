@@ -14,7 +14,6 @@ use crate::gpu::{ BufferDescription, BufferSource };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use foreign_types::ForeignTypeRef;
 
-use std::num::NonZeroU32;
 use wgpu::{ Origin3d, Extent3d, TextureAspect, ImageCopyTexture, ImageCopyBuffer, ImageDataLayout };
 
 pub enum NativeTexture {

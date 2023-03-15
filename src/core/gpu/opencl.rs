@@ -123,7 +123,7 @@ impl OclWrapper {
 
         let mut platform = None;
         let mut device = None;
-        let preference = [ "nvidia", "radeon", "geforce", "firepro", "accelerated parallel processing", "graphics" ];
+        let preference = [ "nvidia", "quadro", "radeon", "geforce", "firepro", "accelerated parallel processing", "graphics" ];
         'outer: for pref in preference {
             for p in Platform::list() {
                 if let Ok(devs) = Device::list(p, Some(ocl::flags::DeviceType::new().gpu().accelerator())) {
