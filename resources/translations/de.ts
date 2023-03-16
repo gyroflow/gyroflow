@@ -1170,7 +1170,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/App.qml" line="219"/>
       <source>Apply selected settings to all items in the render queue</source>
-      <translation>Die ausgewählten Einstellungen auf ALLE Aufträge in der Watreschlange anwenden</translation>
+      <translation>Die ausgewählten Einstellungen auf ALLE Aufträge in der Warteschlange anwenden</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="220"/>
