@@ -2843,15 +2843,15 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>这通常是由只读文件系统造成的。
+确保您已经将 Gyroflow 应用程序复制到了到您的应用程序文件夹内，而不要直接从 .dmg 镜像内运行。</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>这通常是由只读文件系统造成的。
+如果您将 Gyroflow 放在 C 盘的 Program Files 文件夹内，那么您需要以管理员身份运行 Gyroflow 才能将 SDK 提取到 Gyroflow 文件夹中。</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>
