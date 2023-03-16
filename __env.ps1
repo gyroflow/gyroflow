@@ -1,5 +1,5 @@
 # Qt
-$Env:Path = "$PSScriptRoot\ext\6.4.2\msvc2019_64\bin;$Env:Path"
+$Env:Path = "$PSScriptRoot\ext\6.4.3\msvc2019_64\bin;$Env:Path"
 
 # FFmpeg
 $Env:FFMPEG_DIR = "$PSScriptRoot\ext\ffmpeg-master-windows-desktop-vs2022-gpl-lite"

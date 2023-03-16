@@ -2,7 +2,7 @@
 
 : "${PROJECT_DIR:=$(readlink -f $(dirname $(readlink -f $0))/..)}"
 : "${CARGO_TARGET:=$PROJECT_DIR/target/deploy}"
-: "${QT_DIR:=$PROJECT_DIR/ext/6.4.2/gcc_64}"
+: "${QT_DIR:=$PROJECT_DIR/ext/6.4.3/gcc_64}"
 : "${FFMPEG_DIR:=$PROJECT_DIR/ext/ffmpeg-master-linux-clang-gpl-lite}"
 : "${VCPKG_ROOT:=$PROJECT_DIR/ext/vcpkg}"
 : "${VULKAN_SDK:=$PROJECT_DIR/VULKAN_SDK}"

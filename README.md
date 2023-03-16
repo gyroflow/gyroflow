@@ -226,7 +226,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer
 2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
-    - `Qt 6.4.2` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.4.2 win64_msvc2019_64 -m qtshadertools` or use the [official installer](https://www.qt.io/download-qt-installer)
+    - `Qt 6.4.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.4.3 win64_msvc2019_64 -m qtshadertools` or use the [official installer](https://www.qt.io/download-qt-installer)
     - `FFmpeg 5.1`: download [ffmpeg 5.1 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-master-windows-desktop-vs2022-gpl-lite.7z/download) and unzip it to `ext/ffmpeg-master-windows-desktop-vs2022-gpl-lite`
     - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat -disableMetrics`
     - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
@@ -256,7 +256,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Building for Android
 1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested
-2. Install Qt for Android: `aqt install-qt windows android 6.4.2 android_arm64_v8a` and `aqt install-qt windows desktop 6.4.2 win64_mingw`
+2. Install Qt for Android: `aqt install-qt windows android 6.4.3 android_arm64_v8a` and `aqt install-qt windows desktop 6.4.3 win64_mingw`
 3. Install `cargo-apk`: `cargo install --git https://github.com/rust-windowing/android-ndk-rs.git cargo-apk`
 4. Add a Rust target: `rustup target add aarch64-linux-android`
 5. Update paths in `_deployment/build-android.ps1`

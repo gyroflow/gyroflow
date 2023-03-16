@@ -58,14 +58,14 @@ jobs:
           target: ${{ matrix.targets.target }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf7
+          key: gf8
 
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-7
+          key: ${{ runner.os }}-gf-ext-8
 
       - name: Add rust target
         run: rustup target add ${{ matrix.targets.target2 }}
@@ -73,7 +73,7 @@ jobs:
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
         with:
-          vulkan-query-version: 1.3.204.0
+          vulkan-query-version: latest
           vulkan-components: Vulkan-Headers
           vulkan-use-cache: true
 
@@ -81,7 +81,7 @@ jobs:
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext/vcpkg'
-          vcpkgGitCommitId: 223d33be7d3ec6c3d64381ca37f501b8c87dda6a
+          vcpkgGitCommitId: 07da05c20c56d3df4b488a16d5bcfeebb761e754
           doNotCache: true
 
       - name: Setup MacOS deployment target
@@ -101,7 +101,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: 6.4.2
+          version: 6.4.3
           dir: ${{ github.workspace }}/ext/
           cached: ${{ steps.extcache.outputs.cache-hit }}
 
@@ -168,7 +168,7 @@ jobs:
 
       - name: Install Mac certificate
         if: ${{ matrix.targets.os == 'macos-latest' }}
-        uses: apple-actions/import-codesign-certs@v1
+        uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}

@@ -11,7 +11,7 @@ if [ "$1" != "CI" ]; then
     # Install Qt
     pip3 install -U pip
     pip3 install aqtinstall
-    python3 -m aqt install-qt mac ios 6.4.2
+    python3 -m aqt install-qt mac ios 6.4.3
 
     # Install OpenCV
     ./vcpkg/vcpkg install "opencv[core]:arm64-ios"
