@@ -31,7 +31,7 @@ pub fn create_texture_from_metal(device: &Device, image: *mut metal::MTLTexture,
     let texture = unsafe {
         <Metal as wgpu_hal::Api>::Device::texture_from_raw(
             image,
-            format_wgpu_to_metal(format),
+            format,
             metal::MTLTextureType::D2,
             1,
             1,
