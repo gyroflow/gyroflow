@@ -11,6 +11,8 @@ use ffmpeg_next::{ ffi, codec, encoder, format, frame, media, Dictionary, Ration
 use super::*;
 use super::ffmpeg_video::*;
 use super::ffmpeg_audio::*;
+#[cfg(target_os = "android")]
+use super::ffmpeg_android::*;
 
 pub struct FfmpegProcessor<'a> {
     pub gpu_decoding: bool,
@@ -29,6 +31,9 @@ pub struct FfmpegProcessor<'a> {
     pub decoder_fps: f64,
 
     pub preserve_other_tracks: bool,
+
+    #[cfg(target_os = "android")]
+    pub android_handles: Option<AndroidHWHandles>,
 
     ost_time_bases: Vec<Rational>,
 }
@@ -185,6 +190,9 @@ impl<'a> FfmpegProcessor<'a> {
             preserve_other_tracks: false,
 
             decoder_fps,
+
+            #[cfg(target_os = "android")]
+            android_handles: None,//if gpu_decoding { AndroidHWHandles::init_with_context(&mut decoder_ctx).ok() } else { None },
 
             video: VideoTranscoder {
                 gpu_encoding: true,

@@ -12,6 +12,8 @@ pub mod mdk_processor;
 pub mod video_processor;
 pub mod zero_copy;
 use zero_copy::*;
+#[cfg(target_os = "android")]
+pub mod ffmpeg_android;
 
 pub use self::video_processor::VideoProcessor;
 pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
@@ -279,9 +281,6 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     smpte2084       16           .D.V....... SMPTE ST 2084
                     smpte428_1      17           .D.V....... SMPTE ST 428-1
             */
-        }
-        Some("h264_mediacodec") | Some("hevc_mediacodec") => {
-            // proc.video.encoder_params.pixel_format = Some(Pixel::NV12);
         }
         _ => { }
     }
@@ -790,9 +789,25 @@ pub fn test() {
 pub fn test_decode() {
     let mut proc = FfmpegProcessor::from_file("/storage/self/primary/Download/gf/h8.MP4", true, 0, None).unwrap();
 
+    let recv = proc.android_handles.as_mut().unwrap().receiver.take().unwrap();
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
     proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
-        ::log::debug!("ts: {} width: {}, format: {:?}", timestamp_us, input_frame.plane_width(0), input_frame.format());
+
+        ffmpeg_android::release_frame(input_frame);
+        let hw_buf = recv.recv().unwrap();
+
+        unsafe {
+            let desc = unsafe {
+                let mut result = std::mem::MaybeUninit::uninit();
+                ndk_sys::AHardwareBuffer_describe(hw_buf.as_ptr(), result.as_mut_ptr());
+                result.assume_init()
+            };
+            ::log::debug!("recv: {:x}", desc.format);
+        }
+
+        ::log::debug!("recv: {:?}", hw_buf.as_ptr());
+
+        ::log::debug!("ts: {} width: {}, format: {:?}", timestamp_us, input_frame.width(), input_frame.format());
 
         /*let (w, h) = (small_frame.plane_width(0) as i32, small_frame.plane_height(0) as i32);
         let mut bytes = small_frame.data_mut(0);

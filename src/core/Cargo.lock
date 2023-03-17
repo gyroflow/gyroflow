@@ -291,9 +291,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4f6e5df9abedba5099a01a6567c6086a6fbcff57af07c360d356737f9e0c644"
+checksum = "d5dd14596c0e5b954530d0e6f1fd99b89c03e313aa2086e8da4303701a09e1cf"
 
 [[package]]
 name = "bitreader"
@@ -980,7 +980,7 @@ dependencies = [
  "bincode",
  "biquad",
  "bitarray",
- "bitflags 2.0.0",
+ "bitflags 2.0.1",
  "bytemuck",
  "byteorder",
  "core-foundation-sys",
@@ -2534,12 +2534,11 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "walkdir"
-version = "2.3.2"
+version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "808cf2735cd4b6866113f648b791c6adc5714537bc222d9347bb203386ffda56"
+checksum = "36df944cda56c7d8d8b7496af378e6b16de9284591917d307c9b4d313c44e698"
 dependencies = [
  "same-file",
- "winapi",
  "winapi-util",
 ]
 

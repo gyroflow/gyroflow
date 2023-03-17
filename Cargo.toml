@@ -110,13 +110,14 @@ codegen-units = 1
 build_targets = [ "aarch64-linux-android" ]
 
 [package.metadata.android.sdk]
-min_sdk_version = 23
-target_sdk_version = 29
+min_sdk_version = 26
+target_sdk_version = 30
 
 [[package.metadata.android.uses_permission]]
 name = "android.permission.WRITE_EXTERNAL_STORAGE"
 
 [target.'cfg(target_os = "android")'.dependencies]
-# ndk = { version = "*", features = ["trace"] }
+jni = "0.21"
+ndk = { version = "0.7", features = ["media", "api-level-26"] }
 # ndk-glue = { version = "*", features = ["logger"] }
 ndk-sys = { version = "0.4.1" }
