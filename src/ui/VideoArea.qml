@@ -239,8 +239,8 @@ Item {
                     if (!additional_data.contains_raw_gyro && additional_data.contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
                 }
             }
-            if (+additional_data.sample_rate > 0.0 && +additional_data.sample_rate < 50) {
-                messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
+            if (+additional_data.sample_rate > 0.0 && Math.round(+additional_data.sample_rate) < 50) {
+                messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
             }
             if (root.pendingGyroflowData) {
                 Qt.callLater(loadGyroflowData, root.pendingGyroflowData);

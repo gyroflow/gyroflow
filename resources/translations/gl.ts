@@ -2842,15 +2842,15 @@ Probablemente, a cámara non&apos; grava datos de movemento neste modo de dispar
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Isto adoita ser causado por un sistema de ficheiros de só lectura.
+Asegúrese de copiar a aplicación Gyroflow no cartafol Aplicacións, en lugar de executala directamente desde o .dmg.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Isto adoita ser causado por un sistema de ficheiros de só lectura.
+Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow como administrador para extraer o SDK no cartafol Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>

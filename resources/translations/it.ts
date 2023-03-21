@@ -2840,15 +2840,15 @@ Probabilmente la camera non registra dati di movimento in questa particolare mod
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Ciò solitamente è causato dal file system di sola lettura.
+Assicurati di aver copiato l'app Gyroflow nella cartella Applicazioni, invece di eseguire direttamente dal .dmg.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Ciò potrebbe essere causato da file system di sola lettura.
+Se hai Gyroflow in C:File programma, allora devi eseguire Gyroflow come amministratore per estrarre l'SDK nella cartella Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>
