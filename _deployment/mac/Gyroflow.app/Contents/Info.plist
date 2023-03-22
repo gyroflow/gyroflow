@@ -67,9 +67,9 @@
 			<key>CFBundleTypeName</key>
 			<string>mp4</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.mpeg-4</string>
@@ -81,9 +81,9 @@
 			<key>CFBundleTypeName</key>
 			<string>qt movie</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.apple.quicktime-movie</string>
@@ -99,9 +99,9 @@
 			<key>CFBundleTypeName</key>
 			<string>MXF</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -111,9 +111,9 @@
 			<key>CFBundleTypeName</key>
 			<string>R3D</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -123,9 +123,9 @@
 			<key>CFBundleTypeName</key>
 			<string>BRAW</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -135,9 +135,9 @@
 			<key>CFBundleTypeName</key>
 			<string>MTS</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>None</string>
 		</dict>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
@@ -148,9 +148,9 @@
 			<key>CFBundleTypeName</key>
 			<string>M2T(s)</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
-			<string>Alternate</string>
+			<string>Name</string>
 		</dict>
 	</array>
 	<key>UTExportedTypeDeclarations</key>
