@@ -244,17 +244,6 @@ impl Stabilization {
                             }
 
                             ///////////////////////////////////////////////////////////////////
-                            // Calculate source `y` for rolling shutter
-                            let mut sy = y;
-                            if params.matrix_count > 1 {
-                                let idx = params.matrix_count as usize / 2;
-                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
-                                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
-                                }
-                            }
-                            ///////////////////////////////////////////////////////////////////
-
-                            ///////////////////////////////////////////////////////////////////
                             // Add lens distortion back
                             if params.lens_correction_amount < 1.0 {
                                 let mut new_out_pos = out_pos;
@@ -275,6 +264,17 @@ impl Stabilization {
                                     new_out_pos.0 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
                                     new_out_pos.1 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount),
                                 );
+                            }
+                            ///////////////////////////////////////////////////////////////////
+
+                            ///////////////////////////////////////////////////////////////////
+                            // Calculate source `y` for rolling shutter
+                            let mut sy = (out_pos.1.round() as i32).min(params.height).max(0) as usize;
+                            if params.matrix_count > 1 {
+                                let idx = params.matrix_count as usize / 2;
+                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
+                                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                                }
                             }
                             ///////////////////////////////////////////////////////////////////
 

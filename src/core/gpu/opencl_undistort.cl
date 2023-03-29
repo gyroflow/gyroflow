@@ -258,18 +258,6 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         float2 out_pos = (float2)(x, y) + params->translation2d;
 
         ///////////////////////////////////////////////////////////////////
-        // Calculate source `y` for rolling shutter
-        int sy = y;
-        if (params->matrix_count > 1) {
-            int idx = (params->matrix_count / 2) * 9; // Use middle matrix
-            float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
-            if (uv.x > -99998.0f) {
-                sy = min((int)params->height, max(0, (int)round(uv.y)));
-            }
-        }
-        ///////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////////////////////
         // Add lens distortion back
         if (params->lens_correction_amount < 1.0f) {
             float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
@@ -286,6 +274,18 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             new_out_pos = out_f * new_out_pos + out_c;
 
             out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
+        }
+        ///////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////
+        // Calculate source `y` for rolling shutter
+        int sy = min((int)params->height, max(0, (int)round(out_pos.y)));
+        if (params->matrix_count > 1) {
+            int idx = (params->matrix_count / 2) * 9; // Use middle matrix
+            float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
+            if (uv.x > -99998.0f) {
+                sy = min((int)params->height, max(0, (int)round(uv.y)));
+            }
         }
         ///////////////////////////////////////////////////////////////////
 

@@ -138,18 +138,6 @@ void main() {
     }
 
     ///////////////////////////////////////////////////////////////////
-    // Calculate source `y` for rolling shutter
-    float sy = texPos.y;
-    if (params.matrix_count > 1) {
-        float idx = params.matrix_count / 2.0; // Use middle matrix
-        vec2 uv = rotate_and_distort(texPos, idx);
-        if (uv.x > -99998.0) {
-            sy = min(params.height, max(0, floor(0.5 + uv.y)));
-        }
-    }
-    ///////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
         float factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
@@ -167,6 +155,18 @@ void main() {
         new_out_pos = out_f * new_out_pos + out_c;
 
         texPos = new_out_pos * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);
+    }
+    ///////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////
+    // Calculate source `y` for rolling shutter
+    float sy = texPos.y;
+    if (params.matrix_count > 1) {
+        float idx = params.matrix_count / 2.0; // Use middle matrix
+        vec2 uv = rotate_and_distort(texPos, idx);
+        if (uv.x > -99998.0) {
+            sy = min(params.height, max(0, floor(0.5 + uv.y)));
+        }
     }
     ///////////////////////////////////////////////////////////////////
 

@@ -220,18 +220,6 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     out_pos = out_pos + params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
-    // Calculate source `y` for rolling shutter
-    var sy = u32(position.y);
-    if (params.matrix_count > 1) {
-        let idx: u32 = u32((params.matrix_count / 2) * 9); // Use middle matrix
-        let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
-        if (uv.x > -99998.0) {
-            sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
-        }
-    }
-    ///////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
         let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
@@ -249,6 +237,18 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
         new_out_pos = out_f * new_out_pos + out_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+    }
+    ///////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////
+    // Calculate source `y` for rolling shutter
+    var sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
+    if (params.matrix_count > 1) {
+        let idx: u32 = u32((params.matrix_count / 2) * 9); // Use middle matrix
+        let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
+        if (uv.x > -99998.0) {
+            sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
+        }
     }
     ///////////////////////////////////////////////////////////////////
 
