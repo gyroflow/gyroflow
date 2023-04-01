@@ -310,7 +310,7 @@ pub fn create_native_shared_buffer_dx12(device: &wgpu::Device, size: usize) -> R
                 let actual_size = ai.SizeInBytes as usize;
 
                 let mut handle: usize = 0;
-                let hr = raw_device.CreateSharedHandle(resource.as_mut_ptr() as *mut _, std::ptr::null(), windows::Win32::System::SystemServices::GENERIC_ALL, std::ptr::null(), (&mut handle) as *mut _ as *mut *mut std::ffi::c_void);
+                let hr = raw_device.CreateSharedHandle(resource.as_mut_ptr() as *mut _, std::ptr::null(), winapi::um::winnt::GENERIC_ALL, std::ptr::null(), (&mut handle) as *mut _ as *mut *mut std::ffi::c_void);
                 if hr != 0 {
                     return Err(format!("CreateSharedHandle returned error: {}", hr));
                 }
