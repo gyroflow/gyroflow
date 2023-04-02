@@ -188,8 +188,8 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
                         if !constraints.is_null() {
                             dev.hw_formats = pix_formats_to_vec((*constraints).valid_hw_formats);
                             dev.sw_formats = pix_formats_to_vec((*constraints).valid_sw_formats);
-                            dev.min_size = ((*constraints).min_width as i32, (*constraints).min_height as i32);
-                            dev.max_size = ((*constraints).max_width as i32, (*constraints).max_height as i32);
+                            dev.min_size = ((*constraints).min_width, (*constraints).min_height);
+                            dev.max_size = ((*constraints).max_width, (*constraints).max_height);
 
                             log::debug!("HW formats: {:?}", &dev.hw_formats);
                             log::debug!("SW formats: {:?}", &dev.sw_formats);
@@ -283,7 +283,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                                 format::Pixel::into(*formats.first().unwrap())
                             }
                         } else {
-                            pixel_format.into()
+                            pixel_format
                         }
                     };
                     log::debug!("target_format: {:?}", &target_format);

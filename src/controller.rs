@@ -655,7 +655,7 @@ impl Controller {
             self.set_preview_resolution(self.preview_resolution, player);
 
             if duration_ms > 0.0 && fps > 0.0 {
-                if let Ok(_) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
+                if stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size).is_ok() {
                     stab.set_output_size(video_size.0, video_size.1);
                 }
             }
@@ -1061,7 +1061,7 @@ impl Controller {
                 }
 
                 update_info2((1.0, 1.0, None, QString::from("---")));
-                return false;
+                false
             }));
 
             let stab = self.stabilizer.clone();
@@ -1664,15 +1664,8 @@ impl Controller {
                 profile.set_from_calibrator(cal);
             }
             let name = profile.get_name()
-                .replace(':', "-")
-                .replace("|", "_")
-                .replace("*", "_")
-                .replace(":", "_")
-                .replace("<", "")
-                .replace("\"", "")
-                .replace(">", "")
-                .replace("/", "")
-                .replace("\\", "");
+                .replace([':', '|', '*', ':'], "_")
+                .replace(['<', '"', '>', '/', '\\'], "");
             return QString::from(format!("{}.json", name));
         }
         QString::default()
@@ -1978,7 +1971,7 @@ impl Controller {
                                             last_diff = timestamp - last_timestamp;
                                             last_timestamp = timestamp;
                                             let new_timestamp = timestamp + add_timestamp;
-                                            line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).into_iter().map(str::to_string)).join(",");
+                                            line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
                                         }
                                     }
                                     if first_file || is_data {
@@ -2045,7 +2038,7 @@ impl Controller {
 
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
-    fn file_size(&self, path: QString) -> u64 { std::fs::metadata(&path.to_string()).map(|x| x.len()).unwrap_or_default() }
+    fn file_size(&self, path: QString) -> u64 { std::fs::metadata(path.to_string()).map(|x| x.len()).unwrap_or_default() }
     fn video_duration(&self, path: QString) -> f64 { gyroflow_core::util::get_video_metadata(&path.to_string()).map(|x| x.3).unwrap_or_default() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }

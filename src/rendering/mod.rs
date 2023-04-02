@@ -303,7 +303,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 let mut options = ffmpeg_next::Dictionary::new();
                 options.set("allow_sw", "1");
                 options.set("constant_bit_rate", "1");
-                if let Ok(_) = encoder.open_with(options) {
+                if encoder.open_with(options).is_ok() {
                     proc.video.encoder_params.options.set("constant_bit_rate", "1");
                 }
             }

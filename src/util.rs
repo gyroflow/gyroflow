@@ -371,15 +371,15 @@ pub fn save_exe_location() {
             if let Some(parent) = exe_path.parent() { // MacOS
                 if let Some(parent) = parent.parent() { // Contents
                     if let Some(parent) = parent.parent() { // Gyroflow.app
-                        set_setting("exeLocation", &parent.to_string_lossy().to_string());
+                        set_setting("exeLocation", &parent.to_string_lossy());
                     }
                 }
             }
         } else if cfg!(target_os = "linux") {
             // TODO: AppImage
-            set_setting("exeLocation", &exe_path.to_string_lossy().to_string());
+            set_setting("exeLocation", &exe_path.to_string_lossy());
         } else {
-            set_setting("exeLocation", &exe_path.to_string_lossy().to_string());
+            set_setting("exeLocation", &exe_path.to_string_lossy());
         }
     }
 }

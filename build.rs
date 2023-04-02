@@ -9,7 +9,7 @@ use std::fmt::Write;
 
 fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     let mut config = cc::Build::new();
-    config.include(&qt_include_path);
+    config.include(qt_include_path);
     config.include(&format!("{}/QtCore", qt_include_path));
     config.include(&format!("{}/QtQml", qt_include_path));
     if cfg!(target_os = "macos") {
@@ -55,11 +55,11 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     std::fs::write(&qrc_path, qrc).unwrap();
 
     for (qml, cpp) in &files {
-        assert!(Command::new(&compiler_path).args(&["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success());
+        assert!(Command::new(&compiler_path).args(["--resource", &qrc_path, "-o", cpp, qml]).status().unwrap().success());
     }
 
     let loader_path = out_dir.join("qmlcache_loader.cpp").to_str().unwrap().to_string();
-    assert!(Command::new(&compiler_path).args(&["--resource-file-mapping", &qrc_path, "-o", &loader_path, "ui.qrc"]).status().unwrap().success());
+    assert!(Command::new(&compiler_path).args(["--resource-file-mapping", &qrc_path, "-o", &loader_path, "ui.qrc"]).status().unwrap().success());
 
     config.file(&loader_path);
 

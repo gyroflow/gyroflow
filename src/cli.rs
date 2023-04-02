@@ -323,7 +323,7 @@ pub fn run(open_file: &mut String) -> bool {
                             if preset.starts_with('{') {
                                 queue.apply_to_all(preset.clone(), additional_data.to_string(), 0);
                                 applying_preset = true;
-                            } else if let Ok(data) = std::fs::read_to_string(&preset) {
+                            } else if let Ok(data) = std::fs::read_to_string(preset) {
                                 queue.apply_to_all(data, additional_data.to_string(), 0);
                                 applying_preset = true;
                             }
@@ -374,7 +374,7 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
             lens_profiles.push(file.clone());
         } else if file.ends_with(".gyroflow") {
             let video_path = || -> Option<String> {
-                let data = std::fs::read(&file).ok()?;
+                let data = std::fs::read(file).ok()?;
                 let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
                 Some(obj.get("videofile")?.as_str()?.to_string())
             }().unwrap_or_default();

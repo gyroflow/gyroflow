@@ -103,7 +103,7 @@ pub fn get_plane_buffer<'a>(frame: &'a mut Video, size: (usize, usize), plane_in
             BufferDescription {
                 size: (frame.plane_width (plane_index) as usize,
                        frame.plane_height(plane_index) as usize,
-                       frame.stride      (plane_index) as usize),
+                       frame.stride      (plane_index)),
                 data: BufferSource::Cpu { buffer: frame.data_mut(plane_index) },
                 ..Default::default()
             }

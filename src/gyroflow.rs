@@ -165,7 +165,7 @@ fn entry() {
             } else {
                 PathBuf::from("./ui/main_window.qml")
             };
-            let final_path = std::env::current_exe().ok()?.parent()?.join(&path);
+            let final_path = std::env::current_exe().ok()?.parent()?.join(path);
             if final_path.exists() {
                 Some(String::from(final_path.to_str()?))
             } else {
