@@ -1,39 +1,56 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2021-2023 Adrian <adrian.eddy at gmail>
 
 import QtQuick
 import QtQuick.Controls as QQC
 
-Button {
+Rectangle {
     id: root;
-
     property string iconName;
-    icon.name: iconName || "";
-    icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
 
     // TODO popup direction
+    property alias text: mainbtn.text;
     property alias model: popup.model;
     property alias popup: popup;
+    property alias btn: mainbtn;
+    property alias splitbtn: splitbtn;
 
-    rightPadding: 47 * dpiScale;
+    width: mainbtn.width;
+    height: mainbtn.height;
     layer.enabled: true;
+    opacity: enabled? 1.0 : 0.6;
+    Ease on opacity { }
+    border.width: 1 * dpiScale;
+    border.color: Qt.darker(styleAccentColor, 1.5);
+    radius: 6 * dpiScale;
+    color: "transparent";
 
     Button {
-        id: splitbtn;
-        textColor: root.textColor;
-        anchors.right: parent.right;
-        width: 35 * dpiScale;
-        height: parent.height;
-        contentItem: Item { }
-        accent: parent.accent;
+        id: mainbtn;
+        icon.name: root.iconName || "";
+        icon.source: root.iconName ? "qrc:/resources/icons/svg/" + root.iconName + ".svg" : "";
 
-        DropdownChevron { opened: popup.visible; color: root.textColor; anchors.centerIn: parent; }
+        rightPadding: 47 * dpiScale;
+        fadeWhenDisabled: root.enabled;
+        Ease on opacity { }
+    }
+    Button {
+        id: splitbtn;
+        textColor: mainbtn.textColor;
+        anchors.right: mainbtn.right;
+        width: 35 * dpiScale;
+        height: mainbtn.height;
+        contentItem: Item { }
+        accent: mainbtn.accent;
+        fadeWhenDisabled: root.enabled;
+
+        DropdownChevron { opened: popup.visible; color: mainbtn.textColor; anchors.centerIn: parent; }
         onClicked: popup.open();
     }
     Rectangle {
         anchors.left: splitbtn.left;
         width: 1 * dpiScale;
-        height: parent.height;
+        height: mainbtn.height;
         color: Qt.darker(styleAccentColor, 1.5);
     }
     Popup {
@@ -42,13 +59,5 @@ Button {
         y: -height - 5 * dpiScale;
         width: Math.max(root.width, popup.maxItemWidth + 10 * dpiScale);
         currentIndex: -1;
-    }
-
-    Rectangle {
-        anchors.fill: parent;
-        border.width: 1 * dpiScale;
-        border.color: Qt.darker(styleAccentColor, 1.5);
-        radius: 6 * dpiScale;
-        color: "transparent";
     }
 }

@@ -458,6 +458,8 @@ MenuItem {
             onTriggered: {
                 let w = Math.round(calib.videoWidth  * (xStretch.value || 1));
                 let h = Math.round(calib.videoHeight * (yStretch.value || 1));
+                if ((xStretch.value || 1) != 1 && (w % 2) != 0) w--;
+                if ((yStretch.value || 1) != 1 && (h % 2) != 0) h--;
                 if (calib.calibrationInfo.output_dimension.w != w || calib.calibrationInfo.output_dimension.h != h) {
                     messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "x" + h + "</b>"), [
                         { text: qsTr("Yes"), accent: true, clicked: () => {

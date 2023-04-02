@@ -192,25 +192,22 @@ Rectangle {
 
                 SplitButton {
                     id: renderBtn;
-                    accent: true;
+                    btn.accent: true;
                     anchors.right: parent.right;
                     anchors.rightMargin: 55 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
                     text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
                     iconName: "video";
-                    opacity: enabled? 1.0 : 0.6;
-                    Ease on opacity { }
-                    fadeWhenDisabled: false;
                     property bool isAddToQueue: false;
                     property bool allowFile: false;
                     property bool allowLens: false;
                     property bool allowSync: false;
                     onIsAddToQueueChanged: updateModel();
-                    enabled: false;
+                    enabled: window.videoArea.vid.loaded;
 
                     property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
-                    Timer { id: et; interval: 200; onTriggered: renderBtn.enabled = renderBtn.enabled2; }
+                    Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
 
                     function updateModel() {
                         let m = [
@@ -300,7 +297,7 @@ Rectangle {
                             }
                         }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
                     }
-                    onClicked: {
+                    btn.onClicked: {
                         allowFile = false;
                         allowLens = false;
                         allowSync = false;
