@@ -889,7 +889,7 @@ impl RenderQueue {
         });
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if std::path::Path::new(&job.render_options.output_path).exists() {
+                if std::path::Path::new(&job.render_options.output_path.replace("_%05d", "_00001")).exists() {
                     let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1088,7 +1088,7 @@ impl RenderQueue {
                                 }
                                 let is_main_video = gyro_path.is_empty();
                                 let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                let _ = stab.load_gyro_data(&gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+                                let _ = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
                                 let camera_id = stab.camera_id.read();
 
@@ -1124,7 +1124,7 @@ impl RenderQueue {
                                 loaded(render_options);
 
                                 let default_preset = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
-                                if let Ok(data) = std::fs::read_to_string(&default_preset) {
+                                if let Ok(data) = std::fs::read_to_string(default_preset) {
                                     // Apply default preset
                                     apply_preset((data, job_id));
                                 }
@@ -1328,7 +1328,7 @@ impl RenderQueue {
                         job.render_options.output_path = Self::get_output_path(&self.default_suffix.to_string(), &itm.input_file.to_string(), &job.render_options.codec, &job.render_options.output_path);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
                         itm.output_path = QString::from(job.render_options.output_path.as_str());
-                        if std::path::Path::new(&job.render_options.output_path).exists() {
+                        if std::path::Path::new(&job.render_options.output_path.replace("_%05d", "_00001")).exists() {
                             let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
@@ -1378,7 +1378,7 @@ impl RenderQueue {
         fn resolve_duration_to_ms(d: &serde_json::Value, fps: f64) -> Option<f64> {
             if !d.is_number() && !d.is_string() { return None; }
                  if d.is_string() && d.as_str()?.ends_with("ms") { d.as_str()?.strip_suffix("ms")?.parse::<f64>().ok() }
-            else if d.is_string() && d.as_str()?.ends_with("s")  { d.as_str()?.strip_suffix("s")?.parse::<f64>().ok().map(|x| x * 1000.0) }
+            else if d.is_string() && d.as_str()?.ends_with('s')  { d.as_str()?.strip_suffix('s')?.parse::<f64>().ok().map(|x| x * 1000.0) }
             else if d.is_string() { d.as_str()?.parse::<f64>().ok().map(|x| (x / fps) * 1000.0) }
             else { d.as_f64().map(|x| (x / fps) * 1000.0) }
         }
@@ -1409,7 +1409,7 @@ impl RenderQueue {
         } else if o.is_object() {
             timestamps.append(&mut resolve_item(o, duration, fps));
         }
-        timestamps.sort_by(|a, b| a.total_cmp(&b));
+        timestamps.sort_by(|a, b| a.total_cmp(b));
 
         timestamps
     }

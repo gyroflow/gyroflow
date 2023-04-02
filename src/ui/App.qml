@@ -265,7 +265,7 @@ Rectangle {
                             ]);
                             return;
                         }
-                        if ((controller.file_exists(outputFile.text) || render_queue.file_exists(outputFile.text)) && !allowFile) {
+                        if ((controller.file_exists(outputFile.text.replace("_%05d", "_00001")) || render_queue.file_exists(outputFile.text)) && !allowFile) {
                             messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
                                 { text: qsTr("Rename"), clicked: () => { outputFile.text = window.renameOutput(outputFile.text); render(); } },
@@ -599,8 +599,8 @@ Rectangle {
         const suffix = advanced.item.defaultSuffix.text;
         let output = orgOutput;
         let i = 1;
-        while (controller.file_exists(output) || render_queue.file_exists(output)) {
-            output = orgOutput.replace(new RegExp(suffix + "(_\\d+)?\\.([a-z0-9]+)$", "i"), suffix + "_" + i++ + ".$2");
+        while (controller.file_exists(output.replace("_%05d", "_00001")) || render_queue.file_exists(output)) {
+            output = orgOutput.replace(new RegExp(suffix + "(_\\d+)?((?:_%05d)?\\.[a-z0-9]+)$", "i"), suffix + "_" + i++ + "$2");
             if (i > 1000) break;
         }
 
