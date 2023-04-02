@@ -1553,7 +1553,7 @@ impl Controller {
                                         if let Some(dims) = &dims {
                                             let (w, h) = (dims.0.load(SeqCst), dims.1.load(SeqCst));
                                             if w > 0 && h > 0 {
-                                                pt_scale *= h as f32 / height as f32;
+                                                pt_scale = h as f32 / height as f32;
                                             }
                                         }
                                         cal.feed_frame(timestamp_us, frame, width, height, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
