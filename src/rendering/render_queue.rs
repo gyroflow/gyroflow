@@ -1001,7 +1001,7 @@ impl RenderQueue {
 
                                     Ok(())
                                 });
-                                proc.start_decoder_only(vec![(0.0, 0.0)], Arc::new(AtomicBool::new(false)))?;
+                                proc.start_decoder_only(vec![(0.0, 50.0)], Arc::new(AtomicBool::new(true)))?;
                             }
                             Ok(())
                         };
@@ -1068,7 +1068,7 @@ impl RenderQueue {
                                     err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
                                 }
                             }
-                        } else if let Ok(info) = rendering::FfmpegProcessor::get_video_info(&path) {
+                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&path) {
                             ::log::info!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);

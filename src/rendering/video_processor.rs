@@ -5,7 +5,7 @@ use super::*;
 use super::mdk_processor::*;
 use super::ffmpeg_video::RateControl;
 use ffmpeg_next::{ frame, Dictionary };
-use std::sync::{ Arc, atomic::{ AtomicI32, AtomicBool } };
+use std::{ sync::{ Arc, atomic::{ AtomicI32, AtomicBool } }, rc::Rc, cell::RefCell };
 
 pub enum Processor<'a> {
     Ffmpeg(FfmpegProcessor<'a>),
@@ -28,6 +28,40 @@ impl<'a> VideoProcessor<'a> {
         match &self.inner {
             Processor::Ffmpeg(_) => None,
             Processor::Mdk(x) => x.get_org_dimensions(),
+        }
+    }
+    pub fn get_video_info(path: &str) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
+        if path.to_lowercase().ends_with(".braw") || path.to_lowercase().ends_with(".r3d") {
+            let mut mdk = MDKProcessor::from_file(path, None);
+
+            let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
+
+            let mut info = Rc::new(RefCell::new(crate::rendering::ffmpeg_processor::VideoInfo::default()));
+
+            let mut info2 = info.clone();
+            mdk.mdk.startProcessing(0, 0, 0, false, &mdk.custom_decoder, vec![], move |frame_num, _, _, _, org_width, org_height, fps, duration_ms, frame_count, data| {
+                if fps > 0.0 && org_width > 0 {
+                    let mut info2 = info2.borrow_mut();
+                    info2.duration_ms = duration_ms;
+                    info2.frame_count = frame_count as usize;
+                    info2.fps = fps;
+                    info2.width = org_width;
+                    info2.height = org_height;
+                }
+                if frame_num == -1 || data.is_empty() {
+                    let _ = tx.send(());
+                    return true;
+                }
+                false
+            });
+            pollster::block_on(rx.receive());
+
+            std::thread::sleep(std::time::Duration::from_millis(100));
+
+            let info = info.borrow().clone();
+            Ok(info)
+        } else {
+            FfmpegProcessor::get_video_info(&path)
         }
     }
 

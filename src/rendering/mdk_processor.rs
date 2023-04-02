@@ -16,9 +16,9 @@ use qmetaobject::QString;
 use itertools::Itertools;
 
 pub struct MDKProcessor {
-    mdk: qml_video_rs::video_item::MDKVideoItem,
+    pub mdk: qml_video_rs::video_item::MDKVideoItem,
     format: ffmpeg_next::format::Pixel,
-    custom_decoder: String,
+    pub custom_decoder: String,
     org_width: Arc<AtomicI32>,
     org_height: Arc<AtomicI32>,
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static>>,
@@ -71,7 +71,7 @@ impl MDKProcessor {
         let format = self.format;
         let self_org_width = self.org_width.clone();
         let self_org_height = self.org_height.clone();
-        self.mdk.startProcessing(0, 0, 0, false, &self.custom_decoder, ranges_ms, move |frame_num, timestamp_ms, width, height, org_width, org_height, data| {
+        self.mdk.startProcessing(0, 0, 0, false, &self.custom_decoder, ranges_ms, move |frame_num, timestamp_ms, width, height, org_width, org_height, _fps, _duration_ms, _frame_count, data| {
             if frame_num == -1 || data.is_empty() {
                 let _ = tx.send(());
                 return true;

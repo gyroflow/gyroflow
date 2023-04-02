@@ -102,7 +102,7 @@ impl From<ffmpeg_next::Error> for FFmpegError {
     fn from(err: ffmpeg_next::Error) -> FFmpegError { FFmpegError::InternalError(err) }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct VideoInfo {
     pub duration_ms: f64,
     pub frame_count: usize,

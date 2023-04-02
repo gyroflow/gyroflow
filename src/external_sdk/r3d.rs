@@ -70,7 +70,7 @@ impl REDSdk {
 
         if let Some(paths) = std::env::var_os("PATH") {
             for dir in std::env::split_paths(&paths) {
-                let full_path = dir.join(&"REDline");
+                let full_path = dir.join("REDline");
                 if full_path.is_file() {
                     if let Some(full_path) = full_path.to_str() {
                         return full_path.to_string();
@@ -80,7 +80,7 @@ impl REDSdk {
         }
 
         for l in locations {
-            if let Ok(p) = std::fs::canonicalize(&l) {
+            if let Ok(p) = std::fs::canonicalize(l) {
                 if p.exists() {
                     if let Some(p) = p.to_str() {
                         return p.to_string();
