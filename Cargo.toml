@@ -65,8 +65,8 @@ log-panics = { version = "2.1", features = ["with-backtrace"] }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
-qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
-qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "6411d54" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "102ae77" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "102ae77" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.48.0"

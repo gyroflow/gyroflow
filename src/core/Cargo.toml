@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "29b01cb" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "c96f320" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -18,7 +18,7 @@ ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", feat
 #rs-sync = { path = "../../../rs-sync" }
 rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "eaabbc3" }
 
-mimalloc = { version = "0.1.35", default-features = false }
+mimalloc = { version = "0.1.36", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
 rayon = "1.7"
 biquad = "0.4.2"

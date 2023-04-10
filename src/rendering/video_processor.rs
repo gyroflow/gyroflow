@@ -36,7 +36,7 @@ impl<'a> VideoProcessor<'a> {
 
             let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
 
-            let mut info = Rc::new(RefCell::new(crate::rendering::ffmpeg_processor::VideoInfo::default()));
+            let info = Rc::new(RefCell::new(crate::rendering::ffmpeg_processor::VideoInfo::default()));
 
             let mut info2 = info.clone();
             mdk.mdk.startProcessing(0, 0, 0, false, &mdk.custom_decoder, vec![], move |frame_num, _, _, _, org_width, org_height, fps, duration_ms, frame_count, data| {
