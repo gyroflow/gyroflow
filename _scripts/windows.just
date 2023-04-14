@@ -191,3 +191,5 @@ deploy:
     # Other
     xcopy /Y "$QtDir\bin\d3dcompiler_47.dll"                             "$TargetDir\"
     xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
+
+    7z a $ProjectDir\_deployment\_binaries\Gyroflow-windows64.zip $TargetDir\*

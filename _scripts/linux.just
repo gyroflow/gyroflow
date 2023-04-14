@@ -53,7 +53,6 @@ install-deps:
         pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
         sudo mv /opt/squashfs-root /opt/appimagetool.AppDir
         sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
-        popd
 
         sudo pip3 install -U pip
         sudo pip3 install appimage-builder==0.9.2
@@ -106,7 +105,7 @@ deploy *param:
             export IN_DOCKER=1
             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
             source \$HOME/.cargo/env
-            cargo install --force just
+            cargo install --version '>=1.13' just
             cd $PROJECT_DIR
             just install-deps
             just deploy
