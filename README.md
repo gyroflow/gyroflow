@@ -222,37 +222,34 @@ For working with QML I recommend to use Qt Creator and load all QML files there,
 The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `gyroflow.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
 
 ### Building on Windows
+0. Prerequisites: `git`, `7z` and working `powershell`. If you never ran powershell scripts before, run `set-executionpolicy remotesigned` in powershell as admin
 1. Get latest stable Rust language from: https://rustup.rs/
     - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer
-2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-3. Install dependencies to the `ext` directory: `cd gyroflow/ext`
-    - `Qt 6.4.3` or higher: `pip3 install -U pip & pip3 install aqtinstall` then `aqt install-qt windows desktop 6.4.3 win64_msvc2019_64 -m qtshadertools` or use the [official installer](https://www.qt.io/download-qt-installer)
-    - `FFmpeg 5.1`: download [ffmpeg 5.1 lite](https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-master-windows-desktop-vs2022-gpl-lite.7z/download) and unzip it to `ext/ffmpeg-master-windows-desktop-vs2022-gpl-lite`
-    - vcpkg: `git clone --depth 1 https://github.com/Microsoft/vcpkg.git & .\vcpkg\bootstrap-vcpkg.bat -disableMetrics`
-    - OpenCV: `.\vcpkg\vcpkg install "opencv[core]:x64-windows-release"`
-    - OpenCL: `.\vcpkg\vcpkg install "opencl:x64-windows-release"`
-    - LLVM: download and install [LLVM](https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.4/LLVM-15.0.4-win64.exe)
-4. Make sure you have `7z` in PATH.
-5. Setup the environment in powershell (or set the same variables in cmd): `./__env.ps1` - I do this in VS Code built-in terminal
-    - some machines might have issue that scripts are forbidden to run, try to `set-executionpolicy remotesigned` in powershell with admin
-6. Compile and run: `cargo run --release`
+2. Install `Just` by running `cargo install --force just`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+4. Enter the project directory and:
+    - Install dependencies: `just install-deps`
+    - Compile and run: `just run`
 
 ### Building on MacOS
+0. Prerequisites: `git`, `7z`, `brew`
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install Xcode command line tools: `xcode-select --install`
-3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-4. Install dependencies: `cd gyroflow/ext && ./install-deps-mac.sh`
-5. Setup the environment in terminal: `source __env-macos.sh` or `. ./__env-macos.sh` - I do this in VS Code built-in terminal
-6. For some reason `DYLD_FALLBACK_LIBRARY_PATH` may be overwritten so export it again in terminal: `export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"` (if you have build errors, try the other one from __env-macos.sh)
-7. Compile and run: `cargo run --release`
-8. If it fails to run, do: `./_deployment/deploy-macos.sh` once
+3. Install `Just` by running `cargo install --force just`
+4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+5. Enter the project directory and:
+    - Install dependencies: `just install-deps`
+    - Compile and run: `just run`
+    - The first time you run it won't work, run `just deploy` once and then `just run` will work
 
 ### Building on Linux
+0. Prerequisites: `git`, `7z`, `apt` package manager (or adjust commands inside scripts if on different distro)
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-3. Install dependencies: `cd gyroflow/ext && ./install-deps-linux.sh` (Debian based apt)
-4. Setup the environment in terminal: `./__env-linux.sh` - I do this in VS Code built-in terminal
-5. Compile and run: `cargo run --release`
+2. Install `Just` by running `cargo install --force just`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+4. Enter the project directory and:
+    - Install dependencies: `just install-deps`
+    - Compile and run: `just run`
 
 ### Building for Android
 1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested
