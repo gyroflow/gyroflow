@@ -24,13 +24,13 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf2
+          key: gf3
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-2
+          key: ${{ runner.os }}-gf-ext-3
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
