@@ -105,7 +105,7 @@ deploy *param:
             export IN_DOCKER=1
             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
             source \$HOME/.cargo/env
-            cargo install --force just
+            cargo install --version '>=1.13' just
             cd $PROJECT_DIR
             just install-deps
             just deploy

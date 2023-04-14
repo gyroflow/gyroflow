@@ -24,13 +24,13 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf1
+          key: gf2
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-1
+          key: ${{ runner.os }}-gf-ext-2
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -55,8 +55,7 @@ jobs:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
-      - name: Install just
-        run: cargo install --version ">=1.13" just
+      - uses: extractions/setup-just@v1
 
       - name: Build Gyroflow (macOS)
         if: ${{ matrix.targets.os == 'macos-latest' }}
