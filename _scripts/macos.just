@@ -280,6 +280,7 @@ deploy *param:
                 "PlugIns/platforms/libqcocoa.dylib"
                 "Resources/qml/Qt/labs/settings/libqmlsettingsplugin.dylib"
                 "Resources/qml/QtQml/libqmlplugin.dylib"
+                "Resources/qml/QtQml/Models/libmodelsplugin.dylib"
                 "Resources/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib"
                 "Resources/qml/QtCore/libqtqmlcoreplugin.dylib"
                 "Resources/qml/QtQuick/libqtquick2plugin.dylib"
