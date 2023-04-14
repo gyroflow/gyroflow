@@ -26,7 +26,7 @@ install-deps:
         {{ExtDir}}/vcpkg/vcpkg install "opencv4[core]:{{VcpkgArch}}"
     fi
 
-    if [[ -z "${LIBCLANG_PATH}" ]]; then
+    if [[ ! -d "${LIBCLANG_PATH}" ]]; then
         sudo apt-get install -y libclang-13-dev
     fi
 

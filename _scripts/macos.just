@@ -8,6 +8,7 @@
 install-deps:
     #!/bin/bash
     brew install p7zip pkg-config
+    xcode-select --install
 
     cd {{ExtDir}}
 

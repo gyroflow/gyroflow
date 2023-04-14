@@ -16,8 +16,13 @@ install-deps:
     } elseif (Get-Command "python3.exe" -ErrorAction SilentlyContinue) {
         $Python = "python3";
     } else {
-        echo "Python not found. Make sure you have Python 3 installed and in PATH"
-        exit
+        if (-not (Test-Path -Path "{{ExtDir}}/WPy64-310100b3")) {
+            echo "Downloading WinPython"
+            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -outfile "winpython.exe"
+            7z x -y winpython.exe
+            del winpython.exe
+        }
+        $Python = resolve-path "{{ExtDir}}\WPy64-310100b3\python-3.10.10.amd64\python.exe"
     }
 
     cargo install --git https://github.com/rust-mobile/cargo-apk.git cargo-apk

@@ -222,7 +222,7 @@ For working with QML I recommend to use Qt Creator and load all QML files there,
 The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `gyroflow.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
 
 ### Building on Windows
-0. Prerequisites: `git`, `7z`, `python` and working `powershell`. If you never ran powershell scripts before, run `set-executionpolicy remotesigned` in powershell as admin
+0. Prerequisites: `git`, `7z` and working `powershell`. If you never ran powershell scripts before, run `set-executionpolicy remotesigned` in powershell as admin
 1. Get latest stable Rust language from: https://rustup.rs/
     - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer
 2. Install `Just` by running `cargo install --force just`
@@ -234,10 +234,9 @@ The project also supports UI live reload, it's a super quick way of working with
 ### Building on MacOS
 0. Prerequisites: `git`, `7z`, `python`, `brew`
 1. Get latest stable Rust language from: https://rustup.rs/
-2. Install Xcode command line tools: `xcode-select --install`
-3. Install `Just` by running `cargo install --force just`
-4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-5. Enter the project directory and:
+2. Install `Just` by running `cargo install --force just`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+4. Enter the project directory and:
     - Install dependencies: `just install-deps`
     - Compile and run: `just run`
     - The first time you run it won't work, run `just deploy` once and then `just run` will work
@@ -252,11 +251,11 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building for Android
-0. Prerequisites: `git`, `7z`, `python`, working `powershell`, Android SDK and NDK. Android is not well supported yet, but the app can be built and somewhat works. Building is supported only on Windows
+0. Prerequisites: `git`, `7z`, working `powershell`, Android SDK and NDK. Android is not well supported yet, but the app can be built and somewhat works. Building is supported only on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-4. Update paths to Android SDK and NDK in `_scripts/android.just`
+4. Install Android SDK and NDK 23c and update paths in `_scripts/android.just`
 5. Enter the project directory and:
     - Install dependencies: `just android install-deps`
     - Compile the apk and install on device: `just android deploy`
@@ -264,12 +263,12 @@ The project also supports UI live reload, it's a super quick way of working with
 ### Building for iOS
 1. iOS is not well supported yet, work in progress
 2. Get latest stable Rust language from: https://rustup.rs/
-3. Install Xcode command line tools: `xcode-select --install`
+3. Install `Just` by running `cargo install --force just`
 4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-5. Install dependencies: `cd gyroflow/ext && ./install-deps-ios.sh`
-6. Setup the environment in terminal: `source __env-ios.sh` or `. ./__env-ios.sh` - I do this in VS Code built-in terminal
-7. Compile and run: `cargo build --target aarch64-apple-ios --release`
-8. Rest of the steps not figured out yet. Now need to package the app, create .ipa and sign it
+5. Enter the project directory and:
+    - Install dependencies: `just ios install-deps`
+    - Compile the apk and install on device: `just ios deploy`
+6. Rest of the steps not figured out yet. Now need to package the app, create .ipa and sign it
 
 ### Profiling on Windows
 1. Install and run `Visual Studio Community Edition`
