@@ -186,7 +186,8 @@ fn entry() {
 
     cpp!(unsafe [] {
         #ifdef Q_OS_ANDROID
-            QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage).result();
+            QtAndroidPrivate::requestPermission("android.permission.READ_EXTERNAL_STORAGE").result();
+            QtAndroidPrivate::requestPermission("android.permission.WRITE_EXTERNAL_STORAGE").result();
         #endif
     });
 

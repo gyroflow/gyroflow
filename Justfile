@@ -17,6 +17,12 @@ install-deps *param:
 deploy *param:
     just --unstable -f _scripts/{{BaseFile}}.just deploy {{param}}
 
+android *param:
+    just --unstable -f _scripts/android.just {{param}}
+
+ios *param:
+    just --unstable -f _scripts/ios.just {{param}}
+
 publish version:
     #!/bin/bash
     git clone --depth 1 https://github.com/gyroflow/gyroflow.git __publish

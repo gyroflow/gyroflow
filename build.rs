@@ -257,8 +257,6 @@ fn main() {
         "android" => {
             println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
-            println!("cargo:rustc-link-search={}/installed/arm64-android/lib", std::env::var("VCPKG_ROOT").unwrap());
-            config.include(format!("{}/installed/arm64-android/include", std::env::var("VCPKG_ROOT").unwrap()));
             config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
         },
         "macos" | "ios" => {

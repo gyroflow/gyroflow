@@ -1,1 +1,1 @@
-forfiles /s /m *.ts /c "cmd /c ..\..\ext\6.4.3\msvc2019_64\bin\lrelease.exe @path"
+forfiles /s /m *.ts /c "cmd /c ..\..\ext\6.5.0\msvc2019_64\bin\lrelease.exe @path"

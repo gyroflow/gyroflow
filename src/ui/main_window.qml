@@ -48,15 +48,14 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(main_window);
-        if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
-                 if (sett.visibility == Window.FullScreen) main_window.showFullScreen();
-            else if (sett.visibility == Window.Maximized)  main_window.showMaximized();
-            else {
-                Qt.callLater(() => {
-                    width = width + 1;
-                    height = height;
-                });
-            }
+        const isMobile = Qt.platform.os == "android" || Qt.platform.os == "ios";
+             if (!isMobile && sett.visibility == Window.FullScreen) main_window.showFullScreen();
+        else if (!isMobile && sett.visibility == Window.Maximized)  main_window.showMaximized();
+        else {
+            Qt.callLater(() => {
+                width = width + 1;
+                height = height;
+            });
         }
     }
     property bool isLandscape: width > height;

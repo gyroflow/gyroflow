@@ -222,7 +222,7 @@ For working with QML I recommend to use Qt Creator and load all QML files there,
 The project also supports UI live reload, it's a super quick way of working with the UI. Just change `live_reload = true` in `gyroflow.rs` and it should work right away. Now every time you change any QML file, the app should reload it immediately.
 
 ### Building on Windows
-0. Prerequisites: `git`, `7z` and working `powershell`. If you never ran powershell scripts before, run `set-executionpolicy remotesigned` in powershell as admin
+0. Prerequisites: `git`, `7z`, `python` and working `powershell`. If you never ran powershell scripts before, run `set-executionpolicy remotesigned` in powershell as admin
 1. Get latest stable Rust language from: https://rustup.rs/
     - Please make sure to check the English language pack option when installing the C++ build tools from Visual Studio Installer
 2. Install `Just` by running `cargo install --force just`
@@ -232,7 +232,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building on MacOS
-0. Prerequisites: `git`, `7z`, `brew`
+0. Prerequisites: `git`, `7z`, `python`, `brew`
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install Xcode command line tools: `xcode-select --install`
 3. Install `Just` by running `cargo install --force just`
@@ -243,7 +243,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - The first time you run it won't work, run `just deploy` once and then `just run` will work
 
 ### Building on Linux
-0. Prerequisites: `git`, `7z`, `apt` package manager (or adjust commands inside scripts if on different distro)
+0. Prerequisites: `git`, `7z`, `python`, `apt` package manager (or adjust commands inside scripts if on different distro)
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
@@ -252,12 +252,14 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building for Android
-1. Android is not well supported yet, but the app can be built and somewhat works. So far only building on Windows was tested
-2. Install Qt for Android: `aqt install-qt windows android 6.4.3 android_arm64_v8a` and `aqt install-qt windows desktop 6.4.3 win64_mingw`
-3. Install `cargo-apk`: `cargo install --git https://github.com/rust-windowing/android-ndk-rs.git cargo-apk`
-4. Add a Rust target: `rustup target add aarch64-linux-android`
-5. Update paths in `_deployment/build-android.ps1`
-6. Run `.\_deployment\build-android.ps1` in Powershell
+0. Prerequisites: `git`, `7z`, `python`, working `powershell`, Android SDK and NDK. Android is not well supported yet, but the app can be built and somewhat works. Building is supported only on Windows
+1. Get latest stable Rust language from: https://rustup.rs/
+2. Install `Just` by running `cargo install --force just`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+4. Update paths to Android SDK and NDK in `_scripts/android.just`
+5. Enter the project directory and:
+    - Install dependencies: `just android install-deps`
+    - Compile the apk and install on device: `just android deploy`
 
 ### Building for iOS
 1. iOS is not well supported yet, work in progress

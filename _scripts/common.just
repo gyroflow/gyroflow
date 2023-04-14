@@ -8,7 +8,7 @@ ProjectDir := if path_exists(justfile_directory() / "Cargo.toml") == "true" { ju
 ExtDir := ProjectDir / "ext"
 
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
-QtVersion := "6.4.3"
+QtVersion := if os() == "windows" { "6.5.0" } else { "6.4.3" }
 QtArch := if os() == "windows" { "msvc2019_64"
    } else if os() == "macos"   { "macos"
    } else                      { "gcc_64" }
@@ -35,9 +35,8 @@ OpenCVPath := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "bin"
 # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
-#export LIBCLANG_PATH := if path_exists(ProjectDir / "ext/llvm/bin") == "true" { ProjectDir / "ext/llvm/bin" } else { env_var_or_default("LIBCLANG_PATH", "/usr/lib/llvm-13/lib/") }
-#LLVMPath := LIBCLANG_PATH
-LLVMPath := ""
+export LIBCLANG_PATH := if path_exists(ExtDir / "llvm/bin") == "true" { ExtDir / "llvm/bin" } else { env_var_or_default("LIBCLANG_PATH", "/usr/lib/llvm-13/lib/") }
+LLVMPath := LIBCLANG_PATH
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
