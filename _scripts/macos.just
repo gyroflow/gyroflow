@@ -169,6 +169,8 @@ deploy *param:
     cp -f $QT_DIR/qml/Qt/labs/settings/libqmlsettingsplugin.dylib  "$CARGO_TARGET/Qt/labs/settings/"
 
     mkdir -p "$CARGO_TARGET/QtCore/"
+    mkdir -p "$CARGO_TARGET/QtQml/Base/"
+    mkdir -p "$CARGO_TARGET/QtQml/Models/"
     mkdir -p "$CARGO_TARGET/QtQml/WorkerScript/"
     mkdir -p "$CARGO_TARGET/QtQuick/Controls/impl/"
     mkdir -p "$CARGO_TARGET/QtQuick/Controls/macOS/"
@@ -184,6 +186,11 @@ deploy *param:
 
     cp -f $QT_DIR/qml/QtQml/qmldir                                                                    "$CARGO_TARGET/QtQml/"
     cp -f $QT_DIR/qml/QtQml/libqmlplugin.dylib                                                        "$CARGO_TARGET/QtQml/"
+    cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.dylib                                                    "$CARGO_TARGET/QtQml/"
+    cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.dylib                                                   "$CARGO_TARGET/QtQml/Base/"
+    cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                               "$CARGO_TARGET/QtQml/Base/"
+    cp -f $QT_DIR/qml/QtQml/Models/libmodelsplugin.dylib                                              "$CARGO_TARGET/QtQml/Models/"
+    cp -f $QT_DIR/qml/QtQml/Models/qmldir                                                             "$CARGO_TARGET/QtQml/Models/"
     cp -f $QT_DIR/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib                                  "$CARGO_TARGET/QtQml/WorkerScript/"
     cp -f $QT_DIR/qml/QtQml/WorkerScript/qmldir                                                       "$CARGO_TARGET/QtQml/WorkerScript/"
     cp -f $QT_DIR/qml/QtQuick/qmldir                                                                  "$CARGO_TARGET/QtQuick"

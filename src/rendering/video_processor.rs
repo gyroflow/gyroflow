@@ -38,7 +38,7 @@ impl<'a> VideoProcessor<'a> {
 
             let info = Rc::new(RefCell::new(crate::rendering::ffmpeg_processor::VideoInfo::default()));
 
-            let mut info2 = info.clone();
+            let info2 = info.clone();
             mdk.mdk.startProcessing(0, 0, 0, false, &mdk.custom_decoder, vec![], move |frame_num, _, _, _, org_width, org_height, fps, duration_ms, frame_count, data| {
                 if fps > 0.0 && org_width > 0 {
                     let mut info2 = info2.borrow_mut();

@@ -123,6 +123,7 @@ deploy:
     xcopy /Y "$QtDir\qml\QtCore\qmldir"                                                              "$TargetDir\QtCore\"
     xcopy /Y "$QtDir\qml\QtCore\qtqmlcoreplugin.dll"                                                 "$TargetDir\QtCore\"
     xcopy /Y "$QtDir\qml\QtQml\qmldir"                                                               "$TargetDir\QtQml\"
+    xcopy /Y "$QtDir\qml\QtQml\qmlplugin.dll"                                                        "$TargetDir\QtQml\"
     xcopy /Y "$QtDir\qml\QtQml\qmlmetaplugin.dll"                                                    "$TargetDir\QtQml\"
     xcopy /Y "$QtDir\qml\QtQml\Base\qmldir"                                                          "$TargetDir\QtQml\Base\"
     xcopy /Y "$QtDir\qml\QtQml\Base\qmlplugin.dll"                                                   "$TargetDir\QtQml\Base\"

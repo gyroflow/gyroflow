@@ -2843,15 +2843,15 @@ Kameraet har sandsynligvis ikke optaget bevægelsesdata i denne særlige optagel
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Dette er ofte forårsaget af et skrivebeskyttet filsystem.
+Sørg for at du har kopieret Gyroflow-app'en til din Applikationsmappe, i stedet for at køre direkte fra .dmg filen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Dette er ofte forårsaget af et skrivebeskyttet filsystem.
+Hvis du har Gyroflow i C:Program Files, så skal du køre Gyroflow som Administrator for at udtrække SDK til Gyroflow-mappen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>
