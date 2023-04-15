@@ -1733,7 +1733,7 @@ impl Controller {
     }
 
     fn fetch_profiles_from_github(&self) {
-        #[cfg(target_os = "android")]
+        #[cfg(any(target_os = "android", target_os = "ios"))]
         {
             return;
         }

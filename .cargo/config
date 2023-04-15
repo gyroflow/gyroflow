@@ -4,5 +4,8 @@ rustflags = ["-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@load
 [target.aarch64-apple-darwin]
 rustflags = ["-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@loader_path/../Frameworks"]
 
+[target.aarch64-apple-ios]
+rustflags = ["-C", "default-linker-libraries", "-C", "link-args=-Wl,-rpath,@loader_path/Frameworks"]
+
 [target.x86_64-unknown-linux-gnu]
 rustflags = ["-C", "link-args=-Wl,-rpath,$ORIGIN,-rpath,$ORIGIN/lib"]
