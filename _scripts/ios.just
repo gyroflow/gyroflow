@@ -29,9 +29,10 @@ install-deps:
     git clone --depth 1 https://github.com/Microsoft/vcpkg.git
     ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
-    if [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/ios" ]; then
+    if [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/ios" ] || [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/macos" ]; then
         # Install Qt
         pip3 install -U pip aqtinstall
+        python3 -m aqt install-qt mac desktop {{QtVersionIOS}}
         python3 -m aqt install-qt mac ios {{QtVersionIOS}}
     fi
 
@@ -83,8 +84,6 @@ deploy *param:
 
     export FFMPEG_DIR="$PROJECT_DIR/ext/ffmpeg-master-iOS-gpl-lite"
     export PATH="$PROJECT_DIR/ext/{{QtVersionIOS}}/ios/bin:$PATH"
-    export PATH="/Applications/Xcode.app/Contents/Developer/usr/bin/:$PATH"
-    export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/:$PATH"
 
     export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
     export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/lib
