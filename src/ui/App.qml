@@ -170,6 +170,10 @@ Rectangle {
                             font.underline: false;
                             font.pixelSize: 15 * dpiScale;
                             onClicked: {
+                                if (Qt.platform.os == "ios") {
+                                    outputFolderDialog.open();
+                                    return;
+                                }
                                 outputFileDialog.defaultSuffix = outputFile.text.substring(outputFile.text.length - 3);
                                 outputFileDialog.selectedFile = controller.path_to_url(outputFile.text);
                                 outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(outputFile.text));
@@ -188,6 +192,28 @@ Rectangle {
                             exportSettings.item.updateCodecParams();
                         }
                     }
+                    FolderDialog {
+                        id: outputFolderDialog;
+                        title: qsTr("Select file destination");
+                        property bool renderAfterSelect: false;
+                        property string urlString: "";
+
+                        onAccepted: {
+                            outputFolderDialog.urlString = selectedFolder.toString();
+                            outputFile.text = controller.url_to_path(selectedFolder) + outputFile.text.split('/').slice(-1);
+                            exportSettings.item.updateCodecParams();
+
+                            if (Qt.platform.os == "ios") {
+                                controller.start_apple_url_access(outputFolderDialog.urlString);
+                                // TODO: stop access
+                                renderBtn.allowedOutputUrls.push(outputFolderDialog.urlString);
+                                if (renderAfterSelect) {
+                                    renderAfterSelect = false;
+                                    renderBtn.btn.clicked();
+                                }
+                            }
+                        }
+                    }
                 }
 
                 SplitButton {
@@ -204,6 +230,8 @@ Rectangle {
                     property bool allowSync: false;
                     onIsAddToQueueChanged: updateModel();
                     enabled: window.videoArea.vid.loaded;
+
+                    property list<string> allowedOutputUrls: [];
 
                     property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                     onEnabled2Changed: et.start();
@@ -285,6 +313,16 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
+                            if (Qt.platform.os == "ios" && (!outputFolderDialog.urlString || !renderBtn.allowedOutputUrls.includes(outputFolderDialog.urlString))) {
+                                messageBox(Modal.Info, qsTr("Due to iOS's file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
+                                    { text: qsTr("Ok"), clicked: () => {
+                                        outputFolderDialog.open();
+                                        outputFolderDialog.renderAfterSelect = true;
+                                    }},
+                                ]);
+                                return;
+                            }
+
                             const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                             if (renderBtn.isAddToQueue) {
                                 // Add to queue
@@ -310,7 +348,7 @@ Rectangle {
                             case "export": // Add to render queue or Export
                                 renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
                                 popup.close();
-                                renderBtn.clicked();
+                                renderBtn.btn.clicked();
                             break;
                             case "create_preset": // Create preset
                             case "apply_all": // Apply settings to render queue
@@ -514,6 +552,9 @@ Rectangle {
         property bool thin: true;
         property bool extended: true;
         onAccepted: {
+            if (Qt.platform.os == "ios") controller.start_apple_url_access(selectedFile.toString());
+            // TODO: stop access
+
             videoArea.videoLoader.show(qsTr("Saving..."), false);
             controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), controller.url_to_path(selectedFile), true);
         }
@@ -525,7 +566,13 @@ Rectangle {
         nameFilters: ["*.gyroflow"];
         type: "output-preset";
         property var presetData: ({});
-        onAccepted: controller.export_preset(selectedFile, presetData);
+        onAccepted: {
+            if (Qt.platform.os == "ios") controller.start_apple_url_access(selectedFile.toString());
+
+            controller.export_preset(selectedFile, presetData);
+
+            if (Qt.platform.os == "ios") controller.stop_apple_url_access(selectedFile.toString());
+        }
     }
 
     Component.onCompleted: {

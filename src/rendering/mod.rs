@@ -57,6 +57,7 @@ pub fn set_gpu_type_from_name(name: &str) {
     }
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     {
+        #[cfg(target_os = "macos")]
         if !name.contains("apple m") {
             // Disable GPU decoding on Intel macOS by default
             *GPU_DECODING.write() = false;

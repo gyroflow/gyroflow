@@ -140,11 +140,14 @@ Item {
                     if (total_frames > 0 && finished) {
                         render_queue.main_job_id = 0;
                         const path = render_queue.get_job_output_path(job_id);
-                        messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + path + "</b>"), [
-                            { text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(path) },
-                            { text: qsTr("Open file location"), clicked: () => controller.open_file_externally(Util.getFolder(path)) },
-                            { text: qsTr("Ok") }
-                        ]);
+                        let options = [];
+                        if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
+                            options.push({ text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(path) });
+                            options.push({ text: qsTr("Open file location"), clicked: () => controller.open_file_externally(Util.getFolder(path)) });
+                        }
+                        options.push({ text: qsTr("Ok") });
+
+                        messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + path + "</b>"), options);
                     }
                 }
             }

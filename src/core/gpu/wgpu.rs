@@ -181,7 +181,7 @@ impl WgpuWrapper {
                     }
                 },
                 _ => {
-                    let max_buffer_bits = if cfg!(target_os = "android") { 29 } else { 31 };
+                    let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
                     pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                         label: None,
                         features: wgpu::Features::empty(),
