@@ -210,14 +210,15 @@ pub struct RenderQueue {
 macro_rules! update_model {
     ($this:ident, $job_id:ident, $itm:ident $action:block) => {
         {
-            let mut q = $this.queue.borrow_mut();
-            if let Some(job) = $this.jobs.get(&$job_id) {
-                if job.queue_index < q.row_count() as usize {
-                    //let mut $itm = &mut q[job.queue_index];
-                    let mut $itm = q[job.queue_index].clone();
-                    $action
-                    q.change_line(job.queue_index, $itm);
-                    //q.data_changed(job.queue_index);
+            if let Ok(mut q) = $this.queue.try_borrow_mut() {
+                if let Some(job) = $this.jobs.get(&$job_id) {
+                    if job.queue_index < q.row_count() as usize {
+                        //let mut $itm = &mut q[job.queue_index];
+                        let mut $itm = q[job.queue_index].clone();
+                        $action
+                        q.change_line(job.queue_index, $itm);
+                        //q.data_changed(job.queue_index);
+                    }
                 }
             }
         }
