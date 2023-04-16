@@ -12,6 +12,8 @@ install-deps:
     sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
     sudo apt-get install -y libfontconfig1 libfreetype6
 
+    mkdir -p {{ExtDir}}
+
     if [ ! -f "{{OpenCVPath}}/../lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # OpenCV dependencies

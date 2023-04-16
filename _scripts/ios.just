@@ -22,6 +22,7 @@ install-deps:
     export DYLD_FALLBACK_LIBRARY_PATH=""
     export MACOSX_DEPLOYMENT_TARGET=""
 
+    mkdir -p {{ExtDir}}
     cd {{ExtDir}}
 
     # Install vcpkg

@@ -10,6 +10,7 @@ install-deps:
     brew install p7zip pkg-config
     xcode-select --install
 
+    mkdir -p {{ExtDir}}
     cd {{ExtDir}}
 
     # Install vcpkg

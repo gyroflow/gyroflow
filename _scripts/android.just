@@ -8,6 +8,7 @@
 install-deps:
     #!powershell
     $ProgressPreference = 'SilentlyContinue'
+    mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
     cd {{ExtDir}}
 
     $Python = "python";
