@@ -93,181 +93,53 @@ fn main() {
     if target_os == "ios" {
         println!("cargo:rerun-if-changed=_deployment/ios/qml_plugins.cpp");
         config.file("_deployment/ios/qml_plugins.cpp");
+        println!("cargo:rustc-link-arg=-force_load");
+        println!("cargo:rustc-link-arg={}/_deployment/ios/qml_plugins.o", env::var("OUT_DIR").unwrap());
 
         println!("cargo:rustc-link-arg=-Wl,-e,_qt_main_wrapper");
+        println!("cargo:rustc-link-arg=-fapple-link-rtlib");
+        println!("cargo:rustc-link-arg=-dead_strip");
+
+        let frameworks = [
+            "AudioToolbox", "AVFoundation", "CoreAudio", "CoreFoundation",
+            "CoreGraphics", "CoreMedia", "CoreServices", "CoreText",
+            "CoreVideo", "Foundation", "ImageIO", "IOKit",
+            "OpenGLES", "QuartzCore", "Security", "SystemConfiguration",
+            "UIKit", "UniformTypeIdentifiers", "VideoToolbox",
+        ];
 
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");
         println!("cargo:rustc-link-lib=xml2");
-        println!("cargo:rustc-link-arg=-fapple-link-rtlib");
-        println!("cargo:rustc-link-lib=framework=AVFoundation");
-        println!("cargo:rustc-link-lib=framework=CoreGraphics");
-        println!("cargo:rustc-link-lib=framework=AudioToolbox");
-        println!("cargo:rustc-link-lib=framework=VideoToolbox");
-        println!("cargo:rustc-link-lib=framework=QuartzCore");
-        println!("cargo:rustc-link-lib=framework=Foundation");
-        println!("cargo:rustc-link-lib=framework=Security");
-        println!("cargo:rustc-link-lib=framework=CoreMedia");
-        println!("cargo:rustc-link-lib=framework=CoreAudio");
-        println!("cargo:rustc-link-lib=framework=CoreVideo");
-        println!("cargo:rustc-link-lib=framework=CoreText");
-        println!("cargo:rustc-link-lib=framework=CoreServices");
-        println!("cargo:rustc-link-lib=framework=CoreFoundation");
-        println!("cargo:rustc-link-lib=framework=SystemConfiguration");
-        println!("cargo:rustc-link-lib=framework=ImageIO");
-        println!("cargo:rustc-link-lib=framework=UIKit");
-        println!("cargo:rustc-link-lib=framework=IOKit");
-        println!("cargo:rustc-link-lib=framework=UniformTypeIdentifiers");
-        println!("cargo:rustc-link-lib=framework=OpenGLES");
-
-        let libs = [
-            "Qt6BundledFreetype",
-            "Qt6BundledHarfbuzz",
-            "Qt6BundledLibjpeg",
-            "Qt6BundledLibpng",
-            "Qt6BundledPcre2",
-            "Qt6Core",
-            "Qt6Gui",
-            "Qt6LabsFolderListModel",
-            "Qt6LabsQmlModels",
-            "Qt6LabsSettings",
-            "Qt6Network",
-            "Qt6OpenGL",
-            "Qt6Qml",
-            "Qt6QmlCompiler",
-            // "Qt6QmlCore",
-            "Qt6QmlLocalStorage",
-            "Qt6QmlModels",
-            "Qt6QmlWorkerScript",
-            "Qt6QmlXmlListModel",
-            "Qt6Quick",
-            "Qt6QuickControls2",
-            "Qt6QuickControls2Impl",
-            "Qt6QuickDialogs2",
-            "Qt6QuickDialogs2QuickImpl",
-            "Qt6QuickDialogs2Utils",
-            "Qt6QuickLayouts",
-            "Qt6QuickShapes",
-            "Qt6QuickTemplates2",
-            "Qt6Sql",
-            "Qt6Svg",
-
-            "qsvgicon",
-            "qsvg",
-            "qsqlite",
-            "qios",
-            "qmlfolderlistmodelplugin",
-            "qmlsettingsplugin",
-            "qmlmetaplugin",
-            "qmlplugin",
-            //"qtqmlcoreplugin",
-            "modelsplugin",
-            "workerscriptplugin",
-            "qmlxmllistmodelplugin",
-            "quickwindowplugin",
-            "qtquickcontrols2basicstyleimplplugin",
-            "qtquickcontrols2basicstyleplugin",
-            "qtquickcontrols2implplugin",
-            "qtquickcontrols2plugin",
-            "qtquickcontrols2materialstyleimplplugin",
-            "qtquickcontrols2materialstyleplugin",
-            "qtquickdialogsplugin",
-            "qtquickdialogs2quickimplplugin",
-            "qquicklayoutsplugin",
-            "qtquick2plugin",
-            "qmllocalstorageplugin",
-            "qtquickcontrols2nativestyleplugin",
-            "qmlshapesplugin",
-            "qtquicktemplates2plugin",
-            "Qt6PacketProtocol",
-            "qscnetworkreachability",
-            "qsecuretransportbackend"
-        ];
-        let folders = [
-            "plugins/iconengines/",
-            "plugins/imageformats/",
-            "plugins/sqldrivers/",
-            "plugins/platforms/",
-            "plugins/networkinformation/",
-            "plugins/tls/",
-            "qml/Qt/labs/folderlistmodel/",
-            "qml/Qt/labs/settings/",
-            "qml/QtCore/",
-            "qml/QtQml/",
-            "qml/QtQml/Base/",
-            "qml/QtQml/Models/",
-            "qml/QtQml/WorkerScript/",
-            "qml/QtQml/XmlListModel/",
-            "qml/QtQuick/",
-            "qml/QtQuick/Controls/",
-            "qml/QtQuick/Controls/Basic/",
-            "qml/QtQuick/Controls/Basic/impl/",
-            "qml/QtQuick/Controls/impl/",
-            "qml/QtQuick/Controls/Material/",
-            "qml/QtQuick/Controls/Material/impl/",
-            "qml/QtQuick/Dialogs/",
-            "qml/QtQuick/Dialogs/quickimpl/",
-            "qml/QtQuick/Layouts/",
-            "qml/QtQuick/LocalStorage/",
-            "qml/QtQuick/NativeStyle/",
-            "qml/QtQuick/Particles/",
-            "qml/QtQuick/Shapes/",
-            "qml/QtQuick/Templates/",
-            "qml/QtQuick/tooling/",
-            "qml/QtQuick/Window/",
-        ];
-        for x in folders {
-            println!("cargo:rustc-link-search={}/../{}", qt_library_path, x);
-        }
-        for x in libs {
-            println!("cargo:rustc-link-lib=static:+whole-archive={}", x);
+        for x in frameworks {
+            println!("cargo:rustc-link-lib=framework={x}");
         }
 
-        let qt_link = [
-            "lib/objects-Release/Gui_resources_1/.rcc/qrc_qpdf.cpp.o",
-            "lib/objects-Release/Gui_resources_2/.rcc/qrc_gui_shaders.cpp.o",
-            "lib/objects-Release/Qml_resources_2/.rcc/qrc_qmlMetaQmldir.cpp.o",
-            "lib/objects-Release/qtquickcontrols2basicstyleplugin_resources_3/.rcc/qrc_qtquickcontrols2basicstyleplugin.cpp.o",
-            "lib/objects-Release/qtquickcontrols2materialstyleplugin_resources_3/.rcc/qrc_qtquickcontrols2materialstyleplugin.cpp.o",
-            "lib/objects-Release/qtquickcontrols2plugin_resources_1/.rcc/qrc_indirectBasic.cpp.o",
-            "lib/objects-Release/Quick_resources_2/.rcc/qrc_scenegraph_shaders.cpp.o",
-            "lib/objects-Release/QuickDialogs2QuickImpl_resources_3/.rcc/qrc_QuickDialogs2QuickImpl.cpp.o",
-            "lib/objects-Release/QuickDialogs2QuickImpl_resources_4/.rcc/qrc_QuickDialogs2QuickImplShaders.cpp.o",
-            "lib/objects-Release/QuickShapesPrivate_resources_2/.rcc/qrc_qtquickshapes.cpp.o",
-            "qml/Qt/labs/settings/objects-Release/LabsSettings_resources_1/.rcc/qrc_qmake_Qt_labs_settings.cpp.o",
-            "qml/QtCore/objects-Release/QmlCore_resources_1/.rcc/qrc_qmake_QtCore.cpp.o",
-            "qml/QtQml/Base/objects-Release/Qml_resources_1/.rcc/qrc_qmake_QtQml_Base.cpp.o",
-            "qml/QtQml/Models/objects-Release/QmlModels_resources_1/.rcc/qrc_qmake_QtQml_Models.cpp.o",
-            "qml/QtQml/objects-Release/QmlMeta_resources_1/.rcc/qrc_qmake_QtQml.cpp.o",
-            "qml/QtQml/WorkerScript/objects-Release/QmlWorkerScript_resources_1/.rcc/qrc_qmake_QtQml_WorkerScript.cpp.o",
-            "qml/QtQuick/Controls/Basic/impl/objects-Release/qtquickcontrols2basicstyleimplplugin_resources_1/.rcc/qrc_qmake_QtQuick_Controls_Basic_impl.cpp.o",
-            "qml/QtQuick/Controls/Basic/objects-Release/qtquickcontrols2basicstyleplugin_qmlcache/.rcc/qmlcache/qtquickcontrols2basicstyleplugin_qmlcache_loader.cpp.o",
-            "qml/QtQuick/Controls/Basic/objects-Release/qtquickcontrols2basicstyleplugin_resources_1/.rcc/qrc_qmake_QtQuick_Controls_Basic.cpp.o",
-            "qml/QtQuick/Controls/Basic/objects-Release/qtquickcontrols2basicstyleplugin_resources_2/.rcc/qrc_qtquickcontrols2basicstyleplugin_raw_qml_0.cpp.o",
-            "qml/QtQuick/Controls/impl/objects-Release/QuickControls2Impl_resources_1/.rcc/qrc_qmake_QtQuick_Controls_impl.cpp.o",
-            "qml/QtQuick/Controls/Material/impl/objects-Release/qtquickcontrols2materialstyleimplplugin_qmlcache/.rcc/qmlcache/qtquickcontrols2materialstyleimplplugin_qmlcache_loader.cpp.o",
-            "qml/QtQuick/Controls/Material/impl/objects-Release/qtquickcontrols2materialstyleimplplugin_resources_1/.rcc/qrc_qmake_QtQuick_Controls_Material_impl.cpp.o",
-            "qml/QtQuick/Controls/Material/impl/objects-Release/qtquickcontrols2materialstyleimplplugin_resources_2/.rcc/qrc_qtquickcontrols2materialstyleimplplugin_raw_qml_0.cpp.o",
-            "qml/QtQuick/Controls/Material/objects-Release/qtquickcontrols2materialstyleplugin_qmlcache/.rcc/qmlcache/qtquickcontrols2materialstyleplugin_qmlcache_loader.cpp.o",
-            "qml/QtQuick/Controls/Material/objects-Release/qtquickcontrols2materialstyleplugin_resources_1/.rcc/qrc_qmake_QtQuick_Controls_Material.cpp.o",
-            "qml/QtQuick/Controls/Material/objects-Release/qtquickcontrols2materialstyleplugin_resources_2/.rcc/qrc_qtquickcontrols2materialstyleplugin_raw_qml_0.cpp.o",
-            "qml/QtQuick/Controls/objects-Release/QuickControls2_resources_1/.rcc/qrc_qmake_QtQuick_Controls.cpp.o",
-            "qml/QtQuick/Dialogs/objects-Release/QuickDialogs2_resources_1/.rcc/qrc_qmake_QtQuick_Dialogs.cpp.o",
-            "qml/QtQuick/Dialogs/quickimpl/objects-Release/QuickDialogs2QuickImpl_qmlcache/.rcc/qmlcache/QuickDialogs2QuickImpl_qmlcache_loader.cpp.o",
-            "qml/QtQuick/Dialogs/quickimpl/objects-Release/QuickDialogs2QuickImpl_resources_1/.rcc/qrc_qmake_QtQuick_Dialogs_quickimpl.cpp.o",
-            "qml/QtQuick/Dialogs/quickimpl/objects-Release/QuickDialogs2QuickImpl_resources_2/.rcc/qrc_QuickDialogs2QuickImpl_raw_qml_0.cpp.o",
-            "qml/QtQuick/objects-Release/Quick_resources_1/.rcc/qrc_qmake_QtQuick.cpp.o",
-            "qml/QtQuick/Shapes/objects-Release/QuickShapesPrivate_resources_1/.rcc/qrc_qmake_QtQuick_Shapes.cpp.o",
-            "qml/QtQuick/Templates/objects-Release/QuickTemplates2_resources_1/.rcc/qrc_qmake_QtQuick_Templates.cpp.o",
-            "qml/QtQuick/Window/objects-Release/quickwindow_resources_1/.rcc/qrc_qmake_QtQuick_Window.cpp.o",
-        ];
-        for x in qt_link {
-            println!("cargo:rustc-link-arg=-force_load");
-            println!("cargo:rustc-link-arg={}/../{}", qt_library_path, x);
-        }
-        println!("cargo:rustc-link-arg=-force_load");
-        println!("cargo:rustc-link-arg={}/_deployment/ios/qml_plugins.o", env::var("OUT_DIR").unwrap());
-        println!("cargo:rustc-link-arg=-dead_strip");
+        let mut added_paths = vec![];
+        for x in walkdir::WalkDir::new(Path::new(&qt_library_path).parent().unwrap()) {
+            let x = x.unwrap();
+            let name = x.file_name().to_str().unwrap();
+            let path = x.path().to_str().unwrap();
+            if path.contains("objects-Debug") ||
+               path.contains("Imagine") || path.contains("Fusion") || path.contains("Universal") ||
+               path.to_ascii_lowercase().contains("particles") || path.to_ascii_lowercase().contains("tooling") {
+                continue;
+            }
+            if name.starts_with("qrc_") && name.ends_with(".cpp.o") {
+                println!("cargo:rustc-link-arg=-force_load");
+                println!("cargo:rustc-link-arg={}", path);
+            }
+            if name.starts_with("lib") && name.ends_with(".a") {
+                let parent_path = x.path().parent().unwrap().to_str().unwrap().to_owned();
+                if !added_paths.contains(&parent_path) {
+                    println!("cargo:rustc-link-search={}", parent_path);
+                    added_paths.push(parent_path);
+                }
+                if !name.contains("_debug") && !name.contains("Widgets") && !name.contains("Test") {
+                    println!("cargo:rustc-link-lib={}", name[3..].replace(".a", ""));
+                }
+            }
+        };
     } else if target_os == "macos" {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");

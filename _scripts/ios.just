@@ -2,6 +2,8 @@
 
 QtVersionIOS := "6.5.0"
 
+SigningIdentity := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
+
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=15 -isysroot " + IPHONESDK
 export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.14"
@@ -78,45 +80,37 @@ deploy *param:
 
     mkdir -p $APP_BUNDLE
 
-    OPENCV_DIR="$PROJECT_DIR/ext/vcpkg/installed/arm64-ios"
     export FFMPEG_DIR="$PROJECT_DIR/ext/ffmpeg-master-iOS-gpl-lite"
     export PATH="$PROJECT_DIR/ext/{{QtVersionIOS}}/ios/bin:$PATH"
+    export PATH="/Applications/Xcode.app/Contents/Developer/usr/bin/:$PATH"
+    export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/:$PATH"
 
     export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
-    export OPENCV_LINK_PATHS=$OPENCV_DIR/lib
-    export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/include/
+    export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/lib
+    export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/include/
 
     cargo build --target aarch64-apple-ios --profile release
 
-    cp -f $PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow $APP_BUNDLE/gyroflow
-    cp -rf $PROJECT_DIR/target/aarch64-apple-ios/Frameworks $APP_BUNDLE/Frameworks
-    cp -rf $PROJECT_DIR/_deployment/ios/Info.plist $APP_BUNDLE/Info.plist
-    cp -rf $PROJECT_DIR/_deployment/ios/PkgInfo $APP_BUNDLE/PkgInfo
-    cp -rf $PROJECT_DIR/_deployment/ios/Entitlements.plist $APP_BUNDLE/../entitlements.xcent
+    if [ -f "$PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow" ]; then
+        cp -f $PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow $APP_BUNDLE/gyroflow
+        cp -rf $PROJECT_DIR/target/aarch64-apple-ios/Frameworks $APP_BUNDLE/Frameworks
+        cp -rf $PROJECT_DIR/_deployment/ios/Info.plist $APP_BUNDLE/Info.plist
+        cp -rf $PROJECT_DIR/_deployment/ios/PkgInfo $APP_BUNDLE/PkgInfo
+        cp -rf $PROJECT_DIR/_deployment/ios/Entitlements.plist $APP_BUNDLE/../entitlements.xcent
 
-    xcrun actool $PROJECT_DIR/_deployment/ios/Resources/Images.xcassets --compile $APP_BUNDLE --platform iphoneos --minimum-deployment-target 15 --app-icon AppIcon --output-partial-info-plist $APP_BUNDLE/test.plist
+        actool $PROJECT_DIR/_deployment/ios/Resources/Images.xcassets --compile $APP_BUNDLE --platform iphoneos --minimum-deployment-target 15 --app-icon AppIcon --output-partial-info-plist $APP_BUNDLE/../AppIcon.plist
 
-    #cp -f $PROJECT_DIR/_deployment/ios/Gyroflow_dev.mobileprovision $APP_BUNDLE/embedded.mobileprovision
+        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --auto-activate-custom-fonts --compilation-directory $APP_BUNDLE/../ $PROJECT_DIR/_deployment/ios/LaunchScreen.storyboard
+        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --link $APP_BUNDLE $APP_BUNDLE/../LaunchScreen.storyboardc
 
-    /Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module gyroflow --output-partial-info-plist $APP_BUNDLE/../LaunchScreen-SBPartialInfo.plist --auto-activate-custom-fonts --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --compilation-directory $APP_BUNDLE/../ $PROJECT_DIR/_deployment/ios/LaunchScreen.storyboard
-    /Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --link $APP_BUNDLE $APP_BUNDLE/../LaunchScreen.storyboardc
+        #cp -f $PROJECT_DIR/_deployment/ios/Gyroflow_dev.mobileprovision $APP_BUNDLE/embedded.mobileprovision
+        #derq query -f xml -i $PROJECT_DIR/_deployment/ios/Entitlements.plist -o $APP_BUNDLE/../gyroflow.app.xcent.der --raw
+        #dsymutil $APP_BUNDLE/gyroflow -o $APP_BUNDLE/../gyroflow.app.dSYM
 
-    #/usr/bin/derq query -f xml -i $PROJECT_DIR/_deployment/ios/Entitlements.plist -o $APP_BUNDLE/../gyroflow.app.xcent.der --raw
+        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} ${APP_BUNDLE}/Frameworks/mdk.framework/mdk
+        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} ${APP_BUNDLE}/gyroflow
+        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} --entitlements $APP_BUNDLE/../entitlements.xcent $APP_BUNDLE
+        codesign -vvvv --deep --verify $APP_BUNDLE
 
-    #/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil $APP_BUNDLE/gyroflow -o $APP_BUNDLE/../gyroflow.app.dSYM
-
-    IDENTITY="612D010FA5522A25CE1F1D5A38B84DCD2798704B"
-    codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign $IDENTITY ${APP_BUNDLE}/Frameworks/mdk.framework/mdk
-    for lib in ${APP_BUNDLE}/*; do
-        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign $IDENTITY ${lib}
-    done
-
-    codesign -vvvv --force --sign $IDENTITY --entitlements $APP_BUNDLE/../entitlements.xcent --timestamp=none --generate-entitlement-der $APP_BUNDLE
-
-    codesign -vvvv --deep --verify $APP_BUNDLE
-
-    touch -c $APP_BUNDLE
-
-    if [ -f "$APP_BUNDLE/gyroflow" ]; then
         ios-deploy --bundle $APP_BUNDLE --debug
     fi

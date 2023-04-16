@@ -267,8 +267,8 @@ The project also supports UI live reload, it's a super quick way of working with
 4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
 5. Enter the project directory and:
     - Install dependencies: `just ios install-deps`
-    - Compile the apk and install on device: `just ios deploy`
-6. Rest of the steps not figured out yet. Now need to package the app, create .ipa and sign it
+    - Update Team ID in `_deployment/ios/Entitlements.plist` and SigningIdentity key in `_scripts/ios.just`
+    - Compile and install on device: `just ios deploy`
 
 ### Profiling on Windows
 1. Install and run `Visual Studio Community Edition`

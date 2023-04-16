@@ -41,6 +41,9 @@ MenuItem {
     function loadFile(url: url) {
         if (Qt.platform.os == "android") {
             url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
+        } else if (Qt.platform.os == "ios") {
+            controller.start_apple_url_access(url.toString());
+            // TODO: stop access
         }
         controller.load_lens_profile_url(url);
     }

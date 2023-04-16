@@ -261,6 +261,11 @@ pub struct Controller {
 
     play_sound: qt_method!(fn(&mut self, typ: String)),
 
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    start_apple_url_access: qt_method!(fn(&mut self, url: String) -> bool),
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    stop_apple_url_access: qt_method!(fn(&mut self, url: String) -> bool),
+
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
 
@@ -2048,4 +2053,9 @@ impl Controller {
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn clear_settings(&self) { util::clear_settings() }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
+
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    fn start_apple_url_access(&self, url: String) -> bool { util::start_accessing_security_scoped_resource(&url) }
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    fn stop_apple_url_access(&self, url: String) -> bool { util::stop_accessing_security_scoped_resource(&url) }
 }

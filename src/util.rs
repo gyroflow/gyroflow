@@ -409,3 +409,35 @@ pub fn image_to_b64(img: QImage) -> QString {
         return b64;
     })
 }
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub fn start_accessing_security_scoped_resource(url: &str) -> bool {
+    use core_foundation_sys::{ base::*, url::*, string::* };
+    let mut ok = false;
+    unsafe {
+        let url_u8 = url.as_bytes();
+        let len = url_u8.len() as isize;
+        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, std::ptr::null());
+        if !url_ref.is_null() {
+            ok = CFURLStartAccessingSecurityScopedResource(url_ref) == 1;
+            CFRelease(url_ref as CFTypeRef);
+        }
+    }
+    ok
+}
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
+    use core_foundation_sys::{ base::*, url::*, string::* };
+    let mut ok = false;
+    unsafe {
+        let url_u8 = url.as_bytes();
+        let len = url_u8.len() as isize;
+        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, std::ptr::null());
+        if !url_ref.is_null() {
+            CFURLStopAccessingSecurityScopedResource(url_ref);
+            ok = true;
+            CFRelease(url_ref as CFTypeRef);
+        }
+    }
+    ok
+}

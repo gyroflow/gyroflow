@@ -435,6 +435,13 @@ Item {
         timeline.editingSyncPoint = false;
     }
     function loadMultipleFiles(urls: list<url>, skip_detection: bool) {
+        if (Qt.platform.os == "ios") {
+            for (const url of urls) {
+                controller.start_apple_url_access(url.toString());
+                // TODO: stop access
+            }
+        }
+
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
