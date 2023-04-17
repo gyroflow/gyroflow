@@ -91,6 +91,16 @@ Window {
         }
     }
 
+    Image {
+        id: loadingImage;
+        source: "qrc:/resources/logo" + (style === "dark"? "_white" : "_black") + ".svg";
+        sourceSize.width: Math.min(400 * dpiScale, parent.width * 0.7);
+        opacity: 0;
+        YAnimator       on y       { id: liy; from: main_window.height / 2 - loadingImage.height - 60 * dpiScale; to: main_window.height / 2 - loadingImage.height - 110 * dpiScale; duration: 1000; easing.type: Easing.OutExpo; }
+        OpacityAnimator on opacity { id: lio; from: 0; to: 1; duration: 1000; easing.type: Easing.OutExpo; }
+        anchors.horizontalCenter: parent.horizontalCenter;
+        z: 9999;
+    }
     Loader {
         id: appLoader;
         objectName: "AppLoader";
@@ -103,8 +113,9 @@ Window {
         }
     }
     QQC.BusyIndicator {
+        id: loadingIndicator;
         anchors.centerIn: parent;
         running: appLoader.status != Loader.Ready;
-        onRunningChanged: if (!running) destroy(700);
+        onRunningChanged: if (!running) { destroy(700); lio.from = 1; lio.to = 0; lio.running = true; }
     }
 }
