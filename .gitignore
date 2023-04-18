@@ -8,3 +8,4 @@ ext/*
 *.code-workspace
 gyroflow.log
 .DS_Store
+*.mobileprovision

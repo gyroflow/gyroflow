@@ -1,13 +1,27 @@
 !include common.just
 
+# Important! For development/debugging the provisioning profile needs to be "Development"
+# For distribution - it needs to be a distribution provisioning profile.
+
+# Make sure to unlock the keychain if using ssh: security -v unlock-keychain -p 1234 login.keychain
+# To list available certificates: security find-identity -v -p codesigning
+
+TeamID := "RR3ZC2L4DF"
+DevelopmentCertificateSHA     := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
+DevelopmentProvisioning       := ProjectDir / "_deployment/ios/Gyroflow_dev.mobileprovision"
+DevelopmentProvisioningName   := "Gyroflow dev"
+DistributionCertificateSHA    := "7F82D6013B8F6D45F88FE547438744BD64750C5B"
+DistributionProvisioning      := ProjectDir / "_deployment/ios/Gyroflow_dist.mobileprovision"
+DistributionProvisioningName  := "Gyroflow dist"
+
+AppBundle := ProjectDir / "_deployment/_binaries/ios/Payload/Gyroflow.app"
+
 QtVersionIOS := "6.5.0"
 
-SigningIdentity := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
-
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=15 -isysroot " + IPHONESDK
+export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK
 export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.14"
-export IPHONEOS_DEPLOYMENT_TARGET := "15.0"
+export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,61 +70,127 @@ install-deps:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#[no-cd]
-#run *param:
-#    cargo run --release -- {{param}}
-#
-#[no-cd]
-#debug *param:
-#    cargo run -- {{param}}
+[no-cd]
+run:
+    #!/bin/bash
+    just --unstable -f {{justfile()}} build-and-package release development
+
+    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
+        ios-deploy --bundle {{AppBundle}} --noninteractive
+    fi
+
+[no-cd]
+debug:
+    #!/bin/bash
+
+    just --unstable -f {{justfile()}} build-and-package debug development
+
+    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
+        ios-deploy --bundle {{AppBundle}} --debug
+    fi
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Deployment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [no-cd]
-deploy *param:
+build-and-package profile is_dist:
     #!/bin/bash
-    : "${PROJECT_DIR:=$(cd "{{ProjectDir}}"; pwd -P)}"
 
-    security -v unlock-keychain -p 1234 login.keychain
+    rm -rf {{ProjectDir}}/_deployment/_binaries/ios/
+    rm -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow
 
-    APP_BUNDLE=$PROJECT_DIR/_deployment/_binaries/ios/gyroflow.app
+    mkdir -p {{AppBundle}}
 
-    rm -rf $APP_BUNDLE
-    rm -f $PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow
-
-    mkdir -p $APP_BUNDLE
-
-    export FFMPEG_DIR="$PROJECT_DIR/ext/ffmpeg-master-iOS-gpl-lite"
-    export PATH="$PROJECT_DIR/ext/{{QtVersionIOS}}/ios/bin:$PATH"
+    export FFMPEG_DIR="{{ProjectDir}}/ext/ffmpeg-master-iOS-gpl-lite"
+    export PATH="{{ProjectDir}}/ext/{{QtVersionIOS}}/ios/bin:/usr/libexec/:$PATH"
 
     export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4"
-    export OPENCV_LINK_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/lib
-    export OPENCV_INCLUDE_PATHS=$PROJECT_DIR/ext/vcpkg/installed/arm64-ios/include/
+    export OPENCV_LINK_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/lib
+    export OPENCV_INCLUDE_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/include/
 
-    cargo build --target aarch64-apple-ios --profile release
+    if [ "{{profile}}" == "debug" ]; then
+        cargo build --target aarch64-apple-ios
+    else
+        cargo build --target aarch64-apple-ios --profile {{profile}}
+    fi
 
-    if [ -f "$PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow" ]; then
-        cp -f $PROJECT_DIR/target/aarch64-apple-ios/release/gyroflow $APP_BUNDLE/gyroflow
-        cp -rf $PROJECT_DIR/target/aarch64-apple-ios/Frameworks $APP_BUNDLE/Frameworks
-        cp -rf $PROJECT_DIR/_deployment/ios/Info.plist $APP_BUNDLE/Info.plist
-        cp -rf $PROJECT_DIR/_deployment/ios/PkgInfo $APP_BUNDLE/PkgInfo
-        cp -rf $PROJECT_DIR/_deployment/ios/Entitlements.plist $APP_BUNDLE/../entitlements.xcent
+    if [ "{{is_dist}}" == "distribution" ]; then
+        SIGN_KEY="{{DistributionCertificateSHA}}"
+        PROVISIONING_PROFILE="{{DistributionProvisioning}}"
+    else
+        SIGN_KEY="{{DevelopmentCertificateSHA}}"
+        PROVISIONING_PROFILE="{{DevelopmentProvisioning}}"
+    fi
 
-        actool $PROJECT_DIR/_deployment/ios/Resources/Images.xcassets --compile $APP_BUNDLE --platform iphoneos --minimum-deployment-target 15 --app-icon AppIcon --output-partial-info-plist $APP_BUNDLE/../AppIcon.plist
+    if [ -f "{{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow" ]; then
+        cp -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow {{AppBundle}}/gyroflow
+        cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
+        cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
+        cp -rf {{ProjectDir}}/_deployment/ios/PkgInfo {{AppBundle}}/PkgInfo
 
-        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --auto-activate-custom-fonts --compilation-directory $APP_BUNDLE/../ $PROJECT_DIR/_deployment/ios/LaunchScreen.storyboard
-        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --link $APP_BUNDLE $APP_BUNDLE/../LaunchScreen.storyboardc
+        # Generate entitlements
+        PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.xyz.gyroflow" {{AppBundle}}/../../entitlements.xcent
+        PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../../entitlements.xcent
+        if [ "{{is_dist}}" == "distribution" ]; then
+            PlistBuddy -x -c "Add :get-task-allow bool false" {{AppBundle}}/../../entitlements.xcent
+        else
+            PlistBuddy -x -c "Add :get-task-allow bool true" {{AppBundle}}/../../entitlements.xcent
+        fi
+        PlistBuddy -x -c "Add :keychain-access-groups array" {{AppBundle}}/../../entitlements.xcent
+        PlistBuddy -x -c "Add :keychain-access-groups:0 string {{TeamID}}.xyz.gyroflow" {{AppBundle}}/../../entitlements.xcent
 
-        #cp -f $PROJECT_DIR/_deployment/ios/Gyroflow_dev.mobileprovision $APP_BUNDLE/embedded.mobileprovision
-        #derq query -f xml -i $PROJECT_DIR/_deployment/ios/Entitlements.plist -o $APP_BUNDLE/../gyroflow.app.xcent.der --raw
-        #dsymutil $APP_BUNDLE/gyroflow -o $APP_BUNDLE/../gyroflow.app.dSYM
+        actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}} --platform iphoneos --minimum-deployment-target 15 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../../AppIcon.plist
 
-        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} ${APP_BUNDLE}/Frameworks/mdk.framework/mdk
-        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} ${APP_BUNDLE}/gyroflow
-        codesign -vvvv --force --timestamp=none --generate-entitlement-der --sign {{SigningIdentity}} --entitlements $APP_BUNDLE/../entitlements.xcent $APP_BUNDLE
-        codesign -vvvv --deep --verify $APP_BUNDLE
+        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --auto-activate-custom-fonts --compilation-directory {{AppBundle}}/../../ {{ProjectDir}}/_deployment/ios/LaunchScreen.storyboard
+        ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --link {{AppBundle}} {{AppBundle}}/../../LaunchScreen.storyboardc
 
-        ios-deploy --bundle $APP_BUNDLE --debug
+        cp -f $PROVISIONING_PROFILE {{AppBundle}}/embedded.mobileprovision
+        #derq query -f xml -i {{ProjectDir}}/_deployment/ios/Entitlements.plist -o {{AppBundle}}/../../Gyroflow.app.xcent.der --raw
+        #dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../Gyroflow.app.dSYM
+
+        codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}/Frameworks/mdk.framework
+        codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
+    fi
+
+[no-cd]
+deploy *param:
+    #!/bin/bash
+
+    just --unstable -f {{justfile()}} build-and-package deploy distribution
+
+    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
+        pushd {{AppBundle}}/../../
+            zip -r Gyroflow.ipa Payload
+        popd
+
+        # ---------------------- XCode archive way ----------------------
+        # This shouldn't be normally needed, but if anything changes in the build process in the future, it's more "official" way
+        if false; then
+            if [ "{{param}}" == "distribution" ]; then
+                SIGN_KEY="{{DistributionCertificateSHA}}"
+                PROVISIONING_PROFILE="{{DistributionProvisioningName}}"
+            else
+                SIGN_KEY="{{DevelopmentCertificateSHA}}"
+                PROVISIONING_PROFILE="{{DevelopmentProvisioningName}}"
+            fi
+            mkdir -p {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications
+            cp -rf {{AppBundle}} {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications/
+            cp -f {{ProjectDir}}/_deployment/ios/Archive.plist {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Info.plist
+            PlistBuddy -x -c "Add :method string app-store" {{AppBundle}}/../../Export.plist
+            PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
+            PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
+            PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
+            PlistBuddy -x -c "Add :provisioningProfiles:xyz.gyroflow string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
+            xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
+            pushd {{AppBundle}}/../out/
+                rm -f Gyroflow.ipa
+                rm -f Payload/*.plist
+                rm -f Payload/*.log
+                zip -r Gyroflow.ipa Payload
+            popd
+        fi
+        # ---------------------- XCode archive way ----------------------
+
+        ios-deploy --bundle {{AppBundle}}
     fi

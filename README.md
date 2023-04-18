@@ -232,7 +232,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building on MacOS
-0. Prerequisites: `git`, `7z`, `python`, `brew`
+0. Prerequisites: `git`, `brew`, `python`
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
@@ -255,20 +255,20 @@ The project also supports UI live reload, it's a super quick way of working with
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-4. Install Android SDK and NDK 23c and update paths in `_scripts/android.just`
+4. Install Android SDK and NDK r23c and update paths in `_scripts/android.just`
 5. Enter the project directory and:
     - Install dependencies: `just android install-deps`
     - Compile the apk and install on device: `just android deploy`
 
 ### Building for iOS
-1. iOS is not well supported yet, work in progress
-2. Get latest stable Rust language from: https://rustup.rs/
-3. Install `Just` by running `cargo install --force just`
-4. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
-5. Enter the project directory and:
+0. Prerequisites: `git`, `brew`, `python`
+1. Get latest stable Rust language from: https://rustup.rs/
+2. Install `Just` by running `cargo install --force just`
+3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
+4. Enter the project directory and:
     - Install dependencies: `just ios install-deps`
-    - Update Team ID in `_deployment/ios/Entitlements.plist` and SigningIdentity key in `_scripts/ios.just`
-    - Compile and install on device: `just ios deploy`
+    - Update Team ID, signing keys and provisioning profiles in `_scripts/ios.just`
+    - Compile and run on device: `just ios run`
 
 ### Profiling on Windows
 1. Install and run `Visual Studio Community Edition`
