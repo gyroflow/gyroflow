@@ -13,6 +13,7 @@
 	<key>CFBundleVersion</key>                     <string>1.5.0</string>
 	<key>MinimumOSVersion</key>                    <string>14.0</string>
 	<key>CFBundleSupportedPlatforms</key>          <array><string>iPhoneOS</string></array>
+	<key>UIDeviceFamily</key>                      <array><integer>1</integer><integer>2</integer></array>
 	<key>LSRequiresIPhoneOS</key>                  <true/>
 	<key>NSPhotoLibraryUsageDescription</key>      <string>Permission needed to open file in Gyroflow</string>
 	<key>NSDownloadsFolderUsageDescription</key>   <string>Permission needed to open file in Gyroflow</string>
@@ -30,18 +31,6 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>CFBundleIcons</key>
-	<dict>
-		<key>CFBundlePrimaryIcon</key>
-		<dict>
-			<key>CFBundleIconFiles</key>
-			<array>
-				<string>AppIcon60x60</string>
-			</array>
-			<key>CFBundleIconName</key>
-			<string>AppIcon</string>
-		</dict>
-	</dict>
-	<key>CFBundleIcons~ipad</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>
 		<dict>

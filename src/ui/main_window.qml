@@ -116,6 +116,6 @@ Window {
         id: loadingIndicator;
         anchors.centerIn: parent;
         running: appLoader.status != Loader.Ready;
-        onRunningChanged: if (!running) { destroy(700); lio.from = 1; lio.to = 0; lio.running = true; }
+        onRunningChanged: if (!running) { destroy(700); lio.running = false; lio.from = 1; lio.to = 0; lio.running = true; }
     }
 }

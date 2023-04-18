@@ -156,6 +156,7 @@ build-and-package profile is_dist:
 [no-cd]
 deploy *param:
     #!/bin/bash
+    export PATH="/usr/libexec/:$PATH"
 
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
@@ -163,34 +164,57 @@ deploy *param:
         pushd {{AppBundle}}/../../
             zip -r Gyroflow.ipa Payload
         popd
+        ios-deploy --bundle {{AppBundle}}
 
         # ---------------------- XCode archive way ----------------------
         # This shouldn't be normally needed, but if anything changes in the build process in the future, it's more "official" way
         if false; then
-            if [ "{{param}}" == "distribution" ]; then
+            if true; then
                 SIGN_KEY="{{DistributionCertificateSHA}}"
                 PROVISIONING_PROFILE="{{DistributionProvisioningName}}"
             else
                 SIGN_KEY="{{DevelopmentCertificateSHA}}"
                 PROVISIONING_PROFILE="{{DevelopmentProvisioningName}}"
             fi
+            # For app store
+            TYPE="app-store"
+            # For ad-hoc
+            TYPE="developer-id"
+
             mkdir -p {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications
             cp -rf {{AppBundle}} {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications/
-            cp -f {{ProjectDir}}/_deployment/ios/Archive.plist {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Info.plist
-            PlistBuddy -x -c "Add :method string app-store" {{AppBundle}}/../../Export.plist
+
+            # Build Archive.plist
+            ARCHIVE_PLIST={{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Info.plist
+            PlistBuddy -x -c "Add :ApplicationProperties dict" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:ApplicationPath string Applications/Gyroflow.app" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:Architectures array" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:Architectures:0 string arm64" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string xyz.gyroflow" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersion}}" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersion}}" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:Team string {{TeamID}}" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ArchiveVersion integer 2" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :CreationDate date \"`date +'%a %b %d %H:%M:%S %Z %Y'`\"" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :Name string Gyroflow" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :SchemeName string Gyroflow" $ARCHIVE_PLIST
+
+            # Build Export.plist
+            PlistBuddy -x -c "Add :method string $TYPE" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :provisioningProfiles:xyz.gyroflow string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
+
             xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
+
             pushd {{AppBundle}}/../out/
                 rm -f Gyroflow.ipa
                 rm -f Payload/*.plist
                 rm -f Payload/*.log
                 zip -r Gyroflow.ipa Payload
             popd
+            ios-deploy --bundle {{AppBundle}}/../out/Payload/Gyroflow.app
         fi
         # ---------------------- XCode archive way ----------------------
-
-        ios-deploy --bundle {{AppBundle}}
     fi
