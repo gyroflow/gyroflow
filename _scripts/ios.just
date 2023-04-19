@@ -6,7 +6,8 @@
 # Make sure to unlock the keychain if using ssh: security -v unlock-keychain -p 1234 login.keychain
 # To list available certificates: security find-identity -v -p codesigning
 
-TeamID := "RR3ZC2L4DF"
+TeamID                        := "RR3ZC2L4DF"
+BundleIdentifier              := "xyz.gyroflow"
 DevelopmentCertificateSHA     := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
 DevelopmentProvisioning       := ProjectDir / "_deployment/ios/Gyroflow_dev.mobileprovision"
 DevelopmentProvisioningName   := "Gyroflow dev"
@@ -30,7 +31,7 @@ export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 [no-cd]
 install-deps:
     #!/bin/bash
-    brew install p7zip pkg-config ios-deploy
+    brew install p7zip python pkg-config ios-deploy
     rustup target add aarch64-apple-ios
     xcode-select --install
     export DYLD_FALLBACK_LIBRARY_PATH=""
@@ -128,9 +129,10 @@ build-and-package profile is_dist:
         cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
         cp -rf {{ProjectDir}}/_deployment/ios/PkgInfo {{AppBundle}}/PkgInfo
+        PlistBuddy -x -c "Set :CFBundleIdentifier string {{BundleIdentifier}}" {{AppBundle}}/Info.plist
 
         # Generate entitlements
-        PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.xyz.gyroflow" {{AppBundle}}/../../entitlements.xcent
+        PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../../entitlements.xcent
         PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../../entitlements.xcent
         if [ "{{is_dist}}" == "distribution" ]; then
             PlistBuddy -x -c "Add :get-task-allow bool false" {{AppBundle}}/../../entitlements.xcent
@@ -138,7 +140,7 @@ build-and-package profile is_dist:
             PlistBuddy -x -c "Add :get-task-allow bool true" {{AppBundle}}/../../entitlements.xcent
         fi
         PlistBuddy -x -c "Add :keychain-access-groups array" {{AppBundle}}/../../entitlements.xcent
-        PlistBuddy -x -c "Add :keychain-access-groups:0 string {{TeamID}}.xyz.gyroflow" {{AppBundle}}/../../entitlements.xcent
+        PlistBuddy -x -c "Add :keychain-access-groups:0 string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../../entitlements.xcent
 
         actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}} --platform iphoneos --minimum-deployment-target 15 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../../AppIcon.plist
 
@@ -190,12 +192,12 @@ deploy *param:
             PlistBuddy -x -c "Add :ApplicationProperties:ApplicationPath string Applications/Gyroflow.app" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ApplicationProperties:Architectures array" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ApplicationProperties:Architectures:0 string arm64" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string xyz.gyroflow" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string {{BundleIdentifier}}" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersion}}" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersion}}" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ApplicationProperties:Team string {{TeamID}}" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :ArchiveVersion integer 2" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :CreationDate date \"`date +'%a %b %d %H:%M:%S %Z %Y'`\"" $ARCHIVE_PLIST
+            PlistBuddy -x -c "Add :CreationDate date \"`date +'%c'`\"" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :Name string Gyroflow" $ARCHIVE_PLIST
             PlistBuddy -x -c "Add :SchemeName string Gyroflow" $ARCHIVE_PLIST
 
@@ -204,7 +206,7 @@ deploy *param:
             PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
             PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
-            PlistBuddy -x -c "Add :provisioningProfiles:xyz.gyroflow string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
+            PlistBuddy -x -c "Add :provisioningProfiles:{{BundleIdentifier}} string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
 
             xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
 

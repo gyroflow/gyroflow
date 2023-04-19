@@ -232,7 +232,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building on MacOS
-0. Prerequisites: `git`, `brew`, `python`
+0. Prerequisites: `git`, `brew`
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
@@ -261,7 +261,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile the apk and install on device: `just android deploy`
 
 ### Building for iOS
-0. Prerequisites: `git`, `brew`, `python`
+0. Prerequisites: `git`, `brew`
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`

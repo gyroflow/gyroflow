@@ -7,7 +7,7 @@
 [no-cd]
 install-deps:
     #!/bin/bash
-    brew install p7zip pkg-config
+    brew install p7zip python pkg-config
     xcode-select --install
 
     mkdir -p {{ExtDir}}
