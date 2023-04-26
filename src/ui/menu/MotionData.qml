@@ -14,6 +14,7 @@ MenuItem {
     objectName: "motiondata";
 
     property alias hasQuaternions: integrator.hasQuaternions;
+    property alias hasRawGyro: integrator.hasRawGyro;
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
     property string filename: "";
@@ -94,6 +95,7 @@ MenuItem {
             orientation.text = additional_data.imu_orientation;
 
             // Twice to trigger change signal
+            integrator.hasRawGyro = additional_data.contains_raw_gyro;
             integrator.hasQuaternions = !additional_data.contains_quats;
             integrator.hasQuaternions = additional_data.contains_quats;
             if (additional_data.contains_quats && !is_main_video) {
@@ -374,6 +376,7 @@ MenuItem {
         ComboBox {
             id: integrator;
             property bool hasQuaternions: false;
+            property bool hasRawGyro: false;
             model: hasQuaternions? [QT_TRANSLATE_NOOP("Popup", "None"), "Complementary", "VQF", "Simple gyro", "Simple gyro + accel", "Mahony", "Madgwick" ] : ["Complementary", "VQF", "Simple gyro", "Simple gyro + accel", "Mahony", "Madgwick"];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;

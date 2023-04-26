@@ -27,6 +27,7 @@ MenuItem {
         property alias adaptiveZoom: adaptiveZoom.value;
         property alias correctionAmount: correctionAmount.value;
         property alias useGravityVectors: useGravityVectors.checked;
+        property alias hlIntegrationMethod: integrationMethod.currentIndex;
         property alias videoSpeedAffectsSmoothing: videoSpeedAffectsSmoothing.checked;
         property alias videoSpeedAffectsZooming: videoSpeedAffectsZooming.checked;
         property alias zoomingMethod: zoomingMethod.currentIndex;
@@ -74,6 +75,9 @@ MenuItem {
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;
+            }
+            if (stab.hasOwnProperty("horizon_lock_integration_method")) {
+                integrationMethod.currentIndex = stab.horizon_lock_integration_method;
             }
 
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
@@ -225,6 +229,7 @@ MenuItem {
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         controller.set_horizon_lock(lockAmount, roll);
         controller.set_use_gravity_vectors(useGravityVectors.checked);
+        controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
 
     ComboBox {
@@ -365,6 +370,23 @@ MenuItem {
             checked: false;
             visible: controller.has_gravity_vectors;
             onCheckedChanged: Qt.callLater(updateHorizonLock);
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Integration method");
+            property bool usesQuats: window.motionData.hasQuaternions && window.motionData.hasRawGyro && window.motionData.integrationMethod === 0;
+            visible: usesQuats;
+
+            ComboBox {
+                id: integrationMethod;
+                model: ["Complementary", "VQF", "Simple gyro + accel", "Mahony", "Madgwick"];
+                currentIndex: 1;
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                tooltip: qsTr("IMU integration method for keeping track of the horizon and adjust built-in quaternions");
+                onCurrentIndexChanged: Qt.callLater(updateHorizonLock);
+            }
         }
 
         BasicText {

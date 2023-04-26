@@ -705,6 +705,10 @@ impl StabilizationManager {
         self.gyro.write().set_use_gravity_vectors(v);
         self.invalidate_smoothing();
     }
+    pub fn set_horizon_lock_integration_method(&self, v: i32) {
+        self.gyro.write().set_horizon_lock_integration_method(v);
+        self.invalidate_smoothing();
+    }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
         self.gyro.read().max_angles
     }
@@ -868,6 +872,7 @@ impl StabilizationManager {
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
+                "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,
                 "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
                 "video_speed_affects_zooming":   params.video_speed_affects_zooming,
@@ -1152,6 +1157,9 @@ impl StabilizationManager {
                 }
                 if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
                     self.gyro.write().set_use_gravity_vectors(v);
+                }
+                if let Some(v) = obj.get("horizon_lock_integration_method").and_then(|x| x.as_i64()) {
+                    self.gyro.write().set_horizon_lock_integration_method(v as i32);
                 }
 
                 obj.remove("adaptive_zoom_fovs");

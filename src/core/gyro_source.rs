@@ -78,6 +78,7 @@ pub struct GyroSource {
 
     pub gravity_vectors: Option<TimeVec>,
     pub use_gravity_vectors: bool,
+    pub horizon_lock_integration_method: i32,
 
     pub lens_positions: Option<TimeFloat>,
 
@@ -99,6 +100,7 @@ impl GyroSource {
         Self {
             integration_method: 1,
             use_gravity_vectors: false,
+            horizon_lock_integration_method: 1, // VQF
             ..Default::default()
         }
     }
@@ -108,6 +110,13 @@ impl GyroSource {
             self.integrate();
         }
         self.use_gravity_vectors = v;
+    }
+    pub fn set_horizon_lock_integration_method(&mut self, v: i32) {
+        if self.horizon_lock_integration_method != v {
+            self.horizon_lock_integration_method = v;
+            self.integrate();
+        }
+        self.horizon_lock_integration_method = v;
     }
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
@@ -353,7 +362,7 @@ impl GyroSource {
             0 => {
                 self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && (self.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
-                    QuaternionConverter::convert(&self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
+                    QuaternionConverter::convert(self.horizon_lock_integration_method, &self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
                 } else {
                     self.org_quaternions.clone()
                 };

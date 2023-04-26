@@ -80,6 +80,7 @@ pub struct Controller {
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
     set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64)),
     set_use_gravity_vectors: qt_method!(fn(&self, v: bool)),
+    set_horizon_lock_integration_method: qt_method!(fn(&self, v: i32)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
@@ -1136,6 +1137,7 @@ impl Controller {
     }
     wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_use_gravity_vectors, v: bool; recompute; chart_data_changed);
+    wrap_simple_method!(set_horizon_lock_integration_method, v: i32; recompute; chart_data_changed);
     pub fn get_smoothing_algs(&self) -> QVariantList {
         self.stabilizer.get_smoothing_algs().into_iter().map(QString::from).collect()
     }
