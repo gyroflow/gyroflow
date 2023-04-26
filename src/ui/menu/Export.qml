@@ -44,6 +44,7 @@ MenuItem {
         property alias keyframeDistance: keyframeDistance.value;
         property alias preserveOtherTracks: preserveOtherTracks.checked;
         property alias padWithBlack: padWithBlack.checked;
+        property alias metadataComment: metadataComment.text;
     }
 
     property real aspectRatio: 1.0;
@@ -79,6 +80,7 @@ MenuItem {
 
             // Advanced
             encoder_options:       encoderOpts,
+            metadata:              { comment: metadataComment.text },
             keyframe_distance:     keyframeDistance.value,
             preserve_other_tracks: preserveOtherTracks.checked,
             pad_with_black:        padWithBlack.checked,
@@ -151,6 +153,9 @@ MenuItem {
             if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
+            if (output.hasOwnProperty("metadata")) {
+                metadataComment.text = output.metadata.comment || "";
+            }
         }
     }
 
@@ -396,6 +401,14 @@ MenuItem {
                     const el = window.messageBox(Modal.Info, text, [ { text: qsTr("Ok") } ], undefined, Text.MarkdownText);
                     el.t.horizontalAlignment = Text.AlignLeft;
                 }
+            }
+        }
+        Label {
+            position: Label.TopPosition;
+            text: qsTr("Metadata comment");
+            TextField {
+                id: metadataComment;
+                width: parent.width;
             }
         }
         Label {

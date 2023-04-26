@@ -37,6 +37,7 @@ pub struct EncoderParams<'a> {
     pub codec: Option<codec::codec::Codec>,
     pub hw_device_type: Option<ffi::AVHWDeviceType>,
     pub options: Dictionary<'a>,
+    pub metadata: Dictionary<'a>,
     pub pixel_format: Option<format::Pixel>,
     pub frame_rate: Option<Rational>,
     pub time_base: Option<Rational>,

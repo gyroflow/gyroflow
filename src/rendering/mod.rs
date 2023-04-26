@@ -218,6 +218,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     proc.video.gpu_encoding = encoder.1;
     proc.video.encoder_params.hw_device_type = encoder.2;
     proc.video.encoder_params.options.set("threads", "auto");
+    proc.video.encoder_params.metadata = render_options.get_metadata_dict();
     proc.video.processing_order = order;
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 

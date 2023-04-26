@@ -53,6 +53,12 @@ struct Job {
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
+pub struct RenderMetadata {
+    pub comment: String,
+}
+
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct RenderOptions {
     pub codec: String,
     pub codec_options: String,
@@ -66,6 +72,7 @@ pub struct RenderOptions {
 
     // Advanced
     pub encoder_options: String,
+    pub metadata: RenderMetadata,
     pub keyframe_distance: f64,
     pub preserve_other_tracks: bool,
     pub pad_with_black: bool,
@@ -97,6 +104,13 @@ impl RenderOptions {
         }
         options
     }
+    pub fn get_metadata_dict(&self) -> ffmpeg_next::Dictionary {
+        let mut metadata = ffmpeg_next::Dictionary::new();
+        if !self.metadata.comment.is_empty() {
+            metadata.set("comment", &self.metadata.comment);
+        }
+        metadata
+    }
     pub fn update_from_json(&mut self, obj: &serde_json::Value) {
         if let serde_json::Value::Object(obj) = obj {
             if let Some(v) = obj.get("codec")          .and_then(|x| x.as_str())  { self.codec = v.to_string(); }
@@ -113,6 +127,10 @@ impl RenderOptions {
             if let Some(v)  = obj.get("keyframe_distance")    .and_then(|x| x.as_f64())  { self.keyframe_distance = v; }
             if let Some(v) = obj.get("preserve_other_tracks").and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
             if let Some(v) = obj.get("pad_with_black")       .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
+
+            if let Some(v) = obj.get("metadata").and_then(|x| x.as_object())  {
+                if let Some(s) = v.get("comment").and_then(|x| x.as_str()) { self.metadata.comment = s.to_string(); }
+            }
 
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
                 let cur_path = std::path::Path::new(&self.output_path);

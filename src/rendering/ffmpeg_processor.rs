@@ -279,8 +279,12 @@ impl<'a> FfmpegProcessor<'a> {
                 output_index += 1;
             }
         }
-
-        octx.set_metadata(self.input_context.metadata().to_owned());
+        let mut metadata = self.input_context.metadata().to_owned();
+        for (k, v) in self.video.encoder_params.metadata.iter() {
+            metadata.set(k, v);
+        }
+        log::debug!("Output metadata: {:?}", &metadata);
+        octx.set_metadata(metadata);
         // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder
 
         let mut video_inited = false;
