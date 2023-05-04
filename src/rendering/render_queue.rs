@@ -1402,22 +1402,23 @@ impl RenderQueue {
             else { d.as_f64().map(|x| (x / fps) * 1000.0) }
         }
         fn resolve_item(x: &serde_json::Value, duration: f64, fps: f64) -> Vec<f64> {
-            let Some(x) = x.as_object() else {
-                return Vec::new();
-            };
-            let start = x.get("start").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
-            let interval = x.get("interval").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or(duration);
-            let gap = x.get("gap").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
-            let mut out = Vec::new();
-            let mut i = start;
-            while i < duration {
-                out.push(i - gap / 2.0);
-                if gap > 0.0 {
-                    out.push(i + gap / 2.0);
+            if let Some(x) = x.as_object() {
+                let start = x.get("start").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
+                let interval = x.get("interval").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or(duration);
+                let gap = x.get("gap").and_then(|y| resolve_duration_to_ms(y, fps)).unwrap_or_default();
+                let mut out = Vec::new();
+                let mut i = start;
+                while i < duration {
+                    out.push(i - gap / 2.0);
+                    if gap > 0.0 {
+                        out.push(i + gap / 2.0);
+                    }
+                    i += interval;
                 }
-                i += interval;
+                out
+            } else {
+                return Vec::new();
             }
-            out
         }
 
         let mut timestamps = Vec::new();
