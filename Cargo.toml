@@ -45,7 +45,7 @@ rodio = { default-features = false, features = ["vorbis"], version = "0.17.1" }
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b471f62" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "f69ea96" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
