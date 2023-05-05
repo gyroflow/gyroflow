@@ -245,9 +245,9 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
       <translation>Některé grafické enkodéry AMD mají chybu, kde je bitrate omezen na 20 Mb/s, pokud je cílový bitrate větší než 100 Mb/s.
 
-Prosím zkontrolujte bitrate souboru po renderování a pokud jste postiženi touto chybou, můžete buď:
+Prosím zkontrolujte bitrate souboru po renderování a pokud jste &apos; postiženi touto chybou, můžete buď:
 - Nastavte výstupní bitrate na méně než 100 Mbps
-- Použijte &quot;Vlastní nastavení enkodéru&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+- Použijte &quot; vlastní nastavení enkodéru&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="343"/>
@@ -2169,7 +2169,7 @@ Toto zdvojnásobí čas výpočtu, takže zkontrolujte pouze počáteční bod a
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="344"/>
       <source>Pose method</source>
-      <translation>Posuzní metoda</translation>
+      <translation>Poziční metoda</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="357"/>

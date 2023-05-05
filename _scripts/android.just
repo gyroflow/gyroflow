@@ -81,7 +81,7 @@ deploy:
     $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk\android-ndk-r23c"
     $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
     $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
-    $BUILD_PROFILE = "release" # change to release for testing, it's much faster
+    $BUILD_PROFILE = "deploy" # change to release for testing, it's much faster
 
     $ProjectDir = (resolve-path "{{ProjectDir}}").ToString()
     cd $ProjectDir

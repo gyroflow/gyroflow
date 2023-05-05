@@ -2839,8 +2839,8 @@ El mínimo absoluto es de 50 Hz y recomendamos al menos 200 Hz.</translation>
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Esto es causado a menudo por el sistema de ficheros de sólo lectura.
+Asegúrese de copiar la aplicación Gyroflow a su carpeta de aplicaciones, en lugar de ejecutar directamente desde el .dmg.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
