@@ -10,8 +10,8 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest },
-          { os: macos-latest-xl },
-          { os: windows-2022-16core }
+          { os: macos-latest },
+          { os: windows-2022 }
         ]
     runs-on: ${{ matrix.targets.os }}
     steps:
@@ -40,16 +40,16 @@ jobs:
           vulkan-use-cache: true
 
       - name: Force qml-video-rs rebuild (UNIX)
-        if: ${{ matrix.targets.os != 'windows-2022-16core' }}
+        if: ${{ matrix.targets.os != 'windows-2022' }}
         run: |
           rm -rf ${{ github.workspace }}/target/*/deploy/build/qml-video-rs*
           rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
       - name: Force qml-video-rs rebuild (Win)
-        if: ${{ matrix.targets.os == 'windows-2022-16core' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         run: rm -r -force ${{ github.workspace }}/target/*/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificate
-        if: ${{ matrix.targets.os == 'macos-latest-xl' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
@@ -58,7 +58,7 @@ jobs:
       - uses: extractions/setup-just@v1
 
       - name: Build Gyroflow (macOS)
-        if: ${{ matrix.targets.os == 'macos-latest-xl' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
         run: |
@@ -72,7 +72,7 @@ jobs:
         run: just deploy docker
 
       - name: Build Gyroflow (Windows)
-        if: ${{ matrix.targets.os == 'windows-2022-16core' }}
+        if: ${{ matrix.targets.os == 'windows-2022' }}
         run: |
           just install-deps
           just deploy
