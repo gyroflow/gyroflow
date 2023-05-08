@@ -22,18 +22,18 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 [dependencies]
 cstr = "0.2.11"
 cpp = "0.5.8"
-serde = "1.0.160"
+serde = "1.0.162"
 serde_json = "1.0.96"
 bytemuck = "1.13.1"
 nalgebra = "0.32"
 semver = "1.0.17"
 fastrand = "1.9.0"
 itertools = "0.10.5"
-regex = "1.7.3"
+regex = "1.8.1"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.25"
+flate2 = "1.0.26"
 walkdir = "2.3.3"
 mp4-merge = "0.1.5"
 human-sort = "0.2.2"
@@ -78,7 +78,7 @@ version = "0.24.0"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.foreign-types]
 version = "0.3.2" # need to match wgpu dependency
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
-version = "0.8.3"
+version = "0.8.4"
 
 [build-dependencies]
 cpp_build = "0.5.8"
