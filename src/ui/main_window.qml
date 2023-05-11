@@ -91,15 +91,33 @@ Window {
         }
     }
 
+    Rectangle {
+        id: libg;
+        anchors.fill: loadingImage;
+        anchors.margins: -20 * dpiScale;
+        radius: 10 * dpiScale;
+        z: 9998;
+        opacity: 0.5;
+        Ease on opacity { duration: 1000; }
+        visible: opacity > 0;
+        color: styleBackground;
+    }
     Image {
         id: loadingImage;
         source: "qrc:/resources/logo" + (style === "dark"? "_white" : "_black") + ".svg";
         sourceSize.width: Math.min(400 * dpiScale, parent.width * 0.7);
         opacity: 0;
-        YAnimator       on y       { id: liy; from: (main_window.height / 2 - 60) - loadingImage.height - 30 * dpiScale; to: (main_window.height / 2 - 60) - loadingImage.height - 60 * dpiScale; duration: 1000; easing.type: Easing.OutExpo; }
+        YAnimator       on y       { id: liy; from: -1000; to: -1000; duration: 1000; easing.type: Easing.OutExpo; }
         OpacityAnimator on opacity { id: lio; from: 0; to: 1; duration: 1000; easing.type: Easing.OutExpo; }
         anchors.horizontalCenter: parent.horizontalCenter;
         z: 9999;
+        onHeightChanged: updateYAnim(loadingIndicator.y, height);
+        function updateYAnim(indicatorY: real, imageHeight: real) {
+            liy.stop();
+            liy.from = indicatorY - imageHeight - 10 * dpiScale;
+            liy.to = indicatorY - imageHeight - 30 * dpiScale;
+            liy.restart();
+        }
     }
     Loader {
         id: appLoader;
@@ -116,6 +134,7 @@ Window {
         id: loadingIndicator;
         anchors.centerIn: parent;
         running: appLoader.status != Loader.Ready;
-        onRunningChanged: if (!running) { destroy(700); lio.running = false; lio.from = 1; lio.to = 0; lio.running = true; }
+        onYChanged: loadingImage.updateYAnim(y, loadingImage.height);
+        onRunningChanged: if (!running) { destroy(700); lio.stop(); lio.from = 1; lio.to = 0; lio.restart(); libg.opacity = 0; libg.destroy(1000); loadingImage.destroy(1000); }
     }
 }
