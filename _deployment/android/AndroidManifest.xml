@@ -20,7 +20,7 @@
         android:extractNativeLibs="true"
         android:hardwareAccelerated="true"
         android:label="Gyroflow"
-        android:icon="@drawable/icon"
+        android:icon="@mipmap/icon"
         android:requestLegacyExternalStorage="true"
         android:allowNativeHeapPointerTagging="false"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
