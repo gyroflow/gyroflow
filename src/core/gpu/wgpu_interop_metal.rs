@@ -137,7 +137,7 @@ pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> metal::MTLPixelForma
         Tf::Bc4RSnorm => BC4_RSnorm,
         Tf::Bc5RgUnorm => BC5_RGUnorm,
         Tf::Bc5RgSnorm => BC5_RGSnorm,
-        Tf::Bc6hRgbSfloat => BC6H_RGBFloat,
+        Tf::Bc6hRgbFloat => BC6H_RGBFloat,
         Tf::Bc6hRgbUfloat => BC6H_RGBUfloat,
         Tf::Bc7RgbaUnorm => BC7_RGBAUnorm,
         Tf::Bc7RgbaUnormSrgb => BC7_RGBAUnorm_sRGB,
