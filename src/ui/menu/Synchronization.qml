@@ -319,6 +319,7 @@ MenuItem {
                     }
 
                     controller.set_processing_resolution(target_height);
+                    render_queue.set_processing_resolution(target_height);
                 }
             }
         }

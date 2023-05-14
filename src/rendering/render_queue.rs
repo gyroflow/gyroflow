@@ -171,6 +171,7 @@ pub struct RenderQueue {
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
     set_error_string: qt_method!(fn(&mut self, job_id: u32, err: QString)),
+    set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
 
@@ -223,6 +224,10 @@ pub struct RenderQueue {
     paused_timestamp: Option<u64>,
 
     stabilizer: Arc<StabilizationManager>,
+
+    processing_resolution: i32,
+
+    autosync_pool: Option<rayon::ThreadPool>
 }
 
 macro_rules! update_model {
@@ -248,11 +253,16 @@ impl RenderQueue {
         Self {
             status: QString::from("stopped"),
             default_suffix: QString::from("_stabilized"),
+            autosync_pool: rayon::ThreadPoolBuilder::new().num_threads(1).build().ok(),
+            processing_resolution: 720,
             stabilizer,
             ..Default::default()
         }
     }
 
+    pub fn set_processing_resolution(&mut self, target_height: i32) {
+        self.processing_resolution = target_height;
+    }
     pub fn get_stab_for_job(&self, job_id: u32) -> Option<Arc<StabilizationManager>> {
         Some(self.jobs.get(&job_id)?.stab.clone())
     }
@@ -997,11 +1007,12 @@ impl RenderQueue {
                     });
                     let processing2 = processing.clone();
                     let err2 = err.clone();
-                    let do_autosync_queued = util::qt_queued_callback_mut(self, move |_this, (path, duration_ms, stab, sync_options): (String, f64, Arc<StabilizationManager>, serde_json::Value)| {
+                    let do_autosync_queued = util::qt_queued_callback_mut(self, move |this, (path, duration_ms, stab, sync_options): (String, f64, Arc<StabilizationManager>, serde_json::Value)| {
                         let processing2 = processing2.clone();
                         let err2 = err2.clone();
-                        core::run_threaded(move || {
-                            Self::do_autosync(&path, duration_ms, stab, processing2, err2, sync_options);
+                        let proc_height = this.processing_resolution;
+                        this.autosync_pool.as_ref().unwrap().spawn(move || {
+                            Self::do_autosync(&path, duration_ms, stab, processing2, err2, sync_options, proc_height);
                         });
                     });
 
@@ -1078,7 +1089,8 @@ impl RenderQueue {
                                                 l.sync_settings = obj.get("synchronization").cloned();
                                             }
                                         }
-                                        Self::do_autosync(&vid_path, duration_ms, stab.clone(), processing, err.clone(), sync_options);
+                                        do_autosync_queued((vid_path, duration_ms, stab.clone(), sync_options));
+                                        // Self::do_autosync(&vid_path, duration_ms, stab.clone(), processing, err.clone(), sync_options);
                                     }
 
                                     processing_done(());
@@ -1107,7 +1119,21 @@ impl RenderQueue {
                                 }
                                 let is_main_video = gyro_path.is_empty();
                                 let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                let _ = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+                                if let Ok(md) = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false))) {
+                                    if let Some(md_fps) = md.frame_rate {
+                                        let fps = stab.params.read().fps;
+                                        if (md_fps - fps).abs() > 1.0 {
+                                            let mut params = stab.params.write();
+                                            if (md_fps - params.fps).abs() > 0.001 {
+                                                params.fps_scale = Some(md_fps / params.fps);
+                                            } else {
+                                                params.fps_scale = None;
+                                            }
+                                            stab.gyro.write().init_from_params(&params);
+                                            stab.keyframes.write().timestamp_scale = params.fps_scale;
+                                        }
+                                    }
+                                }
 
                                 let camera_id = stab.camera_id.read();
 
@@ -1167,7 +1193,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, stab: Arc<StabilizationManager>, processing_cb: F, err: F2, sync_options: serde_json::Value) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(path: &str, duration_ms: f64, stab: Arc<StabilizationManager>, processing_cb: F, err: F2, sync_options: serde_json::Value, proc_height: i32) {
         let (has_gyro, has_sync_points) = {
             let gyro = stab.gyro.read();
             (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
@@ -1251,9 +1277,15 @@ impl RenderQueue {
 
                                 let mut frame_no = 0;
                                 let mut abs_frame_no = 0;
-                                let sync = std::rc::Rc::new(sync);
+                                let sync = Arc::new(sync);
 
-                                match VideoProcessor::from_file(path, gpu_decoding, 0, None) {
+                                let mut decoder_options = ffmpeg_next::Dictionary::new();
+                                if proc_height > 0 {
+                                    decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+                                }
+                                ::log::debug!("Decoder options: {:?}", decoder_options);
+
+                                match VideoProcessor::from_file(path, gpu_decoding, 0, Some(decoder_options)) {
                                     Ok(mut proc) => {
                                         let err2 = err.clone();
                                         let sync2 = sync.clone();
@@ -1277,7 +1309,11 @@ impl RenderQueue {
                                         if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
                                             err(("An error occured: %1".to_string(), e.to_string()));
                                         }
-                                        sync.finished_feeding_frames();
+
+                                        // We need to run this in a global threadpool, otherwise all rayon parallel iterators are limited to single thread, because autosync_pool is 1 thread.
+                                        core::run_threaded_wait(move || {
+                                            sync.finished_feeding_frames();
+                                        });
                                     }
                                     Err(error) => {
                                         err(("An error occured: %1".to_string(), error.to_string()));
@@ -1355,7 +1391,8 @@ impl RenderQueue {
                         }
                     }
                     let processing_done = processing_done.clone();
-                    core::run_threaded(move || {
+                    let proc_height = self.processing_resolution;
+                    self.autosync_pool.as_ref().unwrap().spawn(move || {
                         let mut is_preset = false;
                         if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset) {
                             ::log::error!("Failed to update queue stab data: {:?}", e);
@@ -1364,7 +1401,7 @@ impl RenderQueue {
                             let params = stab.params.read();
                             (stab.input_file.read().path.clone(), params.duration_ms)
                         };
-                        Self::do_autosync(&path, duration_ms, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options);
+                        Self::do_autosync(&path, duration_ms, stab, move |progress| processing2((progress, job_id)) , |_|{}, sync_options, proc_height);
                         processing_done(job_id);
                     });
 

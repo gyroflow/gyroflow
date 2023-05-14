@@ -1518,6 +1518,7 @@ dependencies = [
  "qmetaobject",
  "qml-video-rs",
  "qttypes",
+ "rayon",
  "regex",
  "rodio",
  "rustfft",

@@ -1345,3 +1345,15 @@ pub fn frame_at_timestamp(timestamp_ms: f64, fps: f64) -> i32 { (timestamp_ms * 
 pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
     THREAD_POOL.spawn(cb);
 }
+
+pub fn run_threaded_wait<F>(cb: F) where F: FnOnce() + Send + 'static {
+    let done = Arc::new(AtomicBool::new(false));
+    let done2 = done.clone();
+    THREAD_POOL.spawn(move || {
+        cb();
+        done2.store(true, SeqCst);
+    });
+    while !done.load(SeqCst) {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+}
