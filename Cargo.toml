@@ -22,7 +22,7 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 [dependencies]
 cstr = "0.2.11"
 cpp = "0.5.8"
-serde = "1.0.162"
+serde = "1.0.163"
 serde_json = "1.0.96"
 bytemuck = "1.13.1"
 nalgebra = "0.32"
