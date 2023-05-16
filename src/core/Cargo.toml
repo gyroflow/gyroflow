@@ -58,7 +58,7 @@ enterpolation = "0.2.0"
 libloading = "0.8"
 libc = "0.2"
 
-opencv = { version = "=0.81.2", optional = true }
+opencv = { version = "0.81", features = ["clang-runtime"], optional = true }
 
 wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
