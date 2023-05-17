@@ -154,7 +154,7 @@ impl GyroIntegrator for SimpleGyroIntegrator {
         let mut quats = BTreeMap::new();
         let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
 
-        let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
+        let sample_time_ms = duration_ms / imu_data.len() as f64;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
 
         for v in imu_data {
@@ -188,7 +188,7 @@ impl GyroIntegrator for SimpleGyroAccelIntegrator {
         let mut quats = BTreeMap::new();
         let mut orientation = UnitQuaternion::from_euler_angles(std::f64::consts::FRAC_PI_2, 0.0, 0.0);
 
-        let sample_time_ms = duration_ms / 1000.0 / imu_data.len() as f64;
+        let sample_time_ms = duration_ms / imu_data.len() as f64;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
         let start_time = prev_time;
 
@@ -205,7 +205,7 @@ impl GyroIntegrator for SimpleGyroAccelIntegrator {
 
                     // high weight for first 1.5s to "lock" it
                     let weight = if v.timestamp_ms - start_time < 15000.0 { 10.0 } else { 0.6 };
-                    let correction_body = weight * (orientation.conjugate() *correction_world);
+                    let correction_body = weight * (orientation.conjugate() * correction_world);
                     omega += correction_body;
                 }
 
