@@ -109,6 +109,9 @@ cpp! {{
     #include <QObject>
     #include <QClipboard>
     #include <QEvent>
+    #if (__APPLE__ + 0) || (__linux__ + 0)
+    #   include <sys/resource.h>
+    #endif
 
     class QtEventFilter : public QObject {
     public:
@@ -168,6 +171,25 @@ pub fn get_data_location() -> String {
     cpp!(unsafe [] -> QString as "QString" {
         return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     }).into()
+}
+
+pub fn update_rlimit() {
+    cpp!(unsafe [] {
+        #if (__APPLE__ + 0) || (__linux__ + 0)
+            // Increase open file limit, because it gets hit pretty quickly with R3D or BRAW in render queue
+            struct rlimit limit;
+            if (::getrlimit(RLIMIT_NOFILE, &limit) == 0) {
+                if (limit.rlim_cur < 4096) {
+                    limit.rlim_cur = 4096;
+                    if (limit.rlim_max < 4096)
+                        limit.rlim_max = 4096;
+                    if (::setrlimit(RLIMIT_NOFILE, &limit) != 0) {
+                        qDebug() << "Failed to set RLIMIT_NOFILE to 4096!";
+                    }
+                }
+            }
+        #endif
+    });
 }
 
 pub fn init_logging() {

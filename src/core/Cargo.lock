@@ -291,9 +291,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.2.1"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24a6904aef64d73cf10ab17ebace7befb918b82164785cb89907993be7f83813"
+checksum = "6776fc96284a0bb647b615056fc496d1fe1644a7ab01829818a6d91cae888b84"
 
 [[package]]
 name = "bitreader"
@@ -936,7 +936,7 @@ dependencies = [
  "bincode",
  "biquad",
  "bitarray",
- "bitflags 2.2.1",
+ "bitflags 2.3.1",
  "bytemuck",
  "byteorder",
  "core-foundation-sys",
@@ -1913,9 +1913,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.57"
+version = "1.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4ec6d5fe0b140acb27c9a0444118cf55bfbb4e0b259739429abb4521dd67c16"
+checksum = "fa1fb82fc0c281dd9671101b66b771ebbe1eaf967b96ac8740dcba4b70005ca8"
 dependencies = [
  "unicode-ident",
 ]
@@ -2636,7 +2636,7 @@ source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#6ff2
 dependencies = [
  "arrayvec 0.7.2",
  "bit-vec",
- "bitflags 2.2.1",
+ "bitflags 2.3.1",
  "codespan-reporting",
  "log",
  "naga",
@@ -2660,7 +2660,7 @@ dependencies = [
  "arrayvec 0.7.2",
  "ash",
  "bit-set",
- "bitflags 2.2.1",
+ "bitflags 2.3.1",
  "block",
  "core-graphics-types",
  "d3d12",
@@ -2697,7 +2697,7 @@ name = "wgpu-types"
 version = "0.16.0"
 source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#6ff21ec398c9b5cca7d96a12b463bd0dc726dae6"
 dependencies = [
- "bitflags 2.2.1",
+ "bitflags 2.3.1",
  "js-sys",
  "web-sys",
 ]

@@ -53,6 +53,7 @@ fn entry() {
 
     let _ = util::install_crash_handler();
     util::init_logging();
+    util::update_rlimit();
     log_panics::init();
 
     cpp!(unsafe [] {
