@@ -649,7 +649,7 @@ Item {
 
         }
         function setExportMode(v: int, menuItem: Menu) {
-            v = Math.min(3, Math.max(v, 0));
+            v = Math.min(4, Math.max(v, 0));
 
             render_queue.export_project = v;
 
@@ -689,6 +689,7 @@ Item {
                 Action { text: qsTr("Project file");                                   onTriggered: queueSettings.setExportMode(1, exportModeMenu); }
                 Action { text: qsTr("Project file (including gyro data)");             onTriggered: queueSettings.setExportMode(2, exportModeMenu); }
                 Action { text: qsTr("Project file (including processed gyro data)");   onTriggered: queueSettings.setExportMode(3, exportModeMenu); }
+                Action { text: qsTr("Stabilized video + Project file with gyro data"); onTriggered: queueSettings.setExportMode(4, exportModeMenu); }
                 Component.onCompleted: queueSettings.setExportMode(+window.settings.value("exportMode", "0"), exportModeMenu);
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }

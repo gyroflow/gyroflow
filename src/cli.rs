@@ -52,7 +52,7 @@ struct Opts {
     #[argh(option, short = 'p')]
     out_params: Option<String>,
 
-    /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data
+    /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
     export_project: u32,
 

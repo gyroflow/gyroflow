@@ -797,14 +797,17 @@ impl RenderQueue {
                     1 => job.stab.export_gyroflow_file(&path, true, false, &additional_data),
                     2 => job.stab.export_gyroflow_file(&path, false, false, &additional_data),
                     3 => job.stab.export_gyroflow_file(&path, false, true, &additional_data),
+                    4 => job.stab.export_gyroflow_file(&path, false, false, &additional_data),
                     _ => { Err(std::io::Error::new(std::io::ErrorKind::Other, "Unknown option")) }
                 };
-                if let Err(e) = result {
-                    err((e.to_string(), String::new()));
-                } else {
-                    progress((1.0, 1, 1, true, false));
+                if self.export_project != 4 {
+                    if let Err(e) = result {
+                        err((e.to_string(), String::new()));
+                    } else {
+                        progress((1.0, 1, 1, true, false));
+                    }
+                    return;
                 }
-                return;
             }
 
             core::run_threaded(move || {
