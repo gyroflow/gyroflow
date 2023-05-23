@@ -1239,6 +1239,9 @@ impl RenderQueue {
 
                         if let Ok(mut sync_params) = serde_json::from_value(serde_json::Value::Object(sync_options)) as serde_json::Result<synchronization::SyncParams> {
 
+                            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+                            let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Autosyncing");
+
                             let cancel_flag = Arc::new(AtomicBool::new(false));
                             sync_params.initial_offset     *= 1000.0; // s to ms
                             sync_params.time_per_syncpoint *= 1000.0; // s to ms
