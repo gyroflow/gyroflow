@@ -666,12 +666,6 @@ impl RenderQueue {
             }
             job.cancel_flag.store(false, SeqCst);
 
-            if self.start_timestamp == 0 {
-                self.start_timestamp = Self::current_timestamp();
-                self.status = QString::from("active");
-                self.status_changed();
-            }
-
             let stab = job.stab.clone();
 
             rendering::clear_log();
@@ -707,13 +701,16 @@ impl RenderQueue {
                 this.render_progress(job_id, progress, current_frame, total_frames, finished, start_time as f64, is_conversion);
                 this.progress_changed();
 
+                let is_queue_active = this.status == "active".into();
                 if finished {
-                    if this.get_pending_count() > 0 {
+                    if this.get_pending_count() > 0 && is_queue_active {
                         // Start the next one
                         this.start();
                     } else {
                         this.update_status();
-                        this.post_render_action();
+                        if is_queue_active {
+                            this.post_render_action();
+                        }
                     }
                 }
             });
