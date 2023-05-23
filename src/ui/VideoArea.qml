@@ -528,6 +528,7 @@ Item {
     }
 
     Item {
+        id: vidParentParent;
         width: parent.width;
         height: parent.height - (root.fullScreen? 0 : tlcol.height);
         Item {
@@ -751,28 +752,28 @@ Item {
                 videoLoader.active = false;
             }
         }
-        Loader {
-            id: queue;
-            asynchronous: true;
-            anchors.fill: vid.loaded? vidParent : dropRect;
-            anchors.margins: 10 * dpiScale;
-            sourceComponent: Component {
-                RenderQueue {
-                    onShownChanged: if (statistics.item) statistics.item.shown &= !shown;
-                }
+    }
+    Loader {
+        id: queue;
+        asynchronous: true;
+        anchors.fill: vidParentParent;
+        anchors.margins: 10 * dpiScale;
+        sourceComponent: Component {
+            RenderQueue {
+                onShownChanged: if (statistics.item) statistics.item.shown &= !shown;
             }
         }
-        Loader {
-            id: statistics;
-            asynchronous: true;
-            active: false;
-            anchors.fill: vid.loaded? vidParent : dropRect;
-            anchors.margins: 10 * dpiScale;
-            onStatusChanged: if (status == Loader.Ready) statistics.item.shown = true;
-            sourceComponent: Component {
-                Statistics {
-                    onShownChanged: queue.item.shown &= !shown;
-                }
+    }
+    Loader {
+        id: statistics;
+        asynchronous: true;
+        active: false;
+        anchors.fill: vidParentParent;
+        anchors.margins: 10 * dpiScale;
+        onStatusChanged: if (status == Loader.Ready) statistics.item.shown = true;
+        sourceComponent: Component {
+            Statistics {
+                onShownChanged: queue.item.shown &= !shown;
             }
         }
     }

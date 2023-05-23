@@ -17,7 +17,7 @@ Item {
     Ease on opacity { }
     Ease on anchors.bottomMargin { }
     Ease on anchors.topMargin { }
-    
+
     readonly property real timestamp: window.videoArea.vid.timestamp;
 
     onTimestampChanged: updateCharts();
@@ -47,7 +47,7 @@ Item {
 
     Rectangle {
         color: styleBackground2
-        opacity: 0.7;
+        opacity: 0.8;
         anchors.fill: parent;
         radius: 5 * dpiScale;
         border.width: 1;
@@ -89,7 +89,7 @@ Item {
             spacing: parent.spacing;
 
             readonly property real itemHeight: (height + spacing) / children.length - spacing;
-        
+
             FrequencyChart {
                 id: gyroX;
                 title: qsTr("Gyro-X");
@@ -128,7 +128,7 @@ Item {
             spacing: parent.spacing;
 
             readonly property real itemHeight: (height + spacing) / children.length - spacing;
-        
+
             FrequencyChart {
                 id: acclX;
                 title: qsTr("Accl-X");
@@ -167,8 +167,8 @@ Item {
 
         anchors.left: parent.left;
         anchors.bottom: parent.bottom;
-        anchors.leftMargin: 10 * dpiScale;        
-        anchors.bottomMargin: 5 * dpiScale;        
+        anchors.leftMargin: 10 * dpiScale;
+        anchors.bottomMargin: 5 * dpiScale;
 
         text: qsTr("Logarithmic value axis");
         checked: true;
@@ -180,17 +180,17 @@ Item {
 
         anchors.right: parent.right;
         anchors.bottom: parent.bottom;
-        anchors.rightMargin: 10 * dpiScale;        
-        anchors.bottomMargin: 5 * dpiScale; 
+        anchors.rightMargin: 10 * dpiScale;
+        anchors.bottomMargin: 5 * dpiScale;
 
         ComboBox {
             id: samplerate;
             model: ["200 Hz", "400 Hz", "800 Hz"];
             font.pixelSize: 12 * dpiScale;
 
-            width: parent.width;    
+            width: parent.width;
             height: 25 * dpiScale;
-      
+
             currentIndex: 1;
             onCurrentIndexChanged: root.updateCharts();
             Component.onCompleted: currentIndexChanged();

@@ -28,7 +28,7 @@ Item {
 
     Rectangle {
         color: styleBackground2
-        opacity: 0.7;
+        opacity: 0.8;
         anchors.fill: parent;
         radius: 5 * dpiScale;
         border.width: 1;
