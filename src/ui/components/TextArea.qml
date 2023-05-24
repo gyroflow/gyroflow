@@ -5,13 +5,14 @@ import QtQuick
 import QtQuick.Controls as QQC
 
 Flickable {
-    id: view
+    id: view;
     height: 300 * dpiScale;
     width: 300 * dpiScale;
     property alias text: ta.text;
     property alias tooltip: tt.text;
     flickableDirection: Flickable.VerticalFlick;
     QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
+    clip: true;
 
     QQC.TextArea.flickable: QQC.TextArea {
         id: ta;
@@ -19,10 +20,11 @@ Flickable {
         placeholderTextColor: Qt.darker(styleTextColor);
         padding: 0;
         selectByMouse: true;
+        topPadding: 10 * dpiScale;
+        Component.onCompleted: Qt.callLater(view.returnToBounds);
 
         color: styleTextColor;
         opacity: enabled? 1.0 : 0.5;
-        verticalAlignment: Text.AlignVCenter;
         font.family: styleFont;
         font.pixelSize: 14 * dpiScale;
         background: Rectangle {
