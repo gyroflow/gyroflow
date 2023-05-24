@@ -143,8 +143,7 @@ fn main() {
             }
         };
     } else if target_os == "macos" {
-        println!("cargo:rustc-flags=-C default-linker-libraries");
-        // println!("cargo:rustc-env=RUSTFLAGS=-C default-linker-libraries");
+        println!("cargo:rustc-env=RUSTFLAGS=\"-C default-linker-libraries\"");
         println!("cargo:rustc-link-arg=-Wl,-rpath,@loader_path/../Frameworks");
 
         println!("cargo:rustc-link-lib=z");
