@@ -37,6 +37,42 @@ MenuItem {
         return list;
     };
 
+    property var outputSizePresets: {
+        "16:9": [
+            ["8k", 7680, 4320],
+            ["6k", 6016, 3384],
+            ["4k", 3840, 2160],
+            ["1080p", 1920, 1080],
+            ["720p",  1280, 720],
+        ],
+        "17:9": [
+            ["4k", 4096, 2160],
+            ["2k", 2048, 1080],
+        ],
+        "9:16": [
+            ["8k", 4320, 7680],
+            ["6k", 3384, 6016],
+            ["4k", 2160, 3840],
+            ["1080p", 1080, 1920],
+            ["720p",  720, 1280],
+        ],
+        "4:3": [
+            ["480p", 640, 480],
+        ],
+        "1:1": [
+            ["4k", 2160, 2160],
+            ["1080p", 1080, 1080],
+        ],
+    }
+
+    Component.onCompleted: {
+        let parsed = null;
+        try { parsed = JSON.parse(settings.value("outputSizePresets", "")); } catch(e) { }
+        if (parsed) {
+            outputSizePresets = parsed;
+        }
+    }
+
     Settings {
         id: settings;
         property alias defaultCodec: codec.currentIndex;
@@ -281,12 +317,48 @@ MenuItem {
                 anchors.right: parent.right;
                 display: QQC.Button.IconOnly;
                 tooltip: qsTr("Output size preset");
-                onClicked: sizeMenu.popup(x, y + height);
+                onClicked: { sizeMenu.y = y + height; sizeMenu.open(); }
             }
-            Menu {
+            TabbedPopup {
                 id: sizeMenu;
+                width: parent.width;
                 font.pixelSize: 11.5 * dpiScale;
-
+                itemHeight: 27 * dpiScale;
+                editable: true;
+                editTooltip: qsTr("Edit sizes");
+                formatItem: x => `${x[0]} (${x[1]} x ${x[2]})`;
+                property var items: outputSizePresets;
+                model: Object.assign({}, ...Object.entries(items).map(([k, v]) => ({[k]: [[qsTr("Original"), root.originalWidth, root.originalHeight]].concat(v)})));
+                onClicked: function(index) {
+                    const item = model[tabs[currentTab]][index];
+                    sizeMenu.setSize(item[1], item[2]);
+                }
+                onEdit: function() {
+                    sizeMenu.close();
+                    sizeMenu.resetTab();
+                    const dlg = messageBox(Modal.NoIcon, qsTr("You can edit the output size presets here:"), [
+                        { text: qsTr("Save"), accent: true, clicked: function() {
+                            let parsed = null;
+                            try { parsed = JSON.parse(dlg.mainColumn.children[1].text); } catch(e) { }
+                            if (parsed) {
+                                settings.setValue("outputSizePresets", JSON.stringify(parsed));
+                                sizeMenu.items = parsed;
+                            } else {
+                                messageBox(Modal.Error, qsTr("Invalid JSON format!"), [ { "text": qsTr("Ok") } ]);
+                            }
+                        } },
+                        { text: qsTr("Cancel") },
+                    ]);
+                    const json = JSON.stringify(items)
+                        .replace(/\],\[/g, '],\n        [')
+                        .replace(/,"/g, ",\n    \"")
+                        .replace(/:\[\[/g, ":[\n        [")
+                        .replace(/\]\],/g, "]\n    ],")
+                        .replace(/\]\]\}/g, "]\n    ]\n}")
+                        .replace(/{"/g, "{\n    \"");
+                    const tf = Qt.createComponent("../components/TextArea.qml").createObject(dlg.mainColumn, { text: json });
+                    tf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
+                }
                 function setSize(w: real, h: real) {
                     disableUpdate = true;
                     aspectRatio = w / h;
@@ -295,20 +367,6 @@ MenuItem {
                     Qt.callLater(notifySizeChanged);
                     disableUpdate = false;
                 }
-
-                Action { text: qsTr("Original (%1 x %2)").arg(root.originalWidth).arg(root.originalHeight); onTriggered: sizeMenu.setSize(root.originalWidth, root.originalHeight) }
-                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
-                Action { text: "8k (7680 x 4320)";     onTriggered: sizeMenu.setSize(7680, 4320) }
-                Action { text: "7k (6720 x 3780)";     onTriggered: sizeMenu.setSize(6720, 3780) }
-                Action { text: "6k (6016 x 3384)";     onTriggered: sizeMenu.setSize(6016, 3384) }
-                Action { text: "5k (4800 x 2700)";     onTriggered: sizeMenu.setSize(4800, 2700) }
-                Action { text: "4k (3840 x 2160)";     onTriggered: sizeMenu.setSize(3840, 2160) }
-                Action { text: "2k (2048 x 1080)";     onTriggered: sizeMenu.setSize(2048, 1080) }
-                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
-                Action { text: "1440p (2560 x 1440)";  onTriggered: sizeMenu.setSize(2560, 1440) }
-                Action { text: "1080p (1920 x 1080)";  onTriggered: sizeMenu.setSize(1920, 1080) }
-                Action { text: "720p (1280 x 720)";    onTriggered: sizeMenu.setSize(1280, 720) }
-                Action { text: "480p (640 x 480)";     onTriggered: sizeMenu.setSize( 640, 480) }
             }
         }
     }

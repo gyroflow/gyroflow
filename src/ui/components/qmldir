@@ -25,13 +25,16 @@ MenuItem 1.0 MenuItem.qml
 Modal 1.0 Modal.qml
 NumberField 1.0 NumberField.qml
 Popup 1.0 Popup.qml
+PopupDelegate 1.0 PopupDelegate.qml
 ResizablePanel 1.0 ResizablePanel.qml
 SearchField 1.0 SearchField.qml
 SidePanel 1.0 SidePanel.qml
 Slider 1.0 Slider.qml
 SliderWithField 1.0 SliderWithField.qml
 SplitButton 1.0 SplitButton.qml
+TabbedPopup 1.0 TabbedPopup.qml
 TableList 1.0 TableList.qml
+TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
 Timeline 1.0 Timeline.qml
 TimelineAxisButton 1.0 TimelineAxisButton.qml
