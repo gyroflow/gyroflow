@@ -105,7 +105,7 @@ fn main() {
             "CoreGraphics", "CoreMedia", "CoreServices", "CoreText",
             "CoreVideo", "Foundation", "ImageIO", "IOKit",
             "OpenGLES", "QuartzCore", "Security", "SystemConfiguration",
-            "UIKit", "UniformTypeIdentifiers", "VideoToolbox",
+            "UIKit", "UniformTypeIdentifiers", "VideoToolbox", "Photos"
         ];
 
         println!("cargo:rustc-link-lib=z");

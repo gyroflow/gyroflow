@@ -1,5 +1,8 @@
 !include common.just
 
+KeyStore := "D:/programowanie/android_release.keystore"
+KeyStoreAlias := "eddy"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,11 +129,18 @@ deploy:
     Move-Item -Path "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
     $qtlibs = @(
+        "libQt6Core_arm64-v8a.so",
+        "libQt6Gui_arm64-v8a.so",
         "libQt6LabsFolderListModel_arm64-v8a.so",
         "libQt6LabsSettings_arm64-v8a.so",
+        "libQt6Network_arm64-v8a.so",
+        "libQt6OpenGL_arm64-v8a.so",
+        "libQt6Qml_arm64-v8a.so",
         "libQt6QmlLocalStorage_arm64-v8a.so",
+        "libQt6QmlModels_arm64-v8a.so",
         "libQt6QmlWorkerScript_arm64-v8a.so",
         "libQt6QmlXmlListModel_arm64-v8a.so",
+        "libQt6Quick_arm64-v8a.so",
         "libQt6QuickControls2_arm64-v8a.so",
         "libQt6QuickControls2Impl_arm64-v8a.so",
         "libQt6QuickDialogs2_arm64-v8a.so",
@@ -142,25 +152,15 @@ deploy:
         "libQt6QuickTemplates2_arm64-v8a.so",
         "libQt6Sql_arm64-v8a.so",
         "libQt6Svg_arm64-v8a.so",
-        "libQt6Core_arm64-v8a.so",
-        "libQt6Gui_arm64-v8a.so",
-        "libQt6Network_arm64-v8a.so",
-        "libQt6OpenGL_arm64-v8a.so",
-        "libQt6Qml_arm64-v8a.so",
-        "libQt6QmlModels_arm64-v8a.so",
-        "libQt6Quick_arm64-v8a.so",
-        "libQt6QuickControls2_arm64-v8a.so",
-        "libQt6QuickTemplates2_arm64-v8a.so",
         "libQt6Widgets_arm64-v8a.so",
         "..\plugins\iconengines\libplugins_iconengines_qsvgicon_arm64-v8a.so",
         "..\plugins\imageformats\libplugins_imageformats_qsvg_arm64-v8a.so",
         "..\plugins\sqldrivers\libplugins_sqldrivers_qsqlite_arm64-v8a.so",
         "..\qml\Qt\labs\folderlistmodel\libqml_Qt_labs_folderlistmodel_qmlfolderlistmodelplugin_arm64-v8a.so",
         "..\qml\Qt\labs\settings\libqml_Qt_labs_settings_qmlsettingsplugin_arm64-v8a.so",
-        "..\qml\QtQml\libqml_QtQml_qmlplugin_arm64-v8a.so",
-        "..\qml\QtQml\libqml_QtQml_qmlmetaplugin_arm64-v8a.so",
         "..\qml\QtCore\libqml_QtCore_qtqmlcoreplugin_arm64-v8a.so",
         "..\qml\QtQml\Base\libqml_QtQml_Base_qmlplugin_arm64-v8a.so",
+        "..\qml\QtQml\libqml_QtQml_qmlmetaplugin_arm64-v8a.so",
         "..\qml\QtQml\Models\libqml_QtQml_Models_modelsplugin_arm64-v8a.so",
         "..\qml\QtQml\WorkerScript\libqml_QtQml_WorkerScript_workerscriptplugin_arm64-v8a.so",
         "..\qml\QtQml\XmlListModel\libqml_QtQml_XmlListModel_qmlxmllistmodelplugin_arm64-v8a.so",
@@ -184,7 +184,6 @@ deploy:
     );
     foreach ($x in $qtlibs) {
         Copy-Item -Path "$QT_LIBS\$x" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force -ErrorAction SilentlyContinue
-        . "$Env:ANDROID_NDK_HOME\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-strip.exe" "$QT_LIBS\$x"
     }
 
     # Strip all libs
@@ -194,6 +193,11 @@ deploy:
     {
         "description": "",
         "qt": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/android_arm64_v8a",
+        "qtDataDirectory": ".",
+        "qtLibExecsDirectory": "libexec",
+        "qtLibsDirectory": "lib",
+        "qtPluginsDirectory": "plugins",
+        "qtQmlDirectory": "qml",
         "sdk": "$SDK_REPLACED",
         "sdkBuildToolsRevision": "30.0.3",
         "ndk": "$NDK_REPLACED",
@@ -230,13 +234,14 @@ deploy:
     androiddeployqt --input "$ProjectDir\target\android-build\android-deploy.json" `
                     --output "$ProjectDir\target\android-build" `
                     --deployment bundled `
+                    --release `
                     --android-platform android-30 `
                     --jdk ${Env:JAVA_HOME} `
+                    --sign {{KeyStore}} {{KeyStoreAlias}} `
                     --gradle
     Stop-Job $job
-    adb install "$ProjectDir\target\android-build\build\outputs\apk\debug\android-build-debug.apk"
+    adb install "$ProjectDir\target\android-build\build\outputs\apk\release\android-build-release-signed.apk"
 
     # Alternative
     # cargo install cargo-ndk
     # cargo ndk -t arm64-v8a --platform 26 -o ./jniLibs build --release
-
