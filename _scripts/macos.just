@@ -275,6 +275,7 @@ deploy *param:
                 "Frameworks/QtQuickDialogs2QuickImpl.framework/Versions/A/QtQuickDialogs2QuickImpl"
                 "Frameworks/QtQuickDialogs2Utils.framework/Versions/A/QtQuickDialogs2Utils"
                 "Frameworks/QtQuickTemplates2.framework/Versions/A/QtQuickTemplates2"
+                "Frameworks/QtQuickLayouts.framework/Versions/A/QtQuickLayouts"
                 "Frameworks/QtSvg.framework/Versions/A/QtSvg"
                 "Frameworks/QtWidgets.framework/Versions/A/QtWidgets"
                 "PlugIns/iconengines/libqsvgicon.dylib"
