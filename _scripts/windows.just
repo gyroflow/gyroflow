@@ -118,6 +118,7 @@ deploy:
     xcopy /Y "$QtDir\bin\Qt6QuickDialogs2QuickImpl.dll"                                              "$TargetDir\"
     xcopy /Y "$QtDir\bin\Qt6QuickDialogs2Utils.dll"                                                  "$TargetDir\"
     xcopy /Y "$QtDir\bin\Qt6QuickTemplates2.dll"                                                     "$TargetDir\"
+    xcopy /Y "$QtDir\bin\Qt6QuickLayouts.dll"                                                        "$TargetDir\"
     xcopy /Y "$QtDir\bin\Qt6Svg.dll"                                                                 "$TargetDir\"
 
     # Remove once moved to Qt 6.5.0
