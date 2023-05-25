@@ -91,8 +91,6 @@ fn main() {
     // config.define("QT_QML_DEBUG", None);
 
     if target_os == "ios" {
-        println!("cargo:rustc-link-arg=-Wl,-rpath,@loader_path/Frameworks");
-
         println!("cargo:rerun-if-changed=_deployment/ios/qml_plugins.cpp");
         config.file("_deployment/ios/qml_plugins.cpp");
         println!("cargo:rustc-link-arg=-force_load");
@@ -143,8 +141,6 @@ fn main() {
             }
         };
     } else if target_os == "macos" {
-        println!("cargo:rustc-link-arg=-Wl,-rpath,@loader_path/../Frameworks");
-
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=bz2");
         println!("cargo:rustc-link-lib=xml2");
@@ -198,8 +194,6 @@ fn main() {
             println!("cargo:rustc-link-lib=static:+whole-archive=x265");
         },
         "linux" => {
-            println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN,-rpath,$ORIGIN/lib");
-
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
             println!("cargo:rustc-link-search={}/lib/amd64", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
