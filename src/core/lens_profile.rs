@@ -95,8 +95,7 @@ impl LensProfile {
         serde_json::from_str(json)
     }
 
-    pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
-        let data = std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?;
+    pub fn load_from_data(&mut self, data: &str) -> Result<(), serde_json::Error> {
         *self = Self::from_json(&data)?;
 
         // Trust lens profiles loaded from file
@@ -107,6 +106,10 @@ impl LensProfile {
         }
 
         Ok(())
+    }
+
+    pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
+        self.load_from_data(&std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?)
     }
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {

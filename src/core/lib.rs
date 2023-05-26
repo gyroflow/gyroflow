@@ -196,6 +196,8 @@ impl StabilizationManager {
         let (result, from_db) = if let Some(lens) = db.get_by_id(path) {
             *self.lens.write() = lens.clone();
             (Ok(()), true)
+        } else if path.starts_with('{') {
+            (self.lens.write().load_from_data(path), false)
         } else {
             (self.lens.write().load_from_file(path), false)
         };

@@ -10,6 +10,10 @@ pub static NvOptimusEnablement: i32 = 1;
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 
 pub fn get_video_metadata(filepath: &str) -> Result<telemetry_parser::util::VideoMetadata> {
+    let extensions = ["mp4", "mov", "braw", "insv", "360"];
+    if !extensions.into_iter().any(|ext| filepath.to_ascii_lowercase().ends_with(ext)) {
+        return Err(std::io::ErrorKind::InvalidInput.into());
+    }
     let mut stream = File::open(&filepath)?;
     let filesize = stream.metadata()?.len() as usize;
     telemetry_parser::util::get_video_metadata(&mut stream, filesize)
