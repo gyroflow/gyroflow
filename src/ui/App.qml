@@ -285,7 +285,7 @@ Rectangle {
                             ]);
                             return;
                         }
-                        const usesQuats = motionData.item.hasQuaternions && motionData.item.integrationMethod === 0 && motionData.item.filename == vidInfo.item.filename;
+                        const usesQuats = ((motionData.item.hasQuaternions && motionData.item.integrationMethod === 0) || motionData.item.hasAccurateTimestamps) && motionData.item.filename == vidInfo.item.filename;
                         if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
                             messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},

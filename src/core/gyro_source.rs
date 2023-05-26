@@ -37,6 +37,7 @@ pub struct FileMetadata {
     pub camera_identifier:   Option<CameraIdentifier>,
     pub lens_profile:        Option<serde_json::Value>,
     pub lens_positions:      Option<TimeFloat>,
+    pub has_accurate_timestamps: bool,
     pub additional_data:     serde_json::Value
 }
 
@@ -87,6 +88,8 @@ pub struct GyroSource {
     pub smoothing_status: serde_json::Value,
 
     pub prevent_recompute: bool,
+
+    pub has_accurate_timestamps: bool,
 
     offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
     offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
@@ -284,6 +287,7 @@ impl GyroSource {
             frame_rate,
             lens_profile,
             camera_identifier,
+            has_accurate_timestamps: input.has_accurate_timestamps(),
             additional_data
         })
     }
@@ -322,6 +326,7 @@ impl GyroSource {
 
         self.gravity_vectors = telemetry.gravity_vectors.clone();
         self.lens_positions = telemetry.lens_positions.clone();
+        self.has_accurate_timestamps = telemetry.has_accurate_timestamps;
 
         if !self.org_quaternions.is_empty() {
             let len = self.org_quaternions.len() as f64;
@@ -391,12 +396,12 @@ impl GyroSource {
     pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
         if true {
             // Lock horizon, then smooth
-            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes);
+            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
             self.smoothed_quaternions = alg.smooth(&self.smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
         } else {
             // Smooth, then lock horizon
             self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
-            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes);
+            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
         }
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);

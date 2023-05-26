@@ -54,7 +54,7 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lock(&self, quats: &TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, keyframes: &KeyframeManager) -> TimeQuat {
+    pub fn lock(&self, quats: &TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, keyframes: &KeyframeManager, params: &StabilizationParams) -> TimeQuat {
         if self.lock_enabled || keyframes.is_keyframed(&KeyframeType::LockHorizonAmount) {
             if let Some(gvec) = grav {
                 if !gvec.is_empty() && use_grav {
@@ -71,7 +71,8 @@ impl HorizonLock {
                             let angle_corr = (-correction[(0, 1)]).simd_atan2(correction[(0, 0)]);
 
                             let timestamp_ms = *ts as f64 / 1000.0;
-                            let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll);
+                            let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+                            let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
                             let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
                             // let gv_corrected = corr.inverse() * correction * corr * gv; // Alternative matrix approach
@@ -84,7 +85,8 @@ impl HorizonLock {
 
             return quats.iter().map(|(ts, smoothed_ori)| {
                     let timestamp_ms = *ts as f64 / 1000.0;
-                    let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll);
+                    let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+                    let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
                     let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
                     (*ts, lock_horizon_angle(smoothed_ori, horizonroll * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0))

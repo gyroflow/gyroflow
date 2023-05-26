@@ -202,7 +202,7 @@ MenuItem {
     }
 
     InfoMessageSmall {
-        property bool usesQuats: window.motionData.hasQuaternions && window.motionData.integrationMethod === 0 && window.motionData.filename == window.vidInfo.filename;
+        property bool usesQuats: ((window.motionData.hasQuaternions && window.motionData.integrationMethod === 0) || window.motionData.hasAccurateTimestamps) && window.motionData.filename == window.vidInfo.filename;
         show: usesQuats && controller.offsets_model.rowCount() > 0;
         text: qsTr("This file uses synced motion data, additional sync points are not needed and can make the output look worse.");
         onUsesQuatsChanged: sync.opened = !usesQuats;

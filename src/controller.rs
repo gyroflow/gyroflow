@@ -780,6 +780,7 @@ impl Controller {
                     additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
+                    additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.has_accurate_timestamps));
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyro.get_sample_rate()).unwrap());
                     drop(gyro);
 

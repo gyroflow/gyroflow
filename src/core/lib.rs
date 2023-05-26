@@ -887,6 +887,7 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "detected_source":    gyro.detected_source,
+                "has_accurate_timestamps": gyro.has_accurate_timestamps,
                 "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
                 "quaternions":        if !thin && !gyro.org_quaternions.is_empty() { util::compress_to_base91(&gyro.org_quaternions) } else { None },
                 "image_orientations": if !thin { util::compress_to_base91(&gyro.image_orientations) } else { None },
@@ -1072,6 +1073,7 @@ impl StabilizationManager {
                             frame_readout_time: None,
                             frame_rate: None,
                             camera_identifier: None,
+                            has_accurate_timestamps: obj.get("has_accurate_timestamps").and_then(|x| x.as_bool()).unwrap_or_default(),
                             lens_positions: None,
                             additional_data: Default::default()
                         };

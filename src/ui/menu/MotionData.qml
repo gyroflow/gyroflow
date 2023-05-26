@@ -14,6 +14,7 @@ MenuItem {
     objectName: "motiondata";
 
     property alias hasQuaternions: integrator.hasQuaternions;
+    property bool hasAccurateTimestamps: false;
     property alias hasRawGyro: integrator.hasRawGyro;
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
@@ -98,6 +99,7 @@ MenuItem {
             integrator.hasRawGyro = additional_data.contains_raw_gyro;
             integrator.hasQuaternions = !additional_data.contains_quats;
             integrator.hasQuaternions = additional_data.contains_quats;
+            root.hasAccurateTimestamps = additional_data.has_accurate_timestamps || false;
             if (additional_data.contains_quats && !is_main_video) {
                 integrator.currentIndex = 2;
                 integrateTimer.start();
