@@ -1,9 +1,9 @@
 {
-  "name": "gcsv_Hawkeye___2.5k_16by9_2560x1440-50.00fps",
+  "name": "Hawkeye_Thumb___2.5k_16by9_2560x1440-50.00fps",
   "note": "",
   "calibrated_by": "VICTOR",
-  "camera_brand": "gcsv",
-  "camera_model": "Hawkeye",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Thumb",
   "lens_model": "",
   "camera_setting": "",
   "calib_dimension": {
@@ -18,7 +18,7 @@
     "w": 2560,
     "h": 1440
   },
-  "frame_readout_time": null,
+  "frame_readout_time": 15.7,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
