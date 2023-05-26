@@ -57,7 +57,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "smoothness_yaw"   => self.smoothness_yaw = val,
             "smoothness_roll"  => self.smoothness_roll = val,
             "per_axis"         => self.per_axis = val > 0.1,
-            "second_pass"      => self.second_pass = val > 0.1,
+            // "second_pass"      => self.second_pass = val > 0.1,
             "trim_range_only"  => self.trim_range_only = val > 0.1,
             "max_smoothness"   => self.max_smoothness = val,
             "alpha_0_1s"       => self.alpha_0_1s = val,
@@ -71,7 +71,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             "smoothness_yaw"   => self.smoothness_yaw,
             "smoothness_roll"  => self.smoothness_roll,
             "per_axis"         => if self.per_axis { 1.0 } else { 0.0 },
-            "second_pass"      => if self.second_pass { 1.0 } else { 0.0 },
+            // "second_pass"      => if self.second_pass { 1.0 } else { 0.0 },
             "trim_range_only"  => if self.trim_range_only { 1.0 } else { 0.0 },
             "max_smoothness"   => self.max_smoothness,
             "alpha_0_1s"       => self.alpha_0_1s,
@@ -144,14 +144,14 @@ impl SmoothingAlgorithm for DefaultAlgo {
                     root.getParamElement('smoothness_roll-label').visible = checked;
                 }}"
             },
-            {
+            /*{
                 "name": "second_pass",
                 "description": "Second smoothing pass",
                 "advanced": true,
                 "type": "CheckBox",
                 "default": self.second_pass,
                 "value": if self.second_pass { 1.0 } else { 0.0 },
-            },
+            },*/
             {
                 "name": "trim_range_only",
                 "description": "Only within trim range",
