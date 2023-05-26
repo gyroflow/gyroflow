@@ -249,7 +249,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                     if stabilization_params.video_speed_affects_smoothing {
                         let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(stabilization_params.video_speed);
                         if typ == &KeyframeType::SmoothingParamTimeConstant || typ == &KeyframeType::SmoothingParamTimeConstant2 {
-                            val *= vid_speed / 2.0;
+                            val *= 1.0 + ((vid_speed - 1.0) / 2.0);
                         } else {
                             val *= vid_speed;
                         }
