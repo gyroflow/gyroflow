@@ -9,9 +9,9 @@ pub static NvOptimusEnablement: i32 = 1;
 #[no_mangle]
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 
-pub fn get_video_metadata(filepath: &str) -> Result<(usize, usize, f64, f64)> { // -> (width, height, fps, duration_s)
+pub fn get_video_metadata(filepath: &str) -> Result<telemetry_parser::util::VideoMetadata> {
     let mut stream = File::open(&filepath)?;
-    let filesize = stream.metadata().unwrap().len() as usize;
+    let filesize = stream.metadata()?.len() as usize;
     telemetry_parser::util::get_video_metadata(&mut stream, filesize)
 }
 

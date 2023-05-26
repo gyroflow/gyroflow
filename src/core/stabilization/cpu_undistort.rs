@@ -148,14 +148,23 @@ impl Stabilization {
             return None;
         }
 
-        fn sample_input_at<const I: i32, T: PixelType>(uv: (f32, f32), input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
+        fn rotate_point(pos: (f32, f32), angle: f32, origin: (f32, f32)) -> (f32, f32) {
+             return (angle.cos() * (pos.0 - origin.0) - angle.sin() * (pos.1 - origin.1) + origin.0,
+                     angle.sin() * (pos.0 - origin.0) + angle.cos() * (pos.1 - origin.1) + origin.1);
+        }
+
+        fn sample_input_at<const I: i32, T: PixelType>(mut uv: (f32, f32), input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
             const INTER_BITS: usize = 5;
             const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
             let shift: i32 = (I >> 2) + 1;
             let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
             let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
 
-            let uv = (
+            if params.input_rotation != 0.0 {
+                uv = rotate_point(uv, params.input_rotation * (std::f32::consts::PI / 180.0), (params.width as f32 / 2.0, params.height as f32 / 2.0));
+            }
+
+            uv = (
                 map_coord(uv.0, 0.0, params.width  as f32, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
                 map_coord(uv.1, 0.0, params.height as f32, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
             );

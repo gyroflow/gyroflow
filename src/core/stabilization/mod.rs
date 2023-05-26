@@ -74,7 +74,7 @@ pub struct KernelParams {
     pub background_margin:        f32, // 8
     pub background_margin_feather:f32, // 12
     pub canvas_scale:             f32, // 16
-    pub reserved2:                f32, // 4
+    pub input_rotation:           f32, // 4
     pub reserved3:                f32, // 8
     pub translation2d:         [f32; 2], // 16
     pub translation3d:         [f32; 4], // 16
@@ -176,6 +176,10 @@ impl Stabilization {
             transform.kernel_params.safe_area_rect[1] = pos_y;
             transform.kernel_params.safe_area_rect[2] = self.output_size.0 as f32 - pos_x;
             transform.kernel_params.safe_area_rect[3] = self.output_size.1 as f32 - pos_y;
+
+            if let Some(r) = buffers.input.rotation {
+                transform.kernel_params.input_rotation = r;
+            }
 
             if let Some(r) = buffers.input.rect {
                 transform.kernel_params.source_rect[0] = r.0 as i32;

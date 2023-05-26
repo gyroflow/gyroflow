@@ -216,7 +216,6 @@ pub struct Controller {
 
     file_exists: qt_method!(fn(&self, path: QString) -> bool),
     file_size: qt_method!(fn(&self, path: QString) -> u64),
-    video_duration: qt_method!(fn(&self, path: QString) -> f64),
     resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
     open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
@@ -2047,7 +2046,6 @@ impl Controller {
     // Utilities
     fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
     fn file_size(&self, path: QString) -> u64 { std::fs::metadata(path.to_string()).map(|x| x.len()).unwrap_or_default() }
-    fn video_duration(&self, path: QString) -> f64 { gyroflow_core::util::get_video_metadata(&path.to_string()).map(|x| x.3).unwrap_or_default() }
     fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
     fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }

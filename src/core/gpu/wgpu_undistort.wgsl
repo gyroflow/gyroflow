@@ -26,7 +26,7 @@ struct KernelParams {
     background_margin:        f32, // 8
     background_margin_feather:f32, // 12
     canvas_scale:             f32, // 16
-    reserved2:                f32, // 4
+    input_rotation:           f32, // 4
     reserved3:                f32, // 8
     translation2d:      vec2<f32>, // 16
     translation3d:      vec4<f32>, // 16
@@ -122,6 +122,11 @@ fn read_input_at(uv: vec2<i32>) -> vec4<f32> {
     // {/buffer_input}
 }
 
+fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>) -> vec2<f32> {
+     return vec2<f32>(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin.x,
+                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
+}
+
 fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let fix_range = bool(params.flags & 1);
 
@@ -134,7 +139,12 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
     let offset = offsets[params.interpolation >> 2u];
 
-    var uv = vec2<f32>(
+    var uv = uv;
+    if (params.input_rotation != 0.0) {
+        uv = rotate_point(uv, params.input_rotation * (3.14159265359 / 180.0), vec2<f32>(f32(params.width) / 2.0, f32(params.height) / 2.0));
+    }
+
+    uv = vec2<f32>(
         map_coord(uv.x, 0.0, f32(params.width),  f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
         map_coord(uv.y, 0.0, f32(params.height), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
     );
@@ -260,6 +270,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     if (uv.x > -99998.0) {
         let width_f = f32(params.width);
         let height_f = f32(params.height);
+
         if (params.background_mode == 1) { // edge repeat
             uv = max(vec2<f32>(0.0, 0.0), min(vec2<f32>(width_f - 1.0, height_f - 1.0), uv));
         } else if (params.background_mode == 2) { // edge mirror

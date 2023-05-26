@@ -18,6 +18,7 @@ use std::hash::Hasher;
 pub struct BufferDescription<'a> {
     pub size: (usize, usize, usize), // width, height, stride
     pub rect: Option<(usize, usize, usize, usize)>, // x, y, width, height
+    pub rotation: Option<f32>, // pixels rotation in degrees
     pub data: BufferSource<'a>,
     pub texture_copy: bool
 }

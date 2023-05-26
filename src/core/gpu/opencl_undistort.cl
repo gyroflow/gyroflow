@@ -36,7 +36,7 @@ typedef struct {
     float background_margin;         // 8
     float background_margin_feather; // 12
     float canvas_scale;              // 16
-    float reserved2;                 // 4
+    float input_rotation;            // 4
     float reserved3;                 // 8
     float2 translation2d;            // 16
     float4 translation3d;            // 16
@@ -159,8 +159,17 @@ float map_coord(float x, float in_min, float in_max, float out_min, float out_ma
 
 LENS_MODEL_FUNCTIONS;
 
+float2 rotate_point(float2 pos, float angle, float2 origin) {
+     return (float2)(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin.x,
+                     sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
+}
+
 DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = params->flags & 1;
+
+    if (params->input_rotation != 0.0) {
+        uv = rotate_point(uv, params->input_rotation * (M_PI_F / 180.0), (float2)((float)params->width / 2.0, (float)params->height / 2.0));
+    }
 
     uv.x = map_coord(uv.x, 0.0f, (float)params->width,  (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
     uv.y = map_coord(uv.y, 0.0f, (float)params->height, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
