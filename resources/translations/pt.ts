@@ -2875,17 +2875,17 @@ A camera provavelmente não gravou dados de movimento neste modo em particular.<
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="667"/>
+      <location filename="../../src/ui/VideoArea.qml" line="669"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>O Perfil de lente não foi carregado, o resultado não será o correto. Por favor, carregue um perfil de lente para a sua câmara.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="699"/>
+      <location filename="../../src/ui/VideoArea.qml" line="701"/>
       <source>Loading %1...</source>
       <translation>A carregar %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="699"/>
+      <location filename="../../src/ui/VideoArea.qml" line="701"/>
       <source>Drop video file here</source>
       <translation>Largar ficheiro de vídeo aqui</translation>
     </message>
@@ -2929,57 +2929,62 @@ Se você tiver o Gyroflow em C:\Program Files, então você precisará de execut
       <translation type="unfinished">full frame equiv.: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="827"/>
+      <location filename="../../src/ui/VideoArea.qml" line="829"/>
       <source>Trim start</source>
       <translation>Recortar início</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="828"/>
+      <location filename="../../src/ui/VideoArea.qml" line="830"/>
       <source>Previous frame</source>
       <translation>Fotograma anterior</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="831"/>
+      <location filename="../../src/ui/VideoArea.qml" line="833"/>
       <source>Pause</source>
       <translation>Pausa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="831"/>
+      <location filename="../../src/ui/VideoArea.qml" line="833"/>
       <source>Play</source>
       <translation>Reproduzir</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="834"/>
+      <location filename="../../src/ui/VideoArea.qml" line="836"/>
       <source>Next frame</source>
       <translation>Fotograma seguinte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="835"/>
+      <location filename="../../src/ui/VideoArea.qml" line="837"/>
       <source>Trim end</source>
       <translation>Recortar fim</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="863"/>
+      <location filename="../../src/ui/VideoArea.qml" line="865"/>
       <source>Toggle stabilization overview</source>
       <translation type="unfinished">Toggle stabilization overview</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="870"/>
+      <location filename="../../src/ui/VideoArea.qml" line="872"/>
       <source>Toggle stabilization</source>
       <translation>Ativar/desativar estabilização</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="876"/>
+      <location filename="../../src/ui/VideoArea.qml" line="878"/>
       <source>Mute</source>
       <translation>Silenciar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="876"/>
+      <location filename="../../src/ui/VideoArea.qml" line="878"/>
       <source>Unmute</source>
       <translation>Reativar som</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="893"/>
+      <location filename="../../src/ui/VideoArea.qml" line="903"/>
+      <source>Volume</source>
+      <translation type="unfinished">Volume</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="933"/>
       <source>Playback speed</source>
       <translation>Velocidade de reprodução</translation>
     </message>
